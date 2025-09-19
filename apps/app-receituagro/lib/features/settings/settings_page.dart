@@ -9,10 +9,10 @@ import '../../core/widgets/responsive_content_wrapper.dart';
 import 'constants/settings_design_tokens.dart';
 import 'presentation/providers/settings_provider.dart';
 import 'widgets/dialogs/theme_selection_dialog.dart';
-import 'widgets/sections/about_section.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/development_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
+import 'widgets/sections/notifications_section.dart';
 import 'widgets/sections/premium_section.dart';
 import 'widgets/sections/support_section.dart';
 
@@ -44,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return ChangeNotifierProvider.value(
       value: _settingsProvider,
       child: Scaffold(
-        backgroundColor: theme.cardColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
@@ -111,27 +111,30 @@ class _SettingsPageState extends State<SettingsPage> {
     return Consumer<ReceitaAgroAuthProvider>(
       builder: (context, authProvider, child) {
         return ListView(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
           children: const [
+            SizedBox(height: 12),
+            
             // 👤 SEÇÃO DE CONTA/LOGIN (primeiro item - sempre visível)
             AuthSection(),
-            SizedBox(height: 4),
+            SizedBox(height: 12),
             
             // 💎 PREMIUM/ASSINATURA (sempre visível)
             PremiumSection(),
-            SizedBox(height: 4),
+            SizedBox(height: 12),
             
-            // 🆘 SUPORTE (sempre visível)
-            SupportSection(),
-            SizedBox(height: 4),
+            // 🔔 NOTIFICAÇÕES (sempre visível)
+            NotificationsSection(),
+            SizedBox(height: 12),
             
             // 🔧 SEÇÕES DE DESENVOLVIMENTO (condicional)
             FeatureFlagsSection(),
+            SizedBox(height: 12),
             DevelopmentSection(),
-            SizedBox(height: 4),
+            SizedBox(height: 12),
             
-            // ℹ️ SOBRE O APP (sempre visível)
-            AboutSection(),
+            // 🆘 SUPORTE (sempre visível)
+            SupportSection(),
             
             // Espaço extra para melhor rolagem
             SizedBox(height: 24),

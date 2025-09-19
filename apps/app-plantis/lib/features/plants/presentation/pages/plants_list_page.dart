@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/theme/plantis_colors.dart';
-
+import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -195,13 +194,12 @@ class _PlantsListPageState extends State<PlantsListPage> {
             ChangeNotifierProvider.value(value: _plantsProvider),
             // ChangeNotifierProvider.value(value: _spacesProvider),
           ],
-          child: Scaffold(
-        backgroundColor: PlantisColors.getPageBackgroundColor(context),
-        body: ResponsiveLayout(
-          child: Column(
-            children: [
-              // Header estilo ReceitaAgro
-              _buildHeader(context),
+          child: BasePageScaffold(
+            body: ResponsiveLayout(
+              child: Column(
+                children: [
+                  // Header estilo ReceitaAgro
+                  _buildHeader(context),
               
               // Search and filters section
               Selector<PlantsProvider, AppBarData>(
@@ -227,18 +225,17 @@ class _PlantsListPageState extends State<PlantsListPage> {
                 },
               ),
 
-              // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
-              // Each selector only listens to specific parts of provider state
-              Expanded(child: _buildOptimizedPlantsContent()),
-            ],
-          ),
-        ),
-
-        // FAB para adicionar planta
-        floatingActionButton: PlantsFab(
-          onScrollToTop: _scrollToTop,
-          scrollController: _scrollController,
-        ),
+                  // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
+                  // Each selector only listens to specific parts of provider state
+                  Expanded(child: _buildOptimizedPlantsContent()),
+                ],
+              ),
+            ),
+            // FAB para adicionar planta
+            floatingActionButton: PlantsFab(
+              onScrollToTop: _scrollToTop,
+              scrollController: _scrollController,
+            ),
       ),
     );
       },  // Close Consumer<AuthProvider>
@@ -246,73 +243,13 @@ class _PlantsListPageState extends State<PlantsListPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.primaryDark,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: PlantisColors.primary.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Consumer<PlantsProvider>(
-        builder: (context, plantsProvider, _) {
-          return Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.eco,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Minhas Plantas',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${plantsProvider.plantsCount} plantas no jardim',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+    return Consumer<PlantsProvider>(
+      builder: (context, plantsProvider, _) {
+        return PlantisHeader(
+          title: 'Minhas Plantas',
+          subtitle: '${plantsProvider.plantsCount} plantas no jardim',
+        );
+      },
     );
   }
 

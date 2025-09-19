@@ -6,6 +6,7 @@ import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../../../core/services/receituagro_notification_service.dart';
+import '../../../../core/services/promotional_notification_manager.dart';
 import '../../domain/entities/user_settings_entity.dart';
 import '../../domain/usecases/get_user_settings_usecase.dart';
 import '../../domain/usecases/update_user_settings_usecase.dart';
@@ -19,6 +20,7 @@ class SettingsProvider extends ChangeNotifier {
   // Services from DI
   late final IPremiumService _premiumService;
   late final ReceitaAgroNotificationService _notificationService;
+  late final PromotionalNotificationManager _promotionalManager;
   late final IAnalyticsRepository _analyticsRepository;
   late final ICrashlyticsRepository _crashlyticsRepository;
   late final IAppRatingRepository _appRatingRepository;
@@ -101,6 +103,7 @@ class SettingsProvider extends ChangeNotifier {
     try {
       _premiumService = di.sl<IPremiumService>();
       _notificationService = di.sl<ReceitaAgroNotificationService>();
+      _promotionalManager = PromotionalNotificationManager();
       _analyticsRepository = di.sl<IAnalyticsRepository>();
       _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
       _appRatingRepository = di.sl<IAppRatingRepository>();
@@ -167,7 +170,20 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Update notifications setting
   Future<bool> setNotificationsEnabled(bool enabled) async {
-    return await _updateSingleSetting('notificationsEnabled', enabled);
+    final success = await _updateSingleSetting('notificationsEnabled', enabled);
+    
+    if (success) {
+      // Atualizar preferências promocionais baseado na configuração geral
+      try {
+        final currentPrefs = await _promotionalManager.getUserNotificationPreferences();
+        final newPrefs = currentPrefs.copyWith(promotionalEnabled: enabled);
+        await _promotionalManager.saveUserNotificationPreferences(newPrefs);
+      } catch (e) {
+        debugPrint('Error updating promotional preferences: $e');
+      }
+    }
+    
+    return success;
   }
 
   /// Update sound setting

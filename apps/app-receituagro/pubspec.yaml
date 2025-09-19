@@ -31,12 +31,19 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-  # Firebase packages necessários para imports diretos
+  # Firebase packages necessários para imports diretos  
   firebase_core: ^4.0.0
   firebase_auth: ^6.0.1
   firebase_crashlytics: ^5.0.0
   firebase_remote_config: ^6.0.0
   firebase_analytics: ^12.0.0
+  firebase_messaging: ^16.0.0
+  
+  # Local Notifications (usando mesma versão do core)
+  flutter_local_notifications: ^19.4.0
+  
+  # Shared Preferences for notification settings
+  shared_preferences: ^2.3.4
   
   # Missing critical dependencies (aligned with core package)
   cloud_firestore: ^6.0.0
@@ -70,7 +77,6 @@ dependencies:
 
   http: any
   path_provider: any
-  shared_preferences: any
   permission_handler: ^12.0.1
   collection: any
   uuid: ^4.5.1

@@ -110,13 +110,17 @@ class PlantisTheme {
       circularTrackColor: PlantisColors.primaryLight,
     ),
 
-    // Card theme personalizado para plantas
+    // Card theme baseado no mockup - elevação e sombras aprimoradas
     cardTheme: CardThemeData(
-      elevation: 2,
+      elevation: 0, // Controlamos a sombra manualmente
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: Colors.white,
-      shadowColor: PlantisColors.primary.withValues(alpha: 0.1),
+      shadowColor: Colors.transparent, // Sem sombra padrão
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
+    
+    // Scaffold theme baseado no mockup
+    scaffoldBackgroundColor: const Color(0xFFF8F9FA),
   );
 
   /// Tema escuro do Plantis
@@ -210,13 +214,17 @@ class PlantisTheme {
       circularTrackColor: PlantisColors.primary,
     ),
 
-    // Card theme para modo escuro
+    // Card theme para modo escuro baseado no mockup
     cardTheme: CardThemeData(
-      elevation: 2,
+      elevation: 0, // Controlamos a sombra manualmente
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: const Color(0xFF2D2D2D),
-      shadowColor: Colors.black.withValues(alpha: 0.3),
+      shadowColor: Colors.transparent, // Sem sombra padrão
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
+    
+    // Scaffold theme para modo escuro
+    scaffoldBackgroundColor: const Color(0xFF1C1C1E),
   );
 
   /// Retorna as cores do tema baseado no modo

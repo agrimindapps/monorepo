@@ -23,8 +23,12 @@ class PlantsAppBar extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color:
+          isDark
+              ? const Color(0xFF1C1C1E)
+              : Colors
+                  .transparent, // Transparente para usar o fundo do BasePageScaffold
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       child: Column(
         children: [
           // Search bar with grid button
@@ -37,7 +41,7 @@ class PlantsAppBar extends StatelessWidget {
                     color:
                         isDark
                             ? const Color(0xFF2C2C2E)
-                            : theme.colorScheme.surface,
+                            : const Color(0xFFFFFFFF), // Branco puro
                     borderRadius: BorderRadius.circular(12),
                     border:
                         isDark
@@ -94,32 +98,39 @@ class PlantsAppBar extends StatelessWidget {
               // Grouped by spaces toggle button
               GestureDetector(
                 onTap: () {
-                  final newMode = viewMode == ViewMode.groupedBySpaces 
-                      ? ViewMode.list 
-                      : ViewMode.groupedBySpaces;
+                  final newMode =
+                      viewMode == ViewMode.groupedBySpaces
+                          ? ViewMode.list
+                          : ViewMode.groupedBySpaces;
                   onViewModeChanged(newMode);
                 },
                 child: Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: viewMode == ViewMode.groupedBySpaces
-                        ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                        : (isDark
-                            ? const Color(0xFF2C2C2E)
-                            : theme.colorScheme.surface),
+                    color:
+                        viewMode == ViewMode.groupedBySpaces
+                            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                            : (isDark
+                                ? const Color(0xFF2C2C2E)
+                                : const Color(0xFFFFFFFF)), // Branco puro
                     borderRadius: BorderRadius.circular(12),
-                    border: viewMode == ViewMode.groupedBySpaces
-                        ? Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3))
-                        : (isDark
+                    border:
+                        viewMode == ViewMode.groupedBySpaces
                             ? Border.all(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                            )
-                            : Border.all(
-                              color: theme.colorScheme.outline.withValues(
+                              color: theme.colorScheme.primary.withValues(
                                 alpha: 0.3,
                               ),
-                            )),
+                            )
+                            : (isDark
+                                ? Border.all(
+                                  color: Colors.grey.withValues(alpha: 0.1),
+                                )
+                                : Border.all(
+                                  color: theme.colorScheme.outline.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                )),
                     boxShadow: [
                       BoxShadow(
                         color:
@@ -134,9 +145,10 @@ class PlantsAppBar extends StatelessWidget {
                   ),
                   child: Icon(
                     Icons.category,
-                    color: viewMode == ViewMode.groupedBySpaces
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.secondary,
+                    color:
+                        viewMode == ViewMode.groupedBySpaces
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.secondary,
                     size: 20,
                   ),
                 ),
@@ -149,49 +161,51 @@ class PlantsAppBar extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     final newMode =
-                        viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
+                        viewMode == ViewMode.grid
+                            ? ViewMode.list
+                            : ViewMode.grid;
                     onViewModeChanged(newMode);
                   },
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? const Color(0xFF2C2C2E)
-                            : theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border:
-                        isDark
-                            ? Border.all(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                            )
-                            : Border.all(
-                              color: theme.colorScheme.outline.withValues(
-                                alpha: 0.3,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? const Color(0xFF2C2C2E)
+                              : const Color(0xFFFFFFFF), // Branco puro
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          isDark
+                              ? Border.all(
+                                color: Colors.grey.withValues(alpha: 0.1),
+                              )
+                              : Border.all(
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
-                            ),
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                            isDark
-                                ? Colors.black.withValues(alpha: 0.25)
-                                : Colors.black.withValues(alpha: 0.06),
-                        blurRadius: isDark ? 6 : 8,
-                        offset: const Offset(0, 2),
-                        spreadRadius: isDark ? 0 : 1,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    viewMode == ViewMode.grid
-                        ? Icons.view_list
-                        : Icons.grid_view,
-                    color: theme.colorScheme.secondary,
-                    size: 20,
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              isDark
+                                  ? Colors.black.withValues(alpha: 0.25)
+                                  : Colors.black.withValues(alpha: 0.06),
+                          blurRadius: isDark ? 6 : 8,
+                          offset: const Offset(0, 2),
+                          spreadRadius: isDark ? 0 : 1,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      viewMode == ViewMode.grid
+                          ? Icons.view_list
+                          : Icons.grid_view,
+                      color: theme.colorScheme.secondary,
+                      size: 20,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ],

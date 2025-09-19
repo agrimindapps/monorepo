@@ -33,17 +33,10 @@ class HomePragasRecentWidget extends StatelessWidget {
       emptyMessage: 'Nenhuma praga acessada recentemente',
       child: provider.recentPragas.isEmpty
           ? const SizedBox.shrink()
-          : ListView.separated(
+          : ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: provider.recentPragas.length,
-              separatorBuilder: (context, index) => Divider(
-                height: 1,
-                thickness: 1.2,
-                indent: 64, // Alinhado com o texto (ícone + espaço reduzido)
-                endIndent: 8,
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-              ),
               itemBuilder: (context, index) {
                 final praga = provider.recentPragas[index];
                 return _buildPragaItem(context, praga);

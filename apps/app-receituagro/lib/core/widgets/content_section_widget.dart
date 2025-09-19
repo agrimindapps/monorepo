@@ -174,10 +174,24 @@ class ContentListItemWidget extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.surface.withValues(alpha: 0.8)
+              : theme.colorScheme.surface.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(8),
+          border: theme.brightness == Brightness.dark
+              ? Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  width: 0.5,
+                )
+              : null,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
             // Leading widget ou ícone padrão
             leading ?? _buildDefaultIcon(theme),
             const SizedBox(width: 12),
@@ -223,6 +237,7 @@ class ContentListItemWidget extends StatelessWidget {
               size: 20,
             ),
           ],
+          ),
         ),
       ),
     );

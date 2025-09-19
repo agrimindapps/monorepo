@@ -9,10 +9,12 @@ import 'package:core/core.dart';
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/test_data_generator_service.dart';
 import '../../shared/widgets/responsive_layout.dart';
+import '../../shared/widgets/base_page_scaffold.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../core/theme/plantis_design_tokens.dart';
 import '../../core/providers/theme_provider.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as auth_providers;
+import '../../features/auth/presentation/providers/auth_provider.dart'
+    as auth_providers;
 import '../../features/development/presentation/pages/database_inspector_page.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../features/settings/presentation/widgets/premium_components.dart';
@@ -20,13 +22,12 @@ import '../../shared/widgets/loading/loading_components.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
-  
+
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -35,31 +36,79 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
       context: LoadingContexts.settings,
       child: ChangeNotifierProvider<SettingsProvider>.value(
         value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
-        child: Scaffold(
-          backgroundColor: PlantisColors.getPageBackgroundColor(context),
+        child: BasePageScaffold(
           body: ResponsiveLayout(
             child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
               builder: (context, authProvider, settingsProvider, _) {
                 final user = authProvider.currentUser;
-                
+
                 return Column(
                   children: [
-                    // Header estilo ReceitaAgro
-                    _buildHeader(context, theme),
-                    
+                    // Header seguindo mockup
+                    PlantisHeader(
+                      title: 'Configurações',
+                      subtitle: 'Personalize sua experiência',
+                      leading: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      actions: [
+                        Consumer<ThemeProvider>(
+                          builder: (context, themeProvider, _) {
+                            return Semantics(
+                              label: 'Alterar tema',
+                              hint:
+                                  'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                              button: true,
+                              onTap:
+                                  () =>
+                                      _showThemeDialog(context, themeProvider),
+                              child: GestureDetector(
+                                onTap:
+                                    () => _showThemeDialog(
+                                      context,
+                                      themeProvider,
+                                    ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    themeProvider.themeMode == ThemeMode.dark
+                                        ? Icons.brightness_2
+                                        : themeProvider.themeMode ==
+                                            ThemeMode.light
+                                        ? Icons.brightness_high
+                                        : Icons.brightness_auto,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+
                     // ListView com seções organizadas
                     Expanded(
                       child: ListView(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                         children: [
                           // Seção do Usuário
                           _buildUserSection(context, theme, user, authProvider),
                           const SizedBox(height: 8),
-                          
+
                           // Seção Premium
                           _buildPremiumSectionCard(context, theme),
                           const SizedBox(height: 8),
-                          
+
                           // Seção de Configurações
                           _buildConfigSection(context, theme, settingsProvider),
                           const SizedBox(height: 8),
@@ -71,16 +120,16 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                           // Seção Sobre (com privacidade e termos)
                           _buildAboutSection(context, theme),
                           const SizedBox(height: 8),
-                          
+
                           // Seção de Desenvolvimento (debug only)
                           if (kDebugMode) ...[
                             _buildDevelopmentSection(context, theme),
                             const SizedBox(height: 8),
                           ],
-                          
+
                           // Seção Sobre
                           _buildAboutSection(context, theme),
-                          
+
                           const SizedBox(height: 24),
                         ],
                       ),
@@ -103,10 +152,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.primaryDark,
-          ],
+          colors: [PlantisColors.primary, PlantisColors.primaryDark],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -125,11 +171,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.settings,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: const Icon(Icons.settings, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 16),
           const Expanded(
@@ -147,10 +189,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 SizedBox(height: 4),
                 Text(
                   'Preferências e ajustes do app',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -159,7 +198,8 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
             builder: (context, themeProvider, _) {
               return Semantics(
                 label: 'Alterar tema',
-                hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                hint:
+                    'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
                 button: true,
                 onTap: () => _showThemeDialog(context, themeProvider),
                 child: GestureDetector(
@@ -174,8 +214,8 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       themeProvider.themeMode == ThemeMode.dark
                           ? Icons.brightness_2
                           : themeProvider.themeMode == ThemeMode.light
-                              ? Icons.brightness_high
-                              : Icons.brightness_auto,
+                          ? Icons.brightness_high
+                          : Icons.brightness_auto,
                       color: Colors.white,
                       size: 20,
                     ),
@@ -189,7 +229,11 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-  Widget _buildEnhancedHeader(BuildContext context, ThemeData theme, dynamic user) {
+  Widget _buildEnhancedHeader(
+    BuildContext context,
+    ThemeData theme,
+    dynamic user,
+  ) {
     return Container(
       padding: const EdgeInsets.all(PlantisDesignTokens.spacing6),
       decoration: BoxDecoration(
@@ -215,7 +259,9 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 padding: const EdgeInsets.all(PlantisDesignTokens.spacing2),
                 decoration: BoxDecoration(
                   color: PlantisColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusLG),
+                  borderRadius: BorderRadius.circular(
+                    PlantisDesignTokens.radiusLG,
+                  ),
                 ),
                 child: const Icon(
                   Icons.eco,
@@ -237,7 +283,10 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       ),
                     ),
                     Text(
-                      user != null && user.displayName != null && ((user.displayName as String?)?.isNotEmpty ?? false)
+                      user != null &&
+                              user.displayName != null &&
+                              ((user.displayName as String?)?.isNotEmpty ??
+                                  false)
                           ? 'Bem-vindo, ${user.displayName}'
                           : 'Bem-vindo ao seu jardim digital 🌱',
                       style: theme.textTheme.bodyLarge?.copyWith(
@@ -259,7 +308,11 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-  Widget _buildEnhancedProfileCard(BuildContext context, ThemeData theme, dynamic user) {
+  Widget _buildEnhancedProfileCard(
+    BuildContext context,
+    ThemeData theme,
+    dynamic user,
+  ) {
     return GestureDetector(
       onTap: () => context.push('/account-profile'),
       child: Container(
@@ -277,10 +330,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: PlantisColors.primary,
-                  width: 3,
-                ),
+                border: Border.all(color: PlantisColors.primary, width: 3),
                 boxShadow: [
                   BoxShadow(
                     color: PlantisColors.primary.withValues(alpha: 0.3),
@@ -292,34 +342,35 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               child: CircleAvatar(
                 radius: 32,
                 backgroundColor: PlantisColors.primary,
-                child: user?.hasProfilePhoto == true
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(32),
-                        child: Image.network(
-                          user!.photoUrl?.toString() ?? '',
-                          width: 64,
-                          height: 64,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Text(
-                              (user.initials as String?) ?? 'U',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
+                child:
+                    user?.hasProfilePhoto == true
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(32),
+                          child: Image.network(
+                            user!.photoUrl?.toString() ?? '',
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text(
+                                (user.initials as String?) ?? 'U',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        : Text(
+                          (user?.initials as String?) ?? 'UA',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : Text(
-                        (user?.initials as String?) ?? 'UA',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
             ),
             const SizedBox(width: PlantisDesignTokens.spacing4),
@@ -385,10 +436,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: PlantisColors.primary,
-            ),
+            const Icon(Icons.chevron_right, color: PlantisColors.primary),
           ],
         ),
       ),
@@ -400,9 +448,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: PlantisColors.primary.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: PlantisColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,9 +497,9 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               ],
             ),
           ),
-          
+
           const Divider(height: 1),
-          
+
           // Lista de dispositivos resumida
           Padding(
             padding: const EdgeInsets.all(20),
@@ -498,26 +544,28 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     BuildContext context,
     String deviceName,
     String deviceInfo,
-    IconData icon,
-    {bool isCurrentDevice = false}
-  ) {
+    IconData icon, {
+    bool isCurrentDevice = false,
+  }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isCurrentDevice 
-                ? PlantisColors.primary.withValues(alpha: 0.2)
-                : theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
+            color:
+                isCurrentDevice
+                    ? PlantisColors.primary.withValues(alpha: 0.2)
+                    : theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: isCurrentDevice 
-                ? PlantisColors.primary 
-                : theme.colorScheme.onSurfaceVariant,
+            color:
+                isCurrentDevice
+                    ? PlantisColors.primary
+                    : theme.colorScheme.onSurfaceVariant,
             size: 18,
           ),
         ),
@@ -537,7 +585,10 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                   if (isCurrentDevice) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: PlantisColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
@@ -573,20 +624,26 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-  Widget _buildSyncStatusSection(BuildContext context, ThemeData theme, auth_providers.AuthProvider authProvider) {
+  Widget _buildSyncStatusSection(
+    BuildContext context,
+    ThemeData theme,
+    auth_providers.AuthProvider authProvider,
+  ) {
     final isSyncing = authProvider.isSyncInProgress;
-    final syncMessage = authProvider.syncMessage.isNotEmpty 
-        ? authProvider.syncMessage 
-        : 'Sincronização completa';
-    
+    final syncMessage =
+        authProvider.syncMessage.isNotEmpty
+            ? authProvider.syncMessage
+            : 'Sincronização completa';
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSyncing 
-              ? Colors.orange.withValues(alpha: 0.3)
-              : PlantisColors.primary.withValues(alpha: 0.2),
+          color:
+              isSyncing
+                  ? Colors.orange.withValues(alpha: 0.3)
+                  : PlantisColors.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Padding(
@@ -596,9 +653,10 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isSyncing 
-                    ? Colors.orange.withValues(alpha: 0.2)
-                    : PlantisColors.primary.withValues(alpha: 0.2),
+                color:
+                    isSyncing
+                        ? Colors.orange.withValues(alpha: 0.2)
+                        : PlantisColors.primary.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -620,7 +678,9 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    isSyncing ? syncMessage : 'Todos os dados estão atualizados na nuvem',
+                    isSyncing
+                        ? syncMessage
+                        : 'Todos os dados estão atualizados na nuvem',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -649,48 +709,53 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-  Widget _buildUserSection(BuildContext context, ThemeData theme, dynamic user, auth_providers.AuthProvider authProvider) {
-    return Container(
-      decoration: _getCardDecoration(context),
+  Widget _buildUserSection(
+    BuildContext context,
+    ThemeData theme,
+    dynamic user,
+    auth_providers.AuthProvider authProvider,
+  ) {
+    return PlantisCard(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
         onTap: () => context.push('/account-profile'),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          padding: const EdgeInsets.all(4),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 30,
                 backgroundColor: PlantisColors.primary,
-                child: user?.hasProfilePhoto == true
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.network(
-                          user!.photoUrl?.toString() ?? '',
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Text(
-                              (user.initials as String?) ?? 'U',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
+                child:
+                    user?.hasProfilePhoto == true
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.network(
+                            user!.photoUrl?.toString() ?? '',
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text(
+                                (user.initials as String?) ?? 'LL',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        : Text(
+                          (user?.initials as String?) ?? 'LL',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : Text(
-                        (user?.initials as String?) ?? 'U',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -705,51 +770,52 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      (user?.email as String?) ?? 'usuario@email.com',
+                      (user?.email as String?) ?? 'lucineiy@hotmail.com',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    if (user?.createdAt != null)
-                      Text(
-                        'Membro desde ${_formatDateShort(user!.createdAt)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
+                    Text(
+                      'Membro desde 12 de agosto de 2025',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
                       ),
+                    ),
                   ],
                 ),
               ),
               Row(
                 children: [
-                  if (!authProvider.isAnonymous)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: PlantisColors.primary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.verified,
-                            color: PlantisColors.primary,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Verificado',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: PlantisColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
                     ),
+                    decoration: BoxDecoration(
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.verified,
+                          color: PlantisColors.primary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Verificado',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: PlantisColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(width: 8),
                   Icon(
                     Icons.chevron_right,
@@ -771,9 +837,9 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            PlantisColors.primary,        // Verde Plantis principal
-            PlantisColors.primaryDark,    // Verde escuro
-            PlantisColors.leaf,           // Verde folha
+            PlantisColors.primary, // Verde Plantis principal
+            PlantisColors.primaryDark, // Verde escuro
+            PlantisColors.leaf, // Verde folha
           ],
         ),
         borderRadius: BorderRadius.circular(12),
@@ -825,27 +891,13 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                     SizedBox(height: 4),
                     Text(
                       'Desbloqueie recursos avançados',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     SizedBox(height: 4),
-                    Text(
-                      'A partir de R\$ 12,90/mês',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.white,
-              ),
+              const Icon(Icons.chevron_right, color: Colors.white),
             ],
           ),
         ),
@@ -853,7 +905,11 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-  Widget _buildConfigSection(BuildContext context, ThemeData theme, SettingsProvider settingsProvider) {
+  Widget _buildConfigSection(
+    BuildContext context,
+    ThemeData theme,
+    SettingsProvider settingsProvider,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -975,12 +1031,10 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
   }
 
   Widget _buildSettingsCard(BuildContext context, List<Widget> children) {
-    return Container(
-      decoration: _getCardDecoration(context),
+    return PlantisCard(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        children: children,
-      ),
+      padding: EdgeInsets.zero, // Remove padding padrão para usar o dos items
+      child: Column(children: children),
     );
   }
 
@@ -993,7 +1047,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     Widget? trailing,
   }) {
     final theme = Theme.of(context);
-    
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -1006,11 +1060,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 color: PlantisColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                color: PlantisColors.primary,
-                size: 20,
-              ),
+              child: Icon(icon, color: PlantisColors.primary, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1033,17 +1083,21 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 ],
               ),
             ),
-            trailing ?? Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            trailing ??
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotificationSwitchItem(BuildContext context, SettingsProvider settingsProvider) {
+  Widget _buildNotificationSwitchItem(
+    BuildContext context,
+    SettingsProvider settingsProvider,
+  ) {
     final theme = Theme.of(context);
 
     return Consumer<SettingsProvider>(
@@ -1061,7 +1115,9 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  isEnabled ? Icons.notifications_active : Icons.notifications_off,
+                  isEnabled
+                      ? Icons.notifications_active
+                      : Icons.notifications_off,
                   color: PlantisColors.primary,
                   size: 20,
                 ),
@@ -1117,23 +1173,9 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-  BoxDecoration _getCardDecoration(BuildContext context) {
-    return BoxDecoration(
-      color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.05),
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
-
   String _formatDateShort(dynamic date) {
     if (date == null) return '';
-    
+
     DateTime dateTime;
     if (date is DateTime) {
       dateTime = date;
@@ -1142,12 +1184,22 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     } else {
       return '';
     }
-    
+
     final months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
-    
+
     return '${dateTime.day} de ${months[dateTime.month - 1]} de ${dateTime.year}';
   }
 
@@ -1173,9 +1225,6 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
-
-
-
   String _getMemberSince(DateTime? createdAt) {
     if (createdAt == null) return 'Membro desde 10 dias';
 
@@ -1193,128 +1242,128 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     }
   }
 
-
   void _showRateAppDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(
-              Icons.star_rate,
-              color: PlantisColors.sun,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Avaliar o App',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Está gostando do Plantis?',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 16,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            
-            // Star rating visual
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(
-                  Icons.star,
-                  color: PlantisColors.sun,
-                  size: 32,
-                ),
-              )),
-            ),
-            
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: PlantisColors.primaryLight.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PlantisColors.primary.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.favorite,
-                    color: PlantisColors.flower,
-                    size: 20,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF), // Fundo branco puro
+            title: Row(
+              children: [
+                const Icon(Icons.star_rate, color: PlantisColors.sun, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  'Avaliar o App',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Obrigado por fazer parte da nossa comunidade!',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Está gostando do Plantis?',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 16,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Star rating visual
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    5,
+                    (index) => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Icon(
+                        Icons.star,
+                        color: PlantisColors.sun,
+                        size: 32,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primaryLight.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.favorite,
+                        color: PlantisColors.flower,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Obrigado por fazer parte da nossa comunidade!',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Mais tarde',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Mais tarde',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
-            ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _handleRateApp(context);
+                },
+                icon: const Icon(Icons.star, size: 18),
+                label: const Text('Avaliar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.sun,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
           ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _handleRateApp(context);
-            },
-            icon: const Icon(Icons.star, size: 18),
-            label: const Text('Avaliar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.sun,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1322,7 +1371,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     try {
       final appRatingService = di.sl<IAppRatingRepository>();
       final success = await appRatingService.showRatingDialog(context: context);
-      
+
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1348,84 +1397,82 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: PlantisColors.primaryGradient,
-              ),
-              child: const Icon(
-                Icons.eco,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Plantis',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Seu companheiro para cuidar de plantas',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoRow(context, 'Versão', '1.0.0'),
-            _buildInfoRow(context, 'Build', '1'),
-            _buildInfoRow(context, 'Plataforma', 'Flutter'),
-            const SizedBox(height: 16),
-            Text(
-              'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF), // Fundo branco puro
+            title: Row(
               children: [
-                const Icon(
-                  Icons.favorite,
-                  color: PlantisColors.flower,
-                  size: 16,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: PlantisColors.primaryGradient,
+                  ),
+                  child: const Icon(Icons.eco, color: Colors.white, size: 24),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 12),
                 Text(
-                  'Feito com carinho para amantes de plantas',
+                  'Plantis',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Seu companheiro para cuidar de plantas',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildInfoRow(context, 'Versão', '1.0.0'),
+                _buildInfoRow(context, 'Build', '1'),
+                _buildInfoRow(context, 'Plataforma', 'Flutter'),
+                const SizedBox(height: 16),
+                Text(
+                  'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.favorite,
+                      color: PlantisColors.flower,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Feito com carinho para amantes de plantas',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1458,100 +1505,102 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
   void _showGenerateTestDataDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Gerar Dados de Teste',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Isso criará plantas e tarefas fictícias para testar a interface.',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF), // Fundo branco puro
+            title: Text(
+              'Gerar Dados de Teste',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: PlantisColors.leafLight.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: PlantisColors.leaf.withValues(alpha: 0.3),
-                ),
-              ),
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: PlantisColors.leaf,
-                    size: 20,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Isso criará plantas e tarefas fictícias para testar a interface.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Útil para demonstrações e testes',
-                      style: TextStyle(
-                        color: PlantisColors.leafDark,
-                        fontSize: 12,
-                      ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.leafLight.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: PlantisColors.leaf.withValues(alpha: 0.3),
                     ),
                   ),
-                ],
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: PlantisColors.leaf,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Útil para demonstrações e testes',
+                          style: TextStyle(
+                            color: PlantisColors.leafDark,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final theme = Theme.of(context);
+
+                  navigator.pop();
+                  _showLoadingDialog(context, 'Gerando dados de teste...');
+
+                  try {
+                    final testDataService = di.sl<TestDataGeneratorService>();
+                    await testDataService.generateTestData();
+
+                    navigator.pop(); // Close loading
+
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Dados de teste gerados com sucesso!'),
+                        backgroundColor: PlantisColors.primary,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (e) {
+                    navigator.pop(); // Close loading
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Erro ao gerar dados: $e'),
+                        backgroundColor: theme.colorScheme.error,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Gerar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
           ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final navigator = Navigator.of(context);
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              final theme = Theme.of(context);
-
-              navigator.pop();
-              _showLoadingDialog(context, 'Gerando dados de teste...');
-
-              try {
-                final testDataService = di.sl<TestDataGeneratorService>();
-                await testDataService.generateTestData();
-
-                navigator.pop(); // Close loading
-
-                scaffoldMessenger.showSnackBar(
-                  const SnackBar(
-                    content: Text('Dados de teste gerados com sucesso!'),
-                    backgroundColor: PlantisColors.primary,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              } catch (e) {
-                navigator.pop(); // Close loading
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: Text('Erro ao gerar dados: $e'),
-                    backgroundColor: theme.colorScheme.error,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Gerar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.primary,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1563,147 +1612,160 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.warning,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Limpar Todos os Dados',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Esta ação irá remover permanentemente:',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (stats.hasData) ...[
-              _buildDataItem(context, Icons.eco, '${stats.plantsCount} plantas'),
-              _buildDataItem(context, Icons.task_alt, '${stats.tasksCount} tarefas'),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF), // Fundo branco puro
+            title: Row(
+              children: [
+                Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
+                const SizedBox(width: 8),
+                Text(
+                  'Limpar Todos os Dados',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Theme.of(context).colorScheme.error,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Esta ação não pode ser desfeita',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Esta ação irá remover permanentemente:',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (stats.hasData) ...[
+                  _buildDataItem(
+                    context,
+                    Icons.eco,
+                    '${stats.plantsCount} plantas',
+                  ),
+                  _buildDataItem(
+                    context,
+                    Icons.task_alt,
+                    '${stats.tasksCount} tarefas',
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.error.withValues(alpha: 0.3),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ] else ...[
-              Row(
-                children: [
-                  const Icon(
-                    Icons.check_circle,
-                    color: PlantisColors.leaf,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Não há dados para limpar',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Esta ação não pode ser desfeita',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ] else ...[
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        color: PlantisColors.leaf,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Não há dados para limpar',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
               ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          if (stats.hasData)
-            ElevatedButton.icon(
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                final theme = Theme.of(context);
+              if (stats.hasData)
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final navigator = Navigator.of(context);
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    final theme = Theme.of(context);
 
-                navigator.pop();
-                _showLoadingDialog(context, 'Limpando dados...');
+                    navigator.pop();
+                    _showLoadingDialog(context, 'Limpando dados...');
 
-                try {
-                  final result = await dataCleanerService.clearAllData();
-                  navigator.pop(); // Close loading
+                    try {
+                      final result = await dataCleanerService.clearAllData();
+                      navigator.pop(); // Close loading
 
-                  result.fold(
-                    (failure) {
+                      result.fold(
+                        (failure) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Erro: ${failure.message}'),
+                              backgroundColor: theme.colorScheme.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        (_) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${stats.totalItems} itens removidos com sucesso',
+                              ),
+                              backgroundColor: PlantisColors.primary,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      );
+                    } catch (e) {
+                      navigator.pop(); // Close loading
                       scaffoldMessenger.showSnackBar(
                         SnackBar(
-                          content: Text('Erro: ${failure.message}'),
+                          content: Text('Erro inesperado: $e'),
                           backgroundColor: theme.colorScheme.error,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
-                    },
-                    (_) {
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${stats.totalItems} itens removidos com sucesso',
-                          ),
-                          backgroundColor: PlantisColors.primary,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                  );
-                } catch (e) {
-                  navigator.pop(); // Close loading
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Erro inesperado: $e'),
-                      backgroundColor: theme.colorScheme.error,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.delete_forever),
-              label: const Text('Limpar Tudo'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                foregroundColor: Colors.white,
-              ),
-            ),
-        ],
-      ),
+                    }
+                  },
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text('Limpar Tudo'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+            ],
+          ),
     );
   }
 
@@ -1733,23 +1795,23 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(
-              color: PlantisColors.primary,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF), // Fundo branco puro
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(color: PlantisColors.primary),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -1767,44 +1829,46 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
   void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Escolher Tema'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildThemeOption(
-              context,
-              themeProvider,
-              ThemeMode.system,
-              'Automático (Sistema)',
-              'Segue a configuração do sistema',
-              Icons.brightness_auto,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF), // Fundo branco puro
+            title: const Text('Escolher Tema'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildThemeOption(
+                  context,
+                  themeProvider,
+                  ThemeMode.system,
+                  'Automático (Sistema)',
+                  'Segue a configuração do sistema',
+                  Icons.brightness_auto,
+                ),
+                _buildThemeOption(
+                  context,
+                  themeProvider,
+                  ThemeMode.light,
+                  'Claro',
+                  'Tema claro sempre ativo',
+                  Icons.brightness_high,
+                ),
+                _buildThemeOption(
+                  context,
+                  themeProvider,
+                  ThemeMode.dark,
+                  'Escuro',
+                  'Tema escuro sempre ativo',
+                  Icons.brightness_2,
+                ),
+              ],
             ),
-            _buildThemeOption(
-              context,
-              themeProvider,
-              ThemeMode.light,
-              'Claro',
-              'Tema claro sempre ativo',
-              Icons.brightness_high,
-            ),
-            _buildThemeOption(
-              context,
-              themeProvider,
-              ThemeMode.dark,
-              'Escuro',
-              'Tema escuro sempre ativo',
-              Icons.brightness_2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1817,7 +1881,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     IconData icon,
   ) {
     final isSelected = themeProvider.themeMode == mode;
-    
+
     return InkWell(
       onTap: () {
         themeProvider.setThemeMode(mode);
@@ -1830,9 +1894,12 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
           children: [
             Icon(
               icon,
-              color: isSelected 
-                ? PlantisColors.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color:
+                  isSelected
+                      ? PlantisColors.primary
+                      : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1842,28 +1909,28 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: isSelected 
-                        ? PlantisColors.primary
-                        : Theme.of(context).colorScheme.onSurface,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color:
+                          isSelected
+                              ? PlantisColors.primary
+                              : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check,
-                color: PlantisColors.primary,
-                size: 20,
-              ),
+              Icon(Icons.check, color: PlantisColors.primary, size: 20),
           ],
         ),
       ),

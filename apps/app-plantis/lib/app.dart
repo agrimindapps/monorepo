@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +24,7 @@ class PlantisApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => di.sl<PlantTaskProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PremiumProvider>()),
+        ChangeNotifierProvider<ChangeNotifier>(create: (_) => di.sl<ChangeNotifier>()),
         ChangeNotifierProvider(create: (_) => di.sl<ThemeProvider>()..initialize()),
       ],
       builder: (context, child) {
@@ -37,7 +37,7 @@ class PlantisApp extends StatelessWidget {
                 title: 'Plantis - Cuidado de Plantas',
                 theme: PlantisTheme.lightTheme,
                 darkTheme: PlantisTheme.darkTheme,
-                themeMode: themeProvider?.themeMode ?? ThemeMode.system,
+                themeMode: themeProvider.themeMode,
                 routerConfig: router,
                 debugShowCheckedModeBanner: false,
               ),

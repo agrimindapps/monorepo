@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ValidateDeviceUseCase;
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/auth/auth_state_notifier.dart';
@@ -6,8 +6,11 @@ import 'data/datasources/device_local_datasource.dart';
 import 'data/datasources/device_remote_datasource.dart';
 import 'data/repositories/device_repository_impl.dart';
 import 'domain/repositories/device_repository.dart';
-import 'domain/usecases/get_device_statistics_usecase.dart';
-import 'domain/usecases/validate_device_usecase.dart';
+import 'domain/usecases/get_device_statistics_usecase.dart' as local;
+import 'domain/usecases/get_user_devices_usecase.dart' as local;
+import 'domain/usecases/revoke_device_usecase.dart' as local;
+import 'domain/usecases/update_device_activity_usecase.dart';
+import 'domain/usecases/validate_device_usecase.dart' as local;
 import 'presentation/providers/device_management_provider.dart';
 
 /// Módulo de injeção de dependências para Device Management
@@ -17,12 +20,16 @@ class DeviceManagementModule {
   static List<Provider<Object?>> get dataSources => [
     // Local data source
     Provider<DeviceLocalDataSource>(
-      create: (context) => DeviceLocalDataSourceImpl(),
+      create: (context) => DeviceLocalDataSourceImpl(
+        storageService: context.read<ILocalStorageRepository>(),
+      ),
     ),
 
     // Remote data source
     Provider<DeviceRemoteDataSource>(
-      create: (context) => DeviceRemoteDataSourceImpl(),
+      create: (context) => DeviceRemoteDataSourceImpl(
+        firebaseDeviceService: context.read<FirebaseDeviceService>(),
+      ),
     ),
   ];
 
@@ -36,37 +43,47 @@ class DeviceManagementModule {
     ),
   ];
 
-  /// Use cases providers - usando serviços do core
+  /// Use cases providers - usando implementações locais do app-plantis
   static List<Provider<Object?>> get useCases => [
-    Provider<GetUserDevicesUseCase>(
-      create: (context) => GetUserDevicesUseCase(
-        context.read<IDeviceRepository>(),
-      ),
-    ),
-
-    Provider<ValidateDeviceUseCase>(
-      create: (context) => ValidateDeviceUseCase(
+    // Use cases locais do app-plantis
+    Provider<local.GetUserDevicesUseCase>(
+      create: (context) => local.GetUserDevicesUseCase(
         context.read<DeviceRepository>(),
         context.read<AuthStateNotifier>(),
       ),
     ),
 
-    Provider<RevokeDeviceUseCase>(
-      create: (context) => RevokeDeviceUseCase(
-        context.read<IDeviceRepository>(),
-      ),
-    ),
-
-    Provider<RevokeAllOtherDevicesUseCase>(
-      create: (context) => RevokeAllOtherDevicesUseCase(
-        context.read<IDeviceRepository>(),
-      ),
-    ),
-
-    Provider<GetDeviceStatisticsUseCase>(
-      create: (context) => GetDeviceStatisticsUseCase(
+    Provider<local.ValidateDeviceUseCase>(
+      create: (context) => local.ValidateDeviceUseCase(
         context.read<DeviceRepository>(),
         context.read<AuthStateNotifier>(),
+      ),
+    ),
+
+    Provider<local.RevokeDeviceUseCase>(
+      create: (context) => local.RevokeDeviceUseCase(
+        context.read<DeviceRepository>(),
+        context.read<AuthStateNotifier>(),
+      ),
+    ),
+
+    Provider<local.RevokeAllOtherDevicesUseCase>(
+      create: (context) => local.RevokeAllOtherDevicesUseCase(
+        context.read<DeviceRepository>(),
+        context.read<AuthStateNotifier>(),
+      ),
+    ),
+
+    Provider<local.GetDeviceStatisticsUseCase>(
+      create: (context) => local.GetDeviceStatisticsUseCase(
+        context.read<DeviceRepository>(),
+        context.read<AuthStateNotifier>(),
+      ),
+    ),
+
+    Provider<UpdateDeviceActivityUseCase>(
+      create: (context) => UpdateDeviceActivityUseCase(
+        context.read<DeviceRepository>(),
       ),
     ),
   ];
@@ -75,11 +92,11 @@ class DeviceManagementModule {
   static List<dynamic> get providers => [
     ChangeNotifierProvider<DeviceManagementProvider>(
       create: (context) => DeviceManagementProvider(
-        getUserDevicesUseCase: context.read<GetUserDevicesUseCase>(),
-        validateDeviceUseCase: context.read<ValidateDeviceUseCase>(),
-        revokeDeviceUseCase: context.read<RevokeDeviceUseCase>(),
-        revokeAllOtherDevicesUseCase: context.read<RevokeAllOtherDevicesUseCase>(),
-        getDeviceStatisticsUseCase: context.read<GetDeviceStatisticsUseCase>(),
+        getUserDevicesUseCase: context.read<local.GetUserDevicesUseCase>(),
+        validateDeviceUseCase: context.read<local.ValidateDeviceUseCase>(),
+        revokeDeviceUseCase: context.read<local.RevokeDeviceUseCase>(),
+        revokeAllOtherDevicesUseCase: context.read<local.RevokeAllOtherDevicesUseCase>(),
+        getDeviceStatisticsUseCase: context.read<local.GetDeviceStatisticsUseCase>(),
         authStateNotifier: context.read<AuthStateNotifier>(),
       ),
     ),

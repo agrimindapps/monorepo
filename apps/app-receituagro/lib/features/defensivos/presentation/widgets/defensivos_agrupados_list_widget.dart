@@ -29,12 +29,12 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
     return Expanded(
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 8, 8),
-        child: _buildContent(),
+        child: _buildContent(context),
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     // Loading state
     if (state.isLoading && state.defensivosListFiltered.isEmpty) {
       return DefensivosAgrupadosLoadingSkeletonWidget(
@@ -56,18 +56,16 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
     }
 
     // Content with list/grid
-    return _buildListContainer();
+    return _buildListContainer(context);
   }
 
-  Widget _buildListContainer() {
+  Widget _buildListContainer(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: state.isDark ? const Color(0xFF1E1E22) : Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: state.isDark 
-              ? Colors.grey.shade800 
-              : Colors.grey.shade200,
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
@@ -99,12 +97,14 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 1),
       itemBuilder: (context, index) {
         final item = state.defensivosListFiltered[index];
-        return DefensivoAgrupadoItemWidget(
-          item: item,
-          viewMode: state.selectedViewMode,
-          category: category,
-          isDark: state.isDark,
-          onTap: () => onItemTap(item),
+        return RepaintBoundary(
+          child: DefensivoAgrupadoItemWidget(
+            item: item,
+            viewMode: state.selectedViewMode,
+            category: category,
+            isDark: state.isDark,
+            onTap: () => onItemTap(item),
+          ),
         );
       },
     );
@@ -127,12 +127,14 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
           itemCount: state.defensivosListFiltered.length,
           itemBuilder: (context, index) {
             final item = state.defensivosListFiltered[index];
-            return DefensivoAgrupadoItemWidget(
-              item: item,
-              viewMode: state.selectedViewMode,
-              category: category,
-              isDark: state.isDark,
-              onTap: () => onItemTap(item),
+            return RepaintBoundary(
+              child: DefensivoAgrupadoItemWidget(
+                item: item,
+                viewMode: state.selectedViewMode,
+                category: category,
+                isDark: state.isDark,
+                onTap: () => onItemTap(item),
+              ),
             );
           },
         );

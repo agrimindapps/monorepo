@@ -66,6 +66,7 @@ dependencies:
 
   path_provider: ^2.1.5
   cloud_firestore: any
+  cloud_functions: any
   firebase_storage: any
   shared_preferences: any
   hive: any

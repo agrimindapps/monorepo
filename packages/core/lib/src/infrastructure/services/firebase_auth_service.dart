@@ -434,6 +434,8 @@ class FirebaseAuthService implements IAuthRepository {
         return 'Por segurança, faça login novamente para continuar.';
       case 'credential-already-in-use':
         return 'Esta conta já está vinculada a outro usuário.';
+      case 'invalid-credential':
+        return 'Email ou senha incorretos. Verifique suas credenciais e tente novamente.';
       default:
         return e.message ?? 'Erro de autenticação desconhecido.';
     }

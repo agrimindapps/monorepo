@@ -86,7 +86,9 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
                   borderRadius: BorderRadius.circular(12),
-                  color: theme.colorScheme.surface,
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
                 ),
                 child: const Center(
                   child: SizedBox(
@@ -103,7 +105,9 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.error),
                   borderRadius: BorderRadius.circular(12),
-                  color: theme.colorScheme.surface,
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
                 ),
                 child: Center(
                   child: Row(
@@ -236,8 +240,10 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
           ),
         ),
         filled: true,
-        fillColor: theme.colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
       items: items,
       isExpanded: true,
@@ -283,8 +289,10 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                     ),
                   ),
                   filled: true,
-                  fillColor: theme.colorScheme.surface,
-                  contentPadding: const EdgeInsets.all(16),
+                  fillColor: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
+                  contentPadding: const EdgeInsets.all(12),
                 ),
                 onChanged: (value) {
                   // Atualizar em tempo real

@@ -370,6 +370,18 @@ class AppNavigationProvider extends ChangeNotifier {
     }
   }
   
+  /// Navega para a página de subscription
+  void navigateToSubscription() {
+    navigateToPage(AppPageType.subscription);
+  }
+
+  /// Navega para lista de diagnósticos
+  void navigateToListaDiagnosticos() {
+    // Como não existe uma página específica de diagnósticos,
+    // navega para a página de detalhes que tem diagnósticos
+    navigateToPage(AppPageType.detalheDetalhes);
+  }
+
   /// Navega e limpa toda a pilha (útil para reset completo)
   void navigateAndClearStack(AppPageType pageType, {
     Map<String, dynamic>? arguments,

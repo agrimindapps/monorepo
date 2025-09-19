@@ -82,9 +82,15 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.outline.withValues(alpha: 0.3)
+              : const Color(0xFFE0E0E0),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,9 +141,15 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.outline.withValues(alpha: 0.3)
+              : const Color(0xFFE0E0E0),
+        ),
       ),
       child: InkWell(
         onTap: () => _showImageOptions(context, provider),
@@ -226,7 +238,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -256,7 +268,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
             ],
           ),
         );
@@ -377,7 +389,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               icon: Icons.local_florist,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Plant species (optional) with security validation
             _buildTextField(
@@ -393,7 +405,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               icon: Icons.science,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Space selector
             ChangeNotifierProvider(
@@ -405,7 +417,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Planting date (optional)
             _buildDateField(
@@ -416,7 +428,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               icon: Icons.event,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Notes (optional) with security validation
             _buildTextField(
@@ -517,8 +529,10 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
             ),
             filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.all(16),
+            fillColor: theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro para modo claro
+            contentPadding: const EdgeInsets.all(12),
             errorText: errorText,
           ),
         ),
@@ -565,6 +579,15 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   data: theme.copyWith(
                     colorScheme: theme.colorScheme.copyWith(
                       primary: theme.colorScheme.primary,
+                      surface: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(0xFFFFFFFF), // Branco puro para modo claro
+                      onSurface: theme.colorScheme.onSurface,
+                    ),
+                    dialogTheme: DialogThemeData(
+                      backgroundColor: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(0xFFFFFFFF), // Branco puro para modo claro
                     ),
                   ),
                   child: child!,
@@ -578,13 +601,15 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           },
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border.all(
                 color: theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
               borderRadius: BorderRadius.circular(12),
-              color: Colors.white,
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
             ),
             child: Row(
               children: [

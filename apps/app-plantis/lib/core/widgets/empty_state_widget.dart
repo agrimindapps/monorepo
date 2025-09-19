@@ -107,13 +107,11 @@ class EmptyStateWidget extends StatelessWidget {
   static EmptyStateConfig _getTaskEmptyStateConfig(TasksFilterType filterType, VoidCallback onAddTask) {
     switch (filterType) {
       case TasksFilterType.all:
-        return EmptyStateConfig(
+        return const EmptyStateConfig(
           icon: Icons.task_alt,
           title: AppStrings.noTasksFound,
           description: AppStrings.noTasksFoundDescription,
-          buttonText: AppStrings.addNewTaskButton,
-          onButtonPressed: onAddTask,
-          showButton: true,
+          showButton: false,
         );
 
       case TasksFilterType.today:
@@ -133,13 +131,11 @@ class EmptyStateWidget extends StatelessWidget {
         );
 
       case TasksFilterType.upcoming:
-        return EmptyStateConfig(
+        return const EmptyStateConfig(
           icon: Icons.schedule,
           title: AppStrings.noUpcomingTasks,
           description: AppStrings.noUpcomingTasksDescription,
-          buttonText: AppStrings.addNewTaskButton,
-          onButtonPressed: onAddTask,
-          showButton: true,
+          showButton: false,
         );
 
       case TasksFilterType.completed:

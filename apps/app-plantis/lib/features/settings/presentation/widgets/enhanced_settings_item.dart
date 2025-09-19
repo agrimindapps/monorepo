@@ -53,13 +53,9 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.98,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -164,21 +160,18 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
       decoration: BoxDecoration(
         color: _getIconColor(theme),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: widget.enabled
-            ? [
-                BoxShadow(
-                  color: _getIconColor(theme).withOpacity(0.3),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
+        boxShadow:
+            widget.enabled
+                ? [
+                  BoxShadow(
+                    color: _getIconColor(theme).withOpacity(0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+                : null,
       ),
-      child: Icon(
-        widget.icon,
-        color: Colors.white,
-        size: 18,
-      ),
+      child: Icon(widget.icon, color: Colors.white, size: 18),
     );
   }
 
@@ -218,9 +211,10 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
     return Icon(
       Icons.chevron_right,
-      color: widget.enabled
-          ? theme.colorScheme.onSurfaceVariant
-          : theme.colorScheme.onSurface.withOpacity(0.38),
+      color:
+          widget.enabled
+              ? theme.colorScheme.onSurfaceVariant
+              : theme.colorScheme.onSurface.withOpacity(0.38),
       size: 20,
     );
   }
@@ -244,23 +238,38 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                 onTapUp: _handleTapUp,
                 onTapCancel: _handleTapCancel,
                 onTap: widget.enabled && !widget.loading ? widget.onTap : null,
-                onLongPress: widget.enabled && !widget.loading ? widget.onLongPress : null,
+                onLongPress:
+                    widget.enabled && !widget.loading
+                        ? widget.onLongPress
+                        : null,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: _getBackgroundColor(theme),
-                    border: !widget.isLast
-                        ? Border(
-                            bottom: BorderSide(
-                              color: theme.colorScheme.outline.withOpacity(0.3),
-                              width: 0.5,
-                            ),
-                          )
-                        : null,
+                    border:
+                        !widget.isLast
+                            ? Border(
+                              bottom: BorderSide(
+                                color: theme.colorScheme.outline.withOpacity(
+                                  0.3,
+                                ),
+                                width: 0.5,
+                              ),
+                            )
+                            : null,
                     borderRadius: BorderRadius.vertical(
-                      top: widget.isFirst ? const Radius.circular(12) : Radius.zero,
-                      bottom: widget.isLast ? const Radius.circular(12) : Radius.zero,
+                      top:
+                          widget.isFirst
+                              ? const Radius.circular(12)
+                              : Radius.zero,
+                      bottom:
+                          widget.isLast
+                              ? const Radius.circular(12)
+                              : Radius.zero,
                     ),
                   ),
                   child: Row(
@@ -277,9 +286,11 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                   child: Text(
                                     widget.title,
                                     style: TextStyle(
-                                      color: widget.enabled
-                                          ? theme.colorScheme.onSurface
-                                          : theme.colorScheme.onSurface.withOpacity(0.38),
+                                      color:
+                                          widget.enabled
+                                              ? theme.colorScheme.onSurface
+                                              : theme.colorScheme.onSurface
+                                                  .withOpacity(0.38),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -323,9 +334,11 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                               Text(
                                 widget.subtitle!,
                                 style: TextStyle(
-                                  color: widget.enabled
-                                      ? theme.colorScheme.onSurfaceVariant
-                                      : theme.colorScheme.onSurface.withOpacity(0.38),
+                                  color:
+                                      widget.enabled
+                                          ? theme.colorScheme.onSurfaceVariant
+                                          : theme.colorScheme.onSurface
+                                              .withOpacity(0.38),
                                   fontSize: 14,
                                 ),
                               ),
@@ -348,9 +361,9 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
 /// Settings item types with specific styling
 enum SettingsItemType {
-  normal,   // Default green theme
-  premium,  // Gold/yellow theme for premium features
-  danger,   // Red theme for destructive actions
-  info,     // Blue theme for informational items
-  success,  // Green theme for success states
+  normal, // Default green theme
+  premium, // Gold/yellow theme for premium features
+  danger, // Red theme for destructive actions
+  info, // Blue theme for informational items
+  success, // Green theme for success states
 }

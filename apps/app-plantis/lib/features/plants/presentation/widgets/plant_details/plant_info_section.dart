@@ -30,7 +30,7 @@ class PlantInfoSection extends StatelessWidget {
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
         boxShadow: [
@@ -192,7 +192,7 @@ class PlantInfoSection extends StatelessWidget {
             color:
                 theme.brightness == Brightness.dark
                     ? const Color(0xFF2C2C2E)
-                    : theme.colorScheme.surface,
+                    : const Color(0xFFFFFFFF), // Branco puro
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.1),

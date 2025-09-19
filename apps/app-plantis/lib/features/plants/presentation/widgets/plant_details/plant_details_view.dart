@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
+import '../../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../../../core/localization/app_strings.dart';
 import '../../../../../core/theme/plantis_colors.dart';
@@ -19,20 +20,20 @@ import 'plant_notes_section.dart';
 import 'plant_tasks_section.dart';
 
 /// Main widget for the plant details screen
-/// 
+///
 /// This widget is responsible only for the visual structure and coordination
 /// of components. All business logic is handled by the [PlantDetailsController].
-/// 
+///
 /// Features provided:
 /// - Plant information display with tabs (Overview, Tasks, Care, Notes)
 /// - Loading and error states with user-friendly interfaces
 /// - Image gallery integration
 /// - Quick actions for common plant care tasks
 /// - Plant management options (edit, delete, share, duplicate)
-/// 
+///
 /// The widget uses a [CustomScrollView] with [SliverAppBar] for a modern
 /// scrolling experience and [TabBarView] for organized content presentation.
-/// 
+///
 /// Example usage:
 /// ```dart
 /// PlantDetailsView(plantId: 'plant-123')
@@ -59,11 +60,11 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     // MEMORY LEAK FIX: Enhanced controller initialization with proper mounted checks
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       try {
         final provider = context.read<PlantDetailsProvider>();
         final taskProvider = context.read<PlantTaskProvider>();
-        
+
         // Only create controller if widget is still mounted
         if (mounted) {
           _controller = PlantDetailsController(
@@ -84,7 +85,11 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               if (mounted) _showSnackBar(message, type);
             },
             onShowSnackBarWithColor: (message, type, {Color? backgroundColor}) {
-              if (mounted) _showSnackBarWithColor(message, backgroundColor: backgroundColor);
+              if (mounted)
+                _showSnackBarWithColor(
+                  message,
+                  backgroundColor: backgroundColor,
+                );
             },
             onShowDialog: (dialog) {
               if (mounted) showDialog(context: context, builder: (_) => dialog);
@@ -95,7 +100,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                   context: context,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                   ),
                   builder: (_) => bottomSheet,
                 );
@@ -105,12 +112,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               if (mounted) _syncPlantDeletion(plantId);
             },
           );
-          
+
           // Load plant data only if controller was created successfully
           if (_controller != null && mounted) {
             _controller!.loadPlant(widget.plantId);
           }
-          
+
           // Initialize tasks only if everything is properly set up
           if (mounted) {
             _initializeTasksIfNeeded(taskProvider);
@@ -129,21 +136,78 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   void dispose() {
     // CRITICAL MEMORY LEAK FIX: Proper disposal sequence
     _tabController.dispose();
-    
+
     // Clear controller reference and ensure no pending operations
     if (_controller != null) {
       _controller = null;
     }
-    
+
     // Clear any provider listeners and ensure proper cleanup
     // The providers are dependency-injected, so they'll be disposed by the DI container
     // but we need to ensure no pending operations or callbacks are active
-    
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BasePageScaffold(
+      // Optimized with Selector - only rebuilds when plant loading state changes
+      body: ResponsiveLayout(
+        child: Selector<PlantDetailsProvider, Map<String, dynamic>>(
+          selector:
+              (context, provider) => {
+                'isLoading': provider.isLoading,
+                'hasError': provider.hasError,
+                'plant': provider.plant,
+                'errorMessage': provider.errorMessage,
+              },
+          builder: (context, plantData, child) {
+            // Estados de loading e erro
+            if ((plantData['isLoading'] as bool) &&
+                plantData['plant'] == null) {
+              return _buildLoadingState(context);
+            }
+
+            if ((plantData['hasError'] as bool) && plantData['plant'] == null) {
+              return _buildErrorState(
+                context,
+                plantData['errorMessage'] as String?,
+              );
+            }
+
+            final plant = plantData['plant'] as Plant?;
+            if (plant == null) {
+              return _buildLoadingState(context);
+            }
+
+            // Validate plant data
+            if (!_isPlantDataValid(plant)) {
+              return _buildInvalidDataState(context, plant);
+            }
+
+            // Tela principal com a planta carregada
+            return _buildMainContent(context, plant);
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Builds the loading state UI with skeleton placeholders
+  ///
+  /// This method creates a comprehensive loading interface that includes:
+  /// - Loading shimmer effects for plant image, name, and description
+  /// - Placeholder tabs and content cards
+  /// - Semantic labels for accessibility
+  /// - Smooth animations and proper spacing
+  ///
+  /// The loading state provides visual feedback while plant data is being fetched,
+  /// improving the user experience by showing content structure.
+  ///
+  /// Returns:
+  /// - A [Widget] containing the complete loading state interface
+  Widget _buildLoadingState(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -151,63 +215,6 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           theme.brightness == Brightness.dark
               ? const Color(0xFF1C1C1E)
               : theme.colorScheme.surface,
-      // Optimized with Selector - only rebuilds when plant loading state changes
-      body: ResponsiveLayout(
-        child: Selector<PlantDetailsProvider, Map<String, dynamic>>(
-        selector: (context, provider) => {
-          'isLoading': provider.isLoading,
-          'hasError': provider.hasError,
-          'plant': provider.plant,
-          'errorMessage': provider.errorMessage,
-        },
-        builder: (context, plantData, child) {
-          // Estados de loading e erro
-          if ((plantData['isLoading'] as bool) && plantData['plant'] == null) {
-            return _buildLoadingState(context);
-          }
-
-          if ((plantData['hasError'] as bool) && plantData['plant'] == null) {
-            return _buildErrorState(context, plantData['errorMessage'] as String?);
-          }
-
-          final plant = plantData['plant'] as Plant?;
-          if (plant == null) {
-            return _buildLoadingState(context);
-          }
-          
-          // Validate plant data
-          if (!_isPlantDataValid(plant)) {
-            return _buildInvalidDataState(context, plant);
-          }
-
-          // Tela principal com a planta carregada
-          return _buildMainContent(context, plant);
-        },
-        ),
-      ),
-    );
-  }
-
-  /// Builds the loading state UI with skeleton placeholders
-  /// 
-  /// This method creates a comprehensive loading interface that includes:
-  /// - Loading shimmer effects for plant image, name, and description
-  /// - Placeholder tabs and content cards
-  /// - Semantic labels for accessibility
-  /// - Smooth animations and proper spacing
-  /// 
-  /// The loading state provides visual feedback while plant data is being fetched,
-  /// improving the user experience by showing content structure.
-  /// 
-  /// Returns:
-  /// - A [Widget] containing the complete loading state interface
-  Widget _buildLoadingState(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Scaffold(
-      backgroundColor: theme.brightness == Brightness.dark
-          ? const Color(0xFF1C1C1E)
-          : theme.colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           // Loading AppBar
@@ -225,14 +232,17 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                   color: theme.colorScheme.surface.withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: _buildLoadingImageSection(context),
             ),
           ),
-          
+
           // Loading Content
           SliverToBoxAdapter(
             child: Padding(
@@ -241,15 +251,18 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Loading text shimmer
-                  const _LoadingShimmer(height: AppSpacing.sectionSpacing, width: 200),
+                  const _LoadingShimmer(
+                    height: AppSpacing.sectionSpacing,
+                    width: 200,
+                  ),
                   const SizedBox(height: AppSpacing.iconPadding),
                   const _LoadingShimmer(height: AppSpacing.lg, width: 150),
                   const SizedBox(height: AppSpacing.sectionSpacing),
-                  
+
                   // Loading tabs
                   _buildLoadingTabs(context),
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   // Loading content cards
                   ...[
                     for (int i = 0; i < 3; i++) ...[
@@ -265,10 +278,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
+
   Widget _buildLoadingImageSection(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: AppSpacing.loadingImageHeight,
       decoration: BoxDecoration(
@@ -290,7 +303,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               height: AppSpacing.iconSize,
               decoration: BoxDecoration(
                 color: PlantisColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCircular),
+                borderRadius: BorderRadius.circular(
+                  AppSpacing.borderRadiusCircular,
+                ),
               ),
               child: const Center(
                 child: CircularProgressIndicator(
@@ -316,20 +331,22 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
-  
+
   Widget _buildLoadingTabs(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: AppSpacing.tabHeight,
       margin: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
         children: [
@@ -338,10 +355,13 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               child: Container(
                 margin: const EdgeInsets.all(AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color: theme.brightness == Brightness.dark
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : Colors.grey.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSmall),
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusSmall,
+                  ),
                 ),
               ),
             ),
@@ -349,18 +369,21 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
+
   Widget _buildLoadingCard(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : theme.colorScheme.surface,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,29 +399,30 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   }
 
   /// Builds the error state UI with recovery options
-  /// 
+  ///
   /// This method creates a user-friendly error interface that includes:
   /// - Clear error messaging with illustration
   /// - Retry functionality to recover from temporary failures
   /// - Troubleshooting tips for common issues
   /// - Help dialog for additional support
   /// - Navigation options to return to previous screen
-  /// 
+  ///
   /// The error state helps users understand what went wrong and provides
   /// actionable steps to resolve the issue.
-  /// 
+  ///
   /// Parameters:
   /// - [errorMessage]: Optional detailed error message for debugging
-  /// 
+  ///
   /// Returns:
   /// - A [Widget] containing the complete error state interface
   Widget _buildErrorState(BuildContext context, String? errorMessage) {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.brightness == Brightness.dark
-          ? const Color(0xFF1C1C1E)
-          : theme.colorScheme.surface,
+      backgroundColor:
+          theme.brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : theme.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
@@ -425,7 +449,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.errorContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: Icon(
@@ -435,7 +461,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 ),
               ),
               const SizedBox(height: AppSpacing.sectionSpacing),
-              
+
               Semantics(
                 label: AppStrings.plantLoadError,
                 liveRegion: true,
@@ -449,7 +475,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 ),
               ),
               const SizedBox(height: AppSpacing.buttonSpacing),
-              
+
               Text(
                 AppStrings.plantLoadError,
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -458,13 +484,13 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.iconPadding),
-              
+
               // Error details (expandable)
               if (errorMessage != null && errorMessage.isNotEmpty)
                 _buildErrorDetails(context, errorMessage),
-              
+
               const SizedBox(height: 32),
-              
+
               // Action buttons
               Column(
                 children: [
@@ -486,7 +512,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                     ),
                   ),
                   const SizedBox(height: AppSpacing.buttonSpacing),
-                  
+
                   // Secondary actions
                   Row(
                     children: [
@@ -496,7 +522,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                           icon: const Icon(Icons.arrow_back),
                           label: const Text(AppStrings.goBack),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.buttonSpacing),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.buttonSpacing,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -510,7 +538,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                           icon: const Icon(Icons.help_outline),
                           label: const Text(AppStrings.help),
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.buttonSpacing),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.buttonSpacing,
+                            ),
                           ),
                         ),
                       ),
@@ -518,9 +548,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: AppSpacing.sectionSpacing),
-              
+
               // Troubleshooting tips
               _buildTroubleshootingTips(context),
             ],
@@ -529,10 +559,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
+
   Widget _buildErrorDetails(BuildContext context, String errorMessage) {
     final theme = Theme.of(context);
-    
+
     return ExpansionTile(
       title: Text(
         AppStrings.errorDetails,
@@ -547,7 +577,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(AppSpacing.cardPadding),
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.iconPadding),
+          margin: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.iconPadding,
+          ),
           decoration: BoxDecoration(
             color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSmall),
@@ -566,16 +599,17 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ],
     );
   }
-  
+
   Widget _buildTroubleshootingTips(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : theme.colorScheme.surfaceContainer,
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -602,7 +636,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
             ],
           ),
           const SizedBox(height: 12),
-          
+
           _buildTip(context, AppStrings.checkConnection),
           _buildTip(context, AppStrings.restartApp),
           _buildTip(context, AppStrings.checkUpdates),
@@ -610,10 +644,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
+
   Widget _buildTip(BuildContext context, String tip) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.iconPadding),
       child: Row(
@@ -622,7 +656,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           Container(
             width: AppSpacing.tipBulletSize,
             height: AppSpacing.tipBulletSize,
-            margin: const EdgeInsets.only(top: AppSpacing.iconPadding, right: AppSpacing.buttonSpacing),
+            margin: const EdgeInsets.only(
+              top: AppSpacing.iconPadding,
+              right: AppSpacing.buttonSpacing,
+            ),
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(AppSpacing.tipBulletSize / 2),
@@ -640,38 +677,38 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
+
   void _showErrorHelp(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.needHelp),
-        content: const Text(AppStrings.helpMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(AppStrings.understood),
+      builder:
+          (context) => AlertDialog(
+            title: const Text(AppStrings.needHelp),
+            content: const Text(AppStrings.helpMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(AppStrings.understood),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
-  
-  
+
   /// Initializes plant tasks if none exist for the current plant
-  /// 
+  ///
   /// This method checks if the plant already has tasks assigned and
   /// generates initial tasks if none are found. It ensures that every
   /// plant has basic care reminders set up automatically.
-  /// 
+  ///
   /// The initialization process:
   /// 1. Checks if tasks already exist for the plant
   /// 2. If no tasks found, generates default tasks based on plant type
   /// 3. Tasks include watering, fertilizing, and other care reminders
-  /// 
+  ///
   /// This is called once during widget initialization to avoid duplicate
   /// task creation on subsequent widget rebuilds.
-  /// 
+  ///
   /// Parameters:
   /// - [taskProvider]: The task provider instance for task management
   void _initializeTasksIfNeeded(PlantTaskProvider taskProvider) {
@@ -679,7 +716,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Double-check mounted state to prevent operations on disposed widgets
       if (!mounted) return;
-      
+
       try {
         final provider = context.read<PlantDetailsProvider>();
         if (provider.plant != null && mounted) {
@@ -698,55 +735,52 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       }
     });
   }
-  
+
   /// Shows the new task creation modal
-  /// 
+  ///
   /// This method displays a comprehensive task creation interface
   /// where users can create custom care reminders for their plants.
-  /// 
+  ///
   /// The task creation modal includes:
   /// - Task type selection (watering, fertilizing, pruning, etc.)
   /// - Custom title and description fields
   /// - Date picker for scheduling
   /// - Form validation and submission
-  /// 
+  ///
   /// After successful task creation, the task is added to the plant's
   /// care schedule and the user receives confirmation.
-  /// 
+  ///
   /// Parameters:
   /// - [context]: Build context for showing the modal
   /// - [plant]: The plant entity for which to create the task
-  
-  
-  
+
   /// Returns the default title for a new task of the given type
-  /// 
+  ///
   /// This method provides sensible default task titles that users
   /// can customize when creating new plant care tasks.
-  /// 
+  ///
   /// Parameters:
   /// - [type]: The task type enum to get the default title for
-  /// 
+  ///
   /// Returns:
   /// - A localized default title string for the task type
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final title = _getDefaultTaskTitle(TaskType.watering); // returns "Regar planta"
   /// ```
-  
-  
+
   /// Creates and saves a new plant care task
-  /// 
+  ///
   /// This method handles the actual task creation process by:
   /// 1. Creating a new PlantTask entity with provided parameters
   /// 2. Adding it to the task provider's list for the plant
   /// 3. Closing the creation modal
   /// 4. Showing success feedback to the user
-  /// 
+  ///
   /// The task is immediately available in the Tasks tab and will
   /// trigger notifications based on the scheduled date.
-  /// 
+  ///
   /// Parameters:
   /// - [context]: Build context for navigation and feedback
   /// - [plant]: The plant entity this task belongs to
@@ -754,13 +788,13 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   /// - [title]: User-provided or default title for the task
   /// - [description]: Optional detailed description of the task
   /// - [scheduledDate]: When the task should be performed
-  
+
   void _syncPlantDeletion(String plantId) {
     try {
       // Tentar sincronizar com PlantsListProvider se disponível
       final plantsProvider = context.read<PlantsListProvider>();
-      // Remove da lista local sem chamar repository novamente
-      plantsProvider.plants.removeWhere((plant) => plant.id == plantId);
+      // Forçar recarregamento completo da lista para refletir as mudanças
+      plantsProvider.loadPlants();
     } catch (e) {
       // Se não conseguir encontrar o provider, não há problema
       // A lista será atualizada no próximo reload
@@ -780,8 +814,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildDeleteConfirmDialog(Plant plant) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
+      backgroundColor: const Color(0xFFFFFFFF), // Branco puro
       title: const Text('Excluir planta'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -797,17 +832,11 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
             decoration: BoxDecoration(
               color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.red.withValues(alpha: 0.3),
-              ),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.warning_outlined,
-                  color: Colors.red,
-                  size: 20,
-                ),
+                const Icon(Icons.warning_outlined, color: Colors.red, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -828,19 +857,17 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
-        TextButton(
-          onPressed: () async {
-            try {
-              Navigator.of(context).pop(); // Fechar diálogo
-              await _controller?.deletePlant(plant.id);
-            } catch (e) {
-              // Error já é tratado no controller
-            }
+        StatefulBuilder(
+          builder: (context, setState) {
+            return TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Fechar diálogo primeiro
+                await _controller?.deletePlant(plant.id);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Excluir'),
+            );
           },
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.red,
-          ),
-          child: const Text('Excluir'),
         ),
       ],
     );
@@ -858,7 +885,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       default:
         backgroundColor = null;
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -867,7 +894,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
+
   void _showSnackBarWithColor(String message, {Color? backgroundColor}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -877,29 +904,25 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       ),
     );
   }
-  
-  
 
   /// Builds the main content area with plant details and tabs
-  /// 
+  ///
   /// This method creates the primary interface for displaying plant information
   /// using a tabbed layout. It includes:
   /// - Custom app bar with plant image and action buttons
   /// - Tab bar with four sections: Overview, Tasks, Care, Notes
   /// - Responsive layout that adapts to screen size
   /// - Floating action buttons for quick plant management
-  /// 
+  ///
   /// The content is organized in a [CustomScrollView] for smooth scrolling
   /// and optimal performance with large amounts of plant data.
-  /// 
+  ///
   /// Parameters:
   /// - [plant]: The plant entity containing all plant information
-  /// 
+  ///
   /// Returns:
   /// - A [Widget] containing the complete plant details interface
   Widget _buildMainContent(BuildContext context, Plant plant) {
-    final theme = Theme.of(context);
-
     return Column(
       children: [
         // Header estilo ReceitaAgro
@@ -909,10 +932,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF1C1C1E)
-                  : theme.colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              color:
+                  Colors
+                      .transparent, // Transparente para usar o fundo do BasePageScaffold
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: Column(
               children: [
@@ -924,10 +949,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.brightness == Brightness.dark
-                          ? const Color(0xFF1C1C1E)
-                          : theme.colorScheme.surface,
+                    decoration: const BoxDecoration(
+                      color:
+                          Colors
+                              .transparent, // Transparente para usar o fundo do BasePageScaffold
                     ),
                     child: TabBarView(
                       controller: _tabController,
@@ -949,110 +974,46 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   }
 
   Widget _buildHeader(BuildContext context, Plant plant) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.primaryDark,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: PlantisColors.primary.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => _controller?.goBack(),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 24,
-              ),
+    return PlantisHeader(
+      title: plant.displayName,
+      subtitle:
+          plant.species?.isNotEmpty == true
+              ? plant.species!
+              : 'Detalhes da planta',
+      onBackPressed: () => _controller?.goBack(),
+      actions: [
+        PopupMenuButton<String>(
+          color: const Color(0xFFFFFFFF), // Fundo branco puro
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
             ),
+            child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plant.displayName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+          onSelected: (action) => _handleMenuAction(action, plant),
+          itemBuilder:
+              (context) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: ListTile(
+                    leading: Icon(Icons.edit_outlined),
+                    title: Text('Editar'),
+                    contentPadding: EdgeInsets.zero,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  plant.species?.isNotEmpty == true ? plant.species! : 'Detalhes da planta',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: ListTile(
+                    leading: Icon(Icons.delete_outline, color: Colors.red),
+                    title: Text('Excluir', style: TextStyle(color: Colors.red)),
+                    contentPadding: EdgeInsets.zero,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
-            ),
-          ),
-          PopupMenuButton<String>(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.more_vert,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            onSelected: (action) => _handleMenuAction(action, plant),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: ListTile(
-                  leading: Icon(Icons.edit_outlined),
-                  title: Text('Editar'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                  leading: Icon(Icons.delete_outline, color: Colors.red),
-                  title: Text(
-                    'Excluir',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1092,10 +1053,11 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           label: 'Opções da planta ${plant.displayName}',
           button: true,
           child: PopupMenuButton<String>(
+            color: const Color(0xFFFFFFFF), // Fundo branco puro
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                color: const Color(0xFFFFFFFF), // Branco puro
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -1108,27 +1070,28 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               child: Icon(Icons.more_vert, color: theme.colorScheme.onSurface),
             ),
             onSelected: (action) => _handleMenuAction(action, plant),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: ListTile(
-                  leading: Icon(Icons.edit_outlined),
-                  title: Text('Editar'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                  leading: Icon(Icons.delete_outline, color: Colors.red),
-                  title: Text(
-                    'Excluir',
-                    style: TextStyle(color: Colors.red),
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: ListTile(
+                      leading: Icon(Icons.edit_outlined),
+                      title: Text('Editar'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(Icons.delete_outline, color: Colors.red),
+                      title: Text(
+                        'Excluir',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
           ),
         ),
         const SizedBox(width: 8),
@@ -1167,18 +1130,21 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               ),
             ],
           ),
-          child: plant.hasImage
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(58),
-                  child: Image.network(
-                    plant.primaryImageUrl!,
-                    width: 116,
-                    height: 116,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
-                  ),
-                )
-              : _buildPlaceholderIcon(),
+          child:
+              plant.hasImage
+                  ? ClipRRect(
+                    borderRadius: BorderRadius.circular(58),
+                    child: Image.network(
+                      plant.primaryImageUrl!,
+                      width: 116,
+                      height: 116,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              _buildPlaceholderIcon(),
+                    ),
+                  )
+                  : _buildPlaceholderIcon(),
         ),
       ),
     );
@@ -1186,11 +1152,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildPlaceholderIcon() {
     return const Center(
-      child: Icon(
-        Icons.eco,
-        color: PlantisColors.primary,
-        size: 48,
-      ),
+      child: Icon(Icons.eco, color: PlantisColors.primary, size: 48),
     );
   }
 
@@ -1198,14 +1160,16 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withValues(alpha: 0.05),
@@ -1226,6 +1190,8 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           color: PlantisColors.primary,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSmall),
         ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicatorPadding: const EdgeInsets.all(4),
         labelColor: Colors.white,
         unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
         labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -1241,14 +1207,14 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildOverviewTab(BuildContext context, Plant plant) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: PlantInfoSection(plant: plant),
     );
   }
 
   Widget _buildTasksTab(BuildContext context, Plant plant) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: Consumer<PlantTaskProvider>(
         builder: (context, taskProvider, child) {
           return PlantTasksSection(plant: plant);
@@ -1259,69 +1225,70 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   Widget _buildCareTab(BuildContext context, Plant plant) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: PlantCareSection(plant: plant),
     );
   }
 
   Widget _buildNotesTab(BuildContext context, Plant plant) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: PlantNotesSection(plant: plant),
     );
   }
-  
+
   /// Validates if plant data is complete and valid for display
-  /// 
+  ///
   /// This method performs basic validation checks to ensure the plant
   /// has minimum required information to be properly displayed.
-  /// 
+  ///
   /// Validation checks:
   /// - Plant ID is not empty
   /// - Display name is not empty or whitespace-only
   /// - Basic plant information is present
-  /// 
+  ///
   /// Currently allows plants with minimal data to be displayed,
   /// but this can be extended for more strict validation if needed.
-  /// 
+  ///
   /// Parameters:
   /// - [plant]: The plant entity to validate
-  /// 
+  ///
   /// Returns:
   /// - `true` if plant data is valid for display, `false` otherwise
   bool _isPlantDataValid(Plant plant) {
     // Basic validation checks
     if (plant.id.isEmpty) return false;
     if (plant.displayName.trim().isEmpty) return false;
-    
+
     // Plant must have at least basic information
     return true; // Allow plants with minimal data to be displayed
   }
-  
+
   /// Builds UI for plants with invalid or incomplete data
-  /// 
+  ///
   /// This method creates a specialized interface for handling plants
   /// that have missing or invalid data. It provides:
   /// - Clear messaging about the data issues
   /// - Direct access to edit the plant to fix problems
   /// - Navigation options to return to the plant list
   /// - Accessible design with proper semantic labels
-  /// 
+  ///
   /// This state helps users understand data problems and provides
   /// immediate action to resolve them.
-  /// 
+  ///
   /// Parameters:
   /// - [plant]: The plant entity with invalid or incomplete data
-  /// 
+  ///
   /// Returns:
   /// - A [Widget] containing the invalid data state interface
   Widget _buildInvalidDataState(BuildContext context, Plant plant) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      backgroundColor: theme.brightness == Brightness.dark
-          ? const Color(0xFF1C1C1E)
-          : theme.colorScheme.surface,
+      backgroundColor:
+          theme.brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E)
+              : theme.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
@@ -1352,7 +1319,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.errorContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: const Icon(
@@ -1362,7 +1331,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 ),
               ),
               const SizedBox(height: AppSpacing.sectionSpacing),
-              
+
               Semantics(
                 label: AppStrings.incompleteDataAriaLabel,
                 child: Text(
@@ -1375,7 +1344,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 ),
               ),
               const SizedBox(height: AppSpacing.buttonSpacing),
-              
+
               Text(
                 AppStrings.incompleteDataMessage,
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -1383,9 +1352,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Action buttons
               Column(
                 children: [
@@ -1403,7 +1372,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                           style: ElevatedButton.styleFrom(
                             backgroundColor: PlantisColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.lg,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -1411,9 +1382,9 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                         ),
                       ),
                     ),
-                  
+
                   if (plant.id.isNotEmpty) const SizedBox(height: 12),
-                  
+
                   // Secondary actions
                   OutlinedButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
@@ -1440,10 +1411,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
 /// Optimized loading shimmer widget that doesn't rebuild unnecessarily
 class _LoadingShimmer extends StatelessWidget {
-  const _LoadingShimmer({
-    required this.height,
-    required this.width,
-  });
+  const _LoadingShimmer({required this.height, required this.width});
 
   final double height;
   final double width;
@@ -1451,18 +1419,17 @@ class _LoadingShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? Colors.white.withValues(alpha: 0.1)
-            : Colors.grey.withValues(alpha: 0.2),
+        color:
+            theme.brightness == Brightness.dark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSmall),
       ),
     );
   }
 }
-
-

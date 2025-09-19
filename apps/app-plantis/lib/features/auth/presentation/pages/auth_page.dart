@@ -6,16 +6,20 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
-import '../../../../core/widgets/layout_stability_widget.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/forgot_password_dialog.dart';
+
+// Constantes para SharedPreferences
+const String _kRememberedEmailKey = 'remembered_email';
+const String _kRememberMeKey = 'remember_me';
 
 // Data class for granular Selector optimization
 class AuthLoadingState {
@@ -157,6 +161,8 @@ class _AuthPageState extends State<AuthPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _animationController.forward();
+        // Carregar credenciais lembradas após a inicialização
+        _loadRememberedCredentials();
       }
     });
   }
@@ -175,12 +181,45 @@ class _AuthPageState extends State<AuthPage>
     super.dispose();
   }
 
+  /// Salva ou remove as credenciais lembradas baseado no estado do checkbox
+  Future<void> _saveRememberedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (_rememberMe) {
+      // Salvar email e estado do "Lembrar-me"
+      await prefs.setString(_kRememberedEmailKey, _loginEmailController.text);
+      await prefs.setBool(_kRememberMeKey, true);
+    } else {
+      // Limpar email salvo se "Lembrar-me" foi desmarcado
+      await prefs.remove(_kRememberedEmailKey);
+      await prefs.setBool(_kRememberMeKey, false);
+    }
+  }
+
+  /// Carrega email salvo e estado do "Lembrar-me" na inicialização
+  Future<void> _loadRememberedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    final rememberedEmail = prefs.getString(_kRememberedEmailKey);
+    final rememberMe = prefs.getBool(_kRememberMeKey) ?? false;
+    
+    if (rememberedEmail != null && rememberMe) {
+      setState(() {
+        _loginEmailController.text = rememberedEmail;
+        _rememberMe = true;
+      });
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (_loginFormKey.currentState!.validate()) {
       showLoading(message: 'Fazendo login...');
       
       final authProvider = context.read<AuthProvider>();
       final router = GoRouter.of(context);
+      
+      // Salvar email se "Lembrar-me" estiver marcado
+      await _saveRememberedCredentials();
       
       // Usar novo método loginAndSync em vez do login tradicional
       await authProvider.loginAndSync(_loginEmailController.text, _loginPasswordController.text);
@@ -917,6 +956,8 @@ class _AuthPageState extends State<AuthPage>
                       setState(() {
                         _rememberMe = !_rememberMe;
                       });
+                      // Salvar ou limpar credenciais imediatamente quando o estado mudar
+                      _saveRememberedCredentials();
                     },
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(

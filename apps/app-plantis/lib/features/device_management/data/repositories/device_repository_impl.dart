@@ -23,18 +23,30 @@ class DeviceRepositoryImpl implements DeviceRepository {
   Future<Either<Failure, List<DeviceModel>>> getUserDevices(String userId) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Getting devices for user $userId (stub)');
+        debugPrint('🔄 DeviceRepository: Getting devices for user $userId');
       }
 
-      // Por enquanto, retorna apenas do cache local
-      final result = await _localDataSource.getUserDevices(userId);
+      // Primeiro tenta obter do remote (Firestore)
+      final remoteResult = await _remoteDataSource.getUserDevices(userId);
 
-      return result.fold(
-        (failure) => Left(failure),
-        (devices) {
+      return remoteResult.fold(
+        (failure) async {
           if (kDebugMode) {
-            debugPrint('✅ DeviceRepository: Found ${devices.length} devices');
+            debugPrint('⚠️ DeviceRepository: Remote failed, falling back to local cache');
           }
+          // Se falhar, usa o cache local como fallback
+          return await _localDataSource.getUserDevices(userId);
+        },
+        (devices) async {
+          if (kDebugMode) {
+            debugPrint('✅ DeviceRepository: Found ${devices.length} devices from remote');
+          }
+          
+          // Salva os dispositivos no cache local para uso offline
+          for (final device in devices) {
+            await _localDataSource.saveDevice(device);
+          }
+          
           return Right(devices);
         },
       );
@@ -75,13 +87,28 @@ class DeviceRepositoryImpl implements DeviceRepository {
   }) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Validating device ${device.uuid} (stub)');
+        debugPrint('🔄 DeviceRepository: Validating device ${device.uuid}');
       }
 
-      // Simulação simples - apenas salva no cache local
-      await _localDataSource.saveDevice(device);
+      // Valida com o Firebase primeiro
+      final result = await _remoteDataSource.validateDevice(
+        userId: userId,
+        device: device,
+      );
 
-      return Right(device);
+      return result.fold(
+        (failure) => Left(failure),
+        (validatedDevice) async {
+          // Salva o dispositivo validado no cache local
+          await _localDataSource.saveDevice(validatedDevice);
+          
+          if (kDebugMode) {
+            debugPrint('✅ DeviceRepository: Device validation and caching successful');
+          }
+          
+          return Right(validatedDevice);
+        },
+      );
     } catch (e) {
       return Left(
         ServerFailure(
@@ -100,11 +127,28 @@ class DeviceRepositoryImpl implements DeviceRepository {
   }) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Revoking device $deviceUuid (stub)');
+        debugPrint('🔄 DeviceRepository: Revoking device $deviceUuid');
       }
 
-      // Remove do cache local
-      return await _localDataSource.removeDevice(deviceUuid);
+      // Revoga no Firebase primeiro
+      final result = await _remoteDataSource.revokeDevice(
+        userId: userId,
+        deviceUuid: deviceUuid,
+      );
+
+      return result.fold(
+        (failure) => Left(failure),
+        (_) async {
+          // Remove do cache local também
+          await _localDataSource.removeDevice(deviceUuid);
+          
+          if (kDebugMode) {
+            debugPrint('✅ DeviceRepository: Device revocation and local removal successful');
+          }
+          
+          return const Right(null);
+        },
+      );
     } catch (e) {
       return Left(
         ServerFailure(

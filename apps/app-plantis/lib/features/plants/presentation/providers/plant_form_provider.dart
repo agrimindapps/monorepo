@@ -706,8 +706,8 @@ class PlantFormProvider extends ChangeNotifier {
     final config =
         _hasConfigData()
             ? PlantConfig(
-              wateringIntervalDays: _wateringIntervalDays,
-              fertilizingIntervalDays: _fertilizingIntervalDays,
+              wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : null,
+              fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : null,
               pruningIntervalDays:
                   (_enablePruning == true) ? _pruningIntervalDays : null,
               sunlightCheckIntervalDays:
@@ -743,8 +743,8 @@ class PlantFormProvider extends ChangeNotifier {
     final config =
         _hasConfigData()
             ? PlantConfig(
-              wateringIntervalDays: _wateringIntervalDays,
-              fertilizingIntervalDays: _fertilizingIntervalDays,
+              wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : null,
+              fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : null,
               pruningIntervalDays:
                   (_enablePruning == true) ? _pruningIntervalDays : null,
               sunlightCheckIntervalDays:

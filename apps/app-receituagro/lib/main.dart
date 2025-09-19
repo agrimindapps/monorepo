@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/injection_container.dart' as di;
+import 'core/navigation/app_navigation_provider.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
@@ -16,12 +17,16 @@ import 'core/providers/theme_provider.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/settings/presentation/providers/profile_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
-// navigation_service.dart moved to core package - available via 'package:core/core.dart'
+import 'core/services/firebase_messaging_service.dart';
 import 'core/services/premium_service.dart';
+import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
+// navigation_service.dart moved to core package - available via 'package:core/core.dart'
 // Emergency stub removed
 // revenuecat_service.dart removed - consolidated into premium_service.dart
 // startup_optimization_service.dart removed - unused
@@ -29,6 +34,13 @@ import 'core/setup/receituagro_data_setup.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
+
+/// Handler para mensagens em background (deve ser top-level function)
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint('Background message received: ${message.messageId}');
+  // Processar mensagem em background se necessário
+}
 
 void main() async {
   // Ensure Flutter bindings are initialized first
@@ -52,7 +64,7 @@ void main() async {
     } catch (e) {
       // Log error but don't block app startup
       if (EnvironmentConfig.enableAnalytics) {
-        FirebaseCrashlytics.instance.recordError(
+        await FirebaseCrashlytics.instance.recordError(
           e,
           StackTrace.current,
           reason: 'Failed to sign in anonymously',
@@ -93,6 +105,26 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // ===== PUSH NOTIFICATIONS INITIALIZATION =====
+  // Configurar handler para mensagens em background
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Inicializar Firebase Messaging Service
+  try {
+    final messagingService = di.sl<ReceitaAgroFirebaseMessagingService>();
+    final navigationProvider = di.sl<AppNavigationProvider>();
+    await messagingService.initialize(navigationProvider: navigationProvider);
+
+    // Inicializar Promotional Notification Manager
+    final promotionalManager = di.sl<PromotionalNotificationManager>();
+    await promotionalManager.initialize();
+
+    debugPrint('✅ [MAIN] Push notifications inicializados com sucesso');
+  } catch (e) {
+    debugPrint('❌ [MAIN] Erro ao inicializar push notifications: $e');
+    // Não bloquear o app por falha nas notificações
+  }
 
   // ===== SPRINT 1 SERVICES INITIALIZATION =====
 

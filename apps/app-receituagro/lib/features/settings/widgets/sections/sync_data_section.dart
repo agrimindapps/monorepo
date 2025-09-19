@@ -20,21 +20,32 @@ class _SyncDataSectionState extends State<SyncDataSection> {
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
 
+    final authProvider = Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
+    
+    if (!authProvider.isAuthenticated) {
+      _showMessage('Faça login para sincronizar seus dados', isError: true);
+      return;
+    }
+
     setState(() {
       _isSyncing = true;
     });
 
     try {
-      // Simular sincronização
-      await Future<void>.delayed(const Duration(seconds: 2));
+      // Usar sincronização real do AuthProvider
+      final success = await authProvider.forceSyncUserData();
       
       if (mounted) {
         setState(() {
-          _lastSyncText = 'Agora mesmo';
+          _lastSyncText = success ? 'Agora mesmo' : _lastSyncText;
           _isSyncing = false;
         });
         
-        _showMessage('Sincronização concluída com sucesso!');
+        if (success) {
+          _showMessage('Sincronização concluída com sucesso!');
+        } else {
+          _showMessage('Falha na sincronização. Tente novamente.', isError: true);
+        }
       }
     } catch (e) {
       if (mounted) {

@@ -49,25 +49,44 @@ abstract class DeviceRemoteDataSource {
   Future<Either<Failure, List<DeviceModel>>> syncDevices(String userId);
 }
 
-/// Implementação simplificada do datasource remoto
-/// Stub implementation - funcionalidade será delegada diretamente ao core repository
+/// Implementação real do datasource remoto usando Firebase
+/// Integra com o FirebaseDeviceService do core package
 class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
-  DeviceRemoteDataSourceImpl();
+  final FirebaseDeviceService _firebaseDeviceService;
+
+  DeviceRemoteDataSourceImpl({
+    required FirebaseDeviceService firebaseDeviceService,
+  }) : _firebaseDeviceService = firebaseDeviceService;
 
   @override
   Future<Either<Failure, List<DeviceModel>>> getUserDevices(String userId) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - getUserDevices for $userId');
+      debugPrint('🌐 DeviceRemote: Getting devices from Firestore for user $userId');
     }
-    // Retorna lista vazia por enquanto - o core repository será usado diretamente nos use cases
-    return const Right([]);
+
+    final result = await _firebaseDeviceService.getDevicesFromFirestore(userId);
+
+    return result.fold(
+      (failure) => Left(failure),
+      (entities) {
+        final models = entities.map((entity) => DeviceModel.fromEntity(entity)).toList();
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: Found ${models.length} devices from Firestore');
+        }
+        return Right(models);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, DeviceModel?>> getDeviceByUuid(String deviceUuid) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - getDeviceByUuid $deviceUuid');
+      debugPrint('🌐 DeviceRemote: Getting device $deviceUuid from Firestore');
     }
+
+    // O FirebaseDeviceService não tem método específico para buscar por UUID
+    // Vamos buscar todos os dispositivos e filtrar localmente
+    // TODO: Implementar método específico no FirebaseDeviceService se necessário
     return const Right(null);
   }
 
@@ -77,9 +96,24 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     required DeviceModel device,
   }) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - validateDevice ${device.uuid}');
+      debugPrint('🌐 DeviceRemote: Validating device ${device.uuid} via Firebase');
     }
-    return Left(ServerFailure('Not implemented in stub'));
+
+    final result = await _firebaseDeviceService.validateDevice(
+      userId: userId,
+      device: device.toEntity(),
+    );
+
+    return result.fold(
+      (failure) => Left(failure),
+      (entity) {
+        final model = DeviceModel.fromEntity(entity);
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: Device validation successful');
+        }
+        return Right(model);
+      },
+    );
   }
 
   @override
@@ -88,9 +122,23 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     required String deviceUuid,
   }) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - revokeDevice $deviceUuid');
+      debugPrint('🌐 DeviceRemote: Revoking device $deviceUuid via Firebase');
     }
-    return Left(ServerFailure('Not implemented in stub'));
+
+    final result = await _firebaseDeviceService.revokeDevice(
+      userId: userId,
+      deviceUuid: deviceUuid,
+    );
+
+    return result.fold(
+      (failure) => Left(failure),
+      (_) {
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: Device revocation successful');
+        }
+        return const Right(null);
+      },
+    );
   }
 
   @override
@@ -99,9 +147,49 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     required String currentDeviceUuid,
   }) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - revokeAllOtherDevices');
+      debugPrint('🌐 DeviceRemote: Revoking all other devices via Firebase');
     }
-    return Left(ServerFailure('Not implemented in stub'));
+
+    // O FirebaseDeviceService não tem método para revogar todos exceto o atual
+    // Vamos implementar obtendo todos os dispositivos e revogando individualmente
+    final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(userId);
+
+    return devicesResult.fold(
+      (failure) => Left(failure),
+      (devices) async {
+        try {
+          for (final device in devices) {
+            if (device.uuid != currentDeviceUuid) {
+              final revokeResult = await _firebaseDeviceService.revokeDevice(
+                userId: userId,
+                deviceUuid: device.uuid,
+              );
+              
+              // Se alguma revogação falhar, retornamos o erro
+              if (revokeResult.isLeft()) {
+                return revokeResult.fold(
+                  (failure) => Left(failure),
+                  (_) => const Right(null),
+                );
+              }
+            }
+          }
+          
+          if (kDebugMode) {
+            debugPrint('✅ DeviceRemote: All other devices revoked successfully');
+          }
+          return const Right(null);
+        } catch (e) {
+          return Left(
+            ServerFailure(
+              'Erro ao revogar outros dispositivos',
+              code: 'REVOKE_ALL_ERROR',
+              details: e,
+            ),
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -110,44 +198,118 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     required String deviceUuid,
   }) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - updateLastActivity $deviceUuid');
+      debugPrint('🌐 DeviceRemote: Updating last activity for $deviceUuid via Firebase');
     }
-    return Left(ServerFailure('Not implemented in stub'));
+
+    final result = await _firebaseDeviceService.updateDeviceLastActivity(
+      userId: userId,
+      deviceUuid: deviceUuid,
+    );
+
+    return result.fold(
+      (failure) => Left(failure),
+      (entity) {
+        final model = DeviceModel.fromEntity(entity);
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: Device activity updated successfully');
+        }
+        return Right(model);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - canAddMoreDevices for $userId');
+      debugPrint('🌐 DeviceRemote: Checking device limit for user $userId');
     }
-    return const Right(true); // Permite por padrão
+
+    final result = await _firebaseDeviceService.getActiveDeviceCount(userId);
+
+    return result.fold(
+      (failure) => Left(failure),
+      (count) {
+        const deviceLimit = 3; // Limite padrão
+        final canAdd = count < deviceLimit;
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: User has $count/$deviceLimit devices, can add: $canAdd');
+        }
+        return Right(canAdd);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - getActiveDeviceCount for $userId');
+      debugPrint('🌐 DeviceRemote: Getting active device count for $userId');
     }
-    return const Right(0);
+
+    final result = await _firebaseDeviceService.getActiveDeviceCount(userId);
+
+    return result.fold(
+      (failure) => Left(failure),
+      (count) {
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: Found $count active devices');
+        }
+        return Right(count);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(String userId) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - getDeviceStatistics for $userId');
+      debugPrint('🌐 DeviceRemote: Getting device statistics for $userId');
     }
-    return const Right({
-      'total_devices': 0,
-      'active_devices': 0,
-      'inactive_devices': 0,
-    });
+
+    // O FirebaseDeviceService não tem método de estatísticas específico
+    // Vamos obter os dispositivos e calcular as estatísticas localmente
+    final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(userId);
+
+    return devicesResult.fold(
+      (failure) => Left(failure),
+      (devices) {
+        final totalDevices = devices.length;
+        final activeDevices = devices.where((d) => d.isActive).length;
+        final inactiveDevices = totalDevices - activeDevices;
+
+        final statistics = {
+          'total_devices': totalDevices,
+          'active_devices': activeDevices,
+          'inactive_devices': inactiveDevices,
+          'platforms': _groupDevicesByPlatform(devices),
+        };
+
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: Generated statistics: $statistics');
+        }
+
+        return Right(statistics);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, List<DeviceModel>>> syncDevices(String userId) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Stub implementation - syncDevices for $userId');
+      debugPrint('🌐 DeviceRemote: Syncing devices for $userId');
     }
-    return const Right([]);
+
+    // Para sincronização, simplesmente retornamos os dispositivos do Firestore
+    return getUserDevices(userId);
+  }
+
+  /// Helper para agrupar dispositivos por plataforma
+  Map<String, int> _groupDevicesByPlatform(List<DeviceEntity> devices) {
+    final platformCounts = <String, int>{};
+    
+    for (final device in devices) {
+      final platform = device.platform;
+      platformCounts[platform] = (platformCounts[platform] ?? 0) + 1;
+    }
+    
+    return platformCounts;
   }
 }

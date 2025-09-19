@@ -251,7 +251,7 @@ class HomePragasStatsWidget extends StatelessWidget {
                   child: Icon(
                     icon ?? Icons.circle,
                     size: 70,
-                    color: theme.colorScheme.onPrimary.withValues(alpha: 0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                   ),
                 ),
                 // Conteúdo principal
@@ -265,7 +265,7 @@ class HomePragasStatsWidget extends StatelessWidget {
                         children: [
                           Icon(
                             icon ?? Icons.circle,
-                            color: theme.colorScheme.onPrimary,
+                            color: Colors.white,
                             size: 22,
                           ),
                           const SizedBox(width: 4),
@@ -273,13 +273,13 @@ class HomePragasStatsWidget extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 2),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.onPrimary.withValues(alpha: 0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               count,
                               style: TextStyle(
-                                color: theme.colorScheme.onPrimary,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -294,7 +294,7 @@ class HomePragasStatsWidget extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onPrimary,
+                          color: Colors.white,
                           shadows: [
                             Shadow(
                               blurRadius: 2.0,
@@ -313,7 +313,7 @@ class HomePragasStatsWidget extends StatelessWidget {
                   right: 8,
                   child: Icon(
                     Icons.touch_app,
-                    color: theme.colorScheme.onPrimary.withValues(alpha: 0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     size: 14,
                   ),
                 ),

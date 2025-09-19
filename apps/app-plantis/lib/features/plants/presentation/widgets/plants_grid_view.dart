@@ -17,7 +17,7 @@ class PlantsGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlignedGridView.count(
       controller: scrollController,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       physics: const AlwaysScrollableScrollPhysics(),
       crossAxisCount: _getCrossAxisCount(context),
       mainAxisSpacing: 12,

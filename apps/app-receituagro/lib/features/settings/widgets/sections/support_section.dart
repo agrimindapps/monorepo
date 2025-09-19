@@ -23,23 +23,29 @@ class SupportSection extends StatelessWidget {
           showIcon: true,
         ),
         SettingsCard(
-          child: Column(
-            children: [
-              SettingsListTile(
-                leadingIcon: Icons.star_outline,
-                title: 'Avaliar o App',
-                subtitle: 'Avalie nossa experiência na loja',
-                onTap: () => _showRateApp(context),
-                showDivider: true,
-              ),
-              SettingsListTile(
-                leadingIcon: Icons.feedback_outlined,
-                iconColor: Theme.of(context).colorScheme.secondary,
-                title: 'Enviar Feedback',
-                subtitle: 'Nos ajude a melhorar o app',
-                onTap: () => _showFeedback(context),
-              ),
-            ],
+          child: SettingsListTile(
+            leadingIcon: Icons.star_outline,
+            title: 'Avaliar o App',
+            subtitle: 'Avalie nossa experiência na loja',
+            onTap: () => _showRateApp(context),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SettingsCard(
+          child: SettingsListTile(
+            leadingIcon: Icons.feedback_outlined,
+            title: 'Enviar Feedback',
+            subtitle: 'Nos ajude a melhorar o app',
+            onTap: () => _showFeedback(context),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SettingsCard(
+          child: SettingsListTile(
+            leadingIcon: Icons.info_outline,
+            title: 'Sobre o Aplicativo',
+            subtitle: 'Versão, suporte e informações',
+            onTap: () => _showAboutApp(context),
           ),
         ),
       ],
@@ -72,6 +78,15 @@ class SupportSection extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SettingsDesignTokens.getWarningSnackbar(
         'Sistema de feedback em desenvolvimento',
+      ),
+    );
+  }
+
+  void _showAboutApp(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Sobre o app - Em desenvolvimento'),
+        backgroundColor: Colors.blue,
       ),
     );
   }

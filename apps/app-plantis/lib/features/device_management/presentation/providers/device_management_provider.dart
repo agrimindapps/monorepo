@@ -1,12 +1,14 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide ValidateDeviceUseCase, DeviceValidationResult, ValidateDeviceParams;
+import 'package:core/core.dart' hide GetUserDevicesUseCase, ValidateDeviceUseCase, RevokeDeviceUseCase, RevokeAllOtherDevicesUseCase, DeviceValidationResult, ValidateDeviceParams, GetUserDevicesParams, RevokeDeviceParams, RevokeAllOtherDevicesParams;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
 import '../../domain/usecases/get_device_statistics_usecase.dart';
+import '../../domain/usecases/get_user_devices_usecase.dart';
+import '../../domain/usecases/revoke_device_usecase.dart';
 import '../../domain/usecases/validate_device_usecase.dart';
 
 /// Provider para gerenciar estado de dispositivos no app-plantis
@@ -174,8 +176,7 @@ class DeviceManagementProvider extends ChangeNotifier {
         return;
       }
 
-      final params = GetUserDevicesParams(
-        userId: currentUser.id,
+      const params = GetUserDevicesParams(
         activeOnly: false,
       );
 
@@ -287,7 +288,6 @@ class DeviceManagementProvider extends ChangeNotifier {
       }
 
       final params = RevokeDeviceParams(
-        userId: currentUser.id,
         deviceUuid: deviceUuid,
       );
 
@@ -349,7 +349,6 @@ class DeviceManagementProvider extends ChangeNotifier {
       }
 
       final params = RevokeAllOtherDevicesParams(
-        userId: currentUser.id,
         currentDeviceUuid: _currentDevice!.uuid,
       );
 

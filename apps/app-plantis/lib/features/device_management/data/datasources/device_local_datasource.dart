@@ -37,11 +37,15 @@ abstract class DeviceLocalDataSource {
 /// Implementação simplificada do datasource local
 /// Sem cache local persistente por enquanto - implementação mínima para compilação
 class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
+  final ILocalStorageRepository _storageService;
+  
   // Cache em memória temporário
   final Map<String, List<DeviceModel>> _userDevicesCache = {};
   final Map<String, DeviceModel> _devicesCache = {};
 
-  DeviceLocalDataSourceImpl();
+  DeviceLocalDataSourceImpl({
+    required ILocalStorageRepository storageService,
+  }) : _storageService = storageService;
 
   @override
   Future<Either<Failure, List<DeviceModel>>> getUserDevices(String userId) async {

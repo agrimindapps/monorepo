@@ -211,9 +211,11 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.brightness == Brightness.dark 
+            ? const Color(0xFF2D2D2D) 
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: errorText != null 
@@ -460,7 +462,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
       builder:
           (context) => Container(
             height: 300,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               children: [
                 Text(
@@ -499,11 +501,32 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     DateTime? currentValue,
     ValueChanged<DateTime?> onChanged,
   ) async {
+    final theme = Theme.of(context);
     final date = await showDatePicker(
       context: context,
       initialDate: currentValue ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
+      locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.primary,
+              surface: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
+              onSurface: theme.colorScheme.onSurface,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (date != null) {

@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/services/data_sanitization_service.dart';
-import '../../shared/widgets/responsive_layout.dart';
 import '../../core/theme/plantis_colors.dart';
+import '../../shared/widgets/base_page_scaffold.dart';
 import '../../shared/widgets/loading/loading_components.dart';
+import '../../shared/widgets/responsive_layout.dart';
 import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
 
 class AccountProfilePage extends StatefulWidget {
@@ -22,13 +23,22 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Scaffold(
-      backgroundColor: PlantisColors.getPageBackgroundColor(context),
+    return BasePageScaffold(
       body: ResponsiveLayout(
         child: Column(
           children: [
-            // Header estilo ReceitaAgro
-            _buildHeader(context, theme),
+            // Header seguindo mockup
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: PlantisHeader(
+                title: 'Perfil do Visitante',
+                subtitle: 'Entre em sua conta para recursos completos',
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
             
             Expanded(
               child: SingleChildScrollView(
@@ -42,12 +52,8 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                 // Header com informações do usuário
-                Container(
+                PlantisCard(
                   padding: const EdgeInsets.all(20.0),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
                   child: Row(
                     children: [
                       // Avatar with edit functionality
@@ -225,19 +231,20 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   const SizedBox(height: 24),
                 ],
 
+                // Controle de Dispositivos (apenas para usuários registrados)
+                if (!isAnonymous) ...[
+                  _buildDeviceManagementSectionSimple(context),
+                  const SizedBox(height: 24),
+                ],
+
                 // Dados e Sincronização (apenas para usuários registrados)
                 if (!isAnonymous) ...[
                   _buildDataSyncSection(context, authProvider),
                   const SizedBox(height: 24),
                 ],
 
-
                 // Ações de Conta - Subgrupo separado
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
+                PlantisCard(
                   child: Column(
                     children: [
                       ListTile(
@@ -288,85 +295,6 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   ); // Scaffold
   }
 
-  Widget _buildHeader(BuildContext context, ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.primaryDark,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: PlantisColors.primary.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Minha Conta',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Perfil e configurações pessoais',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAccountInfoSection(BuildContext context, dynamic user, auth_providers.AuthProvider authProvider) {
     final theme = Theme.of(context);
@@ -381,13 +309,8 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
+        PlantisCard(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(16.0),
-          ),
           child: Column(
             children: [
               _buildInfoRow('Tipo de Conta', authProvider.isPremium ? 'Premium' : 'Gratuita'),
@@ -457,12 +380,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(16.0),
-          ),
+        PlantisCard(
           child: Column(
             children: [
               ListTile(
@@ -531,6 +449,91 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
       ],
     );
   }
+
+  Widget _buildDeviceManagementSectionSimple(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Dispositivos Conectados',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        PlantisCard(
+          child: Column(
+            children: [
+              // Status resumido dos dispositivos
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.devices_other,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
+                ),
+                title: Text(
+                  'Nenhum dispositivo registrado',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Recursos em desenvolvimento',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showComingSoonDialog(context),
+              ),
+              
+              // Ações rápidas
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showComingSoonDialog(context),
+                        icon: const Icon(Icons.devices, size: 18),
+                        label: const Text('Gerenciar'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: null, // Desabilitado
+                        icon: const Icon(Icons.logout, size: 18),
+                        label: const Text('Desconectar'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+
 
   void _showImagePickerOptions(BuildContext context) {
     showModalBottomSheet<void>(
@@ -633,7 +636,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   }
 
   void _showComingSoonDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Em breve'),
@@ -650,7 +653,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
 
   void _showLogoutDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
     final theme = Theme.of(context);
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -806,7 +809,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   }
 
   void _showDeleteAccountDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -816,137 +819,6 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
   }
 
 
-  void _showDeletionSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Conta Excluída com Sucesso',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sua conta foi excluída permanentemente. Todos os seus dados foram removidos de nossos servidores.',
-              style: TextStyle(fontSize: 14),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Obrigado por ter usado o Plantis. Se precisar de ajuda, entre em contato conosco.',
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Navegar para tela de login ou inicial
-            },
-            child: const Text('Entendido'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showContactSupportDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.support_agent_outlined,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            const Text('Contatar Suporte'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Para solicitar a exclusão da sua conta ou tirar dúvidas, entre em contato conosco:',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.email_outlined, color: Colors.blue, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Email',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(DataSanitizationService.getSupportContactInfo()['email']!),
-                  const SizedBox(height: 16),
-                  const Row(
-                    children: [
-                      Icon(Icons.schedule, color: Colors.green, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Tempo de Resposta',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(DataSanitizationService.getSupportContactInfo()['response_time']!),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// Dialog stateful para confirmação de exclusão de conta
@@ -1165,7 +1037,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
   }
 
   void _showDeletionSuccessDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(

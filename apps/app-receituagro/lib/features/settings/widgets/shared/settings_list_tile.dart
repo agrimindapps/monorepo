@@ -34,53 +34,69 @@ class SettingsListTile extends StatelessWidget {
     
     return Column(
       children: [
-        ListTile(
-          enabled: enabled,
+        InkWell(
           onTap: enabled ? onTap : null,
-          contentPadding: SettingsDesignTokens.sectionPadding,
-          dense: true,
-          visualDensity: VisualDensity.compact,
-          leading: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: backgroundColor ?? 
-                     (iconColor ?? theme.colorScheme.primary).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(SettingsDesignTokens.iconContainerRadius),
-            ),
-            child: Icon(
-              leadingIcon,
-              color: enabled 
-                  ? (iconColor ?? theme.colorScheme.primary)
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.38),
-              size: 18,
-            ),
-          ),
-          title: Text(
-            title,
-            style: SettingsDesignTokens.getListTitleStyle(context).copyWith(
-              color: enabled 
-                  ? null
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.38),
-            ),
-          ),
-          subtitle: subtitle != null 
-              ? Text(
-                  subtitle!,
-                  style: SettingsDesignTokens.getListSubtitleStyle(context).copyWith(
-                    color: enabled 
-                        ? null
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: backgroundColor ?? 
+                           (iconColor ?? SettingsDesignTokens.primaryColor).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                )
-              : null,
-          trailing: trailing ?? (onTap != null 
-              ? Icon(
-                  Icons.chevron_right,
-                  color: enabled 
-                      ? theme.colorScheme.onSurfaceVariant
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.38),
-                )
-              : null),
+                  child: Icon(
+                    leadingIcon,
+                    color: enabled 
+                        ? (iconColor ?? SettingsDesignTokens.primaryColor)
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: enabled 
+                              ? null
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: enabled 
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                trailing ?? (onTap != null 
+                    ? Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: enabled 
+                            ? theme.colorScheme.onSurfaceVariant
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                      )
+                    : const SizedBox.shrink()),
+              ],
+            ),
+          ),
         ),
         if (showDivider)
           Divider(

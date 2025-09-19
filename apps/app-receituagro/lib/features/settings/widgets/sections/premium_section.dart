@@ -311,7 +311,7 @@ class PremiumSection extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'ReceitaAgro Premium',
+                            'ReceituAgro Premium',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -330,14 +330,6 @@ class PremiumSection extends StatelessWidget {
                         'Desbloqueie recursos avançados',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withValues(alpha: 0.9),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'A partir de R\$ 9,90/mês',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF66BB6A),  // Medium green
                           fontWeight: FontWeight.w500,
                         ),
                       ),

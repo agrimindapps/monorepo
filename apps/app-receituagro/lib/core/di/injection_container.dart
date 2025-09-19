@@ -28,6 +28,7 @@ import '../repositories/favoritos_hive_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
 import '../repositories/pragas_hive_repository.dart';
+import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
@@ -42,6 +43,8 @@ import '../services/cloud_functions_service.dart';
 import '../services/premium_service.dart';
 // premium_service_real.dart removed - consolidated into premium_service.dart
 import '../services/receituagro_notification_service.dart';
+import '../services/firebase_messaging_service.dart';
+import '../services/promotional_notification_manager.dart';
 // Emergency stub removed
 import '../services/remote_config_service.dart';
 import 'core_package_integration.dart';
@@ -156,6 +159,17 @@ Future<void> init() async {
   sl.registerLazySingleton<ReceitaAgroNotificationService>(
     () => sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
   );
+
+  // ===== PUSH NOTIFICATIONS SYSTEM =====
+  // Firebase Messaging Service para push notifications promocionais
+  sl.registerLazySingleton<ReceitaAgroFirebaseMessagingService>(
+    () => ReceitaAgroFirebaseMessagingService(),
+  );
+
+  // Promotional Notification Manager para gerenciar notificações contextuais
+  sl.registerLazySingleton<PromotionalNotificationManager>(
+    () => PromotionalNotificationManager(),
+  );
   
   // Storage Service - Removed (using Core Package EnhancedStorageService)
   
@@ -201,6 +215,10 @@ Future<void> init() async {
 
   sl.registerLazySingleton<PragasInfHiveRepository>(
     () => PragasInfHiveRepository(),
+  );
+
+  sl.registerLazySingleton<PlantasInfHiveRepository>(
+    () => PlantasInfHiveRepository(),
   );
 
   sl.registerLazySingleton<FitossanitarioHiveRepository>(

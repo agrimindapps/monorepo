@@ -34,17 +34,10 @@ class DefensivosRecentSection extends StatelessWidget {
         emptyMessage: 'Nenhum defensivo acessado recentemente',
         isEmpty: provider.recentDefensivos.isEmpty,
         showCard: true,
-        child: ListView.separated(
+        child: ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: provider.recentDefensivos.length,
-          separatorBuilder: (context, index) => Divider(
-            height: 1,
-            thickness: 1.2,
-            indent: 64, // Aligned with text (icon + reduced space)
-            endIndent: 8,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-          ),
           itemBuilder: (context, index) {
             final defensivo = provider.recentDefensivos[index];
             return ContentListItemWidget(

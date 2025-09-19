@@ -45,6 +45,10 @@ class DefensivosListWidget extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -58,7 +62,7 @@ class DefensivosListWidget extends StatelessWidget {
             thickness: 1,
             indent: 64,
             endIndent: 8,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
           ),
           itemBuilder: (context, index) {
             final defensivo = defensivos[index];

@@ -17,17 +17,24 @@ class PlantCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.08),
-            blurRadius: isDark ? 8 : 12,
-            offset: const Offset(0, 4),
-            spreadRadius: isDark ? 0 : 2,
+            color: isDark 
+              ? Colors.black.withValues(alpha: 0.3)
+              : const Color(0xFF000000).withValues(alpha: 0.12), // Sombra mais forte para contraste
+            offset: const Offset(0, 3),
+            blurRadius: 12,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: isDark 
+              ? Colors.black.withValues(alpha: 0.1)
+              : const Color(0xFF000000).withValues(alpha: 0.06),
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+            spreadRadius: 0,
           ),
         ],
       ),

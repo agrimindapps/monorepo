@@ -109,11 +109,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             _buildUserSection(context, authProvider),
                             const SizedBox(height: 12),
                             
-                            // Seção Premium
-                            if (isAuthenticated) ...[
-                              _buildPremiumSection(context),
-                              const SizedBox(height: 12),
-                            ],
                             
                             // Seção de Dispositivos Conectados
                             if (isAuthenticated) ...[
@@ -131,17 +126,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             _buildConfigurationsSection(context),
                             const SizedBox(height: 12),
                             
-                            // Seção de Suporte
-                            _buildSupportSection(context),
-                            const SizedBox(height: 12),
                             
                             // Seção de Conta (apenas para usuários logados)
                             if (isAuthenticated) ...[
                               _buildAccountSection(context, authProvider),
                               const SizedBox(height: 12),
-                            ] else ...[
-                              // Seção de Login para visitantes
-                              _buildLoginSection(context, authProvider),
                             ],
                             
                             const SizedBox(height: 24),
@@ -977,251 +966,26 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Seção Premium
-  Widget _buildPremiumSection(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF4CAF50),
-            Color(0xFF2E7D32),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: () => _navigateToPremium(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.workspace_premium,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '✨ ReceitaAgro Premium ✨',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Desbloqueie recursos avançados',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'A partir de R\$ 9,90/mês',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.white,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   /// Seção de Dispositivos Conectados
   Widget _buildDevicesSection(BuildContext context, SettingsProvider settingsProvider) {
-    return Container(
-      decoration: _getCardDecoration(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header da seção
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.devices,
-                    color: SettingsDesignTokens.primaryColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Dispositivos Conectados',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Gerencie quais aparelhos têm acesso',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ),
-          
-          const Divider(height: 1),
-          
-          // Lista de dispositivos resumida
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                _buildDeviceItem(
-                  context,
-                  'Este Dispositivo',
-                  'Web • Chrome',
-                  Icons.computer,
-                  isCurrentDevice: true,
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showDeviceManagement(context, settingsProvider),
-                    icon: const Icon(Icons.manage_accounts, size: 18),
-                    label: const Text('Gerenciar Todos os Dispositivos'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: SettingsDesignTokens.primaryColor,
-                      side: const BorderSide(color: SettingsDesignTokens.primaryColor),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Widget para item de dispositivo
-  Widget _buildDeviceItem(
-    BuildContext context,
-    String deviceName,
-    String deviceInfo,
-    IconData icon,
-    {bool isCurrentDevice = false}
-  ) {
-    final theme = Theme.of(context);
-    
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isCurrentDevice 
-                ? SettingsDesignTokens.primaryColor.withValues(alpha: 0.2)
-                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(8),
+        _buildSectionHeader(context, '📱 Dispositivos Conectados'),
+        _buildSettingsCard(context, [
+          _buildSettingsItem(
+            context,
+            icon: Icons.manage_accounts,
+            title: 'Gerenciar Todos os Dispositivos',
+            subtitle: 'Visualizar e controlar dispositivos conectados',
+            onTap: () => _showDeviceManagement(context, settingsProvider),
           ),
-          child: Icon(
-            icon,
-            color: isCurrentDevice 
-                ? SettingsDesignTokens.primaryColor 
-                : theme.colorScheme.onSurfaceVariant,
-            size: 18,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    deviceName,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (isCurrentDevice) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'ATUAL',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: SettingsDesignTokens.primaryColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              Text(
-                deviceInfo,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ]),
       ],
     );
   }
+
 
   /// Seção de Sincronização
   Widget _buildSyncSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
@@ -1287,55 +1051,16 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildSettingsCard(context, [
           _buildSettingsItem(
             context,
-            icon: Icons.dark_mode,
-            title: 'Tema do Aplicativo',
-            subtitle: 'Alterar aparência entre claro, escuro ou automático',
-            onTap: () => _showThemeSelection(context),
-          ),
-          _buildSettingsItem(
-            context,
-            icon: Icons.notifications_active,
-            title: 'Notificações',
-            subtitle: 'Configure quando ser notificado',
-            onTap: () => _showNotificationsSettings(context),
+            icon: Icons.settings,
+            title: 'Configurações Gerais',
+            subtitle: 'Acesse todas as configurações',
+            onTap: () => Navigator.pushNamed(context, '/settings'),
           ),
         ]),
       ],
     );
   }
 
-  /// Seção de Suporte
-  Widget _buildSupportSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(context, '🆘 Suporte'),
-        _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.star_rate,
-            title: 'Avaliar o App',
-            subtitle: 'Avalie nossa experiência na loja',
-            onTap: () => _showRateApp(context),
-          ),
-          _buildSettingsItem(
-            context,
-            icon: Icons.feedback,
-            title: 'Enviar Feedback',
-            subtitle: 'Nos ajude a melhorar o app',
-            onTap: () => _showFeedback(context),
-          ),
-          _buildSettingsItem(
-            context,
-            icon: Icons.info,
-            title: 'Sobre o Aplicativo',
-            subtitle: 'Versão, suporte e informações',
-            onTap: () => _showAboutApp(context),
-          ),
-        ]),
-      ],
-    );
-  }
 
   /// Seção de Conta (para usuários logados)
   Widget _buildAccountSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
@@ -1548,16 +1273,72 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Placeholder methods for navigation
 
-  void _navigateToPremium(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Página Premium - Em desenvolvimento')),
-    );
-  }
 
-  void _showSyncDetails(BuildContext context) {
+  void _showSyncDetails(BuildContext context) async {
+    final authProvider = Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
+    
+    if (!authProvider.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Faça login para sincronizar seus dados'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Mostrar indicador de loading
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Detalhes de sincronização - Em desenvolvimento')),
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 16),
+            Text('Sincronizando dados...'),
+          ],
+        ),
+        duration: Duration(seconds: 30),
+      ),
     );
+
+    try {
+      final success = await authProvider.forceSyncUserData();
+      
+      // Remover o snackbar de loading
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      
+      // Mostrar resultado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success 
+                ? '✅ Sincronização concluída com sucesso!'
+                : '❌ Falha na sincronização. Tente novamente.',
+          ),
+          backgroundColor: success ? Colors.green : Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      // Remover o snackbar de loading
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      
+      // Mostrar erro
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Erro na sincronização: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 
   void _showThemeSelection(BuildContext context) {
@@ -1567,27 +1348,5 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showNotificationsSettings(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Configurações de notificação - Em desenvolvimento')),
-    );
-  }
 
-  void _showRateApp(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Avaliar app - Em desenvolvimento')),
-    );
-  }
-
-  void _showFeedback(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Enviar feedback - Em desenvolvimento')),
-    );
-  }
-
-  void _showAboutApp(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sobre o app - Em desenvolvimento')),
-    );
-  }
 }

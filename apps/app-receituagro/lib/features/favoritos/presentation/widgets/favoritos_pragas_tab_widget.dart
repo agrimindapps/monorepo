@@ -57,17 +57,25 @@ class FavoritosPragasTabWidget extends StatelessWidget {
           onRefresh: () async {
             await provider.loadAllFavoritos();
           },
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: items.length,
-            separatorBuilder: (context, index) => const Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: items.length,
+                separatorBuilder: (context, index) => Divider(
+                  height: 1,
+                  indent: 72,
+                  endIndent: 16,
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                ),
+                itemBuilder: (context, index) {
+                  return itemBuilder(items[index]);
+                },
+              ),
             ),
-            itemBuilder: (context, index) {
-              return itemBuilder(items[index]);
-            },
           ),
         );
       
@@ -95,6 +103,7 @@ class FavoritosPragasTabWidget extends StatelessWidget {
       },
       child: InkWell(
         onTap: () => _navigateToPragaDetails(context, praga),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../../core/theme/plantis_colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../../domain/entities/plant_task.dart';
 import '../../providers/plant_task_provider.dart';
@@ -46,7 +47,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
       ),
@@ -145,7 +146,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
             context,
             title: 'Tarefas pendentes',
             tasks: pendingTasks,
-            color: Colors.blue,
+            color: PlantisColors.primary,
             taskProvider: taskProvider,
           ),
           const SizedBox(height: 24),
@@ -196,7 +197,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
             context,
             title: 'Pendentes',
             count: '${pendingTasks.length}',
-            color: Colors.blue,
+            color: PlantisColors.primary,
             icon: Icons.pending_outlined,
           ),
         ),
@@ -306,7 +307,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color:
@@ -459,7 +460,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     if (task.isOverdue) return Colors.red;
     if (task.isDueToday) return Colors.orange;
     if (task.isDueSoon) return Colors.amber;
-    return Colors.blue;
+    return PlantisColors.primary;
   }
 
   IconData _getTaskIcon(TaskType type) {
@@ -739,7 +740,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark
             ? const Color(0xFF2C2C2E)
-            : theme.colorScheme.surface,
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Colors.green.withValues(alpha: 0.3),

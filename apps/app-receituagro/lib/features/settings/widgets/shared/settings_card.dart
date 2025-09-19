@@ -27,7 +27,7 @@ class SettingsCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: color ?? theme.scaffoldBackgroundColor,
+        color: color ?? theme.cardColor,
         borderRadius: BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
         border: showBorder
             ? Border.all(
@@ -45,7 +45,7 @@ class SettingsCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: padding ?? SettingsDesignTokens.cardPadding,
+        padding: padding ?? const EdgeInsets.all(12),
         child: child,
       ),
     );

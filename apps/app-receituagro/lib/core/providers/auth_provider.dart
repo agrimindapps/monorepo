@@ -268,6 +268,57 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Força sincronização manual dos dados do usuário
+  /// Útil quando o usuário quer garantir que seus dados estão atualizados
+  Future<bool> forceSyncUserData() async {
+    if (_syncOrchestrator == null) {
+      if (kDebugMode) print('⚠️ Auth Provider: SyncOrchestrator not available, cannot force sync');
+      return false;
+    }
+
+    if (_currentUser == null || _currentUser!.isAnonymous) {
+      if (kDebugMode) print('⚠️ Auth Provider: Cannot sync - user not authenticated');
+      return false;
+    }
+
+    try {
+      _analytics.trackEvent('manual_sync_triggered', parameters: {
+        'user_id': _currentUser!.id,
+        'trigger_source': 'manual_button',
+      });
+
+      if (kDebugMode) print('🔄 Auth Provider: Starting manual sync for user ${_currentUser!.displayName}');
+
+      final result = await _syncOrchestrator!.performFullSync();
+      
+      if (result.success) {
+        _analytics.trackEvent('manual_sync_success', parameters: {
+          'operations_sent': result.operationsSent.toString(),
+          'operations_received': result.operationsReceived.toString(),
+          'conflicts': result.conflicts.length.toString(),
+        });
+
+        if (kDebugMode) {
+          print('✅ Auth Provider: Manual sync completed successfully');
+          print('   - Operations sent: ${result.operationsSent}');
+          print('   - Operations received: ${result.operationsReceived}');
+          print('   - Conflicts: ${result.conflicts.length}');
+        }
+        return true;
+      } else {
+        _analytics.trackEvent('manual_sync_failure', parameters: {
+          'error': result.message ?? 'unknown_error',
+        });
+        if (kDebugMode) print('❌ Auth Provider: Manual sync failed: ${result.message}');
+        return false;
+      }
+    } catch (e) {
+      _analytics.trackError('manual_sync_exception', e.toString());
+      if (kDebugMode) print('❌ Auth Provider: Manual sync exception: $e');
+      return false;
+    }
+  }
+
   // ===== AUTHENTICATION METHODS =====
 
   Future<AuthResult> signInWithEmailAndPassword({

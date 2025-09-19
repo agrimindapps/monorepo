@@ -24,7 +24,10 @@ class PlantFormDialog extends StatefulWidget {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => PlantFormDialog(plantId: plantId),
+      builder: (context) => ChangeNotifierProvider(
+        create: (_) => di.sl<PlantFormProvider>(),
+        child: PlantFormDialog(plantId: plantId),
+      ),
     );
   }
 }
@@ -79,7 +82,9 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           maxHeight: screenSize.height * 0.9,
         ),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? const Color(0xFF2D2D2D) 
+              : const Color(0xFFFFFFFF), // Branco puro para modo claro
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
@@ -90,13 +95,13 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             // Header moderno
             _buildModernHeader(colorScheme, isEditing),
             
             // Content
-            Flexible(
+            Expanded(
               child: Consumer<PlantFormProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
@@ -279,7 +284,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
       controller: _scrollController,
       child: SingleChildScrollView(
         controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -288,7 +293,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
             const SizedBox(height: 16),
             const PlantFormBasicInfo(),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Configurações de Cuidado  
             _buildSectionTitle('Configurações de Cuidado', Icons.settings_outlined),

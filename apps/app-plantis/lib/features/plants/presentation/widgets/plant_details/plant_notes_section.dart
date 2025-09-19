@@ -67,7 +67,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
         boxShadow: [
@@ -226,7 +226,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surface,
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
         boxShadow: [
@@ -475,32 +475,36 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Icon(
-            Icons.comment_outlined,
-            size: 48,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhuma observação ainda',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.comment_outlined,
+              size: 48,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Adicione a primeira observação sobre ${widget.plant.displayName}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma observação ainda',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Adicione a primeira observação sobre ${widget.plant.displayName}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

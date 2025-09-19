@@ -28,13 +28,20 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
   }
 
   Widget _buildListItem(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      elevation: 2,
+      elevation: theme.brightness == Brightness.dark ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
+        side: theme.brightness == Brightness.dark
+            ? BorderSide(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                width: 0.5,
+              )
+            : BorderSide.none,
       ),
-      color: isDark ? const Color(0xFF2A2A2E) : Colors.white,
+      color: theme.cardColor,
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
@@ -57,13 +64,20 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
   }
 
   Widget _buildGridItem(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.all(4),
-      elevation: 3,
+      elevation: theme.brightness == Brightness.dark ? 4 : 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: theme.brightness == Brightness.dark
+            ? BorderSide(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                width: 0.5,
+              )
+            : BorderSide.none,
       ),
-      color: isDark ? const Color(0xFF2A2A2E) : Colors.white,
+      color: theme.cardColor,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,

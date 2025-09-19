@@ -47,6 +47,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
   @override
   void dispose() {
     _scrollController.dispose();
+    // Provider disposal will be handled automatically by ChangeNotifierProvider
     super.dispose();
   }
 
@@ -416,43 +417,47 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           }
           
           // Mostrar snackbar de sucesso
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      widget.plantId != null
-                          ? 'Planta atualizada com sucesso!'
-                          : 'Planta adicionada com sucesso!',
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        widget.plantId != null
+                            ? 'Planta atualizada com sucesso!'
+                            : 'Planta adicionada com sucesso!',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
               ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          
-          Navigator.of(context).pop(true);
+            );
+
+            Navigator.of(context).pop(true);
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
-                  ),
-                ],
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
+                    ),
+                  ],
+                ),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                behavior: SnackBarBehavior.floating,
               ),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+            );
+          }
         }
       }
     } catch (e) {

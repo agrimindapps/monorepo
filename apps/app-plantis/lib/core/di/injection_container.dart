@@ -36,7 +36,6 @@ import '../services/backup_scheduler.dart';
 import '../services/backup_service.dart';
 import '../services/backup_validation_service.dart';
 import '../services/data_cleaner_service.dart';
-import '../services/image_service.dart' as local;
 import '../services/interfaces/i_notification_permission_manager.dart';
 import '../services/interfaces/i_notification_schedule_manager.dart';
 import '../services/interfaces/i_plant_notification_manager.dart';
@@ -146,8 +145,22 @@ void _initCoreServices() {
   sl.registerLazySingleton<INotificationPermissionManager>(() => sl<NotificationManager>());
   sl.registerLazySingleton<INotificationScheduleManager>(() => sl<NotificationManager>());
 
-  // Image Service
-  sl.registerLazySingleton(() => local.ImageService());
+  // Image Service (using core package)
+  sl.registerLazySingleton(() => ImageService(
+    config: const ImageServiceConfig(
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 80,
+      maxFileSizeInMB: 5,
+      allowedFormats: ['.jpg', '.jpeg', '.png', '.webp'],
+      folders: {
+        'plants': 'plants',
+        'spaces': 'spaces',
+        'tasks': 'tasks',
+        'profiles': 'profiles',
+      },
+    ),
+  ));
 
   // URL Launcher Service
   sl.registerLazySingleton(() => UrlLauncherService());

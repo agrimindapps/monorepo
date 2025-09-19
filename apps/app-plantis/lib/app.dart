@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/injection_container.dart' as di;
@@ -40,6 +41,16 @@ class PlantisApp extends StatelessWidget {
                 themeMode: themeProvider.themeMode,
                 routerConfig: router,
                 debugShowCheckedModeBanner: false,
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('pt', 'BR'),
+                  Locale('en', 'US'),
+                ],
+                locale: const Locale('pt', 'BR'),
               ),
             );
           },

@@ -49,12 +49,18 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                     PlantisHeader(
                       title: 'Configurações',
                       subtitle: 'Personalize sua experiência',
-                      leading: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios,
-                          color: Colors.white,
+                      leading: Container(
+                        margin: const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Icon(
+                          Icons.settings,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
                       actions: [
                         Consumer<ThemeProvider>(
@@ -127,9 +133,6 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                             _buildDevelopmentSection(context, theme),
                             const SizedBox(height: 8),
                           ],
-
-                          // Seção Sobre
-                          _buildAboutSection(context, theme),
 
                           const SizedBox(height: 24),
                         ],

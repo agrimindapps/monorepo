@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:core/core.dart' as core;
+
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/services/image_service.dart';
 import '../../../auth/utils/validation_helpers.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/plant_form_provider.dart';
@@ -58,15 +59,20 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   Widget _buildImageSection(BuildContext context) {
     // Optimized with Selector - only rebuilds when image-related data changes
-    return Selector<PlantFormProvider, bool>(
-      selector: (context, provider) => provider.hasImages,
-      builder: (context, hasImages, child) {
+    return Selector<PlantFormProvider, ({bool hasImages, bool isUploading})>(
+      selector: (context, provider) => (
+        hasImages: provider.hasImages,
+        isUploading: provider.isUploadingImages,
+      ),
+      builder: (context, data, child) {
         final provider = context.read<PlantFormProvider>();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Área para uma única imagem
-            if (hasImages)
+            // Show upload progress or images
+            if (data.isUploading)
+              _buildUploadProgress(context)
+            else if (data.hasImages)
               _buildSingleImage(context, provider)
             else
               _buildEmptyImageArea(context, provider),
@@ -120,11 +126,10 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: ImageService().buildImagePreview(
+            child: _buildNetworkImageWithFallback(
               provider.imageUrls.first,
               width: double.infinity,
               height: 120,
-              fit: BoxFit.cover,
             ),
           ),
         ],
@@ -778,5 +783,123 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     }
     
     return null;
+  }
+
+  /// Build upload progress indicator
+  Widget _buildUploadProgress(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.outline.withValues(alpha: 0.3)
+              : const Color(0xFFE0E0E0),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.cloud_upload,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Fazendo upload da imagem...',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
+                      borderRadius: BorderRadius.circular(2),
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build network image with fallback
+  Widget _buildNetworkImageWithFallback(
+    String imageUrl, {
+    required double width,
+    required double height,
+  }) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+
+          return Container(
+            width: width,
+            height: height,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: width,
+            height: height,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Icon(
+              Icons.broken_image,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 32,
+            ),
+          );
+        },
+      );
+    }
+
+    // For local files or other formats
+    return Container(
+      width: width,
+      height: height,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.image,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        size: 32,
+      ),
+    );
   }
 }

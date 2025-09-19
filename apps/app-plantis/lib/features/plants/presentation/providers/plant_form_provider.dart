@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/services/image_service.dart' as local;
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
@@ -21,7 +20,14 @@ class PlantFormProvider extends ChangeNotifier {
   final GetPlantByIdUseCase getPlantByIdUseCase;
   final AddPlantUseCase addPlantUseCase;
   final UpdatePlantUseCase updatePlantUseCase;
-  final local.ImageService imageService;
+  final core.ImageService imageService;
+
+  @override
+  void dispose() {
+    // Cleanup any pending operations to prevent memory leaks
+    _isUploadingImages = false;
+    super.dispose();
+  }
 
   PlantFormProvider({
     required this.getPlantByIdUseCase,
@@ -334,41 +340,41 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final imageFile = await imageService.pickImageFromCamera();
-      if (imageFile != null) {
-        // Validar arquivo antes do upload
-        if (await imageService.validateImageFile(imageFile, 'plants')) {
-          final downloadUrl = await imageService.uploadImage(
-            imageFile,
-            folder: local.ImageUploadType.plant.folder,
-          );
+      final result = await imageService.pickImageFromCamera();
 
-          if (downloadUrl != null) {
-            // Remove imagem anterior se existir
-            if (_imageUrls.isNotEmpty) {
-              final oldImageUrl = _imageUrls.first;
-              unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
-            }
-            _imageUrls.clear();
-            _imageUrls.add(downloadUrl);
-            _errorMessage = null; // Limpar erro anterior
-          } else {
-            _errorMessage = 'Falha no upload da imagem';
+      if (result.isSuccess) {
+        final imageFile = result.data!;
+
+        // Upload with progress tracking
+        final uploadResult = await imageService.uploadImage(
+          imageFile,
+          folder: 'plants',
+          uploadType: 'plants',
+          onProgress: (progress) {
+            // Progress will be handled by UI state
+          },
+        );
+
+        if (uploadResult.isSuccess) {
+          final downloadUrl = uploadResult.data!.downloadUrl;
+
+          // Remove imagem anterior se existir
+          if (_imageUrls.isNotEmpty) {
+            final oldImageUrl = _imageUrls.first;
+            unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
           }
+          _imageUrls.clear();
+          _imageUrls.add(downloadUrl);
+          _errorMessage = null;
         } else {
-          _errorMessage = 'Imagem inválida ou muito grande (máx. 5MB)';
+          _errorMessage = uploadResult.error!.userMessage;
         }
-      } else {
-        // Usuário cancelou ou erro de permissão
-        _errorMessage = null;
+      } else if (result.error!.code != 'cancelled') {
+        _errorMessage = result.error!.userMessage;
       }
     } catch (e) {
       debugPrint('Erro ao capturar imagem da câmera: $e');
-      if (e.toString().contains('permission')) {
-        _errorMessage = 'Permissão de acesso à câmera negada';
-      } else {
-        _errorMessage = 'Erro ao capturar imagem da câmera';
-      }
+      _errorMessage = 'Erro inesperado ao capturar imagem';
     } finally {
       _isUploadingImages = false;
       notifyListeners();
@@ -380,41 +386,41 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final imageFile = await imageService.pickImageFromGallery();
-      if (imageFile != null) {
-        // Validar arquivo antes do upload
-        if (await imageService.validateImageFile(imageFile, 'plants')) {
-          final downloadUrl = await imageService.uploadImage(
-            imageFile,
-            folder: local.ImageUploadType.plant.folder,
-          );
+      final result = await imageService.pickImageFromGallery();
 
-          if (downloadUrl != null) {
-            // Remove imagem anterior se existir
-            if (_imageUrls.isNotEmpty) {
-              final oldImageUrl = _imageUrls.first;
-              unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
-            }
-            _imageUrls.clear();
-            _imageUrls.add(downloadUrl);
-            _errorMessage = null; // Limpar erro anterior
-          } else {
-            _errorMessage = 'Falha no upload da imagem';
+      if (result.isSuccess) {
+        final imageFile = result.data!;
+
+        // Upload with progress tracking
+        final uploadResult = await imageService.uploadImage(
+          imageFile,
+          folder: 'plants',
+          uploadType: 'plants',
+          onProgress: (progress) {
+            // Progress will be handled by UI state
+          },
+        );
+
+        if (uploadResult.isSuccess) {
+          final downloadUrl = uploadResult.data!.downloadUrl;
+
+          // Remove imagem anterior se existir
+          if (_imageUrls.isNotEmpty) {
+            final oldImageUrl = _imageUrls.first;
+            unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
           }
+          _imageUrls.clear();
+          _imageUrls.add(downloadUrl);
+          _errorMessage = null;
         } else {
-          _errorMessage = 'Imagem inválida ou muito grande (máx. 5MB)';
+          _errorMessage = uploadResult.error!.userMessage;
         }
-      } else {
-        // Usuário cancelou ou erro de permissão
-        _errorMessage = null;
+      } else if (result.error!.code != 'cancelled') {
+        _errorMessage = result.error!.userMessage;
       }
     } catch (e) {
       debugPrint('Erro ao selecionar imagem da galeria: $e');
-      if (e.toString().contains('permission')) {
-        _errorMessage = 'Permissão de acesso à galeria negada';
-      } else {
-        _errorMessage = 'Erro ao selecionar imagem da galeria';
-      }
+      _errorMessage = 'Erro inesperado ao selecionar imagem';
     } finally {
       _isUploadingImages = false;
       notifyListeners();
@@ -428,9 +434,10 @@ class PlantFormProvider extends ChangeNotifier {
       notifyListeners();
 
       // Remover a imagem do Firebase Storage em background
-      imageService.deleteImage(imageUrl);
+      unawaited(imageService.deleteImage(imageUrl));
     }
   }
+
 
   // Config setters
   void setWateringInterval(int? value) {
@@ -902,20 +909,19 @@ class PlantFormProvider extends ChangeNotifier {
     return errors.isEmpty ? null : errors.first;
   }
 
-  String _getErrorMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ValidationFailure:
-        return failure.message;
-      case NotFoundFailure:
-        return 'Planta não encontrada';
-      case NetworkFailure:
-        return 'Sem conexão com a internet';
-      case ServerFailure:
-        return 'Erro no servidor. Tente novamente.';
-      case CacheFailure:
-        return 'Erro local. Verifique o armazenamento.';
-      default:
-        return 'Erro inesperado. Tente novamente.';
+  String _getErrorMessage(core.Failure failure) {
+    if (failure is core.ValidationFailure) {
+      return failure.message;
+    } else if (failure is core.NotFoundFailure) {
+      return 'Planta não encontrada';
+    } else if (failure is core.NetworkFailure) {
+      return 'Sem conexão com a internet';
+    } else if (failure is core.ServerFailure) {
+      return 'Erro no servidor. Tente novamente.';
+    } else if (failure is core.CacheFailure) {
+      return 'Erro local. Verifique o armazenamento.';
+    } else {
+      return 'Erro inesperado. Tente novamente.';
     }
   }
 }

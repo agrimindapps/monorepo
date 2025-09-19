@@ -86,7 +86,7 @@ class BasePageScaffold extends StatelessWidget {
     if (applyDefaultPadding || padding != null) {
       final effectivePadding =
           padding ??
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
+          const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
 
       bodyWidget = Padding(padding: effectivePadding, child: bodyWidget);
     }
@@ -234,14 +234,6 @@ class PlantisHeader extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0D945A).withValues(alpha: 0.3),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-            spreadRadius: 0,
-          ),
-        ],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),

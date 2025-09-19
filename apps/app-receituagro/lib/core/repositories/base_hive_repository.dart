@@ -5,7 +5,8 @@ import '../contracts/i_static_data_repository.dart';
 
 /// Repositório base para entidades Hive
 /// Princípios: Single Responsibility + Template Method Pattern
-abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRepository<T> {
+abstract class BaseHiveRepository<T extends HiveObject>
+    implements IStaticDataRepository<T> {
   final String _boxName;
   final String _versionKey = '_app_version';
 
@@ -59,7 +60,7 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
         print('⚠️ Box $_boxName não estava aberto - retornando lista vazia');
         return [];
       }
-      
+
       final box = Hive.box<T>(_boxName);
       print('📦 Box $_boxName aberto com ${box.length} itens');
       return box.values.toList();
@@ -73,7 +74,9 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
   Future<List<T>> getAllAsync() async {
     try {
       final box = await _getBox();
-      print('📦 Box $_boxName carregado assincronamente com ${box.length} itens');
+      print(
+        '📦 Box $_boxName carregado assincronamente com ${box.length} itens',
+      );
       return box.values.toList();
     } catch (e) {
       print('❌ Erro em getAllAsync(): $e');
@@ -115,7 +118,7 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IStaticDataRe
 
   @override
   int get count => getAll().length;
-  
+
   /// Método count async para uso em Future.wait
   Future<int> countAsync() async {
     return count;

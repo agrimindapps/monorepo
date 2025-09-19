@@ -275,6 +275,12 @@ class _TasksAppBarState extends State<TasksAppBar> {
       builder: (context, provider, child) {
         return Row(
           children: [
+            Icon(
+              Icons.task_alt,
+              color: theme.colorScheme.primary,
+              size: 28,
+            ),
+            const SizedBox(width: 8),
             Text(
               AppStrings.tasksTitle,
               style: TextStyle(

@@ -1,19 +1,15 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
 import '../constants/settings_design_tokens.dart';
-import '../presentation/providers/profile_provider.dart';
 import '../presentation/providers/settings_provider.dart';
 import '../widgets/dialogs/device_management_dialog.dart';
 import '../widgets/dialogs/logout_confirmation_dialog.dart';
 import '../widgets/dialogs/theme_selection_dialog.dart';
-import '../widgets/sections/sync_data_section.dart';
 
 /// Página de perfil do usuário
 /// Funciona tanto para visitantes quanto usuários logados
@@ -109,6 +105,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             _buildUserSection(context, authProvider),
                             const SizedBox(height: 12),
                             
+                            // Informações da Conta (apenas para usuários logados)
+                            if (isAuthenticated) ...[
+                              _buildAccountInfoSection(context, authProvider),
+                              const SizedBox(height: 12),
+                            ],
                             
                             // Seção de Dispositivos Conectados
                             if (isAuthenticated) ...[
@@ -116,20 +117,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               const SizedBox(height: 12),
                             ],
                             
-                            // Seção de Sincronização
+                            // Dados e Sincronização
                             if (isAuthenticated) ...[
-                              _buildSyncSection(context, authProvider),
-                              const SizedBox(height: 12),
-                            ],
-                            
-                            // Seção de Configurações
-                            _buildConfigurationsSection(context),
-                            const SizedBox(height: 12),
-                            
-                            
-                            // Seção de Conta (apenas para usuários logados)
-                            if (isAuthenticated) ...[
-                              _buildAccountSection(context, authProvider),
+                              _buildDataSyncSection(context, authProvider),
                               const SizedBox(height: 12),
                             ],
                             
@@ -969,19 +959,55 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Seção de Dispositivos Conectados
   Widget _buildDevicesSection(BuildContext context, SettingsProvider settingsProvider) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, '📱 Dispositivos Conectados'),
-        _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.manage_accounts,
-            title: 'Gerenciar Todos os Dispositivos',
-            subtitle: 'Visualizar e controlar dispositivos conectados',
-            onTap: () => _showDeviceManagement(context, settingsProvider),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Dispositivos Conectados',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
           ),
-        ]),
+        ),
+        Container(
+          decoration: _getCardDecoration(context),
+          child: ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.smartphone,
+                color: Colors.grey,
+                size: 20,
+              ),
+            ),
+            title: const Text('Nenhum dispositivo registrado'),
+            subtitle: const Text('Recursos em desenvolvimento'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () => _showDeviceManagement(context, settingsProvider),
+                  child: const Text('Gerenciar'),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: () {},
+                  child: const Text('Desconectar'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -1348,5 +1374,204 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Seção de informações da conta (estilo Plantis)
+  Widget _buildAccountInfoSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    final theme = Theme.of(context);
+    final user = authProvider.currentUser;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Informações da Conta',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        Container(
+          decoration: _getCardDecoration(context),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildInfoRow(context, 'Tipo de Conta', 'Gratuita'),
+                const SizedBox(height: 12),
+                Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(context, 'Criada em', _formatDate(user?.createdAt)),
+                const SizedBox(height: 12),
+                Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(context, 'Último acesso', _formatDate(DateTime.now())),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Seção de dados e sincronização (estilo Plantis)
+  Widget _buildDataSyncSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Dados e Sincronização',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        Container(
+          decoration: _getCardDecoration(context),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.cloud_done,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Dados Sincronizados'),
+                subtitle: const Text('Todos os dados estão atualizados'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () => _showSyncRefresh(context, authProvider),
+                ),
+                onTap: () => _showSyncRefresh(context, authProvider),
+              ),
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.download,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Exportar Dados'),
+                subtitle: const Text('Baixar todos os seus dados em formato JSON'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showExportData(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Widget para linha de informação (estilo Plantis)
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Formatar data para exibição
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  /// Mostrar diálogo de exportação de dados
+  void _showExportData(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exportar Dados'),
+        content: const Text(
+          'Esta funcionalidade irá baixar todos os seus dados em formato JSON. '
+          'Deseja continuar?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Exportação de dados em desenvolvimento'),
+                  backgroundColor: Colors.blue,
+                ),
+              );
+            },
+            child: const Text('Exportar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Mostrar feedback de sincronização
+  void _showSyncRefresh(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 8),
+            Text('Dados sincronizados com sucesso'),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
 }

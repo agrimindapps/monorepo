@@ -38,6 +38,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
         value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
         child: BasePageScaffold(
           body: ResponsiveLayout(
+            horizontalPadding: 4.0,
             child: Consumer2<auth_providers.AuthProvider, SettingsProvider>(
               builder: (context, authProvider, settingsProvider, _) {
                 final user = authProvider.currentUser;
@@ -913,7 +914,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, '⚙️ Configurações'),
+        _buildSectionHeader(context, 'Configurações'),
         _buildSettingsCard(context, [
           _buildNotificationSwitchItem(context, settingsProvider),
         ]),
@@ -925,7 +926,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, '🆘 Suporte'),
+        _buildSectionHeader(context, 'Suporte'),
         _buildSettingsCard(context, [
           _buildSettingsItem(
             context,
@@ -950,7 +951,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, '</> Desenvolvimento'),
+        _buildSectionHeader(context, 'Desenvolvimento'),
         _buildSettingsCard(context, [
           _buildSettingsItem(
             context,
@@ -989,7 +990,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, 'ℹ️ Sobre o Plantis'),
+        _buildSectionHeader(context, 'Sobre o Plantis'),
         _buildSettingsCard(context, [
           _buildSettingsItem(
             context,

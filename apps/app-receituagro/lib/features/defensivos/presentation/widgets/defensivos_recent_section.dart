@@ -34,7 +34,7 @@ class DefensivosRecentSection extends StatelessWidget {
         emptyMessage: 'Nenhum defensivo acessado recentemente',
         isEmpty: provider.recentDefensivos.isEmpty,
         showCard: true,
-        child: ListView.builder(
+        child: ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: provider.recentDefensivos.length,
@@ -53,6 +53,11 @@ class DefensivosRecentSection extends StatelessWidget {
               ),
             );
           },
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 0.5,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          ),
         ),
       ),
     );

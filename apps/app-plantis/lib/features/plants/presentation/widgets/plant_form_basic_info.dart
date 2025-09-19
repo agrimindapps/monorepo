@@ -48,7 +48,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           // Image section
           _buildImageSection(context),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           // Basic information form
           _buildBasicInfoForm(context),
@@ -80,7 +80,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     final theme = Theme.of(context);
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark
             ? const Color(0xFF2C2C2E)
@@ -139,7 +139,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark
             ? const Color(0xFF2C2C2E)
@@ -186,7 +186,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       'Selecione uma foto da sua planta',
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -238,7 +238,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -268,7 +268,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
             ],
           ),
         );
@@ -369,6 +369,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     return Consumer<PlantFormProvider>(
       builder: (context, provider, child) {
         final fieldErrors = provider.fieldErrors;
+        final theme = Theme.of(context);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,10 +387,14 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 provider.setName(sanitizedValue);
               },
               validator: (value) => _validatePlantName(value),
-              icon: Icons.local_florist,
+              prefixIcon: Icon(
+                Icons.local_florist,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Plant species (optional) with security validation
             _buildTextField(
@@ -402,10 +407,14 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 provider.setSpecies(sanitizedValue);
               },
               validator: (value) => _validateSpecies(value),
-              icon: Icons.science,
+              prefixIcon: Icon(
+                Icons.science,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Space selector
             ChangeNotifierProvider(
@@ -417,7 +426,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Planting date (optional)
             _buildDateField(
@@ -425,10 +434,14 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               label: 'Data de plantio',
               value: provider.plantingDate,
               onChanged: provider.setPlantingDate,
-              icon: Icons.event,
+              prefixIcon: Icon(
+                Icons.event,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Notes (optional) with security validation
             _buildTextField(
@@ -442,7 +455,11 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 provider.setNotes(sanitizedValue);
               },
               validator: (value) => _validateNotes(value),
-              icon: Icons.note,
+              prefixIcon: Icon(
+                Icons.note,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
             ),
           ],
         );
@@ -455,7 +472,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     required String label,
     required String hint,
     required ValueChanged<String> onChanged,
-    required IconData icon,
+    Widget? prefixIcon,
     String? errorText,
     bool isRequired = false,
     int maxLines = 1,
@@ -466,28 +483,14 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 20, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            if (isRequired)
-              Text(
-                ' *',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-          ],
+        Text(
+          '$label${isRequired ? ' *' : ''}',
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 2),
         TextFormField(
           controller: controller,
           maxLines: maxLines,
@@ -495,16 +498,20 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           validator: validator,
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+            prefixIcon: prefixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -529,10 +536,8 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
             ),
             filled: true,
-            fillColor: theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro para modo claro
-            contentPadding: const EdgeInsets.all(12),
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             errorText: errorText,
           ),
         ),
@@ -545,27 +550,21 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     required String label,
     required DateTime? value,
     required ValueChanged<DateTime?> onChanged,
-    required IconData icon,
+    Widget? prefixIcon,
   }) {
     final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 20, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ],
+        Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 2),
         InkWell(
           onTap: () async {
             final date = await showDatePicker(
@@ -574,25 +573,6 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               firstDate: DateTime(2000),
               lastDate: DateTime.now(),
               locale: const Locale('pt', 'BR'),
-              builder: (context, child) {
-                return Theme(
-                  data: theme.copyWith(
-                    colorScheme: theme.colorScheme.copyWith(
-                      primary: theme.colorScheme.primary,
-                      surface: theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(0xFFFFFFFF), // Branco puro para modo claro
-                      onSurface: theme.colorScheme.onSurface,
-                    ),
-                    dialogTheme: DialogThemeData(
-                      backgroundColor: theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(0xFFFFFFFF), // Branco puro para modo claro
-                    ),
-                  ),
-                  child: child!,
-                );
-              },
             );
 
             if (date != null) {
@@ -601,24 +581,26 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           },
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
               ),
               borderRadius: BorderRadius.circular(12),
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2C2C2E)
-                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
             ),
             child: Row(
               children: [
+                if (prefixIcon != null) ...[
+                  prefixIcon,
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: Text(
                     value != null
                         ? _formatDate(value)
                         : 'Selecionar data (opcional)',
-                    style: theme.textTheme.bodyLarge?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color:
                           value != null
                               ? theme.colorScheme.onSurface

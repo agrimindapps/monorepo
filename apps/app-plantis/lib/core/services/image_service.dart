@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:core/core.dart' as core;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -107,14 +108,32 @@ class PlantisImageService {
         maxWidth: 1200,
         maxHeight: 1200,
         imageQuality: 80,
+        requestFullMetadata: false,
       );
       
       if (image != null) {
-        return File(image.path);
+        // Para web, não podemos usar File diretamente
+        if (kIsWeb) {
+          // Na web, retornar um "pseudo" File usando XFile
+          return File(image.path);
+        } else {
+          final file = File(image.path);
+          // Validar se o arquivo existe e é válido
+          if (await file.exists()) {
+            return file;
+          } else {
+            debugPrint('Arquivo selecionado não existe: ${image.path}');
+            return null;
+          }
+        }
       }
       return null;
     } catch (error) {
       debugPrint('Erro ao selecionar imagem da galeria: $error');
+      // Log mais detalhado para debug
+      if (error.toString().contains('permission')) {
+        debugPrint('Erro de permissão ao acessar galeria');
+      }
       return null;
     }
   }
@@ -127,14 +146,32 @@ class PlantisImageService {
         maxWidth: 1200,
         maxHeight: 1200,
         imageQuality: 80,
+        requestFullMetadata: false,
       );
       
       if (image != null) {
-        return File(image.path);
+        // Para web, não podemos usar File diretamente
+        if (kIsWeb) {
+          // Na web, retornar um "pseudo" File usando XFile
+          return File(image.path);
+        } else {
+          final file = File(image.path);
+          // Validar se o arquivo existe e é válido
+          if (await file.exists()) {
+            return file;
+          } else {
+            debugPrint('Arquivo capturado não existe: ${image.path}');
+            return null;
+          }
+        }
       }
       return null;
     } catch (error) {
       debugPrint('Erro ao capturar imagem da câmera: $error');
+      // Log mais detalhado para debug
+      if (error.toString().contains('permission')) {
+        debugPrint('Erro de permissão ao acessar câmera');
+      }
       return null;
     }
   }
@@ -179,18 +216,30 @@ class PlantisImageService {
       final config = ImageUploadConfigFactory.getConfig(uploadType);
       final maxSize = maxSizeInMB ?? config?.maxSizeInMB ?? 5;
       
+      // Na web, File.length() pode não funcionar corretamente
+      if (kIsWeb) {
+        // Para web, assumir que é válido - validação será feita no servidor
+        return true;
+      }
+      
       final int bytes = await file.length();
       final int maxBytes = maxSize * 1024 * 1024;
       return bytes <= maxBytes;
     } catch (error) {
       debugPrint('Erro ao verificar tamanho do arquivo: $error');
-      return false;
+      // Na web, retornar true para permitir o upload
+      return kIsWeb ? true : false;
     }
   }
 
   /// Obter tamanho do arquivo em MB
   Future<double> getFileSizeInMB(File file) async {
     try {
+      // Na web, File.length() pode não funcionar corretamente
+      if (kIsWeb) {
+        return 0.0; // Retornar 0 para web
+      }
+      
       final int bytes = await file.length();
       return bytes / (1024 * 1024);
     } catch (error) {
@@ -281,18 +330,54 @@ class PlantisImageService {
         memCacheHeight: height?.round(),
       );
     } else {
-      // Imagem local
-      imageWidget = Image.file(
-        File(imageUrl),
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: (context, error, stackTrace) {
-          return errorWidget ?? _buildErrorPlaceholder(width, height);
-        },
-        cacheWidth: width?.round(),
-        cacheHeight: height?.round(),
-      );
+      // Imagem local - tratamento especial para web e mobile
+      try {
+        if (kIsWeb) {
+          // Na web, usar Image.network para blob URLs ou Image.memory para bytes
+          if (imageUrl.startsWith('blob:')) {
+            imageWidget = Image.network(
+              imageUrl,
+              width: width,
+              height: height,
+              fit: fit,
+              errorBuilder: (context, error, stackTrace) {
+                debugPrint('Erro ao carregar blob URL: $error');
+                return errorWidget ?? _buildErrorPlaceholder(width, height);
+              },
+            );
+          } else {
+            // Fallback para web
+            imageWidget = errorWidget ?? _buildErrorPlaceholder(width, height);
+          }
+        } else {
+          // Mobile - usar Image.file normalmente
+          final file = File(imageUrl);
+          imageWidget = Image.file(
+            file,
+            width: width,
+            height: height,
+            fit: fit,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Erro ao carregar imagem local: $error');
+              return errorWidget ?? _buildErrorPlaceholder(width, height);
+            },
+            cacheWidth: width?.round(),
+            cacheHeight: height?.round(),
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              if (wasSynchronouslyLoaded) return child;
+              return AnimatedOpacity(
+                opacity: frame == null ? 0 : 1,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                child: child,
+              );
+            },
+          );
+        }
+      } catch (e) {
+        debugPrint('Erro ao criar widget de imagem local: $e');
+        imageWidget = errorWidget ?? _buildErrorPlaceholder(width, height);
+      }
     }
 
     if (borderRadius != null) {

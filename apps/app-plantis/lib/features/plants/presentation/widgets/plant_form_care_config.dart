@@ -501,32 +501,12 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     DateTime? currentValue,
     ValueChanged<DateTime?> onChanged,
   ) async {
-    final theme = Theme.of(context);
     final date = await showDatePicker(
       context: context,
       initialDate: currentValue ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       locale: const Locale('pt', 'BR'),
-      builder: (context, child) {
-        return Theme(
-          data: theme.copyWith(
-            colorScheme: theme.colorScheme.copyWith(
-              primary: theme.colorScheme.primary,
-              surface: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2C2C2E)
-                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
-              onSurface: theme.colorScheme.onSurface,
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2C2C2E)
-                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (date != null) {

@@ -12,24 +12,24 @@ import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
 
 class AccountProfilePage extends StatefulWidget {
   const AccountProfilePage({super.key});
-  
+
   @override
   State<AccountProfilePage> createState() => _AccountProfilePageState();
 }
 
-class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPageMixin {
-
+class _AccountProfilePageState extends State<AccountProfilePage>
+    with LoadingPageMixin {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return BasePageScaffold(
       body: ResponsiveLayout(
         child: Column(
           children: [
             // Header seguindo mockup
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
               child: PlantisHeader(
                 title: 'Perfil do Visitante',
                 subtitle: 'Entre em sua conta para recursos completos',
@@ -39,266 +39,330 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 ),
               ),
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                 child: Consumer<auth_providers.AuthProvider>(
-                builder: (context, authProvider, _) {
-                  final user = authProvider.currentUser;
-                  final isAnonymous = authProvider.isAnonymous;
-                  
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                // Header com informações do usuário
-                PlantisCard(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    children: [
-                      // Avatar with edit functionality
-                      Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: PlantisColors.primary,
-                            child: DataSanitizationService.shouldShowProfilePhoto(user, isAnonymous)
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(30),
-                                    child: Image.network(
-                                      user!.photoUrl!,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Text(
-                                          DataSanitizationService.sanitizeInitials(user, isAnonymous),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  )
-                                : Text(
-                                    DataSanitizationService.sanitizeInitials(user, isAnonymous),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
-                          if (!isAnonymous)
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: GestureDetector(
-                                onTap: () => _showImagePickerOptions(context),
-                                child: Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: PlantisColors.primary,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: theme.colorScheme.surface,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                    size: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
+                  builder: (context, authProvider, _) {
+                    final user = authProvider.currentUser;
+                    final isAnonymous = authProvider.isAnonymous;
 
-                      // User Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              DataSanitizationService.sanitizeDisplayName(user, isAnonymous),
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              DataSanitizationService.sanitizeEmail(user, isAnonymous),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isAnonymous ? Colors.orange.withValues(alpha: 0.2) : PlantisColors.primary.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                isAnonymous ? 'Conta Anônima' : 'Conta Autenticada',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isAnonymous ? Colors.orange : PlantisColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Card especial para usuário anônimo
-                if (isAnonymous) ...[
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.orange.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline,
-                              color: Colors.orange,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Conta Anônima',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold,
+                        // Header com informações do usuário
+                        PlantisCard(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            children: [
+                              // Avatar with edit functionality
+                              Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor: PlantisColors.primary,
+                                    child:
+                                        DataSanitizationService.shouldShowProfilePhoto(
+                                              user,
+                                              isAnonymous,
+                                            )
+                                            ? ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                              child: Image.network(
+                                                user!.photoUrl!,
+                                                width: 60,
+                                                height: 60,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) {
+                                                  return Text(
+                                                    DataSanitizationService.sanitizeInitials(
+                                                      user,
+                                                      isAnonymous,
+                                                    ),
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            )
+                                            : Text(
+                                              DataSanitizationService.sanitizeInitials(
+                                                user,
+                                                isAnonymous,
+                                              ),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                  ),
+                                  if (!isAnonymous)
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap:
+                                            () => _showImagePickerOptions(
+                                              context,
+                                            ),
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            color: PlantisColors.primary,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: theme.colorScheme.surface,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.edit,
+                                            color: Colors.white,
+                                            size: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+
+                              // User Info
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      DataSanitizationService.sanitizeDisplayName(
+                                        user,
+                                        isAnonymous,
+                                      ),
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      DataSanitizationService.sanitizeEmail(
+                                        user,
+                                        isAnonymous,
+                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color:
+                                                theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            isAnonymous
+                                                ? Colors.orange.withValues(
+                                                  alpha: 0.2,
+                                                )
+                                                : PlantisColors.primary
+                                                    .withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        isAnonymous
+                                            ? 'Conta Anônima'
+                                            : 'Conta Autenticada',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color:
+                                                  isAnonymous
+                                                      ? Colors.orange
+                                                      : PlantisColors.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Card especial para usuário anônimo
+                        if (isAnonymous) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.orange.withValues(alpha: 0.3),
+                                width: 1,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Seus dados estão armazenados apenas neste dispositivo. Para maior segurança e sincronização entre dispositivos, recomendamos criar uma conta.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              context.push('/auth');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.info_outline,
+                                      color: Colors.orange,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Conta Anônima',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: Colors.orange,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Seus dados estão armazenados apenas neste dispositivo. Para maior segurança e sincronização entre dispositivos, recomendamos criar uma conta.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      context.push('/auth');
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.person_add,
+                                      size: 18,
+                                    ),
+                                    label: const Text('Criar Conta'),
+                                  ),
+                                ),
+                              ],
                             ),
-                            icon: const Icon(Icons.person_add, size: 18),
-                            label: const Text('Criar Conta'),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Informações detalhadas da conta (apenas para usuários registrados)
+                        if (!isAnonymous) ...[
+                          _buildAccountInfoSection(context, user, authProvider),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Controle de Dispositivos (apenas para usuários registrados)
+                        if (!isAnonymous) ...[
+                          _buildDeviceManagementSectionSimple(context),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Dados e Sincronização (apenas para usuários registrados)
+                        if (!isAnonymous) ...[
+                          _buildDataSyncSection(context, authProvider),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // Ações de Conta - Subgrupo separado
+                        PlantisCard(
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: Icon(
+                                  Icons.logout_outlined,
+                                  color: theme.colorScheme.error,
+                                ),
+                                title: Text(
+                                  'Sair da Conta',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                                subtitle: const Text(
+                                  'Fazer logout da aplicação',
+                                ),
+                                onTap: () {
+                                  _showLogoutDialog(context, authProvider);
+                                },
+                              ),
+                              if (!isAnonymous) ...[
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.delete_outline,
+                                    color: theme.colorScheme.error,
+                                  ),
+                                  title: Text(
+                                    'Excluir Conta',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                  subtitle: const Text(
+                                    'Remover conta permanentemente',
+                                  ),
+                                  onTap: () {
+                                    _showDeleteAccountDialog(
+                                      context,
+                                      authProvider,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
                           ),
                         ),
+
+                        const SizedBox(height: 40),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-
-                // Informações detalhadas da conta (apenas para usuários registrados)
-                if (!isAnonymous) ...[
-                  _buildAccountInfoSection(context, user, authProvider),
-                  const SizedBox(height: 24),
-                ],
-
-                // Controle de Dispositivos (apenas para usuários registrados)
-                if (!isAnonymous) ...[
-                  _buildDeviceManagementSectionSimple(context),
-                  const SizedBox(height: 24),
-                ],
-
-                // Dados e Sincronização (apenas para usuários registrados)
-                if (!isAnonymous) ...[
-                  _buildDataSyncSection(context, authProvider),
-                  const SizedBox(height: 24),
-                ],
-
-                // Ações de Conta - Subgrupo separado
-                PlantisCard(
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: Icon(
-                          Icons.logout_outlined,
-                          color: theme.colorScheme.error,
-                        ),
-                        title: Text(
-                          'Sair da Conta',
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                        subtitle: const Text('Fazer logout da aplicação'),
-                        onTap: () {
-                          _showLogoutDialog(context, authProvider);
-                        },
-                      ),
-                      if (!isAnonymous) ...[
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: Icon(
-                            Icons.delete_outline,
-                            color: theme.colorScheme.error,
-                          ),
-                          title: Text(
-                            'Excluir Conta',
-                            style: TextStyle(color: theme.colorScheme.error),
-                          ),
-                          subtitle: const Text('Remover conta permanentemente'),
-                          onTap: () {
-                            _showDeleteAccountDialog(context, authProvider);
-                          },
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-              ],
-            );
-          },
-        ), // Consumer
-      ), // SingleChildScrollView
-    ), // Expanded
-        ],
-      ), // Column
-    ), // ResponsiveLayout
-  ); // Scaffold
+                    );
+                  },
+                ), // Consumer
+              ), // SingleChildScrollView
+            ), // Expanded
+          ],
+        ), // Column
+      ), // ResponsiveLayout
+    ); // Scaffold
   }
 
-
-  Widget _buildAccountInfoSection(BuildContext context, dynamic user, auth_providers.AuthProvider authProvider) {
+  Widget _buildAccountInfoSection(
+    BuildContext context,
+    dynamic user,
+    auth_providers.AuthProvider authProvider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -313,7 +377,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _buildInfoRow('Tipo de Conta', authProvider.isPremium ? 'Premium' : 'Gratuita'),
+              _buildInfoRow(
+                'Tipo de Conta',
+                authProvider.isPremium ? 'Premium' : 'Gratuita',
+              ),
               if (user?.createdAt != null) ...[
                 const SizedBox(height: 12),
                 _buildInfoRow('Criada em', _formatDate(user!.createdAt)),
@@ -352,7 +419,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
 
   String _formatDate(dynamic date) {
     if (date == null) return 'N/A';
-    
+
     DateTime dateTime;
     if (date is DateTime) {
       dateTime = date;
@@ -361,11 +428,14 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
     } else {
       return 'N/A';
     }
-    
+
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
-  Widget _buildDataSyncSection(BuildContext context, auth_providers.AuthProvider authProvider) {
+  Widget _buildDataSyncSection(
+    BuildContext context,
+    auth_providers.AuthProvider authProvider,
+  ) {
     final theme = Theme.of(context);
     final isSyncing = authProvider.isSyncInProgress;
     final lastSyncMessage = authProvider.syncMessage;
@@ -387,9 +457,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isSyncing
-                        ? Colors.orange.withValues(alpha: 0.2)
-                        : PlantisColors.primary.withValues(alpha: 0.2),
+                    color:
+                        isSyncing
+                            ? Colors.orange.withValues(alpha: 0.2)
+                            : PlantisColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -405,26 +476,28 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   ),
                 ),
                 subtitle: Text(
-                  isSyncing ? lastSyncMessage : 'Todos os dados estão atualizados',
+                  isSyncing
+                      ? lastSyncMessage
+                      : 'Todos os dados estão atualizados',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                trailing: isSyncing
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : IconButton(
-                        onPressed: () {
-                          authProvider.startAutoSyncIfNeeded();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        tooltip: 'Sincronizar agora',
-                      ),
+                trailing:
+                    isSyncing
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : IconButton(
+                          onPressed: () {
+                            authProvider.startAutoSyncIfNeeded();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          tooltip: 'Sincronizar agora',
+                        ),
               ),
-              const Divider(height: 1),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
@@ -439,7 +512,9 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                   ),
                 ),
                 title: const Text('Exportar Dados'),
-                subtitle: const Text('Baixar todos os seus dados em formato JSON'),
+                subtitle: const Text(
+                  'Baixar todos os seus dados em formato JSON',
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showComingSoonDialog(context),
               ),
@@ -452,7 +527,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
 
   Widget _buildDeviceManagementSectionSimple(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -495,9 +570,8 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showComingSoonDialog(context),
               ),
-              
+
               // Ações rápidas
-              const Divider(height: 1),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -533,252 +607,268 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
     );
   }
 
-
-
   void _showImagePickerOptions(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Text(
-                    'Alterar Foto de Perfil',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+      builder:
+          (context) => Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Alterar Foto de Perfil',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Escolha uma nova foto para seu perfil',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: PlantisColors.primary,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Escolha uma nova foto para seu perfil',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  title: const Text('Câmera'),
+                  subtitle: const Text('Tirar uma nova foto'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showComingSoonDialog(context);
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: PlantisColors.secondary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.photo_library,
+                      color: PlantisColors.secondary,
+                      size: 20,
                     ),
                   ),
-                ],
-              ),
+                  title: const Text('Galeria'),
+                  subtitle: const Text('Escolher da galeria de fotos'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showComingSoonDialog(context);
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                  ),
+                  title: const Text('Remover Foto'),
+                  subtitle: const Text('Voltar para avatar padrão'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showComingSoonDialog(context);
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: PlantisColors.primary.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: PlantisColors.primary,
-                  size: 20,
-                ),
-              ),
-              title: const Text('Câmera'),
-              subtitle: const Text('Tirar uma nova foto'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showComingSoonDialog(context);
-              },
-            ),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: PlantisColors.secondary.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.photo_library,
-                  color: PlantisColors.secondary,
-                  size: 20,
-                ),
-              ),
-              title: const Text('Galeria'),
-              subtitle: const Text('Escolher da galeria de fotos'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showComingSoonDialog(context);
-              },
-            ),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.red,
-                  size: 20,
-                ),
-              ),
-              title: const Text('Remover Foto'),
-              subtitle: const Text('Voltar para avatar padrão'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showComingSoonDialog(context);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
   void _showComingSoonDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Em breve'),
-        content: const Text('Esta funcionalidade estará disponível em breve!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Em breve'),
+            content: const Text(
+              'Esta funcionalidade estará disponível em breve!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
-  void _showLogoutDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
+  void _showLogoutDialog(
+    BuildContext context,
+    auth_providers.AuthProvider authProvider,
+  ) {
     final theme = Theme.of(context);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.logout,
-              color: theme.colorScheme.primary,
-              size: 28,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(width: 12),
-            Text(
-              'Sair da Conta',
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Ao sair da sua conta, as seguintes ações serão realizadas:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildLogoutItem(context, Icons.cleaning_services, 'Limpeza de dados locais armazenados'),
-            _buildLogoutItem(context, Icons.sync_disabled, 'Interrupção da sincronização automática'),
-            _buildLogoutItem(context, Icons.login, 'Necessário fazer login novamente para acessar'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.cloud,
+            title: Row(
+              children: [
+                Icon(Icons.logout, color: theme.colorScheme.primary, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  'Sair da Conta',
+                  style: TextStyle(
                     color: theme.colorScheme.primary,
-                    size: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Seus dados na nuvem permanecem seguros e serão restaurados no próximo login',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ao sair da sua conta, as seguintes ações serão realizadas:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildLogoutItem(
+                  context,
+                  Icons.cleaning_services,
+                  'Limpeza de dados locais armazenados',
+                ),
+                _buildLogoutItem(
+                  context,
+                  Icons.sync_disabled,
+                  'Interrupção da sincronização automática',
+                ),
+                _buildLogoutItem(
+                  context,
+                  Icons.login,
+                  'Necessário fazer login novamente para acessar',
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.cloud,
+                        color: theme.colorScheme.primary,
+                        size: 20,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Seus dados na nuvem permanecem seguros e serão restaurados no próximo login',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancelar',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
               ),
-            ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+
+                  // Start auth loading
+                  startAuthLoading(operation: 'Fazendo logout...');
+
+                  try {
+                    await authProvider.logout();
+
+                    // Stop loading
+                    stopAuthLoading();
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Logout realizado com sucesso'),
+                          backgroundColor: Colors.green,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      context.go('/welcome');
+                    }
+                  } catch (e) {
+                    stopAuthLoading();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+                          ),
+                          backgroundColor: theme.colorScheme.error,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Sair'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-
-              // Start auth loading
-              startAuthLoading(operation: 'Fazendo logout...');
-
-              try {
-                await authProvider.logout();
-
-                // Stop loading
-                stopAuthLoading();
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Logout realizado com sucesso'),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  context.go('/welcome');
-                }
-              } catch (e) {
-                stopAuthLoading();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}'),
-                      backgroundColor: theme.colorScheme.error,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -788,11 +878,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: 20,
-          ),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -808,7 +894,10 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
     );
   }
 
-  void _showDeleteAccountDialog(BuildContext context, auth_providers.AuthProvider authProvider) {
+  void _showDeleteAccountDialog(
+    BuildContext context,
+    auth_providers.AuthProvider authProvider,
+  ) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -817,8 +906,6 @@ class _AccountProfilePageState extends State<AccountProfilePage> with LoadingPag
       },
     );
   }
-
-
 }
 
 /// Dialog stateful para confirmação de exclusão de conta
@@ -849,7 +936,8 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
 
   void _validateConfirmation() {
     setState(() {
-      _isConfirmationValid = _confirmationController.text.trim().toUpperCase() == 'CONCORDO';
+      _isConfirmationValid =
+          _confirmationController.text.trim().toUpperCase() == 'CONCORDO';
     });
   }
 
@@ -857,16 +945,10 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(
-            Icons.warning,
-            color: theme.colorScheme.error,
-            size: 28,
-          ),
+          Icon(Icons.warning, color: theme.colorScheme.error, size: 28),
           const SizedBox(width: 12),
           Text(
             'Excluir Conta',
@@ -890,9 +972,21 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDeletionItem(context, Icons.delete_forever, 'Exclusão permanente de todas suas plantas e dados'),
-          _buildDeletionItem(context, Icons.history, 'Perda do histórico de cuidados e tarefas'),
-          _buildDeletionItem(context, Icons.cloud_off, 'Impossibilidade de recuperar informações'),
+          _buildDeletionItem(
+            context,
+            Icons.delete_forever,
+            'Exclusão permanente de todas suas plantas e dados',
+          ),
+          _buildDeletionItem(
+            context,
+            Icons.history,
+            'Perda do histórico de cuidados e tarefas',
+          ),
+          _buildDeletionItem(
+            context,
+            Icons.cloud_off,
+            'Impossibilidade de recuperar informações',
+          ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
@@ -902,11 +996,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.info,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                ),
+                Icon(Icons.info, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -944,16 +1034,14 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
             ),
             textCapitalization: TextCapitalization.characters,
-            inputFormatters: [
-              _UpperCaseTextFormatter(),
-            ],
-            style: TextStyle(
-              fontSize: 16,
-              color: theme.colorScheme.onSurface,
-            ),
+            inputFormatters: [_UpperCaseTextFormatter()],
+            style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
           ),
         ],
       ),
@@ -968,38 +1056,43 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed: _isConfirmationValid ? () async {
-            Navigator.of(context).pop();
+          onPressed:
+              _isConfirmationValid
+                  ? () async {
+                    Navigator.of(context).pop();
 
-            final success = await widget.authProvider.deleteAccount(
-              password: '', // Plantis não requer senha para exclusão
-              downloadData: false,
-            );
+                    final success = await widget.authProvider.deleteAccount(
+                      password: '', // Plantis não requer senha para exclusão
+                      downloadData: false,
+                    );
 
-            if (context.mounted) {
-              if (success) {
-                _showDeletionSuccessDialog(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      widget.authProvider.errorMessage ??
-                          'Erro ao excluir conta. Tente novamente.',
-                    ),
-                    backgroundColor: theme.colorScheme.error,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            }
-          } : null,
+                    if (context.mounted) {
+                      if (success) {
+                        _showDeletionSuccessDialog(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              widget.authProvider.errorMessage ??
+                                  'Erro ao excluir conta. Tente novamente.',
+                            ),
+                            backgroundColor: theme.colorScheme.error,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                  : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isConfirmationValid
-                ? theme.colorScheme.error
-                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-            foregroundColor: _isConfirmationValid
-                ? Colors.white
-                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            backgroundColor:
+                _isConfirmationValid
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor:
+                _isConfirmationValid
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -1016,11 +1109,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.error,
-            size: 20,
-          ),
+          Icon(icon, color: Theme.of(context).colorScheme.error, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -1040,60 +1129,58 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(width: 8),
-            const Text(
-              'Conta Excluída com Sucesso',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            title: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Conta Excluída com Sucesso',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sua conta foi excluída permanentemente. Todos os seus dados foram removidos de nossos servidores.',
+                  style: TextStyle(fontSize: 14),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Obrigado por ter usado o Plantis. Se precisar de ajuda, entre em contato conosco.',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Navegar para tela de welcome/inicial
+                  context.go('/welcome');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Entendido'),
               ),
-            ),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sua conta foi excluída permanentemente. Todos os seus dados foram removidos de nossos servidores.',
-              style: TextStyle(fontSize: 14),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Obrigado por ter usado o Plantis. Se precisar de ajuda, entre em contato conosco.',
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Navegar para tela de welcome/inicial
-              context.go('/welcome');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Entendido'),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -1105,8 +1192,6 @@ class _UpperCaseTextFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    return newValue.copyWith(
-      text: newValue.text.toUpperCase(),
-    );
+    return newValue.copyWith(text: newValue.text.toUpperCase());
   }
 }

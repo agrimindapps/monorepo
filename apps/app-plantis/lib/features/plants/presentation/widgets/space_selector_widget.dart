@@ -55,26 +55,12 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Label
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 20, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Espaço',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                if (widget.isRequired)
-                  Text(
-                    ' *',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
+            Text(
+              'Espaço${widget.isRequired ? ' *' : ''}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
             
             const SizedBox(height: 8),

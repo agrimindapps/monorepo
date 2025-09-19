@@ -178,15 +178,9 @@ class ContentListItemWidget extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: theme.brightness == Brightness.dark
-              ? theme.colorScheme.surface.withValues(alpha: 0.8)
+              ? Colors.white.withValues(alpha: 0.1)
               : theme.colorScheme.surface.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(8),
-          border: theme.brightness == Brightness.dark
-              ? Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  width: 0.5,
-                )
-              : null,
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -228,13 +222,6 @@ class ContentListItemWidget extends StatelessWidget {
                   ],
                 ],
               ),
-            ),
-
-            // Seta de navegação
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              size: 20,
             ),
           ],
           ),

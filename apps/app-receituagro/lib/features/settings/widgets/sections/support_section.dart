@@ -20,32 +20,40 @@ class SupportSection extends StatelessWidget {
         const SectionHeader(
           title: 'Suporte',
           icon: Icons.support,
-          showIcon: true,
+          showIcon: false,
         ),
         SettingsCard(
-          child: SettingsListTile(
-            leadingIcon: Icons.star_outline,
-            title: 'Avaliar o App',
-            subtitle: 'Avalie nossa experiência na loja',
-            onTap: () => _showRateApp(context),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SettingsCard(
-          child: SettingsListTile(
-            leadingIcon: Icons.feedback_outlined,
-            title: 'Enviar Feedback',
-            subtitle: 'Nos ajude a melhorar o app',
-            onTap: () => _showFeedback(context),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SettingsCard(
-          child: SettingsListTile(
-            leadingIcon: Icons.info_outline,
-            title: 'Sobre o Aplicativo',
-            subtitle: 'Versão, suporte e informações',
-            onTap: () => _showAboutApp(context),
+          child: Column(
+            children: [
+              SettingsListTile(
+                leadingIcon: Icons.star_outline,
+                title: 'Avaliar o App',
+                subtitle: 'Avalie nossa experiência na loja',
+                onTap: () => _showRateApp(context),
+              ),
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              ),
+              SettingsListTile(
+                leadingIcon: Icons.feedback_outlined,
+                title: 'Enviar Feedback',
+                subtitle: 'Nos ajude a melhorar o app',
+                onTap: () => _showFeedback(context),
+              ),
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              ),
+              SettingsListTile(
+                leadingIcon: Icons.info_outline,
+                title: 'Sobre o Aplicativo',
+                subtitle: 'Versão, suporte e informações',
+                onTap: () => _showAboutApp(context),
+              ),
+            ],
           ),
         ),
       ],

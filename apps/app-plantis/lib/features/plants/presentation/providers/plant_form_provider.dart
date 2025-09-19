@@ -336,23 +336,39 @@ class PlantFormProvider extends ChangeNotifier {
     try {
       final imageFile = await imageService.pickImageFromCamera();
       if (imageFile != null) {
-        final downloadUrl = await imageService.uploadImage(
-          imageFile,
-          folder: local.ImageUploadType.plant.folder,
-        );
+        // Validar arquivo antes do upload
+        if (await imageService.validateImageFile(imageFile, 'plants')) {
+          final downloadUrl = await imageService.uploadImage(
+            imageFile,
+            folder: local.ImageUploadType.plant.folder,
+          );
 
-        if (downloadUrl != null) {
-          // Remove imagem anterior se existir
-          if (_imageUrls.isNotEmpty) {
-            final oldImageUrl = _imageUrls.first;
-            unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
+          if (downloadUrl != null) {
+            // Remove imagem anterior se existir
+            if (_imageUrls.isNotEmpty) {
+              final oldImageUrl = _imageUrls.first;
+              unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
+            }
+            _imageUrls.clear();
+            _imageUrls.add(downloadUrl);
+            _errorMessage = null; // Limpar erro anterior
+          } else {
+            _errorMessage = 'Falha no upload da imagem';
           }
-          _imageUrls.clear();
-          _imageUrls.add(downloadUrl);
+        } else {
+          _errorMessage = 'Imagem inválida ou muito grande (máx. 5MB)';
         }
+      } else {
+        // Usuário cancelou ou erro de permissão
+        _errorMessage = null;
       }
     } catch (e) {
-      _errorMessage = 'Erro ao capturar imagem da câmera';
+      debugPrint('Erro ao capturar imagem da câmera: $e');
+      if (e.toString().contains('permission')) {
+        _errorMessage = 'Permissão de acesso à câmera negada';
+      } else {
+        _errorMessage = 'Erro ao capturar imagem da câmera';
+      }
     } finally {
       _isUploadingImages = false;
       notifyListeners();
@@ -366,23 +382,39 @@ class PlantFormProvider extends ChangeNotifier {
     try {
       final imageFile = await imageService.pickImageFromGallery();
       if (imageFile != null) {
-        final downloadUrl = await imageService.uploadImage(
-          imageFile,
-          folder: local.ImageUploadType.plant.folder,
-        );
+        // Validar arquivo antes do upload
+        if (await imageService.validateImageFile(imageFile, 'plants')) {
+          final downloadUrl = await imageService.uploadImage(
+            imageFile,
+            folder: local.ImageUploadType.plant.folder,
+          );
 
-        if (downloadUrl != null) {
-          // Remove imagem anterior se existir
-          if (_imageUrls.isNotEmpty) {
-            final oldImageUrl = _imageUrls.first;
-            unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
+          if (downloadUrl != null) {
+            // Remove imagem anterior se existir
+            if (_imageUrls.isNotEmpty) {
+              final oldImageUrl = _imageUrls.first;
+              unawaited(imageService.deleteImage(oldImageUrl)); // Fire and forget
+            }
+            _imageUrls.clear();
+            _imageUrls.add(downloadUrl);
+            _errorMessage = null; // Limpar erro anterior
+          } else {
+            _errorMessage = 'Falha no upload da imagem';
           }
-          _imageUrls.clear();
-          _imageUrls.add(downloadUrl);
+        } else {
+          _errorMessage = 'Imagem inválida ou muito grande (máx. 5MB)';
         }
+      } else {
+        // Usuário cancelou ou erro de permissão
+        _errorMessage = null;
       }
     } catch (e) {
-      _errorMessage = 'Erro ao selecionar imagem da galeria';
+      debugPrint('Erro ao selecionar imagem da galeria: $e');
+      if (e.toString().contains('permission')) {
+        _errorMessage = 'Permissão de acesso à galeria negada';
+      } else {
+        _errorMessage = 'Erro ao selecionar imagem da galeria';
+      }
     } finally {
       _isUploadingImages = false;
       notifyListeners();

@@ -76,12 +76,24 @@ class PlantsAppBar extends StatelessWidget {
                         ),
                         fontSize: 16,
                       ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.6,
-                        ),
-                        size: 20,
+                      prefixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.local_florist,
+                            color: theme.colorScheme.primary,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.search,
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
+                            size: 20,
+                          ),
+                        ],
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(

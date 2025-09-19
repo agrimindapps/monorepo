@@ -31,9 +31,11 @@ class HomePragasRecentWidget extends StatelessWidget {
       onActionPressed: () {},
       isLoading: provider.isLoading,
       emptyMessage: 'Nenhuma praga acessada recentemente',
+      isEmpty: provider.recentPragas.isEmpty,
+      showCard: true,
       child: provider.recentPragas.isEmpty
           ? const SizedBox.shrink()
-          : ListView.builder(
+          : ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: provider.recentPragas.length,
@@ -41,6 +43,11 @@ class HomePragasRecentWidget extends StatelessWidget {
                 final praga = provider.recentPragas[index];
                 return _buildPragaItem(context, praga);
               },
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                thickness: 0.5,
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              ),
             ),
     );
   }

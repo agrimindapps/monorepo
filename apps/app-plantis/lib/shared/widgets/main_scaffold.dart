@@ -42,6 +42,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _getCurrentIndex(context),
         onDestinationSelected: _onTabTapped,
+        height: 60,
         destinations: const [
           NavigationDestination(
             selectedIcon: Icon(Icons.checklist),

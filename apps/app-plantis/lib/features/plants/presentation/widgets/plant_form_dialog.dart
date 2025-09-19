@@ -332,7 +332,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
 
   Widget _buildFooter(ColorScheme colorScheme) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withAlpha(50),
         borderRadius: const BorderRadius.only(

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:core/core.dart' as core;
-
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../auth/utils/validation_helpers.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/spaces_provider.dart';
@@ -21,20 +18,35 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   final _nameController = TextEditingController();
   final _speciesController = TextEditingController();
   final _notesController = TextEditingController();
+  PlantFormProvider? _provider;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<PlantFormProvider>();
-      _nameController.text = provider.name;
-      _speciesController.text = provider.species;
-      _notesController.text = provider.notes;
+      _provider = context.read<PlantFormProvider>();
+      _updateControllers();
+      _provider?.addListener(_updateControllers);
     });
+  }
+
+  void _updateControllers() {
+    if (_provider != null && mounted) {
+      if (_nameController.text != _provider!.name) {
+        _nameController.text = _provider!.name;
+      }
+      if (_speciesController.text != _provider!.species) {
+        _speciesController.text = _provider!.species;
+      }
+      if (_notesController.text != _provider!.notes) {
+        _notesController.text = _provider!.notes;
+      }
+    }
   }
 
   @override
   void dispose() {
+    _provider?.removeListener(_updateControllers);
     _nameController.dispose();
     _speciesController.dispose();
     _notesController.dispose();
@@ -387,9 +399,8 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               isRequired: true,
               errorText: fieldErrors['name'],
               onChanged: (value) {
-                // Sanitize input before processing
-                final sanitizedValue = ValidationHelpers.sanitizePlantName(value);
-                provider.setName(sanitizedValue);
+                // Não sanitizar em tempo real para não interferir na digitação
+                provider.setName(value);
               },
               validator: (value) => _validatePlantName(value),
               prefixIcon: Icon(
@@ -407,9 +418,8 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               label: 'Espécie',
               hint: 'Ex: Rosa gallica',
               onChanged: (value) {
-                // Sanitize input before processing  
-                final sanitizedValue = ValidationHelpers.sanitizePlantName(value);
-                provider.setSpecies(sanitizedValue);
+                // Não sanitizar em tempo real para não interferir na digitação
+                provider.setSpecies(value);
               },
               validator: (value) => _validateSpecies(value),
               prefixIcon: Icon(
@@ -455,9 +465,8 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               hint: 'Adicione notas sobre a planta...',
               maxLines: 4,
               onChanged: (value) {
-                // Sanitize input before processing
-                final sanitizedValue = ValidationHelpers.sanitizeNotes(value);
-                provider.setNotes(sanitizedValue);
+                // Não sanitizar em tempo real para não interferir na digitação
+                provider.setNotes(value);
               },
               validator: (value) => _validateNotes(value),
               prefixIcon: Icon(

@@ -1,8 +1,13 @@
 import 'dart:developer' as developer;
 
+import 'package:core/core.dart' as core;
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
+import '../../../../core/sync/receituagro_sync_config.dart';
+import '../../../../core/providers/auth_provider.dart';
+import '../../domain/entities/favorito_sync_entity.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 
@@ -10,6 +15,7 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Princípio: Consolidação de responsabilidades similares para reduzir complexidade
 class FavoritosService {
   final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
+  final ReceitaAgroAuthProvider? _authProvider = sl.isRegistered<ReceitaAgroAuthProvider>() ? sl<ReceitaAgroAuthProvider>() : null;
   
   // Cache interno consolidado
   final Map<String, dynamic> _memoryCache = {};
@@ -63,6 +69,10 @@ class FavoritosService {
       // Limpa cache após mudança
       if (result) {
         await _clearCacheForTipo(tipo);
+        
+        // Sincroniza com Firestore se usuário autenticado
+        await _queueSyncOperation('create', tipo, id, itemData);
+        
         developer.log('Favorito adicionado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
       } else {
         developer.log('Falha ao adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
@@ -88,6 +98,10 @@ class FavoritosService {
       // Limpa cache após mudança
       if (result) {
         await _clearCacheForTipo(tipo);
+        
+        // Sincroniza com Firestore se usuário autenticado
+        await _queueSyncOperation('delete', tipo, id, null);
+        
         developer.log('Favorito removido com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
       } else {
         developer.log('Falha ao remover favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
@@ -429,6 +443,79 @@ class FavoritosService {
       developer.log('Favoritos sincronizados - Stats: $stats', name: 'FavoritosService');
     } catch (e) {
       throw FavoritosException('Erro ao sincronizar favoritos: $e');
+    }
+  }
+
+  /// Sincroniza favorito usando sistema core
+  Future<void> _queueSyncOperation(String operation, String tipo, String id, Map<String, dynamic>? data) async {
+    try {
+      // Verifica se o usuário está autenticado
+      if (_authProvider == null || !_authProvider!.isAuthenticated || _authProvider!.isAnonymous) {
+        developer.log('Usuário não autenticado - pulando sincronização de favorito', name: 'FavoritosService');
+        return;
+      }
+
+      // Verifica se há dados válidos para sincronização
+      if (id.isEmpty || tipo.isEmpty) {
+        developer.log('Dados inválidos para sincronização - pulando', name: 'FavoritosService');
+        return;
+      }
+
+      // Resolve dados do item para sincronização
+      final resolvedData = data ?? await resolveItemData(tipo, id);
+      if (resolvedData == null) {
+        developer.log('Não foi possível resolver dados do favorito para sincronização: tipo=$tipo, id=$id', name: 'FavoritosService');
+        return;
+      }
+
+      // Cria entidade de sincronização
+      final syncEntity = FavoritoSyncEntity(
+        id: 'favorite_${tipo}_$id',
+        tipo: tipo,
+        itemId: id,
+        itemData: resolvedData,
+        adicionadoEm: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        userId: _authProvider!.currentUser?.id,
+      );
+
+      // Executa operação de sincronização via ReceitaAgroSyncConfig
+      if (operation == 'create') {
+        final result = await ReceitaAgroSyncConfig.createFavorito(syncEntity);
+        result.fold(
+          (core.Failure failure) {
+            developer.log('Erro na sincronização de favorito (create): ${failure.message}', name: 'FavoritosService');
+          },
+          (String entityId) {
+            developer.log('Favorito criado com sucesso: id=$entityId', name: 'FavoritosService');
+          },
+        );
+      } else if (operation == 'delete') {
+        final result = await ReceitaAgroSyncConfig.deleteFavorito(syncEntity.id);
+        result.fold(
+          (core.Failure failure) {
+            developer.log('Erro na sincronização de favorito (delete): ${failure.message}', name: 'FavoritosService');
+          },
+          (_) {
+            developer.log('Favorito deletado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+          },
+        );
+      } else {
+        final result = await ReceitaAgroSyncConfig.updateFavorito(syncEntity.id, syncEntity);
+        result.fold(
+          (core.Failure failure) {
+            developer.log('Erro na sincronização de favorito (update): ${failure.message}', name: 'FavoritosService');
+          },
+          (_) {
+            developer.log('Favorito atualizado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+          },
+        );
+      }
+      
+    } catch (e) {
+      developer.log('Erro ao sincronizar favorito: $e', name: 'FavoritosService', error: e);
+      // Não relança a exceção para não quebrar a operação local
     }
   }
 }

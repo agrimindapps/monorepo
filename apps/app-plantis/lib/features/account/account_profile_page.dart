@@ -302,11 +302,11 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                             children: [
                               ListTile(
                                 leading: const Icon(
-                                  Icons.clear_all,
+                                  Icons.delete_sweep,
                                   color: Colors.orange,
                                 ),
                                 title: const Text(
-                                  'Apagar Dados',
+                                  'Limpar Dados',
                                   style: TextStyle(
                                     color: Colors.orange,
                                   ),
@@ -536,7 +536,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                   'Baixar dados em formato JSON para backup',
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showComingSoonDialog(context),
+                onTap: () => context.push('/data-export'),
               ),
               ListTile(
                 leading: Container(
@@ -556,7 +556,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                   'Baixar dados em planilha para análise',
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showComingSoonDialog(context),
+                onTap: () => context.push('/data-export'),
               ),
             ],
           ),
@@ -608,7 +608,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showComingSoonDialog(context),
+                onTap: () => context.push('/data-export'),
               ),
 
               // Ações rápidas
@@ -753,6 +753,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
             title: const Text('Em breve'),
             content: const Text(
               'Esta funcionalidade estará disponível em breve!',
@@ -777,6 +778,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
       barrierDismissible: false,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -991,7 +993,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
   void _validateConfirmation() {
     setState(() {
       _isConfirmationValid =
-          _confirmationController.text.trim().toUpperCase() == 'APAGAR';
+          _confirmationController.text.trim().toUpperCase() == 'LIMPAR';
     });
   }
 
@@ -999,32 +1001,53 @@ class __DataClearDialogState extends State<_DataClearDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AlertDialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          const Icon(Icons.clear_all, color: Colors.orange, size: 28),
-          const SizedBox(width: 12),
-          Text(
-            'Apagar Dados do App',
-            style: TextStyle(
-              color: Colors.orange,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Esta ação limpará os seguintes dados:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
+          // Ícone centralizado
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: const Icon(
+              Icons.delete_sweep,
+              size: 32,
+              color: Colors.orange,
             ),
           ),
+          
+          const SizedBox(height: 20),
+          
+          // Título
+          Text(
+            'Limpar Dados do App',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Conteúdo alinhado à esquerda
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Esta ação limpará todos os dados em todos seus dispositivos:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
           const SizedBox(height: 16),
           _buildClearItem(
             context,
@@ -1042,35 +1065,24 @@ class __DataClearDialogState extends State<_DataClearDialog> {
             'Todos os espaços criados',
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.green.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.shield, color: Colors.green, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Serão mantidos: perfil, configurações, tema e assinatura',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.green.shade700,
-                    ),
+          Row(
+            children: [
+              const Icon(Icons.shield, color: Colors.green, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Serão mantidos: perfil, configurações, tema e assinatura',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.green.shade700,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Text(
-            'Para confirmar, digite APAGAR abaixo:',
+            'Para confirmar, digite LIMPAR abaixo:',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -1082,7 +1094,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
             controller: _confirmationController,
             enabled: !_isLoading,
             decoration: InputDecoration(
-              hintText: 'Digite APAGAR para confirmar',
+              hintText: 'Digite LIMPAR para confirmar',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1101,6 +1113,8 @@ class __DataClearDialogState extends State<_DataClearDialog> {
             textCapitalization: TextCapitalization.characters,
             inputFormatters: [_UpperCaseTextFormatter()],
             style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
+          ),
+            ],
           ),
         ],
       ),
@@ -1200,7 +1214,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
                     color: Colors.white,
                   ),
                 )
-              : const Text('Apagar Dados'),
+              : const Text('Limpar Dados'),
         ),
       ],
     );
@@ -1266,6 +1280,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AlertDialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
@@ -1296,12 +1311,12 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
           _buildDeletionItem(
             context,
             Icons.delete_forever,
-            'Exclusão permanente de todas suas plantas e dados',
+            'Exclusão permanente de todos seus dados',
           ),
           _buildDeletionItem(
             context,
             Icons.history,
-            'Perda do histórico de cuidados e tarefas',
+            'Perda do histórico e informações armazenadas',
           ),
           _buildDeletionItem(
             context,
@@ -1452,6 +1467,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
       barrierDismissible: false,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),

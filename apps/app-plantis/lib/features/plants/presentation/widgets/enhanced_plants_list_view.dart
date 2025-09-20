@@ -26,6 +26,7 @@ class EnhancedPlantsListView extends StatefulWidget {
 }
 
 class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
+    with WidgetsBindingObserver
     implements
         ISearchDelegate,
         IViewModeDelegate,
@@ -38,6 +39,9 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void initState() {
     super.initState();
     _plantsProvider = di.sl<PlantsProvider>();
+    
+    // Add observer for app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
@@ -47,7 +51,17 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   @override
   void dispose() {
     _scrollController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Refresh when app comes back to foreground
+    if (state == AppLifecycleState.resumed) {
+      _plantsProvider.refreshPlants();
+    }
   }
 
   // ISearchDelegate implementation

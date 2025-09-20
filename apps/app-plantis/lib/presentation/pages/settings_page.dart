@@ -126,6 +126,10 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                           _buildAboutSection(context, theme),
                           const SizedBox(height: 8),
 
+                          // Seção Conta (sair e excluir)
+                          _buildAccountSection(context, theme, authProvider),
+                          const SizedBox(height: 8),
+
                           // Seção de Desenvolvimento (debug only)
                           if (kDebugMode) ...[
                             _buildDevelopmentSection(context, theme),
@@ -479,7 +483,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                     children: [
                       Text(
                         'Dispositivos Conectados',
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1012,12 +1016,41 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     );
   }
 
+  Widget _buildAccountSection(
+    BuildContext context, 
+    ThemeData theme, 
+    auth_providers.AuthProvider authProvider
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'Conta'),
+        _buildSettingsCard(context, [
+          _buildDangerousSettingsItem(
+            context,
+            icon: Icons.logout,
+            title: 'Sair da Conta',
+            subtitle: 'Fazer logout do aplicativo',
+            onTap: () => _showLogoutConfirmDialog(context, authProvider),
+          ),
+          _buildDangerousSettingsItem(
+            context,
+            icon: Icons.delete_forever,
+            title: 'Excluir Conta',
+            subtitle: 'Remover permanentemente sua conta',
+            onTap: () => context.push('/account-deletion-policy'),
+          ),
+        ]),
+      ],
+    );
+  }
+
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: PlantisColors.primary,
         ),
@@ -1066,6 +1099,63 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                     title,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            trailing ??
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDangerousSettingsItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: Colors.red, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -1468,6 +1558,52 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               ),
             ],
           ),
+    );
+  }
+
+  void _showLogoutConfirmDialog(
+    BuildContext context, 
+    auth_providers.AuthProvider authProvider
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Saída'),
+        content: const Text(
+          'Tem certeza de que deseja sair da sua conta? '
+          'Você precisará fazer login novamente para acessar seus dados.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              try {
+                await authProvider.logout();
+                if (context.mounted) {
+                  context.go('/login');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro ao fazer logout: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
     );
   }
 

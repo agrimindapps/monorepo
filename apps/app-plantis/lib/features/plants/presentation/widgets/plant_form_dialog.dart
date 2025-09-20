@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../shared/widgets/loading/loading_components.dart';
+import '../providers/plant_details_provider.dart';
 import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import 'plant_form_basic_info.dart';
@@ -58,8 +59,14 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
     final provider = Provider.of<PlantFormProvider>(context, listen: false);
     
     if (widget.plantId != null) {
+      if (kDebugMode) {
+        print('🔧 PlantFormDialog._initializeProvider() - Iniciando edição para plantId: ${widget.plantId}');
+      }
       provider.initializeForEdit(widget.plantId!);
     } else {
+      if (kDebugMode) {
+        print('🔧 PlantFormDialog._initializeProvider() - Iniciando adição de nova planta');
+      }
       provider.initializeForAdd();
     }
   }
@@ -414,6 +421,55 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           // Atualizar a lista de plantas se o provider estiver disponível
           if (plantsProvider != null) {
             await plantsProvider.refreshPlants();
+          }
+          
+          // Se for edição, também atualizar o PlantDetailsProvider
+          if (widget.plantId != null && mounted) {
+            if (kDebugMode) {
+              print('🔧 PlantFormDialog._handleSave() - Tentando atualizar PlantDetailsProvider para plantId: ${widget.plantId}');
+            }
+            
+            try {
+              final plantDetailsProvider = Provider.of<PlantDetailsProvider>(context, listen: false);
+              
+              if (kDebugMode) {
+                print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider encontrado via Provider.of');
+                print('   - Planta atual no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
+              }
+              
+              await plantDetailsProvider.reloadPlant(widget.plantId!);
+              
+              if (kDebugMode) {
+                print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider recarregado com sucesso');
+                print('   - Nova planta no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('⚠️ PlantFormDialog._handleSave() - Provider.of falhou: $e');
+                print('⚠️ PlantFormDialog._handleSave() - Tentando usar DI como fallback...');
+              }
+              
+              // Se não encontrar no contexto, tentar usar DI
+              try {
+                final plantDetailsProvider = di.sl<PlantDetailsProvider>();
+                
+                if (kDebugMode) {
+                  print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider encontrado via DI');
+                  print('   - Planta atual no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
+                }
+                
+                await plantDetailsProvider.reloadPlant(widget.plantId!);
+                
+                if (kDebugMode) {
+                  print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider (DI) recarregado com sucesso');
+                  print('   - Nova planta no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
+                }
+              } catch (e2) {
+                if (kDebugMode) {
+                  print('❌ PlantFormDialog._handleSave() - Falha total: $e2');
+                }
+              }
+            }
           }
           
           // Mostrar snackbar de sucesso

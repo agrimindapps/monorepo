@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
+import '../../../auth/utils/validation_helpers.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
@@ -273,6 +274,10 @@ class PlantFormProvider extends ChangeNotifier {
 
   // Initialize form for editing
   Future<void> initializeForEdit(String plantId) async {
+    if (kDebugMode) {
+      print('🌱 PlantFormProvider.initializeForEdit() - Iniciando para plantId: $plantId');
+    }
+    
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -281,10 +286,19 @@ class PlantFormProvider extends ChangeNotifier {
 
     result.fold(
       (failure) {
+        if (kDebugMode) {
+          print('❌ PlantFormProvider.initializeForEdit() - Erro ao buscar planta: ${_getErrorMessage(failure)}');
+        }
         _errorMessage = _getErrorMessage(failure);
         _originalPlant = null;
       },
       (plant) {
+        if (kDebugMode) {
+          print('✅ PlantFormProvider.initializeForEdit() - Planta carregada: ${plant.name} (ID: ${plant.id})');
+          print('   - isDeleted: ${plant.isDeleted}');
+          print('   - species: ${plant.species}');
+          print('   - spaceId: ${plant.spaceId}');
+        }
         _originalPlant = plant;
         _populateFormFromPlant(plant);
         _errorMessage = null;
@@ -293,6 +307,10 @@ class PlantFormProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+    
+    if (kDebugMode) {
+      print('🌱 PlantFormProvider.initializeForEdit() - Finalizado. originalPlant: ${_originalPlant?.name}');
+    }
   }
 
   // Initialize form for adding new plant
@@ -765,10 +783,10 @@ class PlantFormProvider extends ChangeNotifier {
     );
 
     return AddPlantParams(
-      name: _name.trim(),
-      species: _species.trim().isEmpty ? null : _species.trim(),
+      name: ValidationHelpers.sanitizePlantName(_name),
+      species: _species.trim().isEmpty ? null : ValidationHelpers.sanitizePlantName(_species),
       spaceId: _spaceId,
-      notes: _notes.trim().isEmpty ? null : _notes.trim(),
+      notes: _notes.trim().isEmpty ? null : ValidationHelpers.sanitizeNotes(_notes),
       plantingDate: _plantingDate,
       imageBase64: _imageBase64,
       imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
@@ -801,10 +819,10 @@ class PlantFormProvider extends ChangeNotifier {
 
     return UpdatePlantParams(
       id: _originalPlant!.id,
-      name: _name.trim(),
-      species: _species.trim().isEmpty ? null : _species.trim(),
+      name: ValidationHelpers.sanitizePlantName(_name),
+      species: _species.trim().isEmpty ? null : ValidationHelpers.sanitizePlantName(_species),
       spaceId: _spaceId,
-      notes: _notes.trim().isEmpty ? null : _notes.trim(),
+      notes: _notes.trim().isEmpty ? null : ValidationHelpers.sanitizeNotes(_notes),
       plantingDate: _plantingDate,
       imageBase64: _imageBase64,
       imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),

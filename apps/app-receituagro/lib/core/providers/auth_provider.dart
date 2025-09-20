@@ -13,6 +13,9 @@ import '../models/user_session_data.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 import '../services/sync_orchestrator.dart';
+import 'package:core/core.dart' as core;
+import '../sync/receituagro_sync_config.dart';
+import '../entities/user_profile_sync_entity.dart';
 
 /// AuthProvider específico do ReceitauAgro
 /// Integra com o core package FirebaseAuthService e gerencia estado de autenticação
@@ -22,6 +25,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   final DeviceIdentityService _deviceService;
   final ReceitaAgroAnalyticsService _analytics;
   final SyncOrchestrator? _syncOrchestrator;
+  // Sync repository removido - agora usa ReceitaAgroSyncConfig wrappers diretamente
   
   StreamSubscription<UserEntity?>? _userSubscription;
   UserEntity? _currentUser;
@@ -199,6 +203,9 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
         // Even if registration fails (e.g., device already exists), still track for analytics
         _analytics.trackDeviceAdded(deviceInfo.platform);
       }
+      
+      // Sincroniza perfil do usuário com Firestore
+      await _syncUserProfile(user, deviceInfo);
     } catch (e) {
       if (kDebugMode) print('❌ Auth Provider: Device login handling error - $e');
       // Log error but don't block login process
@@ -667,6 +674,60 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
         return AnalyticsUserType.registered;
       case UserType.premium:
         return AnalyticsUserType.premium;
+    }
+  }
+
+  /// Sincroniza perfil do usuário usando sistema core
+  Future<void> _syncUserProfile(UserEntity user, DeviceInfo deviceInfo) async {
+    try {
+      // Verifica se o usuário é válido para sync
+      if (user.id.isEmpty) {
+        if (kDebugMode) print('🔄 Auth Provider: User ID inválido - pulando sincronização de perfil');
+        return;
+      }
+
+      // Cria entidade de sincronização
+      final profileEntity = UserProfileSyncEntity(
+        id: user.id,
+        email: user.email ?? '',
+        displayName: user.displayName ?? '',
+        provider: user.provider.toString(),
+        isAnonymous: user.isAnonymous,
+        deviceId: deviceInfo.uuid,
+        platform: deviceInfo.platform,
+        appVersion: deviceInfo.appVersion,
+        createdAt: user.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
+        userId: user.id,
+      );
+
+      // Executa sincronização - primeiro tenta atualizar, se falhar cria novo
+      final updateResult = await ReceitaAgroSyncConfig.updateUserProfile(profileEntity.id, profileEntity);
+      
+      updateResult.fold(
+        (core.Failure failure) async {
+          // Se falhou update, tenta criar
+          if (kDebugMode) print('Auth Provider: Update falhou, tentando criar: ${failure.message}');
+          final createResult = await ReceitaAgroSyncConfig.createUserProfile(profileEntity);
+          createResult.fold(
+            (core.Failure createFailure) {
+              if (kDebugMode) print('❌ Auth Provider: Erro na sincronização de perfil (create): ${createFailure.message}');
+              _analytics.trackError('user_profile_sync_error', createFailure.message);
+            },
+            (String entityId) {
+              if (kDebugMode) print('✅ Auth Provider: Perfil do usuário criado com sucesso: $entityId');
+            },
+          );
+        },
+        (_) {
+          if (kDebugMode) print('✅ Auth Provider: Perfil do usuário atualizado com sucesso');
+        },
+      );
+      
+    } catch (e) {
+      if (kDebugMode) print('❌ Auth Provider: Erro ao sincronizar perfil do usuário: $e');
+      _analytics.trackError('user_profile_sync_error', e.toString());
+      // Não relança a exceção para não quebrar o fluxo de login
     }
   }
 

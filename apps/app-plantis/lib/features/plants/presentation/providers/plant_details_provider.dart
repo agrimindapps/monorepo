@@ -27,11 +27,23 @@ class PlantDetailsProvider extends ChangeNotifier {
   bool get hasError => _errorMessage != null;
 
   Future<void> loadPlant(String plantId) async {
-    // If we already have this plant loaded, don't show loading
-    if (_plant?.id == plantId && !hasError) return;
+    await _loadPlant(plantId, forceReload: false);
+  }
 
-    // Only show loading if we don't have any plant data yet
-    final shouldShowLoading = _plant?.id != plantId;
+  /// Force reload the plant data, bypassing cache
+  Future<void> reloadPlant(String plantId) async {
+    if (kDebugMode) {
+      print('🔄 PlantDetailsProvider.reloadPlant() - Forçando reload para plantId: $plantId');
+    }
+    await _loadPlant(plantId, forceReload: true);
+  }
+
+  Future<void> _loadPlant(String plantId, {required bool forceReload}) async {
+    // If we already have this plant loaded and not forcing reload, don't show loading
+    if (!forceReload && _plant?.id == plantId && !hasError) return;
+
+    // Only show loading if we don't have any plant data yet or forcing reload
+    final shouldShowLoading = _plant?.id != plantId || forceReload;
 
     if (shouldShowLoading) {
       _isLoading = true;

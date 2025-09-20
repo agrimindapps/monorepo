@@ -21,14 +21,15 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return _buildTabContent(
       context: context,
       provider: provider,
       viewState: provider.getViewStateForType(TipoFavorito.defensivo),
       emptyMessage: provider.getEmptyMessageForType(TipoFavorito.defensivo),
       items: provider.defensivos,
-      itemBuilder: (defensivo) => _buildDefensivoItem(context, defensivo, provider),
+      itemBuilder:
+          (defensivo) => _buildDefensivoItem(context, defensivo, provider),
       isDark: isDark,
     );
   }
@@ -45,32 +46,37 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
     switch (viewState) {
       case FavoritosViewState.loading:
         return const Center(child: CircularProgressIndicator());
-      
+
       case FavoritosViewState.error:
         return _buildErrorState(context, provider, isDark);
-      
+
       case FavoritosViewState.empty:
         return _buildEmptyState(context, emptyMessage, isDark);
-      
+
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
             await provider.loadAllFavoritos();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
             child: Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: ListView.separated(
                 padding: EdgeInsets.zero,
                 itemCount: items.length,
-                separatorBuilder: (context, index) => Divider(
-                  height: 1,
-                  indent: 64,
-                  endIndent: 16,
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
-                ),
+                separatorBuilder:
+                    (context, index) => Divider(
+                      height: 1,
+                      indent: 64,
+                      endIndent: 16,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.4),
+                    ),
                 itemBuilder: (context, index) {
                   return itemBuilder(items[index]);
                 },
@@ -78,19 +84,19 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
             ),
           ),
         );
-      
+
       default:
         return const SizedBox.shrink();
     }
   }
 
   Widget _buildDefensivoItem(
-    BuildContext context, 
-    FavoritoDefensivoEntity defensivo, 
-    FavoritosProviderSimplified provider
+    BuildContext context,
+    FavoritoDefensivoEntity defensivo,
+    FavoritosProviderSimplified provider,
   ) {
     final theme = Theme.of(context);
-    
+
     return Dismissible(
       key: Key('favorito_defensivo_${defensivo.id}'),
       direction: DismissDirection.endToStart,
@@ -141,7 +147,9 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
                         defensivo.ingredienteAtivo,
                         style: TextStyle(
                           fontSize: 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -153,18 +161,20 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
                         defensivo.fabricante!,
                         style: TextStyle(
                           fontSize: 11,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                           fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -179,11 +189,7 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.delete_outline,
-            color: Colors.white,
-            size: 28,
-          ),
+          Icon(Icons.delete_outline, color: Colors.white, size: 28),
           SizedBox(height: 4),
           Text(
             'Excluir',
@@ -210,11 +216,7 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
           ),
           title: const Row(
             children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.orange,
-                size: 24,
-              ),
+              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
               SizedBox(width: 8),
               Text('Confirmar Remoção'),
             ],
@@ -270,10 +272,13 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
   ) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final theme = Theme.of(context);
-    
+
     try {
-      final success = await provider.toggleFavorito(TipoFavorito.defensivo, defensivo.id);
-      
+      final success = await provider.toggleFavorito(
+        TipoFavorito.defensivo,
+        defensivo.id,
+      );
+
       if (success) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
@@ -369,8 +374,14 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToDefensivoDetails(BuildContext context, FavoritoDefensivoEntity defensivo) {
-    final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
+  void _navigateToDefensivoDetails(
+    BuildContext context,
+    FavoritoDefensivoEntity defensivo,
+  ) {
+    final navigationProvider = Provider.of<AppNavigationProvider>(
+      context,
+      listen: false,
+    );
     navigationProvider.navigateToDetalheDefensivo(
       defensivoName: defensivo.displayName,
       fabricante: defensivo.fabricante,

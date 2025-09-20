@@ -38,6 +38,9 @@ abstract class DataExportRepository {
   /// Get user's plant photos data for export
   Future<List<PlantPhotoExportData>> getUserPlantPhotosData(String userId);
 
+  /// Get user's plant comments data for export
+  Future<List<PlantCommentExportData>> getUserPlantCommentsData(String userId);
+
   /// Generate export file in specified format
   Future<String> generateExportFile({
     required ExportRequest request,

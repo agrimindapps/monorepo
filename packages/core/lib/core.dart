@@ -97,8 +97,8 @@ export 'src/infrastructure/services/performance_service.dart';
 export 'src/infrastructure/services/profile_image_service.dart';
 export 'src/infrastructure/services/revenue_cat_service.dart';
 export 'src/infrastructure/services/security_service.dart';
-// export 'src/infrastructure/services/selective_sync_service.dart'; // Commented out - missing dependencies
-// export 'src/infrastructure/services/sync_firebase_service.dart'; // Commented out - missing dependencies
+export 'src/infrastructure/services/selective_sync_service.dart';
+export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
 

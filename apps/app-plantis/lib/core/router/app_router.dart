@@ -24,6 +24,8 @@ import '../../features/settings/presentation/providers/notifications_settings_pr
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../features/license/pages/license_status_page.dart';
+import '../../features/data_export/presentation/pages/data_export_page.dart';
+import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
@@ -51,6 +53,7 @@ class AppRouter {
   static const String notificationsSettings = '/notifications-settings';
   static const String backupSettings = '/backup-settings';
   static const String licenseStatus = '/license-status';
+  static const String dataExport = '/data-export';
 
   /// Helper method to navigate to plant details
   static String plantDetailsPath(String plantId) => '/plants/$plantId';
@@ -89,6 +92,7 @@ class AppRouter {
           notificationsSettings,
           backupSettings,
           accountProfile,
+          dataExport,
           home,
         ];
 
@@ -307,6 +311,18 @@ class AppRouter {
               path: licenseStatus,
               name: 'license-status',
               builder: (context, state) => const LicenseStatusPage(),
+            ),
+            
+            // Data Export Route
+            GoRoute(
+              path: dataExport,
+              name: 'data-export',
+              builder: (context, state) {
+                return ChangeNotifierProvider(
+                  create: (context) => sl<DataExportProvider>(),
+                  child: const DataExportPage(),
+                );
+              },
             ),
           ],
         ),

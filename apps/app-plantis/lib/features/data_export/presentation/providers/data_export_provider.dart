@@ -64,6 +64,7 @@ class DataExportProvider extends ChangeNotifier {
         DataType.plantTasks,
         DataType.spaces,
         DataType.plantPhotos,
+        DataType.plantComments,
         DataType.settings,
       };
 
@@ -121,10 +122,11 @@ class DataExportProvider extends ChangeNotifier {
       // Simulate progress monitoring with realistic steps
       final progressSteps = [
         (0.1, 'Coletando dados das plantas...'),
-        (0.3, 'Processando tarefas e lembretes...'),
-        (0.5, 'Compilando fotos das plantas...'),
+        (0.25, 'Processando tarefas e lembretes...'),
+        (0.4, 'Compilando fotos das plantas...'),
+        (0.55, 'Coletando comentários das plantas...'),
         (0.7, 'Organizando configurações...'),
-        (0.9, 'Gerando arquivo ${request.format.displayName}...'),
+        (0.85, 'Gerando arquivo ${request.format.displayName}...'),
         (1.0, 'Finalizando exportação...'),
       ];
 
@@ -236,6 +238,7 @@ class DataExportProvider extends ChangeNotifier {
       DataType.plantTasks,
       DataType.spaces,
       DataType.plantPhotos,
+      DataType.plantComments,
       DataType.settings,
       DataType.customCare,
       DataType.reminders,
@@ -260,6 +263,9 @@ class DataExportProvider extends ChangeNotifier {
 
       final photos = await _repository.getUserPlantPhotosData(userId);
       stats[DataType.plantPhotos] = photos.length;
+
+      final comments = await _repository.getUserPlantCommentsData(userId);
+      stats[DataType.plantComments] = comments.length;
 
       // Count custom care configurations
       final customCareCount = plants.where((p) => p.config != null).length;

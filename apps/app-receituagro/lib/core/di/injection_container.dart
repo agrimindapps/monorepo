@@ -1,6 +1,8 @@
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../interfaces/i_premium_service.dart';
 import '../services/mock_premium_service.dart';
@@ -47,6 +49,7 @@ import '../services/firebase_messaging_service.dart';
 import '../services/promotional_notification_manager.dart';
 // Emergency stub removed
 import '../services/remote_config_service.dart';
+import '../sync/receituagro_sync_config.dart';
 import 'core_package_integration.dart';
 import 'repositories_di.dart';
 
@@ -104,6 +107,16 @@ Future<void> init() async {
       return service;
     },
   );
+  
+  // Unified Sync Manager (from core package)
+  sl.registerLazySingleton<core.UnifiedSyncManager>(
+    () => core.UnifiedSyncManager.instance,
+  );
+  
+  // Initialize ReceitaAgro sync configuration
+  ReceitaAgroSyncConfig.initializeSync().catchError((error) {
+    if (kDebugMode) print('❌ ReceitaAgro sync initialization failed: $error');
+  });
   
   // Providers for state management
   sl.registerLazySingleton<RemoteConfigProvider>(

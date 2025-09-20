@@ -24,6 +24,7 @@ class _DataExportPageState extends State<DataExportPage>
   Set<DataType> _selectedDataTypes = {
     DataType.plants,
     DataType.plantTasks,
+    DataType.plantComments,
     DataType.spaces,
     DataType.settings,
   };

@@ -71,6 +71,12 @@ class DataExportRepositoryImpl implements DataExportRepository {
             totalSize += photos.length * 2048; // Rough estimate for metadata
             break;
 
+          case DataType.plantComments:
+            final comments = await _plantsDataSource.getUserPlantCommentsData(userId);
+            availableTypes[dataType] = comments.isNotEmpty;
+            totalSize += comments.length * 512; // Rough estimate for comment text
+            break;
+
           case DataType.settings:
             final settings = await _settingsDataSource.getUserSettingsData(userId);
             availableTypes[dataType] = settings.appPreferences.isNotEmpty;
@@ -224,6 +230,10 @@ class DataExportRepositoryImpl implements DataExportRepository {
       _plantsDataSource.getUserPlantPhotosData(userId);
 
   @override
+  Future<List<PlantCommentExportData>> getUserPlantCommentsData(String userId) =>
+      _plantsDataSource.getUserPlantCommentsData(userId);
+
+  @override
   Future<String> generateExportFile({
     required ExportRequest request,
     required Map<DataType, dynamic> exportData,
@@ -258,6 +268,9 @@ class DataExportRepositoryImpl implements DataExportRepository {
           case DataType.plantPhotos:
             exportData[dataType] = await getUserPlantPhotosData(request.userId);
             break;
+          case DataType.plantComments:
+            exportData[dataType] = await getUserPlantCommentsData(request.userId);
+            break;
           case DataType.settings:
             exportData[dataType] = await getUserSettingsData(request.userId);
             break;
@@ -270,6 +283,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
             exportData[DataType.plantTasks] = await getUserTasksData(request.userId);
             exportData[DataType.spaces] = await getUserSpacesData(request.userId);
             exportData[DataType.plantPhotos] = await getUserPlantPhotosData(request.userId);
+            exportData[DataType.plantComments] = await getUserPlantCommentsData(request.userId);
             exportData[DataType.settings] = await getUserSettingsData(request.userId);
             break;
           default:

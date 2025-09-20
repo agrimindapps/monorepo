@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -70,10 +71,25 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           _controller = PlantDetailsController(
             provider: provider,
             onBack: () {
-              if (mounted) Navigator.of(context).pop();
+              if (mounted) {
+                Navigator.of(context).pop();
+                // Forçar atualização da lista na tela anterior
+                _notifyListScreenUpdate();
+              }
             },
-            onNavigateToEdit: (plantId) {
-              if (mounted) PlantFormDialog.show(context, plantId: plantId);
+            onNavigateToEdit: (plantId) async {
+              if (mounted) {
+                final result = await PlantFormDialog.show(context, plantId: plantId);
+                if (result == true && mounted) {
+                  // Planta foi editada com sucesso, recarregar dados
+                  final provider = context.read<PlantDetailsProvider>();
+                  await provider.reloadPlant(plantId);
+                  
+                  if (kDebugMode) {
+                    print('✅ PlantDetailsView - Planta recarregada após edição: ${provider.plant?.name}');
+                  }
+                }
+              }
             },
             onNavigateToImages: (plantId) {
               if (mounted) context.push('/plants/$plantId/images');
@@ -795,9 +811,72 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       final plantsProvider = context.read<PlantsProvider>();
       // Forçar recarregamento completo da lista para refletir as mudanças
       plantsProvider.refreshPlants();
+      
+      if (kDebugMode) {
+        print('✅ _syncPlantDeletion: Refresh solicitado para plantId: $plantId');
+      }
     } catch (e) {
-      // Se não conseguir encontrar o provider, não há problema
-      // A lista será atualizada no próximo reload
+      if (kDebugMode) {
+        print('⚠️ _syncPlantDeletion: Provider não encontrado, tentando Provider.of: $e');
+      }
+      
+      // Tentar método alternativo se o read() falhar
+      try {
+        final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+        plantsProvider.refreshPlants();
+        
+        if (kDebugMode) {
+          print('✅ _syncPlantDeletion: Refresh com Provider.of bem sucedido');
+        }
+      } catch (fallbackError) {
+        if (kDebugMode) {
+          print('❌ _syncPlantDeletion: Falha total na sincronização: $fallbackError');
+        }
+        // Como último recurso, usar um delay e tentar novamente
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            try {
+              final plantsProvider = context.read<PlantsProvider>();
+              plantsProvider.refreshPlants();
+              
+              if (kDebugMode) {
+                print('✅ _syncPlantDeletion: Refresh com delay bem sucedido');
+              }
+            } catch (delayedError) {
+              if (kDebugMode) {
+                print('❌ _syncPlantDeletion: Falha mesmo com delay: $delayedError');
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  /// Notifica a tela de lista para atualizar após mudanças
+  void _notifyListScreenUpdate() {
+    try {
+      // Usar um delay para garantir que a navegação termine antes de atualizar
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          try {
+            final plantsProvider = context.read<PlantsProvider>();
+            plantsProvider.refreshPlants();
+            
+            if (kDebugMode) {
+              print('✅ _notifyListScreenUpdate: Atualização da lista solicitada');
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('⚠️ _notifyListScreenUpdate: Erro ao atualizar lista: $e');
+            }
+          }
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ _notifyListScreenUpdate: Erro geral: $e');
+      }
     }
   }
 

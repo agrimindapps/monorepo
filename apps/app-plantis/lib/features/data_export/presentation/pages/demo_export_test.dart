@@ -1,15 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/data_export_provider.dart';
+import '../../data/datasources/local/export_file_generator.dart';
+import '../../data/datasources/local/settings_export_datasource.dart';
+import '../../data/datasources/local/plants_export_datasource.dart';
+import '../../data/repositories/data_export_repository_impl.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
-import '../../domain/usecases/request_export_usecase.dart';
 import '../../domain/usecases/get_export_history_usecase.dart';
-import '../../data/repositories/data_export_repository_impl.dart';
-import '../../data/datasources/local/plants_export_datasource.dart';
-import '../../data/datasources/local/settings_export_datasource.dart';
-import '../../data/datasources/local/export_file_generator.dart';
+import '../../domain/usecases/request_export_usecase.dart';
+import '../providers/data_export_provider.dart';
+
+/// Demo implementation that only uses mock data
+class DemoPlantsExportDataSource implements PlantsExportDataSource {
+  @override
+  Future<List<PlantExportData>> getUserPlantsData(String userId) async {
+    // Return mock data for demo
+    return [
+      PlantExportData(
+        id: 'demo-1',
+        name: 'Rosa Demo',
+        species: 'Rosa gallica',
+        spaceId: 'jardim-demo',
+        imageUrls: const ['demo_rosa.jpg'],
+        plantingDate: DateTime.now().subtract(const Duration(days: 30)),
+        notes: 'Planta demo para teste de exportação LGPD',
+        isFavorited: true,
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+        updatedAt: DateTime.now(),
+      ),
+      PlantExportData(
+        id: 'demo-2',
+        name: 'Manjericão Demo',
+        species: 'Ocimum basilicum',
+        spaceId: 'horta-demo',
+        imageUrls: const ['demo_manjericao.jpg'],
+        plantingDate: DateTime.now().subtract(const Duration(days: 15)),
+        notes: 'Outra planta para demonstração',
+        isFavorited: false,
+        createdAt: DateTime.now().subtract(const Duration(days: 15)),
+        updatedAt: DateTime.now(),
+      ),
+    ];
+  }
+
+  @override
+  Future<List<TaskExportData>> getUserTasksData(String userId) async {
+    return [
+      TaskExportData(
+        id: 'demo-task-1',
+        title: 'Regar Rosa Demo',
+        description: 'Tarefa de demonstração para teste de export',
+        plantId: 'demo-1',
+        plantName: 'Rosa Demo',
+        type: 'watering',
+        status: 'pending',
+        priority: 'medium',
+        dueDate: DateTime.now().add(const Duration(days: 1)),
+        completedAt: null,
+        completionNotes: null,
+        isRecurring: true,
+        recurringIntervalDays: 7,
+        nextDueDate: DateTime.now().add(const Duration(days: 8)),
+        createdAt: DateTime.now(),
+      ),
+    ];
+  }
+
+  @override
+  Future<List<SpaceExportData>> getUserSpacesData(String userId) async {
+    return [
+      SpaceExportData(
+        id: 'jardim-demo',
+        name: 'Jardim Demo',
+        description: 'Espaço de demonstração para testes',
+        createdAt: DateTime.now().subtract(const Duration(days: 40)),
+        updatedAt: DateTime.now(),
+      ),
+      SpaceExportData(
+        id: 'horta-demo',
+        name: 'Horta Demo',
+        description: 'Outro espaço para demonstração',
+        createdAt: DateTime.now().subtract(const Duration(days: 20)),
+        updatedAt: DateTime.now(),
+      ),
+    ];
+  }
+
+  @override
+  Future<List<PlantPhotoExportData>> getUserPlantPhotosData(String userId) async {
+    return [
+      PlantPhotoExportData(
+        plantId: 'demo-1',
+        plantName: 'Rosa Demo',
+        photoUrls: const ['demo_rosa_1.jpg', 'demo_rosa_2.jpg'],
+        takenAt: DateTime.now().subtract(const Duration(days: 5)),
+        caption: 'Fotos demo da rosa',
+      ),
+    ];
+  }
+
+  @override
+  Future<List<PlantCommentExportData>> getUserPlantCommentsData(String userId) async {
+    return [
+      PlantCommentExportData(
+        id: 'demo-comment-1',
+        plantId: 'demo-1',
+        plantName: 'Rosa Demo',
+        content: 'Comentário demo sobre a rosa',
+        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+    ];
+  }
+}
 
 /// Demo page to test the LGPD export functionality
 class DemoExportTestPage extends StatelessWidget {
@@ -25,8 +129,8 @@ class DemoExportTestPage extends StatelessWidget {
       ),
       body: ChangeNotifierProvider(
         create: (context) {
-          // Create dependencies
-          final plantsDataSource = PlantsExportLocalDataSource();
+          // Create dependencies - using demo implementation with mock data
+          final plantsDataSource = DemoPlantsExportDataSource();
           final settingsDataSource = SettingsExportLocalDataSource();
           final fileGenerator = ExportFileGenerator();
 

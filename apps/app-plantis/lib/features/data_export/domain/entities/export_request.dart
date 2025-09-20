@@ -22,6 +22,7 @@ enum DataType {
   plantPhotos('Fotos das plantas'),
   spaces('Espaços criados'),
   plantTasks('Tarefas das plantas'),
+  plantComments('Comentários das plantas'),
   all('Todos os dados');
 
   const DataType(this.displayName);
@@ -444,5 +445,33 @@ class PlantPhotoExportData extends Equatable {
         photoUrls,
         takenAt,
         caption,
+      ];
+}
+
+class PlantCommentExportData extends Equatable {
+  final String id;
+  final String plantId;
+  final String plantName;
+  final String content;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  const PlantCommentExportData({
+    required this.id,
+    required this.plantId,
+    required this.plantName,
+    required this.content,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        plantId,
+        plantName,
+        content,
+        createdAt,
+        updatedAt,
       ];
 }

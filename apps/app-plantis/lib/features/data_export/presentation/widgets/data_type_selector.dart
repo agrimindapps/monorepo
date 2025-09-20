@@ -47,6 +47,7 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
         DataType.plantTasks,
         DataType.spaces,
         DataType.plantPhotos,
+        DataType.plantComments,
         DataType.settings,
         DataType.customCare,
         DataType.reminders,
@@ -73,6 +74,8 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
         return Icons.home_work;
       case DataType.plantPhotos:
         return Icons.photo_library;
+      case DataType.plantComments:
+        return Icons.comment;
       case DataType.settings:
         return Icons.settings;
       case DataType.customCare:
@@ -96,6 +99,8 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
         return PlantisColors.secondary;
       case DataType.plantPhotos:
         return PlantisColors.accent;
+      case DataType.plantComments:
+        return Colors.purple;
       case DataType.settings:
         return Colors.grey[600]!;
       case DataType.customCare:
@@ -119,6 +124,8 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
         return 'Espaços organizacionais criados';
       case DataType.plantPhotos:
         return 'Fotos das suas plantas (apenas metadados)';
+      case DataType.plantComments:
+        return 'Comentários e observações sobre plantas';
       case DataType.settings:
         return 'Configurações pessoais do aplicativo';
       case DataType.customCare:
@@ -139,6 +146,7 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
       DataType.plantTasks,
       DataType.spaces,
       DataType.plantPhotos,
+      DataType.plantComments,
       DataType.customCare,
       DataType.reminders,
       DataType.settings,

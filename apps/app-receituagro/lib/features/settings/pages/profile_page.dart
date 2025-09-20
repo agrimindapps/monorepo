@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/services/user_action_service.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
 import '../constants/settings_design_tokens.dart';
 import '../presentation/providers/settings_provider.dart';
+import '../widgets/dialogs/clear_data_dialog.dart';
+import '../widgets/dialogs/delete_account_dialog.dart';
 import '../widgets/dialogs/device_management_dialog.dart';
 import '../widgets/dialogs/logout_confirmation_dialog.dart';
-import '../widgets/dialogs/theme_selection_dialog.dart';
 
 /// Página de perfil do usuário
 /// Funciona tanto para visitantes quanto usuários logados
@@ -24,6 +26,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _nameController;
   bool _settingsInitialized = false;
+  late UserActionService _userActionService;
 
   @override
   void initState() {
@@ -35,8 +38,11 @@ class _ProfilePageState extends State<ProfilePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     
-    // Initialize SettingsProvider once when authenticated
+    // Initialize UserActionService
     final authProvider = context.read<ReceitaAgroAuthProvider>();
+    _userActionService = UserActionService(authProvider);
+    
+    // Initialize SettingsProvider once when authenticated
     final settingsProvider = context.read<SettingsProvider>();
     
     if (!_settingsInitialized && 
@@ -52,6 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     }
   }
+
 
   @override
   void dispose() {
@@ -81,9 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     // Modern Header
                     ModernHeaderWidget(
                       title: isAuthenticated 
-                          ? (user?.displayName?.isNotEmpty == true 
-                              ? user!.displayName 
-                              : user?.email ?? 'Perfil')
+                          ? _getUserDisplayTitle(user)
                           : 'Perfil do Visitante',
                       subtitle: isAuthenticated 
                           ? 'Gerencie sua conta e configurações'
@@ -120,6 +125,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             // Dados e Sincronização
                             if (isAuthenticated) ...[
                               _buildDataSyncSection(context, authProvider),
+                              const SizedBox(height: 12),
+                            ],
+                            
+                            // Ações do Usuário (nova seção)
+                            if (isAuthenticated) ...[
+                              _buildUserActionsSection(context, authProvider),
                               const SizedBox(height: 12),
                             ],
                             
@@ -201,9 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Expanded(
                           child: Text(
                             isAuthenticated
-                                ? (user?.displayName?.isNotEmpty == true
-                                    ? user!.displayName
-                                    : user?.email ?? 'Usuário')
+                                ? _getUserDisplayTitle(user)
                                 : 'Visitante',
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -264,237 +273,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Opções para usuários autenticados
-  Widget _buildAuthenticatedOptions(BuildContext context, ReceitaAgroAuthProvider authProvider, SettingsProvider settingsProvider) {
-    return Column(
-      children: [
-        _buildOptionCard(
-          context,
-          icon: Icons.devices,
-          title: 'Gerenciar Dispositivos',
-          subtitle: 'Controlar dispositivos conectados',
-          onTap: () => _showDeviceManagement(context, settingsProvider),
-        ),
-        const SizedBox(height: 12),
-        _buildOptionCard(
-          context,
-          icon: Icons.delete_forever,
-          title: 'Excluir Conta',
-          subtitle: 'Remover permanentemente sua conta',
-          onTap: () => _showDeleteAccountConfirmation(context, authProvider),
-          isDestructive: true,
-        ),
-        const SizedBox(height: 12),
-        _buildOptionCard(
-          context,
-          icon: Icons.logout,
-          title: 'Sair da Conta',
-          subtitle: 'Fazer logout desta conta',
-          onTap: () => _performLogout(context, authProvider),
-          isDestructive: true,
-        ),
-      ],
-    );
-  }
 
-  /// Opções para visitantes
-  Widget _buildGuestOptions(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.account_circle,
-                color: SettingsDesignTokens.primaryColor,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Entre em sua conta',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Faça login ou crie uma conta para acessar recursos como sincronização, backup e personalização.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, height: 1.4),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _navigateToLoginPage(context),
-                  icon: const Icon(Icons.login),
-                  label: const Text('Entrar na Conta'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: SettingsDesignTokens.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        // Opções desabilitadas para visitantes
-        _buildDisabledOptionCard(
-          context,
-          icon: Icons.devices,
-          title: 'Gerenciar Dispositivos',
-          subtitle: 'Disponível após fazer login',
-        ),
-      ],
-    );
-  }
 
-  /// Card de opção ativa
-  Widget _buildOptionCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isDestructive
-                      ? Colors.red.withValues(alpha: 0.1)
-                      : theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: isDestructive
-                      ? Colors.red
-                      : theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isDestructive ? Colors.red : null,
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  /// Card de opção desabilitada
-  Widget _buildDisabledOptionCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Card(
-      elevation: 1,
-      color: theme.colorScheme.surface.withValues(alpha: 0.5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.lock,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Obter iniciais do nome
   String _getInitials(String name) {
@@ -504,21 +285,14 @@ class _ProfilePageState extends State<ProfilePage> {
     return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'.toUpperCase();
   }
 
-  /// Alterar avatar - versão simplificada
-  void _changeAvatar(BuildContext context) {
-    // TODO: Implementar seleção de imagem quando ProfileImagePicker estiver disponível
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Funcionalidade de foto do perfil será implementada em breve'),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(top: 50, left: 16, right: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
+  /// Obter título para exibição do usuário
+  String _getUserDisplayTitle(dynamic user) {
+    if (user?.displayName != null && (user.displayName as String).isNotEmpty) {
+      return user.displayName as String;
+    }
+    return (user?.email as String?) ?? 'Usuário';
   }
+
 
   /// Mostrar gerenciamento de dispositivos
   void _showDeviceManagement(BuildContext context, SettingsProvider settingsProvider) {
@@ -529,407 +303,39 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
-  /// Mostrar confirmação de exclusão de conta com preview dos dados
-  /// LGPD/GDPR Compliant: Mostra exatamente quais dados serão excluídos
-  void _showDeleteAccountConfirmation(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
-    // Primeiro, obter preview dos dados que serão excluídos
-    final preview = await authProvider.getAccountDeletionPreview();
 
-    if (!context.mounted) return;
 
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false, // Prevent accidental dismissal
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning, color: Colors.red.shade700),
-            const SizedBox(width: 8),
-            const Text('Excluir Conta'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // LGPD Warning
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '⚠️ ATENÇÃO: Ação Irreversível',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Esta ação excluirá permanentemente sua conta e TODOS os dados associados, '
-                      'conforme seus direitos sob a LGPD/GDPR.',
-                      style: TextStyle(color: Colors.red.shade700),
-                    ),
-                  ],
-                ),
-              ),
 
-              const SizedBox(height: 16),
-
-              // Data Preview Section
-              if (preview != null) ...[
-                const Text(
-                  'Dados que serão excluídos:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // App info
-                      _buildDataPreviewItem(
-                        '📱 Aplicativo',
-                        (preview['appName'] as String?) ?? 'ReceitaAgro',
-                      ),
-
-                      // Account data
-                      _buildDataPreviewItem(
-                        '👤 Conta Firebase',
-                        'Email, perfil e autenticação',
-                      ),
-
-                      // Local data stats
-                      if (preview['dataStats'] != null) ...[
-                        _buildDataPreviewItem(
-                          '💾 Dados Locais',
-                          '${(preview['dataStats']?['totalRecords'] as int?) ?? 0} registros em ${(preview['dataStats']?['totalBoxes'] as int?) ?? 0} categorias',
-                        ),
-
-                        // Categories
-                        if (preview['availableCategories'] != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            'Categorias: ${(preview['availableCategories'] as List).where((c) => c != 'all').join(', ')}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                      ],
-
-                      // Preferences
-                      _buildDataPreviewItem(
-                        '⚙️ Configurações',
-                        'Preferências e configurações do app',
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-              ],
-
-              // LGPD Rights Information
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ℹ️ Seus Direitos (LGPD/GDPR)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• Você tem o direito de excluir todos os seus dados pessoais\n'
-                      '• Esta exclusão será irreversível e imediata\n'
-                      '• Você pode criar uma nova conta a qualquer momento\n'
-                      '• Para dúvidas, entre em contato conosco',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Final confirmation with TextField
-              Text(
-                'Para confirmar, digite EXCLUIR abaixo:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red.shade700,
-                ),
-              ),
-              const SizedBox(height: 8),
-              StatefulBuilder(
-                builder: (context, setState) {
-                  final TextEditingController confirmationController = TextEditingController();
-                  bool isConfirmationValid = false;
-
-                  return Column(
-                    children: [
-                      TextField(
-                        controller: confirmationController,
-                        onChanged: (value) {
-                          setState(() {
-                            isConfirmationValid = value.trim().toUpperCase() == 'EXCLUIR';
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Digite EXCLUIR para confirmar',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: Colors.red.shade700,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                        ),
-                        textCapitalization: TextCapitalization.characters,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Updated confirm button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: isConfirmationValid ? () {
-                            Navigator.of(context).pop();
-                            _proceedWithAccountDeletion(context, authProvider);
-                          } : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isConfirmationValid
-                                ? Colors.red
-                                : Colors.grey.shade400,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            isConfirmationValid
-                                ? 'Confirmar Exclusão'
-                                : 'Digite EXCLUIR para prosseguir',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Widget helper para mostrar itens do preview de dados
-  Widget _buildDataPreviewItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(color: Colors.grey.shade700),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Proceder com a exclusão da conta após confirmação
-  Future<void> _proceedWithAccountDeletion(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
-    Navigator.of(context).pop(); // Close confirmation dialog
-
-    // Show progress dialog
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Excluindo conta e dados...'),
-            SizedBox(height: 8),
-            Text(
-              'Por favor, aguarde. Esta operação pode levar alguns momentos.',
-              style: TextStyle(fontSize: 12),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-
-    try {
-      // Execute account deletion
-      final result = await authProvider.deleteAccount();
-
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Close progress dialog
-
-        if (result.isSuccess) {
-          // Success - show confirmation and navigate away
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text('Conta excluída com sucesso. Todos os dados foram removidos.'),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 5),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-
-          // Navigate to app start or login page
-          if (context.mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-          }
-        } else {
-          // Error - show error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text('Erro na exclusão: ${result.errorMessage ?? "Erro desconhecido"}'),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 8),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              action: SnackBarAction(
-                label: 'Tentar Novamente',
-                textColor: Colors.white,
-                onPressed: () => _showDeleteAccountConfirmation(context, authProvider),
-              ),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Close progress dialog
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Erro inesperado: $e'),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 8),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
+  /// Handler para logout
+  Future<void> _handleLogout(BuildContext context) async {
+    final shouldLogout = await LogoutConfirmationDialog.show(context);
+    
+    if (shouldLogout == true && context.mounted) {
+      await _userActionService.performLogout(context);
     }
   }
 
-  /// Realizar logout
-  Future<void> _performLogout(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
-    final shouldLogout = await LogoutConfirmationDialog.show(context);
+  /// Handler para limpeza de dados
+  Future<void> _handleClearData(BuildContext context) async {
+    final shouldClear = await ClearDataDialog.show(context);
     
-    if (shouldLogout == true) {
-      try {
-        await authProvider.signOut();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SettingsDesignTokens.getSuccessSnackbar('Logout realizado com sucesso!'),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SettingsDesignTokens.getErrorSnackbar('Erro ao sair da conta: $e'),
-          );
-        }
-      }
+    if (shouldClear == true && context.mounted) {
+      await _userActionService.clearLocalData(context);
+    }
+  }
+
+  /// Handler para exclusão de conta
+  Future<void> _handleDeleteAccount(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
+    if (!context.mounted) return;
+    
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => DeleteAccountDialog(authProvider: authProvider),
+    );
+    
+    if (shouldDelete == true && context.mounted) {
+      await _userActionService.deleteAccount(context);
     }
   }
 
@@ -1013,254 +419,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
-  /// Seção de Sincronização
-  Widget _buildSyncSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    return Container(
-      decoration: _getCardDecoration(context),
-      child: InkWell(
-        onTap: () => _showSyncDetails(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.cloud_done,
-                  color: Colors.green,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sincronização de Dados',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Dados sincronizados com a nuvem',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Seção de Configurações
-  Widget _buildConfigurationsSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(context, '⚙️ Configurações'),
-        _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.settings,
-            title: 'Configurações Gerais',
-            subtitle: 'Acesse todas as configurações',
-            onTap: () => Navigator.pushNamed(context, '/settings'),
-          ),
-        ]),
-      ],
-    );
-  }
 
 
-  /// Seção de Conta (para usuários logados)
-  Widget _buildAccountSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(context, '👤 Conta'),
-        _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.delete_forever,
-            title: 'Excluir Conta',
-            subtitle: 'Remover permanentemente sua conta',
-            onTap: () => _showDeleteAccountConfirmation(context, authProvider),
-            isDestructive: true,
-          ),
-          _buildSettingsItem(
-            context,
-            icon: Icons.logout,
-            title: 'Sair da Conta',
-            subtitle: 'Fazer logout desta conta',
-            onTap: () => _performLogout(context, authProvider),
-            isDestructive: true,
-          ),
-        ]),
-      ],
-    );
-  }
 
-  /// Seção de Login (para visitantes)
-  Widget _buildLoginSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.account_circle,
-            color: SettingsDesignTokens.primaryColor,
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Entre em sua conta',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Faça login ou crie uma conta para acessar recursos como sincronização, backup e personalização.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, height: 1.4),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _navigateToLoginPage(context),
-              icon: const Icon(Icons.login),
-              label: const Text('Entrar na Conta'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: SettingsDesignTokens.primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  /// Helper: Cabeçalho de seção
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: SettingsDesignTokens.primaryColor,
-        ),
-      ),
-    );
-  }
 
-  /// Helper: Card de configurações
-  Widget _buildSettingsCard(BuildContext context, List<Widget> children) {
-    return Container(
-      decoration: _getCardDecoration(context),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        children: children,
-      ),
-    );
-  }
 
-  /// Helper: Item de configuração
-  Widget _buildSettingsItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    final theme = Theme.of(context);
-    
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isDestructive
-                    ? Colors.red.withValues(alpha: 0.1)
-                    : SettingsDesignTokens.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: isDestructive
-                    ? Colors.red
-                    : SettingsDesignTokens.primaryColor,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDestructive ? Colors.red : null,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   /// Helper: Decoração de card
   BoxDecoration _getCardDecoration(BuildContext context) {
@@ -1300,79 +465,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // Placeholder methods for navigation
 
 
-  void _showSyncDetails(BuildContext context) async {
-    final authProvider = Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
-    
-    if (!authProvider.isAuthenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Faça login para sincronizar seus dados'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
 
-    // Mostrar indicador de loading
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-            SizedBox(width: 16),
-            Text('Sincronizando dados...'),
-          ],
-        ),
-        duration: Duration(seconds: 30),
-      ),
-    );
-
-    try {
-      final success = await authProvider.forceSyncUserData();
-      
-      // Remover o snackbar de loading
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      
-      // Mostrar resultado
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success 
-                ? '✅ Sincronização concluída com sucesso!'
-                : '❌ Falha na sincronização. Tente novamente.',
-          ),
-          backgroundColor: success ? Colors.green : Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    } catch (e) {
-      // Remover o snackbar de loading
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      
-      // Mostrar erro
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Erro na sincronização: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-        ),
-      );
-    }
-  }
-
-  void _showThemeSelection(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => const ThemeSelectionDialog(),
-    );
-  }
 
   /// Seção de informações da conta (estilo Plantis)
   Widget _buildAccountInfoSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
@@ -1400,19 +493,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 _buildInfoRow(context, 'Tipo de Conta', 'Gratuita'),
                 const SizedBox(height: 12),
-                Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                ),
-                const SizedBox(height: 12),
                 _buildInfoRow(context, 'Criada em', _formatDate(user?.createdAt)),
-                const SizedBox(height: 12),
-                Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                ),
                 const SizedBox(height: 12),
                 _buildInfoRow(context, 'Último acesso', _formatDate(DateTime.now())),
               ],
@@ -1466,29 +547,128 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 onTap: () => _showSyncRefresh(context, authProvider),
               ),
-              Divider(
-                height: 1,
-                thickness: 0.5,
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.data_object,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Exportar como JSON'),
+                subtitle: const Text('Baixar dados em formato estruturado JSON'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showExportDataJson(context),
               ),
               ListTile(
                 leading: Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
-                    Icons.download,
-                    color: Colors.blue,
+                    Icons.table_chart,
+                    color: Colors.green,
                     size: 20,
                   ),
                 ),
-                title: const Text('Exportar Dados'),
-                subtitle: const Text('Baixar todos os seus dados em formato JSON'),
+                title: const Text('Exportar como CSV'),
+                subtitle: const Text('Baixar dados em formato planilha CSV'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showExportData(context),
+                onTap: () => _showExportDataCsv(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Seção de Ações do Usuário (nova seção)
+  Widget _buildUserActionsSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Ações da Conta',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        Container(
+          decoration: _getCardDecoration(context),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.delete_sweep,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Limpar Dados Locais'),
+                subtitle: const Text('Remove dados salvos neste dispositivo'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _handleClearData(context),
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.delete_forever,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Excluir Conta'),
+                subtitle: const Text('Remove permanentemente sua conta'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _handleDeleteAccount(context, authProvider),
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.logout,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Sair da Conta'),
+                subtitle: const Text('Fazer logout desta conta'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _handleLogout(context),
               ),
             ],
           ),
@@ -1525,15 +705,32 @@ class _ProfilePageState extends State<ProfilePage> {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  /// Mostrar diálogo de exportação de dados
-  void _showExportData(BuildContext context) {
+  /// Mostrar diálogo de exportação de dados em JSON
+  void _showExportDataJson(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Exportar Dados'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(Icons.data_object, color: Colors.green, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text('Exportar como JSON'),
+          ],
+        ),
         content: const Text(
-          'Esta funcionalidade irá baixar todos os seus dados em formato JSON. '
-          'Deseja continuar?',
+          'Esta funcionalidade irá baixar todos os seus dados em formato JSON estruturado. '
+          'Ideal para backup ou migração de dados.',
         ),
         actions: [
           TextButton(
@@ -1541,16 +738,85 @@ class _ProfilePageState extends State<ProfilePage> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Exportação de dados em desenvolvimento'),
-                  backgroundColor: Colors.blue,
+                  content: Row(
+                    children: [
+                      Icon(Icons.construction, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('Exportação JSON em desenvolvimento'),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
                 ),
               );
             },
-            child: const Text('Exportar'),
+            child: const Text('Exportar JSON'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Mostrar diálogo de exportação de dados em CSV
+  void _showExportDataCsv(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(Icons.table_chart, color: Colors.green, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text('Exportar como CSV'),
+          ],
+        ),
+        content: const Text(
+          'Esta funcionalidade irá baixar todos os seus dados em formato CSV (planilha). '
+          'Ideal para análise em Excel ou Google Sheets.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(Icons.construction, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('Exportação CSV em desenvolvimento'),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text('Exportar CSV'),
           ),
         ],
       ),

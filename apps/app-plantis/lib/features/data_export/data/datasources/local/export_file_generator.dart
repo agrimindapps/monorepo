@@ -1,42 +1,52 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 import '../../../domain/entities/export_request.dart';
+import '../platform/platform_file_handler.dart';
+import '../platform/platform_file_handler_factory.dart';
 
 class ExportFileGenerator {
+  late final PlatformFileHandler _fileHandler;
+
+  ExportFileGenerator() {
+    _fileHandler = PlatformFileHandlerFactory.create();
+  }
+
   /// Generate export file in the requested format
   Future<String> generateExportFile({
     required ExportRequest request,
     required Map<DataType, dynamic> exportData,
   }) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final fileName = _generateFileName(request);
-    final filePath = '${directory.path}/$fileName';
-
+    String content;
+    
     switch (request.format) {
       case ExportFormat.json:
-        return await _generateJsonFile(filePath, exportData);
+        content = _generateJsonContent(exportData);
+        break;
       case ExportFormat.csv:
-        return await _generateCsvFile(filePath, exportData);
+        content = _generateCsvContent(exportData);
+        break;
       case ExportFormat.xml:
-        return await _generateXmlFile(filePath, exportData);
+        content = _generateXmlContent(exportData);
+        break;
       case ExportFormat.pdf:
-        return await _generatePdfFile(filePath, exportData);
+        content = _generatePdfContent(exportData);
+        break;
     }
+
+    final mimeType = _fileHandler.getMimeType(request.format);
+    
+    return await _fileHandler.generateAndSaveFile(
+      request: request,
+      content: content,
+      mimeType: mimeType,
+    );
   }
 
-  String _generateFileName(ExportRequest request) {
-    final timestamp = DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
-    final formatExt = request.format.name.toLowerCase();
-    return 'plantis_export_${request.userId}_$timestamp.$formatExt';
-  }
 
-  /// Generate JSON export file
-  Future<String> _generateJsonFile(
-    String filePath,
+  /// Generate JSON content
+  String _generateJsonContent(
     Map<DataType, dynamic> exportData,
-  ) async {
+  ) {
     final jsonData = <String, dynamic>{
       'export_info': {
         'app_name': 'Plantis',
@@ -45,7 +55,7 @@ class ExportFileGenerator {
         'format': 'JSON',
         'compliance': 'LGPD',
       },
-      'user_data': {},
+      'user_data': <String, dynamic>{},
     };
 
     // Process each data type
@@ -87,16 +97,13 @@ class ExportFileGenerator {
       }
     }
 
-    final file = File(filePath);
-    await file.writeAsString(jsonEncode(jsonData));
-    return filePath;
+    return jsonEncode(jsonData);
   }
 
-  /// Generate CSV export file
-  Future<String> _generateCsvFile(
-    String filePath,
+  /// Generate CSV content
+  String _generateCsvContent(
     Map<DataType, dynamic> exportData,
-  ) async {
+  ) {
     final csvRows = <List<String>>[];
 
     // Header
@@ -139,17 +146,13 @@ class ExportFileGenerator {
     }
 
     // Simple CSV conversion without external package
-    final csvString = csvRows.map((row) => row.join(',')).join('\n');
-    final file = File(filePath);
-    await file.writeAsString(csvString);
-    return filePath;
+    return csvRows.map((row) => row.join(',')).join('\n');
   }
 
-  /// Generate XML export file
-  Future<String> _generateXmlFile(
-    String filePath,
+  /// Generate XML content
+  String _generateXmlContent(
     Map<DataType, dynamic> exportData,
-  ) async {
+  ) {
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
     buffer.writeln('<plantis_export>');
@@ -175,16 +178,13 @@ class ExportFileGenerator {
     buffer.writeln('  </user_data>');
     buffer.writeln('</plantis_export>');
 
-    final file = File(filePath);
-    await file.writeAsString(buffer.toString());
-    return filePath;
+    return buffer.toString();
   }
 
-  /// Generate PDF export file (simplified version)
-  Future<String> _generatePdfFile(
-    String filePath,
+  /// Generate PDF content (simplified version)
+  String _generatePdfContent(
     Map<DataType, dynamic> exportData,
-  ) async {
+  ) {
     // For simplicity, generate a text file with PDF extension
     // In a real implementation, you would use a PDF library like `pdf` package
     final buffer = StringBuffer();
@@ -200,9 +200,7 @@ class ExportFileGenerator {
       buffer.writeln();
     }
 
-    final file = File(filePath);
-    await file.writeAsString(buffer.toString());
-    return filePath;
+    return buffer.toString();
   }
 
   // JSON formatting helpers

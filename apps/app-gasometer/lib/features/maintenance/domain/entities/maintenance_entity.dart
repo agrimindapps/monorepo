@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Enum para tipos de manutenção
 enum MaintenanceType {
@@ -78,9 +78,7 @@ enum MaintenanceStatus {
 }
 
 /// Entidade principal para manutenções
-class MaintenanceEntity extends Equatable {
-  final String id;
-  final String userId;
+class MaintenanceEntity extends BaseSyncEntity {
   final String vehicleId;
   final MaintenanceType type;
   final MaintenanceStatus status;
@@ -108,13 +106,10 @@ class MaintenanceEntity extends Equatable {
   final String? notes;
   
   // Metadados do sistema
-  final DateTime createdAt;
-  final DateTime updatedAt;
   final Map<String, dynamic> metadata;
 
   const MaintenanceEntity({
-    required this.id,
-    required this.userId,
+    required String id,
     required this.vehicleId,
     required this.type,
     required this.status,
@@ -132,15 +127,30 @@ class MaintenanceEntity extends Equatable {
     this.invoicesPaths = const [],
     this.parts = const {},
     this.notes,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName,
     this.metadata = const {},
-  });
+  }) : super(
+    id: id,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    lastSyncAt: lastSyncAt,
+    isDirty: isDirty,
+    isDeleted: isDeleted,
+    version: version,
+    userId: userId,
+    moduleName: moduleName,
+  );
 
   @override
   List<Object?> get props => [
-    id,
-    userId,
+    ...super.props,
     vehicleId,
     type,
     status,
@@ -158,14 +168,12 @@ class MaintenanceEntity extends Equatable {
     invoicesPaths,
     parts,
     notes,
-    createdAt,
-    updatedAt,
     metadata,
   ];
 
+  @override
   MaintenanceEntity copyWith({
     String? id,
-    String? userId,
     String? vehicleId,
     MaintenanceType? type,
     MaintenanceStatus? status,
@@ -185,13 +193,18 @@ class MaintenanceEntity extends Equatable {
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
     Map<String, dynamic>? metadata,
     bool clearWorkshop = false,
     bool clearNextService = false,
   }) {
     return MaintenanceEntity(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       vehicleId: vehicleId ?? this.vehicleId,
       type: type ?? this.type,
       status: status ?? this.status,
@@ -211,6 +224,12 @@ class MaintenanceEntity extends Equatable {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
       metadata: metadata ?? this.metadata,
     );
   }
@@ -381,31 +400,112 @@ class MaintenanceEntity extends Equatable {
     return 'MaintenanceEntity(id: $id, type: ${type.displayName}, status: ${status.displayName}, cost: $formattedCost)';
   }
 
-  /// Converte a entidade para um mapa
-  Map<String, dynamic> toMap() {
+  @override
+  Map<String, dynamic> toFirebaseMap() {
     return {
-      'id': id,
-      'userId': userId,
-      'vehicleId': vehicleId,
+      ...baseFirebaseFields,
+      'vehicle_id': vehicleId,
       'type': type.name,
       'status': status.name,
       'title': title,
       'description': description,
       'cost': cost,
-      'serviceDate': serviceDate,
+      'service_date': serviceDate.toIso8601String(),
       'odometer': odometer,
-      'workshopName': workshopName,
-      'workshopPhone': workshopPhone,
-      'workshopAddress': workshopAddress,
-      'nextServiceDate': nextServiceDate,
-      'nextServiceOdometer': nextServiceOdometer,
-      'photosPaths': photosPaths,
-      'invoicesPaths': invoicesPaths,
+      'workshop_name': workshopName,
+      'workshop_phone': workshopPhone,
+      'workshop_address': workshopAddress,
+      'next_service_date': nextServiceDate?.toIso8601String(),
+      'next_service_odometer': nextServiceOdometer,
+      'photos_paths': photosPaths,
+      'invoices_paths': invoicesPaths,
       'parts': parts,
       'notes': notes,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
       'metadata': metadata,
     };
+  }
+
+  static MaintenanceEntity fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    return MaintenanceEntity(
+      id: baseFields['id'] as String,
+      vehicleId: map['vehicle_id'] as String,
+      type: MaintenanceType.values.firstWhere(
+        (e) => e.name == map['type'] as String,
+        orElse: () => MaintenanceType.preventive,
+      ),
+      status: MaintenanceStatus.values.firstWhere(
+        (e) => e.name == map['status'] as String,
+        orElse: () => MaintenanceStatus.pending,
+      ),
+      title: map['title'] as String,
+      description: map['description'] as String,
+      cost: (map['cost'] as num).toDouble(),
+      serviceDate: DateTime.parse(map['service_date'] as String),
+      odometer: (map['odometer'] as num).toDouble(),
+      workshopName: map['workshop_name'] as String?,
+      workshopPhone: map['workshop_phone'] as String?,
+      workshopAddress: map['workshop_address'] as String?,
+      nextServiceDate: map['next_service_date'] != null 
+          ? DateTime.parse(map['next_service_date'] as String) 
+          : null,
+      nextServiceOdometer: map['next_service_odometer'] as double?,
+      photosPaths: List<String>.from(map['photos_paths'] as List? ?? []),
+      invoicesPaths: List<String>.from(map['invoices_paths'] as List? ?? []),
+      parts: Map<String, String>.from(map['parts'] as Map? ?? {}),
+      notes: map['notes'] as String?,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      metadata: Map<String, dynamic>.from(map['metadata'] as Map? ?? {}),
+    );
+  }
+
+  @override
+  MaintenanceEntity markAsDirty() {
+    return copyWith(
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  MaintenanceEntity markAsSynced({DateTime? syncTime}) {
+    return copyWith(
+      isDirty: false,
+      lastSyncAt: syncTime ?? DateTime.now(),
+    );
+  }
+
+  @override
+  MaintenanceEntity markAsDeleted() {
+    return copyWith(
+      isDeleted: true,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  MaintenanceEntity incrementVersion() {
+    return copyWith(
+      version: version + 1,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  MaintenanceEntity withUserId(String userId) {
+    return copyWith(userId: userId);
+  }
+
+  @override
+  MaintenanceEntity withModule(String moduleName) {
+    return copyWith(moduleName: moduleName);
   }
 }

@@ -98,13 +98,18 @@ class PragasDataLoader {
 
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
-    if (!_isLoaded) return false;
-
     try {
       final repository = di.sl<PragasHiveRepository>();
       final pragas = repository.getAll();
-      return pragas.isNotEmpty;
+      final hasData = pragas.isNotEmpty;
+      
+      developer.log('🔍 [PRAGAS] isDataLoaded() - Repository has ${pragas.length} items: $hasData', 
+          name: 'PragasDataLoader');
+      
+      return hasData;
     } catch (e) {
+      developer.log('❌ [PRAGAS] Error checking isDataLoaded: $e', 
+          name: 'PragasDataLoader');
       return false;
     }
   }

@@ -130,7 +130,7 @@ class TaskNotificationService {
       }
       
       // Request permission
-      final permissionGranted = await _notificationService.requestNotificationPermission();
+      final permissionGranted = await _notificationService.requestPermission();
       
       if (!permissionGranted) {
         debugPrint('⚠️ User denied notification permissions');
@@ -178,7 +178,13 @@ class TaskNotificationService {
       );
       
       // Schedule the notification
-      await _notificationService.scheduleDirectNotification(notification);
+      await _notificationService.scheduleDirectNotification(
+        notificationId: id,
+        title: title,
+        body: body,
+        scheduledTime: scheduledDate,
+        payload: payload,
+      );
       
       debugPrint('✅ Scheduled notification: $title at ${scheduledDate.toString()}');
     } catch (e) {
@@ -447,8 +453,10 @@ class TaskNotificationService {
   /// ```
   Future<void> cancelTaskNotifications(String taskId) async {
     try {
-      await _notificationService.cancelNotification('${taskId}_reminder');
-      await _notificationService.cancelNotification('${taskId}_overdue');
+      final reminderId = _createNotificationId('${taskId}_reminder');
+      final overdueId = _createNotificationId('${taskId}_overdue');
+      await _notificationService.cancelNotification(reminderId);
+      await _notificationService.cancelNotification(overdueId);
     } catch (e) {
       debugPrint('Erro ao cancelar notificações da tarefa: $e');
     }
@@ -867,22 +875,8 @@ class TaskNotificationService {
     try {
       await _ensureInitialized();
 
-      // Ensure PlantisNotificationService is fully initialized
-      if (!_notificationService.isInitialized) {
-        debugPrint('⚠️ PlantisNotificationService not initialized, skipping handlers setup');
-        return;
-      }
-
-      // Set up notification tap handler
-      final notificationRepository = _notificationService.notificationRepository;
-
-      notificationRepository.setNotificationTapCallback(
-        (String? payload) => handleNotificationTap(payload ?? ''),
-      );
-
-      notificationRepository.setNotificationActionCallback(
-        (String actionId, String? payload) => handleNotificationAction(actionId, payload ?? ''),
-      );
+      // Note: Notification handlers are now set up automatically in PlantisNotificationService
+      // during initialization. This method is kept for compatibility.
 
       debugPrint('✅ Notification handlers initialized');
     } catch (e) {

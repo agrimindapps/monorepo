@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
 
 import '../providers/device_management_provider.dart';
 import '../widgets/device_list_widget.dart';

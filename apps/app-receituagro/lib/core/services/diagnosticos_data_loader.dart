@@ -115,13 +115,18 @@ class DiagnosticosDataLoader {
 
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
-    if (!_isLoaded) return false;
-
     try {
       final repository = di.sl<DiagnosticoHiveRepository>();
       final diagnosticos = repository.getAll();
-      return diagnosticos.isNotEmpty;
+      final hasData = diagnosticos.isNotEmpty;
+      
+      developer.log('🔍 [DIAGNOSTICOS] isDataLoaded() - Repository has ${diagnosticos.length} items: $hasData', 
+          name: 'DiagnosticosDataLoader');
+      
+      return hasData;
     } catch (e) {
+      developer.log('❌ [DIAGNOSTICOS] Error checking isDataLoaded: $e', 
+          name: 'DiagnosticosDataLoader');
       return false;
     }
   }

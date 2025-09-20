@@ -294,7 +294,7 @@ class SettingsProvider extends ChangeNotifier {
       await _notificationService.showTaskReminderNotification(
         taskName: 'Teste de Notificação',
         plantName: 'Planta de Teste',
-        taskDescription: 'As notificações estão funcionando corretamente! 🌱',
+        taskType: 'test',
       );
       _setSuccess('Notificação de teste enviada!');
     } catch (e) {

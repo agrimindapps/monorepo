@@ -44,18 +44,24 @@ class FavoritosService {
   }
 
   Future<bool> addFavoriteId(String tipo, String id) async {
+    developer.log('🔄 SYNC: Iniciando adição de favorito - tipo=$tipo, id=$id', name: 'FavoritosService');
+    
     try {
       final tipoKey = _storageKeys[tipo];
       if (tipoKey == null) {
-        developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
       }
+      
+      developer.log('✅ SYNC: Tipo válido encontrado - tipoKey=$tipoKey', name: 'FavoritosService');
 
       // Valida antes de adicionar
+      developer.log('🔍 SYNC: Validando se pode adicionar favorito...', name: 'FavoritosService');
       if (!await canAddToFavorites(tipo, id)) {
-        developer.log('Não é possível adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+        developer.log('❌ SYNC: Validação falhou - não é possível adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
         return false;
       }
+      developer.log('✅ SYNC: Validação passou - pode adicionar favorito', name: 'FavoritosService');
 
       // Adiciona com dados básicos para cache
       final itemData = {
@@ -64,18 +70,22 @@ class FavoritosService {
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
       
+      developer.log('💾 SYNC: Salvando favorito localmente...', name: 'FavoritosService');
       final result = await _repository.addFavorito(tipoKey, id, itemData);
+      developer.log('💾 SYNC: Resultado do salvamento local: $result', name: 'FavoritosService');
       
       // Limpa cache após mudança
       if (result) {
+        developer.log('🧹 SYNC: Limpando cache para tipo=$tipo', name: 'FavoritosService');
         await _clearCacheForTipo(tipo);
         
         // Sincroniza com Firestore se usuário autenticado
+        developer.log('☁️ SYNC: Iniciando sincronização com Firestore...', name: 'FavoritosService');
         await _queueSyncOperation('create', tipo, id, itemData);
         
-        developer.log('Favorito adicionado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+        developer.log('✅ SYNC: Favorito adicionado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
       } else {
-        developer.log('Falha ao adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+        developer.log('❌ SYNC: Falha ao adicionar favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
       }
       
       return result;
@@ -86,25 +96,33 @@ class FavoritosService {
   }
 
   Future<bool> removeFavoriteId(String tipo, String id) async {
+    developer.log('🔄 SYNC: Iniciando remoção de favorito - tipo=$tipo, id=$id', name: 'FavoritosService');
+    
     try {
       final tipoKey = _storageKeys[tipo];
       if (tipoKey == null) {
-        developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
       }
+      
+      developer.log('✅ SYNC: Tipo válido encontrado - tipoKey=$tipoKey', name: 'FavoritosService');
 
+      developer.log('💾 SYNC: Removendo favorito localmente...', name: 'FavoritosService');
       final result = await _repository.removeFavorito(tipoKey, id);
+      developer.log('💾 SYNC: Resultado da remoção local: $result', name: 'FavoritosService');
       
       // Limpa cache após mudança
       if (result) {
+        developer.log('🧹 SYNC: Limpando cache para tipo=$tipo', name: 'FavoritosService');
         await _clearCacheForTipo(tipo);
         
         // Sincroniza com Firestore se usuário autenticado
+        developer.log('☁️ SYNC: Iniciando sincronização de remoção com Firestore...', name: 'FavoritosService');
         await _queueSyncOperation('delete', tipo, id, null);
         
-        developer.log('Favorito removido com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+        developer.log('✅ SYNC: Favorito removido com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
       } else {
-        developer.log('Falha ao remover favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+        developer.log('❌ SYNC: Falha ao remover favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
       }
       
       return result;
@@ -150,37 +168,52 @@ class FavoritosService {
   // ========== DATA RESOLVER OPERATIONS ==========
 
   Future<Map<String, dynamic>?> resolveItemData(String tipo, String id) async {
+    developer.log('🔍 RESOLVE_DATA: Resolvendo dados para tipo=$tipo, id=$id', name: 'FavoritosService');
     final cacheKey = 'resolve_${tipo}_$id';
     
     // Tenta pegar do cache primeiro
     final cached = await _getFromCache<Map<String, dynamic>?>(cacheKey);
-    if (cached != null) return cached;
-
+    if (cached != null) {
+      developer.log('✅ RESOLVE_DATA: Dados encontrados no cache', name: 'FavoritosService');
+      return cached;
+    }
+    
+    developer.log('🔍 RESOLVE_DATA: Cache miss - buscando dados...', name: 'FavoritosService');
     Map<String, dynamic>? data;
     
     try {
       switch (tipo) {
         case TipoFavorito.defensivo:
+          developer.log('🔍 RESOLVE_DATA: Resolvendo defensivo...', name: 'FavoritosService');
           data = await _resolveDefensivo(id);
           break;
         case TipoFavorito.praga:
+          developer.log('🔍 RESOLVE_DATA: Resolvendo praga...', name: 'FavoritosService');
           data = await _resolvePraga(id);
           break;
         case TipoFavorito.diagnostico:
+          developer.log('🔍 RESOLVE_DATA: Resolvendo diagnostico...', name: 'FavoritosService');
           data = await _resolveDiagnostico(id);
           break;
         case TipoFavorito.cultura:
+          developer.log('🔍 RESOLVE_DATA: Resolvendo cultura...', name: 'FavoritosService');
           data = await _resolveCultura(id);
           break;
+        default:
+          developer.log('❌ RESOLVE_DATA: Tipo desconhecido: $tipo', name: 'FavoritosService');
       }
 
       // Armazena no cache
       if (data != null) {
+        developer.log('✅ RESOLVE_DATA: Dados resolvidos com sucesso - salvando no cache', name: 'FavoritosService');
         await _putToCache(cacheKey, data);
+      } else {
+        developer.log('❌ RESOLVE_DATA: Não foi possível resolver dados para tipo=$tipo, id=$id', name: 'FavoritosService');
       }
 
       return data;
     } catch (e) {
+      developer.log('❌ RESOLVE_DATA: Erro ao resolver dados: $e', name: 'FavoritosService', error: e);
       return null;
     }
   }
@@ -448,29 +481,41 @@ class FavoritosService {
 
   /// Sincroniza favorito usando sistema core
   Future<void> _queueSyncOperation(String operation, String tipo, String id, Map<String, dynamic>? data) async {
+    developer.log('🔥 FIRESTORE SYNC: Iniciando operação $operation para favorito tipo=$tipo, id=$id', name: 'FavoritosService');
+    
     try {
       // Verifica se o usuário está autenticado
       if (_authProvider == null || !_authProvider!.isAuthenticated || _authProvider!.isAnonymous) {
-        developer.log('Usuário não autenticado - pulando sincronização de favorito', name: 'FavoritosService');
+        developer.log('❌ FIRESTORE SYNC: Usuário não autenticado - pulando sincronização de favorito', name: 'FavoritosService');
         return;
       }
+      
+      developer.log('✅ FIRESTORE SYNC: Usuário autenticado - userId=${_authProvider!.currentUser?.id}', name: 'FavoritosService');
 
       // Verifica se há dados válidos para sincronização
       if (id.isEmpty || tipo.isEmpty) {
-        developer.log('Dados inválidos para sincronização - pulando', name: 'FavoritosService');
+        developer.log('❌ FIRESTORE SYNC: Dados inválidos para sincronização - pulando', name: 'FavoritosService');
         return;
       }
+      
+      developer.log('✅ FIRESTORE SYNC: Dados válidos para sincronização', name: 'FavoritosService');
 
       // Resolve dados do item para sincronização
+      developer.log('🔍 FIRESTORE SYNC: Resolvendo dados do item...', name: 'FavoritosService');
       final resolvedData = data ?? await resolveItemData(tipo, id);
       if (resolvedData == null) {
-        developer.log('Não foi possível resolver dados do favorito para sincronização: tipo=$tipo, id=$id', name: 'FavoritosService');
+        developer.log('❌ FIRESTORE SYNC: Não foi possível resolver dados do favorito para sincronização: tipo=$tipo, id=$id', name: 'FavoritosService');
         return;
       }
+      
+      developer.log('✅ FIRESTORE SYNC: Dados resolvidos com sucesso: ${resolvedData.keys.toList()}', name: 'FavoritosService');
 
       // Cria entidade de sincronização
+      final syncEntityId = 'favorite_${tipo}_$id';
+      developer.log('📦 FIRESTORE SYNC: Criando entidade de sincronização com ID: $syncEntityId', name: 'FavoritosService');
+      
       final syncEntity = FavoritoSyncEntity(
-        id: 'favorite_${tipo}_$id',
+        id: syncEntityId,
         tipo: tipo,
         itemId: id,
         itemData: resolvedData,
@@ -479,36 +524,43 @@ class FavoritosService {
         updatedAt: DateTime.now(),
         userId: _authProvider!.currentUser?.id,
       );
+      
+      developer.log('✅ FIRESTORE SYNC: Entidade criada - userId=${syncEntity.userId}', name: 'FavoritosService');
 
       // Executa operação de sincronização via ReceitaAgroSyncConfig
+      developer.log('🚀 FIRESTORE SYNC: Executando operação $operation via UnifiedSyncManager...', name: 'FavoritosService');
+      
       if (operation == 'create') {
+        developer.log('🆕 FIRESTORE SYNC: Chamando ReceitaAgroSyncConfig.createFavorito()', name: 'FavoritosService');
         final result = await ReceitaAgroSyncConfig.createFavorito(syncEntity);
         result.fold(
           (core.Failure failure) {
-            developer.log('Erro na sincronização de favorito (create): ${failure.message}', name: 'FavoritosService');
+            developer.log('❌ FIRESTORE SYNC: Erro na sincronização de favorito (create): ${failure.message}', name: 'FavoritosService');
           },
           (String entityId) {
-            developer.log('Favorito criado com sucesso: id=$entityId', name: 'FavoritosService');
+            developer.log('✅ FIRESTORE SYNC: Favorito criado com sucesso no Firestore: id=$entityId', name: 'FavoritosService');
           },
         );
       } else if (operation == 'delete') {
+        developer.log('🗑️ FIRESTORE SYNC: Chamando ReceitaAgroSyncConfig.deleteFavorito() com ID: ${syncEntity.id}', name: 'FavoritosService');
         final result = await ReceitaAgroSyncConfig.deleteFavorito(syncEntity.id);
         result.fold(
           (core.Failure failure) {
-            developer.log('Erro na sincronização de favorito (delete): ${failure.message}', name: 'FavoritosService');
+            developer.log('❌ FIRESTORE SYNC: Erro na sincronização de favorito (delete): ${failure.message}', name: 'FavoritosService');
           },
           (_) {
-            developer.log('Favorito deletado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+            developer.log('✅ FIRESTORE SYNC: Favorito deletado com sucesso no Firestore: tipo=$tipo, id=$id', name: 'FavoritosService');
           },
         );
       } else {
+        developer.log('🔄 FIRESTORE SYNC: Chamando ReceitaAgroSyncConfig.updateFavorito() com ID: ${syncEntity.id}', name: 'FavoritosService');
         final result = await ReceitaAgroSyncConfig.updateFavorito(syncEntity.id, syncEntity);
         result.fold(
           (core.Failure failure) {
-            developer.log('Erro na sincronização de favorito (update): ${failure.message}', name: 'FavoritosService');
+            developer.log('❌ FIRESTORE SYNC: Erro na sincronização de favorito (update): ${failure.message}', name: 'FavoritosService');
           },
           (_) {
-            developer.log('Favorito atualizado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
+            developer.log('✅ FIRESTORE SYNC: Favorito atualizado com sucesso no Firestore: tipo=$tipo, id=$id', name: 'FavoritosService');
           },
         );
       }

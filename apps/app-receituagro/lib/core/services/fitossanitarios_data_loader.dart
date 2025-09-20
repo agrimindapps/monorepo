@@ -115,13 +115,18 @@ class FitossanitariosDataLoader {
 
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
-    if (!_isLoaded) return false;
-
     try {
       final repository = di.sl<FitossanitarioHiveRepository>();
       final fitossanitarios = repository.getAll();
-      return fitossanitarios.isNotEmpty;
+      final hasData = fitossanitarios.isNotEmpty;
+      
+      developer.log('🔍 [FITOSSANITARIOS] isDataLoaded() - Repository has ${fitossanitarios.length} items: $hasData', 
+          name: 'FitossanitariosDataLoader');
+      
+      return hasData;
     } catch (e) {
+      developer.log('❌ [FITOSSANITARIOS] Error checking isDataLoaded: $e', 
+          name: 'FitossanitariosDataLoader');
       return false;
     }
   }

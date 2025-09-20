@@ -1,637 +1,465 @@
 import 'dart:convert';
-
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
-import '../di/injection_container.dart';
-import '../utils/navigation_service.dart' as local;
+import 'plantis_notification_config.dart';
 
-/// Serviço de notificações específico do Plantis
+/// Serviço de notificações do Plantis usando o core LocalNotificationService
 class PlantisNotificationService {
-  static final PlantisNotificationService _instance =
-      PlantisNotificationService._internal();
+  static final PlantisNotificationService _instance = PlantisNotificationService._internal();
   factory PlantisNotificationService() => _instance;
   PlantisNotificationService._internal();
 
-  static const String _appName = 'Plantis';
-  static const int _primaryColor = 0xFF4CAF50; // Verde plantas
-
-  final INotificationRepository _notificationRepository = kIsWeb 
+  // Usar o serviço do core
+  final INotificationRepository _notificationService = kIsWeb 
       ? WebNotificationService()
       : LocalNotificationService();
+
   bool _isInitialized = false;
 
   /// Inicializa o serviço de notificações do Plantis
   Future<bool> initialize() async {
     if (_isInitialized) return true;
 
-    // Verificar se está rodando na web
-    if (kIsWeb) {
-      debugPrint('⚠️ Notifications not supported on web platform');
-      _isInitialized = true; // Mock initialization for web
-      return true;
-    }
-
     try {
-      // Inicializa timezone
-      await NotificationHelper.initializeTimeZone();
-
-      // Configura settings
-      final settings = NotificationHelper.createDefaultSettings(
-        defaultColor: _primaryColor,
-      );
-      (_notificationRepository as LocalNotificationService).configure(settings);
-
-      // Cria canais padrão
-      final defaultChannels = NotificationHelper.getDefaultChannels(
-        appName: _appName,
-        primaryColor: _primaryColor,
+      // Inicializar com canais específicos do Plantis
+      _isInitialized = await _notificationService.initialize(
+        defaultChannels: PlantisNotificationConfig.plantisChannels,
       );
 
-      // Inicializa o serviço
-      final result = await _notificationRepository.initialize(
-        defaultChannels: defaultChannels,
-      );
+      if (_isInitialized) {
+        // Configurar callbacks
+        _notificationService.setNotificationTapCallback(_onNotificationTapped);
+        _notificationService.setNotificationActionCallback(_onNotificationAction);
+      }
 
-      // Define callbacks
-      _notificationRepository.setNotificationTapCallback(
-        _handleNotificationTap,
-      );
-      _notificationRepository.setNotificationActionCallback(
-        _handleNotificationAction,
-      );
-
-      _isInitialized = result;
-      return result;
+      return _isInitialized;
     } catch (e) {
-      debugPrint('❌ Error initializing Plantis notifications: $e');
-      // Para web e outras plataformas não suportadas, considerar como inicializado
-      _isInitialized = true;
-      return true;
+      if (kDebugMode) {
+        print('Erro ao inicializar PlantisNotificationService: $e');
+      }
+      return false;
     }
   }
 
   /// Verifica se as notificações estão habilitadas
   Future<bool> areNotificationsEnabled() async {
-    if (kIsWeb) return false; // Web não suporta notificações locais
-    
-    try {
-      final permission = await _notificationRepository.getPermissionStatus();
-      return permission.isGranted;
-    } catch (e) {
-      debugPrint('❌ Error getting permission status: $e');
-      return false;
-    }
+    final permission = await _notificationService.getPermissionStatus();
+    return permission.isGranted;
   }
 
   /// Solicita permissão para notificações
-  Future<bool> requestNotificationPermission() async {
-    if (kIsWeb) return false; // Web não suporta notificações locais
-    
-    try {
-      final permission = await _notificationRepository.requestPermission();
-      return permission.isGranted;
-    } catch (e) {
-      debugPrint('❌ Error requesting notification permission: $e');
-      return false;
-    }
+  Future<bool> requestPermission() async {
+    final permission = await _notificationService.requestPermission();
+    return permission.isGranted;
   }
 
-  /// Abre configurações de notificação
+  /// Abre as configurações de notificação
+  Future<bool> openSettings() async {
+    return await _notificationService.openNotificationSettings();
+  }
+
+  /// Alias para compatibilidade
   Future<bool> openNotificationSettings() async {
-    if (kIsWeb) return false; // Web não suporta configurações nativas
-    
-    try {
-      return await _notificationRepository.openNotificationSettings();
-    } catch (e) {
-      debugPrint('❌ Error opening notification settings: $e');
-      return false;
+    return await openSettings();
+  }
+
+  /// Solicita permissão (alias para compatibilidade)
+  Future<bool> requestNotificationPermission() async {
+    return await requestPermission();
+  }
+
+  /// Inicializa todas as notificações (compatibilidade)
+  Future<void> initializeAllNotifications() async {
+    // Este método era usado para agendar notificações iniciais
+    // Na nova implementação, isso é feito sob demanda
+    if (kDebugMode) {
+      print('PlantisNotificationService: initializeAllNotifications - usando agendamento sob demanda');
     }
   }
 
-  // ==========================================================================
-  // MÉTODOS PREPARATÓRIOS - Para implementar quando definir as regras de negócio
-  // ==========================================================================
+  /// Verifica e notifica tarefas atrasadas (compatibilidade)
+  Future<void> checkAndNotifyOverdueTasks() async {
+    // Este método era usado para verificar tarefas atrasadas
+    // Na nova implementação, isso deve ser feito pelo TaskNotificationService
+    if (kDebugMode) {
+      print('PlantisNotificationService: checkAndNotifyOverdueTasks - delegado para TaskNotificationService');
+    }
+  }
 
-  /// Mostra notificação de lembrete de tarefa
-  Future<void> showTaskReminderNotification({
+  /// Agenda lembrete de tarefa (compatibilidade)
+  Future<bool> scheduleTaskReminder({
+    required String taskId,
     required String taskName,
-    required String plantName,
+    DateTime? dueDate,
     String? taskDescription,
-    String? taskId,
+    String? plantName,
     String? plantId,
   }) async {
-    final notification = NotificationHelper.createReminderNotification(
-      appName: _appName,
-      id: _notificationRepository.generateNotificationId(
-        'task_reminder_$taskName',
-      ),
-      title: '🌱 Lembrete de Tarefa',
-      body:
-          '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
-      payload: jsonEncode({
-        'type': 'task_reminder',
-        'task_name': taskName,
-        'plant_name': plantName,
-        'task_description': taskDescription,
-        'task_id': taskId,
-        'plant_id': plantId,
-      }),
-      color: _primaryColor,
+    // Adaptar para nova interface
+    return await schedulePlantCareNotification(
+      plantId: plantId ?? taskId, // Usar plantId se disponível, senão taskId
+      plantName: plantName ?? 'Planta',
+      careType: 'general',
+      scheduledDate: dueDate ?? DateTime.now().add(const Duration(hours: 1)),
+      customMessage: taskDescription ?? taskName,
     );
-
-    await _notificationRepository.showNotification(notification);
   }
 
-  /// Mostra notificação de tarefa atrasada
+  /// Cancela notificações de tarefas (compatibilidade)
+  Future<void> cancelTaskNotifications(String taskId) async {
+    try {
+      final id = _notificationService.generateNotificationId(taskId);
+      await _notificationService.cancelNotification(id);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao cancelar notificação de tarefa: $e');
+      }
+    }
+  }
+
+  /// Mostra notificação de nova planta (compatibilidade)
+  Future<void> showNewPlantNotification({
+    required String plantName,
+    String? plantType,
+    String? message,
+  }) async {
+    await showNotification(
+      title: '🌱 Nova planta adicionada!',
+      body: message ?? 'Você adicionou $plantName ao seu jardim',
+      type: 'new_plant',
+      extraData: {
+        'plantName': plantName,
+        'plantType': plantType,
+      },
+    );
+  }
+
+  /// Mostra notificação de tarefa atrasada (compatibilidade)
   Future<void> showOverdueTaskNotification({
     required String taskName,
     required String plantName,
-    required int daysOverdue,
+    String? taskType,
   }) async {
-    final notification = NotificationHelper.createAlertNotification(
-      appName: _appName,
-      id: _notificationRepository.generateNotificationId(
-        'overdue_task_$taskName',
-      ),
-      title: '🚨 Tarefa Atrasada!',
-      body:
-          '$taskName para $plantName está $daysOverdue dia${daysOverdue > 1 ? 's' : ''} atrasada.',
-      payload: jsonEncode({
-        'type': 'overdue_task',
-        'task_name': taskName,
-        'plant_name': plantName,
-        'days_overdue': daysOverdue,
-      }),
-      color: _primaryColor,
-    );
-
-    await _notificationRepository.showNotification(notification);
-  }
-
-  /// Mostra notificação de nova planta adicionada
-  Future<void> showNewPlantNotification({
-    required String plantName,
-    required String plantType,
-  }) async {
-    final notification = NotificationHelper.createPromotionNotification(
-      appName: _appName,
-      id: _notificationRepository.generateNotificationId(
-        'new_plant_$plantName',
-      ),
-      title: '🌿 Nova Planta Adicionada!',
-      body: '$plantName ($plantType) foi adicionada com sucesso.',
-      payload: jsonEncode({
-        'type': 'new_plant',
-        'plant_name': plantName,
-        'plant_type': plantType,
-      }),
-      color: _primaryColor,
-    );
-
-    await _notificationRepository.showNotification(notification);
-  }
-
-  /// Agenda lembrete diário de cuidados
-  Future<void> scheduleDailyCareReminder({
-    required String message,
-    required Duration interval,
-  }) async {
-    final notification = NotificationHelper.createReminderNotification(
-      appName: _appName,
-      id: _notificationRepository.generateNotificationId('daily_care_reminder'),
-      title: '🌱 Lembrete de Cuidados',
-      body: message,
-      payload: jsonEncode({
-        'type': 'daily_care_reminder',
-        'message': message,
-        'interval': interval.inHours,
-      }),
-      color: _primaryColor,
-    );
-
-    await _notificationRepository.schedulePeriodicNotification(
-      notification,
-      interval,
+    await showNotification(
+      title: '⏰ Tarefa atrasada!',
+      body: '$taskName para $plantName está atrasada',
+      type: 'overdue_task',
+      extraData: {
+        'taskName': taskName,
+        'plantName': plantName,
+        'taskType': taskType,
+      },
     );
   }
 
-  /// Mostra notificação de dica de jardinagem
-  Future<void> showGardeningTipNotification({
-    required String tip,
-    String? category,
-  }) async {
-    final notification = NotificationHelper.createPromotionNotification(
-      appName: _appName,
-      id: _notificationRepository.generateNotificationId('gardening_tip'),
-      title: '💡 Dica de Jardinagem',
-      body: tip,
-      payload: jsonEncode({
-        'type': 'gardening_tip',
-        'tip': tip,
-        'category': category,
-      }),
-      color: _primaryColor,
-    );
-
-    await _notificationRepository.showNotification(notification);
+  /// Agenda cuidados diários para todas as plantas (compatibilidade)
+  Future<void> scheduleDailyCareForAllPlants() async {
+    // Este método era usado para agendar notificações diárias
+    // Na nova implementação, isso deve ser feito sob demanda por planta
+    if (kDebugMode) {
+      print('PlantisNotificationService: scheduleDailyCareForAllPlants - usando agendamento individual por planta');
+    }
   }
 
-  /// Cancela notificação específica
-  Future<bool> cancelNotification(String identifier) async {
-    if (kIsWeb) return true; // Web não precisa cancelar notificações
-    
+  /// Verifica se uma notificação está agendada (compatibilidade)
+  Future<bool> isNotificationScheduled({
+    required String plantId,
+    required String careType,
+  }) async {
+    return await isPlantNotificationScheduled(plantId, careType);
+  }
+
+  /// Agenda notificação direta (compatibilidade)
+  Future<bool> scheduleDirectNotification({
+    required int notificationId,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+    String? payload,
+  }) async {
     try {
-      final id = _notificationRepository.generateNotificationId(identifier);
-      return await _notificationRepository.cancelNotification(id);
+      final notification = PlantisNotificationConfig.createGeneralNotification(
+        id: notificationId,
+        title: title,
+        body: body,
+        extraData: payload != null ? {'payload': payload} : null,
+      );
+
+      // Atualizar com a data agendada
+      final scheduledNotification = NotificationEntity(
+        id: notification.id,
+        title: notification.title,
+        body: notification.body,
+        payload: notification.payload,
+        channelId: notification.channelId,
+        scheduledDate: scheduledTime,
+        priority: notification.priority,
+      );
+
+      return await _notificationService.scheduleNotification(scheduledNotification);
     } catch (e) {
-      debugPrint('❌ Error cancelling notification: $e');
+      if (kDebugMode) {
+        print('Erro ao agendar notificação direta: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Cancela notificação por ID (compatibilidade)
+  Future<bool> cancelNotification(int notificationId) async {
+    try {
+      return await _notificationService.cancelNotification(notificationId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao cancelar notificação: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Mostra notificação de lembrete de tarefa (compatibilidade)
+  Future<void> showTaskReminderNotification({
+    required String taskName,
+    required String plantName,
+    String? taskType,
+  }) async {
+    await showNotification(
+      title: '📋 Lembrete de tarefa',
+      body: '$taskName para $plantName',
+      type: 'task_reminder',
+      extraData: {
+        'taskName': taskName,
+        'plantName': plantName,
+        'taskType': taskType,
+      },
+    );
+  }
+
+  /// Agenda notificação de cuidado de planta
+  Future<bool> schedulePlantCareNotification({
+    required String plantId,
+    required String plantName,
+    required String careType,
+    required DateTime scheduledDate,
+    String? customMessage,
+  }) async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    try {
+      final id = _notificationService.generateNotificationId('${plantId}_$careType');
+      
+      final title = _getCareTypeTitle(careType);
+      final body = customMessage ?? 'É hora de cuidar da sua $plantName';
+
+      final notification = PlantisNotificationConfig.createPlantCareNotification(
+        id: id,
+        title: title,
+        body: body,
+        careType: careType,
+        plantId: plantId,
+        plantName: plantName,
+        scheduledDate: scheduledDate,
+      );
+
+      return await _notificationService.scheduleNotification(notification);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao agendar notificação de cuidado: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Mostra notificação imediata
+  Future<bool> showNotification({
+    required String title,
+    required String body,
+    String type = 'general',
+    Map<String, dynamic>? extraData,
+  }) async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    try {
+      final id = DateTime.now().millisecondsSinceEpoch;
+      
+      final notification = PlantisNotificationConfig.createGeneralNotification(
+        id: id,
+        title: title,
+        body: body,
+        extraData: extraData,
+      );
+
+      return await _notificationService.showNotification(notification);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao mostrar notificação: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Cancela notificação específica de planta
+  Future<bool> cancelPlantNotification(String plantId, String careType) async {
+    try {
+      final id = _notificationService.generateNotificationId('${plantId}_$careType');
+      return await _notificationService.cancelNotification(id);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao cancelar notificação: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Cancela todas as notificações de uma planta
+  Future<bool> cancelAllPlantNotifications(String plantId) async {
+    try {
+      final pendingNotifications = await _notificationService.getPendingNotifications();
+      bool allCancelled = true;
+
+      for (final notification in pendingNotifications) {
+        if (notification.payload != null) {
+          try {
+            final payloadData = jsonDecode(notification.payload!);
+            if (payloadData is Map<String, dynamic> &&
+                payloadData.containsKey('plantId') &&
+                payloadData['plantId'] == plantId) {
+              final cancelled = await _notificationService.cancelNotification(notification.id);
+              if (!cancelled) allCancelled = false;
+            }
+          } catch (e) {
+            // Payload inválido, ignorar
+          }
+        }
+      }
+
+      return allCancelled;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Erro ao cancelar notificações da planta: $e');
+      }
       return false;
     }
   }
 
   /// Cancela todas as notificações
   Future<bool> cancelAllNotifications() async {
-    if (kIsWeb) return true; // Web não precisa cancelar notificações
-    
-    try {
-      return await _notificationRepository.cancelAllNotifications();
-    } catch (e) {
-      debugPrint('❌ Error cancelling all notifications: $e');
-      return false;
-    }
+    return await _notificationService.cancelAllNotifications();
   }
 
-  /// Lista notificações pendentes
+  /// Lista todas as notificações agendadas
   Future<List<PendingNotificationEntity>> getPendingNotifications() async {
-    if (kIsWeb) return <PendingNotificationEntity>[]; // Web não tem notificações pendentes
-    
+    return await _notificationService.getPendingNotifications();
+  }
+
+  /// Lista notificações de uma planta específica
+  Future<List<PendingNotificationEntity>> getPlantNotifications(String plantId) async {
     try {
-      return await _notificationRepository.getPendingNotifications();
+      final allNotifications = await _notificationService.getPendingNotifications();
+      
+      return allNotifications.where((notification) {
+        if (notification.payload != null) {
+          try {
+            final payloadData = jsonDecode(notification.payload!);
+            return payloadData is Map<String, dynamic> &&
+                   payloadData.containsKey('plantId') &&
+                   payloadData['plantId'] == plantId;
+          } catch (e) {
+            return false;
+          }
+        }
+        return false;
+      }).toList();
     } catch (e) {
-      debugPrint('❌ Error getting pending notifications: $e');
-      return <PendingNotificationEntity>[];
+      if (kDebugMode) {
+        print('Erro ao buscar notificações da planta: $e');
+      }
+      return [];
     }
   }
 
   /// Verifica se uma notificação específica está agendada
-  Future<bool> isNotificationScheduled(String identifier) async {
-    if (kIsWeb) return false; // Web não agenda notificações
-
+  Future<bool> isPlantNotificationScheduled(String plantId, String careType) async {
     try {
-      final id = _notificationRepository.generateNotificationId(identifier);
-      return await _notificationRepository.isNotificationScheduled(id);
+      final id = _notificationService.generateNotificationId('${plantId}_$careType');
+      return await _notificationService.isNotificationScheduled(id);
     } catch (e) {
-      debugPrint('❌ Error checking notification schedule: $e');
-      return false;
-    }
-  }
-
-  /// Expõe o repository para uso interno
-  INotificationRepository get notificationRepository => _notificationRepository;
-
-  /// Verifica se o serviço está inicializado
-  bool get isInitialized => _isInitialized;
-
-  /// Gera um ID de notificação único
-  int generateNotificationId(String identifier) {
-    return _notificationRepository.generateNotificationId(identifier);
-  }
-
-  /// Agenda uma notificação diretamente
-  Future<bool> scheduleDirectNotification(NotificationEntity notification) async {
-    if (kIsWeb) return false;
-
-    try {
-      await _notificationRepository.scheduleNotification(notification);
-      return true;
-    } catch (e) {
-      debugPrint('❌ Error scheduling direct notification: $e');
-      return false;
-    }
-  }
-
-  /// Manipula tap em notificação
-  void _handleNotificationTap(String? payload) {
-    if (payload == null) return;
-
-    try {
-      final data = jsonDecode(payload) as Map<String, dynamic>;
-      final type = data['type'] as String?;
-
-      debugPrint('🔔 Plantis notification tapped: $type');
-
-      // TODO: Implementar navegação específica quando definir as telas
-      switch (type) {
-        case 'task_reminder':
-          _navigateToTaskDetails(data);
-          break;
-        case 'overdue_task':
-          _navigateToTasksList(data);
-          break;
-        case 'new_plant':
-          _navigateToPlantDetails(data);
-          break;
-        case 'daily_care_reminder':
-          _navigateToTasksList(data);
-          break;
-        case 'gardening_tip':
-          _navigateToTipsPage(data);
-          break;
+      if (kDebugMode) {
+        print('Erro ao verificar notificação agendada: $e');
       }
-    } catch (e) {
-      debugPrint('❌ Error handling notification tap: $e');
+      return false;
     }
   }
 
-  /// Manipula ação de notificação
-  void _handleNotificationAction(String actionId, String? payload) {
-    debugPrint('🔔 Plantis notification action: $actionId');
+  /// Callback quando notificação é tocada
+  void _onNotificationTapped(String? payload) {
+    if (payload != null && kDebugMode) {
+      print('Notificação tocada: $payload');
+    }
+    
+    // TODO: Implementar navegação baseada no payload
+    // Por exemplo: navegar para detalhes da planta se for notificação de cuidado
+  }
+
+  /// Callback quando ação de notificação é executada
+  void _onNotificationAction(String actionId, String? payload) {
+    if (kDebugMode) {
+      print('Ação de notificação: $actionId, payload: $payload');
+    }
 
     switch (actionId) {
-      case 'view_details':
-        _handleNotificationTap(payload);
+      case 'mark_done':
+        _handleMarkDoneAction(payload);
         break;
-      case 'dismiss':
-        // Apenas dismissar
-        break;
-      case 'remind_later':
-        _handleRemindLater(payload);
+      case 'snooze':
+        _handleSnoozeAction(payload);
         break;
     }
   }
 
-  // ==========================================================================
-  // MÉTODOS DE NAVEGAÇÃO - Para implementar quando definir as telas
-  // ==========================================================================
-
-  /// Navegar para detalhes da tarefa
-  void _navigateToTaskDetails(Map<String, dynamic> data) {
-    final context = _getNavigationContext();
-    if (context != null) {
-      // Navegar para lista de tarefas (ainda não temos detalhes específicos)
-      Navigator.of(context).pushNamed('/tasks');
-    }
-    debugPrint('Navigate to task details: ${data['task_name']}');
-  }
-
-  /// Navegar para lista de tarefas
-  void _navigateToTasksList(Map<String, dynamic> data) {
-    final context = _getNavigationContext();
-    if (context != null) {
-      Navigator.of(context).pushNamed('/tasks');
-    }
-    debugPrint('Navigate to tasks list');
-  }
-
-  /// Navegar para detalhes da planta
-  void _navigateToPlantDetails(Map<String, dynamic> data) {
-    final context = _getNavigationContext();
-    if (context != null) {
-      final plantName = data['plant_name'] as String?;
-      if (plantName != null) {
-        // Navegar para lista de plantas (pode ser filtrada pelo nome)
-        Navigator.of(
-          context,
-        ).pushNamed('/plants', arguments: {'filter': plantName});
-      } else {
-        Navigator.of(context).pushNamed('/plants');
-      }
-    }
-    debugPrint('Navigate to plant details: ${data['plant_name']}');
-  }
-
-  /// Navegar para página de dicas
-  void _navigateToTipsPage(Map<String, dynamic> data) {
-    final context = _getNavigationContext();
-    if (context != null) {
-      // Como não temos página de dicas ainda, vai para home
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-    }
-    debugPrint('Navigate to tips page');
-  }
-
-  /// Obter contexto de navegação
-  BuildContext? _getNavigationContext() {
-    try {
-      final navigationService = sl<local.NavigationService>();
-      return navigationService.currentContext;
-    } catch (e) {
-      debugPrint('❌ Error getting navigation context: $e');
-      return null;
+  /// Marca tarefa como concluída
+  void _handleMarkDoneAction(String? payload) {
+    // TODO: Implementar marcação de tarefa como concluída
+    if (kDebugMode) {
+      print('Marcando tarefa como concluída: $payload');
     }
   }
 
-  /// Reagendar lembrete
-  void _handleRemindLater(String? payload) {
-    if (payload == null) return;
-
-    try {
-      final data = jsonDecode(payload) as Map<String, dynamic>;
-      final type = data['type'] as String?;
-
-      switch (type) {
-        case 'task_reminder':
-          // Reagendar tarefa para 1 hora depois
-          _rescheduleTaskReminder(data, const Duration(hours: 1));
-          break;
-        case 'daily_care_reminder':
-          // Reagendar lembrete diário para próximo dia
-          _rescheduleDailyCareReminder(data);
-          break;
-        // Adicionar outros tipos conforme necessário
-      }
-    } catch (e) {
-      debugPrint('❌ Error rescheduling notification: $e');
+  /// Adia notificação por 1 hora
+  void _handleSnoozeAction(String? payload) {
+    // TODO: Reagendar notificação para 1 hora
+    if (kDebugMode) {
+      print('Adiando notificação: $payload');
     }
   }
 
-  /// Reagendar lembrete de tarefa
-  Future<void> _rescheduleTaskReminder(
-    Map<String, dynamic> data,
-    Duration delay,
-  ) async {
-    try {
-      final taskName = data['task_name'] as String? ?? '';
-      final plantName = data['plant_name'] as String? ?? '';
-      final taskDescription = data['task_description'] as String?;
-
-      final scheduledDate = DateTime.now().add(delay);
-
-      final notification = NotificationHelper.createReminderNotification(
-        appName: _appName,
-        id: _notificationRepository.generateNotificationId(
-          'task_reminder_${taskName}_rescheduled',
-        ),
-        title: '🌱 Lembrete de Tarefa (Reagendado)',
-        body:
-            '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
-        scheduledDate: scheduledDate,
-        payload: jsonEncode({
-          'type': 'task_reminder',
-          'task_name': taskName,
-          'plant_name': plantName,
-          'task_description': taskDescription,
-          'rescheduled': true,
-        }),
-        color: _primaryColor,
-      );
-
-      await _notificationRepository.scheduleNotification(notification);
-      debugPrint('✅ Task reminder rescheduled for ${scheduledDate.toString()}');
-    } catch (e) {
-      debugPrint('❌ Error rescheduling task reminder: $e');
-    }
-  }
-
-  /// Reagendar lembrete diário de cuidados
-  Future<void> _rescheduleDailyCareReminder(Map<String, dynamic> data) async {
-    try {
-      final message =
-          data['message'] as String? ?? 'Hora de cuidar das suas plantas!';
-      final intervalHours = data['interval'] as int? ?? 24;
-
-      await scheduleDailyCareReminder(
-        message: message,
-        interval: Duration(hours: intervalHours),
-      );
-
-      debugPrint('✅ Daily care reminder rescheduled');
-    } catch (e) {
-      debugPrint('❌ Error rescheduling daily care reminder: $e');
-    }
-  }
-
-  // ==========================================================================
-  // MÉTODOS DE INTEGRAÇÃO COM BUSINESS LOGIC
-  // ==========================================================================
-
-  /// Agenda notificações baseadas nas tarefas pendentes
-  Future<void> scheduleNotificationsForPendingTasks() async {
-    try {
-      // TODO: Integrar com TasksRepository para buscar tarefas pendentes
-      // final tasksRepository = sl<ITasksRepository>();
-      // final pendingTasks = await tasksRepository.getPendingTasks();
-
-      // for (final task in pendingTasks) {
-      //   await scheduleTaskReminder(task);
-      // }
-
-      debugPrint('📅 Scheduled notifications for pending tasks');
-    } catch (e) {
-      debugPrint('❌ Error scheduling notifications for pending tasks: $e');
-    }
-  }
-
-  /// Agenda notificação para uma tarefa específica
-  Future<void> scheduleTaskReminder({
-    required String taskId,
-    required String taskName,
-    required String plantName,
-    String? taskDescription,
-    String? plantId,
-    DateTime? dueDate,
-  }) async {
-    try {
-      final scheduledDate =
-          dueDate ?? DateTime.now().add(const Duration(hours: 1));
-
-      final notification = NotificationHelper.createReminderNotification(
-        appName: _appName,
-        id: _notificationRepository.generateNotificationId(
-          'task_reminder_$taskId',
-        ),
-        title: '🌱 Lembrete de Tarefa',
-        body:
-            '$taskName para $plantName${taskDescription != null ? ' - $taskDescription' : ''}',
-        scheduledDate: scheduledDate,
-        payload: jsonEncode({
-          'type': 'task_reminder',
-          'task_id': taskId,
-          'task_name': taskName,
-          'plant_name': plantName,
-          'plant_id': plantId,
-          'task_description': taskDescription,
-          'due_date': dueDate?.toIso8601String(),
-        }),
-        color: _primaryColor,
-      );
-
-      await _notificationRepository.scheduleNotification(notification);
-      debugPrint(
-        '✅ Task reminder scheduled for $taskName at ${scheduledDate.toString()}',
-      );
-    } catch (e) {
-      debugPrint('❌ Error scheduling task reminder: $e');
-    }
-  }
-
-  /// Cancela notificações de uma tarefa específica
-  Future<void> cancelTaskNotifications(String taskId) async {
-    try {
-      final identifier = 'task_reminder_$taskId';
-      await cancelNotification(identifier);
-      debugPrint('✅ Cancelled notifications for task: $taskId');
-    } catch (e) {
-      debugPrint('❌ Error cancelling task notifications: $e');
-    }
-  }
-
-  /// Verifica tarefas atrasadas e envia notificações
-  Future<void> checkAndNotifyOverdueTasks() async {
-    try {
-      // TODO: Integrar com TasksRepository para buscar tarefas atrasadas
-      // final tasksRepository = sl<ITasksRepository>();
-      // final overdueTasks = await tasksRepository.getOverdueTasks();
-
-      // for (final task in overdueTasks) {
-      //   final daysOverdue = DateTime.now().difference(task.dueDate).inDays;
-      //   await showOverdueTaskNotification(
-      //     taskName: task.name,
-      //     plantName: task.plant.name,
-      //     daysOverdue: daysOverdue,
-      //   );
-      // }
-
-      debugPrint('🔍 Checked and notified overdue tasks');
-    } catch (e) {
-      debugPrint('❌ Error checking overdue tasks: $e');
-    }
-  }
-
-  /// Programa notificações diárias de cuidados para todas as plantas
-  Future<void> scheduleDailyCareForAllPlants() async {
-    try {
-      // TODO: Integrar com PlantsRepository para buscar plantas ativas
-      // final plantsRepository = sl<IPlantsRepository>();
-      // final activePlants = await plantsRepository.getActivePlants();
-
-      // Agenda lembrete diário geral
-      await scheduleDailyCareReminder(
-        message: 'Hora de verificar suas plantas! 🌿',
-        interval: const Duration(days: 1),
-      );
-
-      debugPrint('🌱 Scheduled daily care reminders for all plants');
-    } catch (e) {
-      debugPrint('❌ Error scheduling daily care reminders: $e');
-    }
-  }
-
-  /// Inicializa todas as notificações necessárias
-  Future<void> initializeAllNotifications() async {
-    try {
-      await scheduleNotificationsForPendingTasks();
-      await scheduleDailyCareForAllPlants();
-      debugPrint('✅ All notifications initialized successfully');
-    } catch (e) {
-      debugPrint('❌ Error initializing notifications: $e');
+  /// Obtém título baseado no tipo de cuidado
+  String _getCareTypeTitle(String careType) {
+    switch (careType) {
+      case 'watering':
+        return '💧 Hora de regar!';
+      case 'fertilizing':
+        return '🌱 Hora de adubar!';
+      case 'pruning':
+        return '✂️ Hora de podar!';
+      case 'pest_inspection':
+        return '🔍 Verificar pragas';
+      case 'cleaning':
+        return '🧹 Limpar folhas';
+      case 'repotting':
+        return '🪴 Trocar vaso';
+      default:
+        return '🌿 Cuidar da planta';
     }
   }
 }
 
-/// Tipos de notificação do Plantis
+/// Enum para compatibilidade com código existente
 enum PlantisNotificationType {
   taskReminder('task_reminder'),
   overdueTask('overdue_task'),

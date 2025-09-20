@@ -23,11 +23,21 @@ class DeviceManagementDI {
       ),
     );
 
-    // Remote Data Source
+    // Remote Data Source (Web-safe registration)
     sl.registerLazySingleton<DeviceRemoteDataSource>(
-      () => DeviceRemoteDataSourceImpl(
-        firebaseDeviceService: sl<FirebaseDeviceService>(),
-      ),
+      () {
+        try {
+          return DeviceRemoteDataSourceImpl(
+            firebaseDeviceService: sl<FirebaseDeviceService>(),
+          );
+        } catch (e) {
+          // Fallback for Web or if service is not available
+          print('⚠️  FirebaseDeviceService not available, using fallback: $e');
+          return DeviceRemoteDataSourceImpl(
+            firebaseDeviceService: null, // Use null-safe implementation
+          );
+        }
+      },
     );
 
     // === REPOSITORY ===
@@ -66,14 +76,23 @@ class DeviceManagementDI {
 
     // === HIGH-LEVEL SERVICES ===
     
-    // Device Management Service
+    // Device Management Service (Web-safe registration)  
     sl.registerLazySingleton<DeviceManagementService>(
-      () => DeviceManagementService(
-        firebaseDeviceService: sl<FirebaseDeviceService>(),
-        authService: sl<FirebaseAuthService>(),
-        analyticsService: sl<FirebaseAnalyticsService>(),
-        deviceRepository: sl<IDeviceRepository>(),
-      ),
+      () {
+        try {
+          return DeviceManagementService(
+            firebaseDeviceService: sl<FirebaseDeviceService>(),
+            authService: sl<FirebaseAuthService>(),
+            analyticsService: sl<FirebaseAnalyticsService>(),
+            deviceRepository: sl<IDeviceRepository>(),
+          );
+        } catch (e) {
+          // For Web compatibility, register a stub FirebaseDeviceService first
+          print('⚠️  FirebaseDeviceService not available, DeviceManagementService skipped: $e');
+          // Return a simplified service that won't be used
+          rethrow; // Let this fail gracefully - service won't be available
+        }
+      },
     );
 
     _isRegistered = true;

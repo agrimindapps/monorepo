@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
@@ -114,9 +116,17 @@ Future<void> init() async {
   );
   
   // Initialize ReceitaAgro sync configuration
-  ReceitaAgroSyncConfig.initializeSync().catchError((error) {
-    if (kDebugMode) print('❌ ReceitaAgro sync initialization failed: $error');
-  });
+  if (kDebugMode) print('🚀 DI_CONTAINER: Iniciando configuração de sync do ReceitaAgro...');
+  
+  // Execute sync initialization synchronously during DI setup
+  unawaited(ReceitaAgroSyncConfig.initializeSync().then((_) {
+    if (kDebugMode) print('✅ DI_CONTAINER: ReceitaAgro sync inicializado com sucesso!');
+  }).catchError((error) {
+    if (kDebugMode) print('❌ DI_CONTAINER: ReceitaAgro sync initialization failed: $error');
+  }));
+  
+  // Also ensure sync is called during app startup
+  if (kDebugMode) print('🔄 DI_CONTAINER: Sync initialization triggered');
   
   // Providers for state management
   sl.registerLazySingleton<RemoteConfigProvider>(

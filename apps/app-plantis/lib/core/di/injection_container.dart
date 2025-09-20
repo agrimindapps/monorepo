@@ -46,7 +46,6 @@ import '../services/notification_manager.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
-import '../services/test_data_generator_service.dart';
 import '../services/url_launcher_service.dart';
 import '../utils/navigation_service.dart' as local;
 import 'modules/plants_module.dart';
@@ -134,7 +133,7 @@ void _initCoreServices() {
     ),
   );
 
-  // Notification Services
+  // Notification Services (using core LocalNotificationService)
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
 
@@ -427,10 +426,6 @@ void _initAppServices() {
     () => SyncStatusProvider(sl(), sl()),
   );
 
-  // Test Data Generator Service
-  sl.registerLazySingleton<TestDataGeneratorService>(
-    () => TestDataGeneratorService(addPlantUseCase: sl(), addTaskUseCase: sl()),
-  );
 
   // Data Cleaner Service
   sl.registerLazySingleton<DataCleanerService>(

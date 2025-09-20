@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/navigation/app_navigation_provider.dart';
 import 'core/providers/auth_provider.dart';
+import 'core/sync/receituagro_sync_config.dart';
 import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
@@ -105,6 +106,16 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // ===== SYNC INITIALIZATION =====
+  // Force sync initialization after DI is ready
+  try {
+    print('🔄 MAIN: Forcing sync initialization...');
+    await ReceitaAgroSyncConfig.initializeSync();
+    print('✅ MAIN: Sync initialization completed successfully');
+  } catch (e) {
+    print('❌ MAIN: Sync initialization failed: $e');
+  }
 
   // ===== PUSH NOTIFICATIONS INITIALIZATION =====
   // Configurar handler para mensagens em background

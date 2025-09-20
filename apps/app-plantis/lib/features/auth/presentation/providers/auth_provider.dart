@@ -267,50 +267,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Legacy method - replaced by BackgroundSyncService
-  @deprecated
-  Future<void> _startPostLoginSync() async {
-    // This method is deprecated and replaced by BackgroundSyncService
-    if (kDebugMode) {
-      debugPrint('⚠️ _startPostLoginSync é deprecated - usando BackgroundSyncService');
-    }
-
-    if (isAuthenticated && !isAnonymous && _currentUser != null) {
-      _triggerBackgroundSyncIfNeeded(_currentUser!.id);
-    }
-  }
-
-  /// Legacy sync methods - moved to BackgroundSyncService
-  @deprecated
-  Future<void> _syncUserData() async {
-    // Moved to BackgroundSyncService
-    if (kDebugMode) {
-      debugPrint('⚠️ _syncUserData deprecated - usando BackgroundSyncService');
-    }
-  }
-
-  @deprecated
-  Future<void> _syncPlantsData() async {
-    // Moved to BackgroundSyncService
-    if (kDebugMode) {
-      debugPrint('⚠️ _syncPlantsData deprecated - usando BackgroundSyncService');
-    }
-  }
-
-  @deprecated
-  Future<void> _syncTasksData() async {
-    // Moved to BackgroundSyncService
-    if (kDebugMode) {
-      debugPrint('⚠️ _syncTasksData deprecated - usando BackgroundSyncService');
-    }
-  }
-
-  @deprecated
-  Future<void> _syncSettingsData() async {
-    // Moved to BackgroundSyncService
-    if (kDebugMode) {
-      debugPrint('⚠️ _syncSettingsData deprecated - usando BackgroundSyncService');
-    }
-  }
 
   /// Cancela sincronização em andamento
   void cancelSync() {

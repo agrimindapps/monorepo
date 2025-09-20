@@ -64,7 +64,7 @@ class NotificationManager implements
   /// Solicita permissão para notificações
   Future<bool> requestPermissions() async {
     if (_notificationService == null) return false;
-    return await _notificationService!.requestNotificationPermission();
+    return await _notificationService!.requestPermission();
   }
 
   /// Abre configurações de notificação do sistema
@@ -124,37 +124,48 @@ class NotificationManager implements
     await _notificationService!.showOverdueTaskNotification(
       taskName: taskName,
       plantName: plantName,
-      daysOverdue: daysOverdue,
     );
   }
 
   /// Programa lembretes diários de cuidados
+  @override
   Future<void> scheduleDailyCareReminders() async {
     if (_notificationService == null) return;
     await _notificationService!.scheduleDailyCareForAllPlants();
   }
 
   /// Verifica e notifica tarefas atrasadas
+  @override
   Future<void> checkOverdueTasks() async {
     if (_notificationService == null) return;
     await _notificationService!.checkAndNotifyOverdueTasks();
   }
 
   /// Cancela todas as notificações
+  @override
   Future<bool> cancelAllNotifications() async {
     if (_notificationService == null) return false;
     return await _notificationService!.cancelAllNotifications();
   }
 
   /// Lista todas as notificações pendentes
+  @override
   Future<List<PendingNotificationEntity>> getPendingNotifications() async {
     if (_notificationService == null) return [];
     return await _notificationService!.getPendingNotifications();
   }
 
   /// Verifica se uma notificação específica está agendada
+  @override
   Future<bool> isNotificationScheduled(String identifier) async {
     if (_notificationService == null) return false;
-    return await _notificationService!.isNotificationScheduled(identifier);
+    // Assumir que o identifier é no formato plantId_careType
+    final parts = identifier.split('_');
+    if (parts.length >= 2) {
+      final plantId = parts[0];
+      final careType = parts.sublist(1).join('_');
+      return await _notificationService!.isPlantNotificationScheduled(plantId, careType);
+    }
+    return false;
   }
 }

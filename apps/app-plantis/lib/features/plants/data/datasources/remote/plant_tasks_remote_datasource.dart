@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../domain/entities/plant_task.dart';
 import '../../models/plant_task_model.dart';
 
 abstract class PlantTasksRemoteDatasource {

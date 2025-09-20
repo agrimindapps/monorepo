@@ -12,7 +12,6 @@ import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
-import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/forgot_password_dialog.dart';
@@ -236,19 +235,6 @@ class _AuthPageState extends State<AuthPage>
     }
   }
 
-  /// Legacy sync loading methods - no longer needed with background sync
-  @deprecated
-  void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
-    // No longer needed - sync happens in background
-    // Navigate immediately instead
-    router.go('/plants');
-  }
-
-  @deprecated
-  void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
-    // No longer needed - navigation is immediate
-    router.go('/plants');
-  }
 
   Future<void> _handleRegister() async {
     if (_registerFormKey.currentState!.validate()) {

@@ -145,7 +145,7 @@ class NotificationsSettingsProvider extends ChangeNotifier {
     await _notificationService.showTaskReminderNotification(
       taskName: 'Teste de Notificação',
       plantName: 'Planta de Teste',
-      taskDescription: 'As notificações estão funcionando corretamente! 🌱',
+      taskType: 'test',
     );
   }
 

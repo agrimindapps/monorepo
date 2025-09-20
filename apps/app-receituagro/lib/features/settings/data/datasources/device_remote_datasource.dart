@@ -15,14 +15,21 @@ abstract class DeviceRemoteDataSource {
 
 /// Implementação do datasource remoto usando Firebase
 class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
-  final FirebaseDeviceService _firebaseDeviceService;
+  final FirebaseDeviceService? _firebaseDeviceService;
   
   DeviceRemoteDataSourceImpl({
-    required FirebaseDeviceService firebaseDeviceService,
+    required FirebaseDeviceService? firebaseDeviceService,
   }) : _firebaseDeviceService = firebaseDeviceService;
+  
+  /// Helper method to check if service is available
+  bool get _isServiceAvailable => _firebaseDeviceService != null;
 
   @override
   Future<Either<Failure, List<DeviceEntity>>> getUserDevices(String userId) async {
+    if (_firebaseDeviceService == null) {
+      return const Right([]); // Return empty list for Web compatibility
+    }
+    
     try {
       // Usar Firestore diretamente para obter dispositivos
       return await _firebaseDeviceService.getDevicesFromFirestore(userId);
@@ -38,8 +45,13 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
   @override
   Future<Either<Failure, DeviceEntity>> validateDevice(String userId, DeviceEntity device) async {
+    if (!_isServiceAvailable) {
+      // Return device as valid for Web compatibility
+      return Right(device);
+    }
+    
     try {
-      return await _firebaseDeviceService.validateDevice(
+      return await _firebaseDeviceService!.validateDevice(
         userId: userId,
         device: device,
       );
@@ -55,8 +67,13 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
   @override
   Future<Either<Failure, void>> revokeDevice(String userId, String deviceUuid) async {
+    if (!_isServiceAvailable) {
+      // Return success for Web compatibility (no-op)
+      return const Right(null);
+    }
+    
     try {
-      return await _firebaseDeviceService.revokeDevice(
+      return await _firebaseDeviceService!.revokeDevice(
         userId: userId,
         deviceUuid: deviceUuid,
       );
@@ -72,8 +89,28 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
   @override
   Future<Either<Failure, DeviceEntity>> updateLastActivity(String userId, String deviceUuid) async {
+    if (!_isServiceAvailable) {
+      // Return a mock device entity for Web compatibility
+      return Right(DeviceEntity(
+        id: deviceUuid,
+        uuid: deviceUuid,
+        name: 'Web Device',
+        model: 'Web Browser',
+        platform: 'web',
+        systemVersion: 'Unknown',
+        appVersion: '1.0.0',
+        buildNumber: '1',
+        isPhysicalDevice: false,
+        manufacturer: 'Web',
+        firstLoginAt: DateTime.now(),
+        lastActiveAt: DateTime.now(),
+        isActive: true,
+        createdAt: DateTime.now(),
+      ));
+    }
+    
     try {
-      return await _firebaseDeviceService.updateDeviceLastActivity(
+      return await _firebaseDeviceService!.updateDeviceLastActivity(
         userId: userId,
         deviceUuid: deviceUuid,
       );
@@ -89,9 +126,14 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
   @override
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
+    if (!_isServiceAvailable) {
+      // Always allow for Web compatibility
+      return const Right(true);
+    }
+    
     try {
       // Obter contagem atual de dispositivos ativos
-      final countResult = await _firebaseDeviceService.getActiveDeviceCount(userId);
+      final countResult = await _firebaseDeviceService!.getActiveDeviceCount(userId);
       
       return countResult.fold(
         (failure) => Left(failure),
@@ -138,10 +180,10 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
                   ? devices.reduce((a, b) => a.lastActiveAt.isAfter(b.lastActiveAt) ? a : b)
                   : null,
               oldestDevice: devices.isNotEmpty
-                  ? devices.reduce((a, b) => a.firstLoginAt.isBefore(b.firstLoginAt) ? a : b)
+                  ? devices.reduce((a, b) => (a.createdAt ?? DateTime.now()).isBefore(b.createdAt ?? DateTime.now()) ? a : b)
                   : null,
               newestDevice: devices.isNotEmpty
-                  ? devices.reduce((a, b) => a.firstLoginAt.isAfter(b.firstLoginAt) ? a : b)
+                  ? devices.reduce((a, b) => (a.createdAt ?? DateTime.now()).isAfter(b.createdAt ?? DateTime.now()) ? a : b)
                   : null,
             ),
           );

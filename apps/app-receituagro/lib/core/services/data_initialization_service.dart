@@ -83,17 +83,22 @@ class DataInitializationService {
   /// Carrega dados de uma categoria específica
   Future<Either<Exception, void>> _loadCategoryData(_CategoryData category, String currentVersion) async {
     try {
-      developer.log('Verificando necessidade de atualização para ${category.name}...', name: 'DataInitializationService');
+      developer.log('🔍 Verificando necessidade de atualização para ${category.name}...', name: 'DataInitializationService');
+      
+      // DEBUG: Obter versão armazenada para mostrar comparação
+      final storedVersion = await _versionManager.getStoredVersion(category.name);
+      developer.log('📱 VERSION CHECK ${category.name}: Stored="$storedVersion", Current="$currentVersion"', name: 'DataInitializationService');
       
       // Verifica se precisa atualizar esta categoria
       final needsReload = await _versionManager.needsDataReload(category.name);
+      developer.log('🔄 NEEDS RELOAD ${category.name}: $needsReload', name: 'DataInitializationService');
       
       if (!needsReload) {
-        developer.log('Dados de ${category.name} já estão atualizados', name: 'DataInitializationService');
+        developer.log('✅ Dados de ${category.name} já estão atualizados (SKIP)', name: 'DataInitializationService');
         return const Right(null);
       }
       
-      developer.log('Carregando dados de ${category.name}...', name: 'DataInitializationService');
+      developer.log('📥 Carregando dados de ${category.name}...', name: 'DataInitializationService');
       
       // Carrega dados do JSON
       final jsonResult = await _assetLoader.loadCategoryData(category.name);
@@ -102,18 +107,20 @@ class DataInitializationService {
       }
       
       final jsonData = jsonResult.fold((l) => <Map<String, dynamic>>[], (r) => r);
-      developer.log('Carregados ${jsonData.length} registros de ${category.name}', name: 'DataInitializationService');
+      developer.log('📊 Carregados ${jsonData.length} registros de ${category.name}', name: 'DataInitializationService');
       
       // Salva no repositório
+      developer.log('💾 Salvando ${jsonData.length} registros no Hive para ${category.name}...', name: 'DataInitializationService');
       final dynamic saveResult = await category.repository.loadFromJson(jsonData, currentVersion);
       if (saveResult is Either && saveResult.isLeft()) {
         return Left(Exception('Erro ao salvar dados de ${category.name}: ${saveResult.fold((e) => e.toString(), (r) => '')}'));
       }
       
       // Marca como atualizado
+      developer.log('🔖 Marcando ${category.name} como atualizado para versão $currentVersion', name: 'DataInitializationService');
       await _versionManager.markAsUpdated(currentVersion, category.name);
       
-      developer.log('Dados de ${category.name} carregados com sucesso', name: 'DataInitializationService');
+      developer.log('✅ Dados de ${category.name} carregados com sucesso', name: 'DataInitializationService');
       return const Right(null);
       
     } catch (e) {

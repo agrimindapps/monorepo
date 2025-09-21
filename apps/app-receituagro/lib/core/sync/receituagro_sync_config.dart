@@ -1,181 +1,163 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
-import '../entities/user_profile_sync_entity.dart';
+import '../extensions/user_entity_receituagro_extension.dart';
 
-/// Configuração de sincronização específica para o app ReceitaAgro
-class ReceitaAgroSyncConfig {
-  
-  /// Inicializa a configuração de sincronização para o app
-  static Future<void> initializeSync() async {
-    print('🔄 RECEITUAGRO_SYNC: Iniciando configuração de sincronização...');
-    late UnifiedSyncManager syncManager;
-    
-    try {
-      syncManager = UnifiedSyncManager.instance;
-      print('🔄 RECEITUAGRO_SYNC: UnifiedSyncManager instanciado - $syncManager');
-    } catch (e) {
-      print('❌ RECEITUAGRO_SYNC: Erro ao instanciar UnifiedSyncManager: $e');
-      rethrow;
-    }
-    
-    // Configuração do app
-    final appConfig = AppSyncConfig(
+// Funções auxiliares para contornar problema do analyzer
+FavoritoSyncEntity _favoritoFromFirebaseMap(Map<String, dynamic> map) {
+  return FavoritoSyncEntity.fromMap(map);
+}
+
+ComentarioSyncEntity _comentarioFromFirebaseMap(Map<String, dynamic> map) {
+  return ComentarioSyncEntity.fromMap(map);
+}
+
+UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
+  return UserEntityReceitaAgroExtension.fromReceitaAgroFirebaseMap(map);
+}
+
+/// Configuração de sincronização específica do ReceitaAgro
+/// Diagnóstico agrícola com favoritos, comentários e dados do usuário
+abstract final class ReceitaAgroSyncConfig {
+  /// Configura o sistema de sincronização para o ReceitaAgro
+  static Future<void> configure() async {
+    await UnifiedSyncManager.instance.initializeApp(
       appName: 'receituagro',
-      syncInterval: const Duration(minutes: 2), // Sync mais frequente
-      batchSize: 50,
-      globalConflictStrategy: ConflictStrategy.remoteWins,
-      maxRetries: 3,
-      enableRealtimeSync: true,
-    );
-    print('🔄 RECEITUAGRO_SYNC: AppSyncConfig criado - appName: receituagro');
-    
-    // Lista de entidades para sincronizar
-    final entities = [
-      // Favoritos
-      EntitySyncRegistration<FavoritoSyncEntity>(
-        entityType: FavoritoSyncEntity,
-        collectionName: 'favoritos',
-        fromMap: FavoritoSyncEntity.fromMap,
-        toMap: (entity) => (entity as FavoritoSyncEntity).toMap(),
-        conflictStrategy: ConflictStrategy.timestamp,
-        batchSize: 25,
-        maxRetries: 3,
-      ),
-      
-      // Comentários
-      EntitySyncRegistration<ComentarioSyncEntity>(
-        entityType: ComentarioSyncEntity,
-        collectionName: 'comentarios',
-        fromMap: ComentarioSyncEntity.fromMap,
-        toMap: (entity) => (entity as ComentarioSyncEntity).toMap(),
-        conflictStrategy: ConflictStrategy.timestamp,
-        batchSize: 25,
-        maxRetries: 3,
-      ),
-      
-      // Perfil do usuário
-      EntitySyncRegistration<UserProfileSyncEntity>(
-        entityType: UserProfileSyncEntity,
-        collectionName: 'user_profiles',
-        fromMap: UserProfileSyncEntity.fromMap,
-        toMap: (entity) => (entity as UserProfileSyncEntity).toMap(),
-        conflictStrategy: ConflictStrategy.timestamp,
-        batchSize: 10,
-        maxRetries: 5, // Mais tentativas para perfil
-      ),
-    ];
-    print('🔄 RECEITUAGRO_SYNC: ${entities.length} entidades criadas para registro');
-    
-    // Registrar no UnifiedSyncManager
-    print('🔄 RECEITUAGRO_SYNC: Registrando app no UnifiedSyncManager...');
-    try {
-      final result = await syncManager.initializeApp(
+      config: AppSyncConfig.simple(
         appName: 'receituagro',
-        config: appConfig,
-        entities: entities,
-      );
-      
-      print('🔄 RECEITUAGRO_SYNC: initializeApp() retornou resultado');
-      
-      result.fold(
-        (failure) {
-          print('❌ RECEITUAGRO_SYNC: Erro ao inicializar sync: ${failure.message}');
-        },
-        (_) {
-          print('✅ RECEITUAGRO_SYNC: ReceitaAgro sync inicializado com sucesso!');
-          print('📦 RECEITUAGRO_SYNC: Entidades registradas: favoritos, comentarios, user_profiles');
-        },
-      );
-    } catch (e) {
-      print('❌ RECEITUAGRO_SYNC: Erro em initializeApp(): $e');
-      rethrow;
-    }
+        syncInterval: const Duration(minutes: 2), // Sync mais frequente
+        conflictStrategy: ConflictStrategy.timestamp,
+      ),
+      entities: [
+        // Favoritos - Ferramentas favoritas do usuário
+        EntitySyncRegistration<FavoritoSyncEntity>.simple(
+          entityType: FavoritoSyncEntity,
+          collectionName: 'favoritos',
+          fromMap: _favoritoFromFirebaseMap,
+          toMap: (favorito) => favorito.toMap(),
+        ),
+        
+        // Comentários - Feedback sobre diagnósticos
+        EntitySyncRegistration<ComentarioSyncEntity>.simple(
+          entityType: ComentarioSyncEntity,
+          collectionName: 'comentarios',
+          fromMap: _comentarioFromFirebaseMap,
+          toMap: (comentario) => comentario.toMap(),
+        ),
+
+        // Usuários (profile compartilhado entre apps)
+        EntitySyncRegistration<UserEntity>.simple(
+          entityType: UserEntity,
+          collectionName: 'users',
+          fromMap: _userEntityFromFirebaseMap,
+          toMap: (user) => user.toReceitaAgroFirebaseMap(),
+        ),
+
+        // Assinaturas (subscription compartilhada entre apps)
+        EntitySyncRegistration<SubscriptionEntity>.simple(
+          entityType: SubscriptionEntity,
+          collectionName: 'subscriptions',
+          fromMap: SubscriptionEntity.fromFirebaseMap,
+          toMap: (subscription) => subscription.toFirebaseMap(),
+        ),
+      ],
+    );
   }
-  
-  /// Obtém repositório de sync para favoritos
-  /// DEPRECADO: Use os métodos createFavorito, updateFavorito, deleteFavorito
-  static ISyncRepository<FavoritoSyncEntity>? getFavoritosRepository() {
-    // Método privado não é acessível, use os wrappers públicos
-    return null;
+
+  /// Configuração para desenvolvimento
+  static Future<void> configureDevelopment() async {
+    await UnifiedSyncManager.instance.initializeApp(
+      appName: 'receituagro',
+      config: AppSyncConfig.development(
+        appName: 'receituagro',
+        syncInterval: const Duration(minutes: 1),
+      ),
+      entities: [
+        EntitySyncRegistration<FavoritoSyncEntity>.simple(
+          entityType: FavoritoSyncEntity,
+          collectionName: 'dev_favoritos',
+          fromMap: _favoritoFromFirebaseMap,
+          toMap: (favorito) => favorito.toMap(),
+        ),
+
+        EntitySyncRegistration<ComentarioSyncEntity>.simple(
+          entityType: ComentarioSyncEntity,
+          collectionName: 'dev_comentarios',
+          fromMap: _comentarioFromFirebaseMap,
+          toMap: (comentario) => comentario.toMap(),
+        ),
+
+        EntitySyncRegistration<UserEntity>.simple(
+          entityType: UserEntity,
+          collectionName: 'dev_users',
+          fromMap: _userEntityFromFirebaseMap,
+          toMap: (user) => user.toReceitaAgroFirebaseMap(),
+        ),
+
+        EntitySyncRegistration<SubscriptionEntity>.simple(
+          entityType: SubscriptionEntity,
+          collectionName: 'dev_subscriptions',
+          fromMap: SubscriptionEntity.fromFirebaseMap,
+          toMap: (subscription) => subscription.toFirebaseMap(),
+        ),
+      ],
+    );
   }
-  
-  /// Obtém repositório de sync para comentários
-  /// DEPRECADO: Use os métodos createComentario, updateComentario, deleteComentario
-  static ISyncRepository<ComentarioSyncEntity>? getComentariosRepository() {
-    // Método privado não é acessível, use os wrappers públicos
-    return null;
-  }
-  
-  /// Obtém repositório de sync para perfil do usuário
-  static ISyncRepository<UserProfileSyncEntity>? getUserProfileRepository() {
-    // Método privado não é acessível, use os wrappers públicos
-    return null;
-  }
-  
-  /// Wrapper para criar entidade via UnifiedSyncManager
-  static Future<Either<Failure, String>> createFavorito(FavoritoSyncEntity entity) {
-    print('🚀 UNIFIED_SYNC: createFavorito() - entityId=${entity.id}, userId=${entity.userId}');
-    final result = UnifiedSyncManager.instance.create<FavoritoSyncEntity>('receituagro', entity);
-    
-    result.then((either) {
-      either.fold(
-        (failure) => print('❌ UNIFIED_SYNC: createFavorito() falhou - ${failure.message}'),
-        (entityId) => print('✅ UNIFIED_SYNC: createFavorito() sucesso - firestore_id=$entityId'),
-      );
-    }).catchError((error) {
-      print('❌ UNIFIED_SYNC: createFavorito() erro - $error');
-    });
-    
-    return result;
-  }
-  
-  /// Wrapper para atualizar entidade via UnifiedSyncManager
-  static Future<Either<Failure, void>> updateFavorito(String id, FavoritoSyncEntity entity) {
-    return UnifiedSyncManager.instance.update<FavoritoSyncEntity>('receituagro', id, entity);
-  }
-  
-  /// Wrapper para deletar entidade via UnifiedSyncManager
-  static Future<Either<Failure, void>> deleteFavorito(String id) {
-    print('🗑️ UNIFIED_SYNC: deleteFavorito() - entityId=$id');
-    final result = UnifiedSyncManager.instance.delete<FavoritoSyncEntity>('receituagro', id);
-    
-    result.then((either) {
-      either.fold(
-        (failure) => print('❌ UNIFIED_SYNC: deleteFavorito() falhou - ${failure.message}'),
-        (_) => print('✅ UNIFIED_SYNC: deleteFavorito() sucesso - entityId=$id'),
-      );
-    }).catchError((error) {
-      print('❌ UNIFIED_SYNC: deleteFavorito() erro - $error');
-    });
-    
-    return result;
-  }
-  
-  /// Wrapper para criar comentário via UnifiedSyncManager
-  static Future<Either<Failure, String>> createComentario(ComentarioSyncEntity entity) {
-    return UnifiedSyncManager.instance.create<ComentarioSyncEntity>('receituagro', entity);
-  }
-  
-  /// Wrapper para atualizar comentário via UnifiedSyncManager
-  static Future<Either<Failure, void>> updateComentario(String id, ComentarioSyncEntity entity) {
-    return UnifiedSyncManager.instance.update<ComentarioSyncEntity>('receituagro', id, entity);
-  }
-  
-  /// Wrapper para deletar comentário via UnifiedSyncManager
-  static Future<Either<Failure, void>> deleteComentario(String id) {
-    return UnifiedSyncManager.instance.delete<ComentarioSyncEntity>('receituagro', id);
-  }
-  
-  /// Wrapper para criar perfil de usuário via UnifiedSyncManager
-  static Future<Either<Failure, String>> createUserProfile(UserProfileSyncEntity entity) {
-    return UnifiedSyncManager.instance.create<UserProfileSyncEntity>('receituagro', entity);
-  }
-  
-  /// Wrapper para atualizar perfil de usuário via UnifiedSyncManager
-  static Future<Either<Failure, void>> updateUserProfile(String id, UserProfileSyncEntity entity) {
-    return UnifiedSyncManager.instance.update<UserProfileSyncEntity>('receituagro', id, entity);
+
+  /// Configuração offline-first para áreas rurais com internet limitada
+  static Future<void> configureOfflineFirst() async {
+    await UnifiedSyncManager.instance.initializeApp(
+      appName: 'receituagro',
+      config: AppSyncConfig.offlineFirst(
+        appName: 'receituagro',
+        syncInterval: const Duration(hours: 6), // Sync esporádico
+      ),
+      entities: [
+        EntitySyncRegistration<FavoritoSyncEntity>(
+          entityType: FavoritoSyncEntity,
+          collectionName: 'favoritos',
+          fromMap: _favoritoFromFirebaseMap,
+          toMap: (FavoritoSyncEntity favorito) => favorito.toMap(),
+          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 12),
+          batchSize: 50,
+        ),
+
+        EntitySyncRegistration<ComentarioSyncEntity>(
+          entityType: ComentarioSyncEntity,
+          collectionName: 'comentarios',
+          fromMap: _comentarioFromFirebaseMap,
+          toMap: (ComentarioSyncEntity comentario) => comentario.toMap(),
+          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 12),
+          batchSize: 50,
+        ),
+
+        EntitySyncRegistration<UserEntity>(
+          entityType: UserEntity,
+          collectionName: 'users',
+          fromMap: _userEntityFromFirebaseMap,
+          toMap: (UserEntity user) => user.toReceitaAgroFirebaseMap(),
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para usuários
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 24),
+          batchSize: 10,
+        ),
+
+        EntitySyncRegistration<SubscriptionEntity>(
+          entityType: SubscriptionEntity,
+          collectionName: 'subscriptions',
+          fromMap: SubscriptionEntity.fromFirebaseMap,
+          toMap: (SubscriptionEntity subscription) => subscription.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote sempre vence para assinaturas
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 24),
+          batchSize: 5,
+        ),
+      ],
+    );
   }
 }

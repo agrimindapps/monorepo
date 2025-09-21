@@ -1,17 +1,19 @@
 import 'dart:async';
 
+import 'package:core/core.dart' hide Failure, UseCase, NoParamsUseCase, AuthenticationFailure, NetworkFailure, ServerFailure, ValidationFailure, UserEntity, AuthProvider;
+import 'package:core/core.dart' as core show UserEntity, AuthProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../domain/entities/user_entity.dart' as gasometer_entity;
+import '../../data/models/user_model.dart';
 import '../../../../core/interfaces/i_sync_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
-import 'package:core/src/infrastructure/services/monorepo_auth_cache.dart';
-import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
@@ -22,7 +24,6 @@ import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/update_profile.dart';
 import '../../domain/usecases/watch_auth_state.dart';
 import '../../data/datasources/auth_local_data_source.dart';
-import '../../data/models/user_model.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {
@@ -44,7 +45,7 @@ class AuthProvider extends ChangeNotifier {
   // MonorepoAuthCache instance for cross-module security
   final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
   
-  UserEntity? _currentUser;
+  gasometer_entity.UserEntity? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
   bool _isInitialized = false;
@@ -91,7 +92,7 @@ class AuthProvider extends ChangeNotifier {
     _initializeMonorepoAuthCache();
   }
   
-  UserEntity? get currentUser => _currentUser;
+  gasometer_entity.UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _currentUser != null;
   bool get isInitialized => _isInitialized;
@@ -156,14 +157,14 @@ class AuthProvider extends ChangeNotifier {
             debugPrint('🔐 Usuário obtido: ${user?.id ?? 'null'}');
           }
           
-          _currentUser = user;
+          _currentUser = _convertFromCoreUser(user);
           _isInitialized = true;
           
           if (user != null) {
             if (kDebugMode) {
               debugPrint('🔐 Configurando sessão para usuário existente');
             }
-            await _setupUserSession(user);
+            await _setupUserSession(_currentUser);
           } else {
             // If no user and should use anonymous mode, initialize anonymously
             final shouldUseAnonymous = await shouldUseAnonymousMode();
@@ -195,10 +196,10 @@ class AuthProvider extends ChangeNotifier {
             notifyListeners();
           },
           (user) async {
-            _currentUser = user;
+            _currentUser = _convertFromCoreUser(user);
             
             if (user != null) {
-              await _setupUserSession(user);
+              await _setupUserSession(_currentUser);
             } else {
               _isPremium = false;
             }
@@ -214,7 +215,8 @@ class AuthProvider extends ChangeNotifier {
     }
   }
   
-  Future<void> _setupUserSession(UserEntity user) async {
+  Future<void> _setupUserSession(gasometer_entity.UserEntity? user) async {
+    if (user == null) return;
     try {
       if (user.isAnonymous) {
         if (kDebugMode) {
@@ -330,7 +332,7 @@ class AuthProvider extends ChangeNotifier {
           // Registra tentativa bem-sucedida (limpa rate limiting)
           await _rateLimiter.recordSuccessfulAttempt();
           
-          _currentUser = user;
+          _currentUser = _convertFromCoreUser(user);
           _isLoading = false;
           _isInLoginAttempt = false; // SECURITY + UX FIX: Clear login attempt flag on success
           
@@ -376,7 +378,7 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       },
       (user) async {
-        _currentUser = user;
+        _currentUser = _convertFromCoreUser(user);
         _isLoading = false;
         
         // Log analytics
@@ -410,7 +412,7 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       },
       (user) async {
-        _currentUser = user;
+        _currentUser = _convertFromCoreUser(user);
         if (kDebugMode) {
           debugPrint('🔐 Usuário anônimo criado com sucesso');
         }
@@ -555,7 +557,7 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       },
       (updatedUser) {
-        _currentUser = updatedUser;
+        _currentUser = _convertFromCoreUser(updatedUser);
         _isLoading = false;
         notifyListeners();
       },
@@ -631,15 +633,15 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Helper method to save user data locally including avatar
-  Future<void> _saveUserLocallyWithAvatar(UserEntity user) async {
+  Future<void> _saveUserLocallyWithAvatar(gasometer_entity.UserEntity user) async {
     try {
       if (kDebugMode) {
         debugPrint('🔐 Salvando dados do usuário localmente com avatar');
       }
       
-      // Convert entity to model and save through local data source
-      final userModel = UserModel.fromEntity(user);
-      await _authLocalDataSource.cacheUser(userModel);
+      // Convert gasometer UserEntity to core UserEntity for storage
+      final coreUser = _convertToCore(user);
+      await _authLocalDataSource.cacheUser(coreUser);
       
     } catch (e) {
       throw Exception('Falha ao salvar dados do usuário localmente: $e');
@@ -911,6 +913,72 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
   
+  /// Convert core UserEntity to gasometer UserEntity
+  gasometer_entity.UserEntity? _convertFromCoreUser(core.UserEntity? coreUser) {
+    if (coreUser == null) return null;
+    
+    // Convert from core UserEntity to gasometer UserEntity
+    return gasometer_entity.UserEntity(
+      id: coreUser.id,
+      email: coreUser.email,
+      displayName: coreUser.displayName,
+      photoUrl: coreUser.photoUrl,
+      avatarBase64: null, // Core doesn't have local avatar support
+      type: _mapAuthProviderToUserType(coreUser.provider),
+      isEmailVerified: coreUser.isEmailVerified,
+      createdAt: coreUser.createdAt ?? DateTime.now(),
+      lastSignInAt: coreUser.lastLoginAt,
+      metadata: {
+        'provider': coreUser.provider.name,
+        'phone': coreUser.phone,
+        'isActive': coreUser.isActive,
+      },
+    );
+  }
+
+
+  /// Map AuthProvider to UserType
+  gasometer_entity.UserType _mapAuthProviderToUserType(core.AuthProvider provider) {
+    switch (provider) {
+      case core.AuthProvider.anonymous:
+        return gasometer_entity.UserType.anonymous;
+      case core.AuthProvider.email:
+      case core.AuthProvider.google:
+      case core.AuthProvider.apple:
+      case core.AuthProvider.facebook:
+        return gasometer_entity.UserType.registered;
+    }
+  }
+
+  /// Convert gasometer UserEntity to core UserEntity
+  core.UserEntity _convertToCore(gasometer_entity.UserEntity gasometerUser) {
+    return core.UserEntity(
+      id: gasometerUser.id,
+      email: gasometerUser.email ?? '',
+      displayName: gasometerUser.displayName ?? '',
+      photoUrl: gasometerUser.photoUrl,
+      isEmailVerified: gasometerUser.isEmailVerified,
+      lastLoginAt: gasometerUser.lastSignInAt,
+      provider: _mapUserTypeToAuthProvider(gasometerUser.type),
+      phone: gasometerUser.metadata['phone'] as String?,
+      isActive: gasometerUser.metadata['isActive'] as bool? ?? true,
+      createdAt: gasometerUser.createdAt,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Map UserType to AuthProvider for reverse conversion
+  core.AuthProvider _mapUserTypeToAuthProvider(gasometer_entity.UserType userType) {
+    switch (userType) {
+      case gasometer_entity.UserType.anonymous:
+        return core.AuthProvider.anonymous;
+      case gasometer_entity.UserType.registered:
+      case gasometer_entity.UserType.premium:
+        return core.AuthProvider.email; // Default to email for registered users
+    }
+  }
+
+
   @override
   void dispose() {
     _authStateSubscription?.cancel();

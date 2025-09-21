@@ -92,10 +92,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               }
             },
             onNavigateToImages: (plantId) {
-              if (mounted) context.push('/plants/$plantId/images');
+              // TODO: Implementar rota para galeria de imagens
+              // if (mounted) context.push('/plants/$plantId/images');
             },
             onNavigateToSchedule: (plantId) {
-              if (mounted) context.push('/plants/$plantId/schedule');
+              // TODO: Implementar rota para cronograma de cuidados
+              // if (mounted) context.push('/plants/$plantId/schedule');
             },
             onShowSnackBar: (message, type) {
               if (mounted) _showSnackBar(message, type);

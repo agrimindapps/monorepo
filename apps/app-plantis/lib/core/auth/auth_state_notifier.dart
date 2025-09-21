@@ -59,13 +59,13 @@ class AuthStateNotifier {
   bool _isInitialized = false;
 
   // Stream controllers for state changes
-  final StreamController<UserEntity?> _userController = 
+  final StreamController<UserEntity?> _userController =
       StreamController<UserEntity?>.broadcast();
-  final StreamController<bool> _authController = 
+  final StreamController<bool> _authController =
       StreamController<bool>.broadcast();
-  final StreamController<bool> _premiumController = 
+  final StreamController<bool> _premiumController =
       StreamController<bool>.broadcast();
-  final StreamController<bool> _initializedController = 
+  final StreamController<bool> _initializedController =
       StreamController<bool>.broadcast();
 
   // Public getters for current state
@@ -96,7 +96,7 @@ class AuthStateNotifier {
     if (_currentUser != user) {
       _currentUser = user;
       _isAuthenticated = user != null;
-      
+
       // Notify listeners
       if (!_userController.isClosed) {
         _userController.add(user);
@@ -104,8 +104,10 @@ class AuthStateNotifier {
       if (!_authController.isClosed) {
         _authController.add(_isAuthenticated);
       }
-      
-      debugPrint('🔐 AuthStateNotifier: User updated - authenticated: $_isAuthenticated');
+
+      debugPrint(
+        '🔐 AuthStateNotifier: User updated - authenticated: $_isAuthenticated',
+      );
     }
   }
 
@@ -119,11 +121,11 @@ class AuthStateNotifier {
   void updatePremiumStatus(bool isPremium) {
     if (_isPremium != isPremium) {
       _isPremium = isPremium;
-      
+
       if (!_premiumController.isClosed) {
         _premiumController.add(_isPremium);
       }
-      
+
       debugPrint('💎 AuthStateNotifier: Premium status updated: $_isPremium');
     }
   }
@@ -140,12 +142,14 @@ class AuthStateNotifier {
   void updateInitializationStatus(bool isInitialized) {
     if (_isInitialized != isInitialized) {
       _isInitialized = isInitialized;
-      
+
       if (!_initializedController.isClosed) {
         _initializedController.add(_isInitialized);
       }
-      
-      debugPrint('🚀 AuthStateNotifier: Initialization status updated: $_isInitialized');
+
+      debugPrint(
+        '🚀 AuthStateNotifier: Initialization status updated: $_isInitialized',
+      );
     }
   }
 
@@ -209,12 +213,12 @@ class AuthStateNotifier {
   /// and a new instance should be created if needed.
   void dispose() {
     debugPrint('♻️ AuthStateNotifier: Disposing resources');
-    
+
     _userController.close();
     _authController.close();
     _premiumController.close();
     _initializedController.close();
-    
+
     // Clear the singleton instance
     synchronized(_lock, () {
       _instance = null;
@@ -223,7 +227,7 @@ class AuthStateNotifier {
 }
 
 /// Thread-safe synchronization utility
-/// 
+///
 /// This ensures that singleton creation is thread-safe across isolates
 void synchronized(Object lock, void Function() callback) {
   // In Flutter, this is primarily for consistency as most operations

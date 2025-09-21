@@ -108,7 +108,7 @@ class OdometerValidationService {
 
     // Check for unrealistic daily increases
     
-    final daysSinceLastUpdate = DateTime.now().difference(vehicle.updatedAt).inDays;
+    final daysSinceLastUpdate = DateTime.now().difference(vehicle.updatedAt ?? DateTime.now()).inDays;
     
     if (daysSinceLastUpdate > 0) {
       final dailyIncrease = (odometerValue - vehicle.currentOdometer) / daysSinceLastUpdate;

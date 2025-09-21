@@ -1,9 +1,41 @@
 import 'package:core/core.dart';
+
+import '../features/plants/domain/entities/plant.dart';
+import '../features/tasks/domain/entities/task.dart';
 import 'data/models/comentario_model.dart';
+
+// Funções auxiliares para contornar problema do analyzer
+Plant _plantFromFirebaseMap(Map<String, dynamic> map) {
+  // Referência completa ao método estático
+  final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+  return Plant(
+    id: baseFields['id'] as String,
+    createdAt: baseFields['createdAt'] as DateTime?,
+    updatedAt: baseFields['updatedAt'] as DateTime?,
+    lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+    isDirty: baseFields['isDirty'] as bool,
+    isDeleted: baseFields['isDeleted'] as bool,
+    version: baseFields['version'] as int,
+    userId: baseFields['userId'] as String?,
+    moduleName: baseFields['moduleName'] as String?,
+    name: map['name'] as String,
+    species: map['species'] as String?,
+    spaceId: map['space_id'] as String?,
+    imageBase64: map['image_base64'] as String?,
+    imageUrls: map['image_urls'] != null
+        ? List<String>.from(map['image_urls'] as List)
+        : const [],
+    plantingDate: map['planting_date'] != null
+        ? DateTime.parse(map['planting_date'] as String)
+        : null,
+    notes: map['notes'] as String?,
+    isFavorited: map['is_favorited'] as bool? ?? false,
+  );
+}
 
 /// Configuração de sincronização específica do Plantis
 /// Apps simples com poucas entidades e sync básico
-class PlantisSyncConfig {
+abstract final class PlantisSyncConfig {
   /// Configura o sistema de sincronização para o Plantis
   static Future<void> configure() async {
     await UnifiedSyncManager.instance.initializeApp(
@@ -14,28 +46,20 @@ class PlantisSyncConfig {
         conflictStrategy: ConflictStrategy.timestamp, // Simples timestamp
       ),
       entities: [
-        // Entidade principal - Plantas
+        // Entidade principal - Plantas (usando a entidade real do app)
         EntitySyncRegistration<Plant>.simple(
           entityType: Plant,
           collectionName: 'plants',
-          fromMap: Plant.fromMap,
+          fromMap: _plantFromFirebaseMap,
           toMap: (plant) => plant.toFirebaseMap(),
         ),
         
-        // Cuidados/Tasks relacionadas às plantas
-        EntitySyncRegistration<PlantCare>.simple(
-          entityType: PlantCare,
-          collectionName: 'plant_care',
-          fromMap: PlantCare.fromMap,
-          toMap: (care) => care.toFirebaseMap(),
-        ),
-        
-        // Lembretes e notificações
-        EntitySyncRegistration<PlantReminder>.simple(
-          entityType: PlantReminder,
-          collectionName: 'plant_reminders',
-          fromMap: PlantReminder.fromMap,
-          toMap: (reminder) => reminder.toFirebaseMap(),
+        // Tasks relacionadas às plantas (usando a entidade real do app)
+        EntitySyncRegistration<Task>.simple(
+          entityType: Task,
+          collectionName: 'tasks',
+          fromMap: Task.fromFirebaseMap,
+          toMap: (task) => task.toFirebaseMap(),
         ),
 
         // Comentários das plantas
@@ -44,6 +68,22 @@ class PlantisSyncConfig {
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
           toMap: (comentario) => comentario.toFirebaseMap(),
+        ),
+
+        // Usuários (profile compartilhado entre apps)
+        EntitySyncRegistration<UserEntity>.simple(
+          entityType: UserEntity,
+          collectionName: 'users',
+          fromMap: UserEntity.fromFirebaseMap,
+          toMap: (user) => user.toFirebaseMap(),
+        ),
+
+        // Assinaturas (subscription compartilhada entre apps)
+        EntitySyncRegistration<SubscriptionEntity>.simple(
+          entityType: SubscriptionEntity,
+          collectionName: 'subscriptions',
+          fromMap: SubscriptionEntity.fromFirebaseMap,
+          toMap: (subscription) => subscription.toFirebaseMap(),
         ),
       ],
     );
@@ -61,8 +101,16 @@ class PlantisSyncConfig {
         EntitySyncRegistration<Plant>.simple(
           entityType: Plant,
           collectionName: 'dev_plants',
-          fromMap: Plant.fromMap,
+          fromMap: _plantFromFirebaseMap,
           toMap: (plant) => plant.toFirebaseMap(),
+        ),
+
+        // Tasks relacionadas às plantas (desenvolvimento)
+        EntitySyncRegistration<Task>.simple(
+          entityType: Task,
+          collectionName: 'dev_tasks',
+          fromMap: Task.fromFirebaseMap,
+          toMap: (task) => task.toFirebaseMap(),
         ),
 
         // Comentários das plantas (desenvolvimento)
@@ -71,6 +119,22 @@ class PlantisSyncConfig {
           collectionName: 'dev_comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
           toMap: (comentario) => comentario.toFirebaseMap(),
+        ),
+
+        // Usuários (desenvolvimento)
+        EntitySyncRegistration<UserEntity>.simple(
+          entityType: UserEntity,
+          collectionName: 'dev_users',
+          fromMap: UserEntity.fromFirebaseMap,
+          toMap: (user) => user.toFirebaseMap(),
+        ),
+
+        // Assinaturas (desenvolvimento)
+        EntitySyncRegistration<SubscriptionEntity>.simple(
+          entityType: SubscriptionEntity,
+          collectionName: 'dev_subscriptions',
+          fromMap: SubscriptionEntity.fromFirebaseMap,
+          toMap: (subscription) => subscription.toFirebaseMap(),
         ),
       ],
     );
@@ -88,12 +152,24 @@ class PlantisSyncConfig {
         EntitySyncRegistration<Plant>(
           entityType: Plant,
           collectionName: 'plants',
-          fromMap: Plant.fromMap,
+          fromMap: _plantFromFirebaseMap,
           toMap: (Plant plant) => plant.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
           batchSize: 100, // Lotes maiores quando sync
+        ),
+
+        // Tasks relacionadas às plantas (offline-first)
+        EntitySyncRegistration<Task>(
+          entityType: Task,
+          collectionName: 'tasks',
+          fromMap: Task.fromFirebaseMap,
+          toMap: (Task task) => task.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 12),
+          batchSize: 50, // Lotes menores para tasks
         ),
 
         // Comentários das plantas (offline-first)
@@ -107,387 +183,31 @@ class PlantisSyncConfig {
           syncInterval: const Duration(hours: 12),
           batchSize: 50, // Lotes menores para comentários
         ),
+
+        // Usuários (offline-first)
+        EntitySyncRegistration<UserEntity>(
+          entityType: UserEntity,
+          collectionName: 'users',
+          fromMap: UserEntity.fromFirebaseMap,
+          toMap: (UserEntity user) => user.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para usuários
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 24), // Sync mais esporádico para usuários
+          batchSize: 10, // Lotes pequenos para usuários
+        ),
+
+        // Assinaturas (offline-first)
+        EntitySyncRegistration<SubscriptionEntity>(
+          entityType: SubscriptionEntity,
+          collectionName: 'subscriptions',
+          fromMap: SubscriptionEntity.fromFirebaseMap,
+          toMap: (SubscriptionEntity subscription) => subscription.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote sempre vence para assinaturas
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 24), // Sync mais esporádico para assinaturas
+          batchSize: 5, // Lotes muito pequenos para assinaturas
+        ),
       ],
     );
   }
-}
-
-// Modelos simples do Plantis
-
-class Plant extends BaseSyncEntity {
-  const Plant({
-    required String id,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-    required this.name,
-    required this.species,
-    this.notes = '',
-    this.isActive = true,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastSyncAt: lastSyncAt,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
-
-  final String name;
-  final String species;
-  final String notes;
-  final bool isActive;
-
-  static Plant fromMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    return Plant(
-      id: baseFields['id'] as String,
-      createdAt: baseFields['createdAt'] as DateTime?,
-      updatedAt: baseFields['updatedAt'] as DateTime?,
-      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      name: (map['name'] as String?) ?? '',
-      species: (map['species'] as String?) ?? '',
-      notes: (map['notes'] as String?) ?? '',
-      isActive: (map['is_active'] as bool?) ?? true,
-    );
-  }
-
-  @override
-  Map<String, dynamic> toFirebaseMap() {
-    return {
-      ...baseFirebaseFields,
-      'name': name,
-      'species': species,
-      'notes': notes,
-      'is_active': isActive,
-    };
-  }
-
-  @override
-  Plant copyWith({
-    String? id,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool? isDirty,
-    bool? isDeleted,
-    int? version,
-    String? userId,
-    String? moduleName,
-    String? name,
-    String? species,
-    String? notes,
-    bool? isActive,
-  }) {
-    return Plant(
-      id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
-      isDirty: isDirty ?? this.isDirty,
-      isDeleted: isDeleted ?? this.isDeleted,
-      version: version ?? this.version,
-      userId: userId ?? this.userId,
-      moduleName: moduleName ?? this.moduleName,
-      name: name ?? this.name,
-      species: species ?? this.species,
-      notes: notes ?? this.notes,
-      isActive: isActive ?? this.isActive,
-    );
-  }
-
-  @override
-  Plant markAsDirty() => copyWith(isDirty: true, updatedAt: DateTime.now());
-
-  @override
-  Plant markAsSynced({DateTime? syncTime}) => copyWith(
-        isDirty: false,
-        lastSyncAt: syncTime ?? DateTime.now(),
-      );
-
-  @override
-  Plant markAsDeleted() => copyWith(isDeleted: true, updatedAt: DateTime.now());
-
-  @override
-  Plant incrementVersion() => copyWith(version: version + 1);
-
-  @override
-  Plant withUserId(String userId) => copyWith(userId: userId);
-
-  @override
-  Plant withModule(String moduleName) => copyWith(moduleName: moduleName);
-
-  @override
-  List<Object?> get props => [
-        ...super.props,
-        name,
-        species,
-        notes,
-        isActive,
-      ];
-}
-
-class PlantCare extends BaseSyncEntity {
-  const PlantCare({
-    required String id,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-    required this.plantId,
-    required this.careType,
-    this.notes = '',
-    this.isCompleted = false,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastSyncAt: lastSyncAt,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
-
-  final String plantId;
-  final String careType; // 'watering', 'fertilizing', 'pruning', etc.
-  final String notes;
-  final bool isCompleted;
-
-  static PlantCare fromMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    return PlantCare(
-      id: baseFields['id'] as String,
-      createdAt: baseFields['createdAt'] as DateTime?,
-      updatedAt: baseFields['updatedAt'] as DateTime?,
-      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      plantId: (map['plant_id'] as String?) ?? '',
-      careType: (map['care_type'] as String?) ?? '',
-      notes: (map['notes'] as String?) ?? '',
-      isCompleted: (map['is_completed'] as bool?) ?? false,
-    );
-  }
-
-  @override
-  Map<String, dynamic> toFirebaseMap() {
-    return {
-      ...baseFirebaseFields,
-      'plant_id': plantId,
-      'care_type': careType,
-      'notes': notes,
-      'is_completed': isCompleted,
-    };
-  }
-
-  @override
-  PlantCare copyWith({
-    String? id,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool? isDirty,
-    bool? isDeleted,
-    int? version,
-    String? userId,
-    String? moduleName,
-    String? plantId,
-    String? careType,
-    String? notes,
-    bool? isCompleted,
-  }) {
-    return PlantCare(
-      id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
-      isDirty: isDirty ?? this.isDirty,
-      isDeleted: isDeleted ?? this.isDeleted,
-      version: version ?? this.version,
-      userId: userId ?? this.userId,
-      moduleName: moduleName ?? this.moduleName,
-      plantId: plantId ?? this.plantId,
-      careType: careType ?? this.careType,
-      notes: notes ?? this.notes,
-      isCompleted: isCompleted ?? this.isCompleted,
-    );
-  }
-
-  @override
-  PlantCare markAsDirty() => copyWith(isDirty: true, updatedAt: DateTime.now());
-
-  @override
-  PlantCare markAsSynced({DateTime? syncTime}) => copyWith(
-        isDirty: false,
-        lastSyncAt: syncTime ?? DateTime.now(),
-      );
-
-  @override
-  PlantCare markAsDeleted() => copyWith(isDeleted: true, updatedAt: DateTime.now());
-
-  @override
-  PlantCare incrementVersion() => copyWith(version: version + 1);
-
-  @override
-  PlantCare withUserId(String userId) => copyWith(userId: userId);
-
-  @override
-  PlantCare withModule(String moduleName) => copyWith(moduleName: moduleName);
-
-  @override
-  List<Object?> get props => [
-        ...super.props,
-        plantId,
-        careType,
-        notes,
-        isCompleted,
-      ];
-}
-
-class PlantReminder extends BaseSyncEntity {
-  const PlantReminder({
-    required String id,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-    required this.plantId,
-    required this.title,
-    required this.reminderDate,
-    this.isActive = true,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastSyncAt: lastSyncAt,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
-
-  final String plantId;
-  final String title;
-  final DateTime reminderDate;
-  final bool isActive;
-
-  static PlantReminder fromMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    return PlantReminder(
-      id: baseFields['id'] as String,
-      createdAt: baseFields['createdAt'] as DateTime?,
-      updatedAt: baseFields['updatedAt'] as DateTime?,
-      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      plantId: (map['plant_id'] as String?) ?? '',
-      title: (map['title'] as String?) ?? '',
-      reminderDate: DateTime.parse((map['reminder_date'] as String?) ?? DateTime.now().toIso8601String()),
-      isActive: (map['is_active'] as bool?) ?? true,
-    );
-  }
-
-  @override
-  Map<String, dynamic> toFirebaseMap() {
-    return {
-      ...baseFirebaseFields,
-      'plant_id': plantId,
-      'title': title,
-      'reminder_date': reminderDate.toIso8601String(),
-      'is_active': isActive,
-    };
-  }
-
-  @override
-  PlantReminder copyWith({
-    String? id,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool? isDirty,
-    bool? isDeleted,
-    int? version,
-    String? userId,
-    String? moduleName,
-    String? plantId,
-    String? title,
-    DateTime? reminderDate,
-    bool? isActive,
-  }) {
-    return PlantReminder(
-      id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
-      isDirty: isDirty ?? this.isDirty,
-      isDeleted: isDeleted ?? this.isDeleted,
-      version: version ?? this.version,
-      userId: userId ?? this.userId,
-      moduleName: moduleName ?? this.moduleName,
-      plantId: plantId ?? this.plantId,
-      title: title ?? this.title,
-      reminderDate: reminderDate ?? this.reminderDate,
-      isActive: isActive ?? this.isActive,
-    );
-  }
-
-  @override
-  PlantReminder markAsDirty() => copyWith(isDirty: true, updatedAt: DateTime.now());
-
-  @override
-  PlantReminder markAsSynced({DateTime? syncTime}) => copyWith(
-        isDirty: false,
-        lastSyncAt: syncTime ?? DateTime.now(),
-      );
-
-  @override
-  PlantReminder markAsDeleted() => copyWith(isDeleted: true, updatedAt: DateTime.now());
-
-  @override
-  PlantReminder incrementVersion() => copyWith(version: version + 1);
-
-  @override
-  PlantReminder withUserId(String userId) => copyWith(userId: userId);
-
-  @override
-  PlantReminder withModule(String moduleName) => copyWith(moduleName: moduleName);
-
-  @override
-  List<Object?> get props => [
-        ...super.props,
-        plantId,
-        title,
-        reminderDate,
-        isActive,
-      ];
 }

@@ -1,11 +1,10 @@
-import 'base_entity.dart';
+import 'base_sync_entity.dart';
 
 /// Entidade de assinatura compartilhada entre os apps
 /// Representa o status de assinatura do usuário via RevenueCat
-class SubscriptionEntity extends BaseEntity {
+class SubscriptionEntity extends BaseSyncEntity {
   const SubscriptionEntity({
     required super.id,
-    required this.userId,
     required this.productId,
     required this.status,
     required this.tier,
@@ -20,10 +19,13 @@ class SubscriptionEntity extends BaseEntity {
     this.isSandbox = false,
     super.createdAt,
     super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty = false,
+    super.isDeleted = false,
+    super.version = 1,
+    required super.userId,
+    super.moduleName,
   });
-
-  /// ID do usuário proprietário da assinatura
-  final String userId;
 
   /// ID do produto da assinatura (Plantis/ReceitaAgro)
   final String productId;
@@ -104,9 +106,8 @@ class SubscriptionEntity extends BaseEntity {
   }
 
   @override
-  BaseEntity copyWith({
+  SubscriptionEntity copyWith({
     String? id,
-    String? userId,
     String? productId,
     SubscriptionStatus? status,
     SubscriptionTier? tier,
@@ -121,10 +122,15 @@ class SubscriptionEntity extends BaseEntity {
     bool? isSandbox,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
   }) {
     return SubscriptionEntity(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       productId: productId ?? this.productId,
       status: status ?? this.status,
       tier: tier ?? this.tier,
@@ -139,13 +145,18 @@ class SubscriptionEntity extends BaseEntity {
       isSandbox: isSandbox ?? this.isSandbox,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
 
   @override
   List<Object?> get props => [
         ...super.props,
-        userId,
         productId,
         status,
         tier,
@@ -159,6 +170,113 @@ class SubscriptionEntity extends BaseEntity {
         isInTrial,
         isSandbox,
       ];
+
+  /// Implementação dos métodos abstratos do BaseSyncEntity
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      'user_id': userId,
+      'product_id': productId,
+      'status': status.name,
+      'tier': tier.name,
+      'expiration_date': expirationDate?.toIso8601String(),
+      'purchase_date': purchaseDate?.toIso8601String(),
+      'original_purchase_date': originalPurchaseDate?.toIso8601String(),
+      'renewal_date': renewalDate?.toIso8601String(),
+      'trial_end_date': trialEndDate?.toIso8601String(),
+      'cancellation_reason': cancellationReason,
+      'store': store.name,
+      'is_in_trial': isInTrial,
+      'is_sandbox': isSandbox,
+    };
+  }
+
+  /// Create SubscriptionEntity from Firebase map
+  static SubscriptionEntity fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+
+    return SubscriptionEntity(
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String? ?? map['user_id'] as String,
+      moduleName: baseFields['moduleName'] as String?,
+      productId: map['product_id'] as String,
+      status: SubscriptionStatus.values.firstWhere(
+        (s) => s.name == (map['status'] as String),
+        orElse: () => SubscriptionStatus.unknown,
+      ),
+      tier: SubscriptionTier.values.firstWhere(
+        (t) => t.name == (map['tier'] as String),
+        orElse: () => SubscriptionTier.free,
+      ),
+      expirationDate: map['expiration_date'] != null
+          ? DateTime.parse(map['expiration_date'] as String)
+          : null,
+      purchaseDate: map['purchase_date'] != null
+          ? DateTime.parse(map['purchase_date'] as String)
+          : null,
+      originalPurchaseDate: map['original_purchase_date'] != null
+          ? DateTime.parse(map['original_purchase_date'] as String)
+          : null,
+      renewalDate: map['renewal_date'] != null
+          ? DateTime.parse(map['renewal_date'] as String)
+          : null,
+      trialEndDate: map['trial_end_date'] != null
+          ? DateTime.parse(map['trial_end_date'] as String)
+          : null,
+      cancellationReason: map['cancellation_reason'] as String?,
+      store: Store.values.firstWhere(
+        (s) => s.name == (map['store'] as String),
+        orElse: () => Store.unknown,
+      ),
+      isInTrial: map['is_in_trial'] as bool? ?? false,
+      isSandbox: map['is_sandbox'] as bool? ?? false,
+    );
+  }
+
+  @override
+  SubscriptionEntity markAsDirty() {
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  SubscriptionEntity markAsSynced({DateTime? syncTime}) {
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
+  }
+
+  @override
+  SubscriptionEntity markAsDeleted() {
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  SubscriptionEntity incrementVersion() {
+    return copyWith(
+      version: version + 1,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  SubscriptionEntity withUserId(String userId) {
+    return copyWith(userId: userId, isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  SubscriptionEntity withModule(String moduleName) {
+    return copyWith(
+      moduleName: moduleName,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
 }
 
 /// Status da assinatura

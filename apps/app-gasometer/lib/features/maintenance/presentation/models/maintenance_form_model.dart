@@ -102,7 +102,7 @@ class MaintenanceFormModel extends Equatable {
   factory MaintenanceFormModel.fromMaintenanceEntity(MaintenanceEntity maintenance) {
     return MaintenanceFormModel(
       id: maintenance.id,
-      userId: maintenance.userId,
+      userId: maintenance.userId ?? '',
       vehicleId: maintenance.vehicleId,
       vehicle: null, // Será carregado separadamente
       type: maintenance.type,

@@ -256,7 +256,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      context.push('/auth');
+                                      context.push('/login');
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.orange,

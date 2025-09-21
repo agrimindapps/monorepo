@@ -1,13 +1,12 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' as core;
 
-import '../../../core/interfaces/i_premium_service.dart';
-import '../../../core/sync/receituagro_sync_config.dart';
-import '../../../core/providers/auth_provider.dart';
 import '../../../core/di/injection_container.dart';
-import '../domain/entities/comentario_sync_entity.dart';
+import '../../../core/interfaces/i_premium_service.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../constants/comentarios_design_tokens.dart';
+import '../domain/entities/comentario_sync_entity.dart';
 import '../models/comentario_model.dart';
 
 abstract class IComentariosRepository {
@@ -50,34 +49,46 @@ class ComentariosService extends ChangeNotifier {
   }
 
   Future<void> addComentario(ComentarioModel comentario) async {
+    print('💬 COMENTARIO_SERVICE: Adicionando comentário - id=${comentario.id}, titulo="${comentario.titulo}"');
     try {
+      print('📁 COMENTARIO_SERVICE: Salvando no repositório local...');
       await _repository?.addComentario(comentario);
+      print('✅ COMENTARIO_SERVICE: Comentário salvo localmente com sucesso');
       
       // Sincroniza com Firestore se usuário autenticado
+      print('🔄 COMENTARIO_SERVICE: Iniciando sincronização...');
       await _queueSyncOperation('create', comentario);
     } catch (e) {
-      debugPrint('Error adding comentario: $e');
+      print('❌ COMENTARIO_SERVICE: Error adding comentario: $e');
       rethrow;
     }
   }
 
   Future<void> updateComentario(ComentarioModel comentario) async {
+    print('💬 COMENTARIO_SERVICE: Atualizando comentário - id=${comentario.id}, titulo="${comentario.titulo}"');
     try {
+      print('📁 COMENTARIO_SERVICE: Atualizando no repositório local...');
       await _repository?.updateComentario(comentario);
+      print('✅ COMENTARIO_SERVICE: Comentário atualizado localmente com sucesso');
       
       // Sincroniza com Firestore se usuário autenticado
+      print('🔄 COMENTARIO_SERVICE: Iniciando sincronização...');
       await _queueSyncOperation('update', comentario);
     } catch (e) {
-      debugPrint('Error updating comentario: $e');
+      print('❌ COMENTARIO_SERVICE: Error updating comentario: $e');
       rethrow;
     }
   }
 
   Future<void> deleteComentario(String id) async {
+    print('💬 COMENTARIO_SERVICE: Deletando comentário - id=$id');
     try {
+      print('📁 COMENTARIO_SERVICE: Removendo do repositório local...');
       await _repository?.deleteComentario(id);
+      print('✅ COMENTARIO_SERVICE: Comentário removido localmente com sucesso');
       
       // Sincroniza com Firestore se usuário autenticado  
+      print('🔄 COMENTARIO_SERVICE: Iniciando sincronização de deleção...');
       await _queueSyncOperation('delete', ComentarioModel(
         id: id,
         idReg: '',
@@ -90,7 +101,7 @@ class ComentariosService extends ChangeNotifier {
         status: false,
       ));
     } catch (e) {
-      debugPrint('Error deleting comentario: $e');
+      print('❌ COMENTARIO_SERVICE: Error deleting comentario: $e');
       rethrow;
     }
   }
@@ -182,20 +193,26 @@ class ComentariosService extends ChangeNotifier {
 
   /// Sincroniza comentário usando sistema core
   Future<void> _queueSyncOperation(String operation, ComentarioModel comentario) async {
+    print('💬 COMENTARIO_SERVICE: Iniciando operação de sync - operation=$operation, comentario_id=${comentario.id}');
     try {
       // Verifica se o usuário está autenticado
-      if (_authProvider == null || !_authProvider!.isAuthenticated || _authProvider!.isAnonymous) {
-        debugPrint('Usuário não autenticado - pulando sincronização de comentário');
+      if (_authProvider == null || !_authProvider.isAuthenticated || _authProvider.isAnonymous) {
+        print('⚠️ COMENTARIO_SERVICE: Usuário não autenticado - pulando sincronização de comentário');
         return;
       }
+      
+      print('✅ COMENTARIO_SERVICE: Usuário autenticado - userId=${_authProvider.currentUser?.id}');
 
       // Verifica se há dados válidos para sincronização
       if (comentario.id.isEmpty) {
-        debugPrint('ID do comentário inválido - pulando sincronização');
+        print('❌ COMENTARIO_SERVICE: ID do comentário inválido - pulando sincronização');
         return;
       }
+      
+      print('📄 COMENTARIO_SERVICE: Dados do comentário válidos - id=${comentario.id}, titulo="${comentario.titulo}", ferramenta=${comentario.ferramenta}');
 
       // Cria entidade de sincronização
+      print('🔄 COMENTARIO_SERVICE: Criando entidade de sincronização...');
       final syncEntity = ComentarioSyncEntity(
         id: comentario.id,
         idReg: comentario.idReg,
@@ -206,44 +223,51 @@ class ComentariosService extends ChangeNotifier {
         status: comentario.status,
         createdAt: comentario.createdAt,
         updatedAt: comentario.updatedAt,
-        userId: _authProvider!.currentUser?.id,
+        userId: _authProvider.currentUser?.id,
       );
+      print('✅ COMENTARIO_SERVICE: Entidade de sincronização criada - syncEntity.id=${syncEntity.id}');
 
-      // Executa operação de sincronização via ReceitaAgroSyncConfig
+      // Executa operação de sincronização via UnifiedSyncManager
+      print('🚀 COMENTARIO_SERVICE: Executando operação de sync - $operation');
       if (operation == 'create') {
-        final result = await ReceitaAgroSyncConfig.createComentario(syncEntity);
+        print('🆕 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.create<ComentarioSyncEntity>()...');
+        final result = await core.UnifiedSyncManager.instance.create<ComentarioSyncEntity>('receituagro', syncEntity);
         result.fold(
           (core.Failure failure) {
-            debugPrint('Erro na sincronização de comentário (create): ${failure.message}');
+            print('❌ COMENTARIO_SERVICE: Erro na sincronização de comentário (create): ${failure.message}');
           },
           (String entityId) {
-            debugPrint('Comentário criado com sucesso: id=$entityId');
+            print('✅ COMENTARIO_SERVICE: Comentário criado com sucesso: id=$entityId');
           },
         );
       } else if (operation == 'delete') {
-        final result = await ReceitaAgroSyncConfig.deleteComentario(syncEntity.id);
+        print('🗜 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.delete<ComentarioSyncEntity>()...');
+        final result = await core.UnifiedSyncManager.instance.delete<ComentarioSyncEntity>('receituagro', syncEntity.id);
         result.fold(
           (core.Failure failure) {
-            debugPrint('Erro na sincronização de comentário (delete): ${failure.message}');
+            print('❌ COMENTARIO_SERVICE: Erro na sincronização de comentário (delete): ${failure.message}');
           },
           (_) {
-            debugPrint('Comentário deletado com sucesso: id=${comentario.id}');
+            print('✅ COMENTARIO_SERVICE: Comentário deletado com sucesso: id=${comentario.id}');
           },
         );
       } else {
-        final result = await ReceitaAgroSyncConfig.updateComentario(syncEntity.id, syncEntity);
+        print('🔄 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.update<ComentarioSyncEntity>()...');
+        final result = await core.UnifiedSyncManager.instance.update<ComentarioSyncEntity>('receituagro', syncEntity.id, syncEntity);
         result.fold(
           (core.Failure failure) {
-            debugPrint('Erro na sincronização de comentário (update): ${failure.message}');
+            print('❌ COMENTARIO_SERVICE: Erro na sincronização de comentário (update): ${failure.message}');
           },
           (_) {
-            debugPrint('Comentário atualizado com sucesso: id=${comentario.id}');
+            print('✅ COMENTARIO_SERVICE: Comentário atualizado com sucesso: id=${comentario.id}');
           },
         );
       }
       
+      print('✨ COMENTARIO_SERVICE: Operação de sync $operation finalizada para comentario_id=${comentario.id}');
+      
     } catch (e) {
-      debugPrint('Erro ao sincronizar comentário: $e');
+      print('❌ COMENTARIO_SERVICE: Erro ao sincronizar comentário: $e');
       // Não relança a exceção para não quebrar a operação local
     }
   }

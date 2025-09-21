@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:core/core.dart' hide Failure, AuthenticationFailure, ServerFailure, CacheFailure, NetworkFailure, ValidationFailure, UnexpectedFailure, NetworkException;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -7,7 +8,6 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/data_cleaner_service.dart';
-import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';
@@ -31,13 +31,13 @@ class AuthRepositoryImpl implements AuthRepository {
       if (remoteUser != null) {
         // Cache the user locally
         await localDataSource.cacheUser(remoteUser);
-        return Right(remoteUser.toEntity());
+        return Right(remoteUser);
       }
       
       // Fallback to local cache
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
-        return Right(cachedUser.toEntity());
+        return Right(cachedUser);
       }
       
       return const Right(null);
@@ -46,7 +46,7 @@ class AuthRepositoryImpl implements AuthRepository {
       try {
         final cachedUser = await localDataSource.getCachedUser();
         if (cachedUser != null) {
-          return Right(cachedUser.toEntity());
+          return Right(cachedUser);
         }
       } catch (_) {}
       
@@ -71,8 +71,8 @@ class AuthRepositoryImpl implements AuthRepository {
         // Cache the user locally
         localDataSource.cacheUser(userModel).catchError((_) {});
         
-        return Right(userModel.toEntity());
-      }).handleError((error) {
+        return Right(userModel);
+      }).handleError((Object error) {
         if (error is ServerException) {
           return Left(ServerFailure(error.message));
         }
@@ -94,7 +94,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Cache user locally
       await localDataSource.cacheUser(userModel);
       
-      return Right(userModel.toEntity());
+      return Right(userModel);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
     } on ServerException catch (e) {
@@ -113,7 +113,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       // Don't cache anonymous users
       
-      return Right(userModel.toEntity());
+      return Right(userModel);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
     } on ServerException catch (e) {
@@ -139,7 +139,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Cache user locally
       await localDataSource.cacheUser(userModel);
       
-      return Right(userModel.toEntity());
+      return Right(userModel);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
     } on ServerException catch (e) {
@@ -160,7 +160,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Update cached user
       await localDataSource.cacheUser(userModel);
       
-      return Right(userModel.toEntity());
+      return Right(userModel);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
     } on ServerException catch (e) {
@@ -251,7 +251,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Cache the converted user
       await localDataSource.cacheUser(userModel);
       
-      return Right(userModel.toEntity());
+      return Right(userModel);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
     } on ServerException catch (e) {

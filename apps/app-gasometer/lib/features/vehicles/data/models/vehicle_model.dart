@@ -303,8 +303,8 @@ class VehicleModel extends BaseSyncModel {
   factory VehicleModel.fromEntity(VehicleEntity entity) {
     return VehicleModel(
       id: entity.id,
-      createdAtMs: entity.createdAt.millisecondsSinceEpoch,
-      updatedAtMs: entity.updatedAt.millisecondsSinceEpoch,
+      createdAtMs: entity.createdAt?.millisecondsSinceEpoch,
+      updatedAtMs: entity.updatedAt?.millisecondsSinceEpoch,
       userId: entity.userId,
       marca: entity.brand,
       modelo: entity.model,

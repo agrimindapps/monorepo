@@ -1,9 +1,9 @@
+import 'package:core/core.dart' hide Failure, UseCase;
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
 @lazySingleton
@@ -14,7 +14,7 @@ class UpdateProfile implements UseCase<UserEntity, UpdateProfileParams> {
 
   @override
   Future<Either<Failure, UserEntity>> call(UpdateProfileParams params) async {
-    return await repository.updateProfile(
+    return repository.updateProfile(
       displayName: params.displayName,
       photoUrl: params.photoUrl,
     );

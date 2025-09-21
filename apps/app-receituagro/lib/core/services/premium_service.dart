@@ -167,7 +167,26 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      // Configure RevenueCat
+      // Skip RevenueCat configuration on web platform
+      if (kIsWeb) {
+        developer.log(
+          '🌐 Premium Service: Skipping RevenueCat configuration on web platform',
+          name: 'PremiumService',
+        );
+        
+        // Set mock status for web
+        _status = PremiumStatus.free();
+        _initialized = true;
+        _setLoading(false);
+        
+        developer.log(
+          '✅ Premium Service initialized (web mock mode)',
+          name: 'PremiumService',
+        );
+        return;
+      }
+
+      // Configure RevenueCat (mobile only)
       final configuration = PurchasesConfiguration(
         _getRevenueCatApiKey(),
       );

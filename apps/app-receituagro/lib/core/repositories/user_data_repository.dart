@@ -1,11 +1,11 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
+import 'package:hive/hive.dart';
 
-import '../models/app_settings_model.dart';
-import '../models/subscription_data_model.dart';
-import '../../features/favoritos/models/favorito_defensivo_model.dart';
 import '../../features/comentarios/models/comentario_model.dart';
-import '../providers/auth_provider.dart';
+import '../../features/favoritos/models/favorito_defensivo_model.dart';
+import '../models/app_settings_model.dart';
+import '../providers/auth_provider.dart' as app_auth;
 
 /// Repository para gerenciar dados específicos do usuário com sincronização
 class UserDataRepository {
@@ -14,7 +14,7 @@ class UserDataRepository {
   static const String _favoritosBoxName = 'favoritos';
   static const String _comentariosBoxName = 'comentarios';
 
-  final AuthProvider _authProvider;
+  final app_auth.AuthProvider _authProvider;
 
   UserDataRepository(this._authProvider);
 
@@ -110,50 +110,70 @@ class UserDataRepository {
   // =============================================================================
 
   /// Obtém dados de subscription para o usuário atual
-  Future<Either<Exception, SubscriptionDataModel?>> getSubscriptionData() async {
+  Future<Either<Exception, SubscriptionEntity?>> getSubscriptionData() async {
     try {
       final userId = currentUserId;
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
 
-      final box = await Hive.openBox<SubscriptionDataModel>(_subscriptionDataBoxName);
-      final subscription = box.values
-          .where((subscription) => subscription.userId == userId)
+      // Temporariamente ainda usa Hive com SubscriptionDataModel para compatibilidade
+      // Será migrado para usar o sistema unificado gradualmente
+      final box = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
+      final subscriptionMap = box.values
+          .where((sub) => sub['userId'] == userId)
           .firstOrNull;
 
-      return Right(subscription);
+      if (subscriptionMap == null) {
+        return const Right(null);
+      }
+
+      // Converter Map para SubscriptionEntity via adaptador
+      try {
+        final entity = SubscriptionEntity.fromFirebaseMap(
+          Map<String, dynamic>.from(subscriptionMap),
+        );
+        return Right(entity);
+      } catch (e) {
+        return Left(Exception('Error parsing subscription data: $e'));
+      }
     } catch (e) {
       return Left(Exception('Error getting subscription data: $e'));
     }
   }
 
   /// Salva dados de subscription para o usuário atual
-  Future<Either<Exception, void>> saveSubscriptionData(SubscriptionDataModel subscription) async {
+  Future<Either<Exception, void>> saveSubscriptionData(SubscriptionEntity subscription) async {
     try {
       final userId = currentUserId;
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
 
-      final box = await Hive.openBox<SubscriptionDataModel>(_subscriptionDataBoxName);
+      final box = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
       
       // Verificar se já existe subscription para o usuário
       final existingKey = box.keys.firstWhere(
-        (key) => box.get(key)?.userId == userId,
+        (key) {
+          final sub = box.get(key);
+          return sub != null && sub['userId'] == userId;
+        },
         orElse: () => null,
       );
 
       final updatedSubscription = subscription.copyWith(
         userId: userId,
         updatedAt: DateTime.now(),
-        synchronized: false, // Marca como não sincronizado
+        isDirty: true, // Marca como não sincronizado
       );
 
+      // Converter para Map para salvar no Hive temporariamente
+      final subscriptionMap = updatedSubscription.toFirebaseMap();
+
       if (existingKey != null) {
-        await box.put(existingKey, updatedSubscription);
+        await box.put(existingKey, subscriptionMap);
       } else {
-        await box.add(updatedSubscription);
+        await box.add(subscriptionMap);
       }
 
       return const Right(null);
@@ -317,7 +337,7 @@ class UserDataRepository {
       subscriptionResult.fold(
         (error) => null,
         (subscription) {
-          if (subscription != null && !subscription.synchronized) {
+          if (subscription != null && subscription.isDirty) {
             unsynchronizedData['subscription_data'] = [subscription];
           }
         },
@@ -384,7 +404,7 @@ class UserDataRepository {
             (error) => Left(error),
             (subscription) async {
               if (subscription != null) {
-                final syncedSubscription = subscription.markAsSynchronized();
+                final syncedSubscription = subscription.markAsSynced();
                 return await saveSubscriptionData(syncedSubscription);
               }
               return Left(Exception('Subscription not found'));
@@ -426,9 +446,12 @@ class UserDataRepository {
       }
 
       // Limpar subscription data
-      final subscriptionBox = await Hive.openBox<SubscriptionDataModel>(_subscriptionDataBoxName);
+      final subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
       final subscriptionKeysToRemove = subscriptionBox.keys
-          .where((key) => subscriptionBox.get(key)?.userId == userId)
+          .where((key) {
+            final sub = subscriptionBox.get(key);
+            return sub != null && sub['userId'] == userId;
+          })
           .toList();
       
       for (final key in subscriptionKeysToRemove) {
@@ -460,9 +483,9 @@ class UserDataRepository {
           .length;
 
       // Contar subscriptions
-      final subscriptionBox = await Hive.openBox<SubscriptionDataModel>(_subscriptionDataBoxName);
+      final subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
       stats['subscription_data'] = subscriptionBox.values
-          .where((subscription) => subscription.userId == userId)
+          .where((sub) => sub['userId'] == userId)
           .length;
 
       // Aqui seria a contagem de favoritos e comentários conforme implementação

@@ -3,12 +3,11 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart' as core;
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
-import '../../../../core/sync/receituagro_sync_config.dart';
-import '../../../../core/providers/auth_provider.dart';
-import '../../domain/entities/favorito_sync_entity.dart';
 import '../../domain/entities/favorito_entity.dart';
+import '../../domain/entities/favorito_sync_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 
 /// Service consolidado para Favoritos - Unifica storage, cache, resolver, factory e validator
@@ -81,7 +80,12 @@ class FavoritosService {
         
         // Sincroniza com Firestore se usuário autenticado
         developer.log('☁️ SYNC: Iniciando sincronização com Firestore...', name: 'FavoritosService');
-        await _queueSyncOperation('create', tipo, id, itemData);
+        try {
+          await _queueSyncOperation('create', tipo, id, itemData);
+        } catch (e) {
+          developer.log('⚠️ SYNC: Erro na sincronização (funcionamento local mantido): $e', name: 'FavoritosService');
+          // Não propaga o erro - favorito já foi salvo localmente
+        }
         
         developer.log('✅ SYNC: Favorito adicionado com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
       } else {
@@ -118,7 +122,12 @@ class FavoritosService {
         
         // Sincroniza com Firestore se usuário autenticado
         developer.log('☁️ SYNC: Iniciando sincronização de remoção com Firestore...', name: 'FavoritosService');
-        await _queueSyncOperation('delete', tipo, id, null);
+        try {
+          await _queueSyncOperation('delete', tipo, id, null);
+        } catch (e) {
+          developer.log('⚠️ SYNC: Erro na sincronização de remoção (funcionamento local mantido): $e', name: 'FavoritosService');
+          // Não propaga o erro - favorito já foi removido localmente
+        }
         
         developer.log('✅ SYNC: Favorito removido com sucesso: tipo=$tipo, id=$id', name: 'FavoritosService');
       } else {
@@ -485,12 +494,12 @@ class FavoritosService {
     
     try {
       // Verifica se o usuário está autenticado
-      if (_authProvider == null || !_authProvider!.isAuthenticated || _authProvider!.isAnonymous) {
+      if (_authProvider == null || !_authProvider.isAuthenticated || _authProvider.isAnonymous) {
         developer.log('❌ FIRESTORE SYNC: Usuário não autenticado - pulando sincronização de favorito', name: 'FavoritosService');
         return;
       }
       
-      developer.log('✅ FIRESTORE SYNC: Usuário autenticado - userId=${_authProvider!.currentUser?.id}', name: 'FavoritosService');
+      developer.log('✅ FIRESTORE SYNC: Usuário autenticado - userId=${_authProvider.currentUser?.id}', name: 'FavoritosService');
 
       // Verifica se há dados válidos para sincronização
       if (id.isEmpty || tipo.isEmpty) {
@@ -522,7 +531,7 @@ class FavoritosService {
         adicionadoEm: DateTime.now(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        userId: _authProvider!.currentUser?.id,
+        userId: _authProvider.currentUser?.id,
       );
       
       developer.log('✅ FIRESTORE SYNC: Entidade criada - userId=${syncEntity.userId}', name: 'FavoritosService');
@@ -531,8 +540,8 @@ class FavoritosService {
       developer.log('🚀 FIRESTORE SYNC: Executando operação $operation via UnifiedSyncManager...', name: 'FavoritosService');
       
       if (operation == 'create') {
-        developer.log('🆕 FIRESTORE SYNC: Chamando ReceitaAgroSyncConfig.createFavorito()', name: 'FavoritosService');
-        final result = await ReceitaAgroSyncConfig.createFavorito(syncEntity);
+        developer.log('🆕 FIRESTORE SYNC: Chamando UnifiedSyncManager.create<FavoritoSyncEntity>()', name: 'FavoritosService');
+        final result = await core.UnifiedSyncManager.instance.create<FavoritoSyncEntity>('receituagro', syncEntity);
         result.fold(
           (core.Failure failure) {
             developer.log('❌ FIRESTORE SYNC: Erro na sincronização de favorito (create): ${failure.message}', name: 'FavoritosService');
@@ -542,8 +551,8 @@ class FavoritosService {
           },
         );
       } else if (operation == 'delete') {
-        developer.log('🗑️ FIRESTORE SYNC: Chamando ReceitaAgroSyncConfig.deleteFavorito() com ID: ${syncEntity.id}', name: 'FavoritosService');
-        final result = await ReceitaAgroSyncConfig.deleteFavorito(syncEntity.id);
+        developer.log('🗑️ FIRESTORE SYNC: Chamando UnifiedSyncManager.delete<FavoritoSyncEntity>() com ID: ${syncEntity.id}', name: 'FavoritosService');
+        final result = await core.UnifiedSyncManager.instance.delete<FavoritoSyncEntity>('receituagro', syncEntity.id);
         result.fold(
           (core.Failure failure) {
             developer.log('❌ FIRESTORE SYNC: Erro na sincronização de favorito (delete): ${failure.message}', name: 'FavoritosService');
@@ -553,8 +562,8 @@ class FavoritosService {
           },
         );
       } else {
-        developer.log('🔄 FIRESTORE SYNC: Chamando ReceitaAgroSyncConfig.updateFavorito() com ID: ${syncEntity.id}', name: 'FavoritosService');
-        final result = await ReceitaAgroSyncConfig.updateFavorito(syncEntity.id, syncEntity);
+        developer.log('🔄 FIRESTORE SYNC: Chamando UnifiedSyncManager.update<FavoritoSyncEntity>() com ID: ${syncEntity.id}', name: 'FavoritosService');
+        final result = await core.UnifiedSyncManager.instance.update<FavoritoSyncEntity>('receituagro', syncEntity.id, syncEntity);
         result.fold(
           (core.Failure failure) {
             developer.log('❌ FIRESTORE SYNC: Erro na sincronização de favorito (update): ${failure.message}', name: 'FavoritosService');

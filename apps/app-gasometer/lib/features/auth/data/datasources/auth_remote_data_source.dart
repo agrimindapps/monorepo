@@ -1,24 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../models/user_model.dart';
+import '../../../../core/extensions/user_entity_gasometer_extension.dart';
 
 abstract class AuthRemoteDataSource {
-  Stream<UserModel?> watchAuthState();
-  Future<UserModel?> getCurrentUser();
+  Stream<UserEntity?> watchAuthState();
+  Future<UserEntity?> getCurrentUser();
   
   // Sign In
-  Future<UserModel> signInWithEmail(String email, String password);
-  Future<UserModel> signInAnonymously();
+  Future<UserEntity> signInWithEmail(String email, String password);
+  Future<UserEntity> signInAnonymously();
   
   // Sign Up
-  Future<UserModel> signUpWithEmail(String email, String password, String? displayName);
+  Future<UserEntity> signUpWithEmail(String email, String password, String? displayName);
   
   // Profile Management
-  Future<UserModel> updateProfile(String? displayName, String? photoUrl);
+  Future<UserEntity> updateProfile(String? displayName, String? photoUrl);
   Future<void> updateEmail(String newEmail);
   Future<void> updatePassword(String newPassword);
   Future<void> sendEmailVerification();
@@ -27,15 +28,15 @@ abstract class AuthRemoteDataSource {
   Future<void> sendPasswordResetEmail(String email);
   
   // Account Conversion
-  Future<UserModel> linkAnonymousWithEmail(String email, String password);
+  Future<UserEntity> linkAnonymousWithEmail(String email, String password);
   
   // Sign Out
   Future<void> signOut();
   Future<void> deleteAccount();
   
   // Firestore user data
-  Future<void> saveUserToFirestore(UserModel user);
-  Future<UserModel?> getUserFromFirestore(String userId);
+  Future<void> saveUserToFirestore(UserEntity user);
+  Future<UserEntity?> getUserFromFirestore(String userId);
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -49,11 +50,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   );
 
   @override
-  Stream<UserModel?> watchAuthState() {
+  Stream<UserEntity?> watchAuthState() {
     try {
       return _firebaseAuth.authStateChanges().map((user) {
         if (user == null) return null;
-        return UserModel.fromFirebaseUser(user);
+        return UserEntityGasometerExtension.fromFirebaseUser(user);
       });
     } catch (e) {
       throw ServerException('Failed to watch auth state: $e');
@@ -61,19 +62,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel?> getCurrentUser() async {
+  Future<UserEntity?> getCurrentUser() async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) return null;
       
-      return UserModel.fromFirebaseUser(user);
+      return UserEntityGasometerExtension.fromFirebaseUser(user);
     } catch (e) {
       throw ServerException('Failed to get current user: $e');
     }
   }
 
   @override
-  Future<UserModel> signInWithEmail(String email, String password) async {
+  Future<UserEntity> signInWithEmail(String email, String password) async {
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -84,7 +85,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthenticationException('No user returned from sign in');
       }
 
-      final userModel = UserModel.fromFirebaseUser(credential.user!);
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(credential.user!);
       
       // Save/update user data in Firestore
       await saveUserToFirestore(userModel);
@@ -122,7 +123,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
 
   @override
-  Future<UserModel> signInAnonymously() async {
+  Future<UserEntity> signInAnonymously() async {
     try {
       final userCredential = await _firebaseAuth.signInAnonymously();
       
@@ -130,7 +131,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthenticationException('No user returned from anonymous sign in');
       }
 
-      return UserModel.fromFirebaseUser(userCredential.user!);
+      return UserEntityGasometerExtension.fromFirebaseUser(userCredential.user!);
     } on FirebaseAuthException catch (e) {
       throw AuthenticationException('Anonymous sign in failed: ${e.message}');
     } catch (e) {
@@ -139,7 +140,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signUpWithEmail(String email, String password, String? displayName) async {
+  Future<UserEntity> signUpWithEmail(String email, String password, String? displayName) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -156,7 +157,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         await credential.user!.reload();
       }
 
-      final userModel = UserModel.fromFirebaseUser(credential.user!);
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(credential.user!);
       
       // Save user data in Firestore
       await saveUserToFirestore(userModel);
@@ -170,7 +171,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateProfile(String? displayName, String? photoUrl) async {
+  Future<UserEntity> updateProfile(String? displayName, String? photoUrl) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) {
@@ -182,7 +183,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await user.reload();
 
       final updatedUser = _firebaseAuth.currentUser!;
-      final userModel = UserModel.fromFirebaseUser(updatedUser);
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(updatedUser);
       
       // Update user data in Firestore
       await saveUserToFirestore(userModel);
@@ -255,7 +256,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> linkAnonymousWithEmail(String email, String password) async {
+  Future<UserEntity> linkAnonymousWithEmail(String email, String password) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null || !user.isAnonymous) {
@@ -269,7 +270,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthenticationException('No user returned from linking');
       }
 
-      final userModel = UserModel.fromFirebaseUser(userCredential.user!);
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(userCredential.user!);
       
       // Save user data in Firestore
       await saveUserToFirestore(userModel);
@@ -313,25 +314,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> saveUserToFirestore(UserModel user) async {
+  Future<void> saveUserToFirestore(UserEntity user) async {
     try {
       await _firestore
           .collection('users')
           .doc(user.id)
-          .set(user.toFirestore(), SetOptions(merge: true));
+          .set(user.toGasometerFirestore(), SetOptions(merge: true));
     } catch (e) {
       throw ServerException('Failed to save user to Firestore: $e');
     }
   }
 
   @override
-  Future<UserModel?> getUserFromFirestore(String userId) async {
+  Future<UserEntity?> getUserFromFirestore(String userId) async {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
       
       if (!doc.exists) return null;
       
-      return UserModel.fromFirestore(doc);
+      return UserEntityGasometerExtension.fromFirestore(doc);
     } catch (e) {
       throw ServerException('Failed to get user from Firestore: $e');
     }

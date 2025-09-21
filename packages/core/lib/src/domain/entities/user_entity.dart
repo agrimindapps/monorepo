@@ -1,8 +1,8 @@
-import 'base_entity.dart';
+import 'base_sync_entity.dart';
 
 /// Entidade do usuário compartilhada entre os apps
 /// Representa dados básicos de um usuário logado no sistema
-class UserEntity extends BaseEntity {
+class UserEntity extends BaseSyncEntity {
   const UserEntity({
     required super.id,
     required this.email,
@@ -15,6 +15,12 @@ class UserEntity extends BaseEntity {
     this.isActive = true,
     super.createdAt,
     super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty = false,
+    super.isDeleted = false,
+    super.version = 1,
+    super.userId,
+    super.moduleName,
   });
 
   /// Email do usuário
@@ -59,7 +65,7 @@ class UserEntity extends BaseEntity {
   String get name => displayName;
 
   @override
-  BaseEntity copyWith({
+  UserEntity copyWith({
     String? id,
     String? email,
     String? displayName,
@@ -71,6 +77,12 @@ class UserEntity extends BaseEntity {
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -84,6 +96,12 @@ class UserEntity extends BaseEntity {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
 
@@ -142,6 +160,90 @@ class UserEntity extends BaseEntity {
         phone,
         isActive,
       ];
+
+  /// Implementação dos métodos abstratos do BaseSyncEntity
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      'email': email,
+      'display_name': displayName,
+      'photo_url': photoUrl,
+      'is_email_verified': isEmailVerified,
+      'last_login_at': lastLoginAt?.toIso8601String(),
+      'provider': provider.name,
+      'phone': phone,
+      'is_active': isActive,
+    };
+  }
+
+  /// Create UserEntity from Firebase map
+  static UserEntity fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+
+    return UserEntity(
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      email: map['email'] as String,
+      displayName: map['display_name'] as String,
+      photoUrl: map['photo_url'] as String?,
+      isEmailVerified: map['is_email_verified'] as bool? ?? false,
+      lastLoginAt: map['last_login_at'] != null
+          ? DateTime.parse(map['last_login_at'] as String)
+          : null,
+      provider: AuthProvider.values.firstWhere(
+        (p) => p.name == (map['provider'] as String),
+        orElse: () => AuthProvider.email,
+      ),
+      phone: map['phone'] as String?,
+      isActive: map['is_active'] as bool? ?? true,
+    );
+  }
+
+  @override
+  UserEntity markAsDirty() {
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  UserEntity markAsSynced({DateTime? syncTime}) {
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
+  }
+
+  @override
+  UserEntity markAsDeleted() {
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  UserEntity incrementVersion() {
+    return copyWith(
+      version: version + 1,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  UserEntity withUserId(String userId) {
+    return copyWith(userId: userId, isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  UserEntity withModule(String moduleName) {
+    return copyWith(
+      moduleName: moduleName,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
 }
 
 /// Provedores de autenticação suportados

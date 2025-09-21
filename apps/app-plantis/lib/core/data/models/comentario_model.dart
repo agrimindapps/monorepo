@@ -1,39 +1,22 @@
 import 'package:hive/hive.dart';
-import 'base_sync_model.dart';
+import 'package:core/core.dart';
 
 part 'comentario_model.g.dart';
 
 /// Comentario model with Firebase sync support
 /// TypeId: 0 - Sequential numbering
 @HiveType(typeId: 0)
-// ignore: must_be_immutable
-// ignore_for_file: overridden_fields
-class ComentarioModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
-  @override
-  @HiveField(0)
-  final String id;
-  @HiveField(1)
-  final int? createdAtMs;
-  @HiveField(2)
-  final int? updatedAtMs;
-  @HiveField(3)
-  final int? lastSyncAtMs;
-  @override
-  @HiveField(4)
-  final bool isDirty;
-  @override
-  @HiveField(5)
-  final bool isDeleted;
-  @override
-  @HiveField(6)
-  final int version;
-  @override
-  @HiveField(7)
-  final String? userId;
-  @override
-  @HiveField(8)
-  final String? moduleName;
+class ComentarioModel extends BaseSyncEntity {
+  // Base sync fields (required for Hive generation)
+  @HiveField(0) @override final String id;
+  @HiveField(1) @override final DateTime? createdAt;
+  @HiveField(2) @override final DateTime? updatedAt;
+  @HiveField(3) @override final DateTime? lastSyncAt;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
 
   // Comentario specific fields
   @HiveField(10)
@@ -43,11 +26,11 @@ class ComentarioModel extends BaseSyncModel {
   @HiveField(12)
   final DateTime? dataCriacao;
 
-  ComentarioModel({
+  const ComentarioModel({
     required this.id,
-    this.createdAtMs,
-    this.updatedAtMs,
-    this.lastSyncAtMs,
+    this.createdAt,
+    this.updatedAt,
+    this.lastSyncAt,
     this.isDirty = false,
     this.isDeleted = false,
     this.version = 1,
@@ -57,28 +40,16 @@ class ComentarioModel extends BaseSyncModel {
     this.dataAtualizacao,
     this.dataCriacao,
   }) : super(
-         id: id,
-         createdAt:
-             createdAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-                 : null,
-         updatedAt:
-             updatedAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
-                 : null,
-         lastSyncAt:
-             lastSyncAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
-                 : null,
-         isDirty: isDirty,
-         isDeleted: isDeleted,
-         version: version,
-         userId: userId,
-         moduleName: moduleName,
-       );
-
-  @override
-  String get collectionName => 'comentarios';
+          id: id,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          lastSyncAt: lastSyncAt,
+          isDirty: isDirty,
+          isDeleted: isDeleted,
+          version: version,
+          userId: userId,
+          moduleName: moduleName,
+        );
 
   /// Factory constructor for creating new comentario
   factory ComentarioModel.create({
@@ -93,8 +64,8 @@ class ComentarioModel extends BaseSyncModel {
 
     return ComentarioModel(
       id: comentarioId,
-      createdAtMs: now.millisecondsSinceEpoch,
-      updatedAtMs: now.millisecondsSinceEpoch,
+      createdAt: now,
+      updatedAt: now,
       isDirty: true,
       userId: userId,
       conteudo: conteudo,
@@ -105,13 +76,13 @@ class ComentarioModel extends BaseSyncModel {
 
   /// Create from Hive map
   factory ComentarioModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return ComentarioModel(
       id: baseFields['id'] as String,
-      createdAtMs: map['createdAt'] as int?,
-      updatedAtMs: map['updatedAt'] as int?,
-      lastSyncAtMs: map['lastSyncAt'] as int?,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
       isDirty: baseFields['isDirty'] as bool,
       isDeleted: baseFields['isDeleted'] as bool,
       version: baseFields['version'] as int,
@@ -129,22 +100,11 @@ class ComentarioModel extends BaseSyncModel {
     );
   }
 
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
-      'conteudo': conteudo,
-      'dataAtualizacao': dataAtualizacao?.toIso8601String(),
-      'dataCriacao': dataCriacao?.toIso8601String(),
-    });
-  }
-
   /// Convert to Firebase map
   @override
   Map<String, dynamic> toFirebaseMap() {
     return {
       ...baseFirebaseFields,
-      ...firebaseTimestampFields,
       'conteudo': conteudo,
       'data_atualizacao': dataAtualizacao?.toIso8601String(),
       'data_criacao': dataCriacao?.toIso8601String(),
@@ -153,14 +113,13 @@ class ComentarioModel extends BaseSyncModel {
 
   /// Create from Firebase map
   factory ComentarioModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
-    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return ComentarioModel(
       id: baseFields['id'] as String,
-      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
-      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
-      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
       isDirty: baseFields['isDirty'] as bool,
       isDeleted: baseFields['isDeleted'] as bool,
       version: baseFields['version'] as int,
@@ -196,9 +155,9 @@ class ComentarioModel extends BaseSyncModel {
   }) {
     return ComentarioModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,
@@ -210,23 +169,49 @@ class ComentarioModel extends BaseSyncModel {
     );
   }
 
-  // Convenience methods for different serialization formats
-  Map<String, dynamic> toMap() => toHiveMap();
+  // Implementação dos métodos abstratos do BaseSyncEntity
   @override
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory ComentarioModel.fromMap(Map<String, dynamic> map) =>
-      ComentarioModel.fromHiveMap(map);
-  factory ComentarioModel.fromJson(Map<String, dynamic> json) =>
-      ComentarioModel.fromHiveMap(json);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is ComentarioModel && other.id == id;
+  ComentarioModel markAsDirty() {
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
-  int get hashCode => id.hashCode;
+  ComentarioModel markAsSynced({DateTime? syncTime}) {
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
+  }
+
+  @override
+  ComentarioModel markAsDeleted() {
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  ComentarioModel incrementVersion() {
+    return copyWith(
+      version: version + 1,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  ComentarioModel withUserId(String userId) {
+    return copyWith(userId: userId, isDirty: true, updatedAt: DateTime.now());
+  }
+
+  @override
+  ComentarioModel withModule(String moduleName) {
+    return copyWith(
+      moduleName: moduleName,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  // Convenience methods for different serialization formats
+  Map<String, dynamic> toJson() => toFirebaseMap();
+  factory ComentarioModel.fromJson(Map<String, dynamic> json) =>
+      ComentarioModel.fromFirebaseMap(json);
 
   @override
   String toString() {

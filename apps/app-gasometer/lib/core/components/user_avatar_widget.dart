@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../services/avatar_service.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as gasometer_auth;
+import '../services/avatar_service.dart';
 import 'avatar_selection_dialog.dart';
 
 /// Customizable user avatar widget with support for local and remote images
@@ -29,7 +29,7 @@ class UserAvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = user ?? context.watch<AuthProvider>().currentUser;
+    final currentUser = user ?? context.watch<gasometer_auth.AuthProvider>().currentUser;
     final theme = Theme.of(context);
     final avatarService = AvatarService();
 

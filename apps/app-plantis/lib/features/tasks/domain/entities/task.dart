@@ -420,4 +420,49 @@ class Task extends BaseSyncEntity {
           : null,
     );
   }
+
+  /// Create Task entity from Firebase map
+  static Task fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+
+    return Task(
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      title: map['title'] as String,
+      description: map['description'] as String?,
+      plantId: map['plant_id'] as String,
+      plantName: map['plant_name'] as String,
+      type: TaskType.values.firstWhere(
+        (e) => e.key == map['type'],
+        orElse: () => TaskType.custom,
+      ),
+      status: TaskStatus.values.firstWhere(
+        (e) => e.key == map['status'],
+        orElse: () => TaskStatus.pending,
+      ),
+      priority: TaskPriority.values.firstWhere(
+        (e) => e.key == map['priority'],
+        orElse: () => TaskPriority.medium,
+      ),
+      dueDate: DateTime.parse(map['due_date'] as String),
+      completedAt:
+          map['completed_at'] != null
+              ? DateTime.parse(map['completed_at'] as String)
+              : null,
+      completionNotes: map['completion_notes'] as String?,
+      isRecurring: map['is_recurring'] as bool? ?? false,
+      recurringIntervalDays: map['recurring_interval_days'] as int?,
+      nextDueDate:
+          map['next_due_date'] != null
+              ? DateTime.parse(map['next_due_date'] as String)
+              : null,
+    );
+  }
 }

@@ -155,6 +155,13 @@ class AppRouter {
           builder: (context, state) => const LandingPage(),
         ),
 
+        // Home Route - Redirects to promotional page
+        GoRoute(
+          path: home,
+          name: 'home',
+          builder: (context, state) => const PromotionalPage(),
+        ),
+
         // Promotional Page Route (outside of shell for web landing)
         GoRoute(
           path: promotional,

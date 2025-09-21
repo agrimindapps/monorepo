@@ -6,6 +6,8 @@ import 'package:core/core.dart';
 
 // App specific imports
 import 'core/gasometer_sync_config.dart';
+import 'features/vehicles/domain/entities/vehicle_entity.dart';
+import 'features/fuel/data/models/fuel_supply_model.dart';
 
 /// Main entry point usando sistema unificado de sincronização
 void main() async {
@@ -199,8 +201,8 @@ class _GasometerHomePageState extends State<GasometerHomePage>
           ),
           Expanded(
             // Usar StreamBuilder com o sistema unificado
-            child: StreamBuilder<List<Vehicle>>(
-              stream: streamEntities<Vehicle>(), // Mixin helper
+            child: StreamBuilder<List<VehicleEntity>>(
+              stream: streamEntities<VehicleEntity>(), // Mixin helper
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -223,7 +225,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
                   );
                 }
                 
-                final vehicles = snapshot.data ?? [];
+                final vehicles = snapshot.data ?? <VehicleEntity>[];
                 
                 if (vehicles.isEmpty) {
                   return const Center(
@@ -254,16 +256,16 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     );
   }
 
-  Widget _buildVehicleTile(Vehicle vehicle) {
+  Widget _buildVehicleTile(VehicleEntity vehicle) {
     return ListTile(
       leading: CircleAvatar(
-        child: Text(vehicle.plateNumber.substring(0, 2)),
+        child: Text(vehicle.licensePlate.substring(0, 2)),
       ),
-      title: Text(vehicle.plateNumber),
+      title: Text(vehicle.licensePlate),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Type: ${vehicle.vehicleType}'),
+          Text('Type: ${vehicle.type.displayName}'),
           Row(
             children: [
               if (vehicle.isDirty)
@@ -328,14 +330,20 @@ class _GasometerHomePageState extends State<GasometerHomePage>
 
   Future<void> _addVehicle() async {
     // Simular adição de veículo
-    final vehicle = Vehicle(
+    final vehicle = VehicleEntity(
       id: '', // Será gerado automaticamente
-      plateNumber: 'ABC-${DateTime.now().millisecond}',
-      vehicleType: 'Car',
-      isDefault: false,
+      name: 'Veículo Teste',
+      brand: 'Toyota',
+      model: 'Corolla',
+      year: 2023,
+      color: 'Branco',
+      licensePlate: 'ABC-${DateTime.now().millisecond}',
+      type: VehicleType.car,
+      supportedFuels: [FuelType.gasoline],
+      currentOdometer: 0.0,
     );
     
-    final result = await createEntity<Vehicle>(vehicle); // Mixin helper
+    final result = await createEntity<VehicleEntity>(vehicle); // Mixin helper
     
     result.fold(
       (failure) {
@@ -351,7 +359,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     );
   }
 
-  void _handleVehicleAction(Vehicle vehicle, String action) {
+  void _handleVehicleAction(VehicleEntity vehicle, String action) {
     switch (action) {
       case 'edit':
         _editVehicle(vehicle);
@@ -365,13 +373,13 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     }
   }
 
-  Future<void> _editVehicle(Vehicle vehicle) async {
+  Future<void> _editVehicle(VehicleEntity vehicle) async {
     // Simular edição
     final updated = vehicle.copyWith(
-      vehicleType: '${vehicle.vehicleType} (Edited)',
+      name: '${vehicle.name} (Edited)',
     );
     
-    final result = await updateEntity<Vehicle>(vehicle.id, updated); // Mixin helper
+    final result = await updateEntity<VehicleEntity>(vehicle.id, updated); // Mixin helper
     
     result.fold(
       (failure) {
@@ -387,12 +395,12 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     );
   }
 
-  Future<void> _deleteVehicle(Vehicle vehicle) async {
+  Future<void> _deleteVehicle(VehicleEntity vehicle) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Vehicle'),
-        content: Text('Are you sure you want to delete ${vehicle.plateNumber}?'),
+        content: Text('Are you sure you want to delete ${vehicle.licensePlate}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -407,7 +415,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     );
     
     if (confirmed == true) {
-      final result = await deleteEntity<Vehicle>(vehicle.id); // Mixin helper
+      final result = await deleteEntity<VehicleEntity>(vehicle.id); // Mixin helper
       
       result.fold(
         (failure) {
@@ -424,13 +432,18 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     }
   }
 
-  Future<void> _addFuelRecord(Vehicle vehicle) async {
-    final fuelSupply = FuelSupply(
-      id: '',
-      quantity: 50.0 + (DateTime.now().millisecond % 30), // Simular quantidade
+  Future<void> _addFuelRecord(VehicleEntity vehicle) async {
+    final fuelSupply = FuelSupplyModel.create(
+      vehicleId: vehicle.id,
+      date: DateTime.now().millisecondsSinceEpoch,
+      odometer: vehicle.currentOdometer + 100, // Simular odômetro
+      liters: 50.0 + (DateTime.now().millisecond % 30), // Simular quantidade
+      totalPrice: 200.0, // Simular preço
+      pricePerLiter: 5.0, // Simular preço por litro
+      fuelType: 0, // Gasolina
     );
     
-    final result = await createEntity<FuelSupply>(fuelSupply); // Mixin helper
+    final result = await createEntity<FuelSupplyModel>(fuelSupply); // Mixin helper
     
     result.fold(
       (failure) {
@@ -440,29 +453,29 @@ class _GasometerHomePageState extends State<GasometerHomePage>
       },
       (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fuel record added for ${vehicle.plateNumber}')),
+          SnackBar(content: Text('Fuel record added for ${vehicle.licensePlate}')),
         );
       },
     );
   }
 
-  void _showVehicleDetails(Vehicle vehicle) {
+  void _showVehicleDetails(VehicleEntity vehicle) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(vehicle.plateNumber),
+        title: Text(vehicle.licensePlate),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Type: ${vehicle.vehicleType}'),
+            Text('Type: ${vehicle.type.displayName}'),
             Text('Version: ${vehicle.version}'),
             Text('Created: ${vehicle.createdAt?.toString() ?? 'Unknown'}'),
             Text('Updated: ${vehicle.updatedAt?.toString() ?? 'Never'}'),
             Text('Last Sync: ${vehicle.lastSyncAt?.toString() ?? 'Never'}'),
             Text('Needs Sync: ${vehicle.needsSync ? 'Yes' : 'No'}'),
-            if (vehicle.customSettings.isNotEmpty)
-              Text('Settings: ${vehicle.customSettings.length} items'),
+            if (vehicle.metadata.isNotEmpty)
+              Text('Settings: ${vehicle.metadata.length} items'),
           ],
         ),
         actions: [

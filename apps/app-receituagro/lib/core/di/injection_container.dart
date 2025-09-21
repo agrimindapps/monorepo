@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 
 import '../interfaces/i_premium_service.dart';
 import '../services/mock_premium_service.dart';
@@ -97,7 +95,7 @@ Future<void> init() async {
     () => ReceitaAgroCloudFunctionsService.instance,
   );
   
-  // Premium Service (New Architecture)
+  // Premium Service (New Architecture) - Handles web platform internally
   sl.registerLazySingleton<ReceitaAgroPremiumService>(
     () {
       final service = ReceitaAgroPremiumService.instance;
@@ -119,7 +117,7 @@ Future<void> init() async {
   if (kDebugMode) print('🚀 DI_CONTAINER: Iniciando configuração de sync do ReceitaAgro...');
   
   // Execute sync initialization synchronously during DI setup
-  unawaited(ReceitaAgroSyncConfig.initializeSync().then((_) {
+  unawaited(ReceitaAgroSyncConfig.configure().then((_) {
     if (kDebugMode) print('✅ DI_CONTAINER: ReceitaAgro sync inicializado com sucesso!');
   }).catchError((error) {
     if (kDebugMode) print('❌ DI_CONTAINER: ReceitaAgro sync initialization failed: $error');

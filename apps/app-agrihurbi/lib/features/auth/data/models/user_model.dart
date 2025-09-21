@@ -59,6 +59,13 @@ class UserModel extends UserEntity {
     isActive: true, // Valor padrão para compatibilidade
     createdAt: userModelCreatedAt,
     updatedAt: userModelUpdatedAt,
+    // Novos parâmetros do BaseSyncEntity
+    lastSyncAt: null,
+    isDirty: false,
+    isDeleted: false,
+    version: 1,
+    userId: null,
+    moduleName: 'agrihurbi',
   );
 
   /// Converte o UserModel para UserEntity do domínio
@@ -71,8 +78,17 @@ class UserModel extends UserEntity {
       isEmailVerified: isEmailVerified,
       lastLoginAt: lastLoginAt,
       provider: provider,
+      phone: phone,
+      isActive: isActive,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      // Campos de sincronização
+      lastSyncAt: lastSyncAt,
+      isDirty: isDirty,
+      isDeleted: isDeleted,
+      version: version,
+      userId: userId,
+      moduleName: moduleName,
     );
   }
 
@@ -145,8 +161,15 @@ class UserModel extends UserEntity {
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
   }) {
-    // Ignorar phone e isActive pois UserModel não os implementa localmente
+    // UserModel mapeia apenas os campos que tem implementação local
+    // Os demais parâmetros são aceitos para compatibilidade mas serão valores padrão
     return UserModel(
       userModelId: id ?? this.id,
       userModelDisplayName: displayName ?? this.displayName,

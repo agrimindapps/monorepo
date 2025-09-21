@@ -135,8 +135,8 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
     final inactiveVehicles = vehicles.where((v) => !v.isActive).toList();
 
     // Ordena por data de criação (mais recente primeiro)
-    activeVehicles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    inactiveVehicles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    activeVehicles.sort((a, b) => (b.createdAt ?? DateTime(1900)).compareTo(a.createdAt ?? DateTime(1900)));
+    inactiveVehicles.sort((a, b) => (b.createdAt ?? DateTime(1900)).compareTo(a.createdAt ?? DateTime(1900)));
 
     // Prioriza veículos ativos, senão pega o primeiro inativo
     if (activeVehicles.isNotEmpty) {

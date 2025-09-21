@@ -1,8 +1,9 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/subscription_data_model.dart';
-import '../services/premium_service.dart';
 import '../../features/analytics/analytics_service.dart';
+import '../adapters/subscription_adapter.dart';
+import '../services/premium_service.dart';
 
 /// Enum para diferentes features premium
 enum PremiumFeature {
@@ -23,7 +24,7 @@ class PremiumAccessResult {
   final bool hasAccess;
   final String reason;
   final PremiumFeature feature;
-  final SubscriptionDataModel? subscription;
+  final SubscriptionEntity? subscription;
 
   const PremiumAccessResult({
     required this.hasAccess,
@@ -32,7 +33,7 @@ class PremiumAccessResult {
     this.subscription,
   });
 
-  factory PremiumAccessResult.granted(PremiumFeature feature, SubscriptionDataModel subscription) {
+  factory PremiumAccessResult.granted(PremiumFeature feature, SubscriptionEntity subscription) {
     return PremiumAccessResult(
       hasAccess: true,
       reason: 'Access granted - premium subscription active',
@@ -76,20 +77,22 @@ class PremiumGuards {
         );
       }
 
-      // Converter Map para SubscriptionDataModel
-      final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+      // Converter Map para SubscriptionEntity via adaptador
+      final subscription = SubscriptionEntity.fromFirebaseMap(
+        Map<String, dynamic>.from(subscriptionData),
+      );
 
       // Verificar se a subscription está ativa
       if (!subscription.isActive) {
-        await _trackAccessDenied(feature, 'Subscription not active: ${subscription.status}');
+        await _trackAccessDenied(feature, 'Subscription not active: ${subscription.status.name}');
         return PremiumAccessResult.denied(
           feature,
           'Premium subscription expired or inactive',
         );
       }
 
-      // Verificar se a feature está incluída na subscription
-      if (!subscription.hasFeature(feature.key)) {
+      // Verificar se a feature está incluída na subscription usando adaptador
+      if (!SubscriptionAdapter.hasFeature(subscription, feature.key)) {
         await _trackAccessDenied(feature, 'Feature not included in subscription');
         return PremiumAccessResult.denied(
           feature,
@@ -149,7 +152,9 @@ class PremiumGuards {
     
     // Se tem subscription ativa, permitir comentários ilimitados
     if (subscriptionData != null) {
-      final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+      final subscription = SubscriptionEntity.fromFirebaseMap(
+        Map<String, dynamic>.from(subscriptionData),
+      );
       if (subscription.isActive) {
         return PremiumAccessResult.granted(PremiumFeature.premiumContent, subscription);
       }
@@ -215,13 +220,15 @@ class PremiumGuards {
       return []; // Nenhuma feature premium disponível
     }
     
-    final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+    final subscription = SubscriptionEntity.fromFirebaseMap(
+      Map<String, dynamic>.from(subscriptionData),
+    );
     if (!subscription.isActive) {
       return []; // Subscription inativa
     }
     
     return PremiumFeature.values
-        .where((feature) => subscription.hasFeature(feature.key))
+        .where((feature) => SubscriptionAdapter.hasFeature(subscription, feature.key))
         .toList();
   }
 
@@ -243,7 +250,9 @@ class PremiumGuards {
     bool isPremium = false;
     
     if (subscriptionData != null) {
-      final subscription = SubscriptionDataModel.fromMap(subscriptionData);
+      final subscription = SubscriptionEntity.fromFirebaseMap(
+        Map<String, dynamic>.from(subscriptionData),
+      );
       isPremium = subscription.isActive;
     }
     
@@ -301,13 +310,13 @@ class PremiumGuards {
   }
 
   /// Tracks quando acesso é permitido
-  Future<void> _trackAccessGranted(PremiumFeature feature, SubscriptionDataModel subscription) async {
+  Future<void> _trackAccessGranted(PremiumFeature feature, SubscriptionEntity subscription) async {
     await _analyticsService.logEvent(
       ReceitaAgroAnalyticsEvent.featureUsed,
       parameters: {
         'feature_name': feature.key,
-        'subscription_status': subscription.status,
-        'subscription_product_id': subscription.productId ?? '',
+        'subscription_status': subscription.status.name,
+        'subscription_product_id': subscription.productId,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
@@ -328,7 +337,7 @@ class PremiumGuards {
 }
 
 /// Widget helper para verificação de acesso premium
-class PremiumAccessWidget {
+abstract class PremiumAccessWidget {
   static Future<T> guardedAction<T>({
     required PremiumGuards guards,
     required PremiumFeature feature,

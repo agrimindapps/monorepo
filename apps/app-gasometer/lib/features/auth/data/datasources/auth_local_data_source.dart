@@ -1,15 +1,16 @@
 import 'dart:convert';
 
+import 'package:core/core.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../models/user_model.dart';
+import '../../../../core/extensions/user_entity_gasometer_extension.dart';
 
 abstract class AuthLocalDataSource {
-  Future<UserModel?> getCachedUser();
-  Future<void> cacheUser(UserModel user);
+  Future<UserEntity?> getCachedUser();
+  Future<void> cacheUser(UserEntity user);
   Future<void> clearCachedUser();
   Future<bool> isFirstLaunch();
   Future<void> markFirstLaunchComplete();
@@ -35,7 +36,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   );
 
   @override
-  Future<UserModel?> getCachedUser() async {
+  Future<UserEntity?> getCachedUser() async {
     try {
       final userJson = _sharedPreferences.getString(_cachedUserKey);
       if (userJson == null) return null;
@@ -45,16 +46,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         _parseJsonString(userJson),
       );
       
-      return UserModel.fromJson(userMap);
+      return UserEntityGasometerExtension.fromGasometerJson(userMap);
     } catch (e) {
       throw CacheException('Failed to get cached user: $e');
     }
   }
 
   @override
-  Future<void> cacheUser(UserModel user) async {
+  Future<void> cacheUser(UserEntity user) async {
     try {
-      final userJson = _jsonEncode(user.toJson());
+      final userJson = _jsonEncode(user.toGasometerJson());
       await _sharedPreferences.setString(_cachedUserKey, userJson);
     } catch (e) {
       throw CacheException('Failed to cache user: $e');

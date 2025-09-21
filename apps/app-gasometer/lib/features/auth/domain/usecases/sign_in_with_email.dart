@@ -1,9 +1,9 @@
+import 'package:core/core.dart' hide Failure, UseCase;
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
 @lazySingleton
@@ -26,7 +26,7 @@ class SignInWithEmail implements UseCase<UserEntity, SignInWithEmailParams> {
       return passwordValidation.fold((failure) => Left(failure), (_) => throw Exception());
     }
 
-    return await repository.signInWithEmail(
+    return repository.signInWithEmail(
       email: params.email,
       password: params.password,
     );

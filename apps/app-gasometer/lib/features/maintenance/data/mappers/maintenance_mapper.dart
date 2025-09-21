@@ -45,7 +45,7 @@ abstract class MaintenanceMapper {
   static MaintenanceModel entityToModel(MaintenanceEntity entity) {
     return MaintenanceModel.create(
       id: entity.id,
-      userId: entity.userId.isEmpty ? null : entity.userId,
+      userId: entity.userId?.isEmpty == true ? null : entity.userId,
       veiculoId: entity.vehicleId,
       tipo: _mapMaintenanceTypeToString(entity.type),
       descricao: entity.description,

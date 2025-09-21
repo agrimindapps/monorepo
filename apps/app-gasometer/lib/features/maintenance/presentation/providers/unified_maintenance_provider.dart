@@ -480,8 +480,8 @@ class UnifiedMaintenanceProvider extends ChangeNotifier {
     }
     
     // Simple check - compare IDs and update timestamps
-    final currentIds = _allMaintenances.map((r) => '${r.id}:${r.updatedAt.millisecondsSinceEpoch}').toSet();
-    final newIds = newRecords.map((r) => '${r.id}:${r.updatedAt.millisecondsSinceEpoch}').toSet();
+    final currentIds = _allMaintenances.map((r) => '${r.id}:${r.updatedAt?.millisecondsSinceEpoch ?? 0}').toSet();
+    final newIds = newRecords.map((r) => '${r.id}:${r.updatedAt?.millisecondsSinceEpoch ?? 0}').toSet();
     
     return !currentIds.containsAll(newIds) || !newIds.containsAll(currentIds);
   }

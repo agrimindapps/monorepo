@@ -111,7 +111,7 @@ void main() async {
   // Force sync initialization after DI is ready
   try {
     print('🔄 MAIN: Forcing sync initialization...');
-    await ReceitaAgroSyncConfig.initializeSync();
+    await ReceitaAgroSyncConfig.configure();
     print('✅ MAIN: Sync initialization completed successfully');
   } catch (e) {
     print('❌ MAIN: Sync initialization failed: $e');
@@ -147,7 +147,7 @@ void main() async {
   final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
   await analyticsService.initialize();
 
-  // Initialize Premium Service
+  // Initialize Premium Service (handles web platform internally)
   final premiumService = di.sl<ReceitaAgroPremiumService>();
   await premiumService.initialize();
 
@@ -171,7 +171,7 @@ void main() async {
   } catch (e) {
     // Log error but don't block app startup
     if (EnvironmentConfig.enableAnalytics) {
-      FirebaseCrashlytics.instance.recordError(
+      await FirebaseCrashlytics.instance.recordError(
         e,
         StackTrace.current,
         reason: 'Failed to initialize RevenueCat',

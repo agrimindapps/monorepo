@@ -107,18 +107,24 @@ class PlantsAppBar extends StatelessWidget {
 
               const SizedBox(width: 8),
 
-              // Grid/List toggle button (hide when grouped by spaces)
-              if (viewMode != ViewMode.groupedBySpaces &&
-                  viewMode != ViewMode.groupedBySpacesGrid &&
-                  viewMode != ViewMode.groupedBySpacesList)
-                GestureDetector(
-                  onTap: () {
-                    final newMode =
-                        viewMode == ViewMode.grid
-                            ? ViewMode.list
-                            : ViewMode.grid;
-                    onViewModeChanged(newMode);
-                  },
+              // Grid/List toggle button (always visible)
+              GestureDetector(
+                onTap: () {
+                  ViewMode newMode;
+                  
+                  // Se está agrupado, alterna entre os modos agrupados
+                  if (viewMode == ViewMode.groupedBySpaces || 
+                      viewMode == ViewMode.groupedBySpacesGrid) {
+                    newMode = ViewMode.groupedBySpacesList;
+                  } else if (viewMode == ViewMode.groupedBySpacesList) {
+                    newMode = ViewMode.groupedBySpacesGrid;
+                  } else {
+                    // Se não está agrupado, alterna normalmente
+                    newMode = viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
+                  }
+                  
+                  onViewModeChanged(newMode);
+                },
                   child: Container(
                     width: 44,
                     height: 44,
@@ -151,9 +157,7 @@ class PlantsAppBar extends StatelessWidget {
                       ],
                     ),
                     child: Icon(
-                      viewMode == ViewMode.grid
-                          ? Icons.view_list
-                          : Icons.grid_view,
+                      _getToggleIcon(viewMode),
                       color: theme.colorScheme.secondary,
                       size: 20,
                     ),
@@ -164,5 +168,18 @@ class PlantsAppBar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Retorna o ícone apropriado baseado no modo atual
+  IconData _getToggleIcon(ViewMode currentMode) {
+    switch (currentMode) {
+      case ViewMode.grid:
+      case ViewMode.groupedBySpacesGrid:
+      case ViewMode.groupedBySpaces: // groupedBySpaces padrão é grid
+        return Icons.view_list; // Mostra lista para alternar para lista
+      case ViewMode.list:
+      case ViewMode.groupedBySpacesList:
+        return Icons.grid_view; // Mostra grid para alternar para grid
+    }
   }
 }

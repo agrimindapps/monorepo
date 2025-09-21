@@ -41,6 +41,27 @@ class Space extends BaseSyncEntity {
     };
   }
 
+  /// Cria uma instância de Space a partir de um mapa Firebase
+  static Space fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    return Space(
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      name: map['name'] as String,
+      description: map['description'] as String?,
+      lightCondition: map['light_condition'] as String?,
+      humidity: (map['humidity'] as num?)?.toDouble(),
+      averageTemperature: (map['average_temperature'] as num?)?.toDouble(),
+    );
+  }
+
   @override
   Space markAsDirty() {
     return copyWith(isDirty: true, updatedAt: DateTime.now());

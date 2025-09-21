@@ -184,12 +184,9 @@ class CompleteTaskWithRegenerationUseCase
       // Converter PlantConfig para PlantaConfigModel
       final configModel = _convertToPlantaConfigModel(plant);
 
-      // Converter Task para TaskModel para compatibilidade com o service
-      final taskModel = _convertToTaskModel(currentTask);
-
       // Gerar próxima tarefa usando o service
       final generationResult = taskGenerationService.generateNextTask(
-        completedTask: taskModel,
+        completedTask: currentTask,
         completionDate: completionDate,
         config: configModel,
       );
@@ -200,16 +197,10 @@ class CompleteTaskWithRegenerationUseCase
         );
       }
 
-      final nextTaskModel = generationResult.fold((_) => null, (task) => task);
-      if (nextTaskModel == null) {
+      final nextTask = generationResult.fold((_) => null, (task) => task);
+      if (nextTask == null) {
         return const Left(ValidationFailure('Nenhuma próxima tarefa foi gerada'));
       }
-
-      // Converter de volta para Task entity
-      final nextTask = task_entity.Task.fromModel(
-        nextTaskModel,
-        plantName: plant.name as String?,
-      );
 
       // Salvar próxima tarefa
       final saveResult = await tasksRepository.addTask(nextTask);
@@ -239,34 +230,6 @@ class CompleteTaskWithRegenerationUseCase
       default:
         return null;
     }
-  }
-
-  /// Converte Task para TaskModel (legacy compatibility)
-  TaskModel _convertToTaskModel(task_entity.Task task) {
-    return TaskModel(
-      id: task.id,
-      createdAt: task.createdAt,
-      updatedAt: task.updatedAt,
-      title: task.title,
-      description: task.description,
-      plantId: task.plantId,
-      plantName: task.plantName,
-      type: task.type,
-      status: task.status,
-      priority: task.priority,
-      dueDate: task.dueDate,
-      completedAt: task.completedAt,
-      completionNotes: task.completionNotes,
-      isRecurring: task.isRecurring,
-      recurringIntervalDays: task.recurringIntervalDays,
-      nextDueDate: task.nextDueDate,
-      lastSyncAt: task.lastSyncAt,
-      isDirty: task.isDirty,
-      isDeleted: task.isDeleted,
-      version: task.version,
-      userId: task.userId,
-      moduleName: task.moduleName,
-    );
   }
 
   /// Converte PlantConfig entity para PlantaConfigModel

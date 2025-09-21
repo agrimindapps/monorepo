@@ -192,13 +192,13 @@ class AppNavigationProvider extends ChangeNotifier {
   /// Retorna configuração padrão para um tipo de página
   NavigationConfig _getDefaultConfigForPageType(AppPageType pageType) {
     switch (pageType) {
-      // Páginas de detalhes - SEM BottomNav
+      // Páginas de detalhes - COM BottomNav
       case AppPageType.detalheDefensivo:
       case AppPageType.detalhePraga:
       case AppPageType.detalheDetalhes:
       case AppPageType.detalheCultura:
         return const NavigationConfig(
-          showBottomNavigation: false,
+          showBottomNavigation: true,
           showBackButton: true,
           canGoBack: true,
         );

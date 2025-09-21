@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 import '../features/plants/domain/entities/plant.dart';
+import '../features/plants/domain/entities/space.dart';
 import '../features/tasks/domain/entities/task.dart';
 import 'data/models/comentario_model.dart';
 
@@ -33,6 +34,10 @@ Plant _plantFromFirebaseMap(Map<String, dynamic> map) {
   );
 }
 
+Space _spaceFromFirebaseMap(Map<String, dynamic> map) {
+  return Space.fromFirebaseMap(map);
+}
+
 /// Configuração de sincronização específica do Plantis
 /// Apps simples com poucas entidades e sync básico
 abstract final class PlantisSyncConfig {
@@ -52,6 +57,14 @@ abstract final class PlantisSyncConfig {
           collectionName: 'plants',
           fromMap: _plantFromFirebaseMap,
           toMap: (plant) => plant.toFirebaseMap(),
+        ),
+
+        // Espaços das plantas
+        EntitySyncRegistration<Space>.simple(
+          entityType: Space,
+          collectionName: 'spaces',
+          fromMap: _spaceFromFirebaseMap,
+          toMap: (space) => space.toFirebaseMap(),
         ),
         
         // Tasks relacionadas às plantas (usando a entidade real do app)
@@ -103,6 +116,14 @@ abstract final class PlantisSyncConfig {
           collectionName: 'dev_plants',
           fromMap: _plantFromFirebaseMap,
           toMap: (plant) => plant.toFirebaseMap(),
+        ),
+
+        // Espaços das plantas (desenvolvimento)
+        EntitySyncRegistration<Space>.simple(
+          entityType: Space,
+          collectionName: 'dev_spaces',
+          fromMap: _spaceFromFirebaseMap,
+          toMap: (space) => space.toFirebaseMap(),
         ),
 
         // Tasks relacionadas às plantas (desenvolvimento)
@@ -158,6 +179,18 @@ abstract final class PlantisSyncConfig {
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
           batchSize: 100, // Lotes maiores quando sync
+        ),
+
+        // Espaços das plantas (offline-first)
+        EntitySyncRegistration<Space>(
+          entityType: Space,
+          collectionName: 'spaces',
+          fromMap: _spaceFromFirebaseMap,
+          toMap: (Space space) => space.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 12),
+          batchSize: 50, // Lotes medianos para espaços
         ),
 
         // Tasks relacionadas às plantas (offline-first)

@@ -66,33 +66,16 @@ class GenerateInitialTasksUseCase
         return Left(failure);
       }
 
-      final tarefaModels = generationResult.fold(
-        (_) => <dynamic>[],
+      final taskEntities = generationResult.fold(
+        (_) => <task_entity.Task>[],
         (tasks) => tasks,
       );
 
       if (kDebugMode) {
-        print('🔧 GenerateInitialTasksUseCase.call() - ${tarefaModels.length} modelos de tarefa gerados');
-      }
-
-      // Converter models para entities
-      if (kDebugMode) {
-        print('🔧 GenerateInitialTasksUseCase.call() - Convertendo models para entities');
-      }
-
-      final taskEntities = <task_entity.Task>[];
-      for (int i = 0; i < tarefaModels.length; i++) {
-        try {
-          final entity = task_entity.Task.fromModel(tarefaModels[i]);
-          taskEntities.add(entity);
-          if (kDebugMode) {
-            print('🔧 Tarefa ${i + 1} convertida: ${entity.title} (${entity.type.key})');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('❌ Erro convertendo tarefa ${i + 1}: $e');
-          }
-          return Left(ServerFailure('Erro na conversão da tarefa ${i + 1}: ${e.toString()}'));
+        print('🔧 GenerateInitialTasksUseCase.call() - ${taskEntities.length} entidades de tarefa geradas');
+        for (int i = 0; i < taskEntities.length; i++) {
+          final entity = taskEntities[i];
+          print('🔧 Tarefa ${i + 1}: ${entity.title} (${entity.type.key})');
         }
       }
 

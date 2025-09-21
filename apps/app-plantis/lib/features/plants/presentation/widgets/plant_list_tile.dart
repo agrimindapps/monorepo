@@ -15,7 +15,7 @@ class PlantListTile extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -205,8 +205,6 @@ class PlantListTile extends StatelessWidget {
     );
   }
 
-
-
   CareStatusInfo _getCareStatus() {
     if (plant.config?.wateringIntervalDays == null) {
       return const CareStatusInfo(
@@ -247,7 +245,6 @@ class PlantListTile extends StatelessWidget {
       );
     }
   }
-
 
   Widget _buildCareStatus(BuildContext context) {
     final theme = Theme.of(context);

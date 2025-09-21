@@ -219,21 +219,63 @@ class NotificationsSettingsPage extends StatelessWidget {
                   ),
                 ),
 
-                if (!statusData.hasPermissions) ...[
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      final provider = context.read<SettingsProvider>();
-                      provider.openNotificationSettings();
-                    },
-                    icon: const Icon(Icons.settings),
-                    label: const Text('Abrir Configurações'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                    ),
-                  ),
-                ],
+                Selector<SettingsProvider, bool>(
+                  selector: (context, provider) => provider.isWebPlatform,
+                  builder: (context, isWeb, child) {
+                    if (!statusData.hasPermissions && !isWeb) {
+                      return Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              final provider = context.read<SettingsProvider>();
+                              provider.openNotificationSettings();
+                            },
+                            icon: const Icon(Icons.settings),
+                            label: const Text('Abrir Configurações'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    if (isWeb) {
+                      return Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Use o aplicativo móvel para receber notificações',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
               ],
             ),
           ),
@@ -250,7 +292,7 @@ class NotificationsSettingsPage extends StatelessWidget {
         taskRemindersEnabled: provider.notificationSettings.taskRemindersEnabled,
         overdueNotificationsEnabled: provider.notificationSettings.overdueNotificationsEnabled,
         dailySummaryEnabled: provider.notificationSettings.dailySummaryEnabled,
-        hasPermissions: provider.hasPermissionsGranted,
+        hasPermissions: provider.hasPermissionsGranted && !provider.isWebPlatform,
       ),
       builder: (context, settingsData, child) {
         return Card(
@@ -329,7 +371,7 @@ class NotificationsSettingsPage extends StatelessWidget {
         reminderMinutesBefore: provider.notificationSettings.reminderMinutesBefore,
         dailySummaryTime: provider.notificationSettings.dailySummaryTime,
         dailySummaryEnabled: provider.notificationSettings.dailySummaryEnabled,
-        hasPermissions: provider.hasPermissionsGranted,
+        hasPermissions: provider.hasPermissionsGranted && !provider.isWebPlatform,
       ),
       builder: (context, timeData, child) {
         return Card(
@@ -390,7 +432,7 @@ class NotificationsSettingsPage extends StatelessWidget {
     return Selector<SettingsProvider, TaskTypeSettingsData>(
       selector: (context, provider) => TaskTypeSettingsData(
         taskTypeSettings: provider.notificationSettings.taskTypeSettings,
-        hasPermissions: provider.hasPermissionsGranted,
+        hasPermissions: provider.hasPermissionsGranted && !provider.isWebPlatform,
       ),
       builder: (context, taskTypeData, child) {
         return Card(
@@ -434,7 +476,7 @@ class NotificationsSettingsPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Selector<SettingsProvider, bool>(
-      selector: (context, provider) => provider.hasPermissionsGranted,
+      selector: (context, provider) => provider.hasPermissionsGranted && !provider.isWebPlatform,
       builder: (context, hasPermissions, child) {
         return Column(
           children: [

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/theme_provider.dart';
@@ -48,6 +49,9 @@ class SettingsProvider extends ChangeNotifier {
   // Estados derivados
   bool get hasPermissionsGranted => _settings.notifications.permissionsGranted;
   bool get isDarkMode => _settings.theme.isDarkMode;
+  
+  // Verificação de plataforma web
+  bool get isWebPlatform => kIsWeb;
 
   // Getter simplificado para o switch de notificações
   bool get notificationsEnabled => _settings.notifications.taskRemindersEnabled;
@@ -421,6 +425,9 @@ class SettingsProvider extends ChangeNotifier {
 extension SettingsProviderExtensions on SettingsProvider {
   /// Texto para exibir status das notificações
   String get notificationStatusText {
+    if (isWebPlatform) {
+      return 'Notificações não disponíveis na versão web';
+    }
     if (!hasPermissionsGranted) {
       return 'Notificações desabilitadas. Habilite nas configurações do dispositivo.';
     }
@@ -429,11 +436,17 @@ extension SettingsProviderExtensions on SettingsProvider {
 
   /// Cor para status das notificações
   Color get notificationStatusColor {
+    if (isWebPlatform) {
+      return Colors.grey;
+    }
     return hasPermissionsGranted ? Colors.green : Colors.red;
   }
 
   /// Ícone para status das notificações
   IconData get notificationStatusIcon {
+    if (isWebPlatform) {
+      return Icons.web;
+    }
     return hasPermissionsGranted ? Icons.notifications_active : Icons.notifications_off;
   }
 

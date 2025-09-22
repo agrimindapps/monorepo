@@ -8,8 +8,6 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_entity;
-import '../../data/models/user_model.dart';
-import '../../../../core/interfaces/i_sync_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
@@ -39,7 +37,6 @@ class AuthProvider extends ChangeNotifier {
   final AnalyticsService _analytics;
   final PlatformService _platformService;
   final AuthRateLimiter _rateLimiter;
-  final ISyncService _syncService;
   final AuthLocalDataSource _authLocalDataSource;
   
   // MonorepoAuthCache instance for cross-module security
@@ -71,7 +68,6 @@ class AuthProvider extends ChangeNotifier {
     required AnalyticsService analytics,
     required PlatformService platformService,
     required AuthRateLimiter rateLimiter,
-    required ISyncService syncService,
     required AuthLocalDataSource authLocalDataSource,
   })  : _getCurrentUser = getCurrentUser,
         _watchAuthState = watchAuthState,
@@ -85,7 +81,6 @@ class AuthProvider extends ChangeNotifier {
         _analytics = analytics,
         _platformService = platformService,
         _rateLimiter = rateLimiter,
-        _syncService = syncService,
         _authLocalDataSource = authLocalDataSource {
     _initializeAuthState();
     // Initialize MonorepoAuthCache for cross-module security
@@ -854,57 +849,40 @@ class AuthProvider extends ChangeNotifier {
     }
   }
   
-  /// Sincronizar dados do Gasometer de forma simplificada
+  /// Sincronizar dados do Gasometer usando UnifiedSync
   Future<void> _syncGasometerData() async {
-    final dataTypes = ['vehicle', 'fuel_supply', 'maintenance', 'expense', 'reports'];
-    
-    for (final dataType in dataTypes) {
-      try {
-        await _syncStepData(dataType);
-        // Delay menor para não impactar performance
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('❌ Erro ao sincronizar $dataType: $e');
-        }
-        // Continuar com próximos tipos mesmo com erro
-        continue;
+    try {
+      // Usar o UnifiedSyncManager para sincronizar todos os dados do app gasometer
+      final syncResult = await UnifiedSyncManager.instance.forceSyncApp('gasometer');
+
+      syncResult.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Erro na sincronização UnifiedSync: ${failure.message}');
+          }
+        },
+        (_) {
+          if (kDebugMode) {
+            debugPrint('✅ Sincronização UnifiedSync concluída com sucesso');
+          }
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Erro na sincronização Gasometer: $e');
       }
     }
   }
   
-  /// Sincroniza dados específicos por tipo
+  /// Sincroniza dados específicos por entidade (implementação obsoleta)
+  /// O UnifiedSyncManager agora gerencia automaticamente todas as entidades
+  @deprecated
   Future<void> _syncStepData(String dataType) async {
-    // Em uma implementação real, cada tipo teria sua própria lógica
-    switch (dataType) {
-      case 'vehicle':
-        // Sincronizar dados de veículos
-        await _syncService.syncCollection('vehicles');
-        break;
-        
-      case 'fuel_supply':
-        // Sincronizar dados de combustível
-        await _syncService.syncCollection('fuel_supplies');
-        break;
-        
-      case 'maintenance':
-        // Sincronizar dados de manutenção
-        await _syncService.syncCollection('maintenances');
-        break;
-        
-      case 'expense':
-        // Sincronizar dados de despesas
-        await _syncService.syncCollection('expenses');
-        break;
-        
-      case 'reports':
-        // Regenerar relatórios/analytics
-        await _syncService.syncCollection('reports');
-        break;
+    // Implementação obsoleta - UnifiedSyncManager gerencia automaticamente
+    // todas as entidades registradas no GasometerSyncConfig
+    if (kDebugMode) {
+      debugPrint('⚠️ _syncStepData obsoleto - usando UnifiedSyncManager');
     }
-    
-    // Aguardar sincronização ser processada
-    await Future<void>.delayed(const Duration(milliseconds: 500));
   }
   
   /// Para sincronização em andamento

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+// import 'package:core/core.dart'; // TODO: Will be needed for UnifiedSync in Phase 2
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +8,7 @@ import 'core/di/injection_container.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/services/receipt_image_service.dart';
-import 'core/sync/presentation/providers/sync_status_provider.dart';
+// import 'core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync provider in Phase 2
 import 'core/theme/gasometer_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as local;
 import 'features/data_export/presentation/providers/data_export_provider.dart';
@@ -62,10 +62,10 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
           create: (_) => sl<ReceiptImageService>(),
         ),
         
-        // Sync Status Provider - independent
-        ChangeNotifierProvider(
-          create: (_) => sl<SyncStatusProvider>(),
-        ),
+        // Sync Status Provider - REMOVED: Legacy sync system
+        // ChangeNotifierProvider(
+        //   create: (_) => sl<SyncStatusProvider>(),
+        // ), // TODO: Replace with UnifiedSync status provider in Phase 2
         
         // Premium Provider - independent 
         ChangeNotifierProvider(

@@ -16,8 +16,8 @@ import 'core/services/analytics_service.dart';
 import 'core/services/database_inspector_service.dart';
 import 'core/services/gasometer_firebase_service.dart';
 import 'core/services/gasometer_notification_service.dart';
-import 'core/interfaces/i_sync_service.dart';
-import 'core/sync/models/sync_queue_item.dart';
+// import 'core/interfaces/i_sync_service.dart'; // TODO: Replace with UnifiedSync in Phase 2
+// import 'core/sync/models/sync_queue_item.dart'; // TODO: Replace with UnifiedSync models in Phase 2
 import 'features/expenses/data/models/expense_model.dart';
 import 'features/fuel/data/models/fuel_supply_model.dart';
 import 'features/maintenance/data/models/maintenance_model.dart';
@@ -52,7 +52,7 @@ void main() async {
   Hive.registerAdapter(ExpenseModelAdapter());
   Hive.registerAdapter(MaintenanceModelAdapter());
   Hive.registerAdapter(CategoryModelAdapter());
-  Hive.registerAdapter(SyncQueueItemAdapter());
+  // Hive.registerAdapter(SyncQueueItemAdapter()); // TODO: Replace with UnifiedSync models in Phase 2
 
   // Register LogEntry adapter for logging system
   if (!Hive.isAdapterRegistered(20)) {
@@ -121,11 +121,12 @@ void main() async {
   await notificationService.initialize();
   print('✅ Notifications initialized successfully');
 
-  // Initialize Sync Service
-  print('🔄 Initializing Sync Service...');
-  final syncService = sl<ISyncService>();
-  await syncService.initialize();
-  print('✅ Sync Service initialized successfully');
+  // Initialize Sync Service - REMOVED: Legacy sync system
+  // print('🔄 Initializing Sync Service...');
+  // final syncService = sl<ISyncService>();
+  // await syncService.initialize();
+  // print('✅ Sync Service initialized successfully');
+  // TODO: Replace with UnifiedSync initialization in Phase 2
 
   // Configure Crashlytics and error handling
   if (!kDebugMode) {

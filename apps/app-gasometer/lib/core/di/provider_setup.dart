@@ -11,7 +11,7 @@ import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../../features/reports/presentation/providers/reports_provider.dart';
 // Providers
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
-import '../sync/presentation/providers/sync_status_provider.dart';
+// import '../sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import 'injectable_config.dart'; // Commented out - using manual DI
 import 'injection_container.dart';
 
@@ -80,13 +80,13 @@ class ProviderSetup {
         lazy: true,
       ),
       
-      // Sync Status Provider - Não lazy (importante para status de sync)
-      ChangeNotifierProvider<SyncStatusProvider>(
-        create: (context) => _getOrCreateProvider<SyncStatusProvider>(
-          () => sl<SyncStatusProvider>(),
-        ),
-        lazy: false,
-      ),
+      // Sync Status Provider - REMOVED: Legacy sync system
+      // ChangeNotifierProvider<SyncStatusProvider>(
+      //   create: (context) => _getOrCreateProvider<SyncStatusProvider>(
+      //     () => sl<SyncStatusProvider>(),
+      //   ),
+      //   lazy: false,
+      // ), // TODO: Replace with UnifiedSync status provider in Phase 2
       
       // Data Export Provider - Lazy loading (usado apenas no perfil)
       ChangeNotifierProvider<DataExportProvider>(
@@ -184,9 +184,9 @@ class ProviderSetup {
       () => sl<auth_provider.AuthProvider>(),
     );
     
-    _getOrCreateProvider<SyncStatusProvider>(
-      () => sl<SyncStatusProvider>(),
-    );
+    // _getOrCreateProvider<SyncStatusProvider>(
+    //   () => sl<SyncStatusProvider>(),
+    // ); // TODO: Replace with UnifiedSync status provider in Phase 2
     
     // Inicializa providers críticos se necessário
     // Note: Implementar inicialização específica se necessário

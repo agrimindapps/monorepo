@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
 
 /// Loading simples para sincronização que aparece e some automaticamente - padrão app-plantis
 class SimpleSyncLoading extends StatefulWidget {
@@ -55,27 +55,44 @@ class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
     super.dispose();
   }
 
-  /// Monitora automaticamente o estado da sincronização
+  /// Monitora automaticamente o estado da sincronização usando UnifiedSyncProvider
   void _startListeningToSync() {
-    final authProvider = context.read<AuthProvider>();
-    
+    final syncProvider = context.read<UnifiedSyncProvider>();
+
     // Verificar periodicamente se a sincronização terminou
     _syncSubscription = Stream.periodic(const Duration(milliseconds: 500))
         .listen((_) {
       if (!mounted) return;
-      
-      // Atualizar mensagem se mudou
-      if (_currentMessage != authProvider.syncMessage) {
+
+      // Atualizar mensagem baseada no status do sync
+      final newMessage = _getSyncMessage(syncProvider.syncStatus);
+      if (_currentMessage != newMessage) {
         setState(() {
-          _currentMessage = authProvider.syncMessage;
+          _currentMessage = newMessage;
         });
       }
-      
+
       // Fechar automaticamente quando sincronização termina
-      if (!authProvider.isSyncInProgress) {
+      if (syncProvider.syncStatus != SyncStatus.syncing) {
         _autoClose();
       }
     });
+  }
+
+  /// Retorna mensagem adequada baseada no status do sync
+  String _getSyncMessage(SyncStatus status) {
+    switch (status) {
+      case SyncStatus.syncing:
+        return 'Sincronizando dados automotivos...';
+      case SyncStatus.synced:
+        return 'Dados sincronizados com sucesso!';
+      case SyncStatus.error:
+        return 'Erro na sincronização';
+      case SyncStatus.offline:
+        return 'Modo offline - dados salvos localmente';
+      default:
+        return widget.message;
+    }
   }
 
   /// Fecha automaticamente o loading

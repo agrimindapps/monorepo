@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:core/core.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
 
@@ -224,6 +225,62 @@ class SyncProgressController {
     }
     
     _progressController.add(_overallProgress);
+  }
+
+  /// Conecta este controlador com o UnifiedSyncProvider
+  void connectToUnifiedSync(UnifiedSyncProvider syncProvider) {
+    // Inicializar etapas específicas do Gasometer
+    initializeGasometerSteps();
+
+    // Escutar mudanças de status do sync provider
+    syncProvider.addListener(() {
+      _updateFromUnifiedSync(syncProvider);
+    });
+
+    // Atualizar estado inicial
+    _updateFromUnifiedSync(syncProvider);
+  }
+
+  /// Atualiza o estado do controlador baseado no UnifiedSyncProvider
+  void _updateFromUnifiedSync(UnifiedSyncProvider syncProvider) {
+    switch (syncProvider.syncStatus) {
+      case SyncStatus.syncing:
+        updateState(SyncProgressState.syncing, message: 'Sincronizando dados automotivos...');
+        _updateStepsFromDebugInfo(syncProvider.debugInfo);
+        break;
+      case SyncStatus.synced:
+        // Marcar todas as etapas como completadas
+        for (final step in _steps) {
+          completeStep(step.id);
+        }
+        updateState(SyncProgressState.completed, message: 'Seus dados automotivos estão sincronizados!');
+        break;
+      case SyncStatus.error:
+        updateState(SyncProgressState.error, message: 'Erro na sincronização dos dados');
+        break;
+      case SyncStatus.offline:
+        updateState(SyncProgressState.preparing, message: 'Modo offline - dados salvos localmente');
+        break;
+      default:
+        updateState(SyncProgressState.preparing, message: 'Preparando sincronização...');
+    }
+  }
+
+  /// Atualiza progresso das etapas baseado nas informações de debug do UnifiedSync
+  void _updateStepsFromDebugInfo(Map<String, dynamic> debugInfo) {
+    final syncedItems = debugInfo['synced_items_count'] as int? ?? 0;
+    final totalItems = debugInfo['local_items_count'] as int? ?? 0;
+
+    // Simular progresso das etapas baseado nos itens sincronizados
+    if (totalItems > 0) {
+      final progress = (syncedItems / totalItems).clamp(0.0, 1.0);
+
+      // Distribuir progresso entre as etapas
+      for (int i = 0; i < _steps.length; i++) {
+        final stepProgress = ((i + 1) / _steps.length * progress).clamp(0.0, 1.0);
+        updateStepProgress(_steps[i].id, stepProgress);
+      }
+    }
   }
 
   /// Agenda auto-hide após completar

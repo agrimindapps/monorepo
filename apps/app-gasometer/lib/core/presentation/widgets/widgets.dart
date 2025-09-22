@@ -19,9 +19,9 @@ export 'error_state_widget.dart';
 export 'feedback_snackbar.dart';
 export 'form_section_widget.dart';
 export 'loading_overlay.dart';
-export 'real_time_sync_status.dart';
+// export 'real_time_sync_status.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // Accessibility components
 export 'semantic_widgets.dart';
 export 'standard_card.dart';
 export 'standard_loading_view.dart';
-export 'sync_status_indicator.dart';
+// export 'sync_status_indicator.dart'; // TODO: Replace with UnifiedSync in Phase 2

@@ -17,21 +17,11 @@ import '../logging/data/datasources/log_remote_data_source.dart';
 import '../logging/data/repositories/log_repository_impl.dart';
 import '../logging/repositories/log_repository.dart';
 import '../logging/services/logging_service.dart';
-import '../logging/repositories/log_repository.dart';
-import '../logging/data/repositories/log_repository_impl.dart';
-import '../logging/data/datasources/log_local_data_source.dart';
-import '../logging/data/datasources/log_remote_data_source.dart';
-import '../sync/services/conflict_resolver.dart';
-import '../sync/services/sync_service.dart';
-import '../sync/services/sync_queue.dart';
-import '../sync/services/sync_operations.dart';
-import '../interfaces/i_sync_service.dart' as sync_interface;
 import '../services/analytics_service.dart';
 import '../services/avatar_service.dart';
 import '../services/platform_service.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/local_data_service.dart';
-import '../data/models/base_sync_model.dart';
 
 // Auth imports (keeping only needed ones)
 import '../../features/auth/domain/repositories/auth_repository.dart';
@@ -61,12 +51,6 @@ import '../../features/vehicles/domain/usecases/update_vehicle.dart';
 import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
 import '../../features/vehicles/domain/usecases/search_vehicles.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
-import '../../features/auth/domain/usecases/sign_in_with_email.dart';
-import '../../features/auth/domain/usecases/sign_out.dart';
-import '../../features/auth/domain/usecases/sign_up_with_email.dart';
-import '../../features/auth/domain/usecases/update_profile.dart';
-import '../../features/auth/domain/usecases/watch_auth_state.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as auth_provider;
 // Fuel imports
 import '../../features/fuel/data/datasources/fuel_local_data_source.dart';
 import '../../features/fuel/data/datasources/fuel_remote_data_source.dart';
@@ -122,8 +106,6 @@ import '../../features/premium/domain/usecases/purchase_premium.dart';
 import '../../features/premium/domain/usecases/restore_purchases.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
 
-// Import for fuel analytics use cases
-import '../../features/fuel/domain/usecases/get_fuel_analytics.dart';
 // Reports imports
 import '../../features/reports/data/datasources/reports_data_source.dart';
 import '../../features/reports/data/repositories/reports_repository_impl.dart';
@@ -135,18 +117,6 @@ import '../../features/reports/domain/usecases/generate_monthly_report.dart';
 import '../../features/reports/domain/usecases/generate_yearly_report.dart';
 import '../../features/reports/domain/usecases/get_reports_analytics.dart';
 import '../../features/reports/presentation/providers/reports_provider.dart';
-// Vehicle imports
-import '../../features/vehicles/data/datasources/vehicle_local_data_source.dart';
-import '../../features/vehicles/data/datasources/vehicle_remote_data_source.dart';
-import '../../features/vehicles/data/repositories/vehicle_repository_impl.dart';
-import '../../features/vehicles/domain/repositories/vehicle_repository.dart';
-import '../../features/vehicles/domain/usecases/add_vehicle.dart';
-import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
-import '../../features/vehicles/domain/usecases/get_all_vehicles.dart';
-import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
-import '../../features/vehicles/domain/usecases/search_vehicles.dart';
-import '../../features/vehicles/domain/usecases/update_vehicle.dart';
-import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 
 // Device Management imports
 import 'package:device_info_plus/device_info_plus.dart';
@@ -169,14 +139,11 @@ import '../../features/data_export/domain/services/platform_export_service.dart'
 import '../error/error_handler.dart';
 import '../error/error_logger.dart';
 import '../error/error_reporter.dart';
-import '../services/auth_rate_limiter.dart';
 import '../services/gasometer_notification_service.dart';
-import '../services/local_data_service.dart';
-import '../services/platform_service.dart';
 import '../services/image_compression_service.dart';
 import '../services/firebase_storage_service.dart';
 import '../services/receipt_image_service.dart';
-import '../sync/presentation/providers/sync_status_provider.dart';
+// import '../sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 
 // Profile Image Service
 import '../../features/profile/domain/services/profile_image_service.dart';
@@ -255,32 +222,6 @@ Future<void> initializeDependencies() async {
     remindLaunches: 5,
   ));
 
-  // Sync Services
-  sl.registerLazySingleton<SyncQueue>(() {
-    final queue = SyncQueue();
-    queue.initialize(); // Initialize async (non-blocking)
-    return queue;
-  });
-
-  sl.registerLazySingleton<SyncOperations>(() => SyncOperations(
-    sl<SyncQueue>(),
-    sl<Connectivity>(),
-    sl<AnalyticsService>(),
-  ));
-
-  sl.registerLazySingleton<ConflictResolver<BaseSyncModel>>(() => ConflictResolver<BaseSyncModel>());
-
-  // Sync Service - requires multiple dependencies
-  sl.registerLazySingleton<SyncService>(() => SyncService(
-    sl<SyncQueue>(),
-    sl<SyncOperations>(),
-    sl<ConflictResolver<BaseSyncModel>>(),
-    sl<AnalyticsService>(),
-    sl<AuthRepository>(),
-  ));
-
-  // Register as interface too
-  sl.registerLazySingleton<sync_interface.ISyncService>(() => sl<SyncService>());
 
   // Premium Sync Service
   sl.registerLazySingleton<PremiumSyncService>(() => PremiumSyncService(
@@ -509,7 +450,7 @@ Future<void> initializeDependencies() async {
     analytics: sl<AnalyticsService>(),
     platformService: sl<PlatformService>(),
     rateLimiter: sl<AuthRateLimiter>(),
-    syncService: sl<sync_interface.ISyncService>(),
+    // syncService: sl<sync_interface.ISyncService>(), // TODO: Replace with UnifiedSync in Phase 2
     authLocalDataSource: sl<AuthLocalDataSource>(),
   ));
 
@@ -680,10 +621,10 @@ Future<void> initializeDependencies() async {
     analyticsService: sl<AnalyticsService>(),
   ));
 
-  // Sync Status Provider
-  sl.registerLazySingleton<SyncStatusProvider>(() => SyncStatusProvider(
-    sl<SyncService>(),
-  ));
+  // Sync Status Provider - REMOVED: Legacy sync system
+  // sl.registerLazySingleton<SyncStatusProvider>(() => SyncStatusProvider(
+  //   sl<SyncService>(),
+  // )); // TODO: Replace with UnifiedSync status provider in Phase 2
 
   // ===== Initialize services that need post-DI setup =====
   // await initializePostDIServices(); // Function not defined - commenting out

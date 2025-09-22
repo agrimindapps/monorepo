@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+import '../features/expenses/domain/entities/expense_entity.dart';
+import '../features/fuel/domain/entities/fuel_record_entity.dart';
 import '../features/maintenance/domain/entities/maintenance_entity.dart';
 import '../features/vehicles/domain/entities/vehicle_entity.dart';
 import 'extensions/user_entity_gasometer_extension.dart';
@@ -13,6 +15,14 @@ MaintenanceEntity _maintenanceFromFirebaseMap(Map<String, dynamic> map) {
   return MaintenanceEntity.fromFirebaseMap(map);
 }
 
+FuelRecordEntity _fuelRecordFromFirebaseMap(Map<String, dynamic> map) {
+  return FuelRecordEntity.fromFirebaseMap(map);
+}
+
+ExpenseEntity _expenseFromFirebaseMap(Map<String, dynamic> map) {
+  return ExpenseEntity.fromFirebaseMap(map);
+}
+
 UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
   return UserEntityGasometerExtension.fromGasometerJson(map);
 }
@@ -23,12 +33,13 @@ abstract final class GasometerSyncConfig {
   const GasometerSyncConfig._();
 
   /// Configura o sistema de sincronização para o Gasometer
+  /// Configuração específica para dados financeiros com sync mais frequente
   static Future<void> configure() async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'gasometer',
       config: AppSyncConfig.simple(
         appName: 'gasometer',
-        syncInterval: const Duration(minutes: 5), // Sync regular
+        syncInterval: const Duration(minutes: 5), // Sync frequente para dados financeiros
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
@@ -39,7 +50,23 @@ abstract final class GasometerSyncConfig {
           fromMap: _vehicleFromFirebaseMap,
           toMap: (vehicle) => vehicle.toFirebaseMap(),
         ),
-        
+
+        // Registros de Combustível - Dados frequentes e volumosos
+        EntitySyncRegistration<FuelRecordEntity>.simple(
+          entityType: FuelRecordEntity,
+          collectionName: 'fuel_records',
+          fromMap: _fuelRecordFromFirebaseMap,
+          toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
+        ),
+
+        // Despesas - Dados financeiros importantes
+        EntitySyncRegistration<ExpenseEntity>.simple(
+          entityType: ExpenseEntity,
+          collectionName: 'expenses',
+          fromMap: _expenseFromFirebaseMap,
+          toMap: (expense) => expense.toFirebaseMap(),
+        ),
+
         // Manutenções - Registros de manutenção dos veículos
         EntitySyncRegistration<MaintenanceEntity>.simple(
           entityType: MaintenanceEntity,
@@ -67,13 +94,13 @@ abstract final class GasometerSyncConfig {
     );
   }
 
-  /// Configuração para desenvolvimento
+  /// Configuração para desenvolvimento com sync em tempo real
   static Future<void> configureDevelopment() async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'gasometer',
       config: AppSyncConfig.development(
         appName: 'gasometer',
-        syncInterval: const Duration(minutes: 2),
+        syncInterval: const Duration(minutes: 2), // Sync mais frequente para desenvolvimento
       ),
       entities: [
         EntitySyncRegistration<VehicleEntity>.simple(
@@ -81,6 +108,20 @@ abstract final class GasometerSyncConfig {
           collectionName: 'dev_vehicles',
           fromMap: _vehicleFromFirebaseMap,
           toMap: (vehicle) => vehicle.toFirebaseMap(),
+        ),
+
+        EntitySyncRegistration<FuelRecordEntity>.simple(
+          entityType: FuelRecordEntity,
+          collectionName: 'dev_fuel_records',
+          fromMap: _fuelRecordFromFirebaseMap,
+          toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
+        ),
+
+        EntitySyncRegistration<ExpenseEntity>.simple(
+          entityType: ExpenseEntity,
+          collectionName: 'dev_expenses',
+          fromMap: _expenseFromFirebaseMap,
+          toMap: (expense) => expense.toFirebaseMap(),
         ),
 
         EntitySyncRegistration<MaintenanceEntity>.simple(
@@ -108,12 +149,13 @@ abstract final class GasometerSyncConfig {
   }
 
   /// Configuração offline-first para áreas com internet limitada
+  /// Otimizada para dados financeiros com batch sizes menores
   static Future<void> configureOfflineFirst() async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'gasometer',
       config: AppSyncConfig.offlineFirst(
         appName: 'gasometer',
-        syncInterval: const Duration(hours: 4), // Sync esporádico
+        syncInterval: const Duration(hours: 4), // Sync esporádico para economizar bateria
       ),
       entities: [
         EntitySyncRegistration<VehicleEntity>(
@@ -124,7 +166,31 @@ abstract final class GasometerSyncConfig {
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 8),
-          batchSize: 50,
+          batchSize: 30, // Menor batch para dados críticos
+        ),
+
+        // Registros de combustível - Dados frequentes, batches pequenos
+        EntitySyncRegistration<FuelRecordEntity>(
+          entityType: FuelRecordEntity,
+          collectionName: 'fuel_records',
+          fromMap: _fuelRecordFromFirebaseMap,
+          toMap: (FuelRecordEntity fuelRecord) => fuelRecord.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.manual, // Resolução manual para dados financeiros
+          enableRealtime: false,
+          syncInterval: const Duration(hours: 6), // Sync mais frequente para dados financeiros
+          batchSize: 15, // Batch pequeno para dados financeiros críticos
+        ),
+
+        // Despesas - Dados financeiros críticos, resolução manual de conflitos
+        EntitySyncRegistration<ExpenseEntity>(
+          entityType: ExpenseEntity,
+          collectionName: 'expenses',
+          fromMap: _expenseFromFirebaseMap,
+          toMap: (ExpenseEntity expense) => expense.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy.manual, // Resolução manual para dados monetários
+          enableRealtime: false,
+          syncInterval: const Duration(hours: 6), // Sync mais frequente para dados financeiros
+          batchSize: 15, // Batch pequeno para garantir precisão
         ),
 
         EntitySyncRegistration<MaintenanceEntity>(
@@ -135,7 +201,7 @@ abstract final class GasometerSyncConfig {
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 8),
-          batchSize: 50,
+          batchSize: 25, // Batch médio para manutenções
         ),
 
         EntitySyncRegistration<UserEntity>(

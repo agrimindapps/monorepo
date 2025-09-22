@@ -9,8 +9,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/sync/presentation/providers/sync_status_provider.dart';
-import '../../../../core/sync/services/sync_status_manager.dart';
+// import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
+// import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
 import '../widgets/devices_section_widget.dart';
@@ -362,21 +362,38 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildSyncSection(BuildContext context) {
-    return Consumer<SyncStatusProvider>(
-      builder: (context, syncProvider, _) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-          ),
-          child: _buildSyncListTile(context, syncProvider),
-        );
-      },
+    // TODO: Phase 2 - Replace with UnifiedSync
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: ListTile(
+        leading: Icon(Icons.sync, color: Theme.of(context).colorScheme.primary),
+        title: Text('Sincronização'),
+        subtitle: Text('Aguardando Phase 2 - UnifiedSync'),
+        trailing: Icon(Icons.info_outline),
+      ),
     );
+    // Original sync implementation commented out for Phase 2
+    // return Consumer<SyncStatusProvider>(
+    //   builder: (context, syncProvider, _) {
+    //     return Container(
+    //       decoration: BoxDecoration(
+    //         color: Theme.of(context).colorScheme.surfaceContainerHigh,
+    //         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+    //         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    //       ),
+    //       child: _buildSyncListTile(context, syncProvider),
+    //     );
+    //   },
+    // );
   }
 
-  /// Constrói ListTile único para sincronização com status e ação
+  // TODO: Phase 2 - Replace with UnifiedSync helper functions
+  /// Constrói ListTile único para sincronização com status e ação - COMMENTED OUT FOR PHASE 1
+  /*
   Widget _buildSyncListTile(BuildContext context, SyncStatusProvider syncProvider) {
     final syncColor = _getSyncStatusColor(context, syncProvider);
     final syncIcon = _getSyncStatusIcon(syncProvider);
@@ -468,6 +485,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+  */
 
   Widget _buildSettingsSection(BuildContext context, bool isAnonymous) {
     return _buildSection(
@@ -1126,71 +1144,74 @@ class _ProfilePageState extends State<ProfilePage> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  Color _getSyncStatusColor(BuildContext context, SyncStatusProvider syncProvider) {
-    switch (syncProvider.status) {
-      case SyncStatus.idle:
-        return syncProvider.hasQueueItems 
-            ? GasometerDesignTokens.colorWarning
-            : GasometerDesignTokens.colorSuccess;
-      case SyncStatus.syncing:
-        return Theme.of(context).colorScheme.primary;
-      case SyncStatus.error:
-        return Theme.of(context).colorScheme.error;
-      case SyncStatus.success:
-        return GasometerDesignTokens.colorSuccess;
-      case SyncStatus.conflict:
-        return Theme.of(context).colorScheme.error;
-      case SyncStatus.offline:
-        return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
-    }
-  }
+  // TODO: Phase 2 - Replace with UnifiedSync color mapping
+  // Color _getSyncStatusColor(BuildContext context, SyncStatusProvider syncProvider) {
+  //   switch (syncProvider.status) {
+  //     case SyncStatus.idle:
+  //       return syncProvider.hasQueueItems
+  //           ? GasometerDesignTokens.colorWarning
+  //           : GasometerDesignTokens.colorSuccess;
+  //     case SyncStatus.syncing:
+  //       return Theme.of(context).colorScheme.primary;
+  //     case SyncStatus.error:
+  //       return Theme.of(context).colorScheme.error;
+  //     case SyncStatus.success:
+  //       return GasometerDesignTokens.colorSuccess;
+  //     case SyncStatus.conflict:
+  //       return Theme.of(context).colorScheme.error;
+  //     case SyncStatus.offline:
+  //       return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
+  //   }
+  // }
 
-  IconData _getSyncStatusIcon(SyncStatusProvider syncProvider) {
-    switch (syncProvider.status) {
-      case SyncStatus.idle:
-        return syncProvider.hasQueueItems ? Icons.schedule : Icons.check_circle;
-      case SyncStatus.syncing:
-        return Icons.sync;
-      case SyncStatus.error:
-        return Icons.error;
-      case SyncStatus.success:
-        return Icons.check_circle;
-      case SyncStatus.conflict:
-        return Icons.warning;
-      case SyncStatus.offline:
-        return Icons.cloud_off;
-    }
-  }
+  // TODO: Phase 2 - Replace with UnifiedSync icon mapping
+  // IconData _getSyncStatusIcon(SyncStatusProvider syncProvider) {
+  //   switch (syncProvider.status) {
+  //     case SyncStatus.idle:
+  //       return syncProvider.hasQueueItems ? Icons.schedule : Icons.check_circle;
+  //     case SyncStatus.syncing:
+  //       return Icons.sync;
+  //     case SyncStatus.error:
+  //       return Icons.error;
+  //     case SyncStatus.success:
+  //       return Icons.check_circle;
+  //     case SyncStatus.conflict:
+  //       return Icons.warning;
+  //     case SyncStatus.offline:
+  //       return Icons.cloud_off;
+  //   }
+  // }
 
-  Future<void> _handleForceSync(BuildContext context, SyncStatusProvider syncProvider) async {
-    HapticFeedback.lightImpact();
-    
-    try {
-      await syncProvider.forceSyncNow();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Sincronização iniciada'),
-            backgroundColor: GasometerDesignTokens.colorSuccess,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao sincronizar: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
+  // TODO: Phase 2 - Replace with UnifiedSync force sync
+  // Future<void> _handleForceSync(BuildContext context, SyncStatusProvider syncProvider) async {
+  //   HapticFeedback.lightImpact();
+  //
+  //   try {
+  //     await syncProvider.forceSyncNow();
+  //
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: const Text('Sincronização iniciada'),
+  //           backgroundColor: GasometerDesignTokens.colorSuccess,
+  //           behavior: SnackBarBehavior.floating,
+  //           duration: const Duration(seconds: 2),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Erro ao sincronizar: $e'),
+  //           backgroundColor: Theme.of(context).colorScheme.error,
+  //           behavior: SnackBarBehavior.floating,
+  //           duration: const Duration(seconds: 3),
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 
   /// Mostra dialog de confirmação para exclusão de conta
   Future<void> _showAccountDeletionDialog(BuildContext context) async {

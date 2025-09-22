@@ -188,11 +188,13 @@ class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
   // These methods handle pure UI interactions (scroll, navigation)
   
   void _scrollToTop() {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   Future<void> _navigateToAddPlant(BuildContext context) async {

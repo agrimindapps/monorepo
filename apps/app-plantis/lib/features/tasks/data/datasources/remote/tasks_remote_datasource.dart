@@ -34,18 +34,19 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     try {
       // Using simple query to avoid composite index requirement
       final querySnapshot =
-          await _getTasksCollection(userId)
-              .where('is_deleted', isEqualTo: false)
-              .get();
+          await _getTasksCollection(
+            userId,
+          ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks = querySnapshot.docs
-          .map(
-            (doc) => TaskModel.fromFirebaseMap({
-              'id': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            }),
-          )
-          .toList();
+      final tasks =
+          querySnapshot.docs
+              .map(
+                (doc) => TaskModel.fromFirebaseMap({
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                }),
+              )
+              .toList();
 
       // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
@@ -61,7 +62,10 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   }
 
   @override
-  Future<List<TaskModel>> getTasksByPlantId(String plantId, String userId) async {
+  Future<List<TaskModel>> getTasksByPlantId(
+    String plantId,
+    String userId,
+  ) async {
     try {
       // Using simple query to avoid composite index requirement
       final querySnapshot =
@@ -70,14 +74,15 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
               .where('is_deleted', isEqualTo: false)
               .get();
 
-      final tasks = querySnapshot.docs
-          .map(
-            (doc) => TaskModel.fromFirebaseMap({
-              'id': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            }),
-          )
-          .toList();
+      final tasks =
+          querySnapshot.docs
+              .map(
+                (doc) => TaskModel.fromFirebaseMap({
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                }),
+              )
+              .toList();
 
       // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
@@ -93,7 +98,10 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   }
 
   @override
-  Future<List<TaskModel>> getTasksByStatus(TaskStatus status, String userId) async {
+  Future<List<TaskModel>> getTasksByStatus(
+    TaskStatus status,
+    String userId,
+  ) async {
     try {
       // Using simple query to avoid composite index requirement
       final querySnapshot =
@@ -102,14 +110,15 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
               .where('is_deleted', isEqualTo: false)
               .get();
 
-      final tasks = querySnapshot.docs
-          .map(
-            (doc) => TaskModel.fromFirebaseMap({
-              'id': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            }),
-          )
-          .toList();
+      final tasks =
+          querySnapshot.docs
+              .map(
+                (doc) => TaskModel.fromFirebaseMap({
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                }),
+              )
+              .toList();
 
       // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
@@ -130,25 +139,27 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final now = DateTime.now();
       // Using simple query to avoid composite index requirement
       final querySnapshot =
-          await _getTasksCollection(userId)
-              .where('is_deleted', isEqualTo: false)
-              .get();
+          await _getTasksCollection(
+            userId,
+          ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks = querySnapshot.docs
-          .map(
-            (doc) => TaskModel.fromFirebaseMap({
-              'id': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            }),
-          )
-          .toList();
+      final tasks =
+          querySnapshot.docs
+              .map(
+                (doc) => TaskModel.fromFirebaseMap({
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                }),
+              )
+              .toList();
 
       // Apply filtering and sorting on client-side to avoid composite index
-      final filteredTasks = tasks.where((task) {
-        return task.status == TaskStatus.pending &&
-               task.dueDate != null &&
-               task.dueDate!.isBefore(now);
-      }).toList();
+      final filteredTasks =
+          tasks.where((task) {
+            return task.status == TaskStatus.pending &&
+                task.dueDate != null &&
+                task.dueDate!.isBefore(now);
+          }).toList();
 
       filteredTasks.sort((a, b) {
         final aDate = a.dueDate ?? DateTime(2100);
@@ -171,26 +182,32 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
 
       // Using simple query to avoid composite index requirement
       final querySnapshot =
-          await _getTasksCollection(userId)
-              .where('is_deleted', isEqualTo: false)
-              .get();
+          await _getTasksCollection(
+            userId,
+          ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks = querySnapshot.docs
-          .map(
-            (doc) => TaskModel.fromFirebaseMap({
-              'id': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            }),
-          )
-          .toList();
+      final tasks =
+          querySnapshot.docs
+              .map(
+                (doc) => TaskModel.fromFirebaseMap({
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                }),
+              )
+              .toList();
 
       // Apply filtering and sorting on client-side to avoid composite index
-      final filteredTasks = tasks.where((task) {
-        return task.status == TaskStatus.pending &&
-               task.dueDate != null &&
-               task.dueDate!.isAfter(startOfDay.subtract(const Duration(seconds: 1))) &&
-               task.dueDate!.isBefore(endOfDay.add(const Duration(seconds: 1)));
-      }).toList();
+      final filteredTasks =
+          tasks.where((task) {
+            return task.status == TaskStatus.pending &&
+                task.dueDate != null &&
+                task.dueDate!.isAfter(
+                  startOfDay.subtract(const Duration(seconds: 1)),
+                ) &&
+                task.dueDate!.isBefore(
+                  endOfDay.add(const Duration(seconds: 1)),
+                );
+          }).toList();
 
       filteredTasks.sort((a, b) {
         final aDate = a.dueDate ?? DateTime(2100);
@@ -212,26 +229,30 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
 
       // Using simple query to avoid composite index requirement
       final querySnapshot =
-          await _getTasksCollection(userId)
-              .where('is_deleted', isEqualTo: false)
-              .get();
+          await _getTasksCollection(
+            userId,
+          ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks = querySnapshot.docs
-          .map(
-            (doc) => TaskModel.fromFirebaseMap({
-              'id': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            }),
-          )
-          .toList();
+      final tasks =
+          querySnapshot.docs
+              .map(
+                (doc) => TaskModel.fromFirebaseMap({
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                }),
+              )
+              .toList();
 
       // Apply filtering and sorting on client-side to avoid composite index
-      final filteredTasks = tasks.where((task) {
-        return task.status == TaskStatus.pending &&
-               task.dueDate != null &&
-               task.dueDate!.isAfter(now) &&
-               task.dueDate!.isBefore(nextWeek.add(const Duration(seconds: 1)));
-      }).toList();
+      final filteredTasks =
+          tasks.where((task) {
+            return task.status == TaskStatus.pending &&
+                task.dueDate != null &&
+                task.dueDate!.isAfter(now) &&
+                task.dueDate!.isBefore(
+                  nextWeek.add(const Duration(seconds: 1)),
+                );
+          }).toList();
 
       filteredTasks.sort((a, b) {
         final aDate = a.dueDate ?? DateTime(2100);
@@ -248,8 +269,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   @override
   Future<TaskModel?> getTaskById(String id, String userId) async {
     try {
-      final docSnapshot =
-          await _getTasksCollection(userId).doc(id).get();
+      final docSnapshot = await _getTasksCollection(userId).doc(id).get();
 
       if (!docSnapshot.exists) return null;
 

@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+
+import '../animal.dart';
 import '../animal_enums.dart';
 
 /// Entidade Animal para sincronização
@@ -86,6 +88,7 @@ class AnimalSyncEntity extends BaseSyncEntity {
   /// Helper getters para compatibilidade com código legado
   double get currentWeight => weight ?? 0.0;
   String? get photo => photoUrl;
+  @override
   bool get isDeleted => !isActive || super.isDeleted;
 
   /// Verifica se há informações médicas críticas
@@ -137,15 +140,15 @@ class AnimalSyncEntity extends BaseSyncEntity {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return AnimalSyncEntity(
-      id: baseFields['id'],
-      createdAt: baseFields['createdAt'],
-      updatedAt: baseFields['updatedAt'],
-      lastSyncAt: baseFields['lastSyncAt'],
-      isDirty: baseFields['isDirty'] ?? false,
-      isDeleted: baseFields['isDeleted'] ?? false,
-      version: baseFields['version'] ?? 1,
-      userId: baseFields['userId'],
-      moduleName: baseFields['moduleName'],
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: (baseFields['isDirty'] as bool?) ?? false,
+      isDeleted: (baseFields['isDeleted'] as bool?) ?? false,
+      version: (baseFields['version'] as int?) ?? 1,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
 
       // Campos específicos do animal
       name: map['name'] as String,
@@ -381,5 +384,5 @@ class AnimalSyncEntity extends BaseSyncEntity {
   ];
 }
 
-// Import necessário para compatibilidade - será removido gradualmente
-import '../animal.dart';
+// Import removido para evitar circular dependency
+// Use toLegacyAnimal() method for compatibility instead

@@ -190,15 +190,15 @@ class AppointmentSyncEntity extends BaseSyncEntity {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return AppointmentSyncEntity(
-      id: baseFields['id'],
-      createdAt: baseFields['createdAt'],
-      updatedAt: baseFields['updatedAt'],
-      lastSyncAt: baseFields['lastSyncAt'],
-      isDirty: baseFields['isDirty'] ?? false,
-      isDeleted: baseFields['isDeleted'] ?? false,
-      version: baseFields['version'] ?? 1,
-      userId: baseFields['userId'],
-      moduleName: baseFields['moduleName'],
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: (baseFields['isDirty'] as bool?) ?? false,
+      isDeleted: (baseFields['isDeleted'] as bool?) ?? false,
+      version: (baseFields['version'] as int?) ?? 1,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
 
       // Campos específicos da consulta
       animalId: map['animal_id'] as String,

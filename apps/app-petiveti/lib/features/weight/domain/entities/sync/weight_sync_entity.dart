@@ -162,15 +162,15 @@ class WeightSyncEntity extends BaseSyncEntity {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return WeightSyncEntity(
-      id: baseFields['id'],
-      createdAt: baseFields['createdAt'],
-      updatedAt: baseFields['updatedAt'],
-      lastSyncAt: baseFields['lastSyncAt'],
-      isDirty: baseFields['isDirty'] ?? false,
-      isDeleted: baseFields['isDeleted'] ?? false,
-      version: baseFields['version'] ?? 1,
-      userId: baseFields['userId'],
-      moduleName: baseFields['moduleName'],
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: (baseFields['isDirty'] as bool?) ?? false,
+      isDeleted: (baseFields['isDeleted'] as bool?) ?? false,
+      version: (baseFields['version'] as int?) ?? 1,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
 
       // Campos específicos do peso
       animalId: map['animal_id'] as String,
@@ -536,5 +536,73 @@ extension WeightAccuracyExtension on WeightAccuracy {
       case WeightAccuracy.estimate:
         return 'Estimativa';
     }
+  }
+}
+
+/// Condição corporal do animal
+enum BodyCondition {
+  underweight, // Abaixo do peso
+  ideal,       // Peso ideal
+  overweight,  // Acima do peso
+  unknown      // Não informado
+}
+
+extension BodyConditionExtension on BodyCondition {
+  String get displayName {
+    switch (this) {
+      case BodyCondition.underweight:
+        return 'Abaixo do Peso';
+      case BodyCondition.ideal:
+        return 'Peso Ideal';
+      case BodyCondition.overweight:
+        return 'Acima do Peso';
+      case BodyCondition.unknown:
+        return 'Não Informado';
+    }
+  }
+}
+
+/// Tendência de peso
+enum WeightTrend {
+  gaining, // Ganhando peso
+  losing,  // Perdendo peso
+  stable   // Peso estável
+}
+
+extension WeightTrendExtension on WeightTrend {
+  String get displayName {
+    switch (this) {
+      case WeightTrend.gaining:
+        return 'Ganhando Peso';
+      case WeightTrend.losing:
+        return 'Perdendo Peso';
+      case WeightTrend.stable:
+        return 'Peso Estável';
+    }
+  }
+}
+
+/// Diferença de peso entre duas medições
+class WeightDifference {
+  final double difference;
+  final double percentageChange;
+  final int daysDifference;
+  final WeightTrend trend;
+
+  const WeightDifference({
+    required this.difference,
+    required this.percentageChange,
+    required this.daysDifference,
+    required this.trend,
+  });
+
+  String get formattedDifference {
+    final sign = difference >= 0 ? '+' : '';
+    return '$sign${difference.toStringAsFixed(2)} kg';
+  }
+
+  String get formattedPercentage {
+    final sign = percentageChange >= 0 ? '+' : '';
+    return '$sign${percentageChange.toStringAsFixed(1)}%';
   }
 }

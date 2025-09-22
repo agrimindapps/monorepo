@@ -162,14 +162,11 @@ class PetivetiSyncConfig {
       collectionName: 'animals',
       fromMap: (map) => AnimalSyncEntity.fromFirebaseMap(map),
       toMap: (entity) => entity.toFirebaseMap(),
-      syncConfig: SyncConfig(
-        enableRealtimeSync: petCareFeatures.realTimeMedicalSync,
-        enableOfflineMode: true,
-        batchSize: 25,
-        syncInterval: appSyncConfig.syncInterval,
-        conflictResolution: ConflictResolutionStrategy.timestamp,
-      ),
-      syncPriority: SyncPriority.high,
+      enableRealtime: petCareFeatures.realTimeMedicalSync,
+      enableOfflineMode: true,
+      batchSize: 25,
+      syncInterval: appSyncConfig.syncInterval,
+      priority: SyncPriority.high,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
 
@@ -179,16 +176,13 @@ class PetivetiSyncConfig {
       collectionName: 'medications',
       fromMap: (map) => MedicationSyncEntity.fromFirebaseMap(map),
       toMap: (entity) => entity.toFirebaseMap(),
-      syncConfig: SyncConfig(
-        enableRealtimeSync: emergencyDataConfig.priorityMedicalData,
-        enableOfflineMode: emergencyDataConfig.offlineEmergencyAccess,
-        batchSize: 15,
-        syncInterval: emergencyDataConfig.priorityMedicalData
-          ? const Duration(minutes: 2)
-          : appSyncConfig.syncInterval,
-        conflictResolution: ConflictResolutionStrategy.version,
-      ),
-      syncPriority: emergencyDataConfig.emergencySyncPriority,
+      enableRealtime: emergencyDataConfig.priorityMedicalData,
+      enableOfflineMode: emergencyDataConfig.offlineEmergencyAccess,
+      batchSize: 15,
+      syncInterval: emergencyDataConfig.priorityMedicalData
+        ? const Duration(minutes: 2)
+        : appSyncConfig.syncInterval,
+      priority: emergencyDataConfig.emergencySyncPriority,
       conflictStrategy: ConflictStrategy.version,
     ),
 
@@ -198,14 +192,11 @@ class PetivetiSyncConfig {
       collectionName: 'appointments',
       fromMap: (map) => AppointmentSyncEntity.fromFirebaseMap(map),
       toMap: (entity) => entity.toFirebaseMap(),
-      syncConfig: SyncConfig(
-        enableRealtimeSync: petCareFeatures.enableVetIntegration,
-        enableOfflineMode: true,
-        batchSize: 20,
-        syncInterval: appSyncConfig.syncInterval,
-        conflictResolution: ConflictResolutionStrategy.timestamp,
-      ),
-      syncPriority: SyncPriority.high,
+      enableRealtime: petCareFeatures.enableVetIntegration,
+      enableOfflineMode: true,
+      batchSize: 20,
+      syncInterval: appSyncConfig.syncInterval,
+      priority: SyncPriority.high,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
 
@@ -215,14 +206,11 @@ class PetivetiSyncConfig {
       collectionName: 'weights',
       fromMap: (map) => WeightSyncEntity.fromFirebaseMap(map),
       toMap: (entity) => entity.toFirebaseMap(),
-      syncConfig: SyncConfig(
-        enableRealtimeSync: petCareFeatures.enableHealthTracking,
-        enableOfflineMode: true,
-        batchSize: 50,
-        syncInterval: appSyncConfig.syncInterval,
-        conflictResolution: ConflictResolutionStrategy.timestamp,
-      ),
-      syncPriority: SyncPriority.normal,
+      enableRealtime: petCareFeatures.enableHealthTracking,
+      enableOfflineMode: true,
+      batchSize: 50,
+      syncInterval: appSyncConfig.syncInterval,
+      priority: SyncPriority.normal,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
 
@@ -232,14 +220,11 @@ class PetivetiSyncConfig {
       collectionName: 'user_settings',
       fromMap: (map) => UserSettingsSyncEntity.fromFirebaseMap(map),
       toMap: (entity) => entity.toFirebaseMap(),
-      syncConfig: SyncConfig(
-        enableRealtimeSync: false, // Single-user não precisa de realtime
-        enableOfflineMode: true,
-        batchSize: 10,
-        syncInterval: Duration(minutes: appSyncConfig.syncInterval.inMinutes * 2),
-        conflictResolution: ConflictResolutionStrategy.localWins,
-      ),
-      syncPriority: SyncPriority.low,
+      enableRealtime: false, // Single-user não precisa de realtime
+      enableOfflineMode: true,
+      batchSize: 10,
+      syncInterval: Duration(minutes: appSyncConfig.syncInterval.inMinutes * 2),
+      priority: SyncPriority.low,
       conflictStrategy: ConflictStrategy.localWins,
     ),
   ];
@@ -387,38 +372,3 @@ class MediaConfig {
   }
 }
 
-/// Prioridade de sincronização
-enum SyncPriority {
-  critical,  // Dados médicos críticos
-  high,      // Animais, consultas
-  normal,    // Peso, exercícios
-  low,       // Configurações
-}
-
-extension SyncPriorityExtension on SyncPriority {
-  String get name {
-    switch (this) {
-      case SyncPriority.critical:
-        return 'critical';
-      case SyncPriority.high:
-        return 'high';
-      case SyncPriority.normal:
-        return 'normal';
-      case SyncPriority.low:
-        return 'low';
-    }
-  }
-
-  Duration get syncInterval {
-    switch (this) {
-      case SyncPriority.critical:
-        return const Duration(minutes: 1);
-      case SyncPriority.high:
-        return const Duration(minutes: 5);
-      case SyncPriority.normal:
-        return const Duration(minutes: 15);
-      case SyncPriority.low:
-        return const Duration(hours: 1);
-    }
-  }
-}

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';
 import '../../features/medications/domain/entities/sync/medication_sync_entity.dart';
 import '../../features/appointments/domain/entities/sync/appointment_sync_entity.dart';

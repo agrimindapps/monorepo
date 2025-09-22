@@ -106,6 +106,10 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
 
   // Privacidade (single user)
   final bool allowEmergencyAccess;
+  final bool sharePhotosByDefault = false; // Single user - always false
+  final bool shareWeightDataByDefault = false; // Single user - always false
+  final bool shareMedicalDataByDefault = false; // Single user - always false
+  final bool hasEmergencyContacts = true; // Single user - simplified
 
   // Dados e backup
   final bool autoBackupEnabled;
@@ -255,15 +259,15 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return UserSettingsSyncEntity(
-      id: baseFields['id'],
-      createdAt: baseFields['createdAt'],
-      updatedAt: baseFields['updatedAt'],
-      lastSyncAt: baseFields['lastSyncAt'],
-      isDirty: baseFields['isDirty'] ?? false,
-      isDeleted: baseFields['isDeleted'] ?? false,
-      version: baseFields['version'] ?? 1,
-      userId: baseFields['userId'],
-      moduleName: baseFields['moduleName'],
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: (baseFields['isDirty'] as bool?) ?? false,
+      isDeleted: (baseFields['isDeleted'] as bool?) ?? false,
+      version: (baseFields['version'] as int?) ?? 1,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
 
       // Configurações gerais
       language: map['language'] as String? ?? 'pt-BR',
@@ -646,7 +650,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     return copyWith(
       allowEmergencyAccess: true,
       enableEmergencyAlerts: true,
-      shareMedicalDataByDefault: true,
       isDirty: true,
       updatedAt: DateTime.now(),
     );

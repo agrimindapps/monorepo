@@ -128,6 +128,14 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
         _rotationController.stop();
         _pulseController.repeat(reverse: true);
         break;
+      case SyncStatus.error:
+        _rotationController.stop();
+        _pulseController.repeat(reverse: true);
+        break;
+      case SyncStatus.conflict:
+        _rotationController.stop();
+        _pulseController.repeat(reverse: true);
+        break;
     }
 
     // Animação especial para emergência
@@ -264,6 +272,10 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
         return Icons.cloud_off;
       case SyncStatus.localOnly:
         return Icons.storage;
+      case SyncStatus.error:
+        return Icons.error;
+      case SyncStatus.conflict:
+        return Icons.warning;
     }
   }
 
@@ -284,6 +296,10 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
         return Colors.orange;
       case SyncStatus.localOnly:
         return Colors.grey;
+      case SyncStatus.error:
+        return Colors.red;
+      case SyncStatus.conflict:
+        return Colors.orange;
     }
   }
 
@@ -302,6 +318,10 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
         return 'Offline';
       case SyncStatus.localOnly:
         return 'Local';
+      case SyncStatus.error:
+        return 'Erro';
+      case SyncStatus.conflict:
+        return 'Conflito';
     }
   }
 }
@@ -415,6 +435,14 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
       case SyncStatus.localOnly:
         color = Colors.grey;
         statusText = 'Apenas dados locais';
+        break;
+      case SyncStatus.error:
+        color = Colors.red;
+        statusText = 'Erro na sincronização';
+        break;
+      case SyncStatus.conflict:
+        color = Colors.orange;
+        statusText = 'Conflito de dados';
         break;
     }
 

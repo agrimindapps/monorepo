@@ -90,6 +90,7 @@ class _OdometerPageState extends State<OdometerPage> {
             return Column(
               children: [
                 _buildHeader(),
+                _buildMonthsBar(),
                 _buildControls(odometers),
                 Expanded(child: _buildContent(odometers)),
               ],
@@ -176,21 +177,13 @@ class _OdometerPageState extends State<OdometerPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(
               maxWidth: GasometerDesignTokens.maxWidthContent),
-          child: Column(
-            children: [
-              EnhancedVehicleSelector(
-                selectedVehicleId: _selectedVehicleId,
-                onVehicleChanged: (String? vehicleId) {
-                  setState(() {
-                    _selectedVehicleId = vehicleId;
-                  });
-                },
-              ),
-              if (_selectedVehicleId != null && odometers.isNotEmpty) ...[
-                SizedBox(height: GasometerDesignTokens.spacingLg),
-                _buildMonthsBar(),
-              ],
-            ],
+          child: EnhancedVehicleSelector(
+            selectedVehicleId: _selectedVehicleId,
+            onVehicleChanged: (String? vehicleId) {
+              setState(() {
+                _selectedVehicleId = vehicleId;
+              });
+            },
           ),
         ),
       ),
@@ -198,39 +191,50 @@ class _OdometerPageState extends State<OdometerPage> {
   }
 
   Widget _buildMonthsBar() {
-    return SizedBox(
+    return Container(
       height: 40,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _months.length,
         itemBuilder: (context, index) {
           final isSelected = index == _currentMonthIndex;
-          return GestureDetector(
-            onTap: () => setState(() => _currentMonthIndex = index),
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surface,
+          return Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              child: Text(
-                _months[index],
-                style: TextStyle(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.7),
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                onTap: () {
+                  setState(() {
+                    _currentMonthIndex = index;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _months[index],
+                      style: TextStyle(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

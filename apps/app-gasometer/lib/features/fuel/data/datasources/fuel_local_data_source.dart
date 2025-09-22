@@ -189,7 +189,7 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
   FuelSupplyModel _mapToModel(FuelRecordEntity entity) {
     return FuelSupplyModel.create(
       id: entity.id,
-      userId: entity.userId.isEmpty ? null : entity.userId,
+      userId: entity.userId?.isEmpty == true ? null : entity.userId,
       vehicleId: entity.vehicleId,
       date: entity.date.millisecondsSinceEpoch,
       odometer: entity.odometer,

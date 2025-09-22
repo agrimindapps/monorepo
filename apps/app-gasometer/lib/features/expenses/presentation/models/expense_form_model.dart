@@ -68,7 +68,7 @@ class ExpenseFormModel extends Equatable {
   factory ExpenseFormModel.fromExpenseEntity(ExpenseEntity expense) {
     return ExpenseFormModel(
       id: expense.id,
-      userId: expense.userId,
+      userId: expense.userId ?? '',
       vehicleId: expense.vehicleId,
       vehicle: null, // Será carregado separadamente
       expenseType: expense.type,

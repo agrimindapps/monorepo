@@ -74,7 +74,7 @@ class FuelFormModel extends Equatable {
   factory FuelFormModel.fromFuelRecord(FuelRecordEntity record) {
     return FuelFormModel(
       id: record.id,
-      userId: record.userId,
+      userId: record.userId ?? '',
       vehicleId: record.vehicleId,
       vehicle: null, // Será carregado separadamente
       fuelType: record.fuelType,

@@ -1,9 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
-class FuelRecordEntity extends Equatable {
-  final String id;
-  final String userId;
+class FuelRecordEntity extends BaseSyncEntity {
   final String vehicleId;
   final FuelType fuelType;
   final double liters;
@@ -20,12 +18,9 @@ class FuelRecordEntity extends Equatable {
   final double? previousOdometer;
   final double? distanceTraveled;
   final double? consumption; // km/l
-  final DateTime createdAt;
-  final DateTime updatedAt;
   
   const FuelRecordEntity({
-    required this.id,
-    required this.userId,
+    required String id,
     required this.vehicleId,
     required this.fuelType,
     required this.liters,
@@ -42,14 +37,29 @@ class FuelRecordEntity extends Equatable {
     this.previousOdometer,
     this.distanceTraveled,
     this.consumption,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName,
+  }) : super(
+    id: id,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    lastSyncAt: lastSyncAt,
+    isDirty: isDirty,
+    isDeleted: isDeleted,
+    version: version,
+    userId: userId,
+    moduleName: moduleName,
+  );
   
   @override
   List<Object?> get props => [
-    id,
-    userId,
+    ...super.props,
     vehicleId,
     fuelType,
     liters,
@@ -66,8 +76,6 @@ class FuelRecordEntity extends Equatable {
     previousOdometer,
     distanceTraveled,
     consumption,
-    createdAt,
-    updatedAt,
   ];
   
   
@@ -79,9 +87,9 @@ class FuelRecordEntity extends Equatable {
   // Formatted getters
   String get formattedPricePerLiter => 'R\$ ${pricePerLiter.toStringAsFixed(3)}';
   
+  @override
   FuelRecordEntity copyWith({
     String? id,
-    String? userId,
     String? vehicleId,
     FuelType? fuelType,
     double? liters,
@@ -100,10 +108,15 @@ class FuelRecordEntity extends Equatable {
     double? consumption,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
   }) {
     return FuelRecordEntity(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       vehicleId: vehicleId ?? this.vehicleId,
       fuelType: fuelType ?? this.fuelType,
       liters: liters ?? this.liters,
@@ -122,6 +135,12 @@ class FuelRecordEntity extends Equatable {
       consumption: consumption ?? this.consumption,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
   
@@ -177,5 +196,102 @@ class FuelRecordEntity extends Equatable {
       return '${consumption!.toStringAsFixed(1)} km/l';
     }
     return 'N/A';
+  }
+
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      'vehicle_id': vehicleId,
+      'fuel_type': fuelType.index,
+      'liters': liters,
+      'price_per_liter': pricePerLiter,
+      'total_price': totalPrice,
+      'odometer': odometer,
+      'date': date.toIso8601String(),
+      'gas_station_name': gasStationName,
+      'gas_station_brand': gasStationBrand,
+      'latitude': latitude,
+      'longitude': longitude,
+      'full_tank': fullTank,
+      'notes': notes,
+      'previous_odometer': previousOdometer,
+      'distance_traveled': distanceTraveled,
+      'consumption': consumption,
+    };
+  }
+
+  static FuelRecordEntity fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    return FuelRecordEntity(
+      id: baseFields['id'] as String,
+      vehicleId: map['vehicle_id'] as String,
+      fuelType: FuelType.values[map['fuel_type'] as int? ?? 0],
+      liters: (map['liters'] as num).toDouble(),
+      pricePerLiter: (map['price_per_liter'] as num).toDouble(),
+      totalPrice: (map['total_price'] as num).toDouble(),
+      odometer: (map['odometer'] as num).toDouble(),
+      date: DateTime.parse(map['date'] as String),
+      gasStationName: map['gas_station_name'] as String?,
+      gasStationBrand: map['gas_station_brand'] as String?,
+      latitude: map['latitude'] as double?,
+      longitude: map['longitude'] as double?,
+      fullTank: map['full_tank'] as bool? ?? true,
+      notes: map['notes'] as String?,
+      previousOdometer: map['previous_odometer'] as double?,
+      distanceTraveled: map['distance_traveled'] as double?,
+      consumption: map['consumption'] as double?,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+    );
+  }
+
+  @override
+  FuelRecordEntity markAsDirty() {
+    return copyWith(
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  FuelRecordEntity markAsSynced({DateTime? syncTime}) {
+    return copyWith(
+      isDirty: false,
+      lastSyncAt: syncTime ?? DateTime.now(),
+    );
+  }
+
+  @override
+  FuelRecordEntity markAsDeleted() {
+    return copyWith(
+      isDeleted: true,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  FuelRecordEntity incrementVersion() {
+    return copyWith(
+      version: version + 1,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  FuelRecordEntity withUserId(String userId) {
+    return copyWith(userId: userId);
+  }
+
+  @override
+  FuelRecordEntity withModule(String moduleName) {
+    return copyWith(moduleName: moduleName);
   }
 }

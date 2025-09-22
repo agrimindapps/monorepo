@@ -1,10 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Entidade de despesa do veículo
-class ExpenseEntity extends Equatable {
-  final String id;
-  final String userId;
+class ExpenseEntity extends BaseSyncEntity {
   final String vehicleId;
   final ExpenseType type;
   final String description;
@@ -14,13 +12,10 @@ class ExpenseEntity extends Equatable {
   final String? receiptImagePath;
   final String? location;
   final String? notes;
-  final DateTime createdAt;
-  final DateTime updatedAt;
   final Map<String, dynamic> metadata;
 
   const ExpenseEntity({
-    required this.id,
-    required this.userId,
+    required String id,
     required this.vehicleId,
     required this.type,
     required this.description,
@@ -30,15 +25,30 @@ class ExpenseEntity extends Equatable {
     this.receiptImagePath,
     this.location,
     this.notes,
-    required this.createdAt,
-    required this.updatedAt,
     this.metadata = const {},
-  });
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastSyncAt,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName,
+  }) : super(
+    id: id,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    lastSyncAt: lastSyncAt,
+    isDirty: isDirty,
+    isDeleted: isDeleted,
+    version: version,
+    userId: userId,
+    moduleName: moduleName,
+  );
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
+        ...super.props,
         vehicleId,
         type,
         description,
@@ -48,15 +58,13 @@ class ExpenseEntity extends Equatable {
         receiptImagePath,
         location,
         notes,
-        createdAt,
-        updatedAt,
         metadata,
       ];
 
   /// Cria nova instância com valores atualizados
+  @override
   ExpenseEntity copyWith({
     String? id,
-    String? userId,
     String? vehicleId,
     ExpenseType? type,
     String? description,
@@ -66,13 +74,18 @@ class ExpenseEntity extends Equatable {
     String? receiptImagePath,
     String? location,
     String? notes,
+    Map<String, dynamic>? metadata,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Map<String, dynamic>? metadata,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
   }) {
     return ExpenseEntity(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       vehicleId: vehicleId ?? this.vehicleId,
       type: type ?? this.type,
       description: description ?? this.description,
@@ -82,9 +95,15 @@ class ExpenseEntity extends Equatable {
       receiptImagePath: receiptImagePath ?? this.receiptImagePath,
       location: location ?? this.location,
       notes: notes ?? this.notes,
+      metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      metadata: metadata ?? this.metadata,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
 
@@ -140,6 +159,91 @@ class ExpenseEntity extends Equatable {
 
   /// Nome do estabelecimento para filtros (baseado na localização)
   String get establishmentName => location ?? '';
+
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      'vehicle_id': vehicleId,
+      'type': type.name,
+      'description': description,
+      'amount': amount,
+      'date': date.toIso8601String(),
+      'odometer': odometer,
+      'receipt_image_path': receiptImagePath,
+      'location': location,
+      'notes': notes,
+      'metadata': metadata,
+    };
+  }
+
+  static ExpenseEntity fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    return ExpenseEntity(
+      id: baseFields['id'] as String,
+      vehicleId: map['vehicle_id'] as String,
+      type: ExpenseType.fromString(map['type'] as String),
+      description: map['description'] as String,
+      amount: (map['amount'] as num).toDouble(),
+      date: DateTime.parse(map['date'] as String),
+      odometer: (map['odometer'] as num).toDouble(),
+      receiptImagePath: map['receipt_image_path'] as String?,
+      location: map['location'] as String?,
+      notes: map['notes'] as String?,
+      metadata: Map<String, dynamic>.from(map['metadata'] as Map? ?? {}),
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+    );
+  }
+
+  @override
+  ExpenseEntity markAsDirty() {
+    return copyWith(
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  ExpenseEntity markAsSynced({DateTime? syncTime}) {
+    return copyWith(
+      isDirty: false,
+      lastSyncAt: syncTime ?? DateTime.now(),
+    );
+  }
+
+  @override
+  ExpenseEntity markAsDeleted() {
+    return copyWith(
+      isDeleted: true,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  ExpenseEntity incrementVersion() {
+    return copyWith(
+      version: version + 1,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  ExpenseEntity withUserId(String userId) {
+    return copyWith(userId: userId);
+  }
+
+  @override
+  ExpenseEntity withModule(String moduleName) {
+    return copyWith(moduleName: moduleName);
+  }
 }
 
 /// Enum para tipos de despesa

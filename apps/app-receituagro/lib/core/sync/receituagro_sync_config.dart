@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 
 import '../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
+import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
+import '../../features/settings/domain/entities/user_history_sync_entity.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 
 // Funções auxiliares para contornar problema do analyzer
@@ -11,6 +13,14 @@ FavoritoSyncEntity _favoritoFromFirebaseMap(Map<String, dynamic> map) {
 
 ComentarioSyncEntity _comentarioFromFirebaseMap(Map<String, dynamic> map) {
   return ComentarioSyncEntity.fromMap(map);
+}
+
+UserSettingsSyncEntity _userSettingsFromFirebaseMap(Map<String, dynamic> map) {
+  return UserSettingsSyncEntity.fromFirebaseMap(map);
+}
+
+UserHistorySyncEntity _userHistoryFromFirebaseMap(Map<String, dynamic> map) {
+  return UserHistorySyncEntity.fromFirebaseMap(map);
 }
 
 UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
@@ -37,13 +47,29 @@ abstract final class ReceitaAgroSyncConfig {
           fromMap: _favoritoFromFirebaseMap,
           toMap: (favorito) => favorito.toMap(),
         ),
-        
+
         // Comentários - Feedback sobre diagnósticos
         EntitySyncRegistration<ComentarioSyncEntity>.simple(
           entityType: ComentarioSyncEntity,
           collectionName: 'comentarios',
           fromMap: _comentarioFromFirebaseMap,
           toMap: (comentario) => comentario.toMap(),
+        ),
+
+        // Configurações do Usuário - Preferências e configurações
+        EntitySyncRegistration<UserSettingsSyncEntity>.simple(
+          entityType: UserSettingsSyncEntity,
+          collectionName: 'user_settings',
+          fromMap: _userSettingsFromFirebaseMap,
+          toMap: (settings) => settings.toMap(),
+        ),
+
+        // Histórico do Usuário - Analytics e comportamento
+        EntitySyncRegistration<UserHistorySyncEntity>.simple(
+          entityType: UserHistorySyncEntity,
+          collectionName: 'user_history',
+          fromMap: _userHistoryFromFirebaseMap,
+          toMap: (history) => history.toMap(),
         ),
 
         // Usuários (profile compartilhado entre apps)
@@ -86,6 +112,20 @@ abstract final class ReceitaAgroSyncConfig {
           collectionName: 'dev_comentarios',
           fromMap: _comentarioFromFirebaseMap,
           toMap: (comentario) => comentario.toMap(),
+        ),
+
+        EntitySyncRegistration<UserSettingsSyncEntity>.simple(
+          entityType: UserSettingsSyncEntity,
+          collectionName: 'dev_user_settings',
+          fromMap: _userSettingsFromFirebaseMap,
+          toMap: (settings) => settings.toMap(),
+        ),
+
+        EntitySyncRegistration<UserHistorySyncEntity>.simple(
+          entityType: UserHistorySyncEntity,
+          collectionName: 'dev_user_history',
+          fromMap: _userHistoryFromFirebaseMap,
+          toMap: (history) => history.toMap(),
         ),
 
         EntitySyncRegistration<UserEntity>.simple(
@@ -134,6 +174,28 @@ abstract final class ReceitaAgroSyncConfig {
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
           batchSize: 50,
+        ),
+
+        EntitySyncRegistration<UserSettingsSyncEntity>(
+          entityType: UserSettingsSyncEntity,
+          collectionName: 'user_settings',
+          fromMap: _userSettingsFromFirebaseMap,
+          toMap: (UserSettingsSyncEntity settings) => settings.toMap(),
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para settings
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 24),
+          batchSize: 10,
+        ),
+
+        EntitySyncRegistration<UserHistorySyncEntity>(
+          entityType: UserHistorySyncEntity,
+          collectionName: 'user_history',
+          fromMap: _userHistoryFromFirebaseMap,
+          toMap: (UserHistorySyncEntity history) => history.toMap(),
+          conflictStrategy: ConflictStrategy.localWins, // Local vence para histórico
+          enableRealtime: false, // Sem tempo real para economizar bateria
+          syncInterval: const Duration(hours: 24),
+          batchSize: 100, // Maior batch para histórico
         ),
 
         EntitySyncRegistration<UserEntity>(

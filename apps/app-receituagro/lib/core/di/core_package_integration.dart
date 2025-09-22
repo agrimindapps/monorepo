@@ -4,7 +4,7 @@ import 'package:get_it/get_it.dart';
 
 import '../services/receituagro_validation_service.dart';
 import '../services/device_identity_service.dart';
-import '../services/sync_orchestrator.dart';
+// sync_orchestrator.dart removed - using UnifiedSyncManager from core package
 import '../../features/analytics/analytics_service.dart';
 import '../providers/auth_provider.dart';
 
@@ -365,29 +365,12 @@ class CorePackageIntegration {
       ),
     );
 
-    // Register SyncOrchestrator for data synchronization
-    _sl.registerLazySingleton<SyncOrchestrator>(
-      () {
-        final orchestrator = SyncOrchestrator(
-          analytics: _sl<core.IAnalyticsRepository>(),
-          storage: _sl<core.HiveStorageService>(),
-          premiumService: _sl<core.ISubscriptionRepository>(),
-        );
-        // Initialize orchestrator in background
-        orchestrator.initialize().catchError((Object e) {
-          if (kDebugMode) print('⚠️ SyncOrchestrator initialization failed: $e');
-        });
-        return orchestrator;
-      },
-    );
-
-    // Register ReceitaAgro Auth Provider (lazy evaluation of dependencies)
+    // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)
     _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
       () => ReceitaAgroAuthProvider(
         authRepository: _sl<core.IAuthRepository>(),
         deviceService: _sl<DeviceIdentityService>(),
         analytics: _sl<ReceitaAgroAnalyticsService>(),
-        syncOrchestrator: _sl<SyncOrchestrator>(),
       ),
     );
 

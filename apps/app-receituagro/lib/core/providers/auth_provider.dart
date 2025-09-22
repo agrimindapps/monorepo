@@ -11,7 +11,7 @@ import '../extensions/user_entity_receituagro_extension.dart';
 import '../models/user_session_data.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
-import '../services/sync_orchestrator.dart';
+// sync_orchestrator.dart removed - using UnifiedSyncManager from core package
 
 /// AuthProvider específico do ReceitauAgro
 /// Integra com o core package FirebaseAuthService e gerencia estado de autenticação
@@ -20,8 +20,7 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   final IAuthRepository _authRepository;
   final DeviceIdentityService _deviceService;
   final ReceitaAgroAnalyticsService _analytics;
-  final SyncOrchestrator? _syncOrchestrator;
-  // Sync repository removido - agora usa ReceitaAgroSyncConfig wrappers diretamente
+  // Sync now handled by UnifiedSyncManager from core package
   
   StreamSubscription<UserEntity?>? _userSubscription;
   UserEntity? _currentUser;
@@ -33,11 +32,9 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
     required IAuthRepository authRepository,
     required DeviceIdentityService deviceService,
     required ReceitaAgroAnalyticsService analytics,
-    SyncOrchestrator? syncOrchestrator,
   })  : _authRepository = authRepository,
         _deviceService = deviceService,
-        _analytics = analytics,
-        _syncOrchestrator = syncOrchestrator {
+        _analytics = analytics {
     _initializeAuthProvider();
   }
 
@@ -212,11 +209,6 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   /// Trigger sincronização automática após autenticação bem-sucedida
   /// Preserva dados locais e sincroniza com a nuvem
   Future<void> _triggerPostAuthSync(UserEntity user, UserEntity? previousUser) async {
-    if (_syncOrchestrator == null) {
-      if (kDebugMode) print('⚠️ Auth Provider: SyncOrchestrator not available, skipping post-auth sync');
-      return;
-    }
-
     try {
       _analytics.trackEvent('post_auth_sync_triggered', parameters: {
         'user_id': user.id,
@@ -227,39 +219,36 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       if (kDebugMode) print('🔄 Auth Provider: Triggering post-authentication sync for user ${user.displayName}');
 
       // Executar sincronização em background para não bloquear a UI
-      unawaited(_syncOrchestrator.performFullSync().then((result) {
-        if (result.success) {
-          _analytics.trackEvent('post_auth_sync_success', parameters: {
-            'operations_sent': result.operationsSent.toString(),
-            'operations_received': result.operationsReceived.toString(),
-            'conflicts': result.conflicts.length.toString(),
-          });
-
-          if (kDebugMode) {
-            print('✅ Auth Provider: Post-auth sync completed successfully');
-            print('   - Operations sent: ${result.operationsSent}');
-            print('   - Operations received: ${result.operationsReceived}');
-            print('   - Conflicts: ${result.conflicts.length}');
-          }
-
-          // Se havia dados de usuário anônimo e agora está logado, 
-          // garantir que os dados foram preservados
-          if (previousUser?.isAnonymous == true && !user.isAnonymous) {
-            _analytics.trackEvent('anonymous_to_authenticated_migration', parameters: {
-              'previous_user_id': previousUser?.id ?? 'unknown',
-              'new_user_id': user.id,
-              'migration_result': 'success',
+      unawaited(UnifiedSyncManager.instance.forceSyncApp('receituagro').then((result) {
+        result.fold(
+          (failure) {
+            _analytics.trackEvent('post_auth_sync_failed', parameters: {
+              'error': failure.message,
+            });
+            if (kDebugMode) print('❌ Auth Provider: Post-auth sync failed: ${failure.message}');
+          },
+          (_) {
+            _analytics.trackEvent('post_auth_sync_success', parameters: {
+              'sync_completed': 'true',
             });
 
-            if (kDebugMode) print('✅ Auth Provider: Anonymous to authenticated migration completed');
-          }
-        } else {
-          _analytics.trackEvent('post_auth_sync_failed', parameters: {
-            'error': result.message ?? 'unknown',
-          });
+            if (kDebugMode) {
+              print('✅ Auth Provider: Post-auth sync completed successfully');
+            }
 
-          if (kDebugMode) print('❌ Auth Provider: Post-auth sync failed: ${result.message}');
-        }
+            // Se havia dados de usuário anônimo e agora está logado,
+            // garantir que os dados foram preservados
+            if (previousUser?.isAnonymous == true && !user.isAnonymous) {
+              _analytics.trackEvent('anonymous_to_authenticated_migration', parameters: {
+                'previous_user_id': previousUser?.id ?? 'unknown',
+                'new_user_id': user.id,
+                'migration_result': 'success',
+              });
+
+              if (kDebugMode) print('✅ Auth Provider: Anonymous to authenticated migration completed');
+            }
+          },
+        );
       }).catchError((Object error) {
         _analytics.trackError('post_auth_sync_exception', error.toString());
         if (kDebugMode) print('❌ Auth Provider: Post-auth sync exception: $error');
@@ -274,11 +263,6 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   /// Força sincronização manual dos dados do usuário
   /// Útil quando o usuário quer garantir que seus dados estão atualizados
   Future<bool> forceSyncUserData() async {
-    if (_syncOrchestrator == null) {
-      if (kDebugMode) print('⚠️ Auth Provider: SyncOrchestrator not available, cannot force sync');
-      return false;
-    }
-
     if (_currentUser == null || _currentUser!.isAnonymous) {
       if (kDebugMode) print('⚠️ Auth Provider: Cannot sync - user not authenticated');
       return false;
@@ -292,29 +276,27 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
 
       if (kDebugMode) print('🔄 Auth Provider: Starting manual sync for user ${_currentUser!.displayName}');
 
-      final result = await _syncOrchestrator.performFullSync();
-      
-      if (result.success) {
-        _analytics.trackEvent('manual_sync_success', parameters: {
-          'operations_sent': result.operationsSent.toString(),
-          'operations_received': result.operationsReceived.toString(),
-          'conflicts': result.conflicts.length.toString(),
-        });
+      final result = await UnifiedSyncManager.instance.forceSyncApp('receituagro');
 
-        if (kDebugMode) {
-          print('✅ Auth Provider: Manual sync completed successfully');
-          print('   - Operations sent: ${result.operationsSent}');
-          print('   - Operations received: ${result.operationsReceived}');
-          print('   - Conflicts: ${result.conflicts.length}');
-        }
-        return true;
-      } else {
-        _analytics.trackEvent('manual_sync_failure', parameters: {
-          'error': result.message ?? 'unknown_error',
-        });
-        if (kDebugMode) print('❌ Auth Provider: Manual sync failed: ${result.message}');
-        return false;
-      }
+      return result.fold(
+        (failure) {
+          _analytics.trackEvent('manual_sync_failure', parameters: {
+            'error': failure.message,
+          });
+          if (kDebugMode) print('❌ Auth Provider: Manual sync failed: ${failure.message}');
+          return false;
+        },
+        (_) {
+          _analytics.trackEvent('manual_sync_success', parameters: {
+            'sync_completed': 'true',
+          });
+
+          if (kDebugMode) {
+            print('✅ Auth Provider: Manual sync completed successfully');
+          }
+          return true;
+        },
+      );
     } catch (e) {
       _analytics.trackError('manual_sync_exception', e.toString());
       if (kDebugMode) print('❌ Auth Provider: Manual sync exception: $e');

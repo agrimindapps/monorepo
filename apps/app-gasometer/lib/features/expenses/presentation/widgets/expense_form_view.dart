@@ -210,7 +210,7 @@ class ExpenseFormView extends StatelessWidget {
     final model = provider.formModel;
 
     return Card(
-      color: GasometerDesignTokens.colorPrimaryLight.withValues(alpha: 0.3),
+      color: Colors.white,
       child: Padding(
         padding: GasometerDesignTokens.paddingAll(
           GasometerDesignTokens.spacingLg,
@@ -222,7 +222,7 @@ class ExpenseFormView extends StatelessWidget {
               children: [
                 Icon(
                   Icons.summarize,
-                  color: GasometerDesignTokens.colorPrimary,
+                  color: Colors.grey.shade600,
                   size: GasometerDesignTokens.iconSizeSm,
                 ),
                 SizedBox(width: GasometerDesignTokens.spacingSm),
@@ -231,7 +231,7 @@ class ExpenseFormView extends StatelessWidget {
                   style: TextStyle(
                     fontSize: GasometerDesignTokens.fontSizeLg,
                     fontWeight: GasometerDesignTokens.fontWeightMedium,
-                    color: GasometerDesignTokens.colorPrimary,
+                    color: Colors.grey.shade600,
                   ),
                 ),
               ],
@@ -259,14 +259,14 @@ class ExpenseFormView extends StatelessWidget {
                   Icon(
                     Icons.attach_file,
                     size: GasometerDesignTokens.iconSizeXs,
-                    color: GasometerDesignTokens.colorPrimary,
+                    color: Colors.grey.shade600,
                   ),
                   SizedBox(width: GasometerDesignTokens.spacingXs),
                   Text(
                     'Comprovante anexado',
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeBody,
-                      color: GasometerDesignTokens.colorPrimary,
+                      color: Colors.grey.shade600,
                     ),
                   ),
                 ],
@@ -427,7 +427,7 @@ class ExpenseFormView extends StatelessWidget {
             suffixIcon: const Icon(Icons.calendar_today, size: 24),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -476,7 +476,10 @@ class ExpenseFormView extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -541,7 +544,7 @@ class ExpenseFormView extends StatelessWidget {
               Icon(
                 icon,
                 size: GasometerDesignTokens.iconSizeSm,
-                color: GasometerDesignTokens.colorPrimary,
+                color: Colors.grey.shade600,
               ),
               SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(
@@ -571,7 +574,7 @@ class ExpenseFormView extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                GasometerDesignTokens.colorPrimary,
+                Colors.grey.shade600,
               ),
             ),
           ),

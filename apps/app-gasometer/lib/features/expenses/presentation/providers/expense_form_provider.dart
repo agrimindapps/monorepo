@@ -464,7 +464,10 @@ class ExpenseFormProvider extends BaseProvider {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,

@@ -34,7 +34,7 @@ class FormDialog extends StatelessWidget {
         margin: const EdgeInsets.all(20),
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -58,7 +58,7 @@ class FormDialog extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: Colors.grey.shade50,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),

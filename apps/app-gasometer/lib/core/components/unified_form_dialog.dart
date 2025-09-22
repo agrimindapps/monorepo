@@ -83,7 +83,7 @@ class UnifiedFormDialog extends StatelessWidget {
           maxHeight: screenSize.height * 0.9,
         ),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusDialog),
           boxShadow: [
             BoxShadow(
@@ -129,7 +129,7 @@ class UnifiedFormDialog extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(UnifiedDesignTokens.spacingDialogPadding),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: Colors.grey.shade50,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(UnifiedDesignTokens.radiusDialog),
           topRight: Radius.circular(UnifiedDesignTokens.radiusDialog),
@@ -227,8 +227,8 @@ class UnifiedFormDialog extends StatelessWidget {
             FilledButton(
               onPressed: (isLoading || !canConfirm) ? null : onConfirm,
               style: FilledButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 disabledBackgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.12),
                 disabledForegroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                 padding: const EdgeInsets.symmetric(

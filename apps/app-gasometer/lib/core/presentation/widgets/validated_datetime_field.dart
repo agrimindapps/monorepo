@@ -414,8 +414,10 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: GasometerDesignTokens.colorPrimary,
-              onPrimary: GasometerDesignTokens.colorTextOnPrimary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -435,8 +437,10 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: GasometerDesignTokens.colorPrimary,
-              onPrimary: GasometerDesignTokens.colorTextOnPrimary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -466,8 +470,10 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: GasometerDesignTokens.colorPrimary,
-              onPrimary: GasometerDesignTokens.colorTextOnPrimary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,

@@ -40,8 +40,10 @@ class UnifiedDatePicker {
         return Theme(
           data: theme.copyWith(
             colorScheme: theme.colorScheme.copyWith(
-              primary: UnifiedDesignTokens.colorPrimary,
+              primary: Colors.grey.shade800,
               onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -72,8 +74,10 @@ class UnifiedDatePicker {
         return Theme(
           data: theme.copyWith(
             colorScheme: theme.colorScheme.copyWith(
-              primary: UnifiedDesignTokens.colorPrimary,
+              primary: Colors.grey.shade800,
               onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,

@@ -46,8 +46,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getAllMaintenanceRecords();
       
-      // Sync em background se conectado (não bloqueia o retorno)
-      _scheduleSyncInBackground();
+      // Sync em background TEMPORARIAMENTE DESABILITADO devido a índices Firestore ausentes
+      // _scheduleSyncInBackground();
       
       return Right(localRecords);
       

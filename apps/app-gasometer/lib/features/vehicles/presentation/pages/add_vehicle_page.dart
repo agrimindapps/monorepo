@@ -627,7 +627,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
         ),
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       validator: (value) => value == null ? 'Campo obrigatório' : null,

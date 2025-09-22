@@ -382,7 +382,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           height: 16,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         );
       case ValidationState.valid:
@@ -422,7 +422,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       case ValidationState.invalid:
         return Theme.of(context).colorScheme.error;
       case ValidationState.validating:
-        return Theme.of(context).colorScheme.primary;
+        return Colors.green;
       case ValidationState.initial:
         return null;
     }
@@ -573,10 +573,10 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                   )
                 : OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline, width: 2),
                   ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
             helperText: _displayHelperText,
             helperStyle: TextStyle(color: _helperTextColor),
             counterText: widget.showCharacterCount && widget.maxLength != null 
@@ -590,8 +590,8 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
-              color: Theme.of(context).colorScheme.primary,
-              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.onSurface,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
       ],

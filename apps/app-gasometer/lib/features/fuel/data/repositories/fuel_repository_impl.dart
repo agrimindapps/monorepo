@@ -112,8 +112,8 @@ class FuelRepositoryImpl implements FuelRepository {
       // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getAllFuelRecords();
       
-      // Sync em background se conectado (não bloqueia o retorno)
-      unawaited(_syncAllFuelRecordsInBackground());
+      // Sync em background TEMPORARIAMENTE DESABILITADO devido a índices Firestore ausentes
+      // unawaited(_syncAllFuelRecordsInBackground());
       
       return Right(localRecords);
       
@@ -155,8 +155,8 @@ class FuelRepositoryImpl implements FuelRepository {
       // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
       
-      // Sync em background se conectado
-      unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
+      // Sync em background TEMPORARIAMENTE DESABILITADO devido a índices Firestore ausentes
+      // unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
       
       return Right(localRecords);
       

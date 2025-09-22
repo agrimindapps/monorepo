@@ -5,6 +5,7 @@ import '../../../../core/presentation/widgets/widgets.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -83,7 +84,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [

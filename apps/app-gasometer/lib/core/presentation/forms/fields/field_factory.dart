@@ -289,6 +289,19 @@ class _MaterialDateField extends BaseFormField {
       initialDate: initialDate,
       firstDate: config.minDate ?? DateTime(1900),
       lastDate: config.maxDate ?? DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     
     if (date != null) {
@@ -368,11 +381,21 @@ class _MaterialTimeField extends BaseFormField {
       context: context,
       initialTime: initialTime,
       builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            alwaysUse24HourFormat: config.use24HourFormat,
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
-          child: child!,
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: config.use24HourFormat,
+            ),
+            child: child!,
+          ),
         );
       },
     );

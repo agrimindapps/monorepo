@@ -277,7 +277,7 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-          color: theme.colorScheme.primary,
+          color: theme.colorScheme.outline,
           width: 2,
         ),
       ),
@@ -296,8 +296,8 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
       ),
       filled: true,
       fillColor: widget.config.isEnabled
-          ? theme.colorScheme.surface
-          : theme.colorScheme.surfaceVariant.withOpacity(0.5),
+          ? Colors.white
+          : Colors.grey.shade100,
     );
   }
 }

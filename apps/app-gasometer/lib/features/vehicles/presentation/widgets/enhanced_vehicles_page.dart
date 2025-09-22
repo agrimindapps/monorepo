@@ -12,6 +12,7 @@ import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/responsive_content_area.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
 
 /// Enhanced responsive vehicles page
@@ -37,7 +38,7 @@ class _EnhancedVehiclesPageState extends State<EnhancedVehiclesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [

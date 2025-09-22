@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
@@ -63,7 +64,7 @@ class _OdometerPageState extends State<OdometerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Consumer<OdometerProvider>(
           builder: (context, odometerProvider, child) {

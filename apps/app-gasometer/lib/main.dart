@@ -16,6 +16,7 @@ import 'core/services/analytics_service.dart';
 import 'core/services/database_inspector_service.dart';
 import 'core/services/gasometer_firebase_service.dart';
 import 'core/services/gasometer_notification_service.dart';
+import 'core/services/startup_sync_service.dart';
 // import 'core/interfaces/i_sync_service.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import 'core/sync/models/sync_queue_item.dart'; // TODO: Replace with UnifiedSync models in Phase 2
 import 'features/expenses/data/models/expense_model.dart';
@@ -120,6 +121,17 @@ void main() async {
   final notificationService = sl<GasOMeterNotificationService>();
   await notificationService.initialize();
   print('✅ Notifications initialized successfully');
+
+  // Perform startup sync (apenas no início do app)
+  print('🔄 Performing startup sync...');
+  final startupSyncService = sl<StartupSyncService>();
+  // Fire-and-forget - não bloqueia o startup
+  unawaited(startupSyncService.performStartupSync().then((_) {
+    print('✅ Startup sync completed successfully');
+  }).catchError((Object e) {
+    print('⚠️ Startup sync failed: $e - app continues with local data');
+  }));
+  print('✅ Startup sync initiated');
 
   // Initialize Sync Service - REMOVED: Legacy sync system
   // print('🔄 Initializing Sync Service...');

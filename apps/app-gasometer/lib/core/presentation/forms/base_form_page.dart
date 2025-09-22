@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme/gasometer_colors.dart';
 import 'form_mixins.dart';
 import 'form_widgets.dart';
 
@@ -143,7 +144,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   
   Widget _buildLoadingScaffold() {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       appBar: AppBar(
         title: Text(currentTitle),
       ),
@@ -155,7 +156,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   
   Widget _buildFormScaffold(BuildContext context, T formProvider) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       appBar: AppBar(
         title: Text(currentTitle),
         actions: [
@@ -182,7 +183,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
           submitButtonText,
           style: TextStyle(
             color: canSubmit
-              ? Theme.of(context).colorScheme.primary
+              ? Theme.of(context).colorScheme.onSurface
               : Theme.of(context).disabledColor,
           ),
         ),

@@ -5,6 +5,7 @@ import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
@@ -88,7 +89,7 @@ class _FuelPageState extends State<FuelPage> {
         final vehiclesError = data['vehiclesError'] as String?;
         
         return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          backgroundColor: GasometerColors.getPageBackgroundColor(context),
           body: SafeArea(
             child: Column(
               children: [

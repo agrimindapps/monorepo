@@ -343,16 +343,27 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
                 const SizedBox(width: 12),
               ],
             ),
-            enabledBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor),
-                  )
-                : null,
-            focusedBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor, width: 2),
-                  )
-                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: borderColor ?? Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: borderColor ?? Theme.of(context).colorScheme.outline,
+                width: 2,
+              ),
+            ),
+            filled: true,
+            fillColor: Colors.white,
             helperText: _displayHelperText,
             helperStyle: TextStyle(color: _helperTextColor),
             counterText: widget.showCharacterCount && widget.maxLength != null 
@@ -375,16 +386,27 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
                 const SizedBox(width: 12),
               ],
             ),
-            enabledBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor),
-                  )
-                : null,
-            focusedBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(color: borderColor, width: 2),
-                  )
-                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: borderColor ?? Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: borderColor ?? Theme.of(context).colorScheme.outline,
+                width: 2,
+              ),
+            ),
+            filled: true,
+            fillColor: Colors.white,
             helperText: _displayHelperText,
             helperStyle: TextStyle(color: _helperTextColor),
             counterText: widget.showCharacterCount && widget.maxLength != null 
@@ -398,8 +420,8 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
           Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
-              color: GasometerDesignTokens.colorPrimary,
-              backgroundColor: GasometerDesignTokens.colorPrimary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.onSurface,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
       ],

@@ -167,7 +167,7 @@ class FuelFormView extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -269,11 +269,11 @@ class FuelFormView extends StatelessWidget {
       decoration: InputDecoration(
         prefixText: 'R\$ ',
         filled: true,
-        fillColor: GasometerDesignTokens.colorNeutral50,
+        fillColor: Colors.grey.shade100,
       ),
       textStyle: TextStyle(
         fontWeight: GasometerDesignTokens.fontWeightBold,
-        color: GasometerDesignTokens.colorPrimary,
+        color: Colors.grey.shade800,
       ),
     );
   }
@@ -332,7 +332,10 @@ class FuelFormView extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -402,7 +405,7 @@ class FuelFormView extends StatelessWidget {
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        GasometerDesignTokens.colorPrimary,
+                        Colors.grey.shade600,
                       ),
                     ),
                   ),
@@ -508,7 +511,7 @@ class FuelFormView extends StatelessWidget {
               Icon(
                 icon,
                 size: GasometerDesignTokens.iconSizeSm,
-                color: GasometerDesignTokens.colorPrimary,
+                color: Colors.grey.shade600,
               ),
               SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(

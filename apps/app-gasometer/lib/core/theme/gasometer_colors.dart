@@ -140,4 +140,12 @@ class GasometerColors {
         return primary;
     }
   }
+
+  /// Cor de fundo padrão das páginas seguindo padrão do app-plantis
+  static Color getPageBackgroundColor(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.brightness == Brightness.dark
+        ? const Color(0xFF1C1C1E) // Cor escura personalizada
+        : const Color(0xFFF0F2F5); // Cinza claro do app-plantis
+  }
 }

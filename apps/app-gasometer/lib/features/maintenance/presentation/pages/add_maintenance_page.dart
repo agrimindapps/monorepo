@@ -107,25 +107,36 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FormDialog(
-      title: 'Manutenção',
-      subtitle: 'Registre a manutenção do seu veículo',
-      headerIcon: Icons.build,
-      isLoading: context.watch<MaintenanceFormProvider>().isLoading || _isSubmitting,
-      confirmButtonText: 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
-      onConfirm: _submitFormWithRateLimit,
-      content: Consumer<MaintenanceFormProvider>(
-        builder: (context, formProvider, child) {
-          if (!formProvider.isInitialized) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+    return Consumer<MaintenanceFormProvider>(
+      builder: (context, formProvider, child) {
+        // Generate subtitle based on vehicle information
+        String subtitle = 'Registre a manutenção do seu veículo';
+        if (formProvider.isInitialized && formProvider.formModel.vehicle != null) {
+          final vehicle = formProvider.formModel.vehicle!;
+          final odometer = vehicle.currentOdometer;
+          subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+        }
 
-          return _buildFormContent(formProvider);
-        },
-      ),
+        return FormDialog(
+          title: 'Manutenção',
+          subtitle: subtitle,
+          headerIcon: Icons.build,
+          isLoading: formProvider.isLoading || _isSubmitting,
+          confirmButtonText: 'Salvar',
+          onCancel: () => Navigator.of(context).pop(),
+          onConfirm: _submitFormWithRateLimit,
+          content: !formProvider.isInitialized
+              ? const Center(child: CircularProgressIndicator())
+              : _buildFormContent(formProvider),
+        );
+      },
+    );
+  }
+
+  String _formatOdometer(num odometer) {
+    return odometer.toInt().toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
     );
   }
 
@@ -603,7 +614,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -653,7 +664,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
             helperText: 'Opcional - ajuda a acompanhar a manutenção preventiva',
           ),
           child: Row(
@@ -707,7 +718,10 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -767,7 +781,10 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,

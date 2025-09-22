@@ -85,16 +85,27 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       }
     }
     
-    // Notificar mudanças após o build atual completar
+    // Carregar dados do vehicle após inicialização
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          // Força rebuild após inicialização
-        });
-      }
+      _loadVehicleData();
     });
   }
-  
+
+  void _loadVehicleData() async {
+    if (!mounted) return;
+
+    final vehicleId = _formProvider.vehicleId;
+    if (vehicleId.isNotEmpty) {
+      final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+      await vehiclesProvider.loadVehicles();
+      final vehicle = await vehiclesProvider.getVehicleById(vehicleId);
+
+      if (vehicle != null && mounted) {
+        _formProvider.setVehicle(vehicle);
+      }
+    }
+  }
+
   void _setupFormControllers() {
     try {
       // Setup listeners for reactive updates with proper error handling
@@ -262,26 +273,44 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
   @override
   Widget build(BuildContext context) {
-    
-    return FormDialog(
-      title: 'Odômetro',
-      subtitle: 'Gerencie seus registros de quilometr...',
-      headerIcon: Icons.speed,
-      isLoading: context.watch<OdometerFormProvider>().isLoading || _isSubmitting,
-      confirmButtonText: 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
-      onConfirm: _submitFormWithRateLimit,
-      content: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBasicInfoSection(),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            _buildAdditionalInfoSection(),
-          ],
-        ),
-      ),
+    return Consumer<OdometerFormProvider>(
+      builder: (context, formProvider, child) {
+        // Generate subtitle based on vehicle information
+        String subtitle = 'Gerencie seus registros de quilometragem';
+        if (formProvider.vehicle != null) {
+          final vehicle = formProvider.vehicle!;
+          final odometer = vehicle.currentOdometer;
+          subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+        }
+
+        return FormDialog(
+          title: 'Odômetro',
+          subtitle: subtitle,
+          headerIcon: Icons.speed,
+          isLoading: formProvider.isLoading || _isSubmitting,
+          confirmButtonText: 'Salvar',
+          onCancel: () => Navigator.of(context).pop(),
+          onConfirm: _submitFormWithRateLimit,
+          content: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildBasicInfoSection(),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                _buildAdditionalInfoSection(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatOdometer(num odometer) {
+    return odometer.toInt().toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
     );
   }
 
@@ -325,11 +354,11 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       builder: (context, formProvider, child) {
         return TextFormField(
           controller: _odometerController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: TextInputType.number,
           textAlign: TextAlign.right,
           decoration: InputDecoration(
             labelText: OdometerConstants.fieldLabels['odometro'],
-            hintText: '0,00',
+            hintText: '45234',
             suffixText: OdometerConstants.units['odometro'],
             suffixIcon: formProvider.odometerValue > 0
                 ? IconButton(
@@ -341,7 +370,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
           ),
           inputFormatters: _getOdometroFormatters(),
           validator: formProvider.validateOdometer,
@@ -366,7 +395,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
           ),
           items: OdometerType.allTypes.map((type) {
             return DropdownMenuItem<OdometerType>(
@@ -402,7 +431,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Colors.white,
           ),
           validator: formProvider.validateDescription,
           onChanged: (value) {
@@ -431,7 +460,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              fillColor: Colors.white,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -468,55 +497,10 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   // Formatadores de entrada
   List<TextInputFormatter> _getOdometroFormatters() {
     return [
-      // Permitir apenas números e vírgula para decimal (consistente com cadastro de veículos)
-      FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-      // Limitar a 999999,99 (máximo 6 dígitos inteiros + 2 decimais)
-      LengthLimitingTextInputFormatter(9), // 999999,99
-      // Formatter personalizado para controlar vírgula decimal
-      TextInputFormatter.withFunction((oldValue, newValue) {
-        var text = newValue.text;
-        var selection = newValue.selection;
-        
-        // Não permitir vírgula no início
-        if (text.startsWith(',')) {
-          return oldValue;
-        }
-        
-        // Permitir apenas uma vírgula
-        final commaCount = ','.allMatches(text).length;
-        if (commaCount > 1) {
-          return oldValue;
-        }
-        
-        // Se tem vírgula, limitar a 2 dígitos após a vírgula (consistente com cadastro de veículos)
-        if (text.contains(',')) {
-          final parts = text.split(',');
-          if (parts.length == 2 && parts[1].length > 2) {
-            text = '${parts[0]},${parts[1].substring(0, 2)}';
-            // Ajustar cursor se o texto foi truncado
-            if (selection.baseOffset > text.length) {
-              selection = TextSelection.collapsed(offset: text.length);
-            }
-          }
-          // Não permitir vírgula no final se não há dígitos após
-          if (parts.length == 2 && parts[1].isEmpty && text.endsWith(',')) {
-            // Permitir vírgula temporariamente para que o usuário possa digitar decimal
-          }
-        }
-        
-        // Preservar a seleção original se possível, senão posicionar no final
-        if (selection.baseOffset <= text.length) {
-          return TextEditingValue(
-            text: text,
-            selection: selection,
-          );
-        } else {
-          return TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: text.length),
-          );
-        }
-      }),
+      // Permitir apenas números (odômetro em quilômetros inteiros)
+      FilteringTextInputFormatter.digitsOnly,
+      // Limitar a 999999 (máximo 6 dígitos para quilometragem)
+      LengthLimitingTextInputFormatter(6),
     ];
   }
 
@@ -533,7 +517,10 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -557,7 +544,10 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
                 child: Theme(
                   data: Theme.of(context).copyWith(
                     colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: Theme.of(context).colorScheme.primary,
+                      primary: Colors.grey.shade800,
+                      onPrimary: Colors.white,
+                      surface: Colors.white,
+                      onSurface: Colors.black,
                     ),
                   ),
                   child: child!,

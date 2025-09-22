@@ -22,6 +22,9 @@ import '../services/avatar_service.dart';
 import '../services/platform_service.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/local_data_service.dart';
+import '../services/data_sanitization_service.dart';
+import '../services/gasometer_data_cleaner_service.dart';
+import '../services/startup_sync_service.dart';
 
 // Auth imports (keeping only needed ones)
 import '../../features/auth/domain/repositories/auth_repository.dart';
@@ -195,6 +198,28 @@ Future<void> initializeDependencies() async {
   // Profile Image Service
   sl.registerLazySingleton<GasometerProfileImageService>(() => GasometerProfileImageService(
     sl<AnalyticsService>(),
+  ));
+
+  // Data Sanitization Service
+  sl.registerLazySingleton<DataSanitizationService>(() => DataSanitizationService());
+
+  // Gasometer Data Cleaner Service
+  sl.registerLazySingleton<GasometerDataCleanerService>(() => GasometerDataCleanerService(
+    vehicleRepository: sl<VehicleRepository>(),
+    fuelRepository: sl<FuelRepository>(),
+    maintenanceRepository: sl<MaintenanceRepository>(),
+    expensesRepository: sl<ExpensesRepository>(),
+    odometerRepository: sl<OdometerRepository>(),
+    logRepository: sl<LogRepository>(),
+  ));
+
+  // Startup Sync Service - substitui syncs em background
+  sl.registerLazySingleton<StartupSyncService>(() => StartupSyncService(
+    fuelRepository: sl<FuelRepository>(),
+    maintenanceRepository: sl<MaintenanceRepository>(),
+    vehicleRepository: sl<VehicleRepository>(),
+    connectivity: sl<Connectivity>(),
+    loggingService: sl<LoggingService>(),
   ));
   
   // Logging Service - requires AnalyticsService and LogRepository (both now injectable)

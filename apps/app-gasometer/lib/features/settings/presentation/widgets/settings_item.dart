@@ -34,10 +34,10 @@ class SettingsItem extends StatelessWidget {
     
     return Container(
       margin: EdgeInsets.only(
-        bottom: isLast ? 0 : 8,
+        bottom: isLast ? 0 : 4,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.vertical(
           top: isFirst ? const Radius.circular(12) : Radius.zero,
           bottom: isLast ? const Radius.circular(12) : Radius.zero,
@@ -52,11 +52,11 @@ class SettingsItem extends StatelessWidget {
             bottom: isLast ? const Radius.circular(12) : Radius.zero,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: (iconColor ?? theme.colorScheme.primary)
                         .withValues(alpha: 0.1),
@@ -68,7 +68,7 @@ class SettingsItem extends StatelessWidget {
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

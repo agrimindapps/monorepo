@@ -67,38 +67,17 @@ class SettingsSection extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHigh,
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: GasometerDesignTokens.borderRadius(
               GasometerDesignTokens.radiusDialog,
             ),
           ),
           child: Column(
-            children: _buildChildrenWithDividers(),
+            children: children,
           ),
         ),
       ],
     );
   }
 
-  /// Builds children with appropriate dividers between items
-  List<Widget> _buildChildrenWithDividers() {
-    if (children.isEmpty) return [];
-    
-    final result = <Widget>[];
-    for (int i = 0; i < children.length; i++) {
-      result.add(children[i]);
-      
-      // Add divider between items (except for last item)
-      if (i < children.length - 1) {
-        result.add(
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Divider(height: 1),
-          ),
-        );
-      }
-    }
-    
-    return result;
-  }
 }

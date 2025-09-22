@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,6 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
+import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../core/services/gasometer_data_cleaner_service.dart';
 // import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -47,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
         final isAnonymous = authProvider.isAnonymous;
         
         return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+          backgroundColor: GasometerColors.getPageBackgroundColor(context),
           body: SafeArea(
             child: Column(
               children: [
@@ -186,6 +190,12 @@ class _ProfilePageState extends State<ProfilePage> {
           const ExportDataSection(),
         ],
         
+        // Limpeza de Dados (apenas para usuários registrados)
+        if (!isAnonymous) ...[
+          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          _buildDataManagementSection(context, authProvider),
+        ],
+
         // Ações da conta
         SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildActionsSection(context, authProvider, isAnonymous),
@@ -271,13 +281,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     _buildProfileInfoRow(
                       'Nome',
-                      (user?.displayName as String?) ?? 'Não informado',
+                      DataSanitizationService.sanitizeDisplayName(user, false),
                       icon: Icons.person,
                     ),
                     const SizedBox(height: 16),
                     _buildProfileInfoRow(
                       'Email',
-                      (user?.email as String?) ?? 'Não informado',
+                      DataSanitizationService.sanitizeEmail(user, false),
                       icon: Icons.email,
                     ),
                     const SizedBox(height: 24),
@@ -520,6 +530,39 @@ class _ProfilePageState extends State<ProfilePage> {
                   HapticFeedback.lightImpact();
                   context.go('/terms');
                 },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDataManagementSection(BuildContext context, AuthProvider authProvider) {
+    return _buildSection(
+      context,
+      title: 'Gerenciamento de Dados',
+      icon: Icons.cleaning_services,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+          ),
+          child: Column(
+            children: [
+              _buildSettingsItem(
+                context,
+                icon: Icons.delete_sweep,
+                title: 'Limpar Dados',
+                subtitle: 'Limpar veículos, abastecimentos e manutenções',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _showClearDataDialog(context, authProvider);
+                },
+                isFirst: true,
+                isLast: true,
+                isDestructive: true,
               ),
             ],
           ),
@@ -1225,6 +1268,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Auth handling methods
+  /// Mostra dialog de confirmação para limpeza de dados
+  Future<void> _showClearDataDialog(BuildContext context, AuthProvider authProvider) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return _DataClearDialog(authProvider: authProvider);
+      },
+    );
+  }
+
   Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1321,27 +1375,57 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (confirmed == true && context.mounted) {
-      await authProvider.logoutWithLoadingDialog(context);
+      await _performLogoutWithProgressDialog(context, authProvider);
+    }
+  }
+
+  /// Executa logout com progress dialog animado
+  Future<void> _performLogoutWithProgressDialog(BuildContext context, AuthProvider authProvider) async {
+    // Mostrar progress dialog
+    unawaited(showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _LogoutProgressDialog(),
+    ));
+
+    try {
+      // Simular processamento para melhor UX
+      await Future<void>.delayed(const Duration(milliseconds: 800));
+
+      // Executar logout real
+      await authProvider.logout();
+
+      // Fechar progress dialog
       if (context.mounted) {
-        if (authProvider.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(authProvider.errorMessage!),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
+        Navigator.of(context).pop();
+
+        // Mostrar mensagem de sucesso e navegar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Logout realizado com sucesso'),
+            backgroundColor: GasometerDesignTokens.colorSuccess,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        context.go('/');
+      }
+    } catch (e) {
+      // Fechar progress dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        // Mostrar mensagem de erro
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
             ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Logout realizado com sucesso'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          // Navigate back to home after successful logout
-          context.go('/');
-        }
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -1547,6 +1631,477 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
             color: Theme.of(context).colorScheme.error,
             size: 20,
           ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dialog de progresso durante o logout
+class _LogoutProgressDialog extends StatefulWidget {
+  @override
+  State<_LogoutProgressDialog> createState() => _LogoutProgressDialogState();
+}
+
+class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  final List<String> _progressSteps = [
+    'Limpando dados locais...',
+    'Removendo configurações...',
+    'Finalizando logout...',
+  ];
+
+  int _currentStepIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _animationController.forward();
+    _startProgressSteps();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _startProgressSteps() {
+    // Cycle through progress steps
+    Timer.periodic(const Duration(milliseconds: 600), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentStepIndex = (_currentStepIndex + 1) % _progressSteps.length;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated logout icon
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: RotationTransition(
+                  turns: _animationController,
+                  child: Icon(
+                    Icons.logout,
+                    size: 32,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Title
+              Text(
+                'Saindo da Conta',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 16),
+
+              // Progress indicator
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Dynamic progress text
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  _progressSteps[_currentStepIndex],
+                  key: ValueKey(_currentStepIndex),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Info message
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: theme.colorScheme.primary,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Seus dados na nuvem permanecerão seguros',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Dialog stateful para confirmação de limpeza de dados
+class _DataClearDialog extends StatefulWidget {
+  final AuthProvider authProvider;
+
+  const _DataClearDialog({required this.authProvider});
+
+  @override
+  State<_DataClearDialog> createState() => __DataClearDialogState();
+}
+
+class __DataClearDialogState extends State<_DataClearDialog> {
+  final TextEditingController _confirmationController = TextEditingController();
+  bool _isConfirmationValid = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _confirmationController.addListener(_validateConfirmation);
+  }
+
+  @override
+  void dispose() {
+    _confirmationController.dispose();
+    super.dispose();
+  }
+
+  void _validateConfirmation() {
+    setState(() {
+      _isConfirmationValid =
+          _confirmationController.text.trim().toUpperCase() == 'LIMPAR';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Ícone centralizado
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: GasometerDesignTokens.colorWarning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: Icon(
+              Icons.delete_sweep,
+              size: 32,
+              color: GasometerDesignTokens.colorWarning,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Título
+          Text(
+            'Limpar Dados do App',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: GasometerDesignTokens.colorWarning,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Conteúdo alinhado à esquerda
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Esta ação limpará todos os dados em todos seus dispositivos:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+          const SizedBox(height: 16),
+          _buildClearItem(
+            context,
+            Icons.directions_car,
+            'Todos os seus veículos',
+          ),
+          _buildClearItem(
+            context,
+            Icons.local_gas_station,
+            'Todos os abastecimentos',
+          ),
+          _buildClearItem(
+            context,
+            Icons.build,
+            'Todas as manutenções',
+          ),
+          _buildClearItem(
+            context,
+            Icons.attach_money,
+            'Todas as despesas registradas',
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Icon(Icons.shield, color: GasometerDesignTokens.colorSuccess, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Serão mantidos: perfil, configurações, tema e assinatura',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: GasometerDesignTokens.colorSuccess,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Para confirmar, digite LIMPAR abaixo:',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _confirmationController,
+            enabled: !_isLoading,
+            decoration: InputDecoration(
+              hintText: 'Digite LIMPAR para confirmar',
+              border: OutlineInputBorder(
+                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                borderSide: BorderSide(
+                  color: GasometerDesignTokens.colorWarning,
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
+            ),
+            textCapitalization: TextCapitalization.characters,
+            inputFormatters: [_UpperCaseTextFormatter()],
+            style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
+          ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed:
+              _isConfirmationValid && !_isLoading
+                  ? () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
+
+                    try {
+                      final dataCleanerService = GetIt.instance<GasometerDataCleanerService>();
+                      final result = await dataCleanerService.clearUserContentOnly();
+
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+
+                        if (result['success'] as bool) {
+                          final vehiclesCleaned = result['vehiclesCleaned'] as int;
+                          final fuelRecordsCleaned = result['fuelRecordsCleaned'] as int;
+                          final maintenanceRecordsCleaned = result['maintenanceRecordsCleaned'] as int;
+                          final expensesCleaned = result['expensesCleaned'] as int;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Dados limpos com sucesso!\n'
+                                'Veículos: $vehiclesCleaned | Abastecimentos: $fuelRecordsCleaned | Manutenções: $maintenanceRecordsCleaned | Despesas: $expensesCleaned',
+                              ),
+                              backgroundColor: GasometerDesignTokens.colorSuccess,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 4),
+                            ),
+                          );
+                        } else {
+                          final errors = result['errors'] as List<String>;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Erro ao limpar dados: ${errors.join(', ')}',
+                              ),
+                              backgroundColor: theme.colorScheme.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Erro ao limpar dados: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+                            ),
+                            backgroundColor: theme.colorScheme.error,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    }
+
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                  : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                _isConfirmationValid && !_isLoading
+                    ? GasometerDesignTokens.colorWarning
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor:
+                _isConfirmationValid && !_isLoading
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            shape: RoundedRectangleBorder(
+              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+            ),
+          ),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text('Limpar Dados'),
+        ),
+      ],
+    );
+  }
+
+  /// Constrói item de informação sobre limpeza
+  Widget _buildClearItem(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: GasometerDesignTokens.colorWarning, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

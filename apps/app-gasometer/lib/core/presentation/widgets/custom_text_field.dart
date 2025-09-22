@@ -247,7 +247,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         enabledBorder: widget.enabledBorder ?? _defaultEnabledBorder(context),
         focusedBorder: widget.focusedBorder ?? _defaultFocusedBorder(context),
         errorBorder: widget.errorBorder ?? _defaultErrorBorder(context),
-        fillColor: widget.fillColor ?? Theme.of(context).colorScheme.surface,
+        fillColor: Colors.white,
         filled: widget.filled,
       ),
     );

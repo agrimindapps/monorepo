@@ -320,7 +320,7 @@ class AppRouter {
               name: 'license-status',
               builder: (context, state) => const LicenseStatusPage(),
             ),
-            
+
             // Data Export Route
             GoRoute(
               path: dataExport,

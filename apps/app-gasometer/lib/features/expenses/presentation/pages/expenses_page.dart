@@ -5,6 +5,7 @@ import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -84,7 +85,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
         final vehiclesError = data['vehiclesError'] as String?;
         
         return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          backgroundColor: GasometerColors.getPageBackgroundColor(context),
           body: SafeArea(
             child: Column(
               children: [

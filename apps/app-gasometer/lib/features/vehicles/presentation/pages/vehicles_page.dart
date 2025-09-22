@@ -7,6 +7,7 @@ import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicles_provider.dart';
 import '../widgets/vehicle_card.dart';
@@ -95,7 +96,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [

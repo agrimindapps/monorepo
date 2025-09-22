@@ -71,7 +71,7 @@ class CustomDropdown<T> extends StatelessWidget {
         enabledBorder: enabledBorder ?? _defaultEnabledBorder(context),
         focusedBorder: focusedBorder ?? _defaultFocusedBorder(context),
         errorBorder: errorBorder ?? _defaultErrorBorder(context),
-        fillColor: fillColor ?? Theme.of(context).colorScheme.surface,
+        fillColor: Colors.white,
         filled: filled,
       ),
       dropdownColor: Theme.of(context).colorScheme.surface,

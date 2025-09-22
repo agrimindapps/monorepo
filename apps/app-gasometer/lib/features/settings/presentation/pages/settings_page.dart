@@ -11,6 +11,7 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/gasometer_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 // ✅ REFACTORED: Use extracted dialogs
@@ -34,7 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -418,9 +419,9 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
-      color: Theme.of(context).colorScheme.surface,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -449,7 +450,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             ...children,
           ],
         ),

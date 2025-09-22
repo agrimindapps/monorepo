@@ -67,7 +67,7 @@ mixin FormErrorMixin<T extends StatefulWidget> on State<T> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
     );

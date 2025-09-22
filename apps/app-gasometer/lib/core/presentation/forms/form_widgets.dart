@@ -358,14 +358,21 @@ class FormHeader extends StatelessWidget {
     return Container(
       padding: effectivePadding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? 
-            Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        color: backgroundColor ??
+            Colors.white,
         borderRadius: GasometerDesignTokens.borderRadius(
           GasometerDesignTokens.radiusCard,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -374,7 +381,7 @@ class FormHeader extends StatelessWidget {
               GasometerDesignTokens.spacingMd,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusInput,
               ),

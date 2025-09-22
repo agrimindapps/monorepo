@@ -139,8 +139,8 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           item.hasCount 
-              ? '${item.displayCount} Registros'
-              : item.displaySubtitle,
+              ? '${item.displayCount} registros'
+              : '0 registros',
           style: TextStyle(
             fontSize: 13,
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -148,10 +148,6 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        if (item.hasIngredienteAtivo) ...[
-          const SizedBox(height: 6),
-          _buildIngredienteChip(),
-        ],
       ],
     );
   }
@@ -227,33 +223,6 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildIngredienteChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark 
-            ? Colors.blue.shade900.withValues(alpha: 0.3)
-            : Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark 
-              ? Colors.blue.shade700.withValues(alpha: 0.5)
-              : Colors.blue.shade200,
-          width: 1,
-        ),
-      ),
-      child: Text(
-        item.ingredienteAtivo!,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
 
   Color _getItemColor() {
     // Todos os ícones devem ser verdes como nos mockups

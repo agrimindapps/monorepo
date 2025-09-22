@@ -29,7 +29,29 @@ class LogoutUseCase implements NoParamsUseCase<void> {
     }
 
     try {
-      // 1. Limpar dados locais primeiro (se configurado)
+      // 1. Fazer logout do Firebase PRIMEIRO para evitar sincronização indevida
+      if (kDebugMode) {
+        debugPrint('🔥 LogoutUseCase: Fazendo logout do Firebase...');
+      }
+
+      final logoutResult = await _authRepository.signOut();
+      
+      // Se o logout falhou, não prosseguir com limpeza
+      if (logoutResult.isLeft()) {
+        if (kDebugMode) {
+          logoutResult.fold(
+            (failure) => debugPrint('❌ LogoutUseCase: Logout falhou: ${failure.message}'),
+            (_) => null,
+          );
+        }
+        return logoutResult;
+      }
+
+      if (kDebugMode) {
+        debugPrint('✅ LogoutUseCase: Logout do Firebase completado com sucesso');
+      }
+
+      // 2. Limpar dados locais APÓS logout (se configurado)
       if (_appDataCleaner != null) {
         if (kDebugMode) {
           debugPrint('🧹 LogoutUseCase: Limpando dados locais...');
@@ -73,13 +95,6 @@ class LogoutUseCase implements NoParamsUseCase<void> {
         }
       }
 
-      // 2. Fazer logout do Firebase
-      if (kDebugMode) {
-        debugPrint('🔥 LogoutUseCase: Fazendo logout do Firebase...');
-      }
-
-      final logoutResult = await _authRepository.signOut();
-
       // 3. Log analytics independentemente do resultado
       try {
         await _analyticsRepository.logLogout();
@@ -93,10 +108,7 @@ class LogoutUseCase implements NoParamsUseCase<void> {
       }
 
       if (kDebugMode) {
-        logoutResult.fold(
-          (failure) => debugPrint('❌ LogoutUseCase: Logout falhou: ${failure.message}'),
-          (_) => debugPrint('✅ LogoutUseCase: Logout completado com sucesso'),
-        );
+        debugPrint('✅ LogoutUseCase: Processo de logout completado com sucesso');
       }
 
       return logoutResult;

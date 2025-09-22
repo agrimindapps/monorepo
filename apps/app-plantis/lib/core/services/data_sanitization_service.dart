@@ -95,20 +95,33 @@ class DataSanitizationService {
 
   /// Gera iniciais sanitizadas para avatar
   static String sanitizeInitials(UserEntity? user, bool isAnonymous) {
-    if (isAnonymous) {
+    if (isAnonymous || user == null) {
       return 'UA'; // Usuário Anônimo
     }
     
     final displayName = sanitizeDisplayName(user, false);
-    if (displayName == _anonymousDisplayName) {
+    if (displayName == _anonymousDisplayName || displayName.trim().isEmpty) {
       return 'UA';
     }
     
-    final names = displayName.trim().split(RegExp(r'\s+'));
-    if (names.isEmpty) return 'UA';
-    if (names.length == 1) return names[0][0].toUpperCase();
+    final names = displayName.trim().split(RegExp(r'\s+'))
+        .where((name) => name.isNotEmpty)
+        .toList();
     
-    return '${names[0][0]}${names[names.length - 1][0]}'.toUpperCase();
+    if (names.isEmpty) return 'UA';
+    
+    if (names.length == 1) {
+      return names[0].isNotEmpty ? names[0][0].toUpperCase() : 'UA';
+    }
+    
+    final firstInitial = names[0].isNotEmpty ? names[0][0] : '';
+    final lastInitial = names[names.length - 1].isNotEmpty ? names[names.length - 1][0] : '';
+    
+    if (firstInitial.isEmpty && lastInitial.isEmpty) return 'UA';
+    if (firstInitial.isEmpty) return lastInitial.toUpperCase();
+    if (lastInitial.isEmpty) return firstInitial.toUpperCase();
+    
+    return '$firstInitial$lastInitial'.toUpperCase();
   }
 
   /// Valida se a foto de perfil deve ser exibida

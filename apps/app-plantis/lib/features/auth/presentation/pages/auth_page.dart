@@ -394,27 +394,36 @@ class _AuthPageState extends State<AuthPage>
 
   /// Responsive layout inspired by gasometer design
   Widget _buildResponsiveLayout(BuildContext context, Size size, bool isDesktop, bool isTablet, bool isMobile) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final availableHeight = size.height - keyboardHeight;
+    
     return Center(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            vertical: MediaQuery.of(context).viewInsets.bottom > 0 ? 20 : 40,
+            vertical: keyboardHeight > 0 ? 10 : 20,
+            horizontal: 16,
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: isMobile
                   ? size.width * 0.9
                   : (isTablet ? 500 : 1000),
-              maxHeight: isMobile
-                  ? double.infinity
-                  : (isTablet ? 650 : 650),
+              // Remove altura fixa para evitar overflow
+              minHeight: isMobile ? 0 : 400,
+              maxHeight: isMobile 
+                  ? double.infinity 
+                  : math.max(availableHeight * 0.9, 500),
             ),
             child: RepaintBoundary(
               child: Card(
                 elevation: 20,
                 shadowColor: Colors.black.withValues(alpha: 0.2),
-                margin: const EdgeInsets.all(16),
+                margin: EdgeInsets.symmetric(
+                  vertical: keyboardHeight > 0 ? 8 : 16,
+                  horizontal: 0,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -463,8 +472,14 @@ class _AuthPageState extends State<AuthPage>
 
   /// Mobile layout with compact branding
   Widget _buildMobileLayout() {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardVisible = keyboardHeight > 0;
+    
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: 20.0,
+        vertical: isKeyboardVisible ? 16.0 : 24.0,
+      ),
       child: FadeTransition(
         opacity: _fadeInAnimation,
         child: AnimatedBuilder(
@@ -474,10 +489,20 @@ class _AuthPageState extends State<AuthPage>
               offset: Offset(0, _slideAnimation.value),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildMobileBranding(),
-                  const SizedBox(height: 32),
-                  _buildAuthContent(),
+                  // Só mostra o branding completo se não tiver teclado visível
+                  if (!isKeyboardVisible) ...[
+                    _buildMobileBranding(),
+                    const SizedBox(height: 32),
+                  ] else ...[
+                    // Versão compacta quando teclado está visível
+                    _buildCompactBranding(),
+                    const SizedBox(height: 16),
+                  ],
+                  Flexible(
+                    child: _buildAuthContent(),
+                  ),
                 ],
               ),
             );
@@ -602,44 +627,45 @@ class _AuthPageState extends State<AuthPage>
 
   /// Mobile branding with compact design
   Widget _buildMobileBranding() {
-    return Column(
+    return ScaleTransition(
+      scale: _logoAnimation,
+      child: _buildModernLogo(
+        isWhite: false,
+        size: 32,
+        color: PlantisColors.primary,
+      ),
+    );
+  }
+
+  /// Compact branding for when keyboard is visible
+  Widget _buildCompactBranding() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ScaleTransition(
-          scale: _logoAnimation,
-          child: _buildModernLogo(
-            isWhite: false,
-            size: 32,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: PlantisColors.primary.withValues(alpha: 0.1),
+            border: Border.all(
+              color: PlantisColors.primary.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
+          ),
+          child: const Icon(
+            Icons.eco,
             color: PlantisColors.primary,
+            size: 20,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(width: 12),
         const Text(
           'Inside Garden',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
             color: PlantisColors.primary,
             letterSpacing: -0.5,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Cuidado inteligente de plantas',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade600,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: 50,
-          height: 3,
-          decoration: BoxDecoration(
-            color: PlantisColors.primary,
-            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ],
@@ -890,12 +916,12 @@ class _AuthPageState extends State<AuthPage>
 
           // Enhanced login button
           _buildAccessibleLoginButton(),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           // Enhanced divider with social login
           _buildSocialLoginSection(),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           
           // Enhanced anonymous login
           _buildAnonymousLoginSection(),

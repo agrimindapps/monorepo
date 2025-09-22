@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/providers/background_sync_provider.dart';
+import '../../../../core/utils/navigation_service.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -53,7 +54,7 @@ class PlantsListPage extends StatefulWidget {
   State<PlantsListPage> createState() => _PlantsListPageState();
 }
 
-class _PlantsListPageState extends State<PlantsListPage> {
+class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
   // Provider injection - now via constructor
   late PlantsProvider _plantsProvider;
   
@@ -76,6 +77,18 @@ class _PlantsListPageState extends State<PlantsListPage> {
       // Iniciar sincronização automática se usuário não anônimo
       _tryStartAutoSync();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Subscribe to route changes with RouteObserver
+    final routeObserver = NavigationService.instance.routeObserver;
+    final modalRoute = ModalRoute.of(context);
+    if (modalRoute is PageRoute) {
+      routeObserver.subscribe(this, modalRoute);
+    }
   }
   
   /// Inicia sincronização em background sem bloquear UI
@@ -109,7 +122,37 @@ class _PlantsListPageState extends State<PlantsListPage> {
   void dispose() {
     _scrollController.dispose();
     _syncStatusSubscription?.cancel();
+    
+    // Unsubscribe from route observer
+    final routeObserver = NavigationService.instance.routeObserver;
+    routeObserver.unsubscribe(this);
+    
     super.dispose();
+  }
+
+  // RouteAware callbacks - called when user navigates back to this page
+  @override
+  void didPopNext() {
+    // Called when a route has been popped off, and the current route shows up.
+    // This means user returned from plant details or other screen
+    if (mounted) {
+      _plantsProvider.refreshPlants();
+    }
+  }
+
+  @override
+  void didPush() {
+    // Called when the current route has been pushed.
+  }
+
+  @override
+  void didPop() {
+    // Called when the current route has been popped off.
+  }
+
+  @override
+  void didPushNext() {
+    // Called when a new route has been pushed, and the current route is no longer visible.
   }
 
   // ===== VIEW EVENT HANDLERS =====
@@ -156,8 +199,8 @@ class _PlantsListPageState extends State<PlantsListPage> {
     // Criar um novo provider para a dialog
     final plantFormProvider = widget.plantFormProviderFactory();
 
-    // Mostrar dialog com o provider
-    await showDialog<bool>(
+    // Mostrar dialog com o provider e capturar o resultado
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => ChangeNotifierProvider.value(
@@ -168,6 +211,13 @@ class _PlantsListPageState extends State<PlantsListPage> {
 
     // Limpar o provider após fechar a dialog
     plantFormProvider.dispose();
+
+    // Se salvou com sucesso, forçar atualização da lista
+    if (result == true && mounted) {
+      await _plantsProvider.refreshPlants();
+      // Scroll para o topo para mostrar a nova planta
+      _scrollToTop();
+    }
   }
 
   @override
@@ -301,7 +351,7 @@ class _PlantsListPageState extends State<PlantsListPage> {
                         color: Colors.white.withValues(alpha: 0.4),
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.category,
                       color: Colors.white,
                       size: 18,

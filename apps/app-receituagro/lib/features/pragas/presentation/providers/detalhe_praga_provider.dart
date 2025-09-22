@@ -96,6 +96,9 @@ class DetalhePragaProvider extends ChangeNotifier {
         .where((p) => p.nomeComum == _pragaName);
     _pragaData = pragas.isNotEmpty ? pragas.first : null;
     
+    debugPrint('🔍 [PRAGA] Buscando praga: $_pragaName');
+    debugPrint('🔍 [PRAGA] Praga encontrada: ${_pragaData != null ? _pragaData!.idReg : "null"}');
+    
     final itemId = _pragaData?.idReg ?? _pragaName;
     
     try {

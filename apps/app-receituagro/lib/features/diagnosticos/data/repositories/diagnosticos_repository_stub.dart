@@ -48,20 +48,6 @@ class DiagnosticosRepositoryStub implements IDiagnosticosRepository {
     return const Right(<DiagnosticoEntity>[]);
   }
 
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomeDefensivo(String nome) async {
-    return const Right(<DiagnosticoEntity>[]);
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomeCultura(String nome) async {
-    return const Right(<DiagnosticoEntity>[]);
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomePraga(String nome) async {
-    return const Right(<DiagnosticoEntity>[]);
-  }
 
   @override
   Future<Either<Failure, List<DiagnosticoEntity>>> getByTipoAplicacao(TipoAplicacao tipo) async {

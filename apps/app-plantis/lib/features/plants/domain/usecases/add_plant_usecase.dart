@@ -2,12 +2,13 @@ import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/data/models/planta_config_model.dart';
 import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../entities/plant.dart';
 import '../repositories/plants_repository.dart';
 import '../repositories/plant_tasks_repository.dart';
 import '../services/plant_task_generator.dart';
+import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/data/models/planta_config_model.dart';
 
 /// Resultado detalhado da geração de tarefas para logging e feedback
 class TaskGenerationResult {
@@ -106,6 +107,12 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       print('🌱 AddPlantUseCase.call() - Criando planta com id: $generatedId');
     }
     
+    // Get current user ID from auth state notifier
+    final currentUser = AuthStateNotifier.instance.currentUser;
+    if (currentUser == null) {
+      return const Left(AuthFailure('Usuário não está autenticado'));
+    }
+
     final plant = Plant(
       id: generatedId,
       name: params.name.trim(),
@@ -119,6 +126,8 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       createdAt: now,
       updatedAt: now,
       isDirty: true,
+      userId: currentUser.id,
+      moduleName: 'plantis',
     );
 
     if (kDebugMode) {

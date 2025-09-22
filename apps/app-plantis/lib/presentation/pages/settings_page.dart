@@ -1009,6 +1009,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: PlantisColors.primary,
+          fontSize: (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) + 2,
         ),
       ),
     );
@@ -1144,6 +1145,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
     return Consumer<SettingsProvider>(
       builder: (context, provider, _) {
         final isEnabled = provider.notificationsEnabled;
+        final isWebPlatform = provider.isWebPlatform;
 
         return Padding(
           padding: const EdgeInsets.all(16),
@@ -1152,14 +1154,18 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: PlantisColors.primary.withValues(alpha: 0.1),
+                  color: isWebPlatform 
+                      ? Colors.grey.withValues(alpha: 0.1)
+                      : PlantisColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  isEnabled
-                      ? Icons.notifications_active
-                      : Icons.notifications_off,
-                  color: PlantisColors.primary,
+                  isWebPlatform
+                      ? Icons.web
+                      : isEnabled
+                          ? Icons.notifications_active
+                          : Icons.notifications_off,
+                  color: isWebPlatform ? Colors.grey : PlantisColors.primary,
                   size: 20,
                 ),
               ),
@@ -1172,13 +1178,16 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                       'Notificações',
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: isWebPlatform ? Colors.grey : null,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isEnabled
-                          ? 'Receba lembretes sobre suas plantas'
-                          : 'Notificações desabilitadas',
+                      isWebPlatform
+                          ? 'Não disponível na versão web'
+                          : isEnabled
+                              ? 'Receba lembretes sobre suas plantas'
+                              : 'Notificações desabilitadas',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -1187,8 +1196,8 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
                 ),
               ),
               Switch.adaptive(
-                value: isEnabled,
-                onChanged: (value) {
+                value: isWebPlatform ? false : isEnabled,
+                onChanged: isWebPlatform ? null : (value) {
                   provider.setNotificationsEnabled(value);
 
                   // Mostrar feedback ao usuário

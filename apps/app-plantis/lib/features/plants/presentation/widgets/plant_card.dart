@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../domain/entities/plant.dart';
 import 'optimized_plant_image_widget.dart';
+import 'plant_tasks_helper.dart';
 
 class PlantCard extends StatelessWidget {
   final Plant plant;
@@ -90,7 +91,7 @@ class PlantCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Badge de cuidados pendentes
-                Center(child: _buildPendingTasksBadge(context)),
+                Center(child: PlantTasksHelper.buildTaskBadge(context, plant.id)),
               ],
             ),
           ),
@@ -111,64 +112,4 @@ class PlantCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPendingTasksBadge(BuildContext context) {
-    final theme = Theme.of(context);
-    final pendingTasks = _getPendingTasksCount();
-
-    // Determinar cor, ícone e texto baseado no número de tarefas
-    final Color badgeColor;
-    final Color backgroundColor;
-    final IconData icon;
-    final String text;
-
-    if (pendingTasks == 0) {
-      badgeColor = theme.colorScheme.primary;
-      backgroundColor = theme.colorScheme.primaryContainer.withValues(alpha: 0.15);
-      icon = Icons.check_circle;
-      text = 'Sem tarefas';
-    } else {
-      badgeColor = theme.colorScheme.error;
-      backgroundColor = theme.colorScheme.errorContainer.withValues(alpha: 0.15);
-      icon = Icons.schedule;
-      text = '$pendingTasks pendentes';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: badgeColor, size: 14),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              color: badgeColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  int _getPendingTasksCount() {
-    // TODO: Integrar com TasksProvider para contar tarefas reais pendentes
-    // Por enquanto, retornar 0 até a integração com o sistema de tarefas ser implementada
-    return 0;
-    
-    // Implementação futura:
-    // final tasksProvider = Provider.of<TasksProvider>(context, listen: false);
-    // return tasksProvider.getPendingTasksCountForPlant(plant.id);
-  }
 }

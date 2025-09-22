@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/auth/auth_state_notifier.dart';
 import '../entities/space.dart';
 import '../repositories/spaces_repository.dart';
 
@@ -44,6 +45,12 @@ class AddSpaceUseCase implements UseCase<Space, AddSpaceParams> {
       return Left(validationResult);
     }
 
+    // Get current user ID from auth state notifier
+    final currentUser = AuthStateNotifier.instance.currentUser;
+    if (currentUser == null) {
+      return const Left(AuthFailure('Usuário não está autenticado'));
+    }
+
     // Create space with timestamps
     final now = DateTime.now();
     final space = Space(
@@ -56,6 +63,8 @@ class AddSpaceUseCase implements UseCase<Space, AddSpaceParams> {
       createdAt: now,
       updatedAt: now,
       isDirty: true,
+      userId: currentUser.id,
+      moduleName: 'plantis',
     );
 
     return repository.addSpace(space);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -301,14 +302,14 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                           child: Column(
                             children: [
                               ListTile(
-                                leading: const Icon(
+                                leading: Icon(
                                   Icons.delete_sweep,
-                                  color: Colors.orange,
+                                  color: theme.colorScheme.error,
                                 ),
-                                title: const Text(
+                                title: Text(
                                   'Limpar Dados',
                                   style: TextStyle(
-                                    color: Colors.orange,
+                                    color: theme.colorScheme.error,
                                   ),
                                 ),
                                 subtitle: const Text(
@@ -381,17 +382,10 @@ class _AccountProfilePageState extends State<AccountProfilePage>
     dynamic user,
     auth_providers.AuthProvider authProvider,
   ) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Informações da Conta',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        _buildSectionHeader(context, 'Informações da Conta'),
         const SizedBox(height: 16),
         PlantisCard(
           padding: const EdgeInsets.all(20),
@@ -463,12 +457,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Dados e Sincronização',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        _buildSectionHeader(context, 'Dados e Sincronização'),
         const SizedBox(height: 16),
         PlantisCard(
           child: Column(
@@ -477,15 +466,12 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color:
-                        isSyncing
-                            ? Colors.orange.withValues(alpha: 0.2)
-                            : PlantisColors.primary.withValues(alpha: 0.2),
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     isSyncing ? Icons.sync : Icons.cloud_done,
-                    color: isSyncing ? Colors.orange : PlantisColors.primary,
+                    color: PlantisColors.primary,
                     size: 20,
                   ),
                 ),
@@ -522,12 +508,12 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: PlantisColors.secondary.withValues(alpha: 0.2),
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.download,
-                    color: PlantisColors.secondary,
+                    color: PlantisColors.primary,
                     size: 20,
                   ),
                 ),
@@ -542,12 +528,12 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.2),
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.table_view,
-                    color: Colors.green,
+                    color: PlantisColors.primary,
                     size: 20,
                   ),
                 ),
@@ -571,12 +557,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Dispositivos Conectados',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        _buildSectionHeader(context, 'Dispositivos Conectados'),
         const SizedBox(height: 16),
         PlantisCard(
           child: Column(
@@ -586,12 +567,12 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.devices_other,
-                    color: Colors.grey,
+                    color: PlantisColors.primary,
                     size: 20,
                   ),
                 ),
@@ -705,12 +686,12 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: PlantisColors.secondary.withValues(alpha: 0.2),
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.photo_library,
-                      color: PlantisColors.secondary,
+                      color: PlantisColors.primary,
                       size: 20,
                     ),
                   ),
@@ -865,40 +846,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
               ElevatedButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
-
-                  // Start auth loading
-                  startAuthLoading(operation: 'Fazendo logout...');
-
-                  try {
-                    await authProvider.logout();
-
-                    // Stop loading
-                    stopAuthLoading();
-
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Logout realizado com sucesso'),
-                          backgroundColor: Colors.green,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                      context.go('/welcome');
-                    }
-                  } catch (e) {
-                    stopAuthLoading();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
-                          ),
-                          backgroundColor: theme.colorScheme.error,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  }
+                  await _performLogoutWithProgressDialog(context, authProvider);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
@@ -961,6 +909,257 @@ class _AccountProfilePageState extends State<AccountProfilePage>
       },
     );
   }
+
+  Future<void> _performLogoutWithProgressDialog(
+    BuildContext context,
+    auth_providers.AuthProvider authProvider,
+  ) async {
+    // Show progress dialog
+    unawaited(showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _LogoutProgressDialog(),
+    ));
+
+    try {
+      // Simulate some processing time for better UX
+      await Future<void>.delayed(const Duration(milliseconds: 800));
+      
+      // Perform actual logout
+      await authProvider.logout();
+
+      // Close progress dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show success message and navigate
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Logout realizado com sucesso'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        
+        context.go('/welcome');
+      }
+    } catch (e) {
+      // Close progress dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erro ao sair: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: PlantisColors.primary,
+          fontSize: (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) + 2,
+        ),
+      ),
+    );
+  }
+}
+
+/// Dialog de progresso durante o logout
+class _LogoutProgressDialog extends StatefulWidget {
+  @override
+  State<_LogoutProgressDialog> createState() => _LogoutProgressDialogState();
+}
+
+class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  
+  final List<String> _progressSteps = [
+    'Limpando dados locais...',
+    'Removendo configurações...',
+    'Finalizando logout...',
+  ];
+  
+  int _currentStepIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _animationController.forward();
+    _startProgressSteps();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _startProgressSteps() {
+    // Cycle through progress steps
+    Timer.periodic(const Duration(milliseconds: 600), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentStepIndex = (_currentStepIndex + 1) % _progressSteps.length;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated logout icon
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: RotationTransition(
+                  turns: _animationController,
+                  child: Icon(
+                    Icons.logout,
+                    size: 32,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Title
+              Text(
+                'Saindo da Conta',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Progress indicator
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Dynamic progress text
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  _progressSteps[_currentStepIndex],
+                  key: ValueKey(_currentStepIndex),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Info message
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: theme.colorScheme.primary,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Seus dados na nuvem permanecerão seguros',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Dialog stateful para confirmação de limpeza de dados
@@ -1011,13 +1210,13 @@ class __DataClearDialogState extends State<_DataClearDialog> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(32),
             ),
             child: const Icon(
               Icons.delete_sweep,
               size: 32,
-              color: Colors.orange,
+              color: Colors.red,
             ),
           ),
           
@@ -1241,6 +1440,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
       ),
     );
   }
+
 }
 
 /// Dialog stateful para confirmação de exclusão de conta
@@ -1520,6 +1720,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
           ),
     );
   }
+
 }
 
 /// Formatter que converte automaticamente o texto para uppercase

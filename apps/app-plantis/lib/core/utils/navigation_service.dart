@@ -8,6 +8,7 @@ class NavigationService {
   static NavigationService get instance => _instance;
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   // Controle para evitar múltiplas mensagens de acesso negado
   DateTime? _lastAccessDeniedMessage;

@@ -118,62 +118,8 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomeDefensivo(String nome) async {
-    try {
-      // Busca todos e filtra por nome - pode ser otimizado no futuro
-      final allDiagnosticos = await _coreRepository.getAllAsync();
-      final diagnosticosHive = allDiagnosticos.where((d) => 
-          d.fkIdDefensivo.contains(nome) || 
-          (d.nomeDefensivo?.toLowerCase().contains(nome.toLowerCase()) ?? false)
-      ).toList();
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
-      
-      return Right(entities);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao buscar por nome defensivo: ${e.toString()}'));
-    }
-  }
 
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomeCultura(String nome) async {
-    try {
-      // Busca todos e filtra por nome - pode ser otimizado no futuro
-      final allDiagnosticos = await _coreRepository.getAllAsync();
-      final diagnosticosHive = allDiagnosticos.where((d) => 
-          d.fkIdCultura.contains(nome) || 
-          (d.nomeCultura?.toLowerCase().contains(nome.toLowerCase()) ?? false)
-      ).toList();
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
-      
-      return Right(entities);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao buscar por nome cultura: ${e.toString()}'));
-    }
-  }
 
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomePraga(String nome) async {
-    try {
-      // Busca todos e filtra por nome - pode ser otimizado no futuro
-      final allDiagnosticos = await _coreRepository.getAllAsync();
-      final diagnosticosHive = allDiagnosticos.where((d) => 
-          d.fkIdPraga.contains(nome) || 
-          (d.nomePraga?.toLowerCase().contains(nome.toLowerCase()) ?? false)
-      ).toList();
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
-      
-      return Right(entities);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao buscar por nome praga: ${e.toString()}'));
-    }
-  }
 
   @override
   Future<Either<Failure, List<DiagnosticoEntity>>> getByTipoAplicacao(TipoAplicacao tipo) async {
@@ -254,29 +200,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         diagnosticos = allResult.fold((l) => [], (r) => r);
       }
 
-      if (filters.nomeDefensivo?.isNotEmpty == true) {
-        final searchResult = await searchByNomeDefensivo(filters.nomeDefensivo!);
-        if (searchResult.isLeft()) return searchResult;
-        final searchDiagnosticos = searchResult.fold((l) => <DiagnosticoEntity>[], (r) => r);
-        diagnosticos = diagnosticos.where((d) => 
-          searchDiagnosticos.any((sd) => sd.id == d.id)).toList();
-      }
-
-      if (filters.nomeCultura?.isNotEmpty == true) {
-        final searchResult = await searchByNomeCultura(filters.nomeCultura!);
-        if (searchResult.isLeft()) return searchResult;
-        final searchDiagnosticos = searchResult.fold((l) => <DiagnosticoEntity>[], (r) => r);
-        diagnosticos = diagnosticos.where((d) => 
-          searchDiagnosticos.any((sd) => sd.id == d.id)).toList();
-      }
-
-      if (filters.nomePraga?.isNotEmpty == true) {
-        final searchResult = await searchByNomePraga(filters.nomePraga!);
-        if (searchResult.isLeft()) return searchResult;
-        final searchDiagnosticos = searchResult.fold((l) => <DiagnosticoEntity>[], (r) => r);
-        diagnosticos = diagnosticos.where((d) => 
-          searchDiagnosticos.any((sd) => sd.id == d.id)).toList();
-      }
+      // Filtros por nome removidos - agora usamos apenas IDs
 
       if (filters.tipoAplicacao != null) {
         diagnosticos = diagnosticos.where((d) => 
@@ -532,40 +456,19 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(<DiagnosticoEntity>[]);
       }
 
-      final futures = await Future.wait([
-        searchByNomeDefensivo(pattern),
-        searchByNomeCultura(pattern),
-        searchByNomePraga(pattern),
-      ]);
-
-      final byDefensivoResult = futures[0];
-      final byCulturaResult = futures[1];
-      final byPragaResult = futures[2];
-
-      if (byDefensivoResult.isLeft()) return byDefensivoResult;
-      if (byCulturaResult.isLeft()) return byCulturaResult;
-      if (byPragaResult.isLeft()) return byPragaResult;
-
-      final byDefensivo = byDefensivoResult.fold((l) => <DiagnosticoEntity>[], (r) => r);
-      final byCultura = byCulturaResult.fold((l) => <DiagnosticoEntity>[], (r) => r);
-      final byPraga = byPragaResult.fold((l) => <DiagnosticoEntity>[], (r) => r);
-
-      final combined = <DiagnosticoEntity>[];
-      combined.addAll(byDefensivo);
-      combined.addAll(byCultura.where((d) => !combined.any((c) => c.id == d.id)));
-      combined.addAll(byPraga.where((d) => !combined.any((c) => c.id == d.id)));
-
-      combined.sort((a, b) {
-        final aDefensivoMatch = a.nomeDefensivo?.toLowerCase().contains(pattern.toLowerCase()) ?? false;
-        final bDefensivoMatch = b.nomeDefensivo?.toLowerCase().contains(pattern.toLowerCase()) ?? false;
-        
-        if (aDefensivoMatch && !bDefensivoMatch) return -1;
-        if (!aDefensivoMatch && bDefensivoMatch) return 1;
-        
-        return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
-      });
-
-      return Right(combined);
+      // Busca por ID direto nos campos correspondentes
+      final allDiagnosticos = await _coreRepository.getAllAsync();
+      final matchingDiagnosticos = allDiagnosticos.where((d) => 
+          d.fkIdDefensivo.contains(pattern) ||
+          d.fkIdCultura.contains(pattern) ||
+          d.fkIdPraga.contains(pattern)
+      ).toList();
+      
+      final entities = matchingDiagnosticos
+          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
+          .toList();
+      
+      return Right(entities);
     } catch (e) {
       return Left(CacheFailure('Erro na busca por padrão: ${e.toString()}'));
     }

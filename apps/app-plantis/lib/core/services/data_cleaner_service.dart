@@ -30,6 +30,13 @@ class DataCleanerService implements IAppDataCleaner {
 
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
+    // Para logout, usar limpeza local sem marcação como deletado
+    return clearAllAppDataForLogout();
+  }
+
+  /// Limpeza específica para logout - remove dados locais sem marcar como deletado
+  /// Evita sincronização indevida com Firebase durante logout
+  Future<Map<String, dynamic>> clearAllAppDataForLogout() async {
     final result = <String, dynamic>{
       'success': false,
       'clearedBoxes': <String>[],
@@ -43,7 +50,86 @@ class DataCleanerService implements IAppDataCleaner {
       final statsBefore = await getDataStatsBeforeCleaning();
       final totalBefore = statsBefore['totalRecords'] as int;
 
-      // 1. Limpar todas as tarefas
+      // 1. Limpar todas as tarefas individualmente (limpeza local sem soft delete)
+      try {
+        final tasksResult = await tasksRepository.getTasks();
+        if (tasksResult.isRight()) {
+          final tasks = tasksResult.getOrElse(() => []);
+          for (final task in tasks) {
+            try {
+              await tasksRepository.deleteTask(task.id);
+            } catch (e) {
+              (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+            }
+          }
+        }
+        (result['clearedBoxes'] as List<String>).add('tasks_box');
+      } catch (e) {
+        (result['errors'] as List<String>).add('Erro ao limpar tasks localmente: $e');
+      }
+
+      // 2. Limpar todas as plantas individualmente (limpeza local sem soft delete)
+      try {
+        final plantsResult = await plantsRepository.getPlants();
+        if (plantsResult.isRight()) {
+          final plants = plantsResult.getOrElse(() => []);
+          for (final plant in plants) {
+            try {
+              await deletePlantUseCase(plant.id);
+            } catch (e) {
+              (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+            }
+          }
+        }
+        (result['clearedBoxes'] as List<String>).add('plants_box');
+      } catch (e) {
+        (result['errors'] as List<String>).add('Erro ao limpar plants localmente: $e');
+      }
+
+      // 3. Limpar todos os espaços individualmente (limpeza local sem soft delete)
+      try {
+        final spacesResult = await spacesRepository.getSpaces();
+        if (spacesResult.isRight()) {
+          final spaces = spacesResult.getOrElse(() => []);
+          for (final space in spaces) {
+            try {
+              await spacesRepository.deleteSpace(space.id);
+            } catch (e) {
+              (result['errors'] as List<String>).add('Erro ao deletar espaço ${space.id}: $e');
+            }
+          }
+        }
+        (result['clearedBoxes'] as List<String>).add('spaces_box');
+      } catch (e) {
+        (result['errors'] as List<String>).add('Erro ao limpar spaces localmente: $e');
+      }
+
+      result['totalRecordsCleared'] = totalBefore;
+      result['success'] = (result['errors'] as List<String>).isEmpty;
+
+      return result;
+    } catch (e) {
+      (result['errors'] as List<String>).add('Erro geral: $e');
+      return result;
+    }
+  }
+
+  /// Limpeza padrão para exclusão de conta - marca como deletado para sincronização
+  Future<Map<String, dynamic>> clearAllAppDataForAccountDeletion() async {
+    final result = <String, dynamic>{
+      'success': false,
+      'clearedBoxes': <String>[],
+      'clearedPreferences': <String>[],
+      'errors': <String>[],
+      'totalRecordsCleared': 0,
+    };
+
+    try {
+      // Obter estatísticas antes da limpeza
+      final statsBefore = await getDataStatsBeforeCleaning();
+      final totalBefore = statsBefore['totalRecords'] as int;
+
+      // 1. Limpar todas as tarefas com soft delete para sincronização
       final tasksResult = await tasksRepository.getTasks();
       if (tasksResult.isRight()) {
         final tasks = tasksResult.getOrElse(() => []);
@@ -57,7 +143,7 @@ class DataCleanerService implements IAppDataCleaner {
         (result['clearedBoxes'] as List<String>).add('tasks_box');
       }
 
-      // 2. Limpar todas as plantas
+      // 2. Limpar todas as plantas com soft delete para sincronização
       final plantsResult = await plantsRepository.getPlants();
       if (plantsResult.isRight()) {
         final plants = plantsResult.getOrElse(() => []);

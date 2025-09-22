@@ -77,9 +77,8 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
         debugPrint('✅ Carregando diagnósticos por ID: ${_pragaProvider.pragaData!.idReg}');
         await _diagnosticosProvider.loadDiagnosticos(_pragaProvider.pragaData!.idReg);
       } else {
-        // Fallback: carregar diagnósticos usando o nome da praga
-        debugPrint('🔄 Fallback: carregando diagnósticos por nome: ${widget.pragaName}');
-        await _diagnosticosProvider.loadDiagnosticosByNomePraga(widget.pragaName);
+        // Diagnósticos só podem ser carregados com idReg válido
+        debugPrint('⚠️ Não foi possível carregar diagnósticos sem idReg da praga');
       }
     } catch (e) {
       debugPrint('❌ Erro ao carregar dados iniciais: $e');

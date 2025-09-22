@@ -61,6 +61,11 @@ Future<void> init() async {
   configureAllRepositoriesDependencies();
   
   // ===== DEVICE MANAGEMENT =====
+  // Register FirebaseDeviceService first (Web-safe)
+  sl.registerLazySingleton<core.FirebaseDeviceService>(
+    () => core.FirebaseDeviceService(),
+  );
+  
   // Configure device management dependencies
   await DeviceManagementDI.registerDependencies(sl);
   

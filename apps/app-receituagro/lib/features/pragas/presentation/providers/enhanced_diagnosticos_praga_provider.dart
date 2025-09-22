@@ -106,30 +106,6 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
     }
   }
 
-  /// Carrega diagnósticos para uma praga específica por NOME
-  Future<void> loadDiagnosticosByNomePraga(String nomePraga) async {
-    debugPrint('🔍 Carregando diagnósticos para praga NOME: $nomePraga');
-    
-    _currentPragaName = nomePraga;
-    _setLoadingState(true);
-
-    try {
-      final result = await _repository.searchByNomePraga(nomePraga);
-
-      result.fold(
-        (failure) {
-          _setErrorState('Erro ao carregar diagnósticos: ${failure.toString()}');
-        },
-        (entities) {
-          _setSuccessState(entities);
-          _updateAvailableCulturas();
-          debugPrint('✅ Carregados ${entities.length} diagnósticos por nome');
-        },
-      );
-    } catch (e) {
-      _setErrorState('Erro ao carregar diagnósticos: $e');
-    }
-  }
 
   /// Busca diagnósticos por texto usando cache otimizado
   Future<void> searchByText(String query) async {
@@ -372,8 +348,6 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   Future<void> refresh() async {
     if (_currentPragaId?.isNotEmpty == true) {
       await loadDiagnosticos(_currentPragaId!);
-    } else if (_currentPragaName?.isNotEmpty == true) {
-      await loadDiagnosticosByNomePraga(_currentPragaName!);
     }
   }
 

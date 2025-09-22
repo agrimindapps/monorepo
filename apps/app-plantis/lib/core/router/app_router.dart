@@ -66,6 +66,7 @@ class AppRouter {
 
     return GoRouter(
       navigatorKey: NavigationService.instance.navigatorKey,
+      observers: [NavigationService.instance.routeObserver],
       initialLocation: initialLocation,
       refreshListenable: authProvider,
       redirect: (context, state) {

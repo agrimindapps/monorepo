@@ -260,37 +260,11 @@ class FavoritosPragasTabWidget extends StatelessWidget {
     FavoritosProviderSimplified provider,
     FavoritoPragaEntity praga,
   ) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final theme = Theme.of(context);
-    
     try {
-      final success = await provider.toggleFavorito(TipoFavorito.praga, praga.id);
-      
-      if (success) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text('🗑️ ${praga.nomeComum} removido dos favoritos'),
-            duration: const Duration(seconds: 2),
-            backgroundColor: theme.colorScheme.primary,
-          ),
-        );
-      } else {
-        scaffoldMessenger.showSnackBar(
-          const SnackBar(
-            content: Text('❌ Erro ao remover dos favoritos'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      await provider.toggleFavorito(TipoFavorito.praga, praga.id);
+      // Remover favorito sem feedback de SnackBar
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(
-          content: Text('❌ Erro inesperado ao remover favorito'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // Erro silencioso
     }
   }
 

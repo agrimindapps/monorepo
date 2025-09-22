@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/plant.dart';
+import 'plant_tasks_helper.dart';
 
 class PlantListTile extends StatelessWidget {
   final Plant plant;
@@ -141,7 +142,7 @@ class PlantListTile extends StatelessWidget {
                       const SizedBox(height: 12),
 
                       // Badge de cuidados pendentes
-                      _buildCareStatus(context),
+                      PlantTasksHelper.buildTaskBadge(context, plant.id, hideWhenEmpty: true),
                     ],
                   ),
                 ),
@@ -205,102 +206,9 @@ class PlantListTile extends StatelessWidget {
     );
   }
 
-  CareStatusInfo _getCareStatus() {
-    if (plant.config?.wateringIntervalDays == null) {
-      return const CareStatusInfo(
-        status: CareStatus.unknown,
-        label: 'Config',
-        icon: Icons.settings,
-        color: Colors.grey,
-      );
-    }
-
-    final now = DateTime.now();
-    final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
-    final nextWatering = lastWatering.add(
-      Duration(days: plant.config!.wateringIntervalDays!),
-    );
-    final daysDifference = nextWatering.difference(now).inDays;
-
-    if (daysDifference <= 0) {
-      return const CareStatusInfo(
-        status: CareStatus.needsWater,
-        label: 'Regar',
-        icon: Icons.water_drop,
-        color: Colors.red,
-      );
-    } else if (daysDifference <= 2) {
-      return const CareStatusInfo(
-        status: CareStatus.soonWater,
-        label: 'Em breve',
-        icon: Icons.schedule,
-        color: Color(0xFFFF9500),
-      );
-    } else {
-      return const CareStatusInfo(
-        status: CareStatus.good,
-        label: 'Ok',
-        icon: Icons.check_circle,
-        color: Color(0xFF34C759),
-      );
-    }
-  }
-
-  Widget _buildCareStatus(BuildContext context) {
-    final theme = Theme.of(context);
-    final careInfo = _getCareStatus();
-
-    // Calcular número de cuidados pendentes
-    int pendingCares = 0;
-    if (careInfo.status == CareStatus.needsWater) {
-      pendingCares++;
-    }
-
-    // Adicionar outros tipos de cuidados se necessário
-    pendingCares += _getOtherPendingCares();
-
-    if (pendingCares == 0) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFF9500).withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFFF9500).withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.schedule, size: 14, color: Color(0xFFFF9500)),
-          const SizedBox(width: 6),
-          Text(
-            pendingCares == 1
-                ? '$pendingCares cuidado pendente'
-                : '$pendingCares cuidados pendentes',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFFFF9500),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  int _getOtherPendingCares() {
-    // Aqui você pode adicionar lógica para outros tipos de cuidados
-    // Por exemplo: fertilizar, podar, trocar vaso, etc.
-    return 4; // Valor mockado para demonstrar
-  }
 
   void _showPlantMenu(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
@@ -359,20 +267,4 @@ class PlantListTile extends StatelessWidget {
       },
     );
   }
-}
-
-enum CareStatus { needsWater, soonWater, good, unknown }
-
-class CareStatusInfo {
-  final CareStatus status;
-  final String label;
-  final IconData icon;
-  final Color color;
-
-  const CareStatusInfo({
-    required this.status,
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
 }

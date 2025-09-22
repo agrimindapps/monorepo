@@ -254,39 +254,17 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     // Adicionar haptic feedback inicial
     unawaited(HapticFeedback.lightImpact());
     
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final wasAlreadyFavorited = provider.isFavorited;
 
     final success =
         await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
 
     if (!mounted) return;
 
-    // Feedback simplificado com haptic adequado
+    // Feedback haptic apenas (sem SnackBar)
     if (success) {
       unawaited(HapticFeedback.selectionClick());
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            wasAlreadyFavorited
-                ? '\u2713 ${widget.defensivoName} removido dos favoritos'
-                : '\u2713 ${widget.defensivoName} adicionado aos favoritos',
-          ),
-          duration: const Duration(seconds: 2),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
     } else {
       unawaited(HapticFeedback.heavyImpact());
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(
-          content: Text('\u274c Erro ao alterar favorito'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
     }
   }
 }

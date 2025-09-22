@@ -4,8 +4,6 @@ import '../../../../../core/theme/plantis_colors.dart';
 import '../../../domain/entities/plant.dart';
 import '../../../domain/entities/plant_task.dart';
 import '../../providers/plant_task_provider.dart';
-import 'task_history/plant_task_history_button.dart';
-import 'task_history/plant_task_history_modal.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
 class PlantTasksSection extends StatefulWidget {
@@ -144,9 +142,9 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
           const SizedBox(height: 24),
         ],
 
-        // Tarefas concluídas - Nova seção otimizada
+        // Tarefas concluídas - Seção expansível inline
         if (completedTasks.isNotEmpty) ...[
-          _buildEnhancedCompletedTasksSection(
+          _buildCompletedTasksExpandableSection(
             context,
             completedTasks,
             taskProvider,
@@ -789,29 +787,106 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     return '${completedDate.hour.toString().padLeft(2, '0')}:${completedDate.minute.toString().padLeft(2, '0')}';
   }
 
-  /// Nova seção aprimorada de tarefas concluídas
-  Widget _buildEnhancedCompletedTasksSection(
+  /// Seção expansível de tarefas concluídas
+  Widget _buildCompletedTasksExpandableSection(
     BuildContext context,
     List<PlantTask> completedTasks,
     PlantTaskProvider taskProvider,
   ) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Botão de acesso ao histórico
-        PlantTaskHistoryButton(
-          completedTasks: completedTasks,
-          onPressed: () => PlantTaskHistoryModal.show(
-            context,
-            plant: widget.plant,
-            completedTasks: completedTasks,
+        // Botão de histórico expansível
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _showAllCompletedTasks = !_showAllCompletedTasks;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PlantisColors.primary.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.history,
+                    color: PlantisColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Histórico de cuidados',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${completedTasks.length} tarefa${completedTasks.length != 1 ? 's' : ''} concluída${completedTasks.length != 1 ? 's' : ''}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                AnimatedRotation(
+                  duration: const Duration(milliseconds: 200),
+                  turns: _showAllCompletedTasks ? 0.5 : 0.0,
+                  child: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: PlantisColors.primary,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
 
-        const SizedBox(height: 16),
-
-        // Preview das últimas 5 tarefas concluídas
-        _buildCompletedTasksPreview(context, completedTasks),
+        // Lista expansível de tarefas concluídas
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: _showAllCompletedTasks
+              ? Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildTaskSection(
+                      context,
+                      title: 'Tarefas concluídas',
+                      tasks: completedTasks,
+                      color: Colors.green,
+                      taskProvider: taskProvider,
+                      isCompleted: true,
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(),
+        ),
       ],
     );
   }

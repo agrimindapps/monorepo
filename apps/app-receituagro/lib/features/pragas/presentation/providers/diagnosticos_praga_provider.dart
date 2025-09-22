@@ -64,7 +64,7 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
 
   /// Carrega diagnósticos para uma praga específica por ID
   Future<void> loadDiagnosticos(String pragaId) async {
-    debugPrint('🔍 Carregando diagnósticos para praga ID: $pragaId');
+    debugPrint('🔍 [DIAGNOSTICOS] Carregando diagnósticos para praga ID: $pragaId');
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -79,7 +79,7 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
           debugPrint('❌ $_errorMessage');
         },
         (diagnosticosEntities) {
-          debugPrint('✅ Encontrados ${diagnosticosEntities.length} diagnósticos para praga ID: $pragaId');
+          debugPrint('✅ [DIAGNOSTICOS] Encontrados ${diagnosticosEntities.length} diagnósticos para praga ID: $pragaId');
           // Converte entidades para o modelo usado na UI
           _diagnosticos = diagnosticosEntities.map((entity) {
             return DiagnosticoModel(
@@ -103,46 +103,6 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
     }
   }
 
-  /// Carrega diagnósticos para uma praga específica por NOME
-  Future<void> loadDiagnosticosByNomePraga(String nomePraga) async {
-    debugPrint('🔍 Carregando diagnósticos para praga NOME: $nomePraga');
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final result = await _diagnosticosRepository.searchByNomePraga(nomePraga);
-
-      result.fold(
-        (failure) {
-          _errorMessage = 'Erro ao carregar diagnósticos: ${failure.toString()}';
-          _diagnosticos = [];
-          debugPrint('❌ $_errorMessage');
-        },
-        (diagnosticosEntities) {
-          debugPrint('✅ Encontrados ${diagnosticosEntities.length} diagnósticos para praga NOME: $nomePraga');
-          // Converte entidades para o modelo usado na UI
-          _diagnosticos = diagnosticosEntities.map((entity) {
-            return DiagnosticoModel(
-              id: entity.id,
-              nome: entity.nomeDefensivo ?? 'Defensivo não especificado',
-              ingredienteAtivo: entity.idDefensivo,
-              dosagem: entity.dosagem.toString(),
-              cultura: entity.nomeCultura ?? 'Não especificado',
-              grupo: entity.nomePraga ?? '',
-            );
-          }).toList();
-        },
-      );
-    } catch (e) {
-      _errorMessage = 'Erro ao carregar diagnósticos: $e';
-      _diagnosticos = [];
-      debugPrint(_errorMessage);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
 
   /// Atualiza query de pesquisa
   void updateSearchQuery(String query) {

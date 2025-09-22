@@ -31,14 +31,6 @@ abstract class IDiagnosticosRepository {
     String? idPraga,
   });
 
-  /// Busca diagnósticos por nome do defensivo
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomeDefensivo(String nome);
-
-  /// Busca diagnósticos por nome da cultura
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomeCultura(String nome);
-
-  /// Busca diagnósticos por nome da praga
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByNomePraga(String nome);
 
   /// Busca diagnósticos por tipo de aplicação
   Future<Either<Failure, List<DiagnosticoEntity>>> getByTipoAplicacao(TipoAplicacao tipo);

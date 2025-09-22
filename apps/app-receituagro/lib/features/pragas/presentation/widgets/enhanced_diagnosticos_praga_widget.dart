@@ -51,7 +51,9 @@ class _EnhancedDiagnosticosPragaWidgetState
     if (widget.pragaId?.isNotEmpty == true) {
       await _provider.loadDiagnosticos(widget.pragaId!);
     } else {
-      await _provider.loadDiagnosticosByNomePraga(widget.pragaName);
+      // Se não temos pragaId, precisamos buscar pela praga primeiro
+      // Para isso, este widget agora requer pragaId obrigatório
+      debugPrint('⚠️ Enhanced widget requer pragaId para funcionar corretamente');
     }
   }
 

@@ -666,9 +666,6 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
           Navigator.of(context).pop({
             'success': true,
             'action': formProvider.isEditing ? 'edit' : 'create',
-            'message': formProvider.isEditing 
-                ? OdometerConstants.successMessages['edicaoSucesso']!
-                : OdometerConstants.successMessages['cadastroSucesso']!,
           });
         }
       } else {

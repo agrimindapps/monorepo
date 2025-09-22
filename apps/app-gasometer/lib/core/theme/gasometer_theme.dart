@@ -12,12 +12,27 @@ class GasometerTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     fontFamily: 'Inter',
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: GasometerColors.primary,
-      brightness: Brightness.light,
-    ).copyWith(
+    colorScheme: const ColorScheme.light(
       primary: GasometerColors.primary,
+      onPrimary: Colors.white,
       secondary: GasometerColors.secondary,
+      onSecondary: Colors.white,
+      surface: Colors.white,
+      onSurface: Colors.black,
+      surfaceContainerHighest: Colors.white,
+      surfaceContainer: Colors.white,
+      surfaceContainerHigh: Color(0xFFF8F9FA),
+      surfaceContainerLow: Color(0xFFFCFCFC),
+      surfaceContainerLowest: Colors.white,
+      inverseSurface: Color(0xFF1C1C1E),
+      onInverseSurface: Colors.white,
+      error: Color(0xFFF44336),
+      onError: Colors.white,
+      outline: Color(0xFFE0E0E0),
+      outlineVariant: Color(0xFFF5F5F5),
+      shadow: Color(0x1F000000),
+      scrim: Color(0x80000000),
+      inversePrimary: GasometerColors.primaryLight,
     ),
   ).copyWith(
     // AppBar personalizado
@@ -60,7 +75,7 @@ class GasometerTheme {
         borderRadius: BorderRadius.circular(16),
       ),
       color: Colors.white,
-      shadowColor: GasometerColors.primary.withOpacity(0.1),
+      shadowColor: GasometerColors.primary.withValues(alpha: 0.1),
     ),
     
     // Elevated button personalizado
@@ -106,7 +121,7 @@ class GasometerTheme {
     
     // Chip theme personalizado para combustíveis
     chipTheme: ChipThemeData(
-      backgroundColor: GasometerColors.secondaryLight.withOpacity(0.2),
+      backgroundColor: GasometerColors.secondaryLight.withValues(alpha: 0.2),
       selectedColor: GasometerColors.primary,
       disabledColor: Colors.grey.shade300,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -133,12 +148,27 @@ class GasometerTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     fontFamily: 'Inter',
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: GasometerColors.primary,
-      brightness: Brightness.dark,
-    ).copyWith(
+    colorScheme: const ColorScheme.dark(
       primary: GasometerColors.primary,
+      onPrimary: Colors.white,
       secondary: GasometerColors.secondary,
+      onSecondary: Colors.white,
+      surface: Color(0xFF1C1C1E),
+      onSurface: Colors.white,
+      surfaceContainerHighest: Color(0xFF2D2D2D),
+      surfaceContainer: Color(0xFF242424),
+      surfaceContainerHigh: Color(0xFF2A2A2A),
+      surfaceContainerLow: Color(0xFF1F1F1F),
+      surfaceContainerLowest: Color(0xFF0F0F0F),
+      inverseSurface: Colors.white,
+      onInverseSurface: Colors.black,
+      error: Color(0xFFF44336),
+      onError: Colors.white,
+      outline: Color(0xFF4A4A4A),
+      outlineVariant: Color(0xFF2A2A2A),
+      shadow: Color(0x4F000000),
+      scrim: Color(0x80000000),
+      inversePrimary: GasometerColors.primaryLight,
     ),
   ).copyWith(
     // AppBar personalizado para modo escuro
@@ -181,7 +211,7 @@ class GasometerTheme {
         borderRadius: BorderRadius.circular(16),
       ),
       color: const Color(0xFF2D2D2D),
-      shadowColor: Colors.black.withOpacity(0.3),
+      shadowColor: Colors.black.withValues(alpha: 0.3),
     ),
     
     // Elevated button para modo escuro
@@ -227,7 +257,7 @@ class GasometerTheme {
     
     // Chip theme para modo escuro
     chipTheme: ChipThemeData(
-      backgroundColor: GasometerColors.secondaryLight.withOpacity(0.2),
+      backgroundColor: GasometerColors.secondaryLight.withValues(alpha: 0.2),
       selectedColor: GasometerColors.primary,
       disabledColor: Colors.grey.shade700,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

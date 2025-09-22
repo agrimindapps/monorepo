@@ -542,9 +542,6 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
           Navigator.of(context).pop({
             'success': true,
             'action': widget.maintenanceToEdit != null ? 'edit' : 'create',
-            'message': widget.maintenanceToEdit != null 
-                ? 'Manutenção editada com sucesso!'
-                : 'Manutenção adicionada com sucesso!',
           });
         }
       } else {

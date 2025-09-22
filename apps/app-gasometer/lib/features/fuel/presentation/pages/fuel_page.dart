@@ -27,10 +27,27 @@ class FuelPage extends StatefulWidget {
 
 class _FuelPageState extends State<FuelPage> {
   String? _selectedVehicleId;
-  
+  int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
+
   // ✅ PERFORMANCE FIX: Cached providers
   late final FuelProvider _fuelProvider;
   late final VehiclesProvider _vehiclesProvider;
+
+  // Generate month list dynamically
+  List<String> get _months {
+    final now = DateTime.now();
+    final currentYear = now.year;
+    final monthNames = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    return monthNames
+        .asMap()
+        .entries
+        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
+        .toList();
+  }
 
   @override
   void initState() {
@@ -61,7 +78,21 @@ class _FuelPageState extends State<FuelPage> {
 
   // ✅ PERFORMANCE FIX: Use cached provider instead of context.read()
   List<FuelRecordEntity> get _filteredRecords {
-    return _fuelProvider.fuelRecords;
+    List<FuelRecordEntity> records = _fuelProvider.fuelRecords;
+
+    // First filter by vehicle if selected
+    if (_selectedVehicleId != null) {
+      records = records.where((record) => record.vehicleId == _selectedVehicleId).toList();
+    }
+
+    // Then filter by selected month
+    final selectedMonth = _currentMonthIndex + 1; // Convert index to month (1-12)
+    final currentYear = DateTime.now().year;
+
+    return records.where((record) {
+      return record.date.month == selectedMonth &&
+             record.date.year == currentYear;
+    }).toList();
   }
 
   // ✅ PERFORMANCE FIX: Use cached provider instead of context.read()
@@ -94,6 +125,7 @@ class _FuelPageState extends State<FuelPage> {
             child: Column(
               children: [
                 _buildHeader(context),
+                _buildMonthSelector(),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Center(
@@ -541,18 +573,6 @@ class _FuelPageState extends State<FuelPage> {
       if (result?['success'] == true && mounted) {
         // Recarregar dados após adicionar combustível
         _loadData();
-        
-        // Mostrar mensagem de sucesso
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result?['message'] as String? ?? 'Abastecimento adicionado com sucesso!'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
       }
     } catch (e) {
       debugPrint('Error opening add fuel dialog: $e');
@@ -595,18 +615,6 @@ class _FuelPageState extends State<FuelPage> {
     if (result?['success'] == true && mounted) {
       // Recarregar dados após editar combustível
       _loadData();
-      
-      // Mostrar mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result?['message'] as String? ?? 'Abastecimento editado com sucesso!'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
     }
   }
 
@@ -848,6 +856,51 @@ class _FuelPageState extends State<FuelPage> {
       ),
     );
   }
+
+  Widget _buildMonthSelector() {
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _months.length,
+        itemBuilder: (context, index) {
+          final isSelected = index == _currentMonthIndex;
+          return GestureDetector(
+            onTap: () => setState(() => _currentMonthIndex = index),
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline,
+                ),
+              ),
+              child: Text(
+                _months[index],
+                style: TextStyle(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.7),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 /// Widget otimizado para card de abastecimento
@@ -1065,4 +1118,5 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
       ),
     );
   }
+
 }

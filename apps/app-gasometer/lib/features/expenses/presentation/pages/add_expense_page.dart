@@ -211,9 +211,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
           Navigator.of(context).pop({
             'success': true,
             'action': widget.editExpenseId != null ? 'edit' : 'create',
-            'message': widget.editExpenseId != null 
-                ? 'Despesa editada com sucesso!'
-                : 'Despesa adicionada com sucesso!',
           });
         }
       } else {

@@ -22,26 +22,44 @@ class OdometerPage extends StatefulWidget {
 
 class _OdometerPageState extends State<OdometerPage> {
   String? _selectedVehicleId;
-  int _currentMonthIndex = 0;
+  int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
   bool _showStatistics = true;
 
-  final List<String> _months = [
-    'Jan 25',
-    'Fev 25',
-    'Mar 25',
-    'Abr 25',
-    'Mai 25',
-    'Jun 25',
-    'Jul 25',
-    'Ago 25',
-  ];
+  // Generate month list dynamically
+  List<String> get _months {
+    final now = DateTime.now();
+    final currentYear = now.year;
+    final monthNames = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    return monthNames
+        .asMap()
+        .entries
+        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
+        .toList();
+  }
 
   // Get odometers from the provider instead of maintaining local state
   List<OdometerEntity> _getOdometers(OdometerProvider provider) {
+    List<OdometerEntity> odometers;
+
+    // First filter by vehicle if selected
     if (_selectedVehicleId != null) {
-      return provider.getOdometersByVehicle(_selectedVehicleId!);
+      odometers = provider.getOdometersByVehicle(_selectedVehicleId!);
+    } else {
+      odometers = provider.odometers;
     }
-    return provider.odometers;
+
+    // Then filter by selected month
+    final selectedMonth = _currentMonthIndex + 1; // Convert index to month (1-12)
+    final currentYear = DateTime.now().year;
+
+    return odometers.where((odometer) {
+      return odometer.registrationDate.month == selectedMonth &&
+             odometer.registrationDate.year == currentYear;
+    }).toList();
   }
 
   @override
@@ -211,7 +229,7 @@ class _OdometerPageState extends State<OdometerPage> {
                       : Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(0.7),
+                          .withValues(alpha: 0.7),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
@@ -383,7 +401,7 @@ class _OdometerPageState extends State<OdometerPage> {
             color: Theme.of(context)
                 .colorScheme
                 .onSurface
-                .withOpacity(GasometerDesignTokens.opacitySecondary),
+                .withValues(alpha: GasometerDesignTokens.opacitySecondary),
           ),
           textAlign: TextAlign.center,
         ),
@@ -426,7 +444,7 @@ class _OdometerPageState extends State<OdometerPage> {
           color: Theme.of(context)
               .colorScheme
               .onSurface
-              .withOpacity(GasometerDesignTokens.opacityHint),
+              .withValues(alpha: GasometerDesignTokens.opacityHint),
         ),
       ),
     );
@@ -468,10 +486,6 @@ class _OdometerPageState extends State<OdometerPage> {
     );
   }
 
-  String _getWeekdayName(int weekday) {
-    const weekdays = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
-    return weekdays[weekday - 1];
-  }
 
   void _addOdometer() async {
     final result = await showDialog<Map<String, dynamic>>(

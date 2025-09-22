@@ -25,15 +25,33 @@ class MaintenancePage extends StatefulWidget {
 
 class _MaintenancePageState extends State<MaintenancePage> {
   String? _selectedVehicleId;
-  
+  int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
+
   // ✅ PERFORMANCE FIX: Cached providers
   late final MaintenanceProvider _maintenanceProvider;
   late final VehiclesProvider _vehiclesProvider;
+
+  // Generate month list dynamically
+  List<String> get _months {
+    final now = DateTime.now();
+    final currentYear = now.year;
+    final monthNames = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    return monthNames
+        .asMap()
+        .entries
+        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
+        .toList();
+  }
   
   // ✅ PERFORMANCE FIX: Memoize filtered records
   List<MaintenanceEntity>? _cachedFilteredRecords;
   String? _lastVehicleId;
   List<MaintenanceEntity>? _lastMaintenanceRecords;
+  int? _lastMonthIndex;
   
   @override
   void initState() {
@@ -54,14 +72,15 @@ class _MaintenancePageState extends State<MaintenancePage> {
   // ✅ PERFORMANCE FIX: Memoized filtered records with caching
   List<MaintenanceEntity> get _filteredRecords {
     final currentRecords = _maintenanceProvider.maintenanceRecords;
-    
+
     // Check if cache is still valid
     if (_cachedFilteredRecords != null &&
         _lastVehicleId == _selectedVehicleId &&
-        _lastMaintenanceRecords == currentRecords) {
+        _lastMaintenanceRecords == currentRecords &&
+        _lastMonthIndex == _currentMonthIndex) {
       return _cachedFilteredRecords!;
     }
-    
+
     // Rebuild cache
     var filtered = List<MaintenanceEntity>.from(currentRecords);
 
@@ -70,6 +89,14 @@ class _MaintenancePageState extends State<MaintenancePage> {
       filtered = filtered.where((r) => r.vehicleId == _selectedVehicleId).toList();
     }
 
+    // Apply month filter
+    final selectedMonth = _currentMonthIndex + 1; // Convert index to month (1-12)
+    final currentYear = DateTime.now().year;
+    filtered = filtered.where((r) {
+      return r.serviceDate.month == selectedMonth &&
+             r.serviceDate.year == currentYear;
+    }).toList();
+
     // Sort by date (most recent first)
     filtered.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
 
@@ -77,6 +104,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
     _cachedFilteredRecords = filtered;
     _lastVehicleId = _selectedVehicleId;
     _lastMaintenanceRecords = currentRecords;
+    _lastMonthIndex = _currentMonthIndex;
 
     return filtered;
   }
@@ -89,6 +117,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         child: Column(
           children: [
             _buildHeader(context),
+            _buildMonthSelector(),
             Expanded(
               child: SingleChildScrollView(
                 child: Center(
@@ -175,6 +204,61 @@ class _MaintenancePageState extends State<MaintenancePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMonthSelector() {
+    return Container(
+      height: 40,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _months.length,
+        itemBuilder: (context, index) {
+          final isSelected = index == _currentMonthIndex;
+          return Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  setState(() {
+                    _currentMonthIndex = index;
+                    _cachedFilteredRecords = null; // Invalidate cache
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _months[index],
+                      style: TextStyle(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -521,16 +605,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         await _maintenanceProvider.loadAllMaintenanceRecords();
         _clearFilterCache();
         
-        // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text((result?['message'] as String?) ?? 'Manutenção adicionada com sucesso!'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
+        // Data reloaded successfully
       }
     } catch (e) {
       if (mounted) {
@@ -572,16 +647,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         await _maintenanceProvider.loadAllMaintenanceRecords();
         _clearFilterCache();
         
-        // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text((result?['message'] as String?) ?? 'Manutenção editada com sucesso!'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
+        // Data reloaded successfully
       }
     } catch (e) {
       if (mounted) {

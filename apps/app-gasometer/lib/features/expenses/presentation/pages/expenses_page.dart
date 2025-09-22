@@ -28,10 +28,27 @@ class ExpensesPage extends StatefulWidget {
 
 class _ExpensesPageState extends State<ExpensesPage> {
   String? _selectedVehicleId;
-  
+  int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
+
   // Performance fix: Cached providers
   late final ExpensesProvider _expensesProvider;
   late final VehiclesProvider _vehiclesProvider;
+
+  // Generate month list dynamically
+  List<String> get _months {
+    final now = DateTime.now();
+    final currentYear = now.year;
+    final monthNames = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    return monthNames
+        .asMap()
+        .entries
+        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
+        .toList();
+  }
 
   @override
   void initState() {
@@ -66,6 +83,25 @@ class _ExpensesPageState extends State<ExpensesPage> {
     return vehicle?.displayName ?? 'Veículo desconhecido';
   }
 
+  // Get filtered expenses by vehicle and month
+  List<ExpenseEntity> _getFilteredExpenses(List<ExpenseEntity> expenses) {
+    List<ExpenseEntity> filtered = expenses;
+
+    // First filter by vehicle if selected
+    if (_selectedVehicleId != null) {
+      filtered = filtered.where((expense) => expense.vehicleId == _selectedVehicleId).toList();
+    }
+
+    // Then filter by selected month
+    final selectedMonth = _currentMonthIndex + 1; // Convert index to month (1-12)
+    final currentYear = DateTime.now().year;
+
+    return filtered.where((expense) {
+      return expense.date.month == selectedMonth &&
+             expense.date.year == currentYear;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Performance fix: Use Selector2 instead of Consumer2 to prevent unnecessary rebuilds
@@ -80,16 +116,18 @@ class _ExpensesPageState extends State<ExpensesPage> {
       builder: (context, data, child) {
         final isLoading = data['isLoading'] as bool;
         final hasError = data['hasError'] as bool;
-        final expenses = data['expenses'] as List<ExpenseEntity>;
+        final allExpenses = data['expenses'] as List<ExpenseEntity>;
+        final expenses = _getFilteredExpenses(allExpenses);
         final expensesError = data['expensesError'] as String?;
         final vehiclesError = data['vehiclesError'] as String?;
-        
+
         return Scaffold(
           backgroundColor: GasometerColors.getPageBackgroundColor(context),
           body: SafeArea(
             child: Column(
               children: [
                 _buildHeader(context),
+                _buildMonthSelector(),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Center(
@@ -373,14 +411,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
           // Recarregar dados após adicionar despesa
           _loadData();
           
-          // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result['message']?.toString() ?? 'Despesa adicionada com sucesso!'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          // Data reloaded successfully
         } else if (result == true) {
           // Fallback for old boolean return
           _loadData();
@@ -442,14 +473,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
         // Recarregar dados após editar despesa
         _loadData();
         
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message']?.toString() ?? 'Despesa editada com sucesso!'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        // Data reloaded successfully
       } else if (result == true) {
         // Fallback for old boolean return
         _loadData();
@@ -642,6 +666,51 @@ class _ExpensesPageState extends State<ExpensesPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMonthSelector() {
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _months.length,
+        itemBuilder: (context, index) {
+          final isSelected = index == _currentMonthIndex;
+          return GestureDetector(
+            onTap: () => setState(() => _currentMonthIndex = index),
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline,
+                ),
+              ),
+              child: Text(
+                _months[index],
+                style: TextStyle(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.7),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

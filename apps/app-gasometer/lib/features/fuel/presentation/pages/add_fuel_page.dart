@@ -232,9 +232,6 @@ class _AddFuelPageState extends State<AddFuelPage> {
           Navigator.of(context).pop({
             'success': true,
             'action': widget.editFuelRecordId != null ? 'edit' : 'create',
-            'message': widget.editFuelRecordId != null 
-                ? 'Abastecimento editado com sucesso!'
-                : 'Abastecimento adicionado com sucesso!',
           });
         }
       } else {

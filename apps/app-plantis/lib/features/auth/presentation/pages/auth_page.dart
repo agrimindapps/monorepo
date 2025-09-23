@@ -16,6 +16,7 @@ import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/forgot_password_dialog.dart';
+import '../widgets/device_validation_overlay.dart';
 
 // Constantes para SharedPreferences
 const String _kRememberedEmailKey = 'remembered_email';
@@ -355,11 +356,17 @@ class _AuthPageState extends State<AuthPage>
       child: Scaffold(
         body: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: _buildModernBackground(
-              child: _buildResponsiveLayout(context, size, isDesktop, isTablet, isMobile),
-            ),
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: _buildModernBackground(
+                  child: _buildResponsiveLayout(context, size, isDesktop, isTablet, isMobile),
+                ),
+              ),
+              // Device validation overlay
+              const DeviceValidationOverlay(),
+            ],
           ),
         ),
       ),

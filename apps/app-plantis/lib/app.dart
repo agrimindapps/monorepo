@@ -8,6 +8,7 @@ import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/plantis_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as app_auth;
+import 'features/device_management/presentation/providers/device_management_provider.dart';
 import 'features/plants/presentation/providers/plant_task_provider.dart';
 import 'features/plants/presentation/providers/plants_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
@@ -23,6 +24,7 @@ class PlantisApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => di.sl<app_auth.AuthProvider>()),
+        ChangeNotifierProvider(create: (_) => di.sl<DeviceManagementProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PlantsProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PlantTaskProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),

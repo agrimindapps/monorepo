@@ -173,70 +173,73 @@ class _VehiclesPageState extends State<VehiclesPage> {
 class _OptimizedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Semantics(
-        label: 'Seção de veículos',
-        hint: 'Página principal para gerenciar veículos',
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(
-                Icons.directions_car,
-                color: Colors.white,
-                size: 19,
-              ),
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Veículos',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    'Gerencie sua frota de veículos',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      height: 1.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
+              spreadRadius: 0,
             ),
           ],
+        ),
+        child: Semantics(
+          label: 'Seção de veículos',
+          hint: 'Página principal para gerenciar veículos',
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(
+                  Icons.directions_car,
+                  color: Colors.white,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Veículos',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Gerencie sua frota de veículos',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -414,13 +417,15 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
                 const double spacing = 16.0;
                 
                 // Calcular colunas baseado na largura do conteúdo limitado
+                // Para telas pequenas (< 500px), sempre usar 1 coluna
                 if (availableWidth > 900) {
                   crossAxisCount = 4;
                 } else if (availableWidth > 600) {
                   crossAxisCount = 3;
-                } else if (availableWidth > 400) {
+                } else if (availableWidth > 500) {
                   crossAxisCount = 2;
                 }
+                // crossAxisCount permanece 1 para larguras <= 500px
                 
                 return AlignedGridView.count(
                   crossAxisCount: crossAxisCount,

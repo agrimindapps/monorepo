@@ -10,6 +10,7 @@ import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/maintenance/presentation/pages/maintenance_page.dart';
 import '../../features/odometer/presentation/pages/odometer_page.dart';
+import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/promo/presentation/pages/account_deletion_page.dart';
 import '../../features/promo/presentation/pages/privacy_policy_page.dart';
@@ -153,6 +154,13 @@ class AppRouter {
               path: '/profile',
               name: 'profile',
               builder: (context, state) => const ProfilePage(),
+            ),
+
+            // Premium
+            GoRoute(
+              path: '/premium',
+              name: 'premium',
+              builder: (context, state) => const PremiumPage(),
             ),
           ],
         ),

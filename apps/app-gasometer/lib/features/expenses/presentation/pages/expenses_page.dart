@@ -126,6 +126,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
             child: Column(
               children: [
                 _buildHeader(context),
+                _buildVehicleSelector(),
                 _buildMonthSelector(),
                 Expanded(
                   child: SingleChildScrollView(
@@ -134,7 +135,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                         constraints: const BoxConstraints(maxWidth: 1120),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildContentOptimized(context, isLoading, hasError, expenses, expensesError),
+                          child: _buildContentOptimizedWithoutVehicleSelector(context, isLoading, hasError, expenses, expensesError),
                         ),
                       ),
                     ),
@@ -150,104 +151,115 @@ class _ExpensesPageState extends State<ExpensesPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Semantics(
-            label: 'Seção de despesas',
-            hint: 'Página principal para gerenciar despesas do veículo',
-            child: Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(
-                Icons.attach_money,
-                color: Colors.white,
-                size: 19,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Semantics(
+              label: 'Seção de despesas',
+              hint: 'Página principal para gerenciar despesas do veículo',
+              child: Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(
+                  Icons.attach_money,
+                  color: Colors.white,
+                  size: 19,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SemanticText.heading(
-                  'Despesas',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SemanticText.heading(
+                    'Despesas',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                SemanticText.subtitle(
-                  'Histórico de despesas dos seus veículos',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    height: 1.3,
+                  const SizedBox(height: 3),
+                  SemanticText.subtitle(
+                    'Histórico de despesas dos seus veículos',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // Performance fix: Optimized content builder with selective data consumption
-  Widget _buildContentOptimized(BuildContext context, bool isLoading, bool hasError, List<ExpenseEntity> expenses, String? errorMessage) {
+  Widget _buildVehicleSelector() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: Consumer<VehiclesProvider>(
+            builder: (context, vehiclesProvider, child) {
+              return EnhancedVehicleSelector(
+                selectedVehicleId: _selectedVehicleId,
+                onVehicleChanged: (String? vehicleId) {
+                  setState(() {
+                    _selectedVehicleId = vehicleId;
+                  });
+
+                  if (_expensesProvider.searchQuery.isNotEmpty) {
+                    _expensesProvider.search('');
+                  }
+
+                  if (vehicleId?.isNotEmpty == true) {
+                    _expensesProvider.loadExpensesByVehicle(vehicleId!);
+                  } else {
+                    _expensesProvider.loadExpenses();
+                  }
+                },
+              );
+            }
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Performance fix: Optimized content builder without vehicle selector
+  Widget _buildContentOptimizedWithoutVehicleSelector(BuildContext context, bool isLoading, bool hasError, List<ExpenseEntity> expenses, String? errorMessage) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Use Consumer only for the specific parts that need provider access
-        Consumer<VehiclesProvider>(
-          builder: (context, vehiclesProvider, child) {
-            return EnhancedVehicleSelector(
-              selectedVehicleId: _selectedVehicleId,
-              onVehicleChanged: (String? vehicleId) {
-                setState(() {
-                  _selectedVehicleId = vehicleId;
-                });
-                
-                if (_expensesProvider.searchQuery.isNotEmpty) {
-                  _expensesProvider.search('');
-                }
-                
-                if (vehicleId?.isNotEmpty == true) {
-                  _expensesProvider.loadExpensesByVehicle(vehicleId!);
-                } else {
-                  _expensesProvider.loadExpenses();
-                }
-              },
-            );
-          }
-        ),
-        const SizedBox(height: 16),
-        
-        
         // Show error state
         if (hasError && errorMessage != null)
           _buildErrorState(errorMessage, () => _loadData())

@@ -116,6 +116,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
         child: Column(
           children: [
             _buildHeader(context),
+            _buildVehicleSelector(),
             _buildMonthSelector(),
             Expanded(
               child: SingleChildScrollView(
@@ -124,7 +125,7 @@ class _MaintenancePageState extends State<MaintenancePage> {
                     constraints: const BoxConstraints(maxWidth: 1120),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: _buildContent(context),
+                      child: _buildContentWithoutVehicleSelector(context),
                     ),
                   ),
                 ),
@@ -138,70 +139,73 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Semantics(
-        label: 'Seção de manutenções',
-        hint: 'Página principal para gerenciar manutenções',
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(
-                Icons.build,
-                color: Colors.white,
-                size: 19,
-              ),
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Manutenções',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    'Histórico de manutenções dos seus veículos',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      height: 1.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
+              spreadRadius: 0,
             ),
           ],
+        ),
+        child: Semantics(
+          label: 'Seção de manutenções',
+          hint: 'Página principal para gerenciar manutenções',
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(
+                  Icons.build,
+                  color: Colors.white,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Manutenções',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Histórico de manutenções dos seus veículos',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -263,28 +267,38 @@ class _MaintenancePageState extends State<MaintenancePage> {
   }
 
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildVehicleSelector() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: Consumer<VehiclesProvider>(
+            builder: (context, vehiclesProvider, child) {
+              return EnhancedVehicleSelector(
+                selectedVehicleId: _selectedVehicleId,
+                onVehicleChanged: (String? vehicleId) {
+                  setState(() {
+                    _selectedVehicleId = vehicleId;
+                    // ✅ PERFORMANCE FIX: Invalidate cache when vehicle changes
+                    _cachedFilteredRecords = null;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentWithoutVehicleSelector(BuildContext context) {
     return Consumer<MaintenanceProvider>(
       builder: (context, maintenanceProvider, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Consumer<VehiclesProvider>(
-              builder: (context, vehiclesProvider, child) {
-                return EnhancedVehicleSelector(
-                  selectedVehicleId: _selectedVehicleId,
-                  onVehicleChanged: (String? vehicleId) {
-                    setState(() {
-                      _selectedVehicleId = vehicleId;
-                      // ✅ PERFORMANCE FIX: Invalidate cache when vehicle changes
-                      _cachedFilteredRecords = null;
-                    });
-                  },
-                );
-              },
-            ),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            
             if (maintenanceProvider.isLoading)
               StandardLoadingView.initial(
                 message: 'Carregando manutenções...',

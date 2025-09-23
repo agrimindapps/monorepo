@@ -8,15 +8,10 @@ import 'package:provider/provider.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/services/data_cleaner_service.dart';
-import '../../../../core/services/data_generator_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/gasometer_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
-// ✅ REFACTORED: Use extracted dialogs
-import '../dialogs/generate_data_dialog.dart';
-import '../dialogs/clear_data_dialog.dart';
 // Keep existing widgets for now to avoid breaking changes
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
@@ -59,99 +54,102 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(9),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
+              spreadRadius: 0,
             ),
-            child: Semantics(
-              label: 'Seção de configurações',
-              hint: 'Página principal para gerenciar preferências',
-              child: const Icon(
-                Icons.settings,
-                color: Colors.white,
-                size: 19,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Semantics(
+                label: 'Seção de configurações',
+                hint: 'Página principal para gerenciar preferências',
+                child: const Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  size: 19,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Configurações',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Gerencie suas preferências',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    height: 1.3,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Semantics(
-                  label: 'Alterar tema',
-                  hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
-                  button: true,
-                  onTap: () => _showThemeDialog(context, themeProvider),
-                  child: IconButton(
-                    onPressed: () => _showThemeDialog(context, themeProvider),
-                    icon: Icon(
-                      themeProvider.themeMode == ThemeMode.dark
-                        ? Icons.brightness_2
-                        : themeProvider.themeMode == ThemeMode.light
-                          ? Icons.brightness_high
-                          : Icons.brightness_auto,
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Configurações',
+                    style: const TextStyle(
                       color: Colors.white,
-                      size: 19,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Gerencie suas preferências',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Semantics(
+                    label: 'Alterar tema',
+                    hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                    button: true,
+                    onTap: () => _showThemeDialog(context, themeProvider),
+                    child: IconButton(
+                      onPressed: () => _showThemeDialog(context, themeProvider),
+                      icon: Icon(
+                        themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.brightness_2
+                          : themeProvider.themeMode == ThemeMode.light
+                            ? Icons.brightness_high
+                            : Icons.brightness_auto,
+                        color: Colors.white,
+                        size: 19,
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -233,40 +231,19 @@ class _SettingsPageState extends State<SettingsPage> {
         Consumer<SettingsProvider>(
           builder: (context, settingsProvider, _) {
             return SettingsItem(
-              icon: Icons.notification_important,
-              title: 'Lembretes de Manutenção',
-              subtitle: 'Receba notificações para manutenções pendentes',
+              icon: Icons.notifications_active,
+              title: 'Notificações',
+              subtitle: 'Receba lembretes e alertas do aplicativo',
               trailing: Semantics(
                 label: settingsProvider.notificationsEnabled
-                    ? 'Lembretes de manutenção ativados'
-                    : 'Lembretes de manutenção desativados',
-                hint: 'Interruptor para ativar ou desativar notificações de manutenções pendentes',
+                    ? 'Notificações ativadas'
+                    : 'Notificações desativadas',
+                hint: 'Interruptor para ativar ou desativar todas as notificações',
                 child: Switch(
                   value: settingsProvider.notificationsEnabled,
                   onChanged: settingsProvider.isLoading
                       ? null
                       : (value) => settingsProvider.toggleNotifications(value),
-                ),
-              ),
-            );
-          },
-        ),
-        Consumer<SettingsProvider>(
-          builder: (context, settingsProvider, _) {
-            return SettingsItem(
-              icon: Icons.local_gas_station,
-              title: 'Alertas de Combustível',
-              subtitle: 'Notificações sobre consumo e economia',
-              trailing: Semantics(
-                label: settingsProvider.fuelAlertsEnabled
-                    ? 'Alertas de combustível ativados'
-                    : 'Alertas de combustível desativados',
-                hint: 'Interruptor para ativar ou desativar notificações sobre consumo e economia de combustível',
-                child: Switch(
-                  value: settingsProvider.fuelAlertsEnabled,
-                  onChanged: settingsProvider.isLoading
-                      ? null
-                      : (value) => settingsProvider.toggleFuelAlerts(value),
                 ),
               ),
             );
@@ -282,39 +259,19 @@ class _SettingsPageState extends State<SettingsPage> {
       icon: Icons.developer_mode,
       children: [
         SettingsItem(
-          icon: Icons.science,
-          title: 'Simular Dados',
-          subtitle: 'Inserir dados de teste (2 veículos, 14\nmeses)',
-          onTap: () => _showGenerateDataDialog(context),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
-          ),
-        ),
-        SettingsItem(
-          icon: Icons.delete,
-          title: 'Remover Dados',
-          subtitle: 'Limpar todo o banco de dados local',
-          onTap: () => _showAdvancedClearDataDialog(context),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
-          ),
-        ),
-        SettingsItem(
           icon: Icons.storage,
           title: 'Inspetor de Banco',
           subtitle: 'Visualizar dados do Hive\nSharedPreferences',
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (context) => const DatabaseInspectorPage(),
               ),
             );
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -413,10 +370,9 @@ class _SettingsPageState extends State<SettingsPage> {
     required List<Widget> children,
   }) {
     return Card(
-      elevation: 0,
+      elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Padding(
@@ -632,19 +588,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
 
-  void _showGenerateDataDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const GenerateDataDialog(),
-    );
-  }
-
-  void _showAdvancedClearDataDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const ClearDataDialog(),
-    );
-  }
 
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(

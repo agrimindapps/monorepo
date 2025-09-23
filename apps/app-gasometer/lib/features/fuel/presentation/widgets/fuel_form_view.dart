@@ -216,7 +216,7 @@ class FuelFormView extends StatelessWidget {
   Widget _buildLitersField(BuildContext context, FuelFormProvider provider) {
     final vehicle = provider.formModel.vehicle;
     final error = provider.formModel.errors['liters'];
-    
+
     return ValidatedFormField(
       controller: provider.litersController,
       label: FuelConstants.litersLabel,
@@ -227,9 +227,9 @@ class FuelFormView extends StatelessWidget {
       tankCapacity: vehicle?.tankCapacity,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().litersFormatter],
-      decoration: InputDecoration(
-        suffixText: 'L',
-        errorText: error,
+      suffix: const Text(
+        'L',
+        style: TextStyle(fontSize: 14, color: Colors.grey),
       ),
       onValidationChanged: (result) {},
     );
@@ -237,19 +237,16 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildPricePerLiterField(BuildContext context, FuelFormProvider provider) {
     final error = provider.formModel.errors['pricePerLiter'];
-    
+
     return ValidatedFormField(
       controller: provider.pricePerLiterController,
       label: FuelConstants.pricePerLiterLabel,
       hint: FuelConstants.pricePlaceholder,
+      prefixIcon: Icons.attach_money,
       required: true,
       validationType: ValidationType.fuelPrice,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().priceFormatter],
-      decoration: InputDecoration(
-        prefixText: 'R\$ ',
-        errorText: error,
-      ),
       onValidationChanged: (result) {},
     );
   }
@@ -281,7 +278,7 @@ class FuelFormView extends StatelessWidget {
   Widget _buildOdometerField(BuildContext context, FuelFormProvider provider) {
     final vehicle = provider.formModel.vehicle;
     final error = provider.formModel.errors['odometer'];
-    
+
     return ValidatedFormField(
       controller: provider.odometerController,
       label: FuelConstants.odometerLabel,
@@ -295,9 +292,9 @@ class FuelFormView extends StatelessWidget {
       maxValue: 9999999.0,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().odometerFormatter],
-      decoration: InputDecoration(
-        suffixText: 'km',
-        errorText: error,
+      suffix: const Text(
+        'km',
+        style: TextStyle(fontSize: 14, color: Colors.grey),
       ),
       onValidationChanged: (result) {},
     );

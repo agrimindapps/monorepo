@@ -6,9 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/validation/form_validator.dart';
+import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -29,27 +30,136 @@ class AddVehiclePage extends StatefulWidget {
   State<AddVehiclePage> createState() => _AddVehiclePageState();
 }
 
-class _AddVehiclePageState extends State<AddVehiclePage> {
+class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMixin {
   VehicleFormProvider? formProvider;
-  final Map<String, ValidationResult> _validationResults = {};
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _observacoesController = TextEditingController();
 
+  // Novo sistema de validação centralizada
+  late final FormValidator _formValidator;
+  final Map<String, GlobalKey> _fieldKeys = {};
+
   void _initializeFormProvider(AuthProvider authProvider) {
     if (formProvider != null) return; // Já inicializado
-    
+
     formProvider = VehicleFormProvider(authProvider);
-    
+
     if (widget.vehicle != null) {
       formProvider!.initializeForEdit(widget.vehicle!);
       // Inicializar observações se editando
       _observacoesController.text = widget.vehicle!.metadata['observacoes'] as String? ?? '';
     }
-    
+
     // Add listeners para atualizar contadores
     formProvider!.placaController.addListener(_updateUI);
     formProvider!.chassiController.addListener(_updateUI);
     formProvider!.renavamController.addListener(_updateUI);
+
+    // Inicializar FormValidator centralizado
+    _initializeFormValidator();
+  }
+
+  void _initializeFormValidator() {
+    _formValidator = FormValidator();
+
+    // Gerar keys para scroll automático
+    _fieldKeys['marca'] = GlobalKey();
+    _fieldKeys['modelo'] = GlobalKey();
+    _fieldKeys['ano'] = GlobalKey();
+    _fieldKeys['cor'] = GlobalKey();
+    _fieldKeys['odometro'] = GlobalKey();
+    _fieldKeys['placa'] = GlobalKey();
+    _fieldKeys['chassi'] = GlobalKey();
+    _fieldKeys['renavam'] = GlobalKey();
+    _fieldKeys['observacoes'] = GlobalKey();
+
+    // Configurar validações centralizadas
+    _formValidator.addFields([
+      FormFieldConfig(
+        fieldId: 'marca',
+        controller: formProvider!.marcaController,
+        validationType: ValidationType.length,
+        required: true,
+        minLength: 2,
+        maxLength: 50,
+        label: 'Marca',
+        scrollKey: _fieldKeys['marca'],
+      ),
+      FormFieldConfig(
+        fieldId: 'modelo',
+        controller: formProvider!.modeloController,
+        validationType: ValidationType.length,
+        required: true,
+        minLength: 2,
+        maxLength: 50,
+        label: 'Modelo',
+        scrollKey: _fieldKeys['modelo'],
+      ),
+      FormFieldConfig(
+        fieldId: 'ano',
+        controller: formProvider!.anoController,
+        validationType: ValidationType.required,
+        required: true,
+        label: 'Ano',
+        scrollKey: _fieldKeys['ano'],
+      ),
+      FormFieldConfig(
+        fieldId: 'cor',
+        controller: formProvider!.corController,
+        validationType: ValidationType.length,
+        required: true,
+        minLength: 3,
+        maxLength: 30,
+        label: 'Cor',
+        scrollKey: _fieldKeys['cor'],
+      ),
+      FormFieldConfig(
+        fieldId: 'odometro',
+        controller: formProvider!.odometroController,
+        validationType: ValidationType.decimal,
+        required: true,
+        minValue: 0.0,
+        maxValue: 999999.0,
+        label: 'Odômetro Atual',
+        scrollKey: _fieldKeys['odometro'],
+      ),
+      FormFieldConfig(
+        fieldId: 'placa',
+        controller: formProvider!.placaController,
+        validationType: ValidationType.licensePlate,
+        required: true,
+        label: 'Placa',
+        scrollKey: _fieldKeys['placa'],
+      ),
+      FormFieldConfig(
+        fieldId: 'chassi',
+        controller: formProvider!.chassiController,
+        validationType: ValidationType.chassis,
+        required: false,
+        label: 'Chassi',
+        scrollKey: _fieldKeys['chassi'],
+      ),
+      FormFieldConfig(
+        fieldId: 'renavam',
+        controller: formProvider!.renavamController,
+        validationType: ValidationType.renavam,
+        required: false,
+        label: 'Renavam',
+        scrollKey: _fieldKeys['renavam'],
+      ),
+      FormFieldConfig(
+        fieldId: 'observacoes',
+        controller: _observacoesController,
+        validationType: ValidationType.length,
+        required: false,
+        minLength: 0,
+        maxLength: 1000,
+        label: 'Observações',
+        scrollKey: _fieldKeys['observacoes'],
+      ),
+    ]);
+
+    // Validação customizada para combustível será feita no submit
   }
 
   void _updateUI() {
@@ -65,6 +175,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       formProvider!.renavamController.removeListener(_updateUI);
       formProvider!.dispose();
     }
+    // Limpar FormValidator
+    _formValidator.clear();
     super.dispose();
   }
 
@@ -111,19 +223,23 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           onConfirm: _submitForm,
           content: Form(
             key: provider.formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildIdentificationSection(provider),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            _buildTechnicalSection(provider),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            _buildDocumentationSection(provider),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            _buildAdditionalInfoSection(provider),
-          ],
-        ),
-      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ErrorHeader para exibir erros de validação
+                buildFormErrorHeader(),
+                if (formErrorMessage != null)
+                  SizedBox(height: GasometerDesignTokens.spacingMd),
+                _buildIdentificationSection(provider),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                _buildTechnicalSection(provider),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                _buildDocumentationSection(provider),
+                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                _buildAdditionalInfoSection(provider),
+              ],
+            ),
+          ),
         );
       }),
         );
@@ -138,47 +254,60 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       children: [
         _buildPhotoUploadSection(provider),
         SizedBox(height: GasometerDesignTokens.spacingLg),
-        ValidatedFormField(
-          controller: provider.marcaController,
-          label: 'Marca',
-          hint: 'Ex: Ford, Volkswagen, etc.',
-          required: true,
-          validationType: ValidationType.length,
-          minLength: 2,
-          maxLengthValidation: 50,
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-          onValidationChanged: (result) => _validationResults['marca'] = result,
+        Container(
+          key: _fieldKeys['marca'],
+          child: ValidatedFormField(
+            controller: provider.marcaController,
+            label: 'Marca',
+            hint: 'Ex: Ford, Volkswagen, etc.',
+            required: true,
+            validationType: ValidationType.length,
+            minLength: 2,
+            maxLengthValidation: 50,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+            // Remover onValidationChanged - validação será centralizada
+          ),
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
-        ValidatedFormField(
-          controller: provider.modeloController,
-          label: 'Modelo',
-          hint: 'Ex: Gol, Fiesta, etc.',
-          required: true,
-          validationType: ValidationType.length,
-          minLength: 2,
-          maxLengthValidation: 50,
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
-          onValidationChanged: (result) => _validationResults['modelo'] = result,
+        Container(
+          key: _fieldKeys['modelo'],
+          child: ValidatedFormField(
+            controller: provider.modeloController,
+            label: 'Modelo',
+            hint: 'Ex: Gol, Fiesta, etc.',
+            required: true,
+            validationType: ValidationType.length,
+            minLength: 2,
+            maxLengthValidation: 50,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
+          ),
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
         Row(
           children: [
             Expanded(
-              child: _buildYearDropdown(provider),
+              child: Container(
+                key: _fieldKeys['ano'],
+                child: _buildYearDropdown(provider),
+              ),
             ),
             SizedBox(width: GasometerDesignTokens.spacingMd),
             Expanded(
-              child: ValidatedFormField(
-              controller: provider.corController,
-              label: 'Cor',
-              hint: 'Ex: Branco, Preto, etc.',
-              required: true,
-              validationType: ValidationType.length,
-              minLength: 3,
-              maxLengthValidation: 30,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-                  onValidationChanged: (result) => _validationResults['cor'] = result,
+              child: Container(
+                key: _fieldKeys['cor'],
+                child: ValidatedFormField(
+                  controller: provider.corController,
+                  label: 'Cor',
+                  hint: 'Ex: Branco, Preto, etc.',
+                  required: true,
+                  validationType: ValidationType.length,
+                  minLength: 3,
+                  maxLengthValidation: 30,
+                  validateOnChange: false, // Desabilitar validação em tempo real
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+                ),
               ),
             ),
           ],
@@ -202,79 +331,92 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       title: 'Documentação',
       icon: Icons.description,
       children: [
-        ValidatedFormField(
-          controller: provider.odometroController,
-          label: 'Odômetro Atual',
-          hint: '0,00',
-          required: true,
-          validationType: ValidationType.decimal,
-          minValue: 0.0,
-          maxValue: 999999.0,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-          ],
-          decoration: const InputDecoration(
-            suffixText: 'km',
+        Container(
+          key: _fieldKeys['odometro'],
+          child: ValidatedFormField(
+            controller: provider.odometroController,
+            label: 'Odômetro Atual',
+            hint: '0,00',
+            required: true,
+            validationType: ValidationType.decimal,
+            minValue: 0.0,
+            maxValue: 999999.0,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+            ],
+            suffix: const Text(
+              'km',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            onChanged: (value) {
+              setState(() {}); // Manter para cálculos em tempo real se necessário
+            },
           ),
-          onValidationChanged: (result) => _validationResults['odometro'] = result,
-          onChanged: (value) {
-            setState(() {});
-          },
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
-        ValidatedFormField(
-          controller: provider.placaController,
-          label: 'Placa',
-          hint: 'Ex: ABC1234 ou ABC1D23',
-          required: true,
-          validationType: ValidationType.licensePlate,
-          maxLength: 7,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-            UpperCaseTextFormatter(),
-            LengthLimitingTextInputFormatter(7),
-          ],
-          onValidationChanged: (result) => _validationResults['placa'] = result,
-          onChanged: (value) {
-            setState(() {});
-          },
+        Container(
+          key: _fieldKeys['placa'],
+          child: ValidatedFormField(
+            controller: provider.placaController,
+            label: 'Placa',
+            hint: 'Ex: ABC1234 ou ABC1D23',
+            required: true,
+            validationType: ValidationType.licensePlate,
+            maxLength: 7,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+              UpperCaseTextFormatter(),
+              LengthLimitingTextInputFormatter(7),
+            ],
+            onChanged: (value) {
+              setState(() {}); // Manter para formatação em tempo real
+            },
+          ),
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
-        ValidatedFormField(
-          controller: provider.chassiController,
-          label: 'Chassi (opcional)',
-          hint: 'Ex: 9BWZZZ377VT004251',
-          required: false,
-          validationType: ValidationType.chassis,
-          maxLength: 17,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
-            LengthLimitingTextInputFormatter(17),
-            UpperCaseTextFormatter(),
-          ],
-          onValidationChanged: (result) => _validationResults['chassi'] = result,
-          onChanged: (value) {
-            setState(() {});
-          },
+        Container(
+          key: _fieldKeys['chassi'],
+          child: ValidatedFormField(
+            controller: provider.chassiController,
+            label: 'Chassi (opcional)',
+            hint: 'Ex: 9BWZZZ377VT004251',
+            required: false,
+            validationType: ValidationType.chassis,
+            maxLength: 17,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
+              LengthLimitingTextInputFormatter(17),
+              UpperCaseTextFormatter(),
+            ],
+            onChanged: (value) {
+              setState(() {}); // Manter para formatação em tempo real
+            },
+          ),
         ),
         SizedBox(height: GasometerDesignTokens.spacingMd),
-        ValidatedFormField(
-          controller: provider.renavamController,
-          label: 'Renavam (opcional)',
-          hint: 'Ex: 12345678901',
-          required: false,
-          validationType: ValidationType.renavam,
-          keyboardType: TextInputType.number,
-          maxLength: 11,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(11),
-          ],
-          onValidationChanged: (result) => _validationResults['renavam'] = result,
-          onChanged: (value) {
-            setState(() {});
-          },
+        Container(
+          key: _fieldKeys['renavam'],
+          child: ValidatedFormField(
+            controller: provider.renavamController,
+            label: 'Renavam (opcional)',
+            hint: 'Ex: 12345678901',
+            required: false,
+            validationType: ValidationType.renavam,
+            keyboardType: TextInputType.number,
+            maxLength: 11,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(11),
+            ],
+            onChanged: (value) {
+              setState(() {}); // Manter para formatação em tempo real
+            },
+          ),
         ),
       ],
     );
@@ -285,22 +427,25 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       title: 'Informações Adicionais',
       icon: Icons.more_horiz,
       children: [
-        ValidatedFormField(
-          controller: _observacoesController,
-          label: 'Observações (opcional)',
-          hint: 'Adicione observações sobre o veículo...',
-          required: false,
-          validationType: ValidationType.length,
-          minLength: 0,
-          maxLengthValidation: 1000,
-          maxLines: 4,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(1000),
-          ],
-          onValidationChanged: (result) => _validationResults['observacoes'] = result,
-          onChanged: (value) {
-            setState(() {});
-          },
+        Container(
+          key: _fieldKeys['observacoes'],
+          child: ValidatedFormField(
+            controller: _observacoesController,
+            label: 'Observações (opcional)',
+            hint: 'Adicione observações sobre o veículo...',
+            required: false,
+            validationType: ValidationType.length,
+            minLength: 0,
+            maxLengthValidation: 1000,
+            maxLines: 4,
+            validateOnChange: false, // Desabilitar validação em tempo real
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(1000),
+            ],
+            onChanged: (value) {
+              setState(() {}); // Manter para contador de caracteres se necessário
+            },
+          ),
         ),
       ],
     );
@@ -740,15 +885,24 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
 
   Future<void> _submitForm() async {
     if (formProvider == null) return;
-    
-    // Validar usando o FormProvider
-    if (!formProvider!.validateForm()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(formProvider!.lastError ?? 'Por favor, corrija os erros no formulário'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+
+    // Limpar erro anterior
+    clearFormError();
+
+    // Validação centralizada usando FormValidator
+    final validationResult = await _formValidator.validateAll();
+
+    // Validação customizada para combustível (não incluída no FormValidator)
+    if (formProvider!.selectedCombustivel == null || formProvider!.selectedCombustivel!.isEmpty) {
+      setFormError('Selecione o tipo de combustível');
+      return;
+    }
+
+    // Se há erro de validação, exibir no header e fazer scroll para o campo
+    if (!validationResult.isValid) {
+      setFormError(validationResult.message);
+      // Scroll para o primeiro campo com erro
+      await _formValidator.scrollToFirstError();
       return;
     }
 
@@ -794,14 +948,14 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           // Fechar o dialog imediatamente após sucesso local
           Navigator.of(context).pop(true);
         } else {
-          // Se falhou, mostrar o erro do provider se disponível
+          // Se falhou, mostrar o erro no header
           final errorMessage = vehiclesProvider.errorMessage ?? 'Erro desconhecido ao salvar veículo';
-          formProvider!.setError('Erro ao salvar veículo: $errorMessage');
+          setFormError('Erro ao salvar veículo: $errorMessage');
         }
       }
     } catch (e) {
       if (mounted) {
-        formProvider!.setError('Erro ao salvar veículo: $e');
+        setFormError('Erro ao salvar veículo: $e');
       }
     } finally {
       if (mounted) {

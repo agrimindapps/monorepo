@@ -124,6 +124,33 @@ class _FuelPageState extends State<FuelPage> {
             child: Column(
               children: [
                 _buildHeader(context),
+                // Vehicle selector moved here - select vehicle first
+                Consumer<VehiclesProvider>(
+                  builder: (context, vehiclesProvider, child) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: EnhancedVehicleSelector(
+                        selectedVehicleId: _selectedVehicleId,
+                        onVehicleChanged: (String? vehicleId) {
+                          setState(() {
+                            _selectedVehicleId = vehicleId;
+                          });
+
+                          if (_fuelProvider.searchQuery.isNotEmpty) {
+                            _fuelProvider.clearSearch();
+                          }
+
+                          if (vehicleId?.isNotEmpty == true) {
+                            _fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
+                          } else {
+                            _fuelProvider.loadAllFuelRecords();
+                          }
+                        },
+                      ),
+                    );
+                  }
+                ),
+                // Month selector moved after vehicle selector
                 _buildMonthSelector(),
                 Expanded(
                   child: SingleChildScrollView(
@@ -132,7 +159,7 @@ class _FuelPageState extends State<FuelPage> {
                         constraints: const BoxConstraints(maxWidth: 1120),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _buildContentOptimized(context, isLoading, hasError, fuelRecords, fuelError),
+                          child: _buildContentOptimizedWithoutVehicleSelector(context, isLoading, hasError, fuelRecords, fuelError),
                         ),
                       ),
                     ),
@@ -148,69 +175,72 @@ class _FuelPageState extends State<FuelPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Semantics(
-            label: 'Seção de abastecimentos',
-            hint: 'Página principal para gerenciar abastecimentos',
-            child: Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(
-                Icons.local_gas_station,
-                color: Colors.white,
-                size: 19,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Semantics(
+              label: 'Seção de abastecimentos',
+              hint: 'Página principal para gerenciar abastecimentos',
+              child: Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(
+                  Icons.local_gas_station,
+                  color: Colors.white,
+                  size: 19,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SemanticText.heading(
-                  'Abastecimentos',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SemanticText.heading(
+                    'Abastecimentos',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                SemanticText.subtitle(
-                  'Histórico de abastecimentos dos seus veículos',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    height: 1.3,
+                  const SizedBox(height: 3),
+                  SemanticText.subtitle(
+                    'Histórico de abastecimentos dos seus veículos',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -230,11 +260,11 @@ class _FuelPageState extends State<FuelPage> {
                 setState(() {
                   _selectedVehicleId = vehicleId;
                 });
-                
+
                 if (_fuelProvider.searchQuery.isNotEmpty) {
                   _fuelProvider.clearSearch();
                 }
-                
+
                 if (vehicleId?.isNotEmpty == true) {
                   _fuelProvider.loadFuelRecordsByVehicle(vehicleId!);
                 } else {
@@ -245,8 +275,34 @@ class _FuelPageState extends State<FuelPage> {
           }
         ),
         const SizedBox(height: 16),
-        
-        
+
+
+        // Show error state
+        if (hasError && errorMessage != null)
+          _buildErrorState(errorMessage, () => _loadData())
+        else if (isLoading)
+          StandardLoadingView.initial(
+            message: 'Carregando abastecimentos...',
+            height: 400,
+          )
+        else if (fuelRecords.isEmpty)
+          _buildEmptyState()
+        else ...[
+          // Statistics with Consumer for live updates
+          Consumer<FuelProvider>(
+            builder: (context, fuelProvider, child) => _buildStatistics(fuelProvider),
+          ),
+          const SizedBox(height: 24),
+          _buildVirtualizedRecordsList(fuelRecords),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildContentOptimizedWithoutVehicleSelector(BuildContext context, bool isLoading, bool hasError, List<FuelRecordEntity> fuelRecords, String? errorMessage) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         // Show error state
         if (hasError && errorMessage != null)
           _buildErrorState(errorMessage, () => _loadData())

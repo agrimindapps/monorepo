@@ -84,73 +84,76 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildHeader(BuildContext context, bool isAnonymous) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(
-        color: GasometerDesignTokens.colorHeaderBackground,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-            blurRadius: 9,
-            offset: const Offset(0, 3),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(9),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: GasometerDesignTokens.colorHeaderBackground,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
+              spreadRadius: 0,
             ),
-            child: Semantics(
-              label: 'Seção de perfil do usuário',
-              hint: 'Página principal para gerenciar perfil',
-              child: Icon(
-                isAnonymous ? Icons.person_outline : Icons.person,
-                color: Colors.white,
-                size: 19,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Semantics(
+                label: 'Seção de perfil do usuário',
+                hint: 'Página principal para gerenciar perfil',
+                child: Icon(
+                  isAnonymous ? Icons.person_outline : Icons.person,
+                  color: Colors.white,
+                  size: 19,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Meu Perfil',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Meu Perfil',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isAnonymous 
-                      ? 'Usuário Anônimo' 
-                      : 'Gerencie suas informações',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    height: 1.3,
+                  const SizedBox(height: 3),
+                  Text(
+                    isAnonymous
+                        ? 'Usuário Anônimo'
+                        : 'Gerencie suas informações',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -208,13 +211,15 @@ class _ProfilePageState extends State<ProfilePage> {
       title: 'Informações Pessoais',
       icon: Icons.person,
       children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
-          child: Column(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
             children: [
               // Avatar section with edit functionality
               _buildAvatarSection(context, authProvider, user, isAnonymous),
@@ -339,6 +344,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
         ),
+        ),
       ],
     );
   }
@@ -349,21 +355,24 @@ class _ProfilePageState extends State<ProfilePage> {
       title: 'Informações da Conta',
       icon: Icons.info,
       children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildInfoRow('Tipo', authProvider.isPremium ? 'Premium' : 'Gratuita'),
-              if (user?.createdAt != null)
-                _buildInfoRow('Criada em', _formatDate(user!.createdAt as DateTime)),
-              if (user?.lastSignInAt != null)
-                _buildInfoRow('Último acesso', _formatDate(user!.lastSignInAt as DateTime)),
-            ],
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow('Tipo', authProvider.isPremium ? 'Premium' : 'Gratuita'),
+                if (user?.createdAt != null)
+                  _buildInfoRow('Criada em', _formatDate(user!.createdAt as DateTime)),
+                if (user?.lastSignInAt != null)
+                  _buildInfoRow('Último acesso', _formatDate(user!.lastSignInAt as DateTime)),
+              ],
+            ),
           ),
         ),
       ],
@@ -502,11 +511,12 @@ class _ProfilePageState extends State<ProfilePage> {
       title: 'Configurações e Privacidade',
       icon: Icons.settings,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
             children: [
               _buildSettingsItem(
@@ -543,11 +553,12 @@ class _ProfilePageState extends State<ProfilePage> {
       title: 'Gerenciamento de Dados',
       icon: Icons.cleaning_services,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
             children: [
               _buildSettingsItem(
@@ -576,11 +587,12 @@ class _ProfilePageState extends State<ProfilePage> {
       title: 'Ações da Conta',
       icon: Icons.security,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
           ),
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
             children: [
               _buildSettingsItem(
@@ -618,10 +630,9 @@ class _ProfilePageState extends State<ProfilePage> {
     required List<Widget> children,
   }) {
     return Card(
-      elevation: 0,
+      elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       color: Theme.of(context).colorScheme.surface,
       child: Padding(

@@ -6,8 +6,9 @@ import '../entities/fuel_record_entity.dart';
 class FuelValidationService {
   factory FuelValidationService() => _instance;
   FuelValidationService._internal();
-  
-  static final FuelValidationService _instance = FuelValidationService._internal();
+
+  static final FuelValidationService _instance =
+      FuelValidationService._internal();
 
   /// Valida consistência entre registros de abastecimento
   ValidationResult validateFuelRecord(
@@ -22,7 +23,13 @@ class FuelValidationService {
     _validateVehicleCompatibility(record, vehicle, errors);
 
     // Validar sequência de odômetro
-    _validateOdometerSequence(record, vehicle, previousRecord, errors, warnings);
+    _validateOdometerSequence(
+      record,
+      vehicle,
+      previousRecord,
+      errors,
+      warnings,
+    );
 
     // Validar consumo (se possível calcular)
     _validateConsumption(record, previousRecord, warnings);
@@ -48,7 +55,7 @@ class FuelValidationService {
   ) {
     // Verificar se o veículo suporta o tipo de combustível
     if (!vehicle.supportsFuelType(record.fuelType)) {
-      errors['fuelType'] = 
+      errors['fuelType'] =
           'Veículo ${vehicle.displayName} não suporta ${record.fuelType.displayName}';
     }
 
@@ -68,14 +75,14 @@ class FuelValidationService {
   ) {
     // Verificar se odômetro não regrediu em relação ao atual do veículo
     if (record.odometer < vehicle.currentOdometer - 100) {
-      errors['odometer'] = 
+      errors['odometer'] =
           'Odômetro muito abaixo do atual (${vehicle.currentOdometer.toStringAsFixed(0)} km)';
     }
 
     // Verificar sequência com registro anterior
     if (previousRecord != null) {
       if (record.odometer < previousRecord.odometer) {
-        errors['odometer'] = 
+        errors['odometer'] =
             'Odômetro menor que o registro anterior (${previousRecord.odometer.toStringAsFixed(0)} km)';
       }
 
@@ -84,13 +91,13 @@ class FuelValidationService {
 
       // Alerta para diferenças suspeitas
       if (difference > FuelConstants.maxOdometerDifference) {
-        warnings['odometer'] = 
+        warnings['odometer'] =
             'Diferença muito grande desde último registro: ${difference.toStringAsFixed(0)} km';
       }
 
       // Alerta para rodagem diária muito alta
       if (daysDifference > 0 && difference / daysDifference > 500) {
-        warnings['odometer'] = 
+        warnings['odometer'] =
             'Média diária muito alta: ${(difference / daysDifference).toStringAsFixed(0)} km/dia';
       }
     }
@@ -102,7 +109,9 @@ class FuelValidationService {
     FuelRecordEntity? previousRecord,
     Map<String, String> warnings,
   ) {
-    if (previousRecord == null || !record.fullTank || !previousRecord.fullTank) {
+    if (previousRecord == null ||
+        !record.fullTank ||
+        !previousRecord.fullTank) {
       return; // Não é possível calcular consumo preciso
     }
 
@@ -113,10 +122,10 @@ class FuelValidationService {
 
     // Alertas para consumo anômalo
     if (consumption < 3.0) {
-      warnings['consumption'] = 
+      warnings['consumption'] =
           'Consumo muito baixo: ${consumption.toStringAsFixed(1)} km/l';
     } else if (consumption > 25.0) {
-      warnings['consumption'] = 
+      warnings['consumption'] =
           'Consumo muito alto: ${consumption.toStringAsFixed(1)} km/l';
     }
   }
@@ -128,19 +137,19 @@ class FuelValidationService {
   ) {
     // Preços muito baixos ou muito altos podem indicar erro
     if (record.pricePerLiter < 3.0) {
-      warnings['pricePerLiter'] = 
+      warnings['pricePerLiter'] =
           'Preço muito baixo: ${record.formattedPricePerLiter}';
     } else if (record.pricePerLiter > 8.0) {
-      warnings['pricePerLiter'] = 
+      warnings['pricePerLiter'] =
           'Preço muito alto: ${record.formattedPricePerLiter}';
     }
 
     // Validar coerência do valor total
     final expectedTotal = record.liters * record.pricePerLiter;
     final difference = (record.totalPrice - expectedTotal).abs();
-    
+
     if (difference > FuelConstants.maxCalculationDifference) {
-      warnings['totalPrice'] = 
+      warnings['totalPrice'] =
           'Valor total não confere: esperado ${expectedTotal.toStringAsFixed(2)}';
     }
   }
@@ -157,12 +166,12 @@ class FuelValidationService {
 
     // Erro se muito acima da capacidade
     if (record.liters > tankCapacity * 1.2) {
-      errors['liters'] = 
+      errors['liters'] =
           'Quantidade muito acima da capacidade (${tankCapacity.toStringAsFixed(0)}L)';
     }
     // Aviso se próximo do limite
     else if (record.liters > tankCapacity * FuelConstants.maxTankOverfill) {
-      warnings['liters'] = 
+      warnings['liters'] =
           'Quantidade próxima do limite da capacidade (${tankCapacity.toStringAsFixed(0)}L)';
     }
   }
@@ -180,19 +189,26 @@ class FuelValidationService {
       ..sort((a, b) => a.date.compareTo(b.date));
 
     // Calcular estatísticas
-    final totalLiters = sortedRecords.fold<double>(0, (sum, r) => sum + r.liters);
+    final totalLiters = sortedRecords.fold<double>(
+      0,
+      (sum, r) => sum + r.liters,
+    );
     final averageLiters = totalLiters / sortedRecords.length;
-    
-    final totalCost = sortedRecords.fold<double>(0, (sum, r) => sum + r.totalPrice);
-    final averagePricePerLiter = sortedRecords
-        .fold<double>(0, (sum, r) => sum + r.pricePerLiter) / sortedRecords.length;
+
+    final totalCost = sortedRecords.fold<double>(
+      0,
+      (sum, r) => sum + r.totalPrice,
+    );
+    final averagePricePerLiter =
+        sortedRecords.fold<double>(0, (sum, r) => sum + r.pricePerLiter) /
+        sortedRecords.length;
 
     // Calcular consumo médio (apenas para tanques cheios consecutivos)
     final consumptions = <double>[];
     for (int i = 1; i < sortedRecords.length; i++) {
       final current = sortedRecords[i];
       final previous = sortedRecords[i - 1];
-      
+
       if (current.fullTank && previous.fullTank) {
         final distance = current.odometer - previous.odometer;
         if (distance > 0) {
@@ -201,9 +217,11 @@ class FuelValidationService {
       }
     }
 
-    final averageConsumption = consumptions.isNotEmpty
-        ? consumptions.fold<double>(0, (sum, c) => sum + c) / consumptions.length
-        : null;
+    final averageConsumption =
+        consumptions.isNotEmpty
+            ? consumptions.fold<double>(0, (sum, c) => sum + c) /
+                consumptions.length
+            : null;
 
     // Detectar anomalias
     final anomalies = _detectAnomalies(sortedRecords);
@@ -224,32 +242,41 @@ class FuelValidationService {
   /// Detecta anomalias nos registros
   List<FuelAnomaly> _detectAnomalies(List<FuelRecordEntity> records) {
     final anomalies = <FuelAnomaly>[];
-    
+
     // Calcular médias para detectar outliers
-    final averagePrice = records.fold<double>(0, (sum, r) => sum + r.pricePerLiter) / records.length;
-    final averageLiters = records.fold<double>(0, (sum, r) => sum + r.liters) / records.length;
+    final averagePrice =
+        records.fold<double>(0, (sum, r) => sum + r.pricePerLiter) /
+        records.length;
+    final averageLiters =
+        records.fold<double>(0, (sum, r) => sum + r.liters) / records.length;
 
     for (final record in records) {
       // Preço muito diferente da média
       if ((record.pricePerLiter - averagePrice).abs() > averagePrice * 0.3) {
-        anomalies.add(FuelAnomaly(
-          recordId: record.id,
-          type: AnomalyType.priceOutlier,
-          description: 'Preço ${record.pricePerLiter > averagePrice ? 'muito alto' : 'muito baixo'} '
-                      'comparado à média (${averagePrice.toStringAsFixed(3)})',
-          severity: AnomalySeverity.medium,
-        ));
+        anomalies.add(
+          FuelAnomaly(
+            recordId: record.id,
+            type: AnomalyType.priceOutlier,
+            description:
+                'Preço ${record.pricePerLiter > averagePrice ? 'muito alto' : 'muito baixo'} '
+                'comparado à média (${averagePrice.toStringAsFixed(3)})',
+            severity: AnomalySeverity.medium,
+          ),
+        );
       }
 
       // Quantidade muito diferente da média
       if ((record.liters - averageLiters).abs() > averageLiters * 0.5) {
-        anomalies.add(FuelAnomaly(
-          recordId: record.id,
-          type: AnomalyType.volumeOutlier,
-          description: 'Quantidade ${record.liters > averageLiters ? 'muito alta' : 'muito baixa'} '
-                      'comparada à média (${averageLiters.toStringAsFixed(2)}L)',
-          severity: AnomalySeverity.low,
-        ));
+        anomalies.add(
+          FuelAnomaly(
+            recordId: record.id,
+            type: AnomalyType.volumeOutlier,
+            description:
+                'Quantidade ${record.liters > averageLiters ? 'muito alta' : 'muito baixa'} '
+                'comparada à média (${averageLiters.toStringAsFixed(2)}L)',
+            severity: AnomalySeverity.low,
+          ),
+        );
       }
     }
 
@@ -297,29 +324,29 @@ class FuelPatternAnalysis {
       averageConsumption: null,
       anomalies: <FuelAnomaly>[],
       lastRecord: FuelRecordEntity(
-        id: '', 
-        userId: '', 
-        vehicleId: '', 
+        id: '',
+        userId: '',
+        vehicleId: '',
         fuelType: FuelType.gasoline,
-        liters: 0, 
-        pricePerLiter: 0, 
-        totalPrice: 0, 
+        liters: 0,
+        pricePerLiter: 0,
+        totalPrice: 0,
         odometer: 0,
-        date: DateTime.now(), 
-        createdAt: DateTime.now(), 
+        date: DateTime.now(),
+        createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
       firstRecord: FuelRecordEntity(
-        id: '', 
-        userId: '', 
-        vehicleId: '', 
+        id: '',
+        userId: '',
+        vehicleId: '',
         fuelType: FuelType.gasoline,
-        liters: 0, 
-        pricePerLiter: 0, 
-        totalPrice: 0, 
+        liters: 0,
+        pricePerLiter: 0,
+        totalPrice: 0,
         odometer: 0,
-        date: DateTime.now(), 
-        createdAt: DateTime.now(), 
+        date: DateTime.now(),
+        createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
     );
@@ -336,11 +363,14 @@ class FuelPatternAnalysis {
   final FuelRecordEntity firstRecord;
 
   bool get hasAnomalies => anomalies.isNotEmpty;
-  
+
   String get totalCostFormatted => 'R\$ ${totalCost.toStringAsFixed(2)}';
-  String get averagePriceFormatted => 'R\$ ${averagePricePerLiter.toStringAsFixed(3)}';
-  String get averageConsumptionFormatted => 
-      averageConsumption != null ? '${averageConsumption!.toStringAsFixed(1)} km/l' : 'N/A';
+  String get averagePriceFormatted =>
+      'R\$ ${averagePricePerLiter.toStringAsFixed(3)}';
+  String get averageConsumptionFormatted =>
+      averageConsumption != null
+          ? '${averageConsumption!.toStringAsFixed(1)} km/l'
+          : 'N/A';
 }
 
 /// Anomalia detectada
@@ -365,9 +395,4 @@ enum AnomalyType {
   sequenceError,
 }
 
-enum AnomalySeverity {
-  low,
-  medium,
-  high,
-  critical,
-}
+enum AnomalySeverity { low, medium, high, critical }

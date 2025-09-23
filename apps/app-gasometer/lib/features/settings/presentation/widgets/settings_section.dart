@@ -64,14 +64,14 @@ class SettingsSection extends StatelessWidget {
         ],
 
         // Section content
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
+        Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
             borderRadius: GasometerDesignTokens.borderRadius(
               GasometerDesignTokens.radiusDialog,
             ),
           ),
+          color: theme.colorScheme.surfaceContainerHighest,
           child: Column(
             children: children,
           ),

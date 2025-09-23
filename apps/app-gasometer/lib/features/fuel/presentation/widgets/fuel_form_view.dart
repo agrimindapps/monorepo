@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/centralized_loading_widget.dart';
+import '../../../../core/presentation/widgets/datetime_field.dart';
+import '../../../../core/presentation/widgets/form_section_header.dart';
 import '../../../../core/presentation/widgets/form_section_widget.dart';
-import '../../../../core/presentation/widgets/validated_form_field.dart';
-import '../../../../core/presentation/widgets/validated_text_field.dart';
+import '../../../../core/presentation/widgets/money_form_field.dart';
+import '../../../../core/presentation/widgets/notes_form_field.dart';
+import '../../../../core/presentation/widgets/odometer_field.dart';
+import '../../../../core/presentation/widgets/receipt_section.dart';
 import '../../../../core/presentation/widgets/validated_dropdown_field.dart';
+import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/presentation/widgets/validated_switch_field.dart';
+import '../../../../core/presentation/widgets/validated_text_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
-import '../../../expenses/presentation/widgets/receipt_image_picker.dart';
 import '../../core/constants/fuel_constants.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../providers/fuel_form_provider.dart';
@@ -47,9 +51,9 @@ class FuelFormView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFuelInfoSection(context, provider),
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
               _buildAdditionalInfoSection(context, provider),
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
               _buildReceiptImageSection(context, provider),
             ],
           ),
@@ -62,7 +66,7 @@ class FuelFormView extends StatelessWidget {
     return Center(
       child: Card(
         child: Padding(
-          padding: EdgeInsets.all(GasometerDesignTokens.spacingLg),
+          padding: const EdgeInsets.all(GasometerDesignTokens.spacingLg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -91,15 +95,19 @@ class FuelFormView extends StatelessWidget {
 
 
   Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
-    return _buildSectionWithoutPadding(
+    return FormSectionHeader(
       title: 'Informações Básicas',
       icon: Icons.calendar_today,
-      content: Column(
+      child: Column(
         children: [
           _buildFuelTypeDropdown(context, provider),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildDateField(context, provider),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          DateTimeField(
+            value: provider.formModel.date,
+            onChanged: (newDate) => provider.updateDate(newDate),
+            label: FuelConstants.dateLabel,
+          ),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildFullTankSwitch(context, provider),
         ],
       ),
@@ -107,10 +115,10 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildAdditionalInfoSection(BuildContext context, FuelFormProvider provider) {
-    return _buildSectionWithoutPadding(
+    return FormSectionHeader(
       title: 'Adicionais',
       icon: Icons.more_horiz,
-      content: Column(
+      child: Column(
         children: [
           FormFieldRow.standard(
             children: [
@@ -118,11 +126,11 @@ class FuelFormView extends StatelessWidget {
               _buildPricePerLiterField(context, provider),
             ],
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildTotalPriceField(context, provider),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildOdometerField(context, provider),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildNotesField(context, provider),
         ],
       ),
@@ -151,53 +159,7 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildDateField(BuildContext context, FuelFormProvider provider) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _selectDateTime(context, provider),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: FuelConstants.dateLabel,
-            suffixIcon: const Icon(
-              Icons.calendar_today,
-              size: 24,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  DateFormat('dd/MM/yyyy').format(provider.formModel.date),
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                height: 20,
-                width: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  TimeOfDay.fromDateTime(provider.formModel.date).format(context),
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.end,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Campo de data removido - agora usa DateTimeField
 
   Widget _buildFullTankSwitch(BuildContext context, FuelFormProvider provider) {
     return ValidatedSwitchField(
@@ -215,7 +177,6 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildLitersField(BuildContext context, FuelFormProvider provider) {
     final vehicle = provider.formModel.vehicle;
-    final error = provider.formModel.errors['liters'];
 
     return ValidatedFormField(
       controller: provider.litersController,
@@ -236,18 +197,13 @@ class FuelFormView extends StatelessWidget {
   }
 
   Widget _buildPricePerLiterField(BuildContext context, FuelFormProvider provider) {
-    final error = provider.formModel.errors['pricePerLiter'];
-
-    return ValidatedFormField(
+    return PriceFormField(
       controller: provider.pricePerLiterController,
       label: FuelConstants.pricePerLiterLabel,
-      hint: FuelConstants.pricePlaceholder,
-      prefixIcon: Icons.attach_money,
       required: true,
-      validationType: ValidationType.fuelPrice,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [FuelFormatterService().priceFormatter],
-      onValidationChanged: (result) {},
+      onChanged: (value) {
+        // O provider já está conectado ao controller
+      },
     );
   }
 
@@ -277,254 +233,49 @@ class FuelFormView extends StatelessWidget {
 
   Widget _buildOdometerField(BuildContext context, FuelFormProvider provider) {
     final vehicle = provider.formModel.vehicle;
-    final error = provider.formModel.errors['odometer'];
 
-    return ValidatedFormField(
+    return OdometerField(
       controller: provider.odometerController,
       label: FuelConstants.odometerLabel,
       hint: FuelConstants.odometerPlaceholder,
-      prefixIcon: Icons.speed,
-      required: true,
-      validationType: ValidationType.odometer, // Usar validação de odômetro específica
       currentOdometer: vehicle?.currentOdometer,
-      initialOdometer: provider.lastOdometerReading,
-      minValue: 0.0,
-      maxValue: 9999999.0,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [FuelFormatterService().odometerFormatter],
-      suffix: const Text(
-        'km',
-        style: TextStyle(fontSize: 14, color: Colors.grey),
-      ),
-      onValidationChanged: (result) {},
+      lastReading: provider.lastOdometerReading,
+      onChanged: (value) {
+        // O provider já está conectado ao controller
+        // Não precisamos fazer nada aqui
+      },
     );
   }
 
 
   Widget _buildNotesField(BuildContext context, FuelFormProvider provider) {
-    return ValidatedFormField(
+    return ObservationsField(
       controller: provider.notesController,
       label: FuelConstants.notesLabel,
       hint: FuelConstants.notesHint,
-      prefixIcon: Icons.note_add,
       required: false,
-      validationType: ValidationType.length,
-      maxLengthValidation: FuelConstants.maxNotesLength,
-      maxLines: 3,
-      maxLength: FuelConstants.maxNotesLength,
-      showCharacterCount: true,
-      onValidationChanged: (result) {},
-    );
-  }
-
-  Future<void> _selectDateTime(BuildContext context, FuelFormProvider provider) async {
-    // Select date first
-    final date = await showDatePicker(
-      context: context,
-      initialDate: provider.formModel.date,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-      locale: const Locale('pt', 'BR'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Colors.grey.shade800,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
+      onChanged: (value) {
+        // O provider já está conectado ao controller
       },
     );
-
-    if (date != null && context.mounted) {
-      // Then select time
-      final currentTime = TimeOfDay.fromDateTime(provider.formModel.date);
-      final time = await showTimePicker(
-        context: context,
-        initialTime: currentTime,
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-            child: Localizations.override(
-              context: context,
-              locale: const Locale('pt', 'BR'),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                child: child!,
-              ),
-            ),
-          );
-        },
-      );
-
-      if (time != null) {
-        // Update provider with combined date and time
-        final combinedDateTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
-        );
-        provider.updateDate(combinedDateTime);
-      }
-    }
   }
+
+  // Método de seleção de data removido - agora é tratado pelo DateTimeField
 
   Widget _buildReceiptImageSection(BuildContext context, FuelFormProvider provider) {
-    return _buildSectionWithoutPadding(
+    return OptionalReceiptSection(
+      imagePath: provider.receiptImagePath,
+      hasImage: provider.hasReceiptImage,
+      isUploading: provider.isUploadingImage,
+      uploadError: provider.imageUploadError,
+      onCameraSelected: () => provider.captureReceiptImage(),
+      onGallerySelected: () => provider.selectReceiptImageFromGallery(),
+      onImageRemoved: () => provider.removeReceiptImage(),
       title: 'Comprovante',
-      icon: Icons.receipt,
-      content: Column(
-        children: [
-          ReceiptImagePicker(
-            imagePath: provider.receiptImagePath,
-            hasImage: provider.hasReceiptImage,
-            onImageSelected: () => _showImagePickerOptions(context, provider),
-            onImageRemoved: () => provider.removeReceiptImage(),
-          ),
-          if (provider.isUploadingImage)
-            Padding(
-              padding: EdgeInsets.only(top: GasometerDesignTokens.spacingMd),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: GasometerDesignTokens.spacingSm),
-                  Text(
-                    'Processando imagem...',
-                    style: TextStyle(
-                      color: GasometerDesignTokens.colorTextSecondary,
-                      fontSize: GasometerDesignTokens.fontSizeSm,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (provider.imageUploadError != null)
-            Padding(
-              padding: EdgeInsets.only(top: GasometerDesignTokens.spacingMd),
-              child: Container(
-                padding: EdgeInsets.all(GasometerDesignTokens.spacingMd),
-                decoration: BoxDecoration(
-                  color: GasometerDesignTokens.colorError.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: GasometerDesignTokens.colorError.withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: GasometerDesignTokens.colorError,
-                      size: 16,
-                    ),
-                    SizedBox(width: GasometerDesignTokens.spacingSm),
-                    Expanded(
-                      child: Text(
-                        provider.imageUploadError!,
-                        style: TextStyle(
-                          color: GasometerDesignTokens.colorError,
-                          fontSize: GasometerDesignTokens.fontSizeSm,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
+      description: 'Anexe uma foto do comprovante de abastecimento (opcional)',
     );
   }
 
-  void _showImagePickerOptions(BuildContext context, FuelFormProvider provider) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Câmera'),
-                subtitle: const Text('Tirar uma nova foto'),
-                onTap: () {
-                  Navigator.pop(context);
-                  provider.captureReceiptImage();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeria'),
-                subtitle: const Text('Escolher da galeria'),
-                onTap: () {
-                  Navigator.pop(context);
-                  provider.selectReceiptImageFromGallery();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('Cancelar'),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
-  // Helper para criar seções sem padding lateral
-  Widget _buildSectionWithoutPadding({
-    required String title,
-    required IconData icon,
-    required Widget content,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: GasometerDesignTokens.spacingMd),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: GasometerDesignTokens.iconSizeSm,
-                color: Colors.grey.shade600,
-              ),
-              SizedBox(width: GasometerDesignTokens.spacingSm),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeLg,
-                  fontWeight: GasometerDesignTokens.fontWeightMedium,
-                  color: GasometerDesignTokens.colorTextPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        content,
-      ],
-    );
-  }
 
 }

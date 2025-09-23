@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/dialogs/pet_form_dialog.dart';
 import '../../../../shared/widgets/sections/form_section_widget.dart';
+import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../providers/animals_provider.dart';
@@ -72,7 +73,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       isLoading: _isLoading,
       confirmButtonText: _isEditing ? 'Salvar Alterações' : 'Cadastrar Pet',
       onCancel: () => Navigator.of(context).pop(),
-      onConfirm: _submitForm,
+      onConfirm: null, // Substituído pelo botão na seção
       content: Form(
         key: _formKey,
         child: Column(
@@ -85,6 +86,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             _buildPhysicalInfoSection(),
             const SizedBox(height: 20),
             _buildAdditionalInfoSection(),
+            const SizedBox(height: 20),
+            _buildSubmitSection(),
           ],
         ),
       ),
@@ -179,23 +182,15 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           ],
         ),
         const SizedBox(height: 16),
-        InkWell(
-          onTap: _selectBirthDate,
-          borderRadius: BorderRadius.circular(8),
-          child: InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Data de Nascimento *',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.cake),
-              suffixIcon: Icon(Icons.calendar_today),
-            ),
-            child: Text(
-              '${_selectedBirthDate.day.toString().padLeft(2, '0')}/'
-              '${_selectedBirthDate.month.toString().padLeft(2, '0')}/'
-              '${_selectedBirthDate.year}',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
+        PetiVetiFormComponents.birthDate(
+          value: _selectedBirthDate,
+          onChanged: (date) {
+            if (date != null) {
+              setState(() {
+                _selectedBirthDate = date;
+              });
+            }
+          },
         ),
       ],
     );
@@ -284,39 +279,29 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       title: 'Informações Adicionais',
       icon: Icons.more_horiz,
       children: [
-        TextFormField(
+        PetiVetiFormComponents.notesGeneral(
           controller: _notesController,
-          decoration: const InputDecoration(
-            labelText: 'Observações',
-            hintText: 'Informações importantes sobre o pet...',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.note_alt),
-            alignLabelWithHint: true,
-          ),
-          maxLines: 3,
-          textCapitalization: TextCapitalization.sentences,
+          isRequired: false,
         ),
       ],
     );
   }
 
-  Future<void> _selectBirthDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedBirthDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365 * 30)), // 30 years ago
-      lastDate: DateTime.now(),
-      helpText: 'Selecionar data de nascimento',
-      cancelText: 'Cancelar',
-      confirmText: 'OK',
-      locale: const Locale('pt', 'BR'),
-    );
+  // Método _selectBirthDate removido - funcionalidade movida para DateTimePickerField
 
-    if (picked != null && picked != _selectedBirthDate) {
-      setState(() {
-        _selectedBirthDate = picked;
-      });
-    }
+  Widget _buildSubmitSection() {
+    return _isEditing
+        ? PetiVetiFormComponents.submitUpdate(
+            onSubmit: _submitForm,
+            onCancel: () => Navigator.of(context).pop(),
+            isLoading: _isLoading,
+          )
+        : PetiVetiFormComponents.submitCreate(
+            onSubmit: _submitForm,
+            onCancel: () => Navigator.of(context).pop(),
+            isLoading: _isLoading,
+            itemName: 'Pet',
+          );
   }
 
   Future<void> _submitForm() async {

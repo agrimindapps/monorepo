@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/widgets/datetime_field.dart';
+import '../../../../core/presentation/widgets/form_section_header.dart';
 import '../../../../core/presentation/widgets/form_section_widget.dart';
-import '../../../../core/presentation/widgets/validated_text_field.dart';
+import '../../../../core/presentation/widgets/money_form_field.dart';
+import '../../../../core/presentation/widgets/notes_form_field.dart';
+import '../../../../core/presentation/widgets/odometer_field.dart';
+import '../../../../core/presentation/widgets/receipt_section.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../core/constants/expense_constants.dart';
 import '../providers/expense_form_provider.dart';
 import 'expense_type_selector.dart';
-import 'receipt_image_picker.dart';
 
 /// Widget principal do formulário de despesas
 class ExpenseFormView extends StatelessWidget {
@@ -26,10 +29,10 @@ class ExpenseFormView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1ª Seção: Informações da Despesa (O QUE foi gasto e QUANDO)
-              _buildSectionWithoutPadding(
+              FormSectionHeader(
                 title: 'Informações da Despesa',
                 icon: Icons.shopping_cart,
-                content: Column(
+                child: Column(
                   children: [
                     // Seletor de tipo de despesa
                     ExpenseTypeSelector(
@@ -38,73 +41,59 @@ class ExpenseFormView extends StatelessWidget {
                       error: provider.formModel.getFieldError('expenseType'),
                     ),
 
-                    SizedBox(height: GasometerDesignTokens.spacingMd),
+                    const SizedBox(height: GasometerDesignTokens.spacingMd),
 
                     // Descrição com validação em tempo real
-                    ValidatedTextField(
+                    DescriptionField(
                       controller: provider.descriptionController,
-                      label: 'Descrição da Despesa *',
+                      label: 'Descrição da Despesa',
                       hint: ExpenseConstants.descriptionPlaceholder,
-                      maxLength: ExpenseConstants.maxDescriptionLength,
                       required: true,
-                      showCharacterCount: true,
-                      prefixIcon: Icons.description,
-                      validator:
-                          (value) =>
-                              provider.validateField('description', value),
-                      debounceDuration: const Duration(milliseconds: 300),
+                      onChanged: (value) {
+                        // O provider já está conectado ao controller
+                      },
                     ),
 
-                    SizedBox(height: GasometerDesignTokens.spacingMd),
+                    const SizedBox(height: GasometerDesignTokens.spacingMd),
 
                     // Data e Hora unified
-                    _buildDateTimeField(context, provider),
+                    DateTimeField(
+                      value: provider.formModel.date,
+                      onChanged: (newDate) => provider.updateDate(newDate),
+                      label: 'Data e Hora',
+                    ),
                   ],
                 ),
               ),
 
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
               // 2ª Seção: Informações Financeiras e Técnicas (QUANTO custou e quilometragem)
-              _buildSectionWithoutPadding(
+              FormSectionHeader(
                 title: 'Informações Financeiras e Técnicas',
                 icon: Icons.monetization_on,
-                content: Column(
+                child: Column(
                   children: [
                     FormFieldRow.standard(
                       children: [
                         // Valor com validação monetária
-                        ValidatedTextField(
+                        AmountFormField(
                           controller: provider.amountController,
-                          label: 'Valor Total *',
-                          hint: ExpenseConstants.amountPlaceholder,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          prefixIcon: Icons.attach_money,
+                          label: 'Valor Total',
                           required: true,
-                          validator: _validateMoney,
-                          debounceDuration: const Duration(milliseconds: 500),
+                          onChanged: (value) {
+                            // O provider já está conectado ao controller
+                          },
                         ),
                         // Odômetro
-                        ValidatedTextField(
+                        OdometerField(
                           controller: provider.odometerController,
-                          label: 'Quilometragem Atual *',
+                          label: 'Quilometragem Atual',
                           hint: ExpenseConstants.odometerPlaceholder,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          prefixIcon: Icons.speed,
-                          suffix: Text(
-                            ExpenseConstants.kilometerUnit,
-                            style: TextStyle(
-                              color: GasometerDesignTokens.colorTextSecondary,
-                              fontSize: GasometerDesignTokens.fontSizeBody,
-                            ),
-                          ),
-                          required: true,
-                          validator: _validateOdometer,
-                          debounceDuration: const Duration(milliseconds: 400),
+                          currentOdometer: provider.formModel.vehicle?.currentOdometer,
+                          onChanged: (value) {
+                            // Provider já está conectado ao controller
+                          },
                         ),
                       ],
                     ),
@@ -112,89 +101,57 @@ class ExpenseFormView extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
               // 3ª Seção: Detalhes Adicionais (ONDE foi realizada)
-              _buildSectionWithoutPadding(
+              FormSectionHeader(
                 title: 'Detalhes Adicionais',
                 icon: Icons.location_on,
-                content: Column(
+                child: Column(
                   children: [
                     // Localização (opcional)
-                    ValidatedTextField(
+                    LocationField(
                       controller: provider.locationController,
                       label: 'Local da Despesa',
                       hint: ExpenseConstants.locationPlaceholder,
-                      maxLength: ExpenseConstants.maxLocationLength,
-                      prefixIcon: Icons.location_on,
-                      showCharacterCount: true,
-                      validator: (value) {
-                        if (value != null &&
-                            value.length > ExpenseConstants.maxLocationLength) {
-                          return 'Localização muito longa';
-                        }
-                        return null;
+                      required: false,
+                      onChanged: (value) {
+                        // O provider já está conectado ao controller
                       },
-                      debounceDuration: const Duration(milliseconds: 600),
                     ),
 
-                    SizedBox(height: GasometerDesignTokens.spacingMd),
+                    const SizedBox(height: GasometerDesignTokens.spacingMd),
 
                     // Observações
-                    ValidatedTextField(
+                    ObservationsField(
                       controller: provider.notesController,
                       label: 'Observações Adicionais',
                       hint: ExpenseConstants.notesPlaceholder,
-                      maxLines: 3,
-                      maxLength: ExpenseConstants.maxNotesLength,
-                      prefixIcon: Icons.note_alt,
-                      showCharacterCount: true,
-                      validator: (value) {
-                        if (value != null &&
-                            value.length > ExpenseConstants.maxNotesLength) {
-                          return 'Observação muito longa';
-                        }
-                        return null;
+                      required: false,
+                      onChanged: (value) {
+                        // O provider já está conectado ao controller
                       },
-                      debounceDuration: const Duration(milliseconds: 800),
                     ),
                   ],
                 ),
               ),
 
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
               // 4ª Seção: Comprovante da Despesa
-              _buildSectionWithoutPadding(
+              OptionalReceiptSection(
+                imagePath: provider.receiptImagePath,
+                hasImage: provider.hasReceiptImage,
+                isUploading: provider.isUploadingImage,
+                uploadError: provider.imageUploadError,
+                onCameraSelected: () => provider.captureReceiptImage(),
+                onGallerySelected: () => provider.selectReceiptImageFromGallery(),
+                onImageRemoved: () => provider.removeReceiptImage(),
                 title: 'Comprovante da Despesa',
-                icon: Icons.receipt,
-                content: Column(
-                  children: [
-                    Text(
-                      'Anexe uma foto do comprovante da despesa (opcional)',
-                      style: TextStyle(
-                        fontSize: GasometerDesignTokens.fontSizeCaption,
-                        color: GasometerDesignTokens.colorTextSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    SizedBox(height: GasometerDesignTokens.spacingSm),
-                    // Comprovante (imagem)
-                    ReceiptImagePicker(
-                      imagePath: provider.receiptImagePath,
-                      hasImage: provider.hasReceiptImage,
-                      onImageSelected:
-                          () => _showImagePickerOptions(context, provider),
-                      onImageRemoved: () => provider.removeReceiptImage(),
-                    ),
-                    if (provider.isUploadingImage) _buildUploadingIndicator(),
-                    if (provider.imageUploadError != null)
-                      _buildErrorIndicator(provider.imageUploadError!),
-                  ],
-                ),
+                description: 'Anexe uma foto do comprovante da despesa (opcional)',
               ),
 
-              SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
               // Resumo do formulário (se tem dados válidos)
               if (provider.formModel.hasMinimumData)
@@ -225,7 +182,7 @@ class ExpenseFormView extends StatelessWidget {
                   color: Colors.grey.shade600,
                   size: GasometerDesignTokens.iconSizeSm,
                 ),
-                SizedBox(width: GasometerDesignTokens.spacingSm),
+                const SizedBox(width: GasometerDesignTokens.spacingSm),
                 Text(
                   'Resumo',
                   style: TextStyle(
@@ -236,7 +193,7 @@ class ExpenseFormView extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
 
             _buildSummaryRow('Tipo:', model.expenseType.displayName),
             _buildSummaryRow(
@@ -253,7 +210,7 @@ class ExpenseFormView extends StatelessWidget {
               _buildSummaryRow('Local:', model.location),
 
             if (model.hasReceipt) ...[
-              SizedBox(height: GasometerDesignTokens.spacingSm),
+              const SizedBox(height: GasometerDesignTokens.spacingSm),
               Row(
                 children: [
                   Icon(
@@ -261,7 +218,7 @@ class ExpenseFormView extends StatelessWidget {
                     size: GasometerDesignTokens.iconSizeXs,
                     color: Colors.grey.shade600,
                   ),
-                  SizedBox(width: GasometerDesignTokens.spacingXs),
+                  const SizedBox(width: GasometerDesignTokens.spacingXs),
                   Text(
                     'Comprovante anexado',
                     style: TextStyle(
@@ -274,7 +231,7 @@ class ExpenseFormView extends StatelessWidget {
             ],
 
             // Indicadores de status
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
             Row(
               children: [
                 // Status de validação
@@ -298,7 +255,7 @@ class ExpenseFormView extends StatelessWidget {
                         size: 14,
                         color: model.canSubmit ? Colors.green : Colors.orange,
                       ),
-                      SizedBox(width: GasometerDesignTokens.spacingXs),
+                      const SizedBox(width: GasometerDesignTokens.spacingXs),
                       Text(
                         model.canSubmit ? 'Pronto' : 'Pendente',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -309,7 +266,7 @@ class ExpenseFormView extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(width: GasometerDesignTokens.spacingSm),
+                const SizedBox(width: GasometerDesignTokens.spacingSm),
 
                 // Indicador de valor alto
                 if (model.isHighValue)
@@ -330,7 +287,7 @@ class ExpenseFormView extends StatelessWidget {
                           size: 14,
                           color: Colors.blue,
                         ),
-                        SizedBox(width: GasometerDesignTokens.spacingXs),
+                        const SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Alto valor',
                           style: Theme.of(
@@ -343,7 +300,7 @@ class ExpenseFormView extends StatelessWidget {
 
                 // Indicador de recorrente
                 if (model.isRecurring) ...[
-                  SizedBox(width: GasometerDesignTokens.spacingSm),
+                  const SizedBox(width: GasometerDesignTokens.spacingSm),
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: GasometerDesignTokens.spacingSm,
@@ -361,7 +318,7 @@ class ExpenseFormView extends StatelessWidget {
                           size: 14,
                           color: Colors.purple,
                         ),
-                        SizedBox(width: GasometerDesignTokens.spacingXs),
+                        const SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Recorrente',
                           style: Theme.of(context).textTheme.labelSmall
@@ -413,281 +370,14 @@ class ExpenseFormView extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  Widget _buildDateTimeField(
-    BuildContext context,
-    ExpenseFormProvider provider,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _selectDateTime(context, provider),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Data e Hora',
-            suffixIcon: const Icon(Icons.calendar_today, size: 24),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  DateFormat('dd/MM/yyyy').format(provider.formModel.date),
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                height: 20,
-                width: 1,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  TimeOfDay.fromDateTime(
-                    provider.formModel.date,
-                  ).format(context),
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.end,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Campo de data/hora removido - agora usa DateTimeField
 
-  Future<void> _selectDateTime(
-    BuildContext context,
-    ExpenseFormProvider provider,
-  ) async {
-    // Select date first
-    final date = await showDatePicker(
-      context: context,
-      initialDate: provider.formModel.date,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-      locale: const Locale('pt', 'BR'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Colors.grey.shade800,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
+  // Método de seleção de data removido - agora é tratado pelo DateTimeField
 
-    if (date != null && context.mounted) {
-      // Then select time
-      final currentTime = TimeOfDay.fromDateTime(provider.formModel.date);
-      final time = await showTimePicker(
-        context: context,
-        initialTime: currentTime,
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-            child: Localizations.override(
-              context: context,
-              locale: const Locale('pt', 'BR'),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: Theme.of(context).colorScheme.copyWith(
-                    primary: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                child: child!,
-              ),
-            ),
-          );
-        },
-      );
 
-      if (time != null) {
-        // Update provider with combined date and time
-        final combinedDateTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
-        );
-        provider.updateDate(combinedDateTime);
-      }
-    }
-  }
 
-  // Helper para criar seções sem padding lateral
-  Widget _buildSectionWithoutPadding({
-    required String title,
-    required IconData icon,
-    required Widget content,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: GasometerDesignTokens.spacingMd,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: GasometerDesignTokens.iconSizeSm,
-                color: Colors.grey.shade600,
-              ),
-              SizedBox(width: GasometerDesignTokens.spacingSm),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeLg,
-                  fontWeight: GasometerDesignTokens.fontWeightMedium,
-                  color: GasometerDesignTokens.colorTextPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        content,
-      ],
-    );
-  }
 
-  Widget _buildUploadingIndicator() {
-    return Padding(
-      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.grey.shade600,
-              ),
-            ),
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingSm),
-          Text(
-            'Processando imagem...',
-            style: TextStyle(
-              fontSize: GasometerDesignTokens.fontSizeSm,
-              color: GasometerDesignTokens.colorTextSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildErrorIndicator(String error) {
-    return Padding(
-      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
-      child: Row(
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 16,
-            color: GasometerDesignTokens.colorError,
-          ),
-          SizedBox(width: GasometerDesignTokens.spacingSm),
-          Expanded(
-            child: Text(
-              error,
-              style: TextStyle(
-                fontSize: GasometerDesignTokens.fontSizeSm,
-                color: GasometerDesignTokens.colorError,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  void _showImagePickerOptions(
-    BuildContext context,
-    ExpenseFormProvider provider,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Câmera'),
-                subtitle: const Text('Tirar uma nova foto'),
-                onTap: () {
-                  Navigator.pop(context);
-                  provider.captureReceiptImage();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeria'),
-                subtitle: const Text('Escolher da galeria'),
-                onTap: () {
-                  Navigator.pop(context);
-                  provider.selectReceiptImageFromGallery();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('Cancelar'),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Validadores locais
-  String? _validateMoney(String? value) {
-    if (value == null || value.isEmpty) return null;
-
-    // Remove formatação e tenta converter
-    final cleanValue = value.replaceAll(RegExp(r'[^\d,.]'), '');
-    final doubleValue = double.tryParse(cleanValue.replaceAll(',', '.'));
-
-    if (doubleValue == null) {
-      return 'Valor inválido';
-    }
-
-    if (doubleValue <= 0) {
-      return 'Valor deve ser maior que zero';
-    }
-
-    return null;
-  }
-
-  String? _validateOdometer(String? value) {
-    if (value == null || value.isEmpty) return 'Campo obrigatório';
-
-    final intValue = int.tryParse(value.replaceAll(RegExp(r'[^\d]'), ''));
-
-    if (intValue == null) {
-      return 'Valor inválido';
-    }
-
-    if (intValue < 0 || intValue > 999999) {
-      return 'Valor deve estar entre 0 e 999999';
-    }
-
-    return null;
-  }
+  // Validador de odômetro removido - agora é tratado pelo OdometerField
 }

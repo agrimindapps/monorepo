@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/uuid_generator.dart';
+import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../../animals/domain/entities/animal.dart';
 import '../../../animals/domain/entities/animal_enums.dart';
 import '../../../animals/presentation/providers/animals_provider.dart';
@@ -89,79 +90,16 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
           padding: const EdgeInsets.all(16),
           children: [
             // Animal Selection
-            if (animalsState.animals.isNotEmpty) ...[
-              Text(
-                'Animal',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<Animal>(
-                value: _selectedAnimal,
-                decoration: InputDecoration(
-                  hintText: 'Selecione um animal',
-                  prefixIcon: const Icon(Icons.pets),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                items: animalsState.animals.map((animal) {
-                  return DropdownMenuItem(
-                    value: animal,
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: theme.colorScheme.primary.withAlpha(51),
-                          child: Text(
-                            animal.name.substring(0, 1).toUpperCase(),
-                            style: TextStyle(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                animal.name,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                '${animal.species} • ${animal.breed}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withAlpha(153),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (animal) {
-                  setState(() {
-                    _selectedAnimal = animal;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Selecione um animal';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-            ],
+            PetiVetiFormComponents.animalRequired(
+              value: _selectedAnimal?.id,
+              onChanged: (animalId) {
+                final animal = animalsState.animals.firstWhere((a) => a.id == animalId);
+                setState(() {
+                  _selectedAnimal = animal;
+                });
+              },
+            ),
+            const SizedBox(height: 24),
 
             // Weight Input
             Text(
@@ -209,24 +147,18 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             const SizedBox(height: 24),
 
             // Date Selection
-            Text(
-              'Data do Registro',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: theme.colorScheme.outline),
-              ),
-              leading: const Icon(Icons.calendar_today),
-              title: Text(_formatDate(_selectedDate)),
-              subtitle: Text(_getDateSubtitle()),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _selectDate(context),
+            DateTimePickerField.date(
+              value: _selectedDate,
+              onChanged: (date) {
+                if (date != null) {
+                  setState(() {
+                    _selectedDate = date;
+                  });
+                }
+              },
+              label: 'Data do Registro',
+              firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+              lastDate: DateTime.now(),
             ),
             const SizedBox(height: 24),
 
@@ -332,44 +264,23 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             const SizedBox(height: 24),
 
             // Notes
-            Text(
-              'Observações (Opcional)',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
+            PetiVetiFormComponents.notesGeneral(
               controller: _notesController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Observações sobre o peso, comportamento, etc...',
-                prefixIcon: const Icon(Icons.notes),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignLabelWithHint: true,
-              ),
+              isRequired: false,
             ),
             const SizedBox(height: 32),
 
             // Save Button
-            SizedBox(
-              height: 48,
-              child: FilledButton(
-                onPressed: _isLoading ? null : _saveWeight,
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(widget.weight != null ? 'Atualizar Registro' : 'Salvar Registro'),
-              ),
-            ),
+            widget.weight != null
+                ? PetiVetiFormComponents.submitUpdate(
+                    onSubmit: _saveWeight,
+                    isLoading: _isLoading,
+                  )
+                : PetiVetiFormComponents.submitCreate(
+                    onSubmit: _saveWeight,
+                    isLoading: _isLoading,
+                    itemName: 'Registro de Peso',
+                  ),
             const SizedBox(height: 16),
 
             // Quick weight suggestions (for new records)

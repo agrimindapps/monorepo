@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/widgets/datetime_field.dart';
+import '../../../../core/presentation/widgets/form_section_header.dart';
+import '../../../../core/presentation/widgets/notes_form_field.dart';
+import '../../../../core/presentation/widgets/odometer_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/form_dialog.dart';
-import '../../../../core/widgets/form_section_widget.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../constants/odometer_constants.dart';
@@ -297,7 +298,7 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildBasicInfoSection(),
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
                 _buildAdditionalInfoSection(),
               ],
             ),
@@ -316,34 +317,45 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
 
 
   Widget _buildBasicInfoSection() {
-    return FormSectionWidget(
+    return FormSectionHeader(
       title: 'Informações Básicas',
       icon: Icons.event_note,
-      children: [
-        Column(
-          children: [
-            _buildOdometerField(),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
-            _buildRegistrationTypeField(),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
-            _buildDateTimeField(),
-          ],
-        ),
-      ],
+      child: Column(
+        children: [
+          _buildOdometerField(),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          _buildRegistrationTypeField(),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          Consumer<OdometerFormProvider>(
+            builder: (context, formProvider, child) {
+              return CustomRangeDateTimeField(
+                value: formProvider.registrationDate,
+                onChanged: (newDate) {
+                  // Decompor a data e hora para usar os métodos existentes do provider
+                  formProvider.setDate(newDate);
+                  formProvider.setTime(newDate.hour, newDate.minute);
+                },
+                label: OdometerConstants.fieldLabels['dataHora']!,
+                firstDate: OdometerConstants.minDate,
+                lastDate: OdometerConstants.maxDate,
+                suffixIcon: OdometerConstants.sectionIcons['dataHora']!,
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildAdditionalInfoSection() {
-    return FormSectionWidget(
+    return FormSectionHeader(
       title: 'Adicionais',
       icon: Icons.more_horiz,
-      children: [
-        Column(
-          children: [
-            _buildDescriptionField(),
-          ],
-        ),
-      ],
+      child: Column(
+        children: [
+          _buildDescriptionField(),
+        ],
+      ),
     );
   }
 
@@ -352,28 +364,12 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   Widget _buildOdometerField() {
     return Consumer<OdometerFormProvider>(
       builder: (context, formProvider, child) {
-        return TextFormField(
+        return OdometerField(
           controller: _odometerController,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.right,
-          decoration: InputDecoration(
-            labelText: OdometerConstants.fieldLabels['odometro'],
-            hintText: '45234',
-            suffixText: OdometerConstants.units['odometro'],
-            suffixIcon: formProvider.odometerValue > 0
-                ? IconButton(
-                    icon: Icon(OdometerConstants.sectionIcons['clear']),
-                    onPressed: () => formProvider.clearOdometer(),
-                  )
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          inputFormatters: _getOdometroFormatters(),
-          validator: formProvider.validateOdometer,
+          label: OdometerConstants.fieldLabels['odometro'],
+          hint: '45234',
+          currentOdometer: formProvider.vehicle?.currentOdometer,
+          lastReading: null, // Será preenchido pelo provider se necessário
           onChanged: (value) {
             // Controller listener will handle the update
           },
@@ -419,21 +415,11 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
   Widget _buildDescriptionField() {
     return Consumer<OdometerFormProvider>(
       builder: (context, formProvider, child) {
-        return TextFormField(
+        return ObservationsField(
           controller: _descriptionController,
-          maxLength: OdometerConstants.maxDescriptionLength,
-          maxLines: OdometerConstants.descriptionMaxLines,
-          decoration: InputDecoration(
-            labelText: OdometerConstants.fieldLabels['descricao'],
-            hintText: OdometerConstants.fieldHints['descricao'],
-            alignLabelWithHint: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          validator: formProvider.validateDescription,
+          label: OdometerConstants.fieldLabels['descricao'],
+          hint: OdometerConstants.fieldHints['descricao'],
+          required: false,
           onChanged: (value) {
             // Controller listener will handle the update
           },
@@ -442,129 +428,12 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
     );
   }
   
-  Widget _buildDateTimeField() {
-    return Consumer<OdometerFormProvider>(
-      builder: (context, formProvider, child) {
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _selectDateTime(formProvider),
-            child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: OdometerConstants.fieldLabels['dataHora'],
-              suffixIcon: Icon(
-                OdometerConstants.sectionIcons['dataHora'],
-                size: OdometerConstants.dimensions['calendarIconSize'],
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    DateFormat('dd/MM/yyyy').format(formProvider.registrationDate),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  height: 20,
-                  width: 1,
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    TimeOfDay.fromDateTime(formProvider.registrationDate).format(context),
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      },
-    );
-  }
+  // Campo de data/hora removido - agora usa CustomRangeDateTimeField
 
-  // Formatadores de entrada
-  List<TextInputFormatter> _getOdometroFormatters() {
-    return [
-      // Permitir apenas números (odômetro em quilômetros inteiros)
-      FilteringTextInputFormatter.digitsOnly,
-      // Limitar a 999999 (máximo 6 dígitos para quilometragem)
-      LengthLimitingTextInputFormatter(6),
-    ];
-  }
+  // Formatadores não são mais necessários - o OdometerField cuida disso
 
 
-  Future<void> _selectDateTime(OdometerFormProvider formProvider) async {
-    // Select date first
-    final date = await showDatePicker(
-      context: context,
-      initialDate: formProvider.registrationDate,
-      firstDate: OdometerConstants.minDate,
-      lastDate: OdometerConstants.maxDate,
-      locale: const Locale('pt', 'BR'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Colors.grey.shade800,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (date != null) {
-      // Then select time
-      if (mounted) {
-        final currentTime = TimeOfDay.fromDateTime(formProvider.registrationDate);
-        final time = await showTimePicker(
-          context: context,
-          initialTime: currentTime,
-          builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-              child: Localizations.override(
-                context: context,
-                locale: const Locale('pt', 'BR'),
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: Colors.grey.shade800,
-                      onPrimary: Colors.white,
-                      surface: Colors.white,
-                      onSurface: Colors.black,
-                    ),
-                  ),
-                  child: child!,
-                ),
-              ),
-            );
-          },
-        );
-
-        if (time != null) {
-          // Update provider instead of local state
-          formProvider.setDate(date);
-          formProvider.setTime(time.hour, time.minute);
-        }
-      }
-    }
-  }
+  // Método de seleção de data removido - agora é tratado pelo CustomRangeDateTimeField
 
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
@@ -726,14 +595,14 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Foram encontrados os seguintes avisos:'),
-              SizedBox(height: GasometerDesignTokens.spacingSm),
+              const SizedBox(height: GasometerDesignTokens.spacingSm),
               ...warnings.entries.map((entry) => 
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text('• ${entry.value}'),
                 ),
               ),
-              SizedBox(height: GasometerDesignTokens.spacingMd),
+              const SizedBox(height: GasometerDesignTokens.spacingMd),
               const Text('Deseja continuar mesmo assim?'),
             ],
           ),

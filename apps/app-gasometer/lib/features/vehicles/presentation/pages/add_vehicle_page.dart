@@ -6,12 +6,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/presentation/widgets/form_section_header.dart';
+import '../../../../core/presentation/widgets/notes_form_field.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/validation/form_validator.dart';
 import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
-import '../../../../core/widgets/form_section_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
@@ -229,13 +230,13 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                 // ErrorHeader para exibir erros de validação
                 buildFormErrorHeader(),
                 if (formErrorMessage != null)
-                  SizedBox(height: GasometerDesignTokens.spacingMd),
+                  const SizedBox(height: GasometerDesignTokens.spacingMd),
                 _buildIdentificationSection(provider),
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
                 _buildTechnicalSection(provider),
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
                 _buildDocumentationSection(provider),
-                SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
                 _buildAdditionalInfoSection(provider),
               ],
             ),
@@ -248,10 +249,11 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
   }
 
   Widget _buildIdentificationSection(VehicleFormProvider provider) {
-    return FormSectionWidget(
+    return FormSectionHeader(
       title: 'Identificação do Veículo',
       icon: Icons.directions_car,
-      children: [
+      child: Column(
+        children: [
         _buildPhotoUploadSection(provider),
         SizedBox(height: GasometerDesignTokens.spacingLg),
         Container(
@@ -269,7 +271,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             // Remover onValidationChanged - validação será centralizada
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(
           key: _fieldKeys['modelo'],
           child: ValidatedFormField(
@@ -284,7 +286,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Row(
           children: [
             Expanded(
@@ -312,25 +314,29 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             ),
           ],
         ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildTechnicalSection(VehicleFormProvider provider) {
-    return FormSectionWidget(
+    return FormSectionHeader(
       title: 'Informações Técnicas',
       icon: Icons.speed,
-      children: [
-        _buildCombustivelSelector(provider),
-      ],
+      child: Column(
+        children: [
+          _buildCombustivelSelector(provider),
+        ],
+      ),
     );
   }
 
   Widget _buildDocumentationSection(VehicleFormProvider provider) {
-    return FormSectionWidget(
+    return FormSectionHeader(
       title: 'Documentação',
       icon: Icons.description,
-      children: [
+      child: Column(
+        children: [
         Container(
           key: _fieldKeys['odometro'],
           child: ValidatedFormField(
@@ -355,7 +361,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             },
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(
           key: _fieldKeys['placa'],
           child: ValidatedFormField(
@@ -376,7 +382,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             },
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(
           key: _fieldKeys['chassi'],
           child: ValidatedFormField(
@@ -397,7 +403,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             },
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(
           key: _fieldKeys['renavam'],
           child: ValidatedFormField(
@@ -418,36 +424,31 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             },
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildAdditionalInfoSection(VehicleFormProvider provider) {
-    return FormSectionWidget(
+    return FormSectionHeader(
       title: 'Informações Adicionais',
       icon: Icons.more_horiz,
-      children: [
-        Container(
-          key: _fieldKeys['observacoes'],
-          child: ValidatedFormField(
-            controller: _observacoesController,
-            label: 'Observações (opcional)',
-            hint: 'Adicione observações sobre o veículo...',
-            required: false,
-            validationType: ValidationType.length,
-            minLength: 0,
-            maxLengthValidation: 1000,
-            maxLines: 4,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(1000),
-            ],
-            onChanged: (value) {
-              setState(() {}); // Manter para contador de caracteres se necessário
-            },
+      child: Column(
+        children: [
+          Container(
+            key: _fieldKeys['observacoes'],
+            child: ObservationsField(
+              controller: _observacoesController,
+              label: 'Observações',
+              hint: 'Adicione observações sobre o veículo...',
+              required: false,
+              onChanged: (value) {
+                setState(() {}); // Manter para contador de caracteres se necessário
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -477,7 +478,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             ),
           ],
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -834,7 +835,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -893,7 +894,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
     final validationResult = await _formValidator.validateAll();
 
     // Validação customizada para combustível (não incluída no FormValidator)
-    if (formProvider!.selectedCombustivel == null || formProvider!.selectedCombustivel!.isEmpty) {
+    if (formProvider!.selectedCombustivel.isEmpty) {
       setFormError('Selecione o tipo de combustível');
       return;
     }
@@ -909,7 +910,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
     formProvider!.setLoading(true);
 
     try {
-      final vehiclesProvider = context.read<VehiclesProvider>();
+      if (!mounted) return;
+      final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
       
       // Criar entidade do veículo usando o FormProvider
       final vehicleEntity = formProvider!.createVehicleEntity();

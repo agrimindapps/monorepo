@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
 import '../../../../features/animals/presentation/providers/animals_provider.dart';
@@ -135,64 +136,9 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
   }
 
   Widget _buildAnimalSelector(List<Animal> animals) {
-    if (animals.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Icon(Icons.pets, size: 48, color: Colors.grey),
-              const SizedBox(height: 8),
-              const Text('Nenhum animal encontrado'),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/animals/add'),
-                child: const Text('Cadastrar Animal'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Animal',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _selectedAnimalId,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'Selecione um animal',
-            prefixIcon: Icon(Icons.pets),
-          ),
-          items: animals.map((animal) {
-            return DropdownMenuItem(
-              value: animal.id,
-              child: Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _getSpeciesColor(animal.species.name),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(animal.name),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: (value) => setState(() => _selectedAnimalId = value),
-          validator: (value) => value == null ? 'Selecione um animal' : null,
-        ),
-      ],
+    return PetiVetiFormComponents.animalRequired(
+      value: _selectedAnimalId,
+      onChanged: (String? value) => setState(() => _selectedAnimalId = value),
     );
   }
 
@@ -218,29 +164,16 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
   }
 
   Widget _buildTypeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Tipo de Medicamento',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<MedicationType>(
-          value: _selectedType,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.category),
-          ),
-          items: MedicationType.values.map((type) {
-            return DropdownMenuItem(
-              value: type,
-              child: Text(type.displayName),
-            );
-          }).toList(),
-          onChanged: (value) => setState(() => _selectedType = value!),
-        ),
-      ],
+    return PetiVetiFormComponents.medicationTypeDropdown(
+      value: _selectedType.name,
+      onChanged: (dynamic value) {
+        // Converter string de volta para enum
+        if (value is String) {
+          final type = MedicationType.values.firstWhere((t) => t.name == value);
+          setState(() => _selectedType = type);
+        }
+      },
+      isRequired: true,
     );
   }
 
@@ -374,59 +307,25 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
   }
 
   Widget _buildNotesField() {
-    return TextFormField(
+    return PetiVetiFormComponents.notesTreatment(
       controller: _notesController,
-      decoration: const InputDecoration(
-        labelText: 'Observações (opcional)',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.notes),
-        hintText: 'Informações adicionais sobre o tratamento',
-      ),
-      maxLines: 3,
-      maxLength: 500,
+      isRequired: false,
     );
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isSubmitting ? null : _submitForm,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: _isSubmitting
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Text(
-                widget.medication != null ? 'Salvar Alterações' : 'Cadastrar Medicamento',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-      ),
-    );
+    return widget.medication != null
+        ? PetiVetiFormComponents.submitUpdate(
+            onSubmit: _submitForm,
+            isLoading: _isSubmitting,
+          )
+        : PetiVetiFormComponents.submitCreate(
+            onSubmit: _submitForm,
+            isLoading: _isSubmitting,
+            itemName: 'Medicamento',
+          );
   }
 
-  Color _getSpeciesColor(String species) {
-    switch (species.toLowerCase()) {
-      case 'dog':
-      case 'cachorro':
-        return Colors.blue;
-      case 'cat':
-      case 'gato':
-        return Colors.orange;
-      case 'bird':
-      case 'pássaro':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;

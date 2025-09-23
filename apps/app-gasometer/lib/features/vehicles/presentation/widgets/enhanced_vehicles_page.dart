@@ -38,7 +38,6 @@ class _EnhancedVehiclesPageState extends State<EnhancedVehiclesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [

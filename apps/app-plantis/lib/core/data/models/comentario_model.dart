@@ -25,6 +25,8 @@ class ComentarioModel extends BaseSyncEntity {
   final DateTime? dataAtualizacao;
   @HiveField(12)
   final DateTime? dataCriacao;
+  @HiveField(13)
+  final String? plantId;
 
   const ComentarioModel({
     required this.id,
@@ -39,6 +41,7 @@ class ComentarioModel extends BaseSyncEntity {
     required this.conteudo,
     this.dataAtualizacao,
     this.dataCriacao,
+    this.plantId,
   }) : super(
           id: id,
           createdAt: createdAt,
@@ -58,6 +61,7 @@ class ComentarioModel extends BaseSyncEntity {
     required String conteudo,
     DateTime? dataAtualizacao,
     DateTime? dataCriacao,
+    String? plantId,
   }) {
     final now = DateTime.now();
     final comentarioId = id ?? now.millisecondsSinceEpoch.toString();
@@ -71,6 +75,7 @@ class ComentarioModel extends BaseSyncEntity {
       conteudo: conteudo,
       dataAtualizacao: dataAtualizacao ?? now,
       dataCriacao: dataCriacao ?? now,
+      plantId: plantId,
     );
   }
 
@@ -97,6 +102,7 @@ class ComentarioModel extends BaseSyncEntity {
           map['dataCriacao'] != null
               ? DateTime.parse(map['dataCriacao'] as String)
               : null,
+      plantId: map['plantId'] as String?,
     );
   }
 
@@ -108,6 +114,7 @@ class ComentarioModel extends BaseSyncEntity {
       'conteudo': conteudo,
       'data_atualizacao': dataAtualizacao?.toIso8601String(),
       'data_criacao': dataCriacao?.toIso8601String(),
+      'plant_id': plantId,
     };
   }
 
@@ -134,6 +141,7 @@ class ComentarioModel extends BaseSyncEntity {
           map['data_criacao'] != null
               ? DateTime.parse(map['data_criacao'] as String)
               : null,
+      plantId: map['plant_id'] as String?,
     );
   }
 
@@ -152,6 +160,7 @@ class ComentarioModel extends BaseSyncEntity {
     String? conteudo,
     DateTime? dataAtualizacao,
     DateTime? dataCriacao,
+    String? plantId,
   }) {
     return ComentarioModel(
       id: id ?? this.id,
@@ -166,6 +175,7 @@ class ComentarioModel extends BaseSyncEntity {
       conteudo: conteudo ?? this.conteudo,
       dataAtualizacao: dataAtualizacao ?? this.dataAtualizacao,
       dataCriacao: dataCriacao ?? this.dataCriacao,
+      plantId: plantId ?? this.plantId,
     );
   }
 

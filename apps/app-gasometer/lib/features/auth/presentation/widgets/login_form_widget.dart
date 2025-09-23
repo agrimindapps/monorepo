@@ -32,7 +32,7 @@ class LoginFormWidget extends StatelessWidget {
                   color: Colors.grey[600],
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // Campo de email
               AuthTextFieldWidget(
@@ -46,7 +46,7 @@ class LoginFormWidget extends StatelessWidget {
                   // Focar no próximo campo
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Campo de senha
               AuthTextFieldWidget(
@@ -69,7 +69,7 @@ class LoginFormWidget extends StatelessWidget {
                 validator: controller.validatePassword,
                 onFieldSubmitted: (_) => _handleLogin(context),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 12),
 
               // Lembrar-me e Esqueceu senha
               _buildRememberMeAndForgotPassword(context),
@@ -97,7 +97,7 @@ class LoginFormWidget extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // Botão de login
               AuthButtonWidget(
@@ -106,7 +106,7 @@ class LoginFormWidget extends StatelessWidget {
                 onPressed: () => _handleLogin(context),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // Divider
               const Row(
@@ -126,7 +126,7 @@ class LoginFormWidget extends StatelessWidget {
                   Expanded(child: Divider()),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Botões de login social
               const SocialLoginButtonsWidget(),
@@ -145,7 +145,7 @@ class LoginFormWidget extends StatelessWidget {
                 ),
               ),
               
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               
               // Botão de modo anônimo
               _buildAnonymousLoginButton(context),

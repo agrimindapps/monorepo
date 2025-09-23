@@ -51,7 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
         final isAnonymous = authProvider.isAnonymous;
         
         return Scaffold(
-          backgroundColor: GasometerColors.getPageBackgroundColor(context),
           body: SafeArea(
             child: Column(
               children: [
@@ -64,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       physics: const ClampingScrollPhysics(),
                       child: Center(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
+                          constraints: const BoxConstraints(maxWidth: 1120),
                           child: Padding(
                             padding: EdgeInsets.all(
                               GasometerDesignTokens.responsiveSpacing(context),

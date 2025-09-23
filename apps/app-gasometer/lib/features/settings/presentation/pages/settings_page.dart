@@ -35,7 +35,6 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -44,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: SingleChildScrollView(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
+                    constraints: const BoxConstraints(maxWidth: 1120),
                     child: Padding(
                       padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
                       child: _buildContent(context),

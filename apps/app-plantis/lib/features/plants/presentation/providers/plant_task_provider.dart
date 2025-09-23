@@ -251,6 +251,66 @@ class PlantTaskProvider extends ChangeNotifier {
     }
   }
 
+  /// Marks a task as completed with specific completion date and notes
+  Future<void> completeTaskWithDate(
+    String plantId, 
+    String taskId, {
+    required DateTime completionDate,
+    String? notes,
+  }) async {
+    try {
+      final tasks = getTasksForPlant(plantId);
+      final taskIndex = tasks.indexWhere((t) => t.id == taskId);
+
+      if (taskIndex == -1) {
+        _errorMessage = 'Tarefa não encontrada';
+        notifyListeners();
+        return;
+      }
+
+      final task = tasks[taskIndex];
+      
+      // Mark as completed with specific date
+      final completedTask = task.copyWith(
+        status: TaskStatus.completed,
+        completedDate: completionDate,
+        // Note: PlantTask doesn't have notes field, but we could extend it if needed
+      );
+
+      // Update the current task
+      tasks[taskIndex] = completedTask;
+
+      // CRÍTICO: Atualizar na persistência se disponível
+      if (_repository != null) {
+        await _repository!.updatePlantTask(completedTask);
+      }
+
+      // Generate next task based on completion date
+      final nextTask = _taskGenerationService.generateNextTask(completedTask);
+      tasks.add(nextTask);
+
+      // CRÍTICO: Salvar nova task na persistência se disponível
+      if (_repository != null) {
+        await _repository!.addPlantTask(nextTask);
+      }
+
+      _plantTasks[plantId] = tasks;
+
+      // Update all task statuses
+      await _updateTaskStatuses(plantId);
+
+      if (kDebugMode) {
+        print('✅ PlantTaskProvider: Tarefa $taskId concluída em ${completionDate.day}/${completionDate.month}/${completionDate.year}');
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao completar tarefa: $e';
+      if (kDebugMode) {
+        print('❌ PlantTaskProvider: Erro ao completar tarefa com data: $e');
+      }
+      notifyListeners();
+    }
+  }
+
   /// Deletes a task
   Future<void> deleteTask(String plantId, String taskId) async {
     try {

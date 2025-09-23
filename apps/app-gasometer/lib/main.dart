@@ -76,7 +76,8 @@ void main() async {
     // Reduce Firebase logging in debug mode to prevent console spam
     if (kDebugMode) {
       print(
-          '🔧 Firestore configurado para desenvolvimento com logging otimizado');
+        '🔧 Firestore configurado para desenvolvimento com logging otimizado',
+      );
     }
   } catch (e) {
     print('⚠️ Falha na configuração do Firestore: $e');
@@ -126,11 +127,16 @@ void main() async {
   print('🔄 Performing startup sync...');
   final startupSyncService = sl<StartupSyncService>();
   // Fire-and-forget - não bloqueia o startup
-  unawaited(startupSyncService.performStartupSync().then((_) {
-    print('✅ Startup sync completed successfully');
-  }).catchError((Object e) {
-    print('⚠️ Startup sync failed: $e - app continues with local data');
-  }));
+  unawaited(
+    startupSyncService
+        .performStartupSync()
+        .then((_) {
+          print('✅ Startup sync completed successfully');
+        })
+        .catchError((Object e) {
+          print('⚠️ Startup sync failed: $e - app continues with local data');
+        }),
+  );
   print('✅ Startup sync initiated');
 
   // Initialize Sync Service - REMOVED: Legacy sync system
@@ -168,15 +174,18 @@ void main() async {
     // Run connectivity test without blocking app startup
     GasometerFirebaseService.checkFirebaseConnectivity()
         .then((connectivityResult) {
-      print(
-          '🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}');
-      if ((connectivityResult['errors'] as List).isNotEmpty) {
-        print(
-            '⚠️ Firebase connectivity errors: ${connectivityResult['errors']}');
-      }
-    }).catchError((Object e) {
-      print('⚠️ Firebase connectivity test failed: $e');
-    });
+          print(
+            '🔗 Firebase connectivity result: ${connectivityResult['firestore']['status']}',
+          );
+          if ((connectivityResult['errors'] as List).isNotEmpty) {
+            print(
+              '⚠️ Firebase connectivity errors: ${connectivityResult['errors']}',
+            );
+          }
+        })
+        .catchError((Object e) {
+          print('⚠️ Firebase connectivity test failed: $e');
+        });
   }
 
   // Run app with error handling

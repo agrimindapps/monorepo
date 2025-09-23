@@ -1,0 +1,101 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== HEALTH CHECK =====
+    match /_health_check/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ===== USUÁRIOS =====
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // ===== SUBCOLEÇÕES DO USUÁRIO =====
+      match /vehicles/{vehicleId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /fuel_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /maintenance_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /expense_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /odometer_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ===== COLEÇÕES RAIZ (caso existam) =====
+    match /vehicles/{vehicleId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /fuel_records/{recordId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /maintenance_records/{recordId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /expense_records/{recordId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /odometer_records/{recordId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    // ===== ASSINATURAS =====
+    match /subscriptions/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== DADOS DE SINCRONIZAÇÃO =====
+    match /syncData/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== DISPOSITIVOS =====
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    // ===== CONFIGURAÇÕES =====
+    match /userSettings/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== BLOQUEAR TODO O RESTO =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

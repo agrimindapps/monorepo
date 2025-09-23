@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../../core/theme/plantis_colors.dart';
+import '../../../../tasks/presentation/widgets/task_completion_dialog.dart';
 import '../../../domain/entities/plant.dart';
 import '../../../domain/entities/plant_task.dart';
 import '../../providers/plant_task_provider.dart';
+import 'plant_task_adapter.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
 class PlantTasksSection extends StatefulWidget {
@@ -15,7 +18,7 @@ class PlantTasksSection extends StatefulWidget {
   State<PlantTasksSection> createState() => _PlantTasksSectionState();
 }
 
-class _PlantTasksSectionState extends State<PlantTasksSection> {
+class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAdapter {
   bool _showAllCompletedTasks = false;
 
   @override
@@ -212,7 +215,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     final color = _getTaskColor(task);
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark
@@ -233,134 +235,77 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // Checkbox ou ícone de status
-          GestureDetector(
-            onTap: () => taskProvider.toggleTaskCompletion(widget.plant.id, task.id),
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: task.isCompleted ? Colors.green : Colors.transparent,
-                border: Border.all(
-                  color: task.isCompleted ? Colors.green : color,
-                  width: 2,
+      child: InkWell(
+        onTap: task.isCompleted 
+            ? null 
+            : () => _showTaskCompletionDialog(context, task, taskProvider),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Ícone da tarefa
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                borderRadius: BorderRadius.circular(6),
+                child: Icon(_getTaskIcon(task.type), color: color, size: 20),
               ),
-              child:
-                  task.isCompleted
-                      ? const Icon(Icons.check, color: Colors.white, size: 16)
-                      : null,
-            ),
-          ),
 
-          const SizedBox(width: 16),
+              const SizedBox(width: 16),
 
-          // Ícone da tarefa
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(_getTaskIcon(task.type), color: color, size: 20),
-          ),
-
-          const SizedBox(width: 16),
-
-          // Informações da tarefa
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color:
-                        task.isCompleted
-                            ? theme.colorScheme.onSurfaceVariant
-                            : theme.colorScheme.onSurface,
-                    decoration:
-                        task.isCompleted ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                if (task.description?.isNotEmpty == true) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    task.description!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Row(
+              // Informações da tarefa
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.schedule,
-                      size: 14,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
                     Text(
-                      _formatDueDate(task.dueDate),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w500,
+                      task.title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color:
+                            task.isCompleted
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.onSurface,
+                        decoration:
+                            task.isCompleted ? TextDecoration.lineThrough : null,
                       ),
+                    ),
+                    if (task.description?.isNotEmpty == true) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        task.description!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          size: 14,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatDueDate(task.dueDate),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-
-          // Menu de ações
-          PopupMenuButton<String>(
-            icon: Icon(
-              Icons.more_vert,
-              color: theme.colorScheme.onSurfaceVariant,
-              size: 18,
-            ),
-            onSelected:
-                (action) =>
-                    _handleTaskAction(context, action, task, taskProvider),
-            itemBuilder:
-                (context) => [
-                  if (!task.isCompleted)
-                    const PopupMenuItem(
-                      value: 'complete',
-                      child: ListTile(
-                        leading: Icon(Icons.check_circle_outline),
-                        title: Text('Marcar como concluída'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: ListTile(
-                      leading: Icon(Icons.edit_outlined),
-                      title: Text('Editar'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: ListTile(
-                      leading: Icon(Icons.delete_outline, color: Colors.red),
-                      title: Text(
-                        'Excluir',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -407,64 +352,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     }
   }
 
-  void _handleTaskAction(
-    BuildContext context,
-    String action,
-    PlantTask task,
-    PlantTaskProvider taskProvider,
-  ) {
-    switch (action) {
-      case 'complete':
-        taskProvider.toggleTaskCompletion(widget.plant.id, task.id);
-        break;
-      case 'edit':
-        // TODO: Implementar edição de tarefa
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Edição de tarefa em desenvolvimento')),
-        );
-        break;
-      case 'delete':
-        _confirmDeleteTask(context, task, taskProvider);
-        break;
-    }
-  }
-
-  void _confirmDeleteTask(
-    BuildContext context,
-    PlantTask task,
-    PlantTaskProvider taskProvider,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Excluir tarefa'),
-            content: Text(
-              'Tem certeza que deseja excluir a tarefa "${task.title}"?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  taskProvider.deleteTask(widget.plant.id, task.id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tarefa excluída'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
-    );
-  }
 
   /// Seção de tarefas concluídas agrupadas por data com opção de carregar todas
   Widget _buildCompletedTasksSection(
@@ -1018,6 +905,56 @@ class _PlantTasksSectionState extends State<PlantTasksSection> {
     } else {
       final diff = today.difference(taskDate).inDays;
       return '${diff}d';
+    }
+  }
+
+  /// Exibe dialog de conclusão de tarefa (igual ao comportamento da página principal)
+  Future<void> _showTaskCompletionDialog(
+    BuildContext context, 
+    PlantTask plantTask, 
+    PlantTaskProvider taskProvider,
+  ) async {
+    try {
+      // Converter PlantTask para Task usando o adaptador
+      final taskEntity = PlantTaskAdapter.plantTaskToTask(plantTask, widget.plant.name);
+      
+      // Exibir dialog de conclusão
+      final result = await TaskCompletionDialog.show(
+        context: context,
+        task: taskEntity,
+      );
+
+      // Processar resultado se o usuário confirmou
+      if (result != null && context.mounted) {
+        await taskProvider.completeTaskWithDate(
+          widget.plant.id,
+          plantTask.id,
+          completionDate: result.completionDate,
+          notes: result.notes,
+        );
+
+        // Feedback visual de sucesso
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Tarefa "${plantTask.title}" concluída!'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Tratamento de erro
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao concluir tarefa: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 }

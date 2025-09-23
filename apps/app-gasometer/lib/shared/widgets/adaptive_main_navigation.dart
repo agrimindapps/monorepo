@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/presentation/widgets/responsive_content_area.dart';
+import '../../core/theme/gasometer_colors.dart';
 import 'responsive_sidebar.dart';
 
 /// Main adaptive navigation shell that changes layout based on screen size
@@ -53,8 +54,24 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
             onToggle: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
           ),
           Expanded(
-            child: ResponsiveContentArea(
-              child: widget.child,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF0F2F5), // Cinza claro igual ao Plantis
+                    Color(0xFFE8ECEF), // Cinza levemente mais escuro
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                ),
+              ),
+              child: ResponsiveContentArea(
+                child: widget.child,
+              ),
             ),
           ),
         ],
@@ -71,7 +88,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
             selectedIndex: _getCurrentNavigationIndex(context),
             onDestinationSelected: _onNavigationSelected,
             labelType: NavigationRailLabelType.selected,
-            backgroundColor: Theme.of(context).colorScheme.surface,
+            backgroundColor: Theme.of(context).colorScheme.surface, // Fundo branco para contraste
             indicatorColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
             selectedIconTheme: IconThemeData(
               color: Theme.of(context).colorScheme.primary,
@@ -87,7 +104,23 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: ResponsiveContentArea(child: widget.child),
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF0F2F5), // Cinza claro igual ao Plantis
+                    Color(0xFFE8ECEF), // Cinza levemente mais escuro
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                ),
+              ),
+              child: ResponsiveContentArea(child: widget.child),
+            ),
           ),
         ],
       ),

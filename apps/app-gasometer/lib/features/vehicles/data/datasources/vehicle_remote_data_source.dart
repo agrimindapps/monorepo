@@ -17,17 +17,14 @@ abstract class VehicleRemoteDataSource {
 class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
   final FirebaseFirestore _firestore;
   static const String _collection = 'vehicles';
-  static const String _appId = 'gasometer';
 
   VehicleRemoteDataSourceImpl(this._firestore);
 
-  String _getUserCollection(String userId) => '${_appId}_$userId';
-
   CollectionReference _getVehiclesCollection(String userId) {
     return _firestore
-        .collection(_collection)
-        .doc(_getUserCollection(userId))
-        .collection('vehicles');
+        .collection('users')
+        .doc(userId)
+        .collection(_collection);
   }
 
   @override
@@ -69,7 +66,7 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
       vehicleData.addAll({
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'appId': _appId,
+        'user_id': userId,
       });
 
       await _getVehiclesCollection(userId).doc(vehicle.id).set(vehicleData);
@@ -112,6 +109,7 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
         vehicleData.addAll({
           'updatedAt': FieldValue.serverTimestamp(),
           'synced': true,
+          'user_id': userId,
         });
 
         batch.set(collection.doc(vehicle.id), vehicleData);

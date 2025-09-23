@@ -1,182 +1,102 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
-/// Implementation of PlantCommentsRepository using Hive for local storage
+/// Implementation of PlantCommentsRepository using the unified sync system
 class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
-  static const String _boxName = 'plant_comments';
-  Box<ComentarioModel>? _box;
+  static const String _appName = 'plantis';
 
-  /// Initialize the Hive box for comments
-  Future<void> _ensureBoxOpen() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox<ComentarioModel>(_boxName);
-    }
-  }
-
-  /// Get key format for storing comments by plant
-  String _getPlantCommentsPrefix(String plantId) => 'plant_$plantId';
+  PlantCommentsRepositoryImpl();
 
   @override
   Future<Either<Failure, List<ComentarioModel>>> getCommentsForPlant(String plantId) async {
-    try {
-      await _ensureBoxOpen();
-      
-      final prefix = _getPlantCommentsPrefix(plantId);
-      final comments = <ComentarioModel>[];
-      
-      // Filter comments for the specific plant
-      for (final key in _box!.keys) {
-        if (key.toString().startsWith(prefix)) {
-          final comment = _box!.get(key);
-          if (comment != null && !comment.isDeleted) {
-            comments.add(comment);
-          }
-        }
-      }
-      
-      // Sort by creation date (newest first)
-      comments.sort((a, b) => (b.dataCriacao ?? DateTime.now())
-          .compareTo(a.dataCriacao ?? DateTime.now()));
-      
-      return Right(comments);
-    } catch (e) {
-      return const Left(CacheFailure('Erro ao carregar comentários'));
-    }
+    // Use UnifiedSyncManager to find all comments and filter locally
+    final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(_appName);
+    
+    return result.fold(
+      (failure) => Left(failure),
+      (comments) {
+        // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
+        final filteredComments = comments
+            .where((comment) => !comment.isDeleted && comment.plantId == plantId)
+            .toList()
+          ..sort((a, b) => (b.dataCriacao ?? DateTime.now())
+              .compareTo(a.dataCriacao ?? DateTime.now()));
+        
+        return Right(filteredComments);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, ComentarioModel>> addComment(String plantId, String content) async {
-    try {
-      await _ensureBoxOpen();
-      
-      // Create new comment
-      final comment = ComentarioModel.create(
-        conteudo: content,
-        // Optionally add userId if available from auth context
-      );
-      
-      // Generate unique key for this plant's comment
-      final key = '${_getPlantCommentsPrefix(plantId)}_${comment.id}';
-      
-      // Store in Hive
-      await _box!.put(key, comment);
-      
-      return Right(comment);
-    } catch (e) {
-      return const Left(CacheFailure('Erro ao adicionar comentário'));
-    }
+    // Create new comment with plant association
+    final comment = ComentarioModel.create(
+      conteudo: content,
+      plantId: plantId,
+    );
+
+    final result = await UnifiedSyncManager.instance.create<ComentarioModel>(_appName, comment);
+    
+    return result.fold(
+      (failure) => Left(failure),
+      (commentId) => Right(comment),
+    );
   }
 
   @override
   Future<Either<Failure, ComentarioModel>> updateComment(ComentarioModel comment) async {
-    try {
-      await _ensureBoxOpen();
-      
-      // Find the key for this comment
-      String? commentKey;
-      for (final key in _box!.keys) {
-        final existingComment = _box!.get(key);
-        if (existingComment?.id == comment.id) {
-          commentKey = key.toString();
-          break;
-        }
-      }
-      
-      if (commentKey == null) {
-        return const Left(NotFoundFailure('Comentário não encontrado'));
-      }
-      
-      // Update comment with new timestamp
-      final updatedComment = comment.copyWith(
-        dataAtualizacao: DateTime.now(),
-        isDirty: true,
-      );
-      
-      await _box!.put(commentKey, updatedComment);
-      
-      return Right(updatedComment);
-    } catch (e) {
-      return const Left(CacheFailure('Erro ao atualizar comentário'));
-    }
+    // Update comment with new timestamp
+    final updatedComment = comment.copyWith(
+      dataAtualizacao: DateTime.now(),
+    );
+    
+    final result = await UnifiedSyncManager.instance.update<ComentarioModel>(_appName, comment.id, updatedComment);
+    
+    return result.fold(
+      (failure) => Left(failure),
+      (_) => Right(updatedComment),
+    );
   }
 
   @override
   Future<Either<Failure, void>> deleteComment(String commentId) async {
-    try {
-      await _ensureBoxOpen();
-      
-      // Find and mark comment as deleted (soft delete)
-      String? commentKey;
-      for (final key in _box!.keys) {
-        final comment = _box!.get(key);
-        if (comment?.id == commentId) {
-          commentKey = key.toString();
-          break;
-        }
-      }
-      
-      if (commentKey == null) {
-        return const Left(NotFoundFailure('Comentário não encontrado'));
-      }
-      
-      final comment = _box!.get(commentKey);
-      if (comment != null) {
-        final deletedComment = comment.copyWith(
-          isDeleted: true,
-          isDirty: true,
-        );
-        await _box!.put(commentKey, deletedComment);
-      }
-      
-      return const Right(null);
-    } catch (e) {
-      return const Left(CacheFailure('Erro ao excluir comentário'));
-    }
+    return await UnifiedSyncManager.instance.delete<ComentarioModel>(_appName, commentId);
   }
 
   @override
   Future<Either<Failure, void>> deleteCommentsForPlant(String plantId) async {
-    try {
-      await _ensureBoxOpen();
-      
-      final prefix = _getPlantCommentsPrefix(plantId);
-      final keysToDelete = <String>[];
-      
-      // Find all comments for this plant
-      for (final key in _box!.keys) {
-        if (key.toString().startsWith(prefix)) {
-          keysToDelete.add(key.toString());
+    // Get all comments for the plant and delete them
+    final commentsResult = await getCommentsForPlant(plantId);
+    
+    return commentsResult.fold(
+      (failure) => Left(failure),
+      (comments) async {
+        // Delete each comment individually using UnifiedSyncManager
+        for (final comment in comments) {
+          final deleteResult = await UnifiedSyncManager.instance.delete<ComentarioModel>(_appName, comment.id);
+          if (deleteResult.isLeft()) {
+            return deleteResult;
+          }
         }
-      }
-      
-      // Delete all comments for the plant
-      for (final key in keysToDelete) {
-        await _box!.delete(key);
-      }
-      
-      return const Right(null);
-    } catch (e) {
-      return const Left(CacheFailure('Erro ao excluir comentários da planta'));
-    }
+        return const Right(null);
+      },
+    );
   }
 
   /// Clear all comments (for testing or data reset)
   Future<void> clearAllComments() async {
-    try {
-      await _ensureBoxOpen();
-      await _box!.clear();
-    } catch (e) {
-      throw Exception('Erro ao limpar todos os comentários: $e');
-    }
-  }
-
-  /// Close the Hive box
-  Future<void> close() async {
-    await _box?.close();
-    _box = null;
+    // Get all comments and delete them
+    final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(_appName);
+    await result.fold(
+      (failure) => throw Exception('Failed to get comments: ${failure.message}'),
+      (comments) async {
+        for (final comment in comments) {
+          await UnifiedSyncManager.instance.delete<ComentarioModel>(_appName, comment.id);
+        }
+      },
+    );
   }
 }

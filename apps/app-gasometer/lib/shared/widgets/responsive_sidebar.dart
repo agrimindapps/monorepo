@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../core/theme/gasometer_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
@@ -34,7 +35,7 @@ class ResponsiveSidebar extends StatelessWidget {
         elevation: 0,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: Theme.of(context).colorScheme.surface, // Fundo branco para contraste
             border: Border(
               right: BorderSide(
                 color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.08),

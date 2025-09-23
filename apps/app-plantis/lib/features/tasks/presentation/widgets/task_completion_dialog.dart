@@ -71,11 +71,14 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     final theme = Theme.of(context);
 
     return AlertDialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       contentPadding: const EdgeInsets.all(24),
       content: SingleChildScrollView(
         child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.85,
+          width: MediaQuery.of(context).size.width > 400 
+              ? 400 
+              : MediaQuery.of(context).size.width * 0.85,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,6 +391,19 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       helpText: 'Data da Conclusão',
       confirmText: 'CONFIRMAR',
       cancelText: 'CANCELAR',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dialogTheme: const DialogThemeData(
+              backgroundColor: Colors.white,
+            ),
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              surface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (selectedDate != null) {

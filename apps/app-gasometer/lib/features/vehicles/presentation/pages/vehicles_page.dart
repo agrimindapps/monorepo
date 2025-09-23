@@ -96,7 +96,6 @@ class _VehiclesPageState extends State<VehiclesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -385,7 +384,7 @@ class _ErrorState extends StatelessWidget {
 
 
 /// ✅ PERFORMANCE FIX: Grid com CustomScrollView e SliverGrid para virtualização
-/// ✅ LAYOUT FIX: Ocupa toda a largura disponível (1120px) distribuindo cards uniformemente
+/// ✅ LAYOUT FIX: Conteúdo limitado a 1120px centralizado dentro da área total
 class _OptimizedVehiclesGrid extends StatelessWidget {
   final List<VehicleEntity> vehicles;
   final void Function(BuildContext, VehicleEntity) onEditVehicle;
@@ -399,60 +398,51 @@ class _OptimizedVehiclesGrid extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Determinar número de colunas baseado na largura disponível
-        int crossAxisCount = 1;
-        final double availableWidth = constraints.maxWidth;
-        const double spacing = 16.0;
-        const double horizontalPadding = 16.0;
-        
-        // Calcular colunas baseado na largura disponível
-        if (availableWidth > 1200) {
-          crossAxisCount = 4;
-        } else if (availableWidth > 800) {
-          crossAxisCount = 3;
-        } else if (availableWidth > 500) {
-          crossAxisCount = 2;
-        }
-        
-        // Calcular largura efetiva dos cards para ocupar toda a largura
-        final double totalSpacing = (crossAxisCount - 1) * spacing + (2 * horizontalPadding);
-        final double effectiveWidth = availableWidth - totalSpacing;
-        final double cardWidth = effectiveWidth / crossAxisCount;
-        
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: 8.0,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              // Remove constraint fixa, permitindo uso completo da largura disponível
-              constraints: BoxConstraints(maxWidth: availableWidth),
-              child: AlignedGridView.count(
-                crossAxisCount: crossAxisCount,
-                mainAxisSpacing: spacing,
-                crossAxisSpacing: spacing,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: vehicles.length,
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    width: cardWidth,
-                    child: VehicleCard(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Center(
+        child: ConstrainedBox(
+          // Limitar conteúdo a 1120px mas centralizado
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Determinar número de colunas baseado na largura limitada (1120px max)
+                int crossAxisCount = 1;
+                final double availableWidth = constraints.maxWidth;
+                const double spacing = 16.0;
+                
+                // Calcular colunas baseado na largura do conteúdo limitado
+                if (availableWidth > 900) {
+                  crossAxisCount = 4;
+                } else if (availableWidth > 600) {
+                  crossAxisCount = 3;
+                } else if (availableWidth > 400) {
+                  crossAxisCount = 2;
+                }
+                
+                return AlignedGridView.count(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: spacing,
+                  crossAxisSpacing: spacing,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: vehicles.length,
+                  itemBuilder: (context, index) {
+                    return VehicleCard(
                       key: ValueKey(vehicles[index].id),
                       vehicle: vehicles[index],
                       onEdit: () => onEditVehicle(context, vehicles[index]),
                       onDelete: () => onDeleteVehicle(context, vehicles[index]),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                );
+              },
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

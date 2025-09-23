@@ -50,22 +50,26 @@ class _ReportsPageState extends State<ReportsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: OptimizedReportsContent(
-                    selectedVehicleId: _selectedVehicleId,
-                    onVehicleChanged: (String? vehicleId) {
-                      setState(() {
-                        _selectedVehicleId = vehicleId;
-                      });
-                    },
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1120),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: OptimizedReportsContent(
+                        selectedVehicleId: _selectedVehicleId,
+                        onVehicleChanged: (String? vehicleId) {
+                          setState(() {
+                            _selectedVehicleId = vehicleId;
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),

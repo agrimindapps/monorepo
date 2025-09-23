@@ -122,7 +122,6 @@ class _ExpensesPageState extends State<ExpensesPage> {
         final vehiclesError = data['vehiclesError'] as String?;
 
         return Scaffold(
-          backgroundColor: GasometerColors.getPageBackgroundColor(context),
           body: SafeArea(
             child: Column(
               children: [
@@ -132,9 +131,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
                   child: SingleChildScrollView(
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1200),
+                        constraints: const BoxConstraints(maxWidth: 1120),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: _buildContentOptimized(context, isLoading, hasError, expenses, expensesError),
                         ),
                       ),

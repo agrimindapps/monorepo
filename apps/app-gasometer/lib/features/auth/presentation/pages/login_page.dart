@@ -106,14 +106,17 @@ class _LoginPageState extends State<LoginPage>
 
     return Center(
       child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).padding.top + 16,
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isMobile
                 ? size.width * 0.9
                 : (isTablet ? 500 : 1000),
             maxHeight: isMobile
-                ? double.infinity
-                : (isTablet ? 650 : 650),
+                ? size.height * 0.9
+                : (isTablet ? 700 : 650),
           ),
           child: Card(
             elevation: 10,
@@ -160,10 +163,10 @@ class _LoginPageState extends State<LoginPage>
       child: FadeTransition(
         opacity: _fadeInAnimation,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             _buildMobileBranding(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
             _buildAuthContent(),
           ],
         ),
@@ -332,45 +335,44 @@ class _LoginPageState extends State<LoginPage>
           return const RecoveryFormWidget();
         }
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AuthTabsWidget(),
-              const SizedBox(height: 30),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.0, 0.1),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      )),
-                      child: child,
-                    ),
-                  );
-                },
-                child: controller.isSignUpMode
-                    ? Container(
-                        key: const ValueKey('signup'),
-                        child: SignupFormWidget(
-                          onSignupSuccess: _handleAuthSuccess,
-                        ),
-                      )
-                    : Container(
-                        key: const ValueKey('login'),
-                        child: LoginFormWidget(
-                          onLoginSuccess: _handleAuthSuccess,
-                        ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AuthTabsWidget(),
+            const SizedBox(height: 24),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.1),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: child,
+                  ),
+                );
+              },
+              child: controller.isSignUpMode
+                  ? Container(
+                      key: const ValueKey('signup'),
+                      child: SignupFormWidget(
+                        onSignupSuccess: _handleAuthSuccess,
                       ),
-              ),
-            ],
-          ),
+                    )
+                  : Container(
+                      key: const ValueKey('login'),
+                      child: LoginFormWidget(
+                        onLoginSuccess: _handleAuthSuccess,
+                      ),
+                    ),
+            ),
+          ],
         );
       },
     );
@@ -404,9 +406,9 @@ class _LoginPageState extends State<LoginPage>
   
   /// Navega para veículos quando sync terminar - padrão app-plantis
   void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
-    late StreamSubscription subscription;
+    late StreamSubscription<void> subscription;
     
-    subscription = Stream.periodic(const Duration(milliseconds: 500))
+    subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
         .listen((_) {
       if (!authProvider.isSyncInProgress) {
         subscription.cancel();

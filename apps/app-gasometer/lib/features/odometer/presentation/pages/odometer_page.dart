@@ -82,7 +82,6 @@ class _OdometerPageState extends State<OdometerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GasometerColors.getPageBackgroundColor(context),
       body: SafeArea(
         child: Consumer<OdometerProvider>(
           builder: (context, odometerProvider, child) {

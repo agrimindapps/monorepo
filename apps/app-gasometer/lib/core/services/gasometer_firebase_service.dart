@@ -91,15 +91,15 @@ class GasometerFirebaseService {
     
     try {
       final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('fuel_records')
-          .doc('${_appId}_$userId')
-          .collection('records')
           .doc();
 
       await docRef.set({
         ...fuelData,
         'createdAt': FieldValue.serverTimestamp(),
-        'appId': _appId,
+        'user_id': userId,
         'platform': Platform.operatingSystem,
       });
 
@@ -145,15 +145,15 @@ class GasometerFirebaseService {
     
     try {
       final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('maintenance_records')
-          .doc('${_appId}_$userId')
-          .collection('records')
           .doc();
 
       await docRef.set({
         ...maintenanceData,
         'createdAt': FieldValue.serverTimestamp(),
-        'appId': _appId,
+        'user_id': userId,
         'platform': Platform.operatingSystem,
       });
 
@@ -183,15 +183,15 @@ class GasometerFirebaseService {
   }) async {
     try {
       final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('expense_records')
-          .doc('${_appId}_$userId')
-          .collection('records')
           .doc();
 
       await docRef.set({
         ...expenseData,
         'createdAt': FieldValue.serverTimestamp(),
-        'appId': _appId,
+        'user_id': userId,
         'platform': Platform.operatingSystem,
       });
 
@@ -220,15 +220,15 @@ class GasometerFirebaseService {
   }) async {
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('vehicles')
-          .doc('${_appId}_$userId')
+          .collection('users')
+          .doc(userId)
           .collection('vehicles')
           .doc();
 
       await docRef.set({
         ...vehicleData,
         'createdAt': FieldValue.serverTimestamp(),
-        'appId': _appId,
+        'user_id': userId,
         'platform': Platform.operatingSystem,
       });
 
@@ -253,26 +253,26 @@ class GasometerFirebaseService {
   static Future<Map<String, dynamic>> getUserStats(String userId) async {
     try {
       final fuelQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('fuel_records')
-          .doc('${_appId}_$userId')
-          .collection('records')
           .get();
 
       final maintenanceQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('maintenance_records')
-          .doc('${_appId}_$userId')
-          .collection('records')
           .get();
 
       final expenseQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('expense_records')
-          .doc('${_appId}_$userId')
-          .collection('records')
           .get();
 
       final vehicleQuery = await FirebaseFirestore.instance
-          .collection('vehicles')
-          .doc('${_appId}_$userId')
+          .collection('users')
+          .doc(userId)
           .collection('vehicles')
           .get();
 
@@ -312,13 +312,13 @@ class GasometerFirebaseService {
   }) async {
     try {
       await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
           .collection('feature_usage')
-          .doc('${_appId}_$userId')
-          .collection('usage')
           .add({
         'featureName': featureName,
         'timestamp': FieldValue.serverTimestamp(),
-        'appId': _appId,
+        'user_id': userId,
         'platform': Platform.operatingSystem,
         'additionalData': additionalData,
       });

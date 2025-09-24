@@ -140,13 +140,13 @@ packages/core/
 
 | Serviço | App-Plantis | Core Package | Diferenças Principais |
 |---------|-------------|--------------|---------------------|
-| **NotificationService** | PlantisNotificationService | LocalNotificationService | Domain logic vs Generic |
-| **StorageService** | SecureStorageService | HiveStorageService | Encryption vs Standard |
-| **AnalyticsService** | AnalyticsProvider | FirebaseAnalyticsService | Provider pattern vs Clean |
-| **AuthService** | AuthSecurityService | FirebaseAuthService | Security layer vs Basic |
-| **NavigationService** | NavigationService | NavigationService | Local vs Shared |
-| **ThemeProvider** | ThemeProvider | ThemeProvider | Duplicated |
-| **ConnectivityService** | NetworkInfo | ConnectivityService | Different abstractions |
+| ✅ **NotificationService** | PlantisNotificationService | LocalNotificationService | Domain logic vs Generic |
+| 📋 **StorageService** | SecureStorageService | HiveStorageService | Encryption vs Standard |
+| 📋 **AnalyticsService** | AnalyticsProvider | FirebaseAnalyticsService | Provider pattern vs Clean |
+| 📋 **AuthService** | AuthSecurityService | FirebaseAuthService | Security layer vs Basic |
+| 📋 **NavigationService** | NavigationService | NavigationService | Local vs Shared |
+| ✅ **ThemeProvider** | ThemeProvider | ThemeProvider | Duplicated |
+| ✅ **ConnectivityService** | NetworkInfo | ConnectivityService | Different abstractions |
 | **ImageService** | Enhanced caching | ImageService | Cache optimization |
 | **FileService** | - | FileManagerService | Missing in app |
 | **ValidationService** | Data validation | ValidationService | Domain vs Generic |

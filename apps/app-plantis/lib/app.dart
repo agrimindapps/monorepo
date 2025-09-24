@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:core/core.dart';
 
 import 'core/di/injection_container.dart' as di;
-import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/plantis_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart' as app_auth;
@@ -39,7 +38,7 @@ class PlantisApp extends StatelessWidget {
           create: (_) => di.sl<ChangeNotifier>(),
         ),
         ChangeNotifierProvider(
-          create: (_) => di.sl<ThemeProvider>()..initialize(),
+          create: (_) => di.sl<ThemeProvider>(),
         ),
       ],
       builder: (context, child) {

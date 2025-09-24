@@ -10,7 +10,6 @@ import '../../shared/widgets/responsive_layout.dart';
 import '../../shared/widgets/base_page_scaffold.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../core/theme/plantis_design_tokens.dart';
-import '../../core/providers/theme_provider.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
     as auth_providers;
 import '../../features/development/presentation/pages/database_inspector_page.dart';

@@ -39,20 +39,26 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
   Widget build(BuildContext context) {
     return Consumer<PlantCommentsProvider>(
       builder: (context, provider, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildAddCommentSection(context, provider),
-            const SizedBox(height: 24),
-            if (provider.isLoading && !provider.hasComments)
-              _buildLoadingState(context)
-            else if (provider.hasComments)
-              _buildCommentsList(context, provider)
-            else
-              _buildEmptyState(context),
-            if (provider.errorMessage != null)
-              _buildErrorMessage(context, provider),
-          ],
+        return GestureDetector(
+          onTap: () {
+            // Remove o foco do campo de comentário quando tocar em outros lugares
+            FocusScope.of(context).unfocus();
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAddCommentSection(context, provider),
+              const SizedBox(height: 24),
+              if (provider.isLoading && !provider.hasComments)
+                _buildLoadingState(context)
+              else if (provider.hasComments)
+                _buildCommentsList(context, provider)
+              else
+                _buildEmptyState(context),
+              if (provider.errorMessage != null)
+                _buildErrorMessage(context, provider),
+            ],
+          ),
         );
       },
     );
@@ -102,6 +108,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
           TextField(
             controller: _commentController,
             maxLines: 3,
+            onTapOutside: (event) {
+              // Remove o foco quando tocar fora do campo
+              FocusScope.of(context).unfocus();
+            },
             decoration: InputDecoration(
               hintText:
                   'Escreva uma observação sobre ${widget.plant.displayName}...',

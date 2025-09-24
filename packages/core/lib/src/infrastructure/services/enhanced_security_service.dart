@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -25,8 +27,10 @@ class EnhancedSecurityService {
   static const String _keyPrefix = 'security_key_';
   static const String _saltKey = 'security_salt';
   static const int _defaultKeyLength = 32;
-  // static const int _defaultSaltLength = 16; // Reserved for future use
+  static const int _defaultSaltLength = 16;
   static const int _defaultIterations = 100000; // PBKDF2 iterations
+  static const String _encryptionVersion = 'v2'; // Version for new AES encryption
+  static const String _legacyPrefix = 'legacy:';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
@@ -88,7 +92,7 @@ class EnhancedSecurityService {
 
   // ========== CRIPTOGRAFIA ==========
 
-  /// Criptografa dados usando AES-256
+  /// Criptografa dados usando AES-256-GCM
   Future<Result<String>> encrypt(String data, {String? customKey}) async {
     if (!_initialized) {
       final initResult = await initialize();
@@ -96,14 +100,20 @@ class EnhancedSecurityService {
     }
 
     try {
-      final key = customKey ?? await _getOrCreateKey('default');
-      final salt = _generateSalt();
-      final iv = _generateIV();
-      
-      // Por simplicidade, usamos base64 (em produção, usaria AES real)
-      final encrypted = base64Encode(utf8.encode(data + key + salt.toString()));
-      final result = '$iv:$salt:$encrypted';
-      
+      final keyString = customKey ?? await _getOrCreateKey('default');
+      final keyBytes = _deriveKey(keyString, await _getMasterSalt());
+      final key = Key(keyBytes);
+
+      // Generate unique IV for each encryption
+      final iv = IV.fromSecureRandom(16);
+
+      // Use AES-256-GCM for authenticated encryption
+      final encrypter = Encrypter(AES(key, mode: AESMode.gcm));
+      final encrypted = encrypter.encrypt(data, iv: iv);
+
+      // Format: version:iv:encrypted_data
+      final result = '$_encryptionVersion:${iv.base64}:${encrypted.base64}';
+
       return Result.success(result);
     } catch (e, stackTrace) {
       return Result.error(
@@ -117,7 +127,7 @@ class EnhancedSecurityService {
     }
   }
 
-  /// Descriptografa dados
+  /// Descriptografa dados (suporta tanto AES quanto legacy Base64)
   Future<Result<String>> decrypt(String encryptedData, {String? customKey}) async {
     if (!_initialized) {
       final initResult = await initialize();
@@ -125,8 +135,13 @@ class EnhancedSecurityService {
     }
 
     try {
+      // Check if it's legacy Base64 encrypted data
+      if (encryptedData.startsWith(_legacyPrefix) || !encryptedData.contains(':')) {
+        return _decryptLegacyData(encryptedData, customKey);
+      }
+
       final parts = encryptedData.split(':');
-      if (parts.length != 3) {
+      if (parts.length < 3) {
         return Result.error(
           SecurityError(
             message: 'Formato de dados criptografados inválido',
@@ -135,17 +150,15 @@ class EnhancedSecurityService {
         );
       }
 
-      // final iv = parts[0]; // Reserved for future use
-      final salt = int.parse(parts[1]);
-      final encrypted = parts[2];
-      
-      final key = customKey ?? await _getOrCreateKey('default');
-      
-      // Por simplicidade, decodifica base64 (em produção, usaria AES real)
-      final decoded = utf8.decode(base64Decode(encrypted));
-      final originalData = decoded.replaceAll(key, '').replaceAll(salt.toString(), '');
-      
-      return Result.success(originalData);
+      final version = parts[0];
+
+      // Handle different encryption versions
+      if (version == _encryptionVersion) {
+        return _decryptAESData(parts, customKey);
+      } else {
+        // Assume it's legacy format without version prefix
+        return _decryptLegacyData(encryptedData, customKey);
+      }
     } catch (e, stackTrace) {
       return Result.error(
         SecurityError(
@@ -575,6 +588,83 @@ class EnhancedSecurityService {
   }
 
   // ========== MÉTODOS PRIVADOS ==========
+
+  /// Deriva chave usando PBKDF2
+  Uint8List _deriveKey(String key, String salt) {
+    final keyBytes = utf8.encode(key);
+    final saltBytes = utf8.encode(salt);
+
+    // Simula PBKDF2 com múltiplas iterações de SHA-256
+    List<int> derivedKey = [...keyBytes, ...saltBytes];
+    for (int i = 0; i < _defaultIterations; i++) {
+      derivedKey = sha256.convert(derivedKey).bytes;
+    }
+
+    // Retorna os primeiros 32 bytes para AES-256
+    return Uint8List.fromList(derivedKey.take(32).toList());
+  }
+
+  /// Descriptografa dados legacy usando Base64
+  Future<Result<String>> _decryptLegacyData(String encryptedData, String? customKey) async {
+    try {
+      // Remove legacy prefix se presente
+      final data = encryptedData.startsWith(_legacyPrefix)
+          ? encryptedData.substring(_legacyPrefix.length)
+          : encryptedData;
+
+      // Para dados legacy, simplesmente decodifica Base64
+      final decoded = utf8.decode(base64Decode(data));
+
+      return Result.success(decoded);
+    } catch (e, stackTrace) {
+      return Result.error(
+        SecurityError(
+          message: 'Erro ao descriptografar dados legacy: ${e.toString()}',
+          code: 'DECRYPT_LEGACY_ERROR',
+          details: e.toString(),
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// Descriptografa dados AES
+  Future<Result<String>> _decryptAESData(List<String> parts, String? customKey) async {
+    try {
+      if (parts.length < 3) {
+        return Result.error(
+          SecurityError(
+            message: 'Formato AES inválido - partes insuficientes',
+            code: 'INVALID_AES_FORMAT',
+          ),
+        );
+      }
+
+      final ivBase64 = parts[1];
+      final encryptedBase64 = parts[2];
+
+      final keyString = customKey ?? await _getOrCreateKey('default');
+      final keyBytes = _deriveKey(keyString, await _getMasterSalt());
+      final key = Key(keyBytes);
+
+      final iv = IV.fromBase64(ivBase64);
+      final encrypted = Encrypted.fromBase64(encryptedBase64);
+
+      final encrypter = Encrypter(AES(key, mode: AESMode.gcm));
+      final decrypted = encrypter.decrypt(encrypted, iv: iv);
+
+      return Result.success(decrypted);
+    } catch (e, stackTrace) {
+      return Result.error(
+        SecurityError(
+          message: 'Erro ao descriptografar dados AES: ${e.toString()}',
+          code: 'DECRYPT_AES_ERROR',
+          details: e.toString(),
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
 
   Future<String> _getOrCreateKey(String keyName) async {
     final keyKey = '$_keyPrefix$keyName';

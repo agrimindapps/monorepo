@@ -29,10 +29,10 @@ import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../auth/auth_state_notifier.dart';
 import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
+import '../adapters/network_info_adapter.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/background_sync_provider.dart';
 import '../providers/sync_status_provider.dart';
-import '../providers/theme_provider.dart';
 import '../services/background_sync_service.dart';
 import '../services/backup_audit_service.dart';
 import '../services/backup_data_transformer_service.dart';
@@ -112,8 +112,9 @@ void _initCoreServices() {
   sl.registerLazySingleton(() => FirebaseStorage.instance);
   sl.registerLazySingleton(() => FirebaseFunctions.instance);
 
-  // Network Info
-  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
+  // Network Info - Migrated to Adapter Pattern for enhanced features
+  // BACKWARD COMPATIBILITY: Interface NetworkInfo preservada, zero breaking changes
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoAdapter(sl<ConnectivityService>()));
 
   // Auth Repository
   sl.registerLazySingleton<IAuthRepository>(() => FirebaseAuthService());
@@ -466,8 +467,8 @@ void _initAppServices() {
     ),
   );
 
-  // Theme Provider
-  sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider());
+  // Theme Provider (using core package implementation)
+  sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider()..initialize());
 
   // Sync Status Provider (legacy)
   sl.registerLazySingleton<SyncStatusProvider>(

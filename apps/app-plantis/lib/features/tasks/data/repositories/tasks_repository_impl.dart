@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart' hide Task;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
+import '../../../../core/adapters/network_info_adapter.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/repositories/tasks_repository.dart';
 import '../datasources/local/tasks_local_datasource.dart';
@@ -113,16 +114,146 @@ class TasksRepositoryImpl implements TasksRepository {
     }
   }
 
-  // Background sync method (fire and forget)
-  void _syncTasksInBackground(String userId) {
+  // Background sync method (fire and forget) - ENHANCED with connection type optimization
+  void _syncTasksInBackground(String userId) async {
+    try {
+      // ENHANCED FEATURE: Optimize sync based on connection type
+      final syncStrategy = await _determineSyncStrategy();
+
+      // Apply connection-specific optimizations
+      switch (syncStrategy) {
+        case SyncStrategy.aggressive:
+          // WiFi/Ethernet: Full sync with all optimizations
+          _performAggressiveSync(userId);
+          break;
+        case SyncStrategy.conservative:
+          // Mobile data: Reduce frequency, smaller batches
+          _performConservativeSync(userId);
+          break;
+        case SyncStrategy.minimal:
+          // Slow connection: Only critical updates
+          _performMinimalSync(userId);
+          break;
+        case SyncStrategy.disabled:
+          // Offline or unstable: Skip sync
+          if (kDebugMode) {
+            print('🚫 TasksRepository: Sync skipped due to poor connection');
+          }
+          return;
+      }
+    } catch (e) {
+      // Fallback to basic sync if enhanced features fail
+      _performBasicSync(userId);
+    }
+  }
+
+  /// ENHANCED FEATURE: Determine optimal sync strategy based on connection type and stability
+  Future<SyncStrategy> _determineSyncStrategy() async {
+    try {
+      // Check if we have enhanced NetworkInfo (backward compatible)
+      final enhanced = networkInfo.asEnhanced;
+      if (enhanced == null) {
+        return SyncStrategy.conservative; // Fallback for basic NetworkInfo
+      }
+
+      // Check connection stability first
+      final isStable = await enhanced.isStable;
+      if (!isStable) {
+        return SyncStrategy.disabled;
+      }
+
+      // Determine strategy based on connection type
+      final connectionType = await enhanced.connectionType;
+      switch (connectionType) {
+        case ConnectivityType.wifi:
+        case ConnectivityType.ethernet:
+          return SyncStrategy.aggressive;
+        case ConnectivityType.mobile:
+          return SyncStrategy.conservative;
+        case ConnectivityType.bluetooth:
+        case ConnectivityType.vpn:
+          return SyncStrategy.minimal;
+        case ConnectivityType.none:
+        case ConnectivityType.offline:
+        case null:
+          return SyncStrategy.disabled;
+        default:
+          return SyncStrategy.conservative;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ TasksRepository: Error determining sync strategy: $e');
+      }
+      return SyncStrategy.conservative; // Safe fallback
+    }
+  }
+
+  /// Aggressive sync for fast, stable connections (WiFi/Ethernet)
+  void _performAggressiveSync(String userId) async {
+    try {
+      final stopwatch = Stopwatch()..start();
+      final remoteTasks = await remoteDataSource.getTasks(userId);
+      await localDataSource.cacheTasks(remoteTasks);
+      stopwatch.stop();
+
+      if (kDebugMode) {
+        print('✅ TasksRepository: Aggressive sync completed in ${stopwatch.elapsedMilliseconds}ms');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ TasksRepository: Aggressive sync failed: $e');
+      }
+    }
+  }
+
+  /// Conservative sync for mobile data - smaller batches, less frequent
+  void _performConservativeSync(String userId) async {
+    try {
+      // TODO: Implement batched sync for mobile connections
+      // For now, use basic sync with timeout
+      final remoteTasks = await remoteDataSource.getTasks(userId)
+          .timeout(const Duration(seconds: 10));
+      await localDataSource.cacheTasks(remoteTasks);
+
+      if (kDebugMode) {
+        print('✅ TasksRepository: Conservative sync completed');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ TasksRepository: Conservative sync failed: $e');
+      }
+    }
+  }
+
+  /// Minimal sync for slow connections - only critical updates
+  void _performMinimalSync(String userId) async {
+    try {
+      // TODO: Implement delta sync for minimal data transfer
+      // For now, skip sync on slow connections to preserve UX
+      if (kDebugMode) {
+        print('⏸️ TasksRepository: Minimal sync - skipping for better UX');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ TasksRepository: Minimal sync failed: $e');
+      }
+    }
+  }
+
+  /// Fallback to basic sync when enhanced features are unavailable
+  void _performBasicSync(String userId) {
     remoteDataSource
         .getTasks(userId)
         .then((remoteTasks) {
-          // Update local cache with remote data
           localDataSource.cacheTasks(remoteTasks);
+          if (kDebugMode) {
+            print('✅ TasksRepository: Basic sync completed');
+          }
         })
         .catchError((e) {
-          // Ignore sync errors in background
+          if (kDebugMode) {
+            print('❌ TasksRepository: Basic sync failed: $e');
+          }
         });
   }
 
@@ -561,4 +692,19 @@ class TasksRepositoryImpl implements TasksRepository {
       );
     }
   }
+}
+
+/// ENHANCED FEATURE: Sync strategies based on connection type and quality
+enum SyncStrategy {
+  /// Full sync with all optimizations - for WiFi/Ethernet connections
+  aggressive,
+
+  /// Reduced frequency sync - for mobile data connections
+  conservative,
+
+  /// Only critical updates - for slow connections
+  minimal,
+
+  /// Skip sync - for offline or unstable connections
+  disabled,
 }

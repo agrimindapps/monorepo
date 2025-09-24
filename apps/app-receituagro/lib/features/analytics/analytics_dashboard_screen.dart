@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' hide PerformanceMetrics;
+import 'package:core/core.dart' hide PerformanceMetrics, UserEngagementMetrics;
 import 'analytics_dashboard_service.dart';
 
 /// Analytics Dashboard Screen for admin/analytics viewing
@@ -255,7 +255,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             style: Theme.of(context).textTheme.titleLarge,
           ),
           SizedBox(height: 16),
-          _buildFeatureUsageChart(_engagementMetrics!.featureUsage),
+          _buildFeatureUsageChart(_engagementMetrics!.featureUsage as Map<String, int>),
         ],
       ),
     );

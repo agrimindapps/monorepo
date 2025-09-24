@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../providers/feature_flags_provider.dart';
 
@@ -394,8 +395,56 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
     }
   }
 
-  /// Start manual sync
-  void _startManualSync() {
+  /// Start manual sync with connectivity check
+  void _startManualSync() async {
+    // Check connectivity first
+    final connectivityResult = await ConnectivityService.instance.isOnline();
+    connectivityResult.fold(
+      (failure) => _showConnectivityError(failure),
+      (isOnline) {
+        if (isOnline) {
+          _performSync();
+        } else {
+          _showOfflineMessage();
+        }
+      },
+    );
+  }
+
+  /// Show connectivity error
+  void _showConnectivityError(Failure failure) {
+    setState(() {
+      _currentSyncStatus = SyncStatus.error;
+    });
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro de conectividade: ${failure.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// Show offline message
+  void _showOfflineMessage() {
+    setState(() {
+      _currentSyncStatus = SyncStatus.error;
+    });
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sem conexão com a internet. Verifique sua conectividade.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
+  /// Perform actual sync
+  void _performSync() {
     setState(() {
       _currentSyncStatus = SyncStatus.syncing;
       _syncProgress = 0.0;

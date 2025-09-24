@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../di/injection_container.dart';
-import '../utils/navigation_service.dart' as local;
 
 /// Serviço de notificações específico do Plantis
 class PlantisNotificationService {
@@ -415,7 +414,7 @@ class PlantisNotificationService {
   /// Obter contexto de navegação
   BuildContext? _getNavigationContext() {
     try {
-      final navigationService = sl<local.NavigationService>();
+      final navigationService = sl<INavigationService>();
       return navigationService.currentContext;
     } catch (e) {
       debugPrint('❌ Error getting navigation context: $e');

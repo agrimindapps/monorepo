@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/providers/background_sync_provider.dart';
-import '../../../../core/utils/navigation_service.dart';
+import 'package:core/core.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart' as providers;
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
 import '../providers/plant_form_provider.dart';
@@ -83,17 +83,18 @@ class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     
-    // Subscribe to route changes with RouteObserver
-    final routeObserver = NavigationService.instance.routeObserver;
-    final modalRoute = ModalRoute.of(context);
-    if (modalRoute is PageRoute) {
-      routeObserver.subscribe(this, modalRoute);
-    }
+    // TODO: Route observer functionality disabled during NavigationService migration
+    // Consider using GoRouter navigation events instead
+    // final routeObserver = NavigationService.instance.routeObserver;
+    // final modalRoute = ModalRoute.of(context);
+    // if (modalRoute is PageRoute) {
+    //   routeObserver.subscribe(this, modalRoute);
+    // }
   }
   
   /// Inicia sincronização em background sem bloquear UI
   void _tryStartAutoSync() {
-    final authProvider = context.read<AuthProvider>();
+    final authProvider = context.read<providers.AuthProvider>();
 
     // Sincronização automática é iniciada pelo AuthProvider
     // em background, não precisamos bloquear a UI
@@ -123,9 +124,9 @@ class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
     _scrollController.dispose();
     _syncStatusSubscription?.cancel();
     
-    // Unsubscribe from route observer
-    final routeObserver = NavigationService.instance.routeObserver;
-    routeObserver.unsubscribe(this);
+    // TODO: Route observer functionality disabled during NavigationService migration
+    // final routeObserver = NavigationService.instance.routeObserver;
+    // routeObserver.unsubscribe(this);
     
     super.dispose();
   }
@@ -225,7 +226,7 @@ class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     // Build UI without blocking for sync - sync happens in background
-    return Consumer2<AuthProvider, BackgroundSyncProvider?>(
+    return Consumer2<providers.AuthProvider, BackgroundSyncProvider?>(
       builder: (context, authProvider, syncProvider, _) {
         // Monitor background sync completion for data refresh
         if (syncProvider != null) {
@@ -292,7 +293,7 @@ class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
             ),
       ),
     );
-      },  // Close Consumer<AuthProvider>
+      },  // Close Consumer<providers.AuthProvider>
     );
   }
 
@@ -414,7 +415,7 @@ class _PlantsListPageState extends State<PlantsListPage> with RouteAware {
           if (syncProvider.syncStatus.toString().contains('error'))
             TextButton(
               onPressed: () {
-                final authProvider = context.read<AuthProvider>();
+                final authProvider = context.read<providers.AuthProvider>();
                 if (authProvider.currentUser != null) {
                   syncProvider.retrySync(authProvider.currentUser!.id);
                 }

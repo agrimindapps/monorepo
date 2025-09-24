@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide ThemeProvider;
+import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -108,6 +109,40 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // ===== CONNECTIVITY INITIALIZATION =====
+  // Initialize ConnectivityService for agricultural operations with poor network
+  try {
+    debugPrint('🌐 [MAIN] Initializing ConnectivityService...');
+    await ConnectivityService.instance.initialize();
+    debugPrint('✅ [MAIN] ConnectivityService initialized successfully');
+
+    // Initialize EnhancedConnectivityService for rural optimization
+    debugPrint('🌾 [MAIN] Initializing EnhancedConnectivityService for rural environments...');
+    final enhancedConnectivity = di.sl<core.EnhancedConnectivityService>();
+    final enhancedResult = await enhancedConnectivity.initialize(
+      customPingHost: '1.1.1.1', // Cloudflare DNS for better rural access
+      enableQualityMonitoring: true,
+      qualityCheckInterval: const Duration(minutes: 2),
+    );
+
+    enhancedResult.fold(
+      (error) => debugPrint('❌ [MAIN] EnhancedConnectivityService initialization failed: ${error.message}'),
+      (_) => debugPrint('✅ [MAIN] EnhancedConnectivityService initialized for agricultural operations'),
+    );
+
+  } catch (e) {
+    debugPrint('❌ [MAIN] Connectivity services initialization failed: $e');
+    // Don't block app startup - connectivity will be handled gracefully
+    if (EnvironmentConfig.enableAnalytics) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        StackTrace.current,
+        reason: 'Failed to initialize connectivity services',
+        fatal: false,
+      );
+    }
+  }
 
   // Initialize Data Inspector (debug mode only)
   if (kDebugMode) {

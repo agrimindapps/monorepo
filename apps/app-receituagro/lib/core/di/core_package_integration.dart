@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../services/receituagro_validation_service.dart';
 import '../services/device_identity_service.dart';
 // sync_orchestrator.dart removed - using UnifiedSyncManager from core package
-import '../../features/analytics/analytics_service.dart';
+import '../../features/analytics/enhanced_analytics_provider.dart';
 import '../providers/auth_provider.dart';
 
 /// Core Package Integration Configuration for ReceitaAgro
@@ -89,13 +89,13 @@ class CorePackageIntegration {
       if (kDebugMode) print('EnhancedLoggingService registration failed: $e');
     }
     
-    // Security Service from Core Package (implements ISecurityRepository)
+    // Security Service from Core Package (singleton instance)
     try {
-      _sl.registerLazySingleton<core.ISecurityRepository>(
-        () => core.SecurityService(),
+      _sl.registerLazySingleton<core.SecurityService>(
+        () => core.SecurityService.instance,
       );
     } catch (e) {
-      if (kDebugMode) print('ISecurityRepository registration failed: $e');
+      if (kDebugMode) print('SecurityService registration failed: $e');
     }
     
     // Enhanced Security Service (separate service with additional features)
@@ -241,7 +241,7 @@ class CorePackageIntegration {
     final services = {
       'EnhancedLoggingService': _sl.isRegistered<core.EnhancedLoggingService>(),
       'EnhancedSecurityService': _sl.isRegistered<core.EnhancedSecurityService>(),
-      'ISecurityRepository': _sl.isRegistered<core.ISecurityRepository>(),
+      'SecurityService': _sl.isRegistered<core.SecurityService>(),
       'PerformanceService': _sl.isRegistered<core.IPerformanceRepository>(),
       'ValidationService': _sl.isRegistered<core.ValidationService>(),
       'EnhancedConnectivityService': _sl.isRegistered<core.EnhancedConnectivityService>(),
@@ -357,12 +357,17 @@ class CorePackageIntegration {
 
   /// Register ReceitaAgro-specific auth services
   static Future<void> _registerReceitaAgroAuthServices() async {
-    // Register ReceitaAgro Analytics Service first
-    _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-      () => ReceitaAgroAnalyticsService(
+    // Register ReceitaAgro Enhanced Analytics Service first
+    _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
+      () => ReceitaAgroEnhancedAnalyticsProvider(
         analyticsRepository: _sl<core.IAnalyticsRepository>(),
         crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
       ),
+    );
+
+    // Register alias for backward compatibility
+    _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+      () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
     );
 
     // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)

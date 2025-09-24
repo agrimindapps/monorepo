@@ -34,6 +34,7 @@ import '../providers/analytics_provider.dart';
 import '../providers/background_sync_provider.dart';
 import '../providers/sync_status_provider.dart';
 import '../services/background_sync_service.dart';
+import '../config/security_config.dart';
 import '../services/backup_audit_service.dart';
 import '../services/backup_data_transformer_service.dart';
 import '../services/backup_restore_service.dart';
@@ -48,9 +49,10 @@ import '../services/interfaces/i_task_notification_manager.dart';
 import '../services/notification_manager.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
+import '../adapters/plantis_storage_adapter.dart';
+import '../adapters/plantis_image_service_adapter.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
-import '../utils/navigation_service.dart' as local;
 import '../../features/data_export/data/datasources/local/export_file_generator.dart';
 import '../../features/data_export/data/datasources/local/plants_export_datasource.dart';
 import '../../features/data_export/data/datasources/local/settings_export_datasource.dart';
@@ -116,8 +118,8 @@ void _initCoreServices() {
   // BACKWARD COMPATIBILITY: Interface NetworkInfo preservada, zero breaking changes
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoAdapter(sl<ConnectivityService>()));
 
-  // Auth Repository
-  sl.registerLazySingleton<IAuthRepository>(() => FirebaseAuthService());
+  // Auth Repository - Enhanced with security features
+  sl.registerLazySingleton<IAuthRepository>(() => PlantisSecurityConfig.createEnhancedAuthService());
 
   // Analytics Repository
   sl.registerLazySingleton<IAnalyticsRepository>(
@@ -135,8 +137,34 @@ void _initCoreServices() {
   // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService(sl<IBoxRegistryService>()));
   
-  // Secure Storage Service
-  sl.registerLazySingleton<SecureStorageService>(() => SecureStorageService.instance);
+  // Enhanced Secure Storage Service with Plantis configuration
+  sl.registerLazySingleton<EnhancedSecureStorageService>(
+    () => EnhancedSecureStorageService(
+      appIdentifier: 'plantis',
+      config: const SecureStorageConfig.plantis(),
+    ),
+  );
+
+  // Enhanced Encrypted Storage Service
+  sl.registerLazySingleton<EnhancedEncryptedStorageService>(
+    () => EnhancedEncryptedStorageService(
+      secureStorage: sl<EnhancedSecureStorageService>(),
+      appIdentifier: 'plantis',
+    ),
+  );
+
+  // Plantis Storage Adapter (backward compatibility)
+  sl.registerLazySingleton<PlantisStorageAdapter>(
+    () => PlantisStorageAdapter(
+      secureStorage: sl<EnhancedSecureStorageService>(),
+      encryptedStorage: sl<EnhancedEncryptedStorageService>(),
+    ),
+  );
+
+  // Legacy SecureStorageService interface (backward compatibility)
+  sl.registerLazySingleton<SecureStorageService>(
+    () => SecureStorageService.instance,
+  );
 
   // App Rating Repository
   sl.registerLazySingleton<IAppRatingRepository>(
@@ -164,7 +192,11 @@ void _initCoreServices() {
   sl.registerLazySingleton<INotificationPermissionManager>(() => sl<NotificationManager>());
   sl.registerLazySingleton<INotificationScheduleManager>(() => sl<NotificationManager>());
 
-  // Image Service (using core package)
+  // Enhanced Image Service (using adapter pattern)
+  // Consolidates Core ImageService + ImagePreloaderService functionality
+  sl.registerLazySingleton(() => PlantisImageServiceAdapterFactory.createForPlantis());
+
+  // Backward compatibility: Register core ImageService separately if needed
   sl.registerLazySingleton(() => ImageService(
     config: const ImageServiceConfig(
       maxWidth: 1200,
@@ -180,6 +212,9 @@ void _initCoreServices() {
       },
     ),
   ));
+
+  // File Manager Service (Core Package) - Replaces custom platform handlers
+  sl.registerLazySingleton<IFileRepository>(() => FileManagerService());
 
   // URL Launcher Service
   sl.registerLazySingleton(() => UrlLauncherService());
@@ -456,8 +491,8 @@ void _initBackup() {
 }
 
 void _initAppServices() {
-  // Navigation Service
-  sl.registerLazySingleton(() => local.NavigationService.instance);
+  // Navigation Service - Core Package Implementation
+  sl.registerLazySingleton<INavigationService>(() => NavigationService());
 
   // Analytics Provider
   sl.registerLazySingleton<AnalyticsProvider>(
@@ -498,7 +533,7 @@ void _initDataExport() {
 
   sl.registerLazySingleton<SettingsExportDataSource>(() => SettingsExportLocalDataSource());
 
-  sl.registerLazySingleton<ExportFileGenerator>(() => ExportFileGenerator());
+  sl.registerLazySingleton<ExportFileGenerator>(() => ExportFileGenerator(fileRepository: sl<IFileRepository>()));
 
   // Repository
   sl.registerLazySingleton<DataExportRepository>(() => DataExportRepositoryImpl(

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
 import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
@@ -33,7 +33,7 @@ import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
 import '../di/injection_container.dart';
-import '../utils/navigation_service.dart';
+import 'package:core/core.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -62,14 +62,13 @@ class AppRouter {
   static String plantDetailsPath(String plantId) => '/plants/$plantId';
 
   static GoRouter router(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
+    final authProvider = context.read<providers.AuthProvider>();
 
     // Web mostra promotional first, mobile vai direto para login
     final initialLocation = kIsWeb ? promotional : login;
 
     return GoRouter(
-      navigatorKey: NavigationService.instance.navigatorKey,
-      observers: [NavigationService.instance.routeObserver],
+      navigatorKey: NavigationService.navigatorKey,
       initialLocation: initialLocation,
       refreshListenable: authProvider,
       redirect: (context, state) {

@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../services/image_preloader_service.dart';
+import '../adapters/plantis_image_service_adapter.dart';
+import '../di/injection_container.dart';
 
 /// Unified image widget that consolidates all image display functionality
 /// Combines features from OptimizedImageWidget and OptimizedPlantImageWidget
@@ -180,12 +182,26 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
 
     // Preload network image
     if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
-      ImagePreloaderService.instance.preloadImage(widget.imageUrl!);
+      // Use enhanced image service adapter for better integration
+      try {
+        final adapter = sl<PlantisImageServiceAdapter>();
+        adapter.preloadImage(widget.imageUrl!);
+      } catch (e) {
+        // Fallback to original preloader service
+        ImagePreloaderService.instance.preloadImage(widget.imageUrl!);
+      }
     }
 
     // Preload from URLs list
     if (widget.imageUrls.isNotEmpty) {
-      ImagePreloaderService.instance.preloadImages(widget.imageUrls, priority: true);
+      // Use enhanced image service adapter for better integration
+      try {
+        final adapter = sl<PlantisImageServiceAdapter>();
+        adapter.preloadImages(widget.imageUrls, priority: true);
+      } catch (e) {
+        // Fallback to original preloader service
+        ImagePreloaderService.instance.preloadImages(widget.imageUrls, priority: true);
+      }
     }
   }
 

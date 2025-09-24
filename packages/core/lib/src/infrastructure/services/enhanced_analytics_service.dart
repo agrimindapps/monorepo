@@ -406,6 +406,15 @@ abstract class ReceitAgroEvent extends AppEvent {
   static final reportViewed = _ReceitAgroEvent('report_viewed', {'category': 'reports', 'action': 'view'});
   static final diagnosisRequested = _ReceitAgroEvent('diagnosis_requested', {'category': 'diagnosis', 'action': 'request'});
   static final premiumAnalysisUsed = _ReceitAgroEvent('premium_analysis_used', {'category': 'premium', 'action': 'use'});
+  static final diseaseIdentified = _ReceitAgroEvent('disease_identified', {'category': 'diagnosis', 'action': 'identify'});
+  static final pestIdentified = _ReceitAgroEvent('pest_identified', {'category': 'diagnosis', 'action': 'identify'});
+  static final deficiencyIdentified = _ReceitAgroEvent('deficiency_identified', {'category': 'diagnosis', 'action': 'identify'});
+  static final treatmentViewed = _ReceitAgroEvent('treatment_viewed', {'category': 'treatment', 'action': 'view'});
+  static final symptomSearched = _ReceitAgroEvent('symptom_searched', {'category': 'search', 'action': 'symptom'});
+  static final favoriteAdded = _ReceitAgroEvent('favorite_added', {'category': 'favorites', 'action': 'add'});
+  static final favoriteRemoved = _ReceitAgroEvent('favorite_removed', {'category': 'favorites', 'action': 'remove'});
+  static final commentAdded = _ReceitAgroEvent('comment_added', {'category': 'engagement', 'action': 'comment'});
+  static final shareContent = _ReceitAgroEvent('share_content', {'category': 'engagement', 'action': 'share'});
 
   ReceitAgroEvent._();
 }

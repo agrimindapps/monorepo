@@ -1,15 +1,16 @@
 import 'dart:convert';
 
+import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../../domain/entities/export_request.dart';
-import '../platform/platform_file_handler.dart';
-import '../platform/platform_file_handler_factory.dart';
 
 class ExportFileGenerator {
-  late final PlatformFileHandler _fileHandler;
+  final IFileRepository _fileRepository;
 
-  ExportFileGenerator() {
-    _fileHandler = PlatformFileHandlerFactory.create();
-  }
+  ExportFileGenerator({
+    required IFileRepository fileRepository,
+  }) : _fileRepository = fileRepository;
 
   /// Generate export file in the requested format
   Future<String> generateExportFile({
@@ -33,9 +34,9 @@ class ExportFileGenerator {
         break;
     }
 
-    final mimeType = _fileHandler.getMimeType(request.format);
-    
-    return await _fileHandler.generateAndSaveFile(
+    final mimeType = _getMimeType(request.format);
+
+    return await _generateAndSaveFile(
       request: request,
       content: content,
       mimeType: mimeType,
@@ -408,5 +409,67 @@ class ExportFileGenerator {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&apos;');
+  }
+
+  /// Generate and save file using core FileManagerService
+  Future<String> _generateAndSaveFile({
+    required ExportRequest request,
+    required String content,
+    required String mimeType,
+  }) async {
+    try {
+      final fileName = 'export_${request.id}_${DateTime.now().millisecondsSinceEpoch}.${_getFileExtension(request.format)}';
+
+      // Get downloads directory
+      final downloadsDir = await _fileRepository.getDownloadsDirectory()
+          ?? await _fileRepository.getDocumentsDirectory();
+      final filePath = _fileRepository.joinPaths([downloadsDir, fileName]);
+
+      final result = await _fileRepository.writeAsString(
+        path: filePath,
+        content: content,
+      );
+
+      // Check if the operation was successful
+      if (result.success) {
+        return result.path ?? filePath;
+      } else {
+        throw Exception('Failed to save file: ${result.error}');
+      }
+    } catch (e) {
+      throw Exception('Export file generation failed: $e');
+    }
+  }
+
+  /// Get MIME type for export format
+  String _getMimeType(ExportFormat format) {
+    switch (format) {
+      case ExportFormat.json:
+        return 'application/json';
+      case ExportFormat.csv:
+        return 'text/csv';
+      case ExportFormat.xml:
+        return 'application/xml';
+      case ExportFormat.pdf:
+        return 'application/pdf';
+      default:
+        return 'text/plain';
+    }
+  }
+
+  /// Get file extension for export format
+  String _getFileExtension(ExportFormat format) {
+    switch (format) {
+      case ExportFormat.json:
+        return 'json';
+      case ExportFormat.csv:
+        return 'csv';
+      case ExportFormat.xml:
+        return 'xml';
+      case ExportFormat.pdf:
+        return 'pdf';
+      default:
+        return 'txt';
+    }
   }
 }

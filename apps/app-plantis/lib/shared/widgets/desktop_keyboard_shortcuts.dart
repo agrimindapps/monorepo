@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/utils/navigation_service.dart';
+import 'package:core/core.dart';
+
+import '../../core/di/injection_container.dart';
 
 /// Widget para atalhos de teclado desktop
 class DesktopKeyboardShortcuts extends StatefulWidget {
@@ -126,7 +128,7 @@ class CustomIntent extends Intent {
 class NavigateToAction extends Action<NavigateToIntent> {
   @override
   Object? invoke(NavigateToIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       context.go(intent.route);
     }
@@ -137,7 +139,7 @@ class NavigateToAction extends Action<NavigateToIntent> {
 class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
   @override
   Object? invoke(CreateNewPlantIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       context.go('/plants/add');
     }
@@ -148,7 +150,7 @@ class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
 class SaveAction extends Action<SaveIntent> {
   @override
   Object? invoke(SaveIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       final saveNotifier = SaveNotifier.maybeOf(context);
       if (saveNotifier != null) {
@@ -162,7 +164,7 @@ class SaveAction extends Action<SaveIntent> {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   Object? invoke(EscapeIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
@@ -175,7 +177,7 @@ class EscapeAction extends Action<EscapeIntent> {
 class GoBackAction extends Action<GoBackIntent> {
   @override
   Object? invoke(GoBackIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       if (context.canPop()) {
         context.pop();
@@ -188,7 +190,7 @@ class GoBackAction extends Action<GoBackIntent> {
 class SearchAction extends Action<SearchIntent> {
   @override
   Object? invoke(SearchIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       final searchNotifier = SearchNotifier.maybeOf(context);
       if (searchNotifier != null) {
@@ -202,7 +204,7 @@ class SearchAction extends Action<SearchIntent> {
 class RefreshAction extends Action<RefreshIntent> {
   @override
   Object? invoke(RefreshIntent intent) {
-    final context = NavigationService.instance.currentContext;
+    final context = sl<INavigationService>().currentContext;
     if (context != null && context.mounted) {
       final refreshNotifier = RefreshNotifier.maybeOf(context);
       if (refreshNotifier != null) {

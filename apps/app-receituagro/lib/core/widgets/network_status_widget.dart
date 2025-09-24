@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:core/core.dart';
 
 /// Network Status Widget
 /// 
@@ -43,11 +44,12 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-  
+  late ConnectivityService _connectivityService;
+
   NetworkStatus _currentStatus = NetworkStatus.unknown;
-  ConnectionType _connectionType = ConnectionType.none;
+  ConnectivityType _connectionType = ConnectivityType.none;
   ConnectionQuality _connectionQuality = ConnectionQuality.unknown;
-  Timer? _statusCheckTimer;
+  StreamSubscription<bool>? _connectivitySubscription;
   int _retryAttempts = 0;
 
   @override
@@ -72,67 +74,93 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   @override
   void dispose() {
     _pulseController.dispose();
-    _statusCheckTimer?.cancel();
+    _connectivitySubscription?.cancel();
     super.dispose();
   }
 
-  /// Initialize network monitoring
-  void _initializeNetworkMonitoring() {
-    _checkNetworkStatus();
-    
-    // Check network status periodically
-    _statusCheckTimer = Timer.periodic(
-      const Duration(seconds: 5),
-      (_) => _checkNetworkStatus(),
+  /// Initialize network monitoring with real ConnectivityService
+  void _initializeNetworkMonitoring() async {
+    _connectivityService = ConnectivityService.instance;
+    await _connectivityService.initialize();
+
+    // Listen to connectivity changes
+    _connectivitySubscription = _connectivityService.connectivityStream.listen((isOnline) {
+      setState(() {
+        _updateNetworkStatus(isOnline);
+      });
+      widget.onStatusChanged?.call(_currentStatus);
+    });
+
+    // Get initial status
+    _checkInitialNetworkStatus();
+  }
+
+  /// Check initial network status
+  void _checkInitialNetworkStatus() async {
+    final result = await _connectivityService.isOnline();
+    result.fold(
+      (failure) {
+        setState(() {
+          _currentStatus = NetworkStatus.unknown;
+          _connectionType = ConnectivityType.none;
+          _connectionQuality = ConnectionQuality.none;
+          _pulseController.stop();
+        });
+      },
+      (isOnline) {
+        setState(() {
+          _updateNetworkStatus(isOnline);
+        });
+      },
     );
   }
 
-  /// Check current network status (mock implementation)
-  void _checkNetworkStatus() {
-    // In real implementation, this would use connectivity_plus package
-    // or similar to check actual network connectivity
-    
-    // Simulate network status changes for demo
-    setState(() {
-      _simulateNetworkStatusChange();
-    });
-    
-    widget.onStatusChanged?.call(_currentStatus);
-  }
+  /// Update network status based on connectivity
+  void _updateNetworkStatus(bool isOnline) {
+    if (isOnline) {
+      // Get current connection type
+      final connectivityType = _connectivityService.currentConnectivityType;
+      _connectionType = connectivityType;
 
-  /// Simulate network status changes for demo
-  void _simulateNetworkStatusChange() {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final variation = (now ~/ 10000) % 4;
-    
-    switch (variation) {
-      case 0:
-        _currentStatus = NetworkStatus.connected;
-        _connectionType = ConnectionType.wifi;
-        _connectionQuality = ConnectionQuality.excellent;
-        _pulseController.stop();
-        _retryAttempts = 0;
-        break;
-      case 1:
-        _currentStatus = NetworkStatus.connected;
-        _connectionType = ConnectionType.mobile;
-        _connectionQuality = ConnectionQuality.good;
-        _pulseController.stop();
-        _retryAttempts = 0;
-        break;
-      case 2:
-        _currentStatus = NetworkStatus.limited;
-        _connectionType = ConnectionType.mobile;
-        _connectionQuality = ConnectionQuality.poor;
-        _pulseController.repeat(reverse: true);
-        break;
-      case 3:
-        _currentStatus = NetworkStatus.disconnected;
-        _connectionType = ConnectionType.none;
-        _connectionQuality = ConnectionQuality.none;
-        _pulseController.stop();
-        _retryAttempts++;
-        break;
+      // Set status and quality based on connection type
+      switch (connectivityType) {
+        case ConnectivityType.wifi:
+          _currentStatus = NetworkStatus.connected;
+          _connectionQuality = ConnectionQuality.excellent;
+          _pulseController.stop();
+          _retryAttempts = 0;
+          break;
+        case ConnectivityType.mobile:
+          _currentStatus = NetworkStatus.connected;
+          _connectionQuality = ConnectionQuality.good;
+          _pulseController.stop();
+          _retryAttempts = 0;
+          break;
+        case ConnectivityType.ethernet:
+          _currentStatus = NetworkStatus.connected;
+          _connectionQuality = ConnectionQuality.excellent;
+          _pulseController.stop();
+          _retryAttempts = 0;
+          break;
+        case ConnectivityType.bluetooth:
+        case ConnectivityType.other:
+          _currentStatus = NetworkStatus.limited;
+          _connectionQuality = ConnectionQuality.poor;
+          _pulseController.repeat(reverse: true);
+          break;
+        case ConnectivityType.none:
+          _currentStatus = NetworkStatus.disconnected;
+          _connectionQuality = ConnectionQuality.none;
+          _pulseController.stop();
+          _retryAttempts++;
+          break;
+      }
+    } else {
+      _currentStatus = NetworkStatus.disconnected;
+      _connectionType = ConnectivityType.none;
+      _connectionQuality = ConnectionQuality.none;
+      _pulseController.stop();
+      _retryAttempts++;
     }
   }
 
@@ -231,7 +259,7 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
           ),
           
           // Connection Type
-          if (widget.showConnectionType && _connectionType != ConnectionType.none) ...[
+          if (widget.showConnectionType && _connectionType != ConnectivityType.none) ...[
             const SizedBox(width: 4),
             Text(
               '•',
@@ -334,11 +362,17 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   /// Get connection type icon
   IconData _getConnectionTypeIcon() {
     switch (_connectionType) {
-      case ConnectionType.wifi:
+      case ConnectivityType.wifi:
         return Icons.wifi;
-      case ConnectionType.mobile:
+      case ConnectivityType.mobile:
         return Icons.signal_cellular_4_bar;
-      case ConnectionType.none:
+      case ConnectivityType.ethernet:
+        return Icons.lan;
+      case ConnectivityType.bluetooth:
+        return Icons.bluetooth;
+      case ConnectivityType.other:
+        return Icons.device_hub;
+      case ConnectivityType.none:
         return Icons.signal_cellular_off;
     }
   }
@@ -383,11 +417,6 @@ enum NetworkStatus {
   disconnected,
 }
 
-enum ConnectionType {
-  none,
-  wifi,
-  mobile,
-}
 
 enum ConnectionQuality {
   unknown,

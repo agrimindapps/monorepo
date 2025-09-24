@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/backup_service.dart';
 import '../../../../core/services/plantis_notification_service.dart';
 import '../../domain/entities/settings_entity.dart';

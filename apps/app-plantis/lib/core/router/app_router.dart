@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/device_management/presentation/pages/device_management_page.dart';
+import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
@@ -52,6 +54,7 @@ class AppRouter {
   static const String promotional = '/promotional';
   static const String notificationsSettings = '/notifications-settings';
   static const String backupSettings = '/backup-settings';
+  static const String deviceManagement = '/device-management';
   static const String licenseStatus = '/license-status';
   static const String dataExport = '/data-export';
 
@@ -92,6 +95,7 @@ class AppRouter {
           settings,
           notificationsSettings,
           backupSettings,
+          deviceManagement,
           accountProfile,
           dataExport,
           home,
@@ -312,6 +316,16 @@ class AppRouter {
                 return ChangeNotifierProvider(
                   create: (context) => sl<BackupSettingsProvider>(),
                   child: const BackupSettingsPage(),
+                );
+              },
+            ),
+            GoRoute(
+              path: deviceManagement,
+              name: 'device-management',
+              builder: (context, state) {
+                return ChangeNotifierProvider.value(
+                  value: sl<DeviceManagementProvider>(),
+                  child: const DeviceManagementPage(),
                 );
               },
             ),

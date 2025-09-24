@@ -36,6 +36,7 @@ export 'src/domain/repositories/i_auth_repository.dart';
 export 'src/domain/repositories/i_crashlytics_repository.dart';
 export 'src/domain/repositories/i_device_repository.dart';
 export 'src/domain/repositories/i_encrypted_storage_repository.dart';
+export 'src/domain/repositories/i_enhanced_notification_repository.dart';
 export 'src/domain/repositories/i_file_repository.dart';
 export 'src/domain/repositories/i_local_storage_repository.dart';
 export 'src/domain/repositories/i_notification_repository.dart';
@@ -62,6 +63,9 @@ export 'src/domain/usecases/auth/logout_usecase.dart';
 // ========== INFRASTRUCTURE LAYER ==========
 // Helpers
 export 'src/infrastructure/helpers/notification_helper.dart';
+export 'src/infrastructure/helpers/notification_template_engine.dart';
+export 'src/infrastructure/helpers/notification_analytics_helper.dart';
+export 'src/infrastructure/helpers/notification_migration_helper.dart';
 
 // Models
 export 'src/infrastructure/models/box_configuration.dart';
@@ -75,6 +79,7 @@ export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/data_migration_service.dart';
 export 'src/infrastructure/services/database_inspector_service.dart';
 export 'src/infrastructure/services/device_management_service.dart';
+export 'src/infrastructure/services/enhanced_analytics_service.dart';
 export 'src/infrastructure/services/enhanced_connectivity_service.dart';
 export 'src/infrastructure/services/enhanced_image_service.dart';
 export 'src/infrastructure/services/enhanced_logging_service.dart';
@@ -90,6 +95,7 @@ export 'src/infrastructure/services/hive_storage_service.dart';
 export 'src/infrastructure/services/http_client_service.dart';
 export 'src/infrastructure/services/image_service.dart';
 export 'src/infrastructure/services/local_notification_service.dart';
+export 'src/infrastructure/services/enhanced_notification_service.dart';
 export 'src/infrastructure/services/log_repository_service.dart';
 export 'src/infrastructure/services/mock_analytics_service.dart';
 export 'src/infrastructure/services/monorepo_auth_cache.dart';
@@ -106,10 +112,11 @@ export 'src/infrastructure/services/web_notification_service.dart';
 export 'src/infrastructure/storage/hive/hive_storage.dart';
 
 // ========== PRESENTATION LAYER ==========
-// Theme System - Base theme components only (provider is app-specific)
+// Theme System
 export 'src/presentation/theme/base/base_colors.dart';
 export 'src/presentation/theme/base/base_theme.dart';
 export 'src/presentation/theme/base/base_typography.dart';
+export 'src/presentation/theme/providers/theme_provider.dart';
 // export 'src/presentation/widgets/error_widget.dart';
 // export 'src/presentation/widgets/image_widgets.dart';
 // export 'src/presentation/widgets/loading_widget.dart';

@@ -58,6 +58,13 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
 
+    // Adiciona listener para remover foco quando mudar de aba
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        FocusScope.of(context).unfocus();
+      }
+    });
+
     // MEMORY LEAK FIX: Enhanced controller initialization with proper mounted checks
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -1022,9 +1029,6 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
             ),
             child: Column(
               children: [
-                // Plant image section
-                _buildPlantImageSection(context, plant),
-
                 const SizedBox(height: AppSpacing.lg),
                 _buildTabBar(context),
                 const SizedBox(height: AppSpacing.lg),
@@ -1061,6 +1065,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           plant.species?.isNotEmpty == true
               ? plant.species!
               : 'Detalhes da planta',
+      margin: const EdgeInsets.only(bottom: 8, top: 4), // Usar mesmo margin das outras páginas
       onBackPressed: () => _controller?.goBack(),
       actions: [
         PopupMenuButton<String>(
@@ -1289,7 +1294,14 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   Widget _buildOverviewTab(BuildContext context, Plant plant) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-      child: PlantInfoSection(plant: plant),
+      child: Column(
+        children: [
+          // Plant image section moved to first tab
+          _buildPlantImageSection(context, plant),
+          const SizedBox(height: AppSpacing.lg),
+          PlantInfoSection(plant: plant),
+        ],
+      ),
     );
   }
 

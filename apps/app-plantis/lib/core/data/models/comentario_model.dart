@@ -9,9 +9,9 @@ part 'comentario_model.g.dart';
 class ComentarioModel extends BaseSyncEntity {
   // Base sync fields (required for Hive generation)
   @HiveField(0) @override final String id;
-  @HiveField(1) @override final DateTime? createdAt;
-  @HiveField(2) @override final DateTime? updatedAt;
-  @HiveField(3) @override final DateTime? lastSyncAt;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
   @HiveField(4) @override final bool isDirty;
   @HiveField(5) @override final bool isDeleted;
   @HiveField(6) @override final int version;
@@ -28,11 +28,21 @@ class ComentarioModel extends BaseSyncEntity {
   @HiveField(13)
   final String? plantId;
 
-  const ComentarioModel({
+  // Getters para compatibilidade com BaseSyncEntity
+  @override
+  DateTime? get createdAt => createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!) : null;
+
+  @override
+  DateTime? get updatedAt => updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!) : null;
+
+  @override
+  DateTime? get lastSyncAt => lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!) : null;
+
+  ComentarioModel({
     required this.id,
-    this.createdAt,
-    this.updatedAt,
-    this.lastSyncAt,
+    this.createdAtMs,
+    this.updatedAtMs,
+    this.lastSyncAtMs,
     this.isDirty = false,
     this.isDeleted = false,
     this.version = 1,
@@ -44,9 +54,9 @@ class ComentarioModel extends BaseSyncEntity {
     this.plantId,
   }) : super(
           id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastSyncAt: lastSyncAt,
+          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
+          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
+          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
           isDirty: isDirty,
           isDeleted: isDeleted,
           version: version,
@@ -68,8 +78,8 @@ class ComentarioModel extends BaseSyncEntity {
 
     return ComentarioModel(
       id: comentarioId,
-      createdAt: now,
-      updatedAt: now,
+      createdAtMs: now.millisecondsSinceEpoch,
+      updatedAtMs: now.millisecondsSinceEpoch,
       isDirty: true,
       userId: userId,
       conteudo: conteudo,
@@ -85,9 +95,9 @@ class ComentarioModel extends BaseSyncEntity {
 
     return ComentarioModel(
       id: baseFields['id'] as String,
-      createdAt: baseFields['createdAt'] as DateTime?,
-      updatedAt: baseFields['updatedAt'] as DateTime?,
-      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      createdAtMs: (baseFields['createdAt'] as DateTime?)?.millisecondsSinceEpoch,
+      updatedAtMs: (baseFields['updatedAt'] as DateTime?)?.millisecondsSinceEpoch,
+      lastSyncAtMs: (baseFields['lastSyncAt'] as DateTime?)?.millisecondsSinceEpoch,
       isDirty: baseFields['isDirty'] as bool,
       isDeleted: baseFields['isDeleted'] as bool,
       version: baseFields['version'] as int,
@@ -124,9 +134,9 @@ class ComentarioModel extends BaseSyncEntity {
 
     return ComentarioModel(
       id: baseFields['id'] as String,
-      createdAt: baseFields['createdAt'] as DateTime?,
-      updatedAt: baseFields['updatedAt'] as DateTime?,
-      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      createdAtMs: (baseFields['createdAt'] as DateTime?)?.millisecondsSinceEpoch,
+      updatedAtMs: (baseFields['updatedAt'] as DateTime?)?.millisecondsSinceEpoch,
+      lastSyncAtMs: (baseFields['lastSyncAt'] as DateTime?)?.millisecondsSinceEpoch,
       isDirty: baseFields['isDirty'] as bool,
       isDeleted: baseFields['isDeleted'] as bool,
       version: baseFields['version'] as int,
@@ -164,9 +174,9 @@ class ComentarioModel extends BaseSyncEntity {
   }) {
     return ComentarioModel(
       id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
+      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
+      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

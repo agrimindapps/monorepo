@@ -1,5 +1,5 @@
 // ✅ REFACTORED IMPORTS: Cleaner, organized imports
-import 'package:core/core.dart' hide AuthProvider;
+import 'package:core/core.dart' hide AuthProvider, ThemeProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';

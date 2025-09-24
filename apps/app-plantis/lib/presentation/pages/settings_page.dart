@@ -10,7 +10,6 @@ import '../../shared/widgets/responsive_layout.dart';
 import '../../shared/widgets/base_page_scaffold.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../core/theme/plantis_design_tokens.dart';
-import '../../core/providers/theme_provider.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
     as auth_providers;
 import '../../features/development/presentation/pages/database_inspector_page.dart';
@@ -250,7 +249,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
         ),
         borderRadius: BorderRadius.circular(PlantisDesignTokens.radiusXL),
         border: Border.all(
-          color: PlantisColors.primary.withOpacity(0.2),
+          color: PlantisColors.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -261,7 +260,7 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
               Container(
                 padding: const EdgeInsets.all(PlantisDesignTokens.spacing2),
                 decoration: BoxDecoration(
-                  color: PlantisColors.primary.withOpacity(0.1),
+                  color: PlantisColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(
                     PlantisDesignTokens.radiusLG,
                   ),
@@ -908,6 +907,13 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
           _buildNotificationSwitchItem(context, settingsProvider),
           _buildSettingsItem(
             context,
+            icon: Icons.devices,
+            title: 'Dispositivos Conectados',
+            subtitle: 'Gerencie aparelhos com acesso à conta',
+            onTap: () => context.push('/device-management'),
+          ),
+          _buildSettingsItem(
+            context,
             icon: Icons.workspace_premium,
             title: 'Status da Licença',
             subtitle: 'Visualizar informações da licença trial',
@@ -1422,7 +1428,8 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
       final appRatingService = di.sl<IAppRatingRepository>();
       final success = await appRatingService.showRatingDialog(context: context);
 
-      if (success && mounted) {
+      if (success) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Obrigado pelo feedback!'),
@@ -1432,15 +1439,14 @@ class _SettingsPageState extends State<SettingsPage> with LoadingPageMixin {
         );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro inesperado: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro inesperado: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ThemeProvider;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';

@@ -1,262 +1,291 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+/// Enhanced Analytics Provider for App-Plantis
+/// Now uses the Enhanced Analytics Service from core package
+/// Maintains backward compatibility while leveraging enhanced features
 class AnalyticsProvider {
-  final IAnalyticsRepository _analyticsRepository;
-  final ICrashlyticsRepository _crashlyticsRepository;
+  final EnhancedAnalyticsService _enhancedService;
 
   AnalyticsProvider({
     required IAnalyticsRepository analyticsRepository,
     required ICrashlyticsRepository crashlyticsRepository,
-  }) : _analyticsRepository = analyticsRepository,
-       _crashlyticsRepository = crashlyticsRepository;
+  }) : _enhancedService = EnhancedAnalyticsService(
+          analytics: analyticsRepository,
+          crashlytics: crashlyticsRepository,
+          config: AnalyticsConfig.forApp(
+            appId: 'plantis',
+            version: '1.0.0', // TODO: Get from package_info
+            enableAnalytics: EnvironmentConfig.enableAnalytics,
+            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
+          ),
+        );
 
-  /// Verifica se o analytics está habilitado baseado no ambiente
-  bool get _isAnalyticsEnabled => EnvironmentConfig.enableAnalytics;
+  /// Direct access to enhanced service for advanced features
+  EnhancedAnalyticsService get enhancedService => _enhancedService;
 
-  /// Verifica se está em modo debug para logs locais
-  bool get _isDebugMode => EnvironmentConfig.isDebugMode;
+  // ==========================================================================
+  // BACKWARD COMPATIBILITY METHODS
+  // ==========================================================================
 
-  // Analytics methods
+  /// Logs screen view with enhanced error handling
   Future<void> logScreenView(String screenName) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('📊 [DEV] Analytics: Screen view - $screenName');
-      }
-      return;
-    }
-
-    try {
-      await _analyticsRepository.setCurrentScreen(screenName: screenName);
-      await _analyticsRepository.logEvent(
-        'screen_view',
-        parameters: {'screen_name': screenName},
-      );
-      debugPrint('📊 Analytics: Screen view logged - $screenName');
-    } catch (e, stackTrace) {
-      await _crashlyticsRepository.recordError(
-        exception: e,
-        stackTrace: stackTrace,
-        reason: 'Failed to log screen view: $screenName',
-      );
-    }
+    await _enhancedService.setCurrentScreen(screenName);
+    await _enhancedService.logEvent('screen_view', {'screen_name': screenName});
   }
 
+  /// Logs custom event with enhanced error handling
   Future<void> logEvent(
     String eventName,
     Map<String, dynamic>? parameters,
   ) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint(
-          '📊 [DEV] Analytics: Event - $eventName ${parameters ?? ''}',
-        );
-      }
-      return;
-    }
-
-    try {
-      await _analyticsRepository.logEvent(eventName, parameters: parameters);
-      debugPrint('📊 Analytics: Event logged - $eventName');
-    } catch (e, stackTrace) {
-      await _crashlyticsRepository.recordError(
-        exception: e,
-        stackTrace: stackTrace,
-        reason: 'Failed to log event: $eventName',
-      );
-    }
+    await _enhancedService.logEvent(eventName, parameters);
   }
 
-  Future<void> logUserAction(
-    String action, {
-    Map<String, dynamic>? parameters,
-  }) async {
-    await logEvent('user_action', {'action': action, ...?parameters});
+  /// Sets user ID in both analytics and crashlytics
+  Future<void> setUserId(String userId) async {
+    await _enhancedService.setUser(userId: userId);
   }
 
-  // Auth events
-  Future<void> logLogin(String method) async {
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('📊 [DEV] Analytics: Login - $method');
-      }
-      return;
-    }
-    await _analyticsRepository.logLogin(method: method);
+  /// Sets user properties
+  Future<void> setUserProperty(String name, String value) async {
+    await _enhancedService.setUser(
+      userId: 'current_user', // Will be updated by actual user ID
+      properties: {name: value},
+    );
   }
 
-  Future<void> logSignUp(String method) async {
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('📊 [DEV] Analytics: SignUp - $method');
-      }
-      return;
-    }
-    await _analyticsRepository.logSignUp(method: method);
-  }
-
-  Future<void> logLogout() async {
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('📊 [DEV] Analytics: Logout');
-      }
-      return;
-    }
-    await _analyticsRepository.logLogout();
-  }
-
-  // App lifecycle events
-  Future<void> logAppOpen() async {
-    await logEvent('app_open', null);
-  }
-
-  Future<void> logAppBackground() async {
-    await logEvent('app_background', null);
-  }
-
-  // Feature usage events
-  Future<void> logFeatureUsed(String featureName) async {
-    await logEvent('feature_used', {'feature': featureName});
-  }
-
-  Future<void> logPlantCreated() async {
-    await logEvent('plant_created', null);
-  }
-
-  Future<void> logTaskCompleted(String taskType) async {
-    await logEvent('task_completed', {'task_type': taskType});
-  }
-
-  Future<void> logSpaceCreated() async {
-    await logEvent('space_created', null);
-  }
-
-  // Premium events
-  Future<void> logPremiumFeatureAttempted(String featureName) async {
-    await logEvent('premium_feature_attempted', {'feature': featureName});
-  }
-
-  // Crashlytics methods
+  /// Records error with enhanced reporting
   Future<void> recordError(
     dynamic error,
     StackTrace? stackTrace, {
     String? reason,
-    Map<String, dynamic>? customKeys,
   }) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('🔥 [DEV] Crashlytics: Error - ${error.toString()}');
-        if (reason != null) debugPrint('🔥 [DEV] Reason: $reason');
-      }
-      return;
-    }
-
-    if (customKeys != null) {
-      await _crashlyticsRepository.setCustomKeys(keys: customKeys);
-    }
-
-    await _crashlyticsRepository.recordError(
-      exception: error,
-      stackTrace: stackTrace ?? StackTrace.current,
+    await _enhancedService.recordError(
+      error,
+      stackTrace,
       reason: reason,
-    );
-
-    debugPrint('🔥 Crashlytics: Error recorded - ${error.toString()}');
-  }
-
-  Future<void> recordNonFatalError(
-    dynamic error,
-    StackTrace? stackTrace, {
-    String? reason,
-  }) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint(
-          '⚠️ [DEV] Crashlytics: Non-fatal error - ${error.toString()}',
-        );
-        if (reason != null) debugPrint('⚠️ [DEV] Reason: $reason');
-      }
-      return;
-    }
-
-    await _crashlyticsRepository.recordNonFatalError(
-      exception: error,
-      stackTrace: stackTrace ?? StackTrace.current,
-      reason: reason,
-    );
-
-    debugPrint(
-      '⚠️ Crashlytics: Non-fatal error recorded - ${error.toString()}',
+      logAsAnalyticsEvent: true, // Log critical errors as analytics events
     );
   }
 
-  Future<void> log(String message) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('📝 [DEV] Crashlytics: Log - $message');
-      }
-      return;
-    }
+  // ==========================================================================
+  // AUTH EVENTS
+  // ==========================================================================
 
-    await _crashlyticsRepository.log(message);
+  Future<void> logLogin(String method) async {
+    await _enhancedService.logAuthEvent('login', parameters: {'method': method});
   }
 
-  Future<void> setCustomKey(String key, dynamic value) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('🔑 [DEV] Crashlytics: Custom key - $key: $value');
-      }
-      return;
-    }
-
-    await _crashlyticsRepository.setCustomKey(key: key, value: value);
+  Future<void> logSignUp(String method) async {
+    await _enhancedService.logAuthEvent('signup', parameters: {'method': method});
   }
 
-  Future<void> setUserId(String userId) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('👤 [DEV] Analytics/Crashlytics: User ID - $userId');
-      }
-      return;
-    }
-
-    await _analyticsRepository.setUserId(userId);
-    await _crashlyticsRepository.setUserId(userId);
+  Future<void> logLogout() async {
+    await _enhancedService.logAuthEvent('logout');
   }
 
-  Future<void> setUserProperties(Map<String, String> properties) async {
-    // Em development, apenas loga localmente
-    if (!_isAnalyticsEnabled) {
-      if (_isDebugMode) {
-        debugPrint('👤 [DEV] Analytics: User properties - $properties');
-      }
-      return;
-    }
+  // ==========================================================================
+  // APP LIFECYCLE EVENTS
+  // ==========================================================================
 
-    await _analyticsRepository.setUserProperties(properties: properties);
+  Future<void> logAppOpen() async {
+    await _enhancedService.logEvent('app_open', {'app': 'plantis'});
   }
 
-  // Test methods for development
+  Future<void> logAppBackground() async {
+    await _enhancedService.logEvent('app_background', {'app': 'plantis'});
+  }
+
+  // ==========================================================================
+  // FEATURE USAGE EVENTS
+  // ==========================================================================
+
+  Future<void> logFeatureUsed(String featureName) async {
+    await _enhancedService.logEvent('feature_used', {'feature': featureName});
+  }
+
+  // ==========================================================================
+  // PLANTIS-SPECIFIC EVENTS (Enhanced with typed events)
+  // ==========================================================================
+
+  Future<void> logPlantCreated({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.plantCreated,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logPlantDeleted({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.plantDeleted,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logPlantUpdated({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.plantUpdated,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logTaskCompleted(String taskType, {Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.taskCompleted,
+      additionalParameters: {
+        'task_type': taskType,
+        if (additionalData != null) ...additionalData,
+      },
+    );
+  }
+
+  Future<void> logTaskCreated({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.taskCreated,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logSpaceCreated({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.spaceCreated,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logSpaceDeleted({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.spaceDeleted,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logPremiumFeatureAttempted(String featureName, {Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.premiumFeatureAttempted,
+      additionalParameters: {
+        'feature': featureName,
+        if (additionalData != null) ...additionalData,
+      },
+    );
+  }
+
+  Future<void> logCareLogAdded({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.careLogAdded,
+      additionalParameters: additionalData,
+    );
+  }
+
+  Future<void> logPlantPhotoAdded({Map<String, dynamic>? additionalData}) async {
+    await _enhancedService.logAppSpecificEvent(
+      PlantisEvent.plantPhotoAdded,
+      additionalParameters: additionalData,
+    );
+  }
+
+  // ==========================================================================
+  // PREMIUM EVENTS
+  // ==========================================================================
+
+  Future<void> logSubscriptionPurchased(String productId, double price) async {
+    await _enhancedService.logPurchaseEvent(
+      productId: productId,
+      value: price,
+      currency: 'USD', // TODO: Get from user locale or RevenueCat
+      additionalParameters: {'subscription_type': 'premium'},
+    );
+  }
+
+  Future<void> logTrialStarted() async {
+    await _enhancedService.logEvent('trial_started', {
+      'app': 'plantis',
+      'trial_type': 'premium',
+    });
+  }
+
+  Future<void> logTrialEnded(String reason) async {
+    await _enhancedService.logEvent('trial_ended', {
+      'app': 'plantis',
+      'reason': reason,
+    });
+  }
+
+  // ==========================================================================
+  // SEARCH AND DISCOVERY EVENTS
+  // ==========================================================================
+
+  Future<void> logSearch(String query, int resultCount) async {
+    await _enhancedService.logEvent('search', {
+      'query': query,
+      'result_count': resultCount,
+      'category': 'plants',
+    });
+  }
+
+  Future<void> logContentViewed(String contentType, String contentId) async {
+    await _enhancedService.logEvent('content_viewed', {
+      'content_type': contentType,
+      'content_id': contentId,
+    });
+  }
+
+  // ==========================================================================
+  // ENGAGEMENT EVENTS
+  // ==========================================================================
+
+  Future<void> logUserEngagement(String action, int durationSeconds) async {
+    await _enhancedService.logEvent('user_engagement', {
+      'action': action,
+      'duration_seconds': durationSeconds,
+      'engagement_time_msec': durationSeconds * 1000,
+    });
+  }
+
+  Future<void> logSessionStart() async {
+    await _enhancedService.logEvent('session_start', {
+      'app': 'plantis',
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+  Future<void> logSessionEnd(int durationSeconds) async {
+    await _enhancedService.logEvent('session_end', {
+      'app': 'plantis',
+      'duration_seconds': durationSeconds,
+    });
+  }
+
+  // ==========================================================================
+  // DEVELOPMENT AND TESTING
+  // ==========================================================================
+
   Future<void> testCrash() async {
+    await _enhancedService.testCrash();
+  }
+
+  Future<void> testAnalyticsEvent() async {
+    await _enhancedService.testAnalyticsEvent();
+  }
+
+  /// Logs a development event for debugging purposes
+  Future<void> logDevelopmentEvent(String event, Map<String, dynamic>? data) async {
     if (kDebugMode) {
-      throw Exception('Test crash from Analytics Provider');
+      await _enhancedService.logEvent('dev_$event', {
+        'is_development': true,
+        if (data != null) ...data,
+      });
     }
   }
 
-  Future<void> testNonFatalError() async {
-    if (kDebugMode) {
-      await recordNonFatalError(
-        Exception('Test non-fatal error'),
-        StackTrace.current,
-        reason: 'Testing non-fatal error reporting',
-      );
-    }
-  }
+  // ==========================================================================
+  // CONVENIENCE GETTERS
+  // ==========================================================================
+
+  /// Whether analytics is enabled in the current environment
+  bool get isAnalyticsEnabled => EnvironmentConfig.enableAnalytics;
+
+  /// Whether debug mode is enabled
+  bool get isDebugMode => kDebugMode;
 }

@@ -79,6 +79,7 @@ export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/data_migration_service.dart';
 export 'src/infrastructure/services/database_inspector_service.dart';
 export 'src/infrastructure/services/device_management_service.dart';
+export 'src/infrastructure/services/enhanced_analytics_service.dart';
 export 'src/infrastructure/services/enhanced_connectivity_service.dart';
 export 'src/infrastructure/services/enhanced_image_service.dart';
 export 'src/infrastructure/services/enhanced_logging_service.dart';

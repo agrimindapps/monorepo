@@ -2,101 +2,62 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Regras para usuarios - somente o próprio usuário pode acessar seus dados
+
+    // ===== HEALTH CHECK =====
+    match /_health_check/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ===== USUÁRIOS =====
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // ===== SUBCOLEÇÕES DO USUÁRIO =====
+      match /vehicles/{vehicleId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /fuel_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /maintenance_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /expense_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /odometer_records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
-    
-    // Regras para veículos - apenas usuários autenticados podem acessar seus próprios dados
-    match /gasometer_12c83_{userId}/vehicles/{vehicleId} {
+
+    // ===== ASSINATURAS =====
+    match /subscriptions/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== DADOS DE SINCRONIZAÇÃO =====
+    match /syncData/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // Regras para registros de combustível
-    match /gasometer_12c83_{userId}/fuel_records/{recordId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
+
+    // ===== DISPOSITIVOS =====
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
     }
-    
-    // Regras para registros de manutenção
-    match /gasometer_12c83_{userId}/maintenance_records/{recordId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Regras para registros de odômetro
-    match /gasometer_12c83_{userId}/odometer_records/{recordId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Regras para dados premium - apenas usuários autenticados
-    match /gasometer_12c83_{userId}/premium/{document=**} {
+
+    // ===== CONFIGURAÇÕES =====
+    match /userSettings/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // Validações de segurança para escrita
-    function isValidVehicle(vehicleData) {
-      return vehicleData.keys().hasAll(['name', 'brand', 'model', 'year', 'userId']) &&
-             vehicleData.userId == request.auth.uid &&
-             vehicleData.name is string &&
-             vehicleData.brand is string &&
-             vehicleData.model is string &&
-             vehicleData.year is number &&
-             vehicleData.year >= 1900 &&
-             vehicleData.year <= 2030;
-    }
-    
-    function isValidFuelRecord(fuelData) {
-      return fuelData.keys().hasAll(['vehicleId', 'liters', 'price', 'date', 'userId']) &&
-             fuelData.userId == request.auth.uid &&
-             fuelData.liters is number &&
-             fuelData.liters > 0 &&
-             fuelData.price is number &&
-             fuelData.price >= 0 &&
-             fuelData.date is timestamp;
-    }
-    
-    function isValidMaintenanceRecord(maintenanceData) {
-      return maintenanceData.keys().hasAll(['vehicleId', 'type', 'cost', 'date', 'userId']) &&
-             maintenanceData.userId == request.auth.uid &&
-             maintenanceData.type is string &&
-             maintenanceData.cost is number &&
-             maintenanceData.cost >= 0 &&
-             maintenanceData.date is timestamp;
-    }
-    
-    // Aplicar validações nas operações de escrita
-    match /gasometer_12c83_{userId}/vehicles/{vehicleId} {
-      allow create: if request.auth != null && 
-                       request.auth.uid == userId && 
-                       isValidVehicle(request.resource.data);
-      allow update: if request.auth != null && 
-                       request.auth.uid == userId && 
-                       isValidVehicle(request.resource.data);
-    }
-    
-    match /gasometer_12c83_{userId}/fuel_records/{recordId} {
-      allow create: if request.auth != null && 
-                       request.auth.uid == userId && 
-                       isValidFuelRecord(request.resource.data);
-      allow update: if request.auth != null && 
-                       request.auth.uid == userId && 
-                       isValidFuelRecord(request.resource.data);
-    }
-    
-    match /gasometer_12c83_{userId}/maintenance_records/{recordId} {
-      allow create: if request.auth != null && 
-                       request.auth.uid == userId && 
-                       isValidMaintenanceRecord(request.resource.data);
-      allow update: if request.auth != null && 
-                       request.auth.uid == userId && 
-                       isValidMaintenanceRecord(request.resource.data);
-    }
-    
-    // Negar acesso a todos os outros documentos
+
+    // ===== BLOQUEAR TODO O RESTO =====
     match /{document=**} {
       allow read, write: if false;
     }

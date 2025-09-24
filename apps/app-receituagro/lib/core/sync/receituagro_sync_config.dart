@@ -11,20 +11,44 @@ FavoritoSyncEntity _favoritoFromFirebaseMap(Map<String, dynamic> map) {
   return FavoritoSyncEntity.fromMap(map);
 }
 
+Map<String, dynamic> _favoritoToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as FavoritoSyncEntity).toMap();
+}
+
 ComentarioSyncEntity _comentarioFromFirebaseMap(Map<String, dynamic> map) {
   return ComentarioSyncEntity.fromMap(map);
+}
+
+Map<String, dynamic> _comentarioToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as ComentarioSyncEntity).toMap();
 }
 
 UserSettingsSyncEntity _userSettingsFromFirebaseMap(Map<String, dynamic> map) {
   return UserSettingsSyncEntity.fromFirebaseMap(map);
 }
 
+Map<String, dynamic> _userSettingsToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as UserSettingsSyncEntity).toMap();
+}
+
 UserHistorySyncEntity _userHistoryFromFirebaseMap(Map<String, dynamic> map) {
   return UserHistorySyncEntity.fromFirebaseMap(map);
 }
 
+Map<String, dynamic> _userHistoryToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as UserHistorySyncEntity).toMap();
+}
+
 UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
   return UserEntityReceitaAgroExtension.fromReceitaAgroFirebaseMap(map);
+}
+
+Map<String, dynamic> _userEntityToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as UserEntity).toReceitaAgroFirebaseMap();
+}
+
+Map<String, dynamic> _subscriptionToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as SubscriptionEntity).toFirebaseMap();
 }
 
 /// Configuração de sincronização específica do ReceitaAgro
@@ -45,7 +69,7 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: FavoritoSyncEntity,
           collectionName: 'favoritos',
           fromMap: _favoritoFromFirebaseMap,
-          toMap: (favorito) => favorito.toMap(),
+          toMap: _favoritoToFirebaseMap,
         ),
 
         // Comentários - Feedback sobre diagnósticos
@@ -53,7 +77,7 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: ComentarioSyncEntity,
           collectionName: 'comentarios',
           fromMap: _comentarioFromFirebaseMap,
-          toMap: (comentario) => comentario.toMap(),
+          toMap: _comentarioToFirebaseMap,
         ),
 
         // Configurações do Usuário - Preferências e configurações
@@ -61,7 +85,7 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: UserSettingsSyncEntity,
           collectionName: 'user_settings',
           fromMap: _userSettingsFromFirebaseMap,
-          toMap: (settings) => settings.toMap(),
+          toMap: _userSettingsToFirebaseMap,
         ),
 
         // Histórico do Usuário - Analytics e comportamento
@@ -69,7 +93,7 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: UserHistorySyncEntity,
           collectionName: 'user_history',
           fromMap: _userHistoryFromFirebaseMap,
-          toMap: (history) => history.toMap(),
+          toMap: _userHistoryToFirebaseMap,
         ),
 
         // Usuários (profile compartilhado entre apps)
@@ -77,7 +101,7 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: _userEntityFromFirebaseMap,
-          toMap: (user) => user.toReceitaAgroFirebaseMap(),
+          toMap: _userEntityToFirebaseMap,
         ),
 
         // Assinaturas (subscription compartilhada entre apps)
@@ -85,7 +109,7 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (subscription) => subscription.toFirebaseMap(),
+          toMap: _subscriptionToFirebaseMap,
         ),
       ],
     );

@@ -4,7 +4,7 @@ import 'base_hive_repository.dart';
 /// Repositório para DiagnosticoHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
-  DiagnosticoHiveRepository() : super('receituagro_diagnosticos_static');
+  DiagnosticoHiveRepository() : super('receituagro_diagnosticos');
 
   @override
   DiagnosticoHive createFromJson(Map<String, dynamic> json) {

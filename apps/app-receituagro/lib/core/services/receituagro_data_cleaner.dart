@@ -414,7 +414,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       case 'defensivos':
         return ['fitossanitarios', 'fitossanitarios_info'];
       case 'diagnosticos':
-        return ['diagnosticos', 'diagnosticos_static'];
+        return ['diagnosticos'];
       case 'favoritos':
         return ['favoritos'];
       case 'premium':
@@ -440,7 +440,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       case 'fitossanitarios_info':
         return 'defensivos';
       case 'diagnosticos':
-      case 'diagnosticos_static':
         return 'diagnosticos';
       case 'favoritos':
         return 'favoritos';

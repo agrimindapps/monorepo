@@ -1,0 +1,129 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== HEALTH CHECK =====
+    match /_health_check/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ===== USUÁRIOS =====
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // ===== SUBCOLEÇÕES DO USUÁRIO =====
+      match /diagnosticos/{diagnosticoId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /comentarios/{comentarioId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /favoritos/{favoritoId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /culturas/{culturaId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /pragas/{pragaId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /defensivos/{defensivoId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ===== COLEÇÕES RAIZ (caso existam) =====
+    match /diagnosticos/{diagnosticoId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /comentarios/{comentarioId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /favoritos/{favoritoId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /culturas/{culturaId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /pragas/{pragaId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    match /defensivos/{defensivoId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    // ===== ASSINATURAS =====
+    match /subscriptions/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== CONFIGURAÇÕES =====
+    match /userSettings/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== DISPOSITIVOS =====
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    // ===== DADOS DE SINCRONIZAÇÃO =====
+    match /syncData/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ===== DADOS ESPECÍFICOS DO RECEITUAGRO =====
+    match /receituagro_data/{dataType} {
+      allow read: if request.auth != null;
+      allow write: if false; // Dados estáticos, apenas leitura
+    }
+
+    match /user_actions/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /export_requests/{requestId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.user_id;
+    }
+
+    // ===== BLOQUEAR TODO O RESTO =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

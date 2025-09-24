@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/extensions/diagnostico_hive_extension.dart';
 import '../../../../core/models/cultura_hive.dart';
+import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/models/pragas_hive.dart';
 import '../../../../core/navigation/app_navigation_provider.dart';
 import '../../../../core/repositories/cultura_hive_repository.dart';
@@ -581,78 +583,15 @@ class _DiagnosticoDefensivoListItemWidgetState
     try {
       final pragasRepository = sl<PragasHiveRepository>();
 
-      // Debug completo do diagnóstico
-      print('🔬 === DEBUG DIAGNÓSTICO COMPLETO ===');
-      print('📋 Tipo do objeto: ${widget.diagnostico.runtimeType}');
 
-      if (widget.diagnostico is Map<String, dynamic>) {
-        final map = widget.diagnostico as Map<String, dynamic>;
-        print('🗝️ Chaves disponíveis: ${map.keys.toList()}');
-        print('📊 Valores: $map');
-      } else {
-        print('🔧 Propriedades do objeto:');
-        try {
-          final props = [
-            'fkIdPraga',
-            'idPraga',
-            'fkIdDefensivo',
-            'idDefensivo',
-            'nomeDefensivo',
-            'nomePraga',
-            'fkIdCultura',
-            'idCultura',
-            'nomeCultura'
-          ];
-          for (final prop in props) {
-            final value = _getProperty(prop);
-            print('  • $prop: $value');
-          }
-        } catch (e) {
-          print('  ❌ Erro ao acessar propriedades: $e');
-        }
-      }
 
       // Tenta ambos os nomes de propriedade para compatibilidade
       final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
-      print('🎯 idPraga extraído: "$idPraga" (tipo: ${idPraga.runtimeType})');
-      print('🔍 fkIdPraga: "${_getProperty('fkIdPraga')}"');
-      print('🔍 idPraga: "${_getProperty('idPraga')}"');
 
-      // Debug do repositório de pragas
-      print('📦 === DEBUG REPOSITÓRIO PRAGAS ===');
-      final todasPragas = pragasRepository.getAll();
-      print('📊 Total de pragas na box: ${todasPragas.length}');
 
-      if (todasPragas.isNotEmpty) {
-        print('🔍 Primeiras 3 pragas como exemplo:');
-        for (int i = 0; i < 3 && i < todasPragas.length; i++) {
-          final p = todasPragas[i];
-          print(
-              '  ${i + 1}. ID: "${p.idReg}" | Nome: "${p.nomeComum}" | Científico: "${p.nomeCientifico}"');
-        }
-
-        // Verifica se existe uma praga com o idPraga exato
-        if (idPraga != null) {
-          final pragaExata =
-              todasPragas.where((p) => p.idReg == idPraga).toList();
-          print('🎯 Pragas com ID "$idPraga": ${pragaExata.length}');
-          if (pragaExata.isNotEmpty) {
-            print('✅ Praga encontrada: "${pragaExata.first.nomeComum}"');
-          } else {
-            print('❌ Nenhuma praga encontrada com ID "$idPraga"');
-            // Procura IDs similares
-            final similares =
-                todasPragas.where((p) => p.idReg.contains(idPraga)).toList();
-            print(
-                '🔍 IDs similares ($similares.length): ${similares.map((p) => '"${p.idReg}"').take(5).join(", ")}');
-          }
-        }
-      }
 
       if (idPraga != null) {
         final praga = pragasRepository.getById(idPraga);
-        print(
-            '🔍 Resultado getById("$idPraga"): ${praga != null ? '"${praga.nomeComum}"' : 'null'}');
 
         if (mounted) {
           setState(() {
@@ -661,7 +600,6 @@ class _DiagnosticoDefensivoListItemWidgetState
           });
         }
       } else {
-        print('⚠️ idPraga é null - não há o que buscar');
         if (mounted) {
           setState(() {
             _isLoadingPraga = false;
@@ -669,10 +607,7 @@ class _DiagnosticoDefensivoListItemWidgetState
         }
       }
 
-      print('🏁 === FIM DEBUG ===');
-    } catch (e, stackTrace) {
-      print('❌ Erro ao carregar dados da praga: $e');
-      print('📚 Stack trace: $stackTrace');
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingPraga = false;
@@ -805,19 +740,24 @@ class _DiagnosticoDefensivoListItemWidgetState
     String nomeComumPraga = 'Praga não identificada';
     String nomeCientificoPraga = '';
 
-    // PRIMEIRA PRIORIDADE: usar nomePraga do modelo (já resolvido pelo sistema)
-    final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
-    if (nomePragaModel != null && nomePragaModel.isNotEmpty && nomePragaModel != 'Não especificado') {
-      nomeComumPraga = nomePragaModel;
-    } else if (_pragaData != null) {
-      // SEGUNDA PRIORIDADE: usar dados do repositório de pragas
-      final nomeComumCompleto = _pragaData!.nomeComum;
-      if (nomeComumCompleto.contains(',')) {
-        nomeComumPraga = nomeComumCompleto.split(',').first.trim();
-      } else if (nomeComumCompleto.contains(';')) {
-        nomeComumPraga = nomeComumCompleto.split(';').first.trim();
-      } else {
-        nomeComumPraga = nomeComumCompleto;
+    // USAR A EXTENSÃO IMPLEMENTADA para resolver dinamicamente
+    if (widget.diagnostico is DiagnosticoHive) {
+      final diagnosticoHive = widget.diagnostico as DiagnosticoHive;
+      nomeComumPraga = diagnosticoHive.displayNomePraga;
+    } else {
+      // FALLBACK: lógica anterior para outros tipos
+      final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
+      if (nomePragaModel != null && nomePragaModel.isNotEmpty && nomePragaModel != 'Não especificado') {
+        nomeComumPraga = nomePragaModel;
+      } else if (_pragaData != null) {
+        final nomeComumCompleto = _pragaData!.nomeComum;
+        if (nomeComumCompleto.contains(',')) {
+          nomeComumPraga = nomeComumCompleto.split(',').first.trim();
+        } else if (nomeComumCompleto.contains(';')) {
+          nomeComumPraga = nomeComumCompleto.split(';').first.trim();
+        } else {
+          nomeComumPraga = nomeComumCompleto;
+        }
       }
     }
 
@@ -1313,10 +1253,18 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   /// Navega para a página de detalhes do diagnóstico
   void _navigateToDetailedDiagnostic(BuildContext context) {
     final diagnosticoId = _getProperty('id');
-    final nomeCultura =
-        _getProperty('nomeCultura', 'cultura') ?? 'Não especificado';
-    final nomeDefensivo =
-        _getProperty('nomeDefensivo', 'nome') ?? 'Não especificado';
+    // Usar extensão para resolver nomes dinamicamente se disponível
+    String nomeCultura = 'Não especificado';
+    String nomeDefensivo = 'Não especificado';
+    
+    if (diagnostico is DiagnosticoHive) {
+      final diagnosticoHive = diagnostico as DiagnosticoHive;
+      nomeCultura = diagnosticoHive.displayNomeCultura;
+      nomeDefensivo = diagnosticoHive.displayNomeDefensivo;
+    } else {
+      nomeCultura = _getProperty('nomeCultura', 'cultura') ?? 'Não especificado';
+      nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? 'Não especificado';
+    }
     final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Não especificado';
 
     if (diagnosticoId != null) {

@@ -4,7 +4,7 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../../core/services/diagnostico_entity_resolver.dart';
 import '../../../../core/services/diagnostico_grouping_service.dart';
-import '../../../../core/services/enhanced_diagnostico_cache_service.dart';
+// import '../../../../core/services/enhanced_diagnostico_cache_service.dart'; // Temporariamente desabilitado
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
@@ -20,7 +20,7 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   late final IDiagnosticosRepository _repository = sl<IDiagnosticosRepository>();
   
   // Serviços centralizados
-  final _cacheService = EnhancedDiagnosticoCacheService.instance;
+  // final _cacheService = EnhancedDiagnosticoCacheService.instance; // Temporariamente desabilitado
   final _resolver = DiagnosticoEntityResolver.instance;
   final _groupingService = DiagnosticoGroupingService.instance;
   final _compatibilityService = DiagnosticoCompatibilityService.instance;
@@ -70,18 +70,17 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   Future<void> initialize() async {
     try {
       // Inicializa serviços se necessário
-      if (_cacheService.performanceStats.indexSize == 0) {
-        await _cacheService.initialize();
-      }
-      debugPrint('✅ EnhancedDiagnosticosPragaProvider inicializado');
+      // Cache temporariamente desabilitado
+      // if (_cacheService.performanceStats.indexSize == 0) {
+      //   await _cacheService.initialize();
+      // }
     } catch (e) {
-      debugPrint('❌ Erro ao inicializar provider: $e');
+      // Initialization errors are logged internally
     }
   }
 
   /// Carrega diagnósticos para uma praga específica por ID
   Future<void> loadDiagnosticos(String pragaId) async {
-    debugPrint('🔍 Carregando diagnósticos para praga ID: $pragaId');
 
     _currentPragaId = pragaId;
     _currentPragaName = _resolver.resolvePragaNome(idPraga: pragaId);
@@ -98,7 +97,6 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
         (entities) {
           _setSuccessState(entities);
           _updateAvailableCulturas();
-          debugPrint('✅ Carregados ${entities.length} diagnósticos');
         },
       );
     } catch (e) {
@@ -114,22 +112,26 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
       return;
     }
 
-    debugPrint('🔍 Buscando diagnósticos por texto: $query');
     _setLoadingState(true);
 
     try {
       // Usa cache service para busca por texto otimizada
-      final diagnosticosHive = await _cacheService.searchByText(query);
+      // Cache temporariamente desabilitado - usando repository direto
+      final diagnosticos = await _repository.searchByPattern(query);
+      final diagnosticosHive = diagnosticos.fold(
+        (failure) => <DiagnosticoEntity>[],
+        (data) => data,
+      );
       
       if (diagnosticosHive.isNotEmpty) {
         // Converte para entidades se necessário
-        final ids = diagnosticosHive.map((d) => d.idReg).toList();
+        final ids = diagnosticosHive.map((d) => d.id).toList();
         final filteredResults = <DiagnosticoEntity>[];
         
         for (final id in ids) {
           final result = await _repository.getById(id);
           result.fold(
-            (failure) => debugPrint('Erro ao buscar diagnóstico $id: $failure'),
+            (failure) => null,
             (entity) {
               if (entity != null) filteredResults.add(entity);
             },
@@ -270,7 +272,8 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
 
   /// Obtém sugestões de busca
   List<String> getSuggestions(String partialQuery) {
-    return _cacheService.getSuggestions(partialQuery, limit: 5);
+    // Cache temporariamente desabilitado - retornando lista vazia
+    return [];
   }
 
   /// Obtém estatísticas dos dados
@@ -285,7 +288,7 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
           ? grouping.values.map((list) => list.length).reduce((a, b) => a + b) / grouping.length
           : 0.0,
       hasFilters: hasFilters,
-      cacheHitRate: _cacheService.performanceStats.hitRate,
+      cacheHitRate: 0.0, // Cache temporariamente desabilitado
     );
   }
 

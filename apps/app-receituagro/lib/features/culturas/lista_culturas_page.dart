@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/models/cultura_hive.dart';
 import '../../core/navigation/app_navigation_provider.dart';
-import '../../core/repositories/cultura_core_repository.dart';
+import '../../core/repositories/cultura_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
 import 'models/cultura_view_mode.dart';
@@ -23,7 +23,7 @@ class ListaCulturasPage extends StatefulWidget {
 
 class _ListaCulturasPageState extends State<ListaCulturasPage> {
   final TextEditingController _searchController = TextEditingController();
-  final CulturaCoreRepository _repository = sl<CulturaCoreRepository>();
+  final CulturaHiveRepository _repository = sl<CulturaHiveRepository>();
 
   List<CulturaHive> _culturas = [];
   List<CulturaHive> _filteredCulturas = [];
@@ -54,7 +54,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
 
     try {
-      final culturas = await _repository.getActiveCulturas();
+      final culturas = _repository.getActiveCulturas();
       setState(() {
         _culturas = culturas;
         _filteredCulturas = culturas;

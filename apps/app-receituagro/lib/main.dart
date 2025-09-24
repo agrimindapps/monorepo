@@ -22,6 +22,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
+import 'core/services/diagnosticos_data_loader.dart';
 import 'core/services/firebase_messaging_service.dart';
 import 'core/services/premium_service.dart';
 import 'core/services/promotional_notification_manager.dart';
@@ -33,6 +34,7 @@ import 'core/services/remote_config_service.dart';
 // startup_optimization_service.dart removed - unused
 import 'core/setup/receituagro_data_setup.dart';
 import 'core/theme/receituagro_theme.dart';
+import 'core/inspector/receita_agro_data_inspector_initializer.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -106,6 +108,12 @@ void main() async {
 
   // Initialize dependency injection
   await di.init();
+
+  // Initialize Data Inspector (debug mode only)
+  if (kDebugMode) {
+    ReceitaAgroDataInspectorInitializer.initialize();
+    debugPrint('🔍 Data Inspector initialized for ReceitaAgro');
+  }
 
   // ===== SYNC INITIALIZATION =====
   // Force sync initialization after DI is ready
@@ -206,10 +214,30 @@ void main() async {
     print('🔧 [FIXED] Iniciando ReceitaAgroDataSetup após AppDataManager...');
     await ReceitaAgroDataSetup.initialize();
     print('✅ [MAIN] ReceitaAgroDataSetup concluído com sucesso');
+
+    // DEBUG: Verificar se diagnósticos foram carregados
+    print('🔍 [DEBUG] Verificando status dos diagnósticos após setup...');
+    final diagnosticosStats = await DiagnosticosDataLoader.getStats();
+    print('📊 [DEBUG] Diagnósticos Stats: $diagnosticosStats');
+
+    // Se não há diagnósticos, tentar forçar carregamento
+    if (diagnosticosStats['total_diagnosticos'] == 0) {
+      print(
+        '⚠️ [DEBUG] Nenhum diagnóstico encontrado, forçando carregamento...',
+      );
+      try {
+        await DiagnosticosDataLoader.forceReload();
+        final newStats = await DiagnosticosDataLoader.getStats();
+        print('🔄 [DEBUG] Diagnósticos após reload forçado: $newStats');
+      } catch (reloadError) {
+        print('❌ [DEBUG] Erro no reload forçado: $reloadError');
+      }
+    }
   } catch (e) {
     print(
       '⚠️ [MAIN] ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados: $e',
     );
+    print('🔧 [DEBUG] Stack trace do erro: ${StackTrace.current}');
     // Log error but don't block app startup - AppDataManager already loaded the data
     if (EnvironmentConfig.enableAnalytics) {
       await FirebaseCrashlytics.instance.recordError(

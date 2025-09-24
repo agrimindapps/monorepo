@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedef.dart';
@@ -19,18 +20,55 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   @override
   ResultFuture<List<DiagnosticoEntity>> getDiagnosticosByDefensivo(String idDefensivo) async {
     try {
+      debugPrint('=== REPOSITORY IMPL: getDiagnosticosByDefensivo ===');
+      debugPrint('ID Defensivo recebido: $idDefensivo');
+      
+      final repositoryStartTime = DateTime.now();
       final result = await _diagnosticosRepository.getByDefensivo(idDefensivo);
+      final repositoryEndTime = DateTime.now();
+      final duration = repositoryEndTime.difference(repositoryStartTime);
+      
+      debugPrint('Tempo na chamada _diagnosticosRepository.getByDefensivo: ${duration.inMilliseconds}ms');
       
       return result.fold(
-        (failure) => Left(failure),
+        (failure) {
+          debugPrint('❌ FALHA no _diagnosticosRepository: ${failure.message}');
+          return Left(failure);
+        },
         (diagnosticosEntities) {
+          debugPrint('✅ SUCESSO no _diagnosticosRepository');
+          debugPrint('Entidades brutas encontradas: ${diagnosticosEntities.length}');
+          
+          // Log das primeiras entidades para debug
+          if (diagnosticosEntities.isNotEmpty) {
+            debugPrint('=== ENTIDADES ENCONTRADAS (primeiras 3) ===');
+            for (int i = 0; i < diagnosticosEntities.length && i < 3; i++) {
+              final entity = diagnosticosEntities[i];
+              debugPrint('[$i] ID: ${entity.id}');
+              debugPrint('[$i] idDefensivo: ${entity.idDefensivo}');
+              debugPrint('[$i] nomeDefensivo: ${entity.nomeDefensivo}');
+              debugPrint('[$i] nomeCultura: ${entity.nomeCultura}');
+              debugPrint('[$i] nomePraga: ${entity.nomePraga}');
+              debugPrint('---');
+            }
+          }
+          
+          final conversionStartTime = DateTime.now();
           final models = diagnosticosEntities
               .map((entity) => DiagnosticoModel.fromDiagnosticsEntity(entity))
               .toList();
+          final conversionEndTime = DateTime.now();
+          final conversionDuration = conversionEndTime.difference(conversionStartTime);
+          
+          debugPrint('Conversão para models: ${conversionDuration.inMilliseconds}ms');
+          debugPrint('Models finais: ${models.length}');
+          
           return Right(models);
         },
       );
     } catch (e) {
+      debugPrint('❌ EXCEÇÃO no Repository Impl: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
       return Left(ServerFailure('Erro ao buscar diagnósticos por defensivo: ${e.toString()}'));
     }
   }

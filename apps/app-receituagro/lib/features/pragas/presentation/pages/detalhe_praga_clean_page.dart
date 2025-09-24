@@ -74,11 +74,9 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
 
       // Se praga carregada com sucesso, carregar diagnósticos por ID
       if (_pragaProvider.pragaData != null && _pragaProvider.pragaData!.idReg.isNotEmpty) {
-        debugPrint('✅ Carregando diagnósticos por ID: ${_pragaProvider.pragaData!.idReg}');
         await _diagnosticosProvider.loadDiagnosticos(_pragaProvider.pragaData!.idReg);
       } else {
         // Diagnósticos só podem ser carregados com idReg válido
-        debugPrint('⚠️ Não foi possível carregar diagnósticos sem idReg da praga');
       }
     } catch (e) {
       debugPrint('❌ Erro ao carregar dados iniciais: $e');

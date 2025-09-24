@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -14,15 +13,10 @@ class DiagnosticosDataLoader {
   /// Carrega dados de diagnósticos do JSON dos assets usando repositório
   static Future<void> loadDiagnosticosData() async {
     if (_isLoaded) {
-      developer.log('Diagnósticos já carregados, pulando...',
-          name: 'DiagnosticosDataLoader');
       return;
     }
 
     try {
-      developer.log('🩺 [DIAGNOSTICOS] Iniciando carregamento de diagnósticos...',
-          name: 'DiagnosticosDataLoader');
-      print('🩺 [DIAGNOSTICOS] Iniciando carregamento de diagnósticos...');
 
       final List<Map<String, dynamic>> allDiagnosticos = [];
 
@@ -43,13 +37,8 @@ class DiagnosticosDataLoader {
 
           allDiagnosticos.addAll(diagnosticos);
 
-          developer.log(
-              '🩺 [DIAGNOSTICOS] Arquivo TBDIAGNOSTICO$i.json carregado: ${diagnosticos.length} registros',
-              name: 'DiagnosticosDataLoader');
+
         } catch (e) {
-          developer.log(
-              '⚠️ [DIAGNOSTICOS] Arquivo TBDIAGNOSTICO$i.json não encontrado ou erro: $e',
-              name: 'DiagnosticosDataLoader');
         }
       }
 
@@ -63,10 +52,8 @@ class DiagnosticosDataLoader {
               item['fkIdPraga'] != null)
           .toList();
 
-      developer.log(
-          '🩺 [DIAGNOSTICOS] JSON carregado: ${allDiagnosticos.length} registros totais, ${diagnosticos.length} diagnósticos válidos',
-          name: 'DiagnosticosDataLoader');
-      print('🩺 [DIAGNOSTICOS] JSON carregado: ${allDiagnosticos.length} registros totais, ${diagnosticos.length} diagnósticos válidos');
+
+
 
       // 2. Salva no repositório Hive usando injeção de dependência
       final repository = di.sl<DiagnosticoHiveRepository>();
@@ -76,33 +63,15 @@ class DiagnosticosDataLoader {
       
       result.fold(
         (error) {
-          developer.log(
-              '⚠️ [DIAGNOSTICOS] Erro ao carregar diagnósticos: $error',
-              name: 'DiagnosticosDataLoader');
           throw error;
         },
-        (_) {
-          developer.log('✅ [DIAGNOSTICOS] Diagnósticos carregados com sucesso',
-              name: 'DiagnosticosDataLoader');
-        },
+        (_) {},
       );
 
-      final countAfter = repository.getAll().length;
-      developer.log('Diagnósticos carregados com sucesso!',
-          name: 'DiagnosticosDataLoader');
-      developer.log('Verificação: $countAfter diagnósticos disponíveis',
-          name: 'DiagnosticosDataLoader');
-      print('Diagnósticos carregados com sucesso!');
-      print('Verificação: $countAfter diagnósticos disponíveis');
+
 
       _isLoaded = true;
-    } catch (e, stackTrace) {
-      developer.log('❌ [DIAGNOSTICOS] Erro durante carregamento de diagnósticos: $e',
-          name: 'DiagnosticosDataLoader');
-      developer.log('❌ [DIAGNOSTICOS] Stack trace: $stackTrace',
-          name: 'DiagnosticosDataLoader');
-      print('❌ [DIAGNOSTICOS] Erro durante carregamento de diagnósticos: $e');
-      print('❌ [DIAGNOSTICOS] Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }
@@ -120,13 +89,9 @@ class DiagnosticosDataLoader {
       final diagnosticos = repository.getAll();
       final hasData = diagnosticos.isNotEmpty;
       
-      developer.log('🔍 [DIAGNOSTICOS] isDataLoaded() - Repository has ${diagnosticos.length} items: $hasData', 
-          name: 'DiagnosticosDataLoader');
       
       return hasData;
     } catch (e) {
-      developer.log('❌ [DIAGNOSTICOS] Error checking isDataLoaded: $e', 
-          name: 'DiagnosticosDataLoader');
       return false;
     }
   }

@@ -24,7 +24,6 @@ import '../../features/settings/di/device_management_di.dart';
 import '../navigation/app_navigation_provider.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_core_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
 import '../repositories/favoritos_hive_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
@@ -340,14 +339,9 @@ Future<void> init() async {
     () => EnhancedDiagnosticIntegrationService(),
   );
 
-  // Core Repository para Diagnósticos
-  sl.registerLazySingleton<DiagnosticoCoreRepository>(
-    () => DiagnosticoCoreRepository(sl<core.ILocalStorageRepository>()),
-  );
-
-  // Enhanced Diagnosticos Repository - Direct implementation
+  // Enhanced Diagnosticos Repository - Direct implementation (usando DiagnosticoHiveRepository já registrado)
   sl.registerLazySingleton<IDiagnosticosRepository>(
-    () => DiagnosticosRepositoryImpl(sl<DiagnosticoCoreRepository>()),
+    () => DiagnosticosRepositoryImpl(sl<DiagnosticoHiveRepository>()),
   );
 
   // Use Cases para Diagnósticos

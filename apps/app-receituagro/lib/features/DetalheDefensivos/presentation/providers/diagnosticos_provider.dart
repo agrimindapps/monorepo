@@ -39,6 +39,11 @@ class DiagnosticosProvider extends ChangeNotifier {
   Future<void> loadDiagnosticos(String idDefensivo) async {
     if (_isLoading) return;
 
+    debugPrint('=== DIAGNOSTICOS PROVIDER: Iniciando busca ===');
+    debugPrint('ID do defensivo para busca: $idDefensivo');
+    debugPrint('Cultura selecionada: $_selectedCultura');
+    debugPrint('Query de busca: $_searchQuery');
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -49,21 +54,56 @@ class DiagnosticosProvider extends ChangeNotifier {
       searchQuery: _searchQuery,
     );
 
+    debugPrint('Parâmetros de busca criados: ${params.isValid ? 'Válidos' : 'Inválidos'}');
+    
+    final searchStartTime = DateTime.now();
     final result = await _getDiagnosticosUseCase(params);
+    final searchEndTime = DateTime.now();
+    final searchDuration = searchEndTime.difference(searchStartTime);
+
+    debugPrint('Tempo de busca no UseCase: ${searchDuration.inMilliseconds}ms');
 
     result.fold(
       (failure) {
+        debugPrint('❌ ERRO na busca de diagnósticos: ${failure.message}');
         _isLoading = false;
         _errorMessage = failure.message;
         notifyListeners();
       },
       (diagnosticos) {
+        debugPrint('✅ SUCESSO na busca de diagnósticos');
+        debugPrint('Número de diagnósticos encontrados: ${diagnosticos.length}');
+        
+        // Log detalhado dos diagnósticos encontrados
+        if (diagnosticos.isNotEmpty) {
+          debugPrint('=== DIAGNÓSTICOS ENCONTRADOS ===');
+          for (int i = 0; i < diagnosticos.length; i++) {
+            final diag = diagnosticos[i];
+            debugPrint('[$i] ID: ${diag.id}');
+            debugPrint('[$i] Nome: ${diag.nome}');
+            debugPrint('[$i] Cultura: ${diag.cultura}');
+            debugPrint('[$i] Grupo/Praga: ${diag.grupo}');
+            debugPrint('[$i] Ingrediente Ativo: ${diag.ingredienteAtivo}');
+            debugPrint('---');
+          }
+        } else {
+          debugPrint('⚠️ Nenhum diagnóstico encontrado para o defensivo: $idDefensivo');
+        }
+
         _originalDiagnosticos = diagnosticos;
         _diagnosticos = diagnosticos;
         _diagnosticosGrouped = _groupDiagnosticosByCultura(diagnosticos);
+        
+        debugPrint('Diagnósticos agrupados por cultura: ${_diagnosticosGrouped.keys.length} grupos');
+        for (final cultura in _diagnosticosGrouped.keys) {
+          debugPrint('Cultura "$cultura": ${_diagnosticosGrouped[cultura]!.length} diagnósticos');
+        }
+        
         _isLoading = false;
         _errorMessage = null;
         notifyListeners();
+        
+        debugPrint('=== PROVIDER: Carregamento finalizado ===');
       },
     );
   }

@@ -64,7 +64,6 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
 
   /// Carrega diagnósticos para uma praga específica por ID
   Future<void> loadDiagnosticos(String pragaId) async {
-    debugPrint('🔍 [DIAGNOSTICOS] Carregando diagnósticos para praga ID: $pragaId');
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -79,7 +78,6 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
           debugPrint('❌ $_errorMessage');
         },
         (diagnosticosEntities) {
-          debugPrint('✅ [DIAGNOSTICOS] Encontrados ${diagnosticosEntities.length} diagnósticos para praga ID: $pragaId');
           // Converte entidades para o modelo usado na UI
           _diagnosticos = diagnosticosEntities.map((entity) {
             return DiagnosticoModel(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:core/core.dart' as core;
 
 import '../../../../core/presentation/widgets/form_section_header.dart';
 import '../../../../core/presentation/widgets/notes_form_field.dart';
@@ -632,36 +632,14 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
 
   /// Widget de shimmer placeholder para loading states
   Widget _buildShimmerPlaceholder(double height, double width) {
-    return Shimmer.fromColors(
+    return core.ShimmerService.imageShimmer(
+      context: context,
+      width: width,
+      height: height,
       baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       highlightColor: Theme.of(context).colorScheme.surface,
-      child: Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(GasometerDesignTokens.radiusLg),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.directions_car,
-              size: 48,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
-            ),
-            SizedBox(height: GasometerDesignTokens.spacingSm),
-            Text(
-              'Carregando...',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(GasometerDesignTokens.radiusLg),
       ),
     );
   }

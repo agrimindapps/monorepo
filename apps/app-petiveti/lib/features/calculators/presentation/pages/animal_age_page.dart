@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 
 /// Página da Calculadora de Idade Animal
 class AnimalAgePage extends StatefulWidget {

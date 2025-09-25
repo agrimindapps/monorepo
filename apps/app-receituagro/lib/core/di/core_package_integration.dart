@@ -358,26 +358,32 @@ class CorePackageIntegration {
   /// Register ReceitaAgro-specific auth services
   static Future<void> _registerReceitaAgroAuthServices() async {
     // Register ReceitaAgro Enhanced Analytics Service first
-    _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
-      () => ReceitaAgroEnhancedAnalyticsProvider(
-        analyticsRepository: _sl<core.IAnalyticsRepository>(),
-        crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
-      ),
-    );
+    if (!_sl.isRegistered<ReceitaAgroEnhancedAnalyticsProvider>()) {
+      _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
+        () => ReceitaAgroEnhancedAnalyticsProvider(
+          analyticsRepository: _sl<core.IAnalyticsRepository>(),
+          crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
+        ),
+      );
+    }
 
     // Register alias for backward compatibility
-    _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-      () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
-    );
+    if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
+      _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+        () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
+      );
+    }
 
     // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)
-    _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
-      () => ReceitaAgroAuthProvider(
-        authRepository: _sl<core.IAuthRepository>(),
-        deviceService: _sl<DeviceIdentityService>(),
-        analytics: _sl<ReceitaAgroAnalyticsService>(),
-      ),
-    );
+    if (!_sl.isRegistered<ReceitaAgroAuthProvider>()) {
+      _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
+        () => ReceitaAgroAuthProvider(
+          authRepository: _sl<core.IAuthRepository>(),
+          deviceService: _sl<DeviceIdentityService>(),
+          analytics: _sl<ReceitaAgroAnalyticsService>(),
+        ),
+      );
+    }
 
     if (kDebugMode) print('✅ ReceitaAgro: Auth services registered successfully');
   }

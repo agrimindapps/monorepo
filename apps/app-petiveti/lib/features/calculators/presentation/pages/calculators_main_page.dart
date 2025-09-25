@@ -19,7 +19,7 @@ class CalculatorsMainPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final calculatorsAsync = ref.watch(calculatorsProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calculadoras Veterinárias'),
@@ -38,7 +38,7 @@ class CalculatorsMainPage extends ConsumerWidget {
 /// Grid de calculadoras
 class _CalculatorsGrid extends StatelessWidget {
   const _CalculatorsGrid({required this.calculators});
-  
+
   final List<Calculator> calculators;
 
   @override
@@ -56,11 +56,9 @@ class _CalculatorsGrid extends StatelessWidget {
         children: [
           _WelcomeHeader(),
           const SizedBox(height: 24),
-          ...categorizedCalculators.entries.map((entry) =>
-            _CategorySection(
-              category: entry.key,
-              calculators: entry.value,
-            ),
+          ...categorizedCalculators.entries.map(
+            (entry) =>
+                _CategorySection(category: entry.key, calculators: entry.value),
           ),
         ],
       ),
@@ -73,7 +71,7 @@ class _WelcomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -93,11 +91,7 @@ class _WelcomeHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.calculate,
-                size: 32,
-                color: theme.colorScheme.primary,
-              ),
+              Icon(Icons.calculate, size: 32, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -126,18 +120,15 @@ class _WelcomeHeader extends StatelessWidget {
 
 /// Seção de categoria de calculadoras
 class _CategorySection extends StatelessWidget {
-  const _CategorySection({
-    required this.category,
-    required this.calculators,
-  });
-  
+  const _CategorySection({required this.category, required this.calculators});
+
   final CalculatorCategory category;
   final List<Calculator> calculators;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -171,9 +162,9 @@ class _CategorySection extends StatelessWidget {
             mainAxisSpacing: 12,
           ),
           itemCount: calculators.length,
-          itemBuilder: (context, index) => _CalculatorCard(
-            calculator: calculators[index],
-          ),
+          itemBuilder:
+              (context, index) =>
+                  _CalculatorCard(calculator: calculators[index]),
         ),
         const SizedBox(height: 24),
       ],
@@ -210,18 +201,16 @@ class _CategorySection extends StatelessWidget {
 /// Card de calculadora individual
 class _CalculatorCard extends StatelessWidget {
   const _CalculatorCard({required this.calculator});
-  
+
   final Calculator calculator;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => _navigateToCalculator(context),
         borderRadius: BorderRadius.circular(12),
@@ -349,25 +338,26 @@ class _CalculatorCard extends StatelessWidget {
         _showComingSoonDialog(context);
         return;
     }
-    
+
     context.push(route);
   }
 
   void _showComingSoonDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Em breve'),
-        content: Text(
-          'A calculadora "${calculator.name}" estará disponível em breve!'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Em breve'),
+            content: Text(
+              'A calculadora "${calculator.name}" estará disponível em breve!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -394,24 +384,20 @@ class _LoadingState extends StatelessWidget {
 /// Estado de erro
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.error});
-  
+
   final Object error;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar calculadoras',

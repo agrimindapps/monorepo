@@ -12,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados do monorepo
   core:
     path: ../../packages/core
 
@@ -20,53 +19,17 @@ dependencies:
   provider: ^6.1.1
   
   # Dependency Injection
-  injectable: ^2.3.2        # Code generation para DI
+  injectable: ^2.3.2
   
   # Navigation
-  go_router: ^16.1.0        # Substitui GetX navigation
+  go_router: ^16.1.0
   
-  # RSS & External Data (será adicionado na Fase 5)
-  
-  # Utils específicos do app
-  intl: ^0.20.2
-  
-  # UI
-  cupertino_icons: ^1.0.8
-  flutter_svg: ^2.0.10+1
-  
-  # Weather & Location
-  geolocator: ^13.0.1
-  weather: ^3.1.1
-  
-  # Charts for calculators
-  fl_chart: ^0.69.2
-  
-  # Date & Time
-  table_calendar: ^3.1.2
-  
-  # Remote Storage (Supabase)
-  supabase_flutter: ^2.6.0
-
-  # JSON
-  json_annotation: ^4.8.1
-
-  xml: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Code Generation
-  injectable_generator: ^2.6.2
-  build_runner: ^2.4.13
-  hive_generator: ^2.0.1
-  json_serializable: ^6.7.1
-  
-  # Testing
-  mockito: ^5.4.2
-  
-  # Linting
   flutter_lints: ^5.0.0
-
+  injectable_generator: ^2.6.2
+  
 flutter:
   uses-material-design: true
-

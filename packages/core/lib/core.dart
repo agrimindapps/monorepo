@@ -197,8 +197,16 @@ export 'repositories/license_local_storage.dart';
 // Provider State Management
 export 'package:provider/provider.dart';
 
+// Navigation
+export 'package:go_router/go_router.dart';
+
 // Image Cache Management
 export 'package:cached_network_image/cached_network_image.dart';
 
+// Shimmer Loading Effects
+export 'package:shimmer/shimmer.dart';
+
 // Services
 export 'services/license_service.dart';
+export 'services/image_compression_service.dart';
+export 'services/shimmer_service.dart';

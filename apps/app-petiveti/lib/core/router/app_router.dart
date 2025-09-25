@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+import 'package:core/core.dart';
 
 import '../../features/animals/presentation/pages/animals_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
@@ -31,12 +31,12 @@ import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
 import '../../features/reminders/presentation/widgets/add_reminder_form.dart';
 import '../../features/reminders/domain/entities/reminder.dart';
-import '../../features/subscription/presentation/pages/subscription_page.dart';
+import '../../features/subscription/presentation/pages/subscription_page.dart' as local;
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
 import '../navigation/bottom_navigation.dart';
 
-final appRouterProvider = Provider<GoRouter>((ref) {
+final appRouterProvider = riverpod.Provider<GoRouter>((ref) {
   // CORREÇÃO: Não tentar acessar authProvider imediatamente
   // Sempre começar com splash para dar tempo da inicialização DI
   final initialRoute = '/splash';
@@ -366,7 +366,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/subscription',
         name: 'subscription',
-        builder: (context, state) => const SubscriptionPage(userId: 'temp_user_id'), // TODO: Get from auth service
+        builder: (context, state) => const local.SubscriptionPage(userId: 'temp_user_id'), // TODO: Get from auth service
       ),
         ],
       ),

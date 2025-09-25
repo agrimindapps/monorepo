@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:core/core.dart';
 
 /// Enhanced loading states specifically designed for favorites
 /// Provides contextual skeleton loaders and smooth transitions
@@ -7,12 +7,14 @@ class FavoritoLoadingStates {
   
   /// Skeleton card para itens de favorito
   static Widget favoritoCardSkeleton({
+    required BuildContext context,
     double height = 120,
     double borderRadius = 12,
     Color? baseColor,
     Color? highlightColor,
   }) {
-    return Shimmer.fromColors(
+    return ShimmerService.fromColors(
+      context: context,
       baseColor: baseColor ?? Colors.grey.shade300,
       highlightColor: highlightColor ?? Colors.grey.shade100,
       child: Container(
@@ -104,19 +106,24 @@ class FavoritoLoadingStates {
 
   /// Lista de skeleton cards
   static Widget favoritoListSkeleton({
+    required BuildContext context,
     int itemCount = 5,
     double itemHeight = 120,
   }) {
     return ListView.builder(
       itemCount: itemCount,
       physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) => favoritoCardSkeleton(height: itemHeight),
+      itemBuilder: (context, index) => favoritoCardSkeleton(
+        context: context,
+        height: itemHeight,
+      ),
     );
   }
 
   /// Skeleton para header de favoritos
-  static Widget favoritoHeaderSkeleton() {
-    return Shimmer.fromColors(
+  static Widget favoritoHeaderSkeleton(BuildContext context) {
+    return ShimmerService.fromColors(
+      context: context,
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Padding(
@@ -162,8 +169,9 @@ class FavoritoLoadingStates {
   }
 
   /// Tab bar skeleton
-  static Widget tabBarSkeleton() {
-    return Shimmer.fromColors(
+  static Widget tabBarSkeleton(BuildContext context) {
+    return ShimmerService.fromColors(
+      context: context,
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Container(

@@ -135,7 +135,6 @@ import '../error/error_handler.dart';
 import '../error/error_logger.dart';
 import '../error/error_reporter.dart';
 import '../services/gasometer_notification_service.dart';
-import '../services/image_compression_service.dart';
 import '../services/firebase_storage_service.dart';
 import '../services/receipt_image_service.dart';
 // import '../sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
@@ -184,10 +183,10 @@ Future<void> initializeDependencies() async {
   ));
 
   // Image Services
-  sl.registerLazySingleton<ImageCompressionService>(() => ImageCompressionService());
+  sl.registerLazySingleton<core.ImageCompressionService>(() => core.ImageCompressionService());
   sl.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService());
   sl.registerLazySingleton<ReceiptImageService>(() => ReceiptImageService(
-    sl<ImageCompressionService>(),
+    sl<core.ImageCompressionService>(),
     sl<FirebaseStorageService>(),
   ));
 

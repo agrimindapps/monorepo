@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';

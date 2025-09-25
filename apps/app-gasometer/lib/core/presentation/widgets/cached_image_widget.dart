@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../constants/ui_constants.dart';
 

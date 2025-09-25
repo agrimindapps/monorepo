@@ -11,69 +11,26 @@ dependencies:
   flutter:
     sdk: flutter
   
+  # Core Package
+  core:
+    path: ../../packages/core
+
   # State Management
   riverpod: ^2.6.1
   flutter_riverpod: ^2.6.1
   
-  # Nota: Hive e path_provider vêm do core package
-  
-  # Core Package
-  core:
-    path: ../../packages/core
-  
-  # Nota: Dio e connectivity_plus vêm do core package
-  
-  # Firebase - Usar core package para serviços básicos
-  firebase_messaging: ^16.0.0
-  firebase_performance: ^0.11.0
-  # Nota: Firebase core services vêm do core package
-  
   # Dependency Injection
   get_it: ^8.2.0
   injectable: ^2.3.2
-  
-  # Utils
-  uuid: ^4.5.1
-  intl: ^0.20.2
-  equatable: ^2.0.7
-  dartz: ^0.10.1
-  device_info_plus: ^11.5.0
-  
-  # Nota: RevenueCat e Notifications vêm do core package
-  
-  # UI
-  google_fonts: ^6.1.0
-  
-  # JSON
-  freezed_annotation: ^3.1.0
-  json_annotation: ^4.8.1
 
-  hive: any
-  path_provider: any
-  firebase_core: any
-  firebase_crashlytics: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
   
-  # Build tools
-  build_runner: ^2.4.13
-  hive_generator: ^2.0.1
-  injectable_generator: ^2.6.2
-  freezed: ^3.0.0-0.0.dev
-  json_serializable: ^6.7.1
-  
   # Linting
   flutter_lints: ^5.0.0
+  injectable_generator: ^2.6.2
   
-  # Testing
-  mockito: ^5.4.2
-  mocktail: ^1.0.0
-
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
 

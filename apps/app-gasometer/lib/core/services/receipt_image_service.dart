@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:core/core.dart' as core;
 import '../di/injection_container.dart';
-import 'image_compression_service.dart';
 import 'firebase_storage_service.dart';
 
 /// Result of image processing operation
@@ -23,7 +22,7 @@ class ImageProcessingResult {
 /// Unified service for handling receipt images
 /// Combines compression and upload in a single operation
 class ReceiptImageService {
-  final ImageCompressionService _compressionService;
+  final core.ImageCompressionService _compressionService;
   final FirebaseStorageService _storageService;
   late final core.ConnectivityService _connectivityService;
 

@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart';
-import '../../core/navigation/app_navigation_provider.dart';
+import '../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../core/repositories/diagnostico_hive_repository.dart';
 import '../../core/services/diagnosticos_data_loader.dart';
 import '../../core/widgets/modern_header_widget.dart';
@@ -274,7 +275,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           isDark: isDark,
           showBackButton: true,
           showActions: true,
-          onBackPressed: () => context.read<AppNavigationProvider>().goBack(),
+          onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack(),
           onRightIconPressed: () => _handleFavoriteToggle(provider),
         );
       },

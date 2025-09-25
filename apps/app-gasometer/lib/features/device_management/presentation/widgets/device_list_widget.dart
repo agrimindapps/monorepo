@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/device_info.dart';
+import 'package:core/core.dart';
 import 'device_card_widget.dart';
 
 /// Widget que exibe lista de dispositivos
 class DeviceListWidget extends StatelessWidget {
-  final List<DeviceInfo> devices;
+  final List<DeviceEntity> devices;
   final String? currentDeviceUuid;
   final Function(String deviceUuid, String action) onDeviceAction;
 
@@ -79,7 +79,7 @@ class DeviceListWidget extends StatelessWidget {
     );
   }
 
-  int _calculateChildCount(List<DeviceInfo> active, List<DeviceInfo> inactive) {
+  int _calculateChildCount(List<DeviceEntity> active, List<DeviceEntity> inactive) {
     int count = 0;
     
     // Dispositivos ativos + header (se houver)

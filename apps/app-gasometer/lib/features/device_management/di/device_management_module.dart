@@ -3,15 +3,10 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:core/core.dart';
+
 import '../core/device_integration_service.dart';
-import '../data/datasources/device_local_datasource.dart';
-import '../data/datasources/device_remote_datasource.dart';
-import '../data/repositories/device_repository_impl.dart';
-import '../domain/repositories/device_repository.dart';
-import '../domain/usecases/get_user_devices.dart';
-import '../domain/usecases/revoke_device.dart';
-import '../domain/usecases/validate_device_limit.dart';
-import '../presentation/providers/device_management_provider.dart';
+import '../presentation/providers/vehicle_device_provider.dart';
 
 /// Módulo de injeção de dependência para Device Management
 @module
@@ -19,70 +14,37 @@ abstract class DeviceManagementModule {
   // External dependencies
   @lazySingleton
   DeviceInfoPlugin get deviceInfoPlugin => DeviceInfoPlugin();
-  
+
   @lazySingleton
   Connectivity get connectivity => Connectivity();
 
-  // Data Sources
+  // Core Services (using core package)
   @lazySingleton
-  DeviceLocalDataSource provideDeviceLocalDataSource() => DeviceLocalDataSource();
-
-  @lazySingleton
-  DeviceRemoteDataSource provideDeviceRemoteDataSource(
-    DeviceInfoPlugin deviceInfoPlugin,
-  ) => DeviceRemoteDataSource(deviceInfoPlugin: deviceInfoPlugin);
-
-  // Repository
-  @lazySingleton
-  DeviceRepository provideDeviceRepository(
-    DeviceRemoteDataSource remoteDataSource,
-    DeviceLocalDataSource localDataSource,
-    Connectivity connectivity,
-  ) => DeviceRepositoryImpl(
-        remoteDataSource,
-        localDataSource,
-        connectivity,
+  DeviceManagementService provideDeviceManagementService(
+    FirebaseDeviceService firebaseDeviceService,
+    FirebaseAuthService authService,
+    FirebaseAnalyticsService analyticsService,
+    IDeviceRepository deviceRepository,
+  ) => DeviceManagementService(
+        firebaseDeviceService: firebaseDeviceService,
+        authService: authService,
+        analyticsService: analyticsService,
+        deviceRepository: deviceRepository,
       );
 
-  // Use Cases
-  @lazySingleton
-  GetUserDevicesUseCase provideGetUserDevicesUseCase(
-    DeviceRepository repository,
-  ) => GetUserDevicesUseCase(repository);
-
-  @lazySingleton
-  RevokeDeviceUseCase provideRevokeDeviceUseCase(
-    DeviceRepository repository,
-  ) => RevokeDeviceUseCase(repository);
-
-  @lazySingleton
-  ValidateDeviceLimitUseCase provideValidateDeviceLimitUseCase(
-    DeviceRepository repository,
-  ) => ValidateDeviceLimitUseCase(repository);
-
-  // Core Services
+  // Vehicle-specific integration service
   @lazySingleton
   DeviceIntegrationService provideDeviceIntegrationService(
-    ValidateDeviceLimitUseCase validateDeviceLimitUseCase,
-    DeviceRemoteDataSource deviceRemoteDataSource,
+    DeviceManagementService coreDeviceService,
     DeviceInfoPlugin deviceInfoPlugin,
   ) => DeviceIntegrationService(
-        validateDeviceLimitUseCase,
-        deviceRemoteDataSource,
+        coreDeviceService,
         deviceInfoPlugin,
       );
 
-  // Providers
+  // Vehicle Device Provider
   @injectable
-  DeviceManagementProvider provideDeviceManagementProvider(
-    GetUserDevicesUseCase getUserDevicesUseCase,
-    RevokeDeviceUseCase revokeDeviceUseCase,
-    ValidateDeviceLimitUseCase validateDeviceLimitUseCase,
-  ) => DeviceManagementProvider(
-        getUserDevicesUseCase: getUserDevicesUseCase,
-        revokeDeviceUseCase: revokeDeviceUseCase,
-        validateDeviceLimitUseCase: validateDeviceLimitUseCase,
-      );
+  VehicleDeviceProvider provideVehicleDeviceProvider() => VehicleDeviceProvider();
 }
 
 /// Função para inicializar as caixas Hive necessárias

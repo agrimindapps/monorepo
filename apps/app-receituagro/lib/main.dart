@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ThemeProvider;
+import 'package:core/core.dart';
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,13 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/injection_container.dart' as di;
-import 'core/navigation/app_navigation_provider.dart';
+import 'core/services/receituagro_navigation_service.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
-import 'core/providers/theme_provider.dart';
+import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/settings/presentation/providers/profile_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
@@ -58,6 +58,9 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Migrate theme preferences from app-specific to core package
+  await ThemePreferenceMigration.migratePreferences();
 
   // Sign in anonymously if no user is logged in
   // This ensures the app works even without user authentication
@@ -167,8 +170,8 @@ void main() async {
   // Inicializar Firebase Messaging Service
   try {
     final messagingService = di.sl<ReceitaAgroFirebaseMessagingService>();
-    final navigationProvider = di.sl<AppNavigationProvider>();
-    await messagingService.initialize(navigationProvider: navigationProvider);
+    final navigationService = di.sl<ReceitaAgroNavigationService>();
+    await messagingService.initialize();
 
     // Inicializar Promotional Notification Manager
     final promotionalManager = di.sl<PromotionalNotificationManager>();

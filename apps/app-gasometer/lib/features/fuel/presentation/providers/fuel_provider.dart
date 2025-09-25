@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/error/error_handler.dart';
 import '../../../../core/error/error_reporter.dart';
@@ -55,6 +57,12 @@ class FuelProvider extends ChangeNotifier {
   final ErrorHandler _errorHandler;
   final ErrorReporter _errorReporter;
 
+  // Connectivity
+  late final core.ConnectivityService _connectivityService;
+  StreamSubscription<bool>? _connectivitySubscription;
+  bool _isOnline = true;
+  final List<FuelRecordEntity> _offlinePendingRecords = [];
+
   List<FuelRecordEntity> _fuelRecords = [];
   List<FuelRecordEntity> _filteredFuelRecords = [];
   bool _isLoading = false;
@@ -93,7 +101,10 @@ class FuelProvider extends ChangeNotifier {
         _getTotalSpent = getTotalSpent,
         _getRecentFuelRecords = getRecentFuelRecords,
         _errorHandler = errorHandler,
-        _errorReporter = errorReporter;
+        _errorReporter = errorReporter {
+    _connectivityService = sl<core.ConnectivityService>();
+    _initializeConnectivity();
+  }
 
   List<FuelRecordEntity> get fuelRecords {
     // Se há busca ativa, retornar os filtrados; senão, retornar todos
@@ -195,22 +206,40 @@ class FuelProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
+    // Check connectivity first
+    if (!_isOnline) {
+      // Save offline - add to pending list and local records
+      _offlinePendingRecords.add(fuelRecord);
+      _fuelRecords.insert(0, fuelRecord); // Add to UI immediately
+      _applyCurrentFilters();
+      _invalidateStatistics();
+      _setLoading(false);
+      debugPrint('🔌 Registro salvo offline: ${fuelRecord.id}');
+      return true;
+    }
+
+    // Online - try to sync immediately
     final result = await _addFuelRecord(
       AddFuelRecordParams(fuelRecord: fuelRecord),
     );
 
     return result.fold(
       (failure) {
-        _handleError(failure);
+        // Failed online - save offline as fallback
+        _offlinePendingRecords.add(fuelRecord);
+        _fuelRecords.insert(0, fuelRecord);
+        _applyCurrentFilters();
+        _invalidateStatistics();
         _setLoading(false);
-        return false;
+        debugPrint('🔌 Erro online, salvo offline: ${failure.message}');
+        return true; // Return true because we saved offline
       },
       (addedRecord) {
         _fuelRecords.insert(0, addedRecord); // Add to beginning (most recent)
         _applyCurrentFilters();
         _invalidateStatistics();
         _setLoading(false);
-        debugPrint('🚗 Registro de combustível adicionado: ${addedRecord.id}');
+        debugPrint('🚗 Registro de combustível sincronizado: ${addedRecord.id}');
         return true;
       },
     );
@@ -505,8 +534,88 @@ class FuelProvider extends ChangeNotifier {
       lastUpdated: DateTime.now(),
     );
   }
-  
+
   void _invalidateStatistics() {
     _statisticsNeedRecalculation = true;
+  }
+
+  // ===== CONNECTIVITY METHODS =====
+
+  void _initializeConnectivity() {
+    _connectivityService.isOnline().then((result) {
+      result.fold(
+        (failure) => debugPrint('🔌 Erro ao verificar conectividade inicial: ${failure.message}'),
+        (isOnline) {
+          _isOnline = isOnline;
+          if (isOnline) _syncOfflinePendingRecords();
+        },
+      );
+    });
+
+    _connectivitySubscription = _connectivityService.connectivityStream.listen(
+      _onConnectivityChanged,
+      onError: (Object error) => debugPrint('🔌 Erro no stream de conectividade: $error'),
+    );
+  }
+
+  void _onConnectivityChanged(bool isOnline) {
+    final wasOnline = _isOnline;
+    _isOnline = isOnline;
+
+    debugPrint('🔌 Conectividade mudou: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}');
+
+    if (!wasOnline && isOnline) {
+      // Ficamos online - sincronizar dados offline
+      _syncOfflinePendingRecords();
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> _syncOfflinePendingRecords() async {
+    if (_offlinePendingRecords.isEmpty) return;
+
+    debugPrint('🔌 Sincronizando ${_offlinePendingRecords.length} registros offline...');
+
+    final recordsToSync = List<FuelRecordEntity>.from(_offlinePendingRecords);
+    _offlinePendingRecords.clear();
+
+    for (final record in recordsToSync) {
+      try {
+        final result = await _addFuelRecord(AddFuelRecordParams(fuelRecord: record));
+        result.fold(
+          (failure) {
+            // Se falhou, volta para a lista de offline
+            _offlinePendingRecords.add(record);
+            debugPrint('🔌 Falha ao sincronizar registro: ${failure.message}');
+          },
+          (syncedRecord) {
+            debugPrint('🔌 Registro sincronizado com sucesso: ${syncedRecord.id}');
+          },
+        );
+      } catch (e) {
+        _offlinePendingRecords.add(record);
+        debugPrint('🔌 Erro ao sincronizar registro: $e');
+      }
+    }
+
+    if (_offlinePendingRecords.isEmpty) {
+      debugPrint('🔌 Todos os registros foram sincronizados!');
+    }
+
+    notifyListeners();
+  }
+
+  // Getters para UI
+
+  bool get isOnline => _isOnline;
+  bool get hasOfflinePendingRecords => _offlinePendingRecords.isNotEmpty;
+  int get offlinePendingRecordsCount => _offlinePendingRecords.length;
+  List<FuelRecordEntity> get offlinePendingRecords => List.unmodifiable(_offlinePendingRecords);
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 }

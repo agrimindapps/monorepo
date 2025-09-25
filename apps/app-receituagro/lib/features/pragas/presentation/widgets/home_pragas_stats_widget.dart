@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/design/design_tokens.dart';
-import '../../../../core/navigation/app_navigation_provider.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../providers/home_pragas_provider.dart';
 
 /// Widget para exibir grid de estatísticas/categorias na home de pragas
@@ -326,21 +327,22 @@ class HomePragasStatsWidget extends StatelessWidget {
   }
 
   void _navigateToCategory(BuildContext context, String category) {
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     switch (category) {
       case 'culturas':
-        context.read<AppNavigationProvider>().navigateToListaCulturas();
+        navigationService.navigateToListaCulturas();
         break;
       case 'insetos':
-        context.read<AppNavigationProvider>().navigateToListaPragas(pragaType: '1');
+        navigationService.navigateToListaPragas(categoria: '1');
         break;
       case 'doencas':
-        context.read<AppNavigationProvider>().navigateToListaPragas(pragaType: '2');
+        navigationService.navigateToListaPragas(categoria: '2');
         break;
       case 'plantas':
-        context.read<AppNavigationProvider>().navigateToListaPragas(pragaType: '3');
+        navigationService.navigateToListaPragas(categoria: '3');
         break;
       default:
-        context.read<AppNavigationProvider>().navigateToListaPragas();
+        navigationService.navigateToListaPragas();
     }
   }
 }

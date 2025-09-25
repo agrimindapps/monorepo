@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'device_info.dart';
+import 'package:core/core.dart';
 
 /// Entidade que representa uma sessão de dispositivo
 class DeviceSession extends Equatable {
@@ -21,7 +21,7 @@ class DeviceSession extends Equatable {
   final String id;
   final String userId;
   final String deviceUuid;
-  final DeviceInfo deviceInfo;
+  final DeviceEntity deviceInfo;
   final DateTime createdAt;
   final DateTime lastActiveAt;
   final bool isActive;
@@ -53,7 +53,7 @@ class DeviceSession extends Equatable {
     String? id,
     String? userId,
     String? deviceUuid,
-    DeviceInfo? deviceInfo,
+    DeviceEntity? deviceInfo,
     DateTime? createdAt,
     DateTime? lastActiveAt,
     bool? isActive,
@@ -111,9 +111,9 @@ class DeviceStatistics extends Equatable {
   final int totalDevices;
   final int activeDevices;
   final Map<String, int> devicesByPlatform;
-  final DeviceInfo? lastActiveDevice;
-  final DeviceInfo? oldestDevice;
-  final DeviceInfo? newestDevice;
+  final DeviceEntity? lastActiveDevice;
+  final DeviceEntity? oldestDevice;
+  final DeviceEntity? newestDevice;
 
   /// Dispositivos inativos
   int get inactiveDevices => totalDevices - activeDevices;

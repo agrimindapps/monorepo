@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import '../../domain/entities/device_info.dart';
+import 'package:core/core.dart';
+import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Widget de card para exibir informações de um dispositivo
 class DeviceCardWidget extends StatelessWidget {
-  final DeviceInfo device;
+  final DeviceEntity device;
   final bool isCurrentDevice;
   final Function(String action) onAction;
 

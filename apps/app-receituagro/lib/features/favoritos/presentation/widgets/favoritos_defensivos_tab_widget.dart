@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/navigation/app_navigation_provider.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_provider_simplified.dart';
 
@@ -353,13 +354,10 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
     BuildContext context,
     FavoritoDefensivoEntity defensivo,
   ) {
-    final navigationProvider = Provider.of<AppNavigationProvider>(
-      context,
-      listen: false,
-    );
-    navigationProvider.navigateToDetalheDefensivo(
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    navigationService.navigateToDetalheDefensivo(
       defensivoName: defensivo.displayName,
-      fabricante: defensivo.fabricante,
+      extraData: {'fabricante': defensivo.fabricante},
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 
-import '../navigation/app_navigation_provider.dart';
+import '../services/receituagro_navigation_service.dart';
 
 /// AppBar customizado para páginas internas que preserva o bottomNavigation
-/// 
-/// Automaticamente adiciona botão de voltar quando está em uma página de detalhe
-/// e permite navegação de volta mantendo o bottomNavigation visível
+///
+/// Automaticamente adiciona botão de voltar quando especificado
+/// e permite navegação de volta usando o novo serviço de navegação
 class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
@@ -14,6 +14,7 @@ class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget 
   final Color? foregroundColor;
   final double elevation;
   final bool automaticallyImplyLeading;
+  final bool showBackButton;
 
   const InternalPageAppBar({
     super.key,
@@ -23,28 +24,30 @@ class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget 
     this.foregroundColor,
     this.elevation = 0,
     this.automaticallyImplyLeading = true,
+    this.showBackButton = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppNavigationProvider>(
-      builder: (context, navigationProvider, child) {
-        return AppBar(
-          title: title != null ? Text(title!) : null,
-          actions: actions,
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
-          elevation: elevation,
-          automaticallyImplyLeading: false, // Controlamos manualmente
-          leading: automaticallyImplyLeading && navigationProvider.isInDetailPage
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => navigationProvider.goBack(),
-                )
-              : null,
-        );
-      },
+    return AppBar(
+      title: title != null ? Text(title!) : null,
+      actions: actions,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: elevation,
+      automaticallyImplyLeading: false, // Controlamos manualmente
+      leading: automaticallyImplyLeading && showBackButton
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => _handleBackPress(),
+            )
+          : null,
     );
+  }
+
+  void _handleBackPress() {
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    navigationService.goBack();
   }
 
   @override
@@ -60,6 +63,7 @@ extension InternalPageScaffold on Widget {
     Color? appBarForegroundColor,
     double appBarElevation = 0,
     bool automaticallyImplyLeading = true,
+    bool showBackButton = true,
   }) {
     return Scaffold(
       appBar: InternalPageAppBar(
@@ -69,6 +73,7 @@ extension InternalPageScaffold on Widget {
         foregroundColor: appBarForegroundColor,
         elevation: appBarElevation,
         automaticallyImplyLeading: automaticallyImplyLeading,
+        showBackButton: showBackButton,
       ),
       body: this,
     );

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 // import 'core/di/injectable_config.dart' as local_di; // Commented out - using manual DI
 import 'core/di/injection_container.dart';
-import 'core/providers/theme_provider.dart';
+import 'package:core/core.dart' show ThemeProvider;
 import 'core/router/app_router.dart';
 import 'core/services/receipt_image_service.dart';
 // import 'core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync provider in Phase 2
@@ -20,7 +20,7 @@ import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/reports/presentation/providers/reports_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'features/vehicles/presentation/providers/vehicles_provider.dart';
-import 'features/device_management/presentation/providers/device_management_provider.dart';
+import 'features/device_management/presentation/providers/vehicle_device_provider.dart';
 
 class GasOMeterApp extends StatefulWidget {
   const GasOMeterApp({super.key});
@@ -122,9 +122,9 @@ class _GasOMeterAppState extends State<GasOMeterApp> {
           lazy: true,
         ),
         
-        // Device Management Provider - depends on Auth for user context
+        // Vehicle Device Provider - Enhanced device management with core services
         ChangeNotifierProvider(
-          create: (_) => sl<DeviceManagementProvider>(),
+          create: (_) => sl<VehicleDeviceProvider>(),
           lazy: true,
         ),
       ],

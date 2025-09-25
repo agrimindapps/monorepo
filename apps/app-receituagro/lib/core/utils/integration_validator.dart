@@ -255,7 +255,7 @@ class IntegrationValidator {
     tests['consistent_theming'] = const ValidationTest(
       'Consistent Theming',
       true,
-      'Using app-specific theming - ThemeProvider not available in core package',
+      'Using core package ThemeProvider for unified theme management',
     );
     
     // Test database inspector for development

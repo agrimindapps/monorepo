@@ -155,6 +155,13 @@ export 'src/shared/extensions/log_level_extensions.dart';
 export 'src/shared/services/asset_loader_service.dart';
 export 'src/shared/services/cache_management_service.dart' hide CacheConfig;
 export 'src/shared/services/navigation_service.dart';
+export 'src/shared/services/enhanced_navigation_service.dart';
+export 'src/shared/services/navigation_configuration_service.dart';
+export 'src/shared/services/navigation_analytics_service.dart';
+
+// Navigation models and interfaces
+export 'src/shared/models/navigation_state.dart';
+export 'src/shared/interfaces/i_navigation_extension.dart';
 export 'src/shared/services/optimized_image_service.dart';
 export 'src/shared/services/preferences_service.dart';
 export 'src/shared/services/version_manager_service.dart';

@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/models/cultura_hive.dart';
-import '../../core/navigation/app_navigation_provider.dart';
+import '../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
@@ -167,7 +168,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
                   isDark: isDark,
                   showBackButton: true,
                   showActions: true,
-                  onBackPressed: () => context.read<AppNavigationProvider>().goBack(),
+                  onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack(),
                   onRightIconPressed: _toggleSort,
                 ),
                 CulturaSearchField(

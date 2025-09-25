@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/design/design_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/models/fitossanitario_hive.dart';
-import '../../core/navigation/app_navigation_provider.dart';
+import '../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../core/repositories/fitossanitario_hive_repository.dart';
 import 'presentation/providers/home_defensivos_provider.dart';
 import 'presentation/widgets/defensivos_error_state.dart';
@@ -140,47 +141,48 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
     final provider = context.read<HomeDefensivosProvider>();
     provider.recordDefensivoAccess(defensivo);
 
-    context.read<AppNavigationProvider>().navigateToDetalheDefensivo(
-          defensivoName: defensivoName,
-          fabricante: fabricante,
-        );
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    navigationService.navigateToDetalheDefensivo(
+      defensivoName: defensivoName,
+      extraData: {'fabricante': fabricante},
+    );
   }
 
   void _navigateToCategory(BuildContext context, String category) {
     // Navigate based on category type
-    final navigationProvider = context.read<AppNavigationProvider>();
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
 
     switch (category.toLowerCase()) {
       case 'defensivos':
         // Para defensivos, mantém navegação original (lista simples)
-        navigationProvider.navigateToListaDefensivos();
+        navigationService.navigateToListaDefensivos();
         break;
       case 'fabricantes':
         // Para fabricantes, vai para lista agrupada por fabricante
-        navigationProvider.navigateToDefensivosAgrupados(
-          tipoAgrupamento: 'fabricantes',
+        navigationService.navigateToDefensivosAgrupados(
+          extraData: {'tipoAgrupamento': 'fabricantes'},
         );
         break;
       case 'modoacao':
         // Para modo de ação, vai para lista agrupada por modo de ação
-        navigationProvider.navigateToDefensivosAgrupados(
-          tipoAgrupamento: 'modoAcao',
+        navigationService.navigateToDefensivosAgrupados(
+          extraData: {'tipoAgrupamento': 'modoAcao'},
         );
         break;
       case 'ingredienteativo':
         // Para ingrediente ativo, vai para lista agrupada por ingrediente ativo
-        navigationProvider.navigateToDefensivosAgrupados(
-          tipoAgrupamento: 'ingredienteAtivo',
+        navigationService.navigateToDefensivosAgrupados(
+          extraData: {'tipoAgrupamento': 'ingredienteAtivo'},
         );
         break;
       case 'classeagronomica':
         // Para classe agronômica, vai para lista agrupada por classe
-        navigationProvider.navigateToDefensivosAgrupados(
-          tipoAgrupamento: 'classeAgronomica',
+        navigationService.navigateToDefensivosAgrupados(
+          extraData: {'tipoAgrupamento': 'classeAgronomica'},
         );
         break;
       default:
-        navigationProvider.navigateToListaDefensivos();
+        navigationService.navigateToListaDefensivos();
     }
   }
 }

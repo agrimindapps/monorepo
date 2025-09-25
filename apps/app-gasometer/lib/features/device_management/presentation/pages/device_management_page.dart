@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import '../providers/device_management_provider.dart';
+import '../providers/vehicle_device_provider.dart';
 import '../widgets/device_actions_dialog.dart';
 import '../widgets/device_list_widget.dart';
 
@@ -24,7 +24,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   void _loadDevices() {
-    final provider = context.read<DeviceManagementProvider>();
+    final provider = context.read<VehicleDeviceProvider>();
     provider.loadUserDevices();
   }
 
@@ -64,7 +64,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
           ),
         ],
       ),
-      body: Consumer<DeviceManagementProvider>(
+      body: Consumer<VehicleDeviceProvider>(
         builder: (context, provider, child) {
           return RefreshIndicator(
             onRefresh: _handleRefresh,
@@ -90,7 +90,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     );
   }
 
-  Widget _buildHeader(DeviceManagementProvider provider) {
+  Widget _buildHeader(VehicleDeviceProvider provider) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -135,7 +135,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     );
   }
 
-  Widget _buildDeviceStats(DeviceManagementProvider provider) {
+  Widget _buildDeviceStats(VehicleDeviceProvider provider) {
     return Row(
       children: [
         Expanded(
@@ -211,7 +211,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     );
   }
 
-  Widget _buildDevicesList(DeviceManagementProvider provider) {
+  Widget _buildDevicesList(VehicleDeviceProvider provider) {
     if (provider.isLoading) {
       return const SliverFillRemaining(
         child: Center(
@@ -302,7 +302,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     );
   }
 
-  Widget _buildFooter(DeviceManagementProvider provider) {
+  Widget _buildFooter(VehicleDeviceProvider provider) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -348,12 +348,12 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   Future<void> _handleRefresh() async {
-    final provider = context.read<DeviceManagementProvider>();
+    final provider = context.read<VehicleDeviceProvider>();
     await provider.refresh();
   }
 
   void _handleMenuAction(String action) {
-    final provider = context.read<DeviceManagementProvider>();
+    final provider = context.read<VehicleDeviceProvider>();
     
     switch (action) {
       case 'logout_all':
@@ -366,7 +366,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   void _handleDeviceAction(String deviceUuid, String action) {
-    final provider = context.read<DeviceManagementProvider>();
+    final provider = context.read<VehicleDeviceProvider>();
     final device = provider.getDeviceByUuid(deviceUuid);
     
     if (device == null) return;
@@ -382,7 +382,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   Future<void> _executeDeviceAction(String deviceUuid, String action) async {
-    final provider = context.read<DeviceManagementProvider>();
+    final provider = context.read<VehicleDeviceProvider>();
     
     switch (action) {
       case 'revoke':
@@ -402,7 +402,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     }
   }
 
-  void _showRevokeAllDialog(DeviceManagementProvider provider) {
+  void _showRevokeAllDialog(VehicleDeviceProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

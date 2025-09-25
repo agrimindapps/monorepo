@@ -121,16 +121,8 @@ import '../../features/reports/domain/usecases/generate_yearly_report.dart';
 import '../../features/reports/domain/usecases/get_reports_analytics.dart';
 import '../../features/reports/presentation/providers/reports_provider.dart';
 
-// Device Management imports
-import 'package:device_info_plus/device_info_plus.dart';
-import '../../features/device_management/presentation/providers/device_management_provider.dart';
-import '../../features/device_management/domain/repositories/device_repository.dart';
-import '../../features/device_management/data/repositories/device_repository_impl.dart';
-import '../../features/device_management/data/datasources/device_local_datasource.dart';
-import '../../features/device_management/data/datasources/device_remote_datasource.dart';
-import '../../features/device_management/domain/usecases/get_user_devices.dart';
-import '../../features/device_management/domain/usecases/revoke_device.dart';
-import '../../features/device_management/domain/usecases/validate_device_limit.dart';
+// Device Management imports (core-based)
+import '../../features/device_management/presentation/providers/vehicle_device_provider.dart';
 
 // Data Export imports
 import '../../features/data_export/presentation/providers/data_export_provider.dart';
@@ -167,6 +159,10 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
   sl.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
   sl.registerSingleton<Connectivity>(Connectivity());
+
+  // Core Connectivity Service
+  sl.registerLazySingleton<core.ConnectivityService>(() => core.ConnectivityService.instance);
+
   sl.registerSingleton<core.ISubscriptionRepository>(core.RevenueCatService());
   sl.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -603,33 +599,10 @@ Future<void> initializeDependencies() async {
   // ===== Device Management =====
   
   // Device Info Plugin
-  sl.registerLazySingleton<DeviceInfoPlugin>(() => DeviceInfoPlugin());
-  
-  // Device Management Data Sources
-  sl.registerLazySingleton<DeviceLocalDataSource>(() => DeviceLocalDataSource());
-  sl.registerLazySingleton<DeviceRemoteDataSource>(() => DeviceRemoteDataSource(
-    firestore: sl<FirebaseFirestore>(),
-    deviceInfoPlugin: sl<DeviceInfoPlugin>(),
-  ));
-  
-  // Device Management Repository
-  sl.registerLazySingleton<DeviceRepository>(() => DeviceRepositoryImpl(
-    sl<DeviceRemoteDataSource>(),
-    sl<DeviceLocalDataSource>(),
-    sl<Connectivity>(),
-  ));
-  
-  // Device Management Use Cases
-  sl.registerLazySingleton<GetUserDevicesUseCase>(() => GetUserDevicesUseCase(sl<DeviceRepository>()));
-  sl.registerLazySingleton<RevokeDeviceUseCase>(() => RevokeDeviceUseCase(sl<DeviceRepository>()));
-  sl.registerLazySingleton<ValidateDeviceLimitUseCase>(() => ValidateDeviceLimitUseCase(sl<DeviceRepository>()));
-  
-  // Device Management Provider
-  sl.registerLazySingleton<DeviceManagementProvider>(() => DeviceManagementProvider(
-    getUserDevicesUseCase: sl<GetUserDevicesUseCase>(),
-    revokeDeviceUseCase: sl<RevokeDeviceUseCase>(),
-    validateDeviceLimitUseCase: sl<ValidateDeviceLimitUseCase>(),
-  ));
+  // ===== ENHANCED VEHICLE DEVICE MANAGEMENT =====
+  // Enhanced Vehicle Device Provider (replaces old DeviceManagementProvider)
+  // Uses core services through service locator in VehicleDeviceProvider
+  sl.registerLazySingleton<VehicleDeviceProvider>(() => VehicleDeviceProvider());
 
   // ===== Data Export =====
   
@@ -652,6 +625,9 @@ Future<void> initializeDependencies() async {
   // )); // TODO: Replace with UnifiedSync status provider in Phase 2
 
   // ===== Initialize services that need post-DI setup =====
+  // Initialize ConnectivityService
+  await sl<core.ConnectivityService>().initialize();
+
   // await initializePostDIServices(); // Function not defined - commenting out
 }
 

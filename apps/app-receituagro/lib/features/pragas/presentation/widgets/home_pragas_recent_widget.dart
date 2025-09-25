@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/design/design_tokens.dart';
-import '../../../../core/navigation/app_navigation_provider.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/praga_entity.dart';
@@ -123,8 +124,8 @@ class HomePragasRecentWidget extends StatelessWidget {
     // Registra o acesso através do provider
     provider.recordPragaAccess(praga);
     
-    final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
-    navigationProvider.navigateToDetalhePraga(
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    navigationService.navigateToDetalhePraga(
       pragaName: pragaName,
       pragaScientificName: scientificName,
     );

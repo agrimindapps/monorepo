@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/navigation/app_navigation_provider.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../../../core/services/premium_status_notifier.dart';
 import '../../../../core/mixins/premium_status_listener.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
@@ -158,7 +159,7 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
           isDark: isDark,
           showBackButton: true,
           showActions: true,
-          onBackPressed: () => context.read<AppNavigationProvider>().goBack(),
+          onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack(),
           onRightIconPressed: () => _toggleFavorito(provider),
         );
       },

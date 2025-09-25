@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/navigation/app_navigation_provider.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -409,11 +410,11 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   void _navegarParaDetalhes(DefensivoEntity defensivo) {
-    final navigationProvider = context.read<AppNavigationProvider>();
-    
-    navigationProvider.navigateToDetalheDefensivo(
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+
+    navigationService.navigateToDetalheDefensivo(
       defensivoName: defensivo.displayName,
-      fabricante: defensivo.fabricante,
+      extraData: {'fabricante': defensivo.fabricante},
     );
   }
 

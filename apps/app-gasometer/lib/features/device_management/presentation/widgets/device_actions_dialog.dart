@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import '../../domain/entities/device_info.dart';
+import 'package:core/core.dart';
+import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Diálogo com ações para um dispositivo específico
 class DeviceActionsDialog extends StatelessWidget {
-  final DeviceInfo device;
+  final DeviceEntity device;
   final bool isCurrentDevice;
   final Function(String action) onAction;
 
@@ -445,7 +446,7 @@ class DeviceActionsDialog extends StatelessWidget {
   String _getStatusText() {
     if (!device.isActive) return 'Inativo';
     if (isCurrentDevice) return 'Dispositivo Atual';
-    return device.activityStatus;
+    return device.vehicleActivityStatus;
   }
 
   Color _getStatusColor() {

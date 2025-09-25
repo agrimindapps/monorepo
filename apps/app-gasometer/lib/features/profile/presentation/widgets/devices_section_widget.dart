@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'package:core/core.dart';
+
 import '../../../../core/theme/design_tokens.dart';
-import '../../../device_management/presentation/providers/device_management_provider.dart';
-import '../../../device_management/domain/entities/device_info.dart';
+import '../../../device_management/presentation/providers/vehicle_device_provider.dart';
 
 /// Seção de gerenciamento de dispositivos otimizada para UX na página de perfil
 /// Integra de forma coesa o controle de dispositivos conectados
@@ -23,13 +24,13 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     super.initState();
     // Carregar dispositivos quando o widget for inicializado
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DeviceManagementProvider>().loadUserDevices();
+      context.read<VehicleDeviceProvider>().loadUserDevices();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceManagementProvider>(
+    return Consumer<VehicleDeviceProvider>(
       builder: (context, provider, _) {
         return _buildSection(
           context,
@@ -108,7 +109,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  Widget _buildDevicesOverview(BuildContext context, DeviceManagementProvider provider) {
+  Widget _buildDevicesOverview(BuildContext context, VehicleDeviceProvider provider) {
     if (provider.isLoading) {
       return _buildLoadingState(context);
     }
@@ -151,7 +152,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
 
 
 
-  Widget _buildCurrentDeviceListTile(BuildContext context, DeviceInfo device) {
+  Widget _buildCurrentDeviceListTile(BuildContext context, DeviceEntity device) {
     return Semantics(
       label: 'Dispositivo atual: ${device.name}',
       child: ListTile(
@@ -201,7 +202,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  Widget _buildDeviceListTile(BuildContext context, DeviceInfo device, DeviceManagementProvider provider) {
+  Widget _buildDeviceListTile(BuildContext context, DeviceEntity device, VehicleDeviceProvider provider) {
     return Semantics(
       label: 'Dispositivo: ${device.name}, ${device.platform}',
       child: ListTile(
@@ -260,7 +261,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  Widget _buildRevokeAllListTile(BuildContext context, DeviceManagementProvider provider) {
+  Widget _buildRevokeAllListTile(BuildContext context, VehicleDeviceProvider provider) {
     return Semantics(
       label: 'Desconectar todos os outros dispositivos',
       button: true,
@@ -379,7 +380,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, DeviceManagementProvider provider) {
+  Widget _buildErrorState(BuildContext context, VehicleDeviceProvider provider) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -471,9 +472,9 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
 
   void _handleDeviceAction(
     BuildContext context,
-    DeviceInfo device,
+    DeviceEntity device,
     String action,
-    DeviceManagementProvider provider,
+    VehicleDeviceProvider provider,
   ) async {
     switch (action) {
       case 'revoke':
@@ -494,7 +495,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     }
   }
 
-  Future<bool?> _showRevokeDeviceDialog(BuildContext context, DeviceInfo device) {
+  Future<bool?> _showRevokeDeviceDialog(BuildContext context, DeviceEntity device) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -524,7 +525,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  void _showRevokeAllDialog(BuildContext context, DeviceManagementProvider provider) {
+  void _showRevokeAllDialog(BuildContext context, VehicleDeviceProvider provider) {
     showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

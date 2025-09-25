@@ -7,7 +7,8 @@ import '../../../../core/extensions/diagnostico_hive_extension.dart';
 import '../../../../core/models/cultura_hive.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/models/pragas_hive.dart';
-import '../../../../core/navigation/app_navigation_provider.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
+import 'package:get_it/get_it.dart';
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
@@ -898,13 +899,13 @@ class _DiagnosticoDefensivoListItemWidgetState
 class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   final dynamic diagnostico;
   final String defensivoName;
-  final AppNavigationProvider navigationProvider;
+  final ReceitaAgroNavigationService navigationService;
 
   const DiagnosticoDefensivoDialogWidget({
     super.key,
     required this.diagnostico,
     required this.defensivoName,
-    required this.navigationProvider,
+    required this.navigationService,
   });
 
   /// Mostra o modal de detalhes
@@ -913,14 +914,13 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     dynamic diagnostico,
     String defensivoName,
   ) {
-    final navigationProvider =
-        Provider.of<AppNavigationProvider>(context, listen: false);
+    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     return showDialog<void>(
       context: context,
       builder: (context) => DiagnosticoDefensivoDialogWidget(
         diagnostico: diagnostico,
         defensivoName: defensivoName,
-        navigationProvider: navigationProvider,
+        navigationService: navigationService,
       ),
     );
   }
@@ -1287,7 +1287,7 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     final nomeComumPraga = _getProperty('nomeComumPraga', 'nomeComum');
 
     if (nomePraga != null) {
-      navigationProvider.navigateToDetalhePraga(
+      navigationService.navigateToDetalhePraga(
         pragaName: nomePraga,
         pragaScientificName: nomeComumPraga,
       );

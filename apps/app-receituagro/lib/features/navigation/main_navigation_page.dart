@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart';
 
-import '../../core/navigation/app_navigation_provider.dart';
+import '../../core/services/receituagro_navigation_service.dart';
+import '../../core/navigation/agricultural_page_types.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../comentarios/comentarios_page.dart';
@@ -19,7 +19,7 @@ import '../subscription/subscription_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
-  
+
   const MainNavigationPage({
     super.key,
     this.initialIndex = 0,
@@ -30,57 +30,42 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-  late AppNavigationProvider _navigationProvider;
+  late ReceitaAgroNavigationService _navigationService;
+  int _currentBottomNavIndex = 0;
+  bool _isNavigating = false;
 
   @override
   void initState() {
     super.initState();
-    _navigationProvider = AppNavigationProvider();
-    if (widget.initialIndex != 0) {
-      _navigationProvider.navigateToBottomNavTab(widget.initialIndex);
-    }
-  }
-
-  @override
-  void dispose() {
-    _navigationProvider.dispose();
-    super.dispose();
+    _navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    _currentBottomNavIndex = widget.initialIndex;
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _navigationProvider,
-      child: Consumer<AppNavigationProvider>(
-        builder: (context, navigationProvider, child) {
-          return Scaffold(
-            body: _buildCurrentPage(navigationProvider),
-            bottomNavigationBar: _buildBottomNavigationBar(navigationProvider),
-          );
-        },
+    return Scaffold(
+      body: Stack(
+        children: [
+          _buildCurrentPage(),
+          if (_isNavigating)
+            Container(
+              color: Colors.black26,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-
-  /// Constrói BottomNavigationBar com controle de visibilidade
-  Widget? _buildBottomNavigationBar(AppNavigationProvider navigationProvider) {
-    // Só mostra BottomNav quando configurado para mostrar
-    if (!navigationProvider.shouldShowBottomNavigation) {
-      return null;
-    }
-
+  /// Constrói BottomNavigationBar
+  Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      currentIndex: navigationProvider.currentBottomNavIndex,
-      onTap: (index) {
-        navigationProvider.navigateToBottomNavTab(index);
-        
-        // Recarrega favoritos quando a tab for selecionada
-        if (index == 2) { // Index 2 é a página de favoritos
-          FavoritosPage.reloadIfActive();
-        }
-      },
+      currentIndex: _currentBottomNavIndex,
+      onTap: _onBottomNavTap,
       elevation: 8,
       items: const [
         BottomNavigationBarItem(
@@ -112,134 +97,95 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 
-  Widget _buildCurrentPage(AppNavigationProvider navigationProvider) {
-    final currentPage = navigationProvider.currentPage;
-    if (currentPage == null) {
-      return const Center(
-        child: Text('Carregando...'),
-      );
-    }
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _currentBottomNavIndex = index;
+    });
 
-    // Adiciona loading indicator se estiver navegando
-    return Stack(
-      children: [
-        _buildPageForType(currentPage.type, currentPage.arguments),
-        if (navigationProvider.isNavigating)
-          Container(
-            color: Colors.black26,
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-      ],
-    );
+    // Recarrega favoritos quando a tab for selecionada
+    if (index == 2) { // Index 2 é a página de favoritos
+      FavoritosPage.reloadIfActive();
+    }
   }
 
-  Widget _buildPageForType(AppPageType pageType, Map<String, dynamic>? arguments) {
+  Widget _buildCurrentPage() {
+    switch (_currentBottomNavIndex) {
+      case 0:
+        return const HomeDefensivosPage();
+      case 1:
+        return const PragasPage();
+      case 2:
+        return const FavoritosPage();
+      case 3:
+        return const ComentariosPage();
+      case 4:
+        return const SettingsPage();
+      default:
+        return const HomeDefensivosPage();
+    }
+  }
+
+  // Legacy method support for existing navigation calls
+  Widget _buildPageForAgriculturalType(AgriculturalPageType pageType, Map<String, dynamic>? arguments) {
     Widget page;
-    
+
     switch (pageType) {
       // Páginas principais
-      case AppPageType.defensivos:
-        page = const HomeDefensivosPage();
-        break;
-      case AppPageType.pragas:
-        page = const PragasPage();
-        break;
-      case AppPageType.favoritos:
+      case AgriculturalPageType.favoritos:
         page = const FavoritosPage();
         break;
-      case AppPageType.comentarios:
-        page = const ComentariosPage();
-        break;
-      case AppPageType.settings:
+      case AgriculturalPageType.settings:
         page = const SettingsPage();
         break;
-      
-      // Páginas de detalhes e listas
-      case AppPageType.listaPragas:
-        page = ListaPragasPage(
-          pragaType: arguments?['pragaType'] as String?,
-        );
+
+      // Páginas de lista
+      case AgriculturalPageType.listaDefensivos:
+        page = const DefensivosUnificadoPage();
         break;
-      case AppPageType.detalhePraga:
-        page = DetalhePragaPage(
-          pragaName: arguments?['pragaName'] as String? ?? '',
-          pragaScientificName: arguments?['pragaScientificName'] as String? ?? '',
-        );
+      case AgriculturalPageType.listaPragas:
+        page = const ListaPragasPage();
         break;
-      case AppPageType.listaDefensivos:
-        page = ChangeNotifierProvider(
-          create: (_) => GetIt.instance<DefensivosUnificadoProvider>(),
-          child: DefensivosUnificadoPage(
-            modoCompleto: arguments?['modoCompleto'] as bool? ?? true,
-            tipoAgrupamento: arguments?['tipoAgrupamento'] as String?,
-            textoFiltro: arguments?['textoFiltro'] as String?,
-            isAgrupados: arguments?['isAgrupados'] as bool? ?? false,
-          ),
-        );
-        break;
-      case AppPageType.detalheDefensivo:
-        page = DetalheDefensivoPage(
-          defensivoName: arguments?['defensivoName'] as String? ?? '',
-          fabricante: arguments?['fabricante'] as String? ?? '',
-        );
-        break;
-      case AppPageType.listaCulturas:
+      case AgriculturalPageType.listaCulturas:
         page = const ListaCulturasPage();
         break;
-      case AppPageType.subscription:
+
+      // Páginas de detalhes
+      case AgriculturalPageType.detalheDefensivo:
+        final defensivoName = arguments?['defensivoName'] as String?;
+        final fabricante = arguments?['fabricante'] as String? ?? 'Fabricante não informado';
+        if (defensivoName != null) {
+          page = DetalheDefensivoPage(
+            defensivoName: defensivoName,
+            fabricante: fabricante,
+          );
+        } else {
+          page = const HomeDefensivosPage(); // Fallback
+        }
+        break;
+
+      case AgriculturalPageType.detalhePraga:
+        final pragaName = arguments?['pragaName'] as String?;
+        final pragaScientificName = arguments?['pragaScientificName'] as String?;
+        if (pragaName != null && pragaScientificName != null) {
+          page = DetalhePragaPage(
+            pragaName: pragaName,
+            pragaScientificName: pragaScientificName,
+          );
+        } else {
+          page = const PragasPage(); // Fallback
+        }
+        break;
+
+      // Páginas especiais
+      case AgriculturalPageType.premium:
         page = const SubscriptionPage();
         break;
-      
-      // Novas páginas para migração futura
-      case AppPageType.detalheCultura:
-        page = _buildPlaceholderPage('Detalhe da Cultura', arguments);
-        break;
-      case AppPageType.buscarAvancada:
-        page = _buildPlaceholderPage('Busca Avançada', arguments);
-        break;
-      case AppPageType.resultadosBusca:
-        page = _buildPlaceholderPage('Resultados da Busca', arguments);
-        break;
-      
+
       default:
-        page = const Center(
-          child: Text('Página não encontrada'),
-        );
+        page = const HomeDefensivosPage();
         break;
     }
-    
-    return page.withResponsiveWrapper();
-  }
-  
-  /// Constrói uma página placeholder para desenvolvimento
-  Widget _buildPlaceholderPage(String title, Map<String, dynamic>? arguments) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            if (arguments != null && arguments.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text('Arguments: $arguments'),
-            ],
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                final navigationProvider = Provider.of<AppNavigationProvider>(context, listen: false);
-                navigationProvider.goBack();
-              },
-              child: const Text('Voltar'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
+    return ResponsiveContentWrapper(child: page);
+  }
 }

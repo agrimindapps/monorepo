@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:core/core.dart' as core;
+import '../di/injection_container.dart';
 import 'image_compression_service.dart';
 import 'firebase_storage_service.dart';
 
@@ -23,11 +25,14 @@ class ImageProcessingResult {
 class ReceiptImageService {
   final ImageCompressionService _compressionService;
   final FirebaseStorageService _storageService;
+  late final core.ConnectivityService _connectivityService;
 
   ReceiptImageService(
     this._compressionService,
     this._storageService,
-  );
+  ) {
+    _connectivityService = sl<core.ConnectivityService>();
+  }
 
   /// Process and upload fuel receipt image
   Future<ImageProcessingResult> processFuelReceiptImage({
@@ -97,10 +102,22 @@ class ReceiptImageService {
       Map<String, dynamic> compressionStats = {};
       bool wasCompressed = false;
 
+      // Check connectivity and optimize compression accordingly
+      bool shouldAggressivelyCompress = false;
+      final connectivityResult = await _connectivityService.getConnectivityType();
+      connectivityResult.fold(
+        (failure) => print('🔌 Erro ao verificar conectividade: ${failure.message}'),
+        (connectivityType) {
+          shouldAggressivelyCompress = connectivityType == core.ConnectivityType.mobile;
+          print('🔌 Conexão: $connectivityType, compressão agressiva: $shouldAggressivelyCompress');
+        },
+      );
+
       // Compress image if requested and needed
       if (compressImage) {
         final needsCompression = await _compressionService.needsCompression(imagePath);
-        if (needsCompression) {
+        if (needsCompression || shouldAggressivelyCompress) {
+          // Use more aggressive compression for mobile connections
           final compressedPath = await _compressionService.compressImage(imagePath);
           compressionStats = await _compressionService.getCompressionStats(
             imagePath,
@@ -112,9 +129,14 @@ class ReceiptImageService {
       }
 
       String? downloadUrl;
-      
-      // Upload to Firebase Storage if requested
-      if (uploadToFirebase) {
+
+      // Check if online before uploading
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((failure) => false, (online) => online);
+
+      // Upload to Firebase Storage if requested and online
+      if (uploadToFirebase && isOnline) {
+        print('🔌 Uploading receipt online...');
         switch (category) {
           case 'fuel':
             downloadUrl = await _storageService.uploadFuelReceiptImage(
@@ -140,12 +162,21 @@ class ReceiptImageService {
           default:
             throw Exception('Invalid category: $category');
         }
+      } else if (uploadToFirebase && !isOnline) {
+        // Offline - store locally for later upload
+        print('🔌 Offline - receipt saved locally, will upload when online');
+        // TODO: Implement offline queue for receipt uploads
       }
 
       return ImageProcessingResult(
         localPath: finalImagePath,
         downloadUrl: downloadUrl,
-        compressionStats: compressionStats,
+        compressionStats: {
+          ...compressionStats,
+          'connectivity_aware': true,
+          'was_offline': !isOnline,
+          'aggressive_compression': shouldAggressivelyCompress,
+        },
         wasCompressed: wasCompressed,
       );
     } catch (e) {

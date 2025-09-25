@@ -21,7 +21,8 @@ import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/device_management_di.dart';
-import '../navigation/app_navigation_provider.dart';
+import '../navigation/agricultural_navigation_extension.dart';
+import '../services/receituagro_navigation_service.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/cultura_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
@@ -68,10 +69,20 @@ Future<void> init() async {
   // Configure device management dependencies
   await DeviceManagementDI.registerDependencies(sl);
   
-  // ===== NAVEGAÇÃO =====
-  // Registra AppNavigationProvider como singleton para navegação global
-  sl.registerLazySingleton<AppNavigationProvider>(
-    () => AppNavigationProvider(),
+  // ===== ENHANCED NAVIGATION =====
+  // Register enhanced core navigation services
+  sl.registerLazySingleton<core.NavigationConfigurationService>(
+    () => core.NavigationConfigurationService(),
+  );
+
+  sl.registerLazySingleton<core.NavigationAnalyticsService>(
+    () => core.NavigationAnalyticsService(
+      sl<core.FirebaseAnalyticsService>(),
+    ),
+  );
+
+  sl.registerLazySingleton<core.EnhancedNavigationService>(
+    () => core.EnhancedNavigationService(),
   );
   
   // ===== DEVICE IDENTITY SERVICE =====
@@ -212,14 +223,8 @@ Future<void> init() async {
     () => sl<core.HiveStorageService>(),
   );
   
-  // Navigation Service - Now available via Core Package
-  try {
-    sl.registerLazySingleton<core.NavigationService>(
-      () => core.NavigationService(),
-    );
-  } catch (e) {
-    if (kDebugMode) print('NavigationService registration failed: $e');
-  }
+  // Navigation Service - Enhanced version via Core Package
+  // Basic navigation service is already registered above as EnhancedNavigationService
   
   // Device Identity Service - Moved to before Core Package Integration
   
@@ -290,6 +295,19 @@ Future<void> init() async {
     ),
   );
   
+  // Agricultural Navigation Extension
+  sl.registerLazySingleton<AgriculturalNavigationExtension>(
+    () => AgriculturalNavigationExtension(),
+  );
+
+  // Unified ReceitaAgro Navigation Service
+  sl.registerLazySingleton<ReceitaAgroNavigationService>(
+    () => ReceitaAgroNavigationService(
+      coreService: sl<core.EnhancedNavigationService>(),
+      agricExtension: sl<AgriculturalNavigationExtension>(),
+    ),
+  );
+
   // Navigation Services - Enhanced version
   sl.registerLazySingleton<FavoritosNavigationService>(
     () => FavoritosNavigationService(

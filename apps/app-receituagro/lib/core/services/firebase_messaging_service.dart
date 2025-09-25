@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../models/promotional_notification.dart';
-import '../navigation/app_navigation_provider.dart';
+import 'receituagro_navigation_service.dart';
 
 /// Serviço para gerenciar Firebase Cloud Messaging (Push Notifications)
 /// Focado em notificações promocionais do ReceitaAgro
@@ -26,16 +26,16 @@ class ReceitaAgroFirebaseMessagingService {
   final FlutterLocalNotificationsPlugin _localNotifications = 
       FlutterLocalNotificationsPlugin();
   
-  AppNavigationProvider? _navigationProvider;
+  ReceitaAgroNavigationService? _navigationService;
   bool _isInitialized = false;
   String? _fcmToken;
 
   /// Inicializa o serviço de push notifications
-  Future<bool> initialize({AppNavigationProvider? navigationProvider}) async {
+  Future<bool> initialize({ReceitaAgroNavigationService? navigationService}) async {
     if (_isInitialized) return true;
     
     try {
-      _navigationProvider = navigationProvider;
+      _navigationService = navigationService;
       
       // Configurar notificações locais
       await _configureLocalNotifications();
@@ -222,11 +222,12 @@ class ReceitaAgroFirebaseMessagingService {
 
   /// Trata navegação baseada no tipo de notificação
   Future<void> _handleNotificationNavigation(PromotionalNotification notification) async {
-    if (_navigationProvider == null) return;
+    if (_navigationService == null) return;
 
     switch (notification.type) {
       case NotificationType.premium:
-        _navigationProvider!.navigateToSubscription();
+        _navigationService!.navigateTo('/premium',
+          pageType: 'premium');
         break;
       case NotificationType.newFeature:
         if (notification.targetScreen != null) {
@@ -248,16 +249,16 @@ class ReceitaAgroFirebaseMessagingService {
   void _navigateToScreen(String screenName) {
     switch (screenName.toLowerCase()) {
       case 'defensivos':
-        _navigationProvider?.navigateToListaDefensivos();
+        _navigationService?.navigateToListaDefensivos();
         break;
       case 'pragas':
-        _navigationProvider?.navigateToListaPragas();
+        _navigationService?.navigateToListaPragas();
         break;
       case 'diagnosticos':
-        _navigationProvider?.navigateToListaDiagnosticos();
+        _navigationService?.navigateToListaDiagnosticos();
         break;
       case 'culturas':
-        _navigationProvider?.navigateToListaCulturas();
+        _navigationService?.navigateToListaCulturas();
         break;
       default:
         debugPrint('Unknown target screen: $screenName');
@@ -314,9 +315,9 @@ class ReceitaAgroFirebaseMessagingService {
   /// Verifica se o serviço está inicializado
   bool get isInitialized => _isInitialized;
 
-  /// Atualiza o provider de navegação
-  void updateNavigationProvider(AppNavigationProvider provider) {
-    _navigationProvider = provider;
+  /// Atualiza o serviço de navegação
+  void updateNavigationService(ReceitaAgroNavigationService service) {
+    _navigationService = service;
   }
 
   /// Método para testar push notifications (desenvolvimento)

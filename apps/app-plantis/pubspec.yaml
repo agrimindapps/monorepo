@@ -31,9 +31,6 @@ dependencies:
   uuid: ^4.5.1
   json_annotation: ^4.8.1
   
-  # UI Components
-  cached_network_image: ^3.4.1
-  
   # Image
   image_picker: ^1.1.2
   

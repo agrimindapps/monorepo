@@ -197,5 +197,8 @@ export 'repositories/license_local_storage.dart';
 // Provider State Management
 export 'package:provider/provider.dart';
 
+// Image Cache Management
+export 'package:cached_network_image/cached_network_image.dart';
+
 // Services
 export 'services/license_service.dart';

@@ -15,51 +15,14 @@ dependencies:
   # Core Package - Serviços compartilhados
   core:
     path: ../../packages/core
-
-  # Dependency Injection
-  get_it: ^8.2.0
   
   # State Management
   provider: ^6.1.2
   flutter_riverpod: ^2.6.1
 
-  # Functional Programming
-  dartz: ^0.10.1
-  equatable: ^2.0.7
-
-  # Hive para storage local (necessário para geradores de código)
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-
   # Firebase packages necessários para imports diretos  
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.1
-  firebase_crashlytics: ^5.0.0
   firebase_remote_config: ^6.0.0
-  firebase_analytics: ^12.0.0
   firebase_messaging: ^16.0.0
-  
-  # Local Notifications (usando mesma versão do core)
-  flutter_local_notifications: ^19.4.0
-  
-  # Shared Preferences for notification settings
-  shared_preferences: ^2.3.4
-  
-  # Missing critical dependencies (aligned with core package)
-  cloud_firestore: ^6.0.0
-  cloud_functions: ^6.0.0
-  device_info_plus: ^11.5.0
-  crypto: ^3.0.6
-  flutter_secure_storage: ^9.2.4
-  connectivity_plus: ^6.1.5
-
-  # Nota: outros serviços Firebase e path_provider vêm do core package
-
-  # App Info
-  package_info_plus: ^8.0.2
-
-  # RevenueCat for subscriptions
-  purchases_flutter: ^9.2.0
 
   # Background processing
   # workmanager: ^0.5.2  # Temporarily removed due to build issues
@@ -76,10 +39,7 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
 
   http: any
-  path_provider: any
-  permission_handler: ^12.0.1
   collection: any
-  uuid: ^4.5.1
   shimmer: ^3.0.0
 dev_dependencies:
   flutter_test:

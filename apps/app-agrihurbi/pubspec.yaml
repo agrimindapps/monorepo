@@ -19,20 +19,11 @@ dependencies:
   # State Management
   provider: ^6.1.1
   
-  # Architecture
-  dartz: ^0.10.1            # Either/Option functional programming
-  equatable: ^2.0.7         # Entity equality
-  
   # Dependency Injection
-  get_it: ^8.2.0           # Service locator
   injectable: ^2.3.2        # Code generation para DI
   
   # Navigation
   go_router: ^16.1.0        # Substitui GetX navigation
-  
-  # Network
-  dio: ^5.9.0              # HTTP client
-  connectivity_plus: ^6.1.5
   
   # RSS & External Data (será adicionado na Fase 5)
   
@@ -53,12 +44,6 @@ dependencies:
   
   # Date & Time
   table_calendar: ^3.1.2
-  
-  # Local Storage
-  shared_preferences: ^2.3.2
-  flutter_secure_storage: ^9.2.2
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   
   # Remote Storage (Supabase)
   supabase_flutter: ^2.6.0

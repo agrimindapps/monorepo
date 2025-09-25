@@ -22,7 +22,6 @@ dependencies:
   provider: ^6.1.2
   
   # Dependency Injection
-  get_it: ^8.2.0
   injectable: ^2.5.0
   
   # Navigation
@@ -34,9 +33,6 @@ dependencies:
   # Nota: Firebase, Hive e SharedPreferences vêm do core package
   
   # Utilities
-  equatable: ^2.0.7
-  dartz: ^0.10.1
-  uuid: ^4.5.1
   intl: ^0.20.2
   rxdart: ^0.28.0
   
@@ -46,17 +42,7 @@ dependencies:
   shimmer: ^3.0.0
   
   # Image
-  image_picker: ^1.1.2
   image: ^4.1.7
-  
-  # Permissions
-  permission_handler: ^12.0.1
-  
-  # Local Notifications
-  flutter_local_notifications: ^19.4.0
-  
-  # Connectivity
-  connectivity_plus: ^6.1.5
   
   # Synchronization
   synchronized: ^3.3.0+3
@@ -67,33 +53,11 @@ dependencies:
   
   # Charts for fuel consumption analytics
   fl_chart: ^1.0.0
-  
-  # In-App Purchases / Subscriptions
-  purchases_flutter: ^9.2.0
-  
-  # Secure Storage
-  flutter_secure_storage: ^9.2.2
-  
-  # File System
-  path_provider: ^2.1.4
-
-  # Device Information
-  device_info_plus: ^11.5.0
-  package_info_plus: ^8.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
-  cloud_firestore: any
-  firebase_auth: any
-  firebase_storage: any
-  shared_preferences: any
-  hive: any
-  firebase_analytics: any
-  firebase_crashlytics: any
-  hive_flutter: any
-  firebase_core: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

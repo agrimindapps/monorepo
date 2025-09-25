@@ -42,7 +42,6 @@ dependencies:
   # Nota: RevenueCat e Notifications vêm do core package
   
   # UI
-  cupertino_icons: ^1.0.2
   google_fonts: ^6.1.0
   
   # JSON

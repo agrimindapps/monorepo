@@ -25,7 +25,6 @@ dependencies:
   go_router: ^16.1.0
   
   # UI Components
-  flutter_staggered_grid_view: ^0.7.0
   
   # Nota: Firebase, Hive e SharedPreferences vêm do core package
   

@@ -76,6 +76,7 @@ dependencies:
   injectable: ^2.4.4
   dartz: ^0.10.1
   equatable: ^2.0.7
+  provider: ^6.1.5
 
   # UI Components
   cupertino_icons: ^1.0.8

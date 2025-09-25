@@ -193,5 +193,9 @@ export 'models/license_model.dart';
 export 'repositories/license_repository.dart';
 export 'repositories/license_local_storage.dart';
 
+// ========== EXTERNAL PACKAGES ==========
+// Provider State Management
+export 'package:provider/provider.dart';
+
 // Services
 export 'services/license_service.dart';

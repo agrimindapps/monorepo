@@ -67,7 +67,6 @@ dependencies:
   flutter_local_notifications: any
   timezone: any
   purchases_flutter: any
-  provider: any  # For local provider usage alongside Riverpod
 dev_dependencies:
   flutter_test:
     sdk: flutter

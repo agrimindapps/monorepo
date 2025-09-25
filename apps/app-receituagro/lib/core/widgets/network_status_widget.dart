@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import 'package:core/core.dart';
 
 /// Network Status Widget
@@ -22,7 +24,7 @@ class NetworkStatusWidget extends StatefulWidget {
   final bool showQualityIndicator;
   
   /// Callback when network status changes
-  final Function(NetworkStatus)? onStatusChanged;
+  final void Function(NetworkStatus)? onStatusChanged;
   
   /// Custom styling
   final NetworkStatusStyle? style;
@@ -84,10 +86,9 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
     await _connectivityService.initialize();
 
     // Listen to connectivity changes
-    _connectivitySubscription = _connectivityService.connectivityStream.listen((isOnline) {
-      setState(() {
-        _updateNetworkStatus(isOnline);
-      });
+    _connectivitySubscription = _connectivityService.connectivityStream.listen((isOnline) async {
+      await _updateNetworkStatus(isOnline);
+      setState(() {});
       widget.onStatusChanged?.call(_currentStatus);
     });
 
@@ -96,7 +97,7 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   }
 
   /// Check initial network status
-  void _checkInitialNetworkStatus() async {
+  Future<void> _checkInitialNetworkStatus() async {
     final result = await _connectivityService.isOnline();
     result.fold(
       (failure) {
@@ -107,19 +108,22 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
           _pulseController.stop();
         });
       },
-      (isOnline) {
-        setState(() {
-          _updateNetworkStatus(isOnline);
-        });
+      (isOnline) async {
+        await _updateNetworkStatus(isOnline);
+        setState(() {});
       },
     );
   }
 
   /// Update network status based on connectivity
-  void _updateNetworkStatus(bool isOnline) {
+  Future<void> _updateNetworkStatus(bool isOnline) async {
     if (isOnline) {
       // Get current connection type
-      final connectivityType = _connectivityService.currentConnectivityType;
+      final connectivityResult = await _connectivityService.getConnectivityType();
+      final connectivityType = connectivityResult.fold(
+        (failure) => ConnectivityType.none,
+        (type) => type,
+      );
       _connectionType = connectivityType;
 
       // Set status and quality based on connection type
@@ -153,6 +157,24 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
           _connectionQuality = ConnectionQuality.none;
           _pulseController.stop();
           _retryAttempts++;
+          break;
+        case ConnectivityType.vpn:
+          _currentStatus = NetworkStatus.connected;
+          _connectionQuality = ConnectionQuality.good;
+          _pulseController.stop();
+          _retryAttempts = 0;
+          break;
+        case ConnectivityType.offline:
+          _currentStatus = NetworkStatus.disconnected;
+          _connectionQuality = ConnectionQuality.none;
+          _pulseController.stop();
+          _retryAttempts++;
+          break;
+        case ConnectivityType.online:
+          _currentStatus = NetworkStatus.connected;
+          _connectionQuality = ConnectionQuality.good;
+          _pulseController.stop();
+          _retryAttempts = 0;
           break;
       }
     } else {
@@ -374,6 +396,12 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
         return Icons.device_hub;
       case ConnectivityType.none:
         return Icons.signal_cellular_off;
+      case ConnectivityType.vpn:
+        return Icons.vpn_lock;
+      case ConnectivityType.offline:
+        return Icons.signal_cellular_off;
+      case ConnectivityType.online:
+        return Icons.wifi;
     }
   }
 

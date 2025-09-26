@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/widgets/loading/loading_components.dart';

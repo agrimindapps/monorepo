@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/plant.dart';
 import 'plant_tasks_helper.dart';
 

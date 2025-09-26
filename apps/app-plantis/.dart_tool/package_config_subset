@@ -386,6 +386,10 @@ http_parser
 3.4
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/http_parser-4.1.2/
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/http_parser-4.1.2/lib/
+image
+3.0
+file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/image-4.5.4/
+file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/image-4.5.4/lib/
 image_picker
 3.3
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/image_picker-1.1.2/
@@ -666,6 +670,10 @@ shelf_web_socket
 3.5
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/shelf_web_socket-3.0.0/
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/shelf_web_socket-3.0.0/lib/
+shimmer
+2.17
+file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/shimmer-3.0.0/
+file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/shimmer-3.0.0/lib/
 source_gen
 3.7
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/source_gen-3.1.0/

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as local;
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -56,7 +56,7 @@ class _LandingPageState extends State<LandingPage>
   }
 
   void _checkUserLoginStatus() {
-    final authProvider = context.read<AuthProvider>();
+    final authProvider = context.read<local.AuthProvider>();
 
     // Se já está inicializado e autenticado, redireciona instantaneamente
     if (authProvider.isInitialized && authProvider.isAuthenticated) {
@@ -78,7 +78,7 @@ class _LandingPageState extends State<LandingPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<AuthProvider>(
+      body: Consumer<local.AuthProvider>(
         builder: (context, authProvider, child) {
           // Se ainda está carregando, mostra splash
           if (!authProvider.isInitialized) {

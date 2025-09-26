@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/plantis_colors.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart' as local;
 import '../../features/tasks/domain/entities/task.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import 'main_scaffold.dart';
@@ -697,7 +697,7 @@ class _SidebarFooter extends StatelessWidget {
               ),
             ),
           ),
-          child: Consumer<AuthProvider>(
+          child: Consumer<local.AuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.currentUser;
           final isAnonymous = authProvider.isAnonymous;

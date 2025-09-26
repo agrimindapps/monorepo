@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/register_loading_overlay.dart';
 import '../../utils/auth_validators.dart';
-import '../providers/auth_provider.dart';
+import '../providers/auth_provider.dart' as local;
 import '../providers/register_provider.dart';
 
 class RegisterPasswordPage extends StatefulWidget {
@@ -68,7 +68,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage>
       if (_registerProvider!.validatePassword()) {
         showRegisterLoading(message: 'Criando conta...');
         
-        final authProvider = context.read<AuthProvider>();
+        final authProvider = context.read<local.AuthProvider>();
         final registerData = _registerProvider!.registerData;
 
         updateRegisterLoadingMessage('Conectando ao servidor...');
@@ -395,7 +395,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage>
                         ),
 
                         // Error message - AuthProvider
-                        Consumer<AuthProvider>(
+                        Consumer<local.AuthProvider>(
                           builder: (context, authProvider, _) {
                             if (authProvider.errorMessage != null) {
                               return Container(
@@ -457,7 +457,7 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage>
                             const SizedBox(width: 16),
                             Expanded(
                               flex: 2,
-                              child: Consumer<AuthProvider>(
+                              child: Consumer<local.AuthProvider>(
                                 builder: (context, authProvider, _) {
                                   return ElevatedButton(
                                     onPressed:

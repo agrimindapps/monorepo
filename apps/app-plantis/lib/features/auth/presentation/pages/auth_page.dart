@@ -5,7 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +14,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
-import '../providers/auth_provider.dart';
+import '../providers/auth_provider.dart' as local;
 import '../widgets/forgot_password_dialog.dart';
 import '../widgets/device_validation_overlay.dart';
 
@@ -216,7 +216,7 @@ class _AuthPageState extends State<AuthPage>
     if (_loginFormKey.currentState!.validate()) {
       showLoading(message: 'Fazendo login...');
 
-      final authProvider = context.read<AuthProvider>();
+      final authProvider = context.read<local.AuthProvider>();
       final router = GoRouter.of(context);
 
       // Salvar email se "Lembrar-me" estiver marcado
@@ -242,7 +242,7 @@ class _AuthPageState extends State<AuthPage>
     if (_registerFormKey.currentState!.validate()) {
       showLoading(message: 'Criando conta...');
       
-      final authProvider = context.read<AuthProvider>();
+      final authProvider = context.read<local.AuthProvider>();
       final router = GoRouter.of(context);
       await authProvider.register(
         _registerEmailController.text,
@@ -326,7 +326,7 @@ class _AuthPageState extends State<AuthPage>
               Navigator.of(context).pop();
               showLoading(message: 'Entrando anonimamente...');
               
-              final authProvider = context.read<AuthProvider>();
+              final authProvider = context.read<local.AuthProvider>();
               final router = GoRouter.of(context);
               await authProvider.signInAnonymously();
               
@@ -1023,7 +1023,7 @@ class _AuthPageState extends State<AuthPage>
   }
   
   Widget _buildErrorMessage() {
-    return Consumer<AuthProvider>(
+    return Consumer<local.AuthProvider>(
       builder: (context, authProvider, _) {
         if (authProvider.errorMessage != null) {
           return AnimatedContainer(
@@ -1063,7 +1063,7 @@ class _AuthPageState extends State<AuthPage>
   }
   
   Widget _buildAccessibleLoginButton() {
-    return Consumer<AuthProvider>(
+    return Consumer<local.AuthProvider>(
       builder: (context, authProvider, _) {
         final isAnonymousLoading = authProvider.currentOperation == AuthOperation.anonymous;
         return AccessibleButton(
@@ -1181,7 +1181,7 @@ class _AuthPageState extends State<AuthPage>
   }
   
   Widget _buildAnonymousLoginSection() {
-    return Consumer<AuthProvider>(
+    return Consumer<local.AuthProvider>(
       builder: (context, authProvider, _) {
         return Container(
           height: 48,
@@ -1468,7 +1468,7 @@ class _AuthPageState extends State<AuthPage>
   }
 
   Widget _buildAccessibleRegisterButton() {
-    return Consumer<AuthProvider>(
+    return Consumer<local.AuthProvider>(
       builder: (context, authProvider, _) {
         return AccessibleButton(
           focusNode: _registerButtonFocusNode,

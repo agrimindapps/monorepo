@@ -22,8 +22,6 @@ dependencies:
   get_it: ^8.2.0
   injectable: ^2.5.0
   
-  # Navigation
-  go_router: ^16.1.0
 
 dev_dependencies:
   flutter_test:

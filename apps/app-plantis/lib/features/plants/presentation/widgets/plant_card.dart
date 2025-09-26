@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 import '../../../../core/router/app_router.dart';
 import '../../domain/entities/plant.dart';
 import 'optimized_plant_image_widget.dart';

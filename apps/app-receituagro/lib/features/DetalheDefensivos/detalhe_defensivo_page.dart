@@ -9,6 +9,8 @@ import '../../core/services/receituagro_navigation_service.dart';
 import 'package:get_it/get_it.dart';
 import '../../core/repositories/diagnostico_hive_repository.dart';
 import '../../core/services/diagnosticos_data_loader.dart';
+import '../../core/services/access_history_service.dart';
+import '../../core/models/fitossanitario_hive.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
@@ -89,13 +91,17 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
 
       // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
       if (_defensivoProvider.defensivoData != null) {
-        final defensivoIdReg = _defensivoProvider.defensivoData!.idReg;
+        final defensivoData = _defensivoProvider.defensivoData!;
+        final defensivoIdReg = defensivoData.idReg;
         debugPrint('=== CARREGANDO DIAGNÓSTICOS ===');
         debugPrint('ID Reg do defensivo encontrado: $defensivoIdReg');
-        debugPrint('Nome do defensivo: ${_defensivoProvider.defensivoData!.nomeComum}');
-        debugPrint('Fabricante: ${_defensivoProvider.defensivoData!.fabricante}');
+        debugPrint('Nome do defensivo: ${defensivoData.nomeComum}');
+        debugPrint('Fabricante: ${defensivoData.fabricante}');
         
         await _diagnosticosProvider.loadDiagnosticos(defensivoIdReg);
+        
+        // Record access to this defensivo for "Últimos Acessados"
+        await _recordDefensivoAccess(defensivoData);
         
         final endTime = DateTime.now();
         final duration = endTime.difference(startTime);
@@ -220,6 +226,25 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     } catch (e) {
       debugPrint('❌ [FORCE DEBUG] Erro: $e');
       debugPrint('Stack: ${StackTrace.current}');
+    }
+  }
+
+  /// Record access to this defensivo for history tracking
+  Future<void> _recordDefensivoAccess(FitossanitarioHive defensivoData) async {
+    try {
+      // Use the AccessHistoryService through dependency injection if available
+      final accessHistoryService = AccessHistoryService();
+      await accessHistoryService.recordDefensivoAccess(
+        id: defensivoData.idReg,
+        name: defensivoData.nomeComum,
+        fabricante: defensivoData.fabricante ?? '',
+        ingrediente: defensivoData.ingredienteAtivo ?? '',
+        classe: defensivoData.classeAgronomica ?? '',
+      );
+      
+      debugPrint('✅ Acesso registrado para: ${defensivoData.nomeComum}');
+    } catch (e) {
+      debugPrint('❌ Erro ao registrar acesso: $e');
     }
   }
 

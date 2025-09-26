@@ -195,7 +195,11 @@ export 'repositories/license_local_storage.dart';
 
 // ========== EXTERNAL PACKAGES ==========
 // Provider State Management
-export 'package:provider/provider.dart';
+export 'package:provider/provider.dart' hide Locator, FutureProvider, Provider, StreamProvider;
+
+// Riverpod State Management  
+export 'package:riverpod/riverpod.dart' hide Locator, AsyncValueX, Provider, StreamProvider;
+export 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider, Consumer;
 
 // Navigation
 export 'package:go_router/go_router.dart';
@@ -215,3 +219,8 @@ export 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 export 'services/license_service.dart';
 export 'services/image_compression_service.dart';
 export 'services/shimmer_service.dart';
+
+// ========== RIVERPOD UTILITIES ==========
+export 'src/riverpod/common_providers.dart';
+export 'src/riverpod/riverpod_utils.dart';
+export 'src/riverpod/common_notifiers.dart';

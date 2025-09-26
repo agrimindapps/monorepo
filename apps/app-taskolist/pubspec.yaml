@@ -16,8 +16,6 @@ dependencies:
     path: ../../packages/core
 
   # State Management
-  riverpod: ^2.6.1
-  flutter_riverpod: ^2.6.1
   
   # Dependency Injection
   get_it: ^8.2.0

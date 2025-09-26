@@ -134,22 +134,25 @@ class DefensivosHistoryProvider extends ChangeNotifier {
         }
       }
       
-      // Combine history with random selection
-      _recentDefensivos = RandomSelectionService.combineHistoryWithRandom(
-        historicDefensivos,
-        allDefensivos,
-        RandomSelectionService.selectRandomDefensivos,
-        count: 10,
-      );
+      // ÚLTIMOS ACESSADOS: Se não há histórico, inicializar com 10 aleatórios
+      if (historicDefensivos.isEmpty) {
+        print('⚠️ Nenhum histórico de acesso encontrado. Inicializando "Últimos Acessados" com 10 defensivos aleatórios.');
+        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>();
+      } else {
+        print('✅ ${historicDefensivos.length} defensivos encontrados no histórico de acesso.');
+        _recentDefensivos = historicDefensivos;
+      }
       
-      // For "new", use random selection with "latest" logic
+      // NOVOS DEFENSIVOS: Usar lógica baseada em createdAt
       _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
       
     } catch (e) {
-      // In case of error, use random selection as fallback
+      print('❌ Erro ao carregar histórico: $e');
+      // In case of error, use random selection as fallback for both lists
       if (allDefensivos.isNotEmpty) {
-        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 3);
-        _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 4);
+        print('🔄 Usando seleção aleatória como fallback para ambas as listas');
+        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>();
+        _newDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>();
       } else {
         _recentDefensivos = [];
         _newDefensivos = [];

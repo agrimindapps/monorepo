@@ -17,7 +17,6 @@ dependencies:
     path: ../../packages/core
   
   # State Management
-  flutter_riverpod: ^2.6.1
 
   # Firebase packages necessários para imports diretos  
   firebase_remote_config: ^6.0.0

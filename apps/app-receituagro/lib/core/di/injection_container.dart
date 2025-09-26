@@ -110,18 +110,8 @@ Future<void> init() async {
     () => ReceitaAgroCloudFunctionsService.instance,
   );
   
-  // Premium Service (New Architecture) - Handles web platform internally
-  sl.registerLazySingleton<ReceitaAgroPremiumService>(
-    () {
-      final service = ReceitaAgroPremiumService.instance;
-      service.setDependencies(
-        analytics: sl<ReceitaAgroAnalyticsService>(),
-        cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
-        remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
-      );
-      return service;
-    },
-  );
+  // Premium Service (New Architecture) - Registered after analytics is available
+  // Moved after auth services initialization to ensure dependencies are available
   
   // Unified Sync Manager (from core package)
   sl.registerLazySingleton<core.UnifiedSyncManager>(
@@ -149,6 +139,9 @@ Future<void> init() async {
   sl.registerLazySingleton<FeatureFlagsProvider>(
     () => FeatureFlagsProvider(),
   );
+  
+  // Premium Service (New Architecture) - Delayed registration
+  // Register after all dependencies are confirmed available
   
   // Box Registry Service and Core Storage Service
   sl.registerLazySingleton<core.IBoxRegistryService>(() => core.BoxRegistryService());
@@ -441,4 +434,28 @@ Future<void> init() async {
   
   // Configurar DI do módulo de Settings
   SettingsDI.register(sl);
+  
+  // ===== FINAL REGISTRATION - SERVICES WITH COMPLEX DEPENDENCIES =====
+  // Premium Service (New Architecture) - Register at the end when all dependencies are available
+  try {
+    sl.registerLazySingleton<ReceitaAgroPremiumService>(
+      () {
+        final service = ReceitaAgroPremiumService.instance;
+        // Only set dependencies if analytics service is available
+        if (sl.isRegistered<ReceitaAgroAnalyticsService>()) {
+          service.setDependencies(
+            analytics: sl<ReceitaAgroAnalyticsService>(),
+            cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
+            remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
+          );
+        } else {
+          if (kDebugMode) print('⚠️ ReceitaAgroAnalyticsService not available for ReceitaAgroPremiumService');
+        }
+        return service;
+      },
+    );
+    if (kDebugMode) print('✅ ReceitaAgroPremiumService registered successfully');
+  } catch (e) {
+    if (kDebugMode) print('❌ ReceitaAgroPremiumService registration failed: $e');
+  }
 }

@@ -11,22 +11,22 @@ enum ReceitaAgroFeatureFlag {
   enableAdvancedDiagnostics('enable_advanced_diagnostics'),
   enableOfflineMode('enable_offline_mode'),
   enablePushNotifications('enable_push_notifications'),
-  
+
   // A/B Testing features
   enableNewUiDesign('enable_new_ui_design'),
   enableImprovedOnboarding('enable_improved_onboarding'),
   enableGamification('enable_gamification'),
-  
+
   // Performance features
   enableImageOptimization('enable_image_optimization'),
   enableDataCaching('enable_data_caching'),
   enablePreloadContent('enable_preload_content'),
-  
+
   // Analytics and monitoring
   enableDetailedAnalytics('enable_detailed_analytics'),
   enablePerformanceMonitoring('enable_performance_monitoring'),
   enableCrashReporting('enable_crash_reporting'),
-  
+
   // Business logic
   enableSubscriptionValidation('enable_subscription_validation'),
   enableDeviceManagement('enable_device_management'),
@@ -41,21 +41,21 @@ enum ReceitaAgroConfigKey {
   // Subscription settings
   maxDevicesPerSubscription('max_devices_per_subscription'),
   subscriptionGracePeriodHours('subscription_grace_period_hours'),
-  
+
   // Performance settings
   imageQualityLevel('image_quality_level'),
   maxCacheSize('max_cache_size_mb'),
   apiTimeoutSeconds('api_timeout_seconds'),
-  
+
   // Content settings
   supportedLanguages('supported_languages'),
   defaultLanguage('default_language'),
   contentUpdateInterval('content_update_interval_hours'),
-  
+
   // Analytics settings
   analyticsEventBatchSize('analytics_event_batch_size'),
   analyticsFlushInterval('analytics_flush_interval_minutes'),
-  
+
   // UI/UX settings
   onboardingStepsCount('onboarding_steps_count'),
   homeScreenLayoutType('home_screen_layout_type'),
@@ -85,14 +85,15 @@ class ReceitaAgroRemoteConfigService {
 
     try {
       _remoteConfig = FirebaseRemoteConfig.instance;
-      
+
       // Set config settings
       await _remoteConfig!.setConfigSettings(
         RemoteConfigSettings(
           fetchTimeout: const Duration(minutes: 1),
-          minimumFetchInterval: EnvironmentConfig.isDebugMode
-              ? const Duration(seconds: 30) // Fast iteration in debug
-              : const Duration(hours: 1), // Conservative in production
+          minimumFetchInterval:
+              EnvironmentConfig.isDebugMode
+                  ? const Duration(seconds: 30) // Fast iteration in debug
+                  : const Duration(hours: 1), // Conservative in production
         ),
       );
 
@@ -115,7 +116,7 @@ class ReceitaAgroRemoteConfigService {
         // Log to Crashlytics in production
         // FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
-      
+
       developer.log(
         '❌ Failed to initialize Remote Config: $e',
         name: 'RemoteConfigService',
@@ -137,14 +138,14 @@ class ReceitaAgroRemoteConfigService {
   Future<bool> _fetchAndActivate() async {
     try {
       final activated = await _remoteConfig!.fetchAndActivate();
-      
+
       if (EnvironmentConfig.enableLogging) {
         developer.log(
           'Remote Config ${activated ? "updated with new values" : "already up to date"}',
           name: 'RemoteConfigService',
         );
       }
-      
+
       return activated;
     } catch (e) {
       developer.log(
@@ -241,7 +242,9 @@ class ReceitaAgroRemoteConfigService {
 
   /// Get list of supported languages
   List<String> getSupportedLanguages() {
-    final languagesJson = getStringConfig(ReceitaAgroConfigKey.supportedLanguages);
+    final languagesJson = getStringConfig(
+      ReceitaAgroConfigKey.supportedLanguages,
+    );
     try {
       final languages = json.decode(languagesJson) as List;
       return languages.cast<String>();
@@ -271,18 +274,12 @@ class ReceitaAgroRemoteConfigService {
     return {
       // Feature flags defaults
       ...ReceitaAgroFeatureFlag.values.asMap().map(
-        (_, feature) => MapEntry(
-          feature.key,
-          _getFeatureDefaultValue(feature),
-        ),
+        (_, feature) => MapEntry(feature.key, _getFeatureDefaultValue(feature)),
       ),
 
       // Configuration defaults
       ...ReceitaAgroConfigKey.values.asMap().map(
-        (_, config) => MapEntry(
-          config.key,
-          _getConfigDefaultValue(config),
-        ),
+        (_, config) => MapEntry(config.key, _getConfigDefaultValue(config)),
       ),
     };
   }
@@ -294,30 +291,30 @@ class ReceitaAgroRemoteConfigService {
       case ReceitaAgroFeatureFlag.enablePremiumFeatures:
       case ReceitaAgroFeatureFlag.enableAdvancedDiagnostics:
         return false;
-      
+
       // Core features - enabled by default
       case ReceitaAgroFeatureFlag.enableOfflineMode:
       case ReceitaAgroFeatureFlag.enablePushNotifications:
       case ReceitaAgroFeatureFlag.enableImageOptimization:
       case ReceitaAgroFeatureFlag.enableDataCaching:
         return true;
-      
+
       // A/B testing features - disabled by default
       case ReceitaAgroFeatureFlag.enableNewUiDesign:
       case ReceitaAgroFeatureFlag.enableImprovedOnboarding:
       case ReceitaAgroFeatureFlag.enableGamification:
         return false;
-      
+
       // Performance features - enabled by default
       case ReceitaAgroFeatureFlag.enablePreloadContent:
         return true;
-      
+
       // Analytics - follows environment config
       case ReceitaAgroFeatureFlag.enableDetailedAnalytics:
       case ReceitaAgroFeatureFlag.enablePerformanceMonitoring:
       case ReceitaAgroFeatureFlag.enableCrashReporting:
         return EnvironmentConfig.enableAnalytics;
-      
+
       // Business logic - enabled by default
       case ReceitaAgroFeatureFlag.enableSubscriptionValidation:
       case ReceitaAgroFeatureFlag.enableDeviceManagement:
@@ -334,7 +331,7 @@ class ReceitaAgroRemoteConfigService {
         return '3';
       case ReceitaAgroConfigKey.subscriptionGracePeriodHours:
         return '24';
-      
+
       // Performance settings
       case ReceitaAgroConfigKey.imageQualityLevel:
         return '0.8';
@@ -342,7 +339,7 @@ class ReceitaAgroRemoteConfigService {
         return '100';
       case ReceitaAgroConfigKey.apiTimeoutSeconds:
         return '30';
-      
+
       // Content settings
       case ReceitaAgroConfigKey.supportedLanguages:
         return '["pt", "en"]';
@@ -350,13 +347,13 @@ class ReceitaAgroRemoteConfigService {
         return 'pt';
       case ReceitaAgroConfigKey.contentUpdateInterval:
         return '24';
-      
+
       // Analytics settings
       case ReceitaAgroConfigKey.analyticsEventBatchSize:
         return '50';
       case ReceitaAgroConfigKey.analyticsFlushInterval:
         return '5';
-      
+
       // UI/UX settings
       case ReceitaAgroConfigKey.onboardingStepsCount:
         return '4';

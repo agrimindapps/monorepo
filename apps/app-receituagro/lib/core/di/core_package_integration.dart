@@ -7,12 +7,14 @@ import '../services/device_identity_service.dart';
 // sync_orchestrator.dart removed - using UnifiedSyncManager from core package
 import '../../features/analytics/enhanced_analytics_provider.dart';
 import '../providers/auth_provider.dart';
+import 'injection_container.dart' as di;
 
 /// Core Package Integration Configuration for ReceitaAgro
 /// This file centralizes all Core Package service registrations
 /// Following the patterns established in app-gasometer and app-plantis
 class CorePackageIntegration {
-  static final GetIt _sl = GetIt.instance;
+  // Use the same GetIt instance as injection_container.dart
+  static GetIt get _sl => di.sl;
 
   /// Initialize all Core Package services for ReceitaAgro
   static Future<void> initializeCoreServices() async {
@@ -358,20 +360,35 @@ class CorePackageIntegration {
   /// Register ReceitaAgro-specific auth services
   static Future<void> _registerReceitaAgroAuthServices() async {
     // Register ReceitaAgro Enhanced Analytics Service first
-    if (!_sl.isRegistered<ReceitaAgroEnhancedAnalyticsProvider>()) {
-      _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
-        () => ReceitaAgroEnhancedAnalyticsProvider(
-          analyticsRepository: _sl<core.IAnalyticsRepository>(),
-          crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
-        ),
-      );
+    try {
+      if (!_sl.isRegistered<ReceitaAgroEnhancedAnalyticsProvider>()) {
+        _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
+          () => ReceitaAgroEnhancedAnalyticsProvider(
+            analyticsRepository: _sl<core.IAnalyticsRepository>(),
+            crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
+          ),
+        );
+        if (kDebugMode) print('✅ ReceitaAgroEnhancedAnalyticsProvider registered successfully');
+      } else {
+        if (kDebugMode) print('⚠️ ReceitaAgroEnhancedAnalyticsProvider already registered');
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ ReceitaAgroEnhancedAnalyticsProvider registration failed: $e');
+      rethrow; // Re-throw to see the actual error
     }
 
-    // Register alias for backward compatibility
-    if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
-      _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-        () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
-      );
+    // Register alias for backward compatibility - Always register
+    try {
+      if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
+        _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+          () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
+        );
+        if (kDebugMode) print('✅ ReceitaAgroAnalyticsService registered successfully');
+      } else {
+        if (kDebugMode) print('⚠️ ReceitaAgroAnalyticsService already registered');
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ ReceitaAgroAnalyticsService registration failed: $e');
     }
 
     // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)

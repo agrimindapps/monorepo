@@ -190,8 +190,13 @@ void main() async {
   await remoteConfigService.initialize();
 
   // Initialize Analytics Service
-  final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
-  await analyticsService.initialize();
+  try {
+    final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
+    await analyticsService.initialize();
+  } catch (e) {
+    if (kDebugMode) print('❌ [MAIN] ReceitaAgroAnalyticsService not registered: $e');
+    // Analytics service will be initialized later when properly registered
+  }
 
   // Initialize Premium Service (handles web platform internally)
   final premiumService = di.sl<ReceitaAgroPremiumService>();

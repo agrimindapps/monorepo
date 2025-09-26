@@ -21,8 +21,6 @@ dependencies:
   # Dependency Injection
   injectable: ^2.3.2
   
-  # Navigation
-  go_router: ^16.1.0
   
 dev_dependencies:
   flutter_test:

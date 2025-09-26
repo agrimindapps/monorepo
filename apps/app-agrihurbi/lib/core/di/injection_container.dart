@@ -314,8 +314,13 @@ void configureDependencies() {
   _initializeCalculatorSystem();
 }
 
+/// Legacy initialization function for backward compatibility
+Future<void> init() async {
+  await configureAppDependencies();
+}
+
 /// Configure dependencies using @injectable + code generation
-/// 
+///
 /// MASSIVE REDUCTION: from 400+ lines to <50 lines!
 /// All @injectable classes are auto-registered by code generation
 Future<void> configureAppDependencies() async {

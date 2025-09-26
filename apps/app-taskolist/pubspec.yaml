@@ -15,8 +15,6 @@ dependencies:
   core:
     path: ../../packages/core
 
-  # State Management
-  
   # Dependency Injection
   get_it: ^8.2.0
   injectable: ^2.3.2

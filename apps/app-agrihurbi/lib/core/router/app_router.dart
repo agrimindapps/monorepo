@@ -17,12 +17,37 @@ import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashbo
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 
-/// Application router configuration using GoRouter
-class AppRouter {
-  // Private constructor to prevent instantiation
-  AppRouter._();
-  static final GoRouter _router = GoRouter(
-    initialLocation: '/login',
+import '../riverpod_providers/providers.dart';
+
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final initialRoute = '/login';
+
+  return GoRouter(
+    initialLocation: initialRoute,
+    debugLogDiagnostics: true,
+    redirect: (context, state) {
+      // Simple auth redirect logic
+      try {
+        final authState = ref.read(authProvider);
+        final isAuthenticated = authState.isAuthenticated;
+        final isOnAuthPage = state.matchedLocation.startsWith('/login') || state.matchedLocation.startsWith('/register');
+
+        // If not authenticated and not on auth page, redirect to login
+        if (!isAuthenticated && !isOnAuthPage) {
+          return '/login';
+        }
+
+        // If authenticated and on auth page, redirect to home
+        if (isAuthenticated && isOnAuthPage) {
+          return '/home';
+        }
+
+        return null; // No redirect needed
+      } catch (e) {
+        // If authProvider not ready, allow current navigation
+        return null;
+      }
+    },
     routes: [
       // Authentication Routes
       GoRoute(
@@ -417,9 +442,7 @@ class AppRouter {
       ),
     ],
   );
-  
-  static GoRouter get router => _router;
-}
+});
 
 /// Navigation helper methods using GoRouter
 class AppNavigation {

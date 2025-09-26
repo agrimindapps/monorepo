@@ -12,14 +12,13 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Core Package - Serviços compartilhados (inclui Riverpod, dartz, equatable, shared_preferences)
   core:
     path: ../../packages/core
 
-  # State Management
-  provider: ^6.1.1
-  
   # Dependency Injection
-  injectable: ^2.3.2
+  get_it: ^8.2.0
+  injectable: ^2.5.0
   
 dev_dependencies:
   flutter_test:

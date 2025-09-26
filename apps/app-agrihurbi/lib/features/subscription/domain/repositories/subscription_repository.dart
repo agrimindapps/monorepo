@@ -37,6 +37,12 @@ abstract class SubscriptionRepository {
   /// Reactivate canceled subscription
   Future<Either<Failure, SubscriptionEntity>> reactivateSubscription();
 
+  /// Purchase subscription with payment method
+  Future<Either<Failure, SubscriptionEntity>> purchaseSubscription({
+    required SubscriptionTier tier,
+    required String paymentMethodId,
+  });
+
   /// Update auto-renewal setting
   Future<Either<Failure, void>> updateAutoRenewal(bool autoRenew);
 

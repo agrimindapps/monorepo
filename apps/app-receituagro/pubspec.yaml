@@ -15,8 +15,6 @@ dependencies:
   # Core Package - Serviços compartilhados
   core:
     path: ../../packages/core
-  
-  # State Management
 
   # Firebase packages necessários para imports diretos  
   firebase_remote_config: ^6.0.0

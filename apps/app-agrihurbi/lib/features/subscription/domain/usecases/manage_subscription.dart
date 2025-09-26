@@ -59,6 +59,17 @@ class ManageSubscription {
   ResultFuture<SubscriptionEntity> reactivateSubscription() async {
     return await _repository.reactivateSubscription();
   }
+
+  /// Purchase subscription with payment method
+  ResultFuture<SubscriptionEntity> purchaseSubscription({
+    required SubscriptionTier tier,
+    required String paymentMethodId,
+  }) async {
+    return await _repository.purchaseSubscription(
+      tier: tier,
+      paymentMethodId: paymentMethodId,
+    );
+  }
 }
 
 /// Check Feature Access Use Case

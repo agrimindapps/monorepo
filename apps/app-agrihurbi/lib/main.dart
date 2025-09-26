@@ -1,82 +1,65 @@
-import 'package:app_agrihurbi/core/constants/app_constants.dart';
-// Core
-import 'package:app_agrihurbi/core/di/injection_container.dart';
-import 'package:app_agrihurbi/core/router/app_router.dart';
-import 'package:app_agrihurbi/core/theme/app_theme.dart';
-// Core Utils
-import 'package:app_agrihurbi/core/utils/hive_initializer.dart';
-// Providers
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
-import 'package:app_agrihurbi/features/livestock/presentation/providers/livestock_provider.dart';
-// import 'package:app_agrihurbi/features/markets/presentation/providers/market_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
-void main() async {
+import 'app.dart';
+import 'core/di/injection_container.dart' as di;
+import 'firebase_options.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
-    // Initialize Hive with all adapters
-    await HiveInitializer.initialize();
-    
-    // Configure Dependencies
-    await configureAppDependencies();
-    
-    runApp(const AgriHurbiApp());
-  } catch (e, stackTrace) {
-    debugPrint('Erro na inicialização da aplicação: $e');
-    debugPrint('StackTrace: $stackTrace');
-    
-    // Em caso de erro, ainda tenta executar a app
-    runApp(const AgriHurbiApp());
-  }
-}
+    // Initialize Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-class AgriHurbiApp extends StatelessWidget {
-  const AgriHurbiApp({super.key});
+    // Configure Crashlytics for Flutter errors
+    if (!kIsWeb) {
+      FlutterError.onError = (errorDetails) {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      };
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // Auth Provider
-        ChangeNotifierProvider(create: (_) => getIt<AuthProvider>()),
-        
-        // Livestock Provider
-        ChangeNotifierProvider(create: (_) => getIt<LivestockProvider>()),
-        
-        // Calculator Provider
-        ChangeNotifierProvider(create: (_) => getIt<CalculatorProvider>()),
-        
-        // Market Provider - TODO: Re-enable when MarketProvider dependencies are fixed
-        // ChangeNotifierProvider(create: (_) => getIt<MarketProvider>()),
-      ],
-      child: MaterialApp.router(
-        title: AppConstants.appName,
-        debugShowCheckedModeBanner: false,
-        
-        // Theme
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        
-        // Navigation
-        routerConfig: AppRouter.router,
-        
-        // Localization (can be added later)
-        locale: const Locale('pt', 'BR'),
-        
-        // Builder for global widgets
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: const TextScaler.linear(1.0), // Disable font scaling
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
+
+    // Initialize dependency injection (includes Hive initialization)
+    await di.init();
+
+    runApp(const ProviderScope(child: AgriHurbiApp()));
+  } catch (error) {
+    // Handle initialization errors
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Erro de inicialização',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
             ),
-            child: child!,
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
+

@@ -132,6 +132,30 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }
 
   @override
+  Future<Either<Failure, SubscriptionEntity>> purchaseSubscription({
+    required SubscriptionTier tier,
+    required String paymentMethodId,
+  }) async {
+    try {
+      if (await _networkInfo.isConnected) {
+        final subscription = await _remoteDataSource.createSubscription({
+          'tier': tier.name,
+          'payment_method_id': paymentMethodId,
+          'billing_period': 'monthly',
+        });
+        await _localDataSource.cacheSubscription(subscription);
+        return Right(subscription.toEntity());
+      } else {
+        return const Left(ServerFailure(message: 'No internet connection'));
+      }
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(GeneralFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, bool>> hasFeatureAccess(PremiumFeature feature) async {
     try {
       final subscription = await _localDataSource.getCachedSubscription();

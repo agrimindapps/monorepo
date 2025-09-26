@@ -23,19 +23,12 @@ dependencies:
   injectable: ^2.5.0
   
   
-  # UI/Auth specific - to be migrated in subsequent phases  
-  google_sign_in: ^6.2.1     # Social auth integration
-  sign_in_with_apple: ^6.1.2
-  flutter_facebook_auth: ^6.0.4
-  
 dev_dependencies:
   flutter_test:
     sdk: flutter
     
   # Linting
-  flutter_lints: ^5.0.0
   injectable_generator: ^2.6.2
-
 
 flutter:
   uses-material-design: true

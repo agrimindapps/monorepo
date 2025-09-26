@@ -36,6 +36,7 @@ import 'core/services/remote_config_service.dart';
 import 'core/setup/receituagro_data_setup.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/inspector/receita_agro_data_inspector_initializer.dart';
+import 'core/navigation/app_router.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -342,6 +343,7 @@ class ReceitaAgroApp extends StatelessWidget {
             darkTheme: ReceitaAgroTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             home: const MainNavigationPage(),
+            onGenerateRoute: AppRouter.generateRoute,
             navigatorKey: NavigationService.navigatorKey,
             debugShowCheckedModeBanner: false,
           );

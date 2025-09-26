@@ -206,6 +206,11 @@ export 'package:cached_network_image/cached_network_image.dart';
 // Shimmer Loading Effects
 export 'package:shimmer/shimmer.dart';
 
+// Social Authentication
+export 'package:google_sign_in/google_sign_in.dart';
+export 'package:sign_in_with_apple/sign_in_with_apple.dart';
+export 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+
 // Services
 export 'services/license_service.dart';
 export 'services/image_compression_service.dart';

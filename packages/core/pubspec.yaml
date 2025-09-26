@@ -56,6 +56,11 @@ dependencies:
   local_auth: ^2.3.0
   flutter_secure_storage: ^9.2.4
   
+  # Social Authentication
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.2
+  flutter_facebook_auth: ^6.0.4
+  
   # File Management
   path: ^1.9.1
   mime: ^2.0.0
@@ -88,10 +93,12 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   shimmer: ^3.0.0
   
+  # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
+  flutter_lints: ^5.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
   
   # Code Generation
   build_runner: ^2.4.13

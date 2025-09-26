@@ -20,15 +20,11 @@ dependencies:
 
   # Dependency Injection
   injectable: ^2.5.0
-  
-  # Navigation
-  go_router: ^16.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0
   injectable_generator: ^2.6.2
 
 # The following section is specific to Flutter packages.

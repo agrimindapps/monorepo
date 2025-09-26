@@ -44,7 +44,13 @@ abstract class DeviceManagementModule {
 
   // Vehicle Device Provider
   @injectable
-  VehicleDeviceProvider provideVehicleDeviceProvider() => VehicleDeviceProvider();
+  VehicleDeviceProvider provideVehicleDeviceProvider(
+    DeviceManagementService coreDeviceService,
+    ConnectivityService connectivityService,
+  ) => VehicleDeviceProvider(
+        coreDeviceService: coreDeviceService,
+        connectivityService: connectivityService,
+      );
 }
 
 /// Função para inicializar as caixas Hive necessárias

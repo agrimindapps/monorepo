@@ -4,7 +4,6 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/error/error_handler.dart';
 import '../../../../core/error/error_reporter.dart';
@@ -58,7 +57,7 @@ class FuelProvider extends ChangeNotifier {
   final ErrorReporter _errorReporter;
 
   // Connectivity
-  late final core.ConnectivityService _connectivityService;
+  final core.ConnectivityService _connectivityService;
   StreamSubscription<bool>? _connectivitySubscription;
   bool _isOnline = true;
   final List<FuelRecordEntity> _offlinePendingRecords = [];
@@ -91,6 +90,7 @@ class FuelProvider extends ChangeNotifier {
     required GetRecentFuelRecords getRecentFuelRecords,
     required ErrorHandler errorHandler,
     required ErrorReporter errorReporter,
+    required core.ConnectivityService connectivityService,
   })  : _getAllFuelRecords = getAllFuelRecords,
         _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
         _addFuelRecord = addFuelRecord,
@@ -101,8 +101,8 @@ class FuelProvider extends ChangeNotifier {
         _getTotalSpent = getTotalSpent,
         _getRecentFuelRecords = getRecentFuelRecords,
         _errorHandler = errorHandler,
-        _errorReporter = errorReporter {
-    _connectivityService = sl<core.ConnectivityService>();
+        _errorReporter = errorReporter,
+        _connectivityService = connectivityService {
     _initializeConnectivity();
   }
 

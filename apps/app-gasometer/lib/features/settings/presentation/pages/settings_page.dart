@@ -4,9 +4,8 @@ import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 // ThemeProvider now imported from core package (line 2)
 import '../../../../core/theme/design_tokens.dart';
@@ -121,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            Consumer<ThemeProvider>(
+            provider.Consumer<ThemeProvider>(
               builder: (context, themeProvider, _) {
                 return Container(
                   decoration: BoxDecoration(
@@ -229,7 +228,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title: 'Notificações',
       icon: Icons.notifications,
       children: [
-        Consumer<SettingsProvider>(
+        provider.Consumer<SettingsProvider>(
           builder: (context, settingsProvider, _) {
             return SettingsItem(
               icon: Icons.notifications_active,
@@ -689,9 +688,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _handleRateApp(BuildContext context) async {
     try {
-      final appRatingService = di.sl<IAppRatingRepository>();
-      final success = await appRatingService.showRatingDialog(context: context);
-      
+      final settingsProvider = provider.Provider.of<SettingsProvider>(context, listen: false);
+      final success = await settingsProvider.handleAppRating(context);
+
       if (success && mounted) {
         _showSnackBar(context, 'Obrigado pelo feedback!');
       }

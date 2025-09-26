@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:core/core.dart' as core;
-import '../di/injection_container.dart';
 import 'firebase_storage_service.dart';
 
 /// Result of image processing operation
@@ -24,14 +23,13 @@ class ImageProcessingResult {
 class ReceiptImageService {
   final core.ImageCompressionService _compressionService;
   final FirebaseStorageService _storageService;
-  late final core.ConnectivityService _connectivityService;
+  final core.ConnectivityService _connectivityService;
 
   ReceiptImageService(
     this._compressionService,
     this._storageService,
-  ) {
-    _connectivityService = sl<core.ConnectivityService>();
-  }
+    this._connectivityService,
+  );
 
   /// Process and upload fuel receipt image
   Future<ImageProcessingResult> processFuelReceiptImage({

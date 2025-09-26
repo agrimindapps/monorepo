@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Provider otimizado para gerenciamento de dispositivos veiculares
 /// Usa DeviceManagementService do core package com extensões específicas de veículos
 class VehicleDeviceProvider extends ChangeNotifier {
-  late final core.DeviceManagementService _coreDeviceService;
-  late final core.ConnectivityService _connectivityService;
+  final core.DeviceManagementService? _coreDeviceService;
+  final core.ConnectivityService _connectivityService;
   StreamSubscription<bool>? _connectivitySubscription;
 
   // Estado
@@ -20,10 +19,11 @@ class VehicleDeviceProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isOnline = true;
 
-  VehicleDeviceProvider() {
-    // TODO: Initialize core services when they are properly configured
-    // _coreDeviceService = sl<core.DeviceManagementService>();
-    _connectivityService = sl<core.ConnectivityService>();
+  VehicleDeviceProvider({
+    core.DeviceManagementService? coreDeviceService,
+    required core.ConnectivityService connectivityService,
+  }) : _coreDeviceService = coreDeviceService,
+       _connectivityService = connectivityService {
     _initializeConnectivity();
   }
 

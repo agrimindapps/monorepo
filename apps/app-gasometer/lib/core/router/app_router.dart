@@ -1,199 +1,164 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-
-import '../constants/ui_constants.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/fuel/presentation/pages/fuel_page.dart';
+import '../../features/expenses/presentation/pages/add_expense_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
-import '../../features/maintenance/presentation/pages/maintenance_page.dart';
-import '../../features/odometer/presentation/pages/odometer_page.dart';
-import '../../features/premium/presentation/pages/premium_page.dart';
+import '../../features/fuel/presentation/pages/add_fuel_page.dart';
+import '../../features/fuel/presentation/pages/fuel_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
-import '../../features/promo/presentation/pages/account_deletion_page.dart';
-import '../../features/promo/presentation/pages/privacy_policy_page.dart';
-import '../../features/promo/presentation/pages/promo_page.dart';
-import '../../features/promo/presentation/pages/terms_conditions_page.dart';
-import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
-import '../../shared/widgets/main_navigation.dart';
-import '../services/platform_service.dart';
-import 'guards/route_guard.dart';
+import '../providers/auth_provider.dart';
 
-class AppRouter {
-  static GoRouter router(BuildContext context) {
-    // Safely get AuthProvider with null check during initialization
-    AuthProvider? authProvider;
-    try {
-      authProvider = Provider.of<AuthProvider>(context, listen: false);
-    } catch (e) {
-      // Provider not ready yet during initialization - will be set later
-      authProvider = null;
-    }
+final appRouterProvider = Provider<GoRouter>((ref) {
+  // Start with a simple initial route - we'll handle auth redirect logic in splash
+  final initialRoute = '/vehicles';
 
-    const platformService = PlatformService();
-    final routeGuard = RouteGuard(authProvider, platformService);
+  return GoRouter(
+    initialLocation: initialRoute,
+    debugLogDiagnostics: true,
+    redirect: (context, state) {
+      // Simple auth redirect logic for now
+      try {
+        final authState = ref.read(authProvider);
+        final isAuthenticated = authState.isAuthenticated;
+        final isOnAuthPage = state.matchedLocation.startsWith('/login');
 
-    return GoRouter(
-      initialLocation: '/', // Always start with home - let redirect handle the logic
-      redirect: (context, state) {
-        // Update authProvider on each redirect check
-        AuthProvider? currentAuthProvider;
-        try {
-          currentAuthProvider = Provider.of<AuthProvider>(context, listen: false);
-        } catch (e) {
-          currentAuthProvider = null;
+        // If not authenticated and not on auth page, redirect to login
+        if (!isAuthenticated && !isOnAuthPage) {
+          return '/login';
         }
-        
-        final updatedRouteGuard = RouteGuard(currentAuthProvider, platformService);
-        return updatedRouteGuard.handleRedirect(state.matchedLocation);
-      },
-      routes: [
-        // Promo Routes (Landing Page and Policies)
-        GoRoute(
-          path: '/promo',
-          name: 'promo',
-          builder: (context, state) => const PromoPage(),
-        ),
 
-        // Privacy Policy Route
-        GoRoute(
-          path: '/privacy',
-          name: 'privacy',
-          builder: (context, state) => const PrivacyPolicyPage(),
-        ),
+        // If authenticated and on auth page, redirect to vehicles
+        if (isAuthenticated && isOnAuthPage) {
+          return '/vehicles';
+        }
 
-        // Terms & Conditions Route
-        GoRoute(
-          path: '/terms',
-          name: 'terms',
-          builder: (context, state) => const TermsConditionsPage(),
-        ),
-
-        // Account Deletion Route
-        GoRoute(
-          path: '/account-deletion',
-          name: 'account_deletion',
-          builder: (context, state) => const AccountDeletionPage(),
-        ),
-
-
-        // Auth Routes
-        GoRoute(
-          path: '/login',
-          name: 'login',
-          builder: (context, state) => const LoginPage(),
-        ),
-
-        // Main Shell Route
-        ShellRoute(
-          builder: (context, state, child) => MainNavigation(child: child),
-          routes: [
-            // Home - Vehicles
-            GoRoute(
-              path: '/',
-              name: 'home',
-              builder: (context, state) => const VehiclesPage(),
-            ),
-
-            // Odometer
-            GoRoute(
-              path: '/odometer',
-              name: 'odometer',
-              builder: (context, state) => const OdometerPage(),
-            ),
-
-            // Fuel
-            GoRoute(
-              path: '/fuel',
-              name: 'fuel',
-              builder: (context, state) => const FuelPage(),
-            ),
-
-            // Expenses
-            GoRoute(
-              path: '/expenses',
-              name: 'expenses',
-              builder: (context, state) => const ExpensesPage(),
-            ),
-
-            // Maintenance
-            GoRoute(
-              path: '/maintenance',
-              name: 'maintenance',
-              builder: (context, state) => const MaintenancePage(),
-            ),
-
-            // Reports
-            GoRoute(
-              path: '/reports',
-              name: 'reports',
-              builder: (context, state) => const ReportsPage(),
-            ),
-
-            // Settings
-            GoRoute(
-              path: '/settings',
-              name: 'settings',
-              builder: (context, state) => const SettingsPage(),
-            ),
-
-            // Device Management
-            GoRoute(
-              path: '/devices',
-              name: 'devices',
-              builder: (context, state) => const DeviceManagementPage(),
-            ),
-
-            // Profile
-            GoRoute(
-              path: '/profile',
-              name: 'profile',
-              builder: (context, state) => const ProfilePage(),
-            ),
-
-            // Premium
-            GoRoute(
-              path: '/premium',
-              name: 'premium',
-              builder: (context, state) => const PremiumPage(),
-            ),
-          ],
-        ),
-      ],
-      errorBuilder: (context, state) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: AppSizes.iconXXL,
-                color: Colors.red,
+        return null; // No redirect needed
+      } catch (e) {
+        // If authProvider not ready, allow current navigation
+        return null;
+      }
+    },
+    routes: [
+      // Main app routes
+      GoRoute(
+        path: '/vehicles',
+        name: 'vehicles',
+        builder: (context, state) => const VehiclesPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-vehicle',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Vehicle Page - Coming Soon'),
               ),
-              const SizedBox(height: AppSpacing.large),
-              Text(
-                'Página não encontrada',
-                style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/fuel',
+        name: 'fuel',
+        builder: (context, state) => const FuelPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-fuel',
+            builder: (context, state) => const AddFuelPage(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/maintenance',
+        name: 'maintenance',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Maintenance Page - Coming Soon'),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-maintenance',
+            builder: (context, state) => const Scaffold(
+              body: Center(
+                child: Text('Add Maintenance Page - Coming Soon'),
               ),
-              const SizedBox(height: AppSpacing.small),
-              Text(
-                'A página "${state.matchedLocation}" não existe.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: AppSpacing.xxlarge),
-              ElevatedButton(
-                onPressed: () => context.go('/'),
-                child: const Text('Voltar ao Início'),
-              ),
-            ],
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/expenses',
+        name: 'expenses',
+        builder: (context, state) => const ExpensesPage(),
+        routes: [
+          GoRoute(
+            path: '/add',
+            name: 'add-expense',
+            builder: (context, state) => const AddExpensePage(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/reports',
+        name: 'reports',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Reports Page - Coming Soon'),
           ),
         ),
       ),
-    );
-  }
-}
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+
+      // Auth routes (outside main navigation)
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
+      ),
+    ],
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Página não encontrada',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.error.toString(),
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go('/vehicles'),
+              child: const Text('Voltar ao Início'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+});

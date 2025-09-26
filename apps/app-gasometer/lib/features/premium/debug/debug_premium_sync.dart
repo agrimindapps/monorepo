@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../../core/di/injection_container.dart';
 import '../data/services/premium_sync_service.dart';
 import '../test/premium_sync_test.dart';
 
@@ -14,7 +14,7 @@ class DebugPremiumSync {
   static Future<void> init() async {
     if (kDebugMode) {
       try {
-        _syncService = sl<PremiumSyncService>();
+        _syncService = GetIt.instance<PremiumSyncService>();
         debugPrint('🔧 Debug Premium Sync inicializado');
       } catch (e) {
         debugPrint('❌ Erro ao inicializar Debug Premium Sync: $e');

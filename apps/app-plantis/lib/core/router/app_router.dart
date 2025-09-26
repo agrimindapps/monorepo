@@ -199,10 +199,7 @@ class AppRouter {
               path: plants,
               name: 'plants',
               builder:
-                  (context, state) => PlantsListPage(
-                    plantsProvider: sl<PlantsProvider>(),
-                    plantFormProviderFactory: () => sl<PlantFormProvider>(),
-                  ),
+                  (context, state) => const PlantsListPage(),
               routes: [
                 GoRoute(
                   path: 'add',

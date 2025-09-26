@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
@@ -97,6 +98,9 @@ void main() async {
   final appRatingService = di.sl<core.IAppRatingRepository>();
   await appRatingService.incrementUsageCount();
 
+  // Create ProviderContainer with RiverpodLogger
+  final providerContainer = ProviderContainer();
+
   // Run app
   if (core.EnvironmentConfig.enableAnalytics) {
     // Run app in guarded zone for Crashlytics only in production/staging
@@ -104,7 +108,12 @@ void main() async {
       runZonedGuarded<Future<void>>(
         () async {
           await performanceService.markFirstFrame();
-          runApp(const PlantisApp());
+          runApp(
+            UncontrolledProviderScope(
+              container: providerContainer,
+              child: const PlantisApp(),
+            ),
+          );
         },
         (error, stack) {
           FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -114,6 +123,11 @@ void main() async {
   } else {
     // Run app normally in development
     await performanceService.markFirstFrame();
-    runApp(const PlantisApp());
+    runApp(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: const PlantisApp(),
+      ),
+    );
   }
 }

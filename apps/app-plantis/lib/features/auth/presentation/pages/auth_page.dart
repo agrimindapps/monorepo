@@ -5,16 +5,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart' hide Consumer;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
-import '../providers/auth_provider.dart' as local;
+import '../../../../core/riverpod_providers/auth_providers.dart';
 import '../widgets/forgot_password_dialog.dart';
 import '../widgets/device_validation_overlay.dart';
 
@@ -45,7 +46,7 @@ class AuthLoadingState {
 
 /// Modern unified auth page combining login and register functionality
 /// with enhanced UX inspired by gasometer design and adapted for Inside Garden
-class AuthPage extends StatefulWidget {
+class AuthPage extends ConsumerStatefulWidget {
   final int initialTab; // 0 = login, 1 = register
   final bool? showBackButton;
 
@@ -56,10 +57,10 @@ class AuthPage extends StatefulWidget {
   });
 
   @override
-  State<AuthPage> createState() => _AuthPageState();
+  ConsumerState<AuthPage> createState() => _AuthPageState();
 }
 
-class _AuthPageState extends State<AuthPage> 
+class _AuthPageState extends ConsumerState<AuthPage>
     with TickerProviderStateMixin, LoadingStateMixin, AccessibilityFocusMixin {
   late TabController _tabController;
   
@@ -216,23 +217,33 @@ class _AuthPageState extends State<AuthPage>
     if (_loginFormKey.currentState!.validate()) {
       showLoading(message: 'Fazendo login...');
 
-      final authProvider = context.read<local.AuthProvider>();
       final router = GoRouter.of(context);
 
       // Salvar email se "Lembrar-me" estiver marcado
       await _saveRememberedCredentials();
 
-      // Usar novo método não-bloqueante
-      await authProvider.loginAndNavigate(_loginEmailController.text, _loginPasswordController.text);
+      // Usar Riverpod AuthNotifier
+      final authNotifier = ref.read(authProvider.notifier);
 
-      if (!mounted) return;
+      try {
+        await authNotifier.login(
+          _loginEmailController.text,
+          _loginPasswordController.text,
+        );
 
-      hideLoading();
+        if (!mounted) return;
 
-      // Navegar imediatamente após login bem-sucedido
-      // Sync roda em background sem bloquear navegação
-      if (authProvider.isAuthenticated) {
-        router.go('/plants');
+        hideLoading();
+
+        // Verificar se login foi bem-sucedido
+        final authState = ref.read(authProvider);
+        if (authState.hasValue && authState.value!.isAuthenticated) {
+          router.go('/plants');
+        }
+      } catch (e) {
+        if (mounted) {
+          hideLoading();
+        }
       }
     }
   }
@@ -241,21 +252,30 @@ class _AuthPageState extends State<AuthPage>
   Future<void> _handleRegister() async {
     if (_registerFormKey.currentState!.validate()) {
       showLoading(message: 'Criando conta...');
-      
-      final authProvider = context.read<local.AuthProvider>();
-      final router = GoRouter.of(context);
-      await authProvider.register(
-        _registerEmailController.text,
-        _registerPasswordController.text,
-        _registerNameController.text,
-      );
 
-      if (!mounted) return;
-      
-      hideLoading();
-      
-      if (authProvider.isAuthenticated) {
-        router.go('/plants');
+      final router = GoRouter.of(context);
+      final authNotifier = ref.read(authProvider.notifier);
+
+      try {
+        await authNotifier.register(
+          _registerEmailController.text,
+          _registerPasswordController.text,
+          _registerNameController.text,
+        );
+
+        if (!mounted) return;
+
+        hideLoading();
+
+        // Verificar se registro foi bem-sucedido
+        final authState = ref.read(authProvider);
+        if (authState.hasValue && authState.value!.isAuthenticated) {
+          router.go('/plants');
+        }
+      } catch (e) {
+        if (mounted) {
+          hideLoading();
+        }
       }
     }
   }
@@ -325,17 +345,26 @@ class _AuthPageState extends State<AuthPage>
             onPressed: () async {
               Navigator.of(context).pop();
               showLoading(message: 'Entrando anonimamente...');
-              
-              final authProvider = context.read<local.AuthProvider>();
+
               final router = GoRouter.of(context);
-              await authProvider.signInAnonymously();
-              
-              if (!mounted) return;
-              
-              hideLoading();
-              
-              if (authProvider.isAuthenticated) {
-                router.go('/plants');
+              final authNotifier = ref.read(authProvider.notifier);
+
+              try {
+                await authNotifier.signInAnonymously();
+
+                if (!mounted) return;
+
+                hideLoading();
+
+                // Verificar se login anônimo foi bem-sucedido
+                final authState = ref.read(authProvider);
+                if (authState.hasValue && authState.value!.isAuthenticated) {
+                  router.go('/plants');
+                }
+              } catch (e) {
+                if (mounted) {
+                  hideLoading();
+                }
               }
             },
             child: const Text('Prosseguir'),
@@ -1023,87 +1052,103 @@ class _AuthPageState extends State<AuthPage>
   }
   
   Widget _buildErrorMessage() {
-    return Consumer<local.AuthProvider>(
-      builder: (context, authProvider, _) {
-        if (authProvider.errorMessage != null) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: Colors.red.shade50,
-              border: Border.all(color: Colors.red.shade200),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.error_outline_rounded,
-                  color: Colors.red.shade600,
-                  size: 20,
+    return riverpod.Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+
+        return authState.when(
+          data: (state) {
+            if (state.errorMessage != null) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  border: Border.all(color: Colors.red.shade200),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    authProvider.errorMessage!,
-                    style: TextStyle(
-                      color: Colors.red.shade700,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.red.shade600,
+                      size: 20,
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        state.errorMessage!,
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
-        return const SizedBox.shrink();
+              );
+            }
+            return const SizedBox.shrink();
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (error, _) => const SizedBox.shrink(),
+        );
       },
     );
   }
   
   Widget _buildAccessibleLoginButton() {
-    return Consumer<local.AuthProvider>(
-      builder: (context, authProvider, _) {
-        final isAnonymousLoading = authProvider.currentOperation == AuthOperation.anonymous;
-        return AccessibleButton(
-          focusNode: _loginButtonFocusNode,
-          onPressed: (authProvider.isLoading || isAnonymousLoading)
-              ? null
-              : _handleLogin,
-          semanticLabel: AccessibilityTokens.getSemanticLabel('login_button', 'Fazer login'),
-          tooltip: 'Entrar com suas credenciais',
-          backgroundColor: (authProvider.isLoading || isAnonymousLoading)
-              ? Colors.grey.shade400
-              : PlantisColors.primary,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(
-            double.infinity, 
-            AccessibilityTokens.largeTouchTargetSize,
-          ),
-          hapticPattern: 'medium',
-          child: authProvider.isLoading
-              ? Semantics(
-                  label: AccessibilityTokens.getSemanticLabel('loading', 'Fazendo login'),
-                  liveRegion: true,
-                  child: const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+    return riverpod.Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+
+        return authState.when(
+          data: (state) {
+            final isAnonymousLoading = state.currentOperation == AuthOperation.anonymous;
+            return AccessibleButton(
+              focusNode: _loginButtonFocusNode,
+              onPressed: (state.isLoading || isAnonymousLoading)
+                  ? null
+                  : _handleLogin,
+              semanticLabel: AccessibilityTokens.getSemanticLabel('login_button', 'Fazer login'),
+              tooltip: 'Entrar com suas credenciais',
+              backgroundColor: (state.isLoading || isAnonymousLoading)
+                  ? Colors.grey.shade400
+                  : PlantisColors.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(
+                double.infinity,
+                AccessibilityTokens.largeTouchTargetSize,
+              ),
+              hapticPattern: 'medium',
+              child: state.isLoading
+                  ? Semantics(
+                      label: AccessibilityTokens.getSemanticLabel('loading', 'Fazendo login'),
+                      liveRegion: true,
+                      child: const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'Entrar',
+                      style: TextStyle(
+                        fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                )
-              : Text(
-                  'Entrar',
-                  style: TextStyle(
-                    fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+            );
+          },
+          loading: () => const CircularProgressIndicator(),
+          error: (error, _) => const SizedBox.shrink(),
         );
       },
     );
@@ -1181,59 +1226,67 @@ class _AuthPageState extends State<AuthPage>
   }
   
   Widget _buildAnonymousLoginSection() {
-    return Consumer<local.AuthProvider>(
-      builder: (context, authProvider, _) {
-        return Container(
-          height: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Colors.grey.shade300,
-              width: 1,
-            ),
-          ),
-          child: OutlinedButton(
-            onPressed: authProvider.isLoading
-                ? null
-                : _showAnonymousLoginDialog,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: PlantisColors.primary,
-              side: BorderSide.none,
-              shape: RoundedRectangleBorder(
+    return riverpod.Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+
+        return authState.when(
+          data: (state) {
+            return Container(
+              height: 48,
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 1,
+                ),
               ),
-            ),
-            child: authProvider.isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        PlantisColors.primary,
-                      ),
-                    ),
-                  )
-                : const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.person_outline_rounded,
-                        size: 18,
-                        color: PlantisColors.primary,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Continuar sem conta',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: PlantisColors.primary,
-                        ),
-                      ),
-                    ],
+              child: OutlinedButton(
+                onPressed: state.isLoading
+                    ? null
+                    : _showAnonymousLoginDialog,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: PlantisColors.primary,
+                  side: BorderSide.none,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-          ),
+                ),
+                child: state.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            PlantisColors.primary,
+                          ),
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 18,
+                            color: PlantisColors.primary,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Continuar sem conta',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: PlantisColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            );
+          },
+          loading: () => const CircularProgressIndicator(),
+          error: (error, _) => const SizedBox.shrink(),
         );
       },
     );
@@ -1468,46 +1521,54 @@ class _AuthPageState extends State<AuthPage>
   }
 
   Widget _buildAccessibleRegisterButton() {
-    return Consumer<local.AuthProvider>(
-      builder: (context, authProvider, _) {
-        return AccessibleButton(
-          focusNode: _registerButtonFocusNode,
-          onPressed: authProvider.isLoading
-              ? null
-              : _handleRegister,
-          semanticLabel: AccessibilityTokens.getSemanticLabel('register_button', 'Criar conta'),
-          tooltip: 'Criar nova conta',
-          backgroundColor: authProvider.isLoading
-              ? Colors.grey.shade400
-              : PlantisColors.primary,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(
-            double.infinity, 
-            AccessibilityTokens.largeTouchTargetSize,
-          ),
-          hapticPattern: 'medium',
-          child: authProvider.isLoading
-              ? Semantics(
-                  label: AccessibilityTokens.getSemanticLabel('loading', 'Criando conta'),
-                  liveRegion: true,
-                  child: const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+    return riverpod.Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+
+        return authState.when(
+          data: (state) {
+            return AccessibleButton(
+              focusNode: _registerButtonFocusNode,
+              onPressed: state.isLoading
+                  ? null
+                  : _handleRegister,
+              semanticLabel: AccessibilityTokens.getSemanticLabel('register_button', 'Criar conta'),
+              tooltip: 'Criar nova conta',
+              backgroundColor: state.isLoading
+                  ? Colors.grey.shade400
+                  : PlantisColors.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(
+                double.infinity,
+                AccessibilityTokens.largeTouchTargetSize,
+              ),
+              hapticPattern: 'medium',
+              child: state.isLoading
+                  ? Semantics(
+                      label: AccessibilityTokens.getSemanticLabel('loading', 'Criando conta'),
+                      liveRegion: true,
+                      child: const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'Criar Conta',
+                      style: TextStyle(
+                        fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                )
-              : Text(
-                  'Criar Conta',
-                  style: TextStyle(
-                    fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+            );
+          },
+          loading: () => const CircularProgressIndicator(),
+          error: (error, _) => const SizedBox.shrink(),
         );
       },
     );

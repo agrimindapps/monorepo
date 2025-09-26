@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart' hide Consumer, ChangeNotifierProvider;
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
 import '../providers/register_provider.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
 
   void _showSocialLoginDialog(BuildContext context) {
@@ -40,8 +41,8 @@ class RegisterPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return provider.ChangeNotifierProvider(
       create: (_) => di.sl<RegisterProvider>()..goToStep(0),
       child: Scaffold(
       backgroundColor: PlantisColors.primary,
@@ -141,7 +142,7 @@ class RegisterPage extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   // Progress indicator
-                  Consumer<RegisterProvider>(
+                  provider.Consumer<RegisterProvider>(
                     builder: (context, registerProvider, _) {
                       final steps = registerProvider.progressSteps;
                       return Row(
@@ -220,7 +221,7 @@ class RegisterPage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Continue button
-                  Consumer<RegisterProvider>(
+                  provider.Consumer<RegisterProvider>(
                     builder: (context, registerProvider, _) {
                       return SizedBox(
                         width: double.infinity,

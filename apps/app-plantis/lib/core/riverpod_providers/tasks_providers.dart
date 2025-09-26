@@ -1,0 +1,1132 @@
+import 'dart:async';
+import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../auth/auth_state_notifier.dart';
+import '../localization/app_strings.dart';
+import '../services/offline_sync_queue_service.dart' as offline_queue;
+import '../services/sync_coordinator_service.dart' hide SyncPriority;
+import '../services/task_notification_service.dart' hide NotificationPermissionStatus;
+import '../services/task_notification_service.dart' as notification_service;
+import '../../features/tasks/core/constants/tasks_constants.dart';
+import '../../features/tasks/domain/entities/task.dart' as task_entity;
+import '../../features/tasks/domain/usecases/add_task_usecase.dart';
+import '../../features/tasks/domain/usecases/complete_task_usecase.dart';
+import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
+import '../../features/tasks/presentation/providers/tasks_state.dart';
+
+part 'tasks_providers.g.dart';
+
+/// Tasks Notifier that handles all task operations with immutable state
+class TasksNotifier extends AsyncNotifier<TasksState> {
+  late final GetTasksUseCase _getTasksUseCase;
+  late final AddTaskUseCase _addTaskUseCase;
+  late final CompleteTaskUseCase _completeTaskUseCase;
+  late final TaskNotificationService _notificationService;
+  late final AuthStateNotifier _authStateNotifier;
+  late final SyncCoordinatorService _syncCoordinator;
+  late final offline_queue.OfflineSyncQueueService _offlineQueue;
+
+  // Stream subscription for auth state changes
+  // ignore: cancel_subscriptions
+  StreamSubscription<UserEntity?>? _authSubscription;
+
+  @override
+  Future<TasksState> build() async {
+    // Initialize dependencies (assuming they are registered in DI)
+    _getTasksUseCase = ref.read(getTasksUseCaseProvider);
+    _addTaskUseCase = ref.read(addTaskUseCaseProvider);
+    _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
+    _notificationService = ref.read(taskNotificationServiceProvider);
+    _authStateNotifier = AuthStateNotifier.instance;
+    _syncCoordinator = SyncCoordinatorService.instance;
+    _offlineQueue = offline_queue.OfflineSyncQueueService.instance;
+
+    // Initialize notification service
+    await _initializeNotificationService();
+
+    // Initialize auth listener
+    _initializeAuthListener();
+
+    // Start with initial state
+    return TasksState.initial();
+  }
+
+  /// Initializes the authentication state listener
+  void _initializeAuthListener() {
+    _authSubscription = _authStateNotifier.userStream.listen((user) {
+      debugPrint('🔐 TasksProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      // Only load tasks if auth is fully initialized AND stable
+      if (_authStateNotifier.isInitialized && user != null) {
+        debugPrint('✅ TasksProvider: Auth is stable, loading tasks...');
+        loadTasks();
+      } else if (_authStateNotifier.isInitialized && user == null) {
+        debugPrint('🔄 TasksProvider: No user but auth initialized - clearing tasks');
+        // Clear tasks when user logs out
+        state = AsyncData(TasksState.initial());
+      }
+    });
+  }
+
+  /// Validates task ownership against the currently authenticated user
+  bool _validateTaskOwnership(task_entity.Task task) {
+    final currentUser = _authStateNotifier.currentUser;
+
+    // If no user is authenticated, deny access
+    if (currentUser == null) {
+      debugPrint('🚫 Access denied: No authenticated user');
+      return false;
+    }
+
+    // SECURITY FIX: Deny access for tasks with null userId
+    if (task.userId == null) {
+      debugPrint('🚫 Access denied: Task has null userId (potential security risk)');
+      return false;
+    }
+
+    // SECURITY: Only allow access if task explicitly belongs to current user
+    if (task.userId == currentUser.id) {
+      return true;
+    }
+
+    // If task belongs to different user, deny access
+    debugPrint('🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}');
+    return false;
+  }
+
+  /// Retrieves a task by ID and validates user ownership
+  task_entity.Task _getTaskWithOwnershipValidation(String taskId) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    final task = currentState.allTasks.firstWhere(
+      (t) => t.id == taskId,
+      orElse: () => throw Exception('Task not found: $taskId'),
+    );
+
+    if (!_validateTaskOwnership(task)) {
+      throw const UnauthorizedAccessException('You are not authorized to modify this task');
+    }
+
+    return task;
+  }
+
+  /// Wait for authentication initialization with timeout
+  Future<bool> _waitForAuthenticationWithTimeout({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    if (_authStateNotifier.isInitialized) {
+      return true;
+    }
+
+    debugPrint('⏳ TasksProvider: Waiting for auth initialization...');
+
+    try {
+      await _authStateNotifier.initializedStream
+          .where((isInitialized) => isInitialized)
+          .timeout(timeout)
+          .first;
+
+      debugPrint('✅ TasksProvider: Auth initialization complete');
+      return true;
+    } on TimeoutException {
+      debugPrint('⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      return false;
+    } catch (e) {
+      debugPrint('❌ TasksProvider: Auth initialization error: $e');
+      return false;
+    }
+  }
+
+  /// Loads tasks from the remote data source with sync coordination
+  Future<void> loadTasks() async {
+    debugPrint('🔄 TasksProvider: Starting load tasks...');
+
+    try {
+      await _syncCoordinator.executeSyncOperation(
+        operationType: TaskSyncOperations.loadTasks.name,
+        priority: SyncPriority.high.index,
+        minimumInterval: TasksConstants.syncMinimumInterval,
+        operation: () => _loadTasksOperation(),
+      );
+    } on SyncThrottledException catch (e) {
+      debugPrint('⚠️ Load tasks throttled: ${e.message}');
+      // Don't show error to user for throttling
+    } catch (e) {
+      debugPrint('❌ TasksProvider: Load tasks failed: $e');
+      final currentState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(currentState.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao sincronizar tarefas: $e',
+      ));
+    }
+  }
+
+  Future<void> _loadTasksOperation() async {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    // Only show loading if we don't have tasks yet
+    final shouldShowLoading = currentState.allTasks.isEmpty;
+
+    if (shouldShowLoading) {
+      state = AsyncData(currentState.copyWith(
+        isLoading: true,
+        clearError: true,
+        activeOperations: currentState.activeOperations..add(TaskLoadingOperation.loadingTasks),
+        currentOperationMessage: AppStrings.loadingTasks,
+      ));
+    } else {
+      state = AsyncData(currentState.copyWith(
+        clearError: true,
+        activeOperations: currentState.activeOperations..add(TaskLoadingOperation.syncing),
+        currentOperationMessage: AppStrings.synchronizing,
+      ));
+    }
+
+    try {
+      debugPrint('🔄 TasksProvider: Calling _getTasksUseCase...');
+      final result = await _getTasksUseCase(const NoParams());
+      debugPrint('✅ TasksProvider: _getTasksUseCase completed successfully');
+
+      result.fold(
+        (failure) {
+          final newState = state.valueOrNull ?? TasksState.initial();
+          state = AsyncData(newState.copyWith(
+            isLoading: false,
+            errorMessage: _mapFailureToMessage(failure),
+            activeOperations: newState.activeOperations
+              ..remove(TaskLoadingOperation.loadingTasks)
+              ..remove(TaskLoadingOperation.syncing),
+            clearOperationMessage: true,
+          ));
+          throw Exception(_mapFailureToMessage(failure));
+        },
+        (tasks) {
+          final newState = state.valueOrNull ?? TasksState.initial();
+          final filteredTasks = _applyFiltersToTasks(
+            tasks,
+            newState.currentFilter,
+            newState.searchQuery,
+            newState.selectedPlantId,
+            newState.selectedTaskTypes,
+            newState.selectedPriorities,
+          );
+
+          state = AsyncData(newState.copyWith(
+            allTasks: tasks,
+            filteredTasks: filteredTasks,
+            isLoading: false,
+            clearError: true,
+            activeOperations: newState.activeOperations
+              ..remove(TaskLoadingOperation.loadingTasks)
+              ..remove(TaskLoadingOperation.syncing),
+            clearOperationMessage: true,
+          ));
+
+          // Check overdue tasks and send notifications
+          _notificationService.checkOverdueTasks(tasks);
+          // Reschedule all notifications
+          _notificationService.rescheduleTaskNotifications(tasks);
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ TasksProvider: Load tasks operation failed: $e');
+      final newState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(newState.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao carregar tarefas: $e',
+        activeOperations: newState.activeOperations
+          ..remove(TaskLoadingOperation.loadingTasks)
+          ..remove(TaskLoadingOperation.syncing),
+        clearOperationMessage: true,
+      ));
+      rethrow;
+    }
+  }
+
+  /// Adds a new task with offline support and user validation
+  Future<bool> addTask(task_entity.Task task) async {
+    try {
+      return await _syncCoordinator.executeSyncOperation<bool>(
+        operationType: TaskSyncOperations.addTask.name,
+        priority: SyncPriority.critical.index,
+        operation: () => _addTaskOperation(task),
+      );
+    } catch (e) {
+      final currentState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(currentState.copyWith(
+        errorMessage: AppStrings.errorSyncingNewTask,
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> _addTaskOperation(task_entity.Task task) async {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    state = AsyncData(currentState.copyWith(
+      clearError: true,
+      activeOperations: currentState.activeOperations..add(TaskLoadingOperation.addingTask),
+      currentOperationMessage: AppStrings.addingTask,
+    ));
+
+    try {
+      // Ensure task is associated with current user
+      final currentUser = _authStateNotifier.currentUser;
+      if (currentUser == null) {
+        final newState = state.valueOrNull ?? TasksState.initial();
+        state = AsyncData(newState.copyWith(
+          errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
+          activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+          clearOperationMessage: true,
+        ));
+        return false;
+      }
+
+      // Assign current user to the task
+      final taskWithUser = task.withUserId(currentUser.id);
+
+      final result = await _addTaskUseCase(AddTaskParams(task: taskWithUser));
+
+      return result.fold(
+        (failure) {
+          // If it's a network failure, queue for offline sync
+          if (_isNetworkFailure(failure)) {
+            debugPrint('🌐 Network failure detected, queuing task for offline sync');
+
+            // Create optimistic local task
+            final optimisticTask = taskWithUser.copyWith(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              isDirty: true,
+            );
+
+            // Add to local state immediately
+            final newState = state.valueOrNull ?? TasksState.initial();
+            final updatedTasks = [...newState.allTasks, optimisticTask];
+            final filteredTasks = _applyFiltersToTasks(
+              updatedTasks,
+              newState.currentFilter,
+              newState.searchQuery,
+              newState.selectedPlantId,
+              newState.selectedTaskTypes,
+              newState.selectedPriorities,
+            );
+
+            state = AsyncData(newState.copyWith(
+              allTasks: updatedTasks,
+              filteredTasks: filteredTasks,
+              clearError: true,
+              activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+              clearOperationMessage: true,
+            ));
+
+            // Queue for offline sync
+            final queuedOperation = offline_queue.QueuedOperation(
+              id: optimisticTask.id,
+              type: OfflineTaskOperations.addTask.name,
+              data: optimisticTask.toFirebaseMap(),
+              createdAt: DateTime.now(),
+              maxRetries: 3,
+              retryCount: 0,
+            );
+
+            _offlineQueue.queueOperation(queuedOperation);
+
+            return true; // Return success for optimistic update
+          } else {
+            final newState = state.valueOrNull ?? TasksState.initial();
+            state = AsyncData(newState.copyWith(
+              errorMessage: _mapFailureToMessage(failure),
+              activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+              clearOperationMessage: true,
+            ));
+            throw Exception(_mapFailureToMessage(failure));
+          }
+        },
+        (addedTask) {
+          final newState = state.valueOrNull ?? TasksState.initial();
+          final updatedTasks = [...newState.allTasks, addedTask];
+          final filteredTasks = _applyFiltersToTasks(
+            updatedTasks,
+            newState.currentFilter,
+            newState.searchQuery,
+            newState.selectedPlantId,
+            newState.selectedTaskTypes,
+            newState.selectedPriorities,
+          );
+
+          state = AsyncData(newState.copyWith(
+            allTasks: updatedTasks,
+            filteredTasks: filteredTasks,
+            clearError: true,
+            activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+            clearOperationMessage: true,
+          ));
+
+          // Schedule notification for the new task
+          _notificationService.scheduleTaskNotification(addedTask);
+          return true;
+        },
+      );
+    } catch (e) {
+      final newState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(newState.copyWith(
+        errorMessage: AppStrings.unexpectedErrorAddingTask,
+        activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+        clearOperationMessage: true,
+      ));
+      rethrow;
+    }
+  }
+
+  /// Completes a task with offline support and ownership validation
+  Future<bool> completeTask(String taskId, {String? notes}) async {
+    try {
+      return await _syncCoordinator.executeSyncOperation<bool>(
+        operationType: TaskSyncOperations.completeTask.name,
+        priority: SyncPriority.critical.index,
+        operation: () => _completeTaskOperation(taskId, notes),
+      );
+    } catch (e) {
+      final currentState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(currentState.copyWith(
+        errorMessage: AppStrings.errorSyncingTaskCompletion,
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> _completeTaskOperation(String taskId, String? notes) async {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    final updatedOperations = Map<String, bool>.from(currentState.individualTaskOperations);
+    updatedOperations[taskId] = true;
+
+    state = AsyncData(currentState.copyWith(
+      clearError: true,
+      individualTaskOperations: updatedOperations,
+      currentOperationMessage: AppStrings.completingTask,
+    ));
+
+    try {
+      // Validate ownership before completing task
+      final task = _getTaskWithOwnershipValidation(taskId);
+
+      final result = await _completeTaskUseCase(
+        CompleteTaskParams(taskId: taskId, notes: notes),
+      );
+
+      return result.fold(
+        (failure) {
+          // If it's a network failure, queue for offline sync
+          if (_isNetworkFailure(failure)) {
+            debugPrint('🌐 Network failure detected, queuing task completion for offline sync');
+
+            // Create optimistic local completion
+            final completedTask = task.copyWithTaskData(
+              status: task_entity.TaskStatus.completed,
+              completedAt: DateTime.now(),
+              completionNotes: notes,
+            );
+
+            // Update local state immediately
+            final newState = state.valueOrNull ?? TasksState.initial();
+            final updatedTasks = newState.allTasks.map((t) {
+              return t.id == taskId ? completedTask : t;
+            }).toList();
+
+            final filteredTasks = _applyFiltersToTasks(
+              updatedTasks,
+              newState.currentFilter,
+              newState.searchQuery,
+              newState.selectedPlantId,
+              newState.selectedTaskTypes,
+              newState.selectedPriorities,
+            );
+
+            final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+            newOperations.remove(taskId);
+
+            state = AsyncData(newState.copyWith(
+              allTasks: updatedTasks,
+              filteredTasks: filteredTasks,
+              clearError: true,
+              individualTaskOperations: newOperations,
+              clearOperationMessage: true,
+            ));
+
+            // Queue for offline sync
+            final queuedOperation = offline_queue.QueuedOperation(
+              id: taskId,
+              type: OfflineTaskOperations.completeTask.name,
+              data: {
+                'taskId': taskId,
+                'notes': notes,
+                'completedAt': DateTime.now().toIso8601String(),
+              },
+              createdAt: DateTime.now(),
+              maxRetries: 3,
+              retryCount: 0,
+            );
+
+            _offlineQueue.queueOperation(queuedOperation);
+
+            // Cancel notifications optimistically
+            _notificationService.cancelTaskNotifications(taskId);
+            _notificationService.rescheduleTaskNotifications(updatedTasks);
+
+            return true; // Return success for optimistic update
+          } else {
+            final newState = state.valueOrNull ?? TasksState.initial();
+            final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+            newOperations.remove(taskId);
+
+            state = AsyncData(newState.copyWith(
+              errorMessage: _mapFailureToMessage(failure),
+              individualTaskOperations: newOperations,
+              clearOperationMessage: true,
+            ));
+            throw Exception(_mapFailureToMessage(failure));
+          }
+        },
+        (completedTask) {
+          final newState = state.valueOrNull ?? TasksState.initial();
+          final updatedTasks = newState.allTasks.map((t) {
+            return t.id == taskId ? completedTask : t;
+          }).toList();
+
+          final filteredTasks = _applyFiltersToTasks(
+            updatedTasks,
+            newState.currentFilter,
+            newState.searchQuery,
+            newState.selectedPlantId,
+            newState.selectedTaskTypes,
+            newState.selectedPriorities,
+          );
+
+          final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+          newOperations.remove(taskId);
+
+          state = AsyncData(newState.copyWith(
+            allTasks: updatedTasks,
+            filteredTasks: filteredTasks,
+            clearError: true,
+            individualTaskOperations: newOperations,
+            clearOperationMessage: true,
+          ));
+
+          // Cancel notifications for the completed task
+          _notificationService.cancelTaskNotifications(taskId);
+          // Reschedule notifications for remaining tasks
+          _notificationService.rescheduleTaskNotifications(updatedTasks);
+
+          return true;
+        },
+      );
+    } on UnauthorizedAccessException catch (e) {
+      final newState = state.valueOrNull ?? TasksState.initial();
+      final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+      newOperations.remove(taskId);
+
+      state = AsyncData(newState.copyWith(
+        errorMessage: e.message,
+        individualTaskOperations: newOperations,
+        clearOperationMessage: true,
+      ));
+      rethrow;
+    } catch (e) {
+      final newState = state.valueOrNull ?? TasksState.initial();
+      final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+      newOperations.remove(taskId);
+
+      state = AsyncData(newState.copyWith(
+        errorMessage: AppStrings.unexpectedErrorCompletingTask,
+        individualTaskOperations: newOperations,
+        clearOperationMessage: true,
+      ));
+      rethrow;
+    }
+  }
+
+  /// Searches tasks by title, plant name, or description
+  void searchTasks(String query) {
+    final normalizedQuery = query.toLowerCase();
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    if (currentState.searchQuery != normalizedQuery) {
+      final filteredTasks = _applyFiltersToTasks(
+        currentState.allTasks,
+        currentState.currentFilter,
+        normalizedQuery,
+        currentState.selectedPlantId,
+        currentState.selectedTaskTypes,
+        currentState.selectedPriorities,
+      );
+
+      state = AsyncData(currentState.copyWith(
+        searchQuery: normalizedQuery,
+        filteredTasks: filteredTasks,
+      ));
+    }
+  }
+
+  /// Sets the active filter for task display with optional plant filtering
+  void setFilter(TasksFilterType filter, {String? plantId}) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    if (currentState.currentFilter != filter || currentState.selectedPlantId != plantId) {
+      final filteredTasks = _applyFiltersToTasks(
+        currentState.allTasks,
+        filter,
+        currentState.searchQuery,
+        plantId,
+        currentState.selectedTaskTypes,
+        currentState.selectedPriorities,
+      );
+
+      state = AsyncData(currentState.copyWith(
+        currentFilter: filter,
+        selectedPlantId: plantId,
+        filteredTasks: filteredTasks,
+      ));
+    }
+  }
+
+  /// Applies advanced filtering with multiple criteria
+  void setAdvancedFilters({
+    List<task_entity.TaskType>? taskTypes,
+    List<task_entity.TaskPriority>? priorities,
+    TasksFilterType? filter,
+    String? plantId,
+  }) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    final filteredTasks = _applyFiltersToTasks(
+      currentState.allTasks,
+      filter ?? currentState.currentFilter,
+      currentState.searchQuery,
+      plantId ?? currentState.selectedPlantId,
+      taskTypes ?? currentState.selectedTaskTypes,
+      priorities ?? currentState.selectedPriorities,
+    );
+
+    state = AsyncData(currentState.copyWith(
+      currentFilter: filter ?? currentState.currentFilter,
+      selectedPlantId: plantId ?? currentState.selectedPlantId,
+      selectedTaskTypes: taskTypes ?? currentState.selectedTaskTypes,
+      selectedPriorities: priorities ?? currentState.selectedPriorities,
+      filteredTasks: filteredTasks,
+    ));
+  }
+
+  /// Refreshes tasks from the remote data source with visual feedback
+  Future<void> refresh() async {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    state = AsyncData(currentState.copyWith(
+      activeOperations: currentState.activeOperations..add(TaskLoadingOperation.refreshing),
+      currentOperationMessage: AppStrings.refreshing,
+    ));
+
+    try {
+      await loadTasks();
+    } finally {
+      final newState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(newState.copyWith(
+        activeOperations: newState.activeOperations..remove(TaskLoadingOperation.refreshing),
+        clearOperationMessage: true,
+      ));
+    }
+  }
+
+  /// Applies comprehensive filtering logic to a list of tasks
+  List<task_entity.Task> _applyFiltersToTasks(
+    List<task_entity.Task> allTasks,
+    TasksFilterType currentFilter,
+    String searchQuery,
+    String? selectedPlantId,
+    List<task_entity.TaskType> selectedTaskTypes,
+    List<task_entity.TaskPriority> selectedPriorities,
+  ) {
+    List<task_entity.Task> tasks = List.from(allTasks);
+
+    // Apply filter by type
+    switch (currentFilter) {
+      case TasksFilterType.all:
+        break;
+      case TasksFilterType.today:
+        tasks = tasks
+            .where(
+              (t) =>
+                  t.isDueToday &&
+                  t.status == task_entity.TaskStatus.pending,
+            )
+            .toList();
+        break;
+      case TasksFilterType.overdue:
+        tasks = tasks.where((t) => t.isOverdue).toList();
+        break;
+      case TasksFilterType.upcoming:
+        final now = DateTime.now();
+        final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
+        tasks = tasks
+            .where(
+              (t) =>
+                  t.status == task_entity.TaskStatus.pending &&
+                  t.dueDate.isAfter(now) &&
+                  t.dueDate.isBefore(nextWeek),
+            )
+            .toList();
+        break;
+      case TasksFilterType.allFuture:
+        final now = DateTime.now();
+        tasks = tasks
+            .where(
+              (t) =>
+                  t.status == task_entity.TaskStatus.pending &&
+                  t.dueDate.isAfter(now),
+            )
+            .toList();
+        break;
+      case TasksFilterType.completed:
+        tasks = tasks
+            .where((t) => t.status == task_entity.TaskStatus.completed)
+            .toList();
+        break;
+      case TasksFilterType.byPlant:
+        if (selectedPlantId != null) {
+          tasks = tasks.where((t) => t.plantId == selectedPlantId).toList();
+        }
+        break;
+    }
+
+    // Apply task type filter
+    if (selectedTaskTypes.isNotEmpty) {
+      tasks = tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
+    }
+
+    // Apply priority filter
+    if (selectedPriorities.isNotEmpty) {
+      tasks = tasks.where((task) => selectedPriorities.contains(task.priority)).toList();
+    }
+
+    // Apply search
+    if (searchQuery.isNotEmpty) {
+      tasks = tasks.where((task) {
+        return task.title.toLowerCase().contains(searchQuery) ||
+            task.plantName.toLowerCase().contains(searchQuery) ||
+            (task.description?.toLowerCase().contains(searchQuery) ??
+                false);
+      }).toList();
+    }
+
+    // Sort by priority and date
+    tasks.sort((a, b) {
+      // First by status (pending first)
+      if (a.status != b.status) {
+        if (a.status == task_entity.TaskStatus.pending) return -1;
+        if (b.status == task_entity.TaskStatus.pending) return 1;
+      }
+
+      // Then by priority
+      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        a.priority,
+      );
+      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        b.priority,
+      );
+      if (aPriorityIndex != bPriorityIndex) {
+        return bPriorityIndex.compareTo(
+          aPriorityIndex,
+        ); // Higher priority first
+      }
+
+      // Finally by due date
+      return a.dueDate.compareTo(b.dueDate);
+    });
+
+    return tasks;
+  }
+
+  /// Clears the current error state
+  void clearError() {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    state = AsyncData(currentState.copyWith(clearError: true));
+  }
+
+  /// Sets filtering to show tasks for a specific plant
+  void setPlantFilter(String? plantId) {
+    setFilter(TasksFilterType.byPlant, plantId: plantId);
+  }
+
+  /// Maps domain failures to user-friendly error messages
+  String _mapFailureToMessage(Failure failure) {
+    return failure.userMessage;
+  }
+
+  /// Determines if a failure is network-related for offline queue handling
+  bool _isNetworkFailure(Failure failure) {
+    return failure is NetworkFailure ||
+           failure.message.toLowerCase().contains('network') ||
+           failure.message.toLowerCase().contains('connection') ||
+           failure.message.toLowerCase().contains('timeout');
+  }
+
+  /// Initializes the notification service with comprehensive setup
+  Future<void> _initializeNotificationService() async {
+    try {
+      final initResult = await _notificationService.initialize();
+      if (initResult) {
+        await _notificationService.initializeNotificationHandlers();
+        debugPrint('✅ TasksProvider: Notification service initialized successfully');
+      } else {
+        debugPrint('⚠️ TasksProvider: Failed to initialize notification service');
+      }
+    } catch (e) {
+      debugPrint('❌ TasksProvider: Error initializing notification service: $e');
+    }
+  }
+
+  /// Retrieves the current notification permission status
+  Future<NotificationPermissionStatus> getNotificationPermissionStatus() async {
+    final serviceStatus = await _notificationService.getPermissionStatus();
+    // Convert from service enum to local enum
+    switch (serviceStatus) {
+      case notification_service.NotificationPermissionStatus.granted:
+        return NotificationPermissionStatus.granted;
+      case notification_service.NotificationPermissionStatus.denied:
+        return NotificationPermissionStatus.denied;
+      default:
+        return NotificationPermissionStatus.notDetermined;
+    }
+  }
+
+  /// Requests notification permissions from the user
+  Future<bool> requestNotificationPermissions() async {
+    try {
+      return true; // Placeholder
+    } catch (e) {
+      debugPrint('❌ Error requesting notification permissions: $e');
+      return false;
+    }
+  }
+
+  /// Opens the system notification settings for the app
+  Future<bool> openNotificationSettings() async {
+    return await _notificationService.openNotificationSettings();
+  }
+
+  /// Returns the count of currently scheduled notifications
+  Future<int> getScheduledNotificationsCount() async {
+    return await _notificationService.getScheduledNotificationsCount();
+  }
+
+  /// Undo task completion - marks a completed task as incomplete
+  Future<bool> undoTaskCompletion(String taskId) async {
+    try {
+      return await _syncCoordinator.executeSyncOperation<bool>(
+        operationType: 'undoTaskCompletion',
+        priority: SyncPriority.critical.index,
+        operation: () => _undoTaskCompletionOperation(taskId),
+      );
+    } catch (e) {
+      final currentState = state.valueOrNull ?? TasksState.initial();
+      state = AsyncData(currentState.copyWith(
+        errorMessage: 'Failed to undo task completion',
+        clearError: false,
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> _undoTaskCompletionOperation(String taskId) async {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    // Find the task and mark it as incomplete
+    final updatedTasks = currentState.allTasks.map((task) {
+      if (task.id == taskId) {
+        return task.copyWithTaskData(
+          status: task_entity.TaskStatus.pending,
+          completedAt: null,
+        );
+      }
+      return task;
+    }).toList();
+
+    // Filter tasks with updated data
+    final filteredTasks = _applyFiltersToTasks(
+      updatedTasks,
+      currentState.currentFilter,
+      currentState.searchQuery,
+      currentState.selectedPlantId,
+      currentState.selectedTaskTypes,
+      currentState.selectedPriorities,
+    );
+
+    state = AsyncData(currentState.copyWith(
+      allTasks: updatedTasks,
+      filteredTasks: filteredTasks,
+      clearError: true,
+    ));
+
+    return true;
+  }
+
+  /// Filter tasks by type
+  void filterTasks(TasksFilterType filter) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    final filteredTasks = _applyFiltersToTasks(
+      currentState.allTasks,
+      filter,
+      currentState.searchQuery,
+      currentState.selectedPlantId,
+      currentState.selectedTaskTypes,
+      currentState.selectedPriorities,
+    );
+
+    state = AsyncData(currentState.copyWith(
+      currentFilter: filter,
+      filteredTasks: filteredTasks,
+      clearError: true,
+    ));
+  }
+}
+
+/// Main Tasks provider using Riverpod
+@riverpod
+class Tasks extends _$Tasks {
+  TasksNotifier? _notifier;
+
+  @override
+  FutureOr<TasksState> build() async {
+    _notifier = TasksNotifier();
+    ref.onDispose(() {
+      // Cancel any ongoing operations for this provider
+      _notifier?._syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks.name);
+      _notifier?._syncCoordinator.cancelOperations(TaskSyncOperations.addTask.name);
+      _notifier?._syncCoordinator.cancelOperations(TaskSyncOperations.completeTask.name);
+
+      // Cleanup subscriptions
+      _notifier?._authSubscription?.cancel();
+    });
+
+    // Note: Notifier already has access to ref through AsyncNotifier superclass
+    return await _notifier!.build();
+  }
+
+  /// Load tasks data
+  Future<void> loadTasks() async {
+    if (_notifier != null) {
+      await _notifier!.loadTasks();
+      _syncState();
+    }
+  }
+
+  /// Complete a task
+  Future<void> completeTask(task_entity.Task task) async {
+    if (_notifier != null) {
+      await _notifier!.completeTask(task.id);
+      _syncState();
+    }
+  }
+
+  /// Undo task completion
+  Future<void> undoTaskCompletion(task_entity.Task task) async {
+    if (_notifier != null) {
+      await _notifier!.undoTaskCompletion(task.id);
+      _syncState();
+    }
+  }
+
+  /// Filter tasks
+  void filterTasks(TasksFilterType filter) {
+    if (_notifier != null) {
+      _notifier!.filterTasks(filter);
+      _syncState();
+    }
+  }
+
+  /// Refresh tasks data - delegate to notifier
+  Future<void> refresh() async {
+    if (_notifier != null) {
+      await _notifier!.refresh();
+      _syncState();
+    }
+  }
+
+  /// Sync state from notifier to provider
+  void _syncState() {
+    if (_notifier != null) {
+      final newState = _notifier!.state.valueOrNull ?? const TasksState();
+      state = AsyncData(newState);
+    }
+  }
+}
+
+// Compatibility providers for legacy code
+@riverpod
+List<task_entity.Task> allTasks(AllTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.allTasks,
+    orElse: () => [],
+  );
+}
+
+@riverpod
+List<task_entity.Task> filteredTasks(FilteredTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.filteredTasks,
+    orElse: () => [],
+  );
+}
+
+@riverpod
+bool tasksIsLoading(TasksIsLoadingRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.isLoading,
+    loading: () => true,
+    orElse: () => false,
+  );
+}
+
+@riverpod
+String? tasksError(TasksErrorRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.errorMessage,
+    error: (error, _) => error.toString(),
+    orElse: () => null,
+  );
+}
+
+// Priority-based task providers
+@riverpod
+List<task_entity.Task> highPriorityTasks(HighPriorityTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.filteredTasks
+        .where(
+          (t) =>
+              t.priority == task_entity.TaskPriority.high ||
+              t.priority == task_entity.TaskPriority.urgent,
+        )
+        .toList(),
+    orElse: () => [],
+  );
+}
+
+@riverpod
+List<task_entity.Task> mediumPriorityTasks(MediumPriorityTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.filteredTasks
+        .where((t) => t.priority == task_entity.TaskPriority.medium)
+        .toList(),
+    orElse: () => [],
+  );
+}
+
+@riverpod
+List<task_entity.Task> lowPriorityTasks(LowPriorityTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.filteredTasks
+        .where((t) => t.priority == task_entity.TaskPriority.low)
+        .toList(),
+    orElse: () => [],
+  );
+}
+
+// Statistics providers
+@riverpod
+int totalTasks(TotalTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.totalTasks,
+    orElse: () => 0,
+  );
+}
+
+@riverpod
+int completedTasks(CompletedTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.completedTasks,
+    orElse: () => 0,
+  );
+}
+
+@riverpod
+int pendingTasks(PendingTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.pendingTasks,
+    orElse: () => 0,
+  );
+}
+
+@riverpod
+int overdueTasks(OverdueTasksRef ref) {
+  final tasksState = ref.watch(tasksProvider);
+  return tasksState.maybeWhen(
+    data: (state) => state.overdueTasks,
+    orElse: () => 0,
+  );
+}
+
+// Offline sync status
+@riverpod
+bool hasPendingOfflineOperations(HasPendingOfflineOperationsRef ref) {
+  // This would need to be implemented based on your offline queue service
+  return offline_queue.OfflineSyncQueueService.instance.hasPendingOperations;
+}
+
+@riverpod
+int pendingOfflineOperationsCount(PendingOfflineOperationsCountRef ref) {
+  return offline_queue.OfflineSyncQueueService.instance.pendingOperationsCount;
+}
+
+// Dependency providers (these would need to be implemented based on your DI setup)
+@riverpod
+GetTasksUseCase getTasksUseCase(GetTasksUseCaseRef ref) {
+  throw UnimplementedError('GetTasksUseCase provider needs to be implemented');
+}
+
+@riverpod
+AddTaskUseCase addTaskUseCase(AddTaskUseCaseRef ref) {
+  throw UnimplementedError('AddTaskUseCase provider needs to be implemented');
+}
+
+@riverpod
+CompleteTaskUseCase completeTaskUseCase(CompleteTaskUseCaseRef ref) {
+  throw UnimplementedError('CompleteTaskUseCase provider needs to be implemented');
+}
+
+@riverpod
+TaskNotificationService taskNotificationService(TaskNotificationServiceRef ref) {
+  throw UnimplementedError('TaskNotificationService provider needs to be implemented');
+}
+
+/// Exception thrown when a user tries to access a task they don't own
+class UnauthorizedAccessException implements Exception {
+  final String message;
+
+  const UnauthorizedAccessException(this.message);
+
+  @override
+  String toString() => 'UnauthorizedAccessException: $message';
+}
+
+// Additional enums and types that may be needed
+// TaskLoadingOperation and TasksFilterType imported from tasks_state.dart
+enum TaskSyncOperations { loadTasks, addTask, completeTask }
+enum OfflineTaskOperations { addTask, completeTask }
+enum SyncPriority { low, medium, high, critical }
+
+class SyncThrottledException implements Exception {
+  final String message;
+  SyncThrottledException(this.message);
+}
+
+
+enum NotificationPermissionStatus { granted, denied, notDetermined }

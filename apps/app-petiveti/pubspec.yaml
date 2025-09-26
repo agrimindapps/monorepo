@@ -15,8 +15,14 @@ dependencies:
   core:
     path: ../../packages/core
 
-  # State Management - Riverpod para este app específico
-  
+  # State Management - Riverpod via core package
+  # (Riverpod é importado via packages/core)
+
+  # Dependencies needed by the app
+  shared_preferences: ^2.5.3
+  dartz: ^0.10.1
+  equatable: ^2.0.7
+
   # Dependency Injection
   get_it: ^8.2.0
   injectable: ^2.5.0

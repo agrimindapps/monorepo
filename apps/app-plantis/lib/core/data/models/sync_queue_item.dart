@@ -1,39 +1,36 @@
 import 'package:hive/hive.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'sync_queue_item.g.dart';
 
 enum SyncOperationType { create, update, delete }
 
 @HiveType(typeId: 100)
-@JsonSerializable()
 class SyncQueueItem extends HiveObject {
   @HiveField(0)
-  @JsonKey(name: 'id')
   final String id;
 
   @HiveField(1)
-  @JsonKey(name: 'modelType')
+  //modelType')
   final String modelType;
 
   @HiveField(2)
-  @JsonKey(name: 'operation')
+  //operation')
   final String operation;
 
   @HiveField(3)
-  @JsonKey(name: 'data')
+  //data')
   final Map<String, dynamic> data;
 
   @HiveField(4)
-  @JsonKey(name: 'timestamp')
+  //timestamp')
   final DateTime timestamp;
 
   @HiveField(5)
-  @JsonKey(name: 'retryCount')
+  //retryCount')
   int retryCount;
 
   @HiveField(6)
-  @JsonKey(name: 'isSynced')
+  //isSynced')
   bool isSynced;
 
   SyncQueueItem({
@@ -46,10 +43,7 @@ class SyncQueueItem extends HiveObject {
     this.isSynced = false,
   }) : timestamp = timestamp ?? DateTime.now();
 
-  factory SyncQueueItem.fromJson(Map<String, dynamic> json) =>
-      _$SyncQueueItemFromJson(json);
-
-  Map<String, dynamic> toJson() => _$SyncQueueItemToJson(this);
+  // JSON serialization methods removed - using Hive only
 
   SyncOperationType get operationType {
     switch (operation) {

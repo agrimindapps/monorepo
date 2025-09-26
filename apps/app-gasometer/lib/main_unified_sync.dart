@@ -1,13 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-// Core imports - Sistema unificado
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_pkg;
 
-// App specific imports
 import 'core/gasometer_sync_config.dart';
-import 'features/vehicles/domain/entities/vehicle_entity.dart';
 import 'features/fuel/data/models/fuel_supply_model.dart';
+import 'features/vehicles/domain/entities/vehicle_entity.dart';
 
 /// Main entry point usando sistema unificado de sincronização
 void main() async {
@@ -20,24 +17,24 @@ void main() async {
 }
 
 class GasometerAppWithUnifiedSync extends StatelessWidget {
-  const GasometerAppWithUnifiedSync({Key? key}) : super(key: key);
+  const GasometerAppWithUnifiedSync({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider_pkg.MultiProvider(
       providers: [
         // Provider único para toda sincronização
-        ChangeNotifierProvider<UnifiedSyncProvider>(
+        provider_pkg.ChangeNotifierProvider<UnifiedSyncProvider>(
           create: (_) => UnifiedSyncProvider.instance..initializeForApp('gasometer'),
         ),
-        
+
         // Outros providers do app podem continuar normalmente
         // Provider<VehicleService>(...),
         // Provider<FuelService>(...),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         title: 'Gasometer - Unified Sync',
-        home: const GasometerHomePage(),
+        home: GasometerHomePage(),
       ),
     );
   }
@@ -45,7 +42,7 @@ class GasometerAppWithUnifiedSync extends StatelessWidget {
 
 /// Home page demonstrando uso do sistema unificado
 class GasometerHomePage extends StatefulWidget {
-  const GasometerHomePage({Key? key}) : super(key: key);
+  const GasometerHomePage({super.key});
 
   @override
   State<GasometerHomePage> createState() => _GasometerHomePageState();
@@ -68,7 +65,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
         title: const Text('Gasometer - Unified Sync'),
         actions: [
           // Status de sincronização no app bar
-          Consumer<UnifiedSyncProvider>(
+          provider_pkg.Consumer<UnifiedSyncProvider>(
             builder: (context, syncProvider, _) {
               return _buildSyncStatusIcon(syncProvider.syncStatus);
             },
@@ -92,16 +89,16 @@ class _GasometerHomePageState extends State<GasometerHomePage>
           // Força sincronização
           FloatingActionButton.small(
             onPressed: _forceSync,
-            child: const Icon(Icons.sync),
             tooltip: 'Force Sync',
+            child: const Icon(Icons.sync),
           ),
           const SizedBox(height: 8),
-          
+
           // Adiciona veículo
           FloatingActionButton(
             onPressed: _addVehicle,
-            child: const Icon(Icons.add),
             tooltip: 'Add Vehicle',
+            child: const Icon(Icons.add),
           ),
         ],
       ),
@@ -138,7 +135,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
   }
 
   Widget _buildSyncStatusCard() {
-    return Consumer<UnifiedSyncProvider>(
+    return provider_pkg.Consumer<UnifiedSyncProvider>(
       builder: (context, syncProvider, _) {
         final status = syncProvider.syncStatus;
         final debugInfo = syncProvider.debugInfo;
@@ -305,7 +302,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
   }
 
   Future<void> _forceSync() async {
-    final syncProvider = Provider.of<UnifiedSyncProvider>(context, listen: false);
+    final syncProvider = provider_pkg.Provider.of<UnifiedSyncProvider>(context, listen: false);
     
     // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
@@ -315,7 +312,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
     final result = await syncProvider.forceSync();
     
     result.fold(
-      (failure) {
+      (Failure failure) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Sync failed: ${failure.message}')),
         );
@@ -339,7 +336,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
       color: 'Branco',
       licensePlate: 'ABC-${DateTime.now().millisecond}',
       type: VehicleType.car,
-      supportedFuels: [FuelType.gasoline],
+      supportedFuels: const [FuelType.gasoline],
       currentOdometer: 0.0,
     );
     
@@ -460,7 +457,7 @@ class _GasometerHomePageState extends State<GasometerHomePage>
   }
 
   void _showVehicleDetails(VehicleEntity vehicle) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(vehicle.licensePlate),

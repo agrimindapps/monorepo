@@ -425,7 +425,7 @@ packages:
     source: hosted
     version: "3.8.11"
   firebase_messaging:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase_messaging
       sha256: "10272b553a49c13a6cedfd00121047157521f82a5d3f2a1706b9dd28342cc482"
@@ -473,7 +473,7 @@ packages:
     source: hosted
     version: "0.1.7+17"
   firebase_remote_config:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase_remote_config
       sha256: d22fe46323f19f5ea252202438c4e006567aa2f2f116521e9373618bcd4daedc
@@ -694,7 +694,7 @@ packages:
     source: hosted
     version: "0.7.0"
   flutter_test:
-    dependency: "direct dev"
+    dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -704,7 +704,7 @@ packages:
     source: sdk
     version: "0.0.0"
   font_awesome_flutter:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: font_awesome_flutter
       sha256: b738e35f8bb4957896c34957baf922f99c5d415b38ddc8b070d14b7fa95715d4
@@ -1240,7 +1240,7 @@ packages:
     source: hosted
     version: "0.28.0"
   share_plus:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: share_plus
       sha256: d7dc0630a923883c6328ca31b89aa682bacbf2f8304162d29f7c6aaff03a27a1

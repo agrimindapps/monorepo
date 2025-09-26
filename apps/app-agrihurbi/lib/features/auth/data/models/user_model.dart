@@ -1,6 +1,5 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 part 'user_model.g.dart';
 
@@ -71,24 +70,24 @@ class UserModel extends UserEntity {
   /// Converte o UserModel para UserEntity do domínio
   UserEntity toEntity() {
     return UserEntity(
-      id: id,
-      displayName: displayName,
-      email: email,
-      photoUrl: photoUrl,
-      isEmailVerified: isEmailVerified,
-      lastLoginAt: lastLoginAt,
-      provider: provider,
-      phone: phone,
-      isActive: isActive,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      id: userModelId,
+      displayName: userModelDisplayName,
+      email: userModelEmail,
+      photoUrl: userModelPhotoUrl,
+      isEmailVerified: userModelIsEmailVerified,
+      lastLoginAt: userModelLastLoginAt,
+      provider: userModelProvider,
+      phone: null, // Valor padrão para compatibilidade
+      isActive: true, // Valor padrão para compatibilidade
+      createdAt: userModelCreatedAt,
+      updatedAt: userModelUpdatedAt,
       // Campos de sincronização
-      lastSyncAt: lastSyncAt,
-      isDirty: isDirty,
-      isDeleted: isDeleted,
-      version: version,
-      userId: userId,
-      moduleName: moduleName,
+      lastSyncAt: null,
+      isDirty: false,
+      isDeleted: false,
+      version: 1,
+      userId: null,
+      moduleName: 'agrihurbi',
     );
   }
 
@@ -135,15 +134,15 @@ class UserModel extends UserEntity {
   @override
   DataMap toJson() {
     return {
-      'id': id,
-      'displayName': displayName,
-      'email': email,
-      'photoUrl': photoUrl,
-      'isEmailVerified': isEmailVerified,
-      'lastLoginAt': lastLoginAt?.toIso8601String(),
-      'provider': provider.name,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'id': userModelId,
+      'displayName': userModelDisplayName,
+      'email': userModelEmail,
+      'photoUrl': userModelPhotoUrl,
+      'isEmailVerified': userModelIsEmailVerified,
+      'lastLoginAt': userModelLastLoginAt?.toIso8601String(),
+      'provider': userModelProvider.name,
+      'createdAt': userModelCreatedAt?.toIso8601String(),
+      'updatedAt': userModelUpdatedAt?.toIso8601String(),
     };
   }
 
@@ -171,15 +170,15 @@ class UserModel extends UserEntity {
     // UserModel mapeia apenas os campos que tem implementação local
     // Os demais parâmetros são aceitos para compatibilidade mas serão valores padrão
     return UserModel(
-      userModelId: id ?? this.id,
-      userModelDisplayName: displayName ?? this.displayName,
-      userModelEmail: email ?? this.email,
-      userModelPhotoUrl: photoUrl ?? this.photoUrl,
-      userModelIsEmailVerified: isEmailVerified ?? this.isEmailVerified,
-      userModelLastLoginAt: lastLoginAt ?? this.lastLoginAt,
-      userModelProvider: provider ?? this.provider,
-      userModelCreatedAt: createdAt ?? this.createdAt,
-      userModelUpdatedAt: updatedAt ?? this.updatedAt,
+      userModelId: id ?? this.userModelId,
+      userModelDisplayName: displayName ?? this.userModelDisplayName,
+      userModelEmail: email ?? this.userModelEmail,
+      userModelPhotoUrl: photoUrl ?? this.userModelPhotoUrl,
+      userModelIsEmailVerified: isEmailVerified ?? this.userModelIsEmailVerified,
+      userModelLastLoginAt: lastLoginAt ?? this.userModelLastLoginAt,
+      userModelProvider: provider ?? this.userModelProvider,
+      userModelCreatedAt: createdAt ?? this.userModelCreatedAt,
+      userModelUpdatedAt: updatedAt ?? this.userModelUpdatedAt,
     );
   }
 

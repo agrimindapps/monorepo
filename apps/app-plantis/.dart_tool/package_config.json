@@ -2,34 +2,10 @@
   "configVersion": 2,
   "packages": [
     {
-      "name": "_fe_analyzer_shared",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-76.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
       "name": "_flutterfire_internals",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/_flutterfire_internals-1.3.60",
       "packageUri": "lib/",
       "languageVersion": "3.2"
-    },
-    {
-      "name": "_macros",
-      "rootUri": "file:///Users/lucineiloch/fvm/versions/3.29.2/bin/cache/dart-sdk/pkg/_macros",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
-      "name": "analyzer",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/analyzer-6.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "analyzer_plugin",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/analyzer_plugin-0.11.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
     },
     {
       "name": "archive",
@@ -68,54 +44,6 @@
       "languageVersion": "3.1"
     },
     {
-      "name": "build",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build-2.5.4",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
-      "name": "build_config",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_config-1.1.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.6"
-    },
-    {
-      "name": "build_daemon",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_daemon-4.0.4",
-      "packageUri": "lib/",
-      "languageVersion": "3.6"
-    },
-    {
-      "name": "build_resolvers",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_resolvers-2.5.4",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
-      "name": "build_runner",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_runner-2.5.4",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
-      "name": "build_runner_core",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_runner_core-9.1.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
-      "name": "built_collection",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/built_collection-5.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "built_value",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/built_value-8.12.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
       "name": "cached_network_image",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/cached_network_image-3.4.1",
       "packageUri": "lib/",
@@ -138,12 +66,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/characters-1.4.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
-    },
-    {
-      "name": "checked_yaml",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/checked_yaml-2.0.3",
-      "packageUri": "lib/",
-      "languageVersion": "2.19"
     },
     {
       "name": "clock",
@@ -186,12 +108,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/cloud_functions_web-5.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
-    },
-    {
-      "name": "code_builder",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/code_builder-4.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
     },
     {
       "name": "collection",
@@ -240,24 +156,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.8",
       "packageUri": "lib/",
       "languageVersion": "3.1"
-    },
-    {
-      "name": "custom_lint_core",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/custom_lint_core-0.7.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "custom_lint_visitor",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/custom_lint_visitor-1.0.0+6.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "dart_style",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/dart_style-2.3.8",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
     },
     {
       "name": "dartz",
@@ -422,6 +320,24 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "firebase_messaging",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_messaging-16.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_messaging_platform_interface",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_messaging_platform_interface-4.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_messaging_web",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_messaging_web-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "firebase_performance",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_performance-0.11.0",
       "packageUri": "lib/",
@@ -436,6 +352,24 @@
     {
       "name": "firebase_performance_web",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_performance_web-0.1.7+17",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "firebase_remote_config",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_remote_config-6.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_remote_config_platform_interface",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_remote_config_platform_interface-2.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_remote_config_web",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/firebase_remote_config_web-1.8.10",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -614,14 +548,8 @@
       "languageVersion": "3.7"
     },
     {
-      "name": "freezed_annotation",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/freezed_annotation-2.4.4",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "frontend_server_client",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/frontend_server_client-4.0.0",
+      "name": "font_awesome_flutter",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/font_awesome_flutter-10.9.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -636,12 +564,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/get_it-8.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
-    },
-    {
-      "name": "glob",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/glob-2.1.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
     },
     {
       "name": "go_router",
@@ -686,12 +608,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "graphs",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/graphs-2.3.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "hive",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/hive-2.2.3",
       "packageUri": "lib/",
@@ -704,22 +620,10 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "hive_generator",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/hive_generator-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "http",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/http-1.5.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
-    },
-    {
-      "name": "http_multi_server",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/http_multi_server-3.2.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
     },
     {
       "name": "http_parser",
@@ -788,12 +692,6 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "injectable_generator",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/injectable_generator-2.6.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
       "name": "integration_test",
       "rootUri": "file:///Users/lucineiloch/fvm/versions/3.29.2/packages/integration_test",
       "packageUri": "lib/",
@@ -804,12 +702,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/intl-0.19.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
-    },
-    {
-      "name": "io",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/io-1.0.5",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
     },
     {
       "name": "js",
@@ -884,12 +776,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "macros",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/macros-0.1.3-main.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "matcher",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/matcher-0.12.17",
       "packageUri": "lib/",
@@ -930,12 +816,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/octo_image-2.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
-    },
-    {
-      "name": "package_config",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/package_config-2.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
     },
     {
       "name": "package_info_plus",
@@ -1052,12 +932,6 @@
       "languageVersion": "3.2"
     },
     {
-      "name": "pool",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/pool-1.5.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "posix",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/posix-6.0.3",
       "packageUri": "lib/",
@@ -1076,18 +950,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "pub_semver",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/pub_semver-2.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
-      "name": "pubspec_parse",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/pubspec_parse-1.5.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.6"
-    },
-    {
       "name": "purchases_flutter",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/purchases_flutter-9.2.0",
       "packageUri": "lib/",
@@ -1100,32 +962,8 @@
       "languageVersion": "3.3"
     },
     {
-      "name": "recase",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/recase-4.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "riverpod",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod-2.6.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "riverpod_analyzer_utils",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_analyzer_utils-0.5.8",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "riverpod_annotation",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_annotation-2.6.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "riverpod_generator",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_generator-2.6.3",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -1134,6 +972,18 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/rxdart-0.28.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "share_plus",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/share_plus-11.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "share_plus_platform_interface",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/share_plus_platform_interface-6.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "shared_preferences",
@@ -1178,18 +1028,6 @@
       "languageVersion": "3.3"
     },
     {
-      "name": "shelf",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/shelf-1.4.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
-      "name": "shelf_web_socket",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/shelf_web_socket-3.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.5"
-    },
-    {
       "name": "shimmer",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/shimmer-3.0.0",
       "packageUri": "lib/",
@@ -1218,18 +1056,6 @@
       "rootUri": "file:///Users/lucineiloch/fvm/versions/3.29.2/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
       "languageVersion": "3.7"
-    },
-    {
-      "name": "source_gen",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/source_gen-1.5.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "source_helper",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/source_helper-1.3.5",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
     },
     {
       "name": "source_span",
@@ -1292,12 +1118,6 @@
       "languageVersion": "3.3"
     },
     {
-      "name": "stream_transform",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/stream_transform-2.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.1"
-    },
-    {
       "name": "string_scanner",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/string_scanner-1.4.1",
       "packageUri": "lib/",
@@ -1332,12 +1152,6 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/timezone-0.10.1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
-    },
-    {
-      "name": "timing",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/timing-1.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
     },
     {
       "name": "typed_data",
@@ -1412,28 +1226,10 @@
       "languageVersion": "3.3"
     },
     {
-      "name": "watcher",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/watcher-1.1.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.1"
-    },
-    {
       "name": "web",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/web-1.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
-    },
-    {
-      "name": "web_socket",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/web_socket-1.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
-      "name": "web_socket_channel",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/web_socket_channel-3.0.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
     },
     {
       "name": "webdriver",
@@ -1466,19 +1262,13 @@
       "languageVersion": "3.2"
     },
     {
-      "name": "yaml",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/yaml-3.1.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "app_plantis",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-09-26T17:24:13.645150Z",
+  "generated": "2025-09-26T17:45:17.650194Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/lucineiloch/fvm/versions/3.29.2",

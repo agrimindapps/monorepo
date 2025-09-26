@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:core/core.dart';
 import '../../../domain/entities/task.dart';
 import '../../models/task_model.dart';
 
@@ -50,9 +50,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
 
       // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
-        final aDate = a.dueDate ?? DateTime(2100);
-        final bDate = b.dueDate ?? DateTime(2100);
-        return aDate.compareTo(bDate); // ascending order
+        return a.dueDate.compareTo(b.dueDate); // ascending order
       });
 
       return tasks;
@@ -86,9 +84,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
 
       // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
-        final aDate = a.dueDate ?? DateTime(2100);
-        final bDate = b.dueDate ?? DateTime(2100);
-        return aDate.compareTo(bDate); // ascending order
+        return a.dueDate.compareTo(b.dueDate); // ascending order
       });
 
       return tasks;
@@ -122,9 +118,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
 
       // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
-        final aDate = a.dueDate ?? DateTime(2100);
-        final bDate = b.dueDate ?? DateTime(2100);
-        return aDate.compareTo(bDate); // ascending order
+        return a.dueDate.compareTo(b.dueDate); // ascending order
       });
 
       return tasks;
@@ -157,14 +151,11 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final filteredTasks =
           tasks.where((task) {
             return task.status == TaskStatus.pending &&
-                task.dueDate != null &&
-                task.dueDate!.isBefore(now);
+                task.dueDate.isBefore(now);
           }).toList();
 
       filteredTasks.sort((a, b) {
-        final aDate = a.dueDate ?? DateTime(2100);
-        final bDate = b.dueDate ?? DateTime(2100);
-        return aDate.compareTo(bDate); // ascending order
+        return a.dueDate.compareTo(b.dueDate); // ascending order
       });
 
       return filteredTasks;
@@ -200,19 +191,16 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final filteredTasks =
           tasks.where((task) {
             return task.status == TaskStatus.pending &&
-                task.dueDate != null &&
-                task.dueDate!.isAfter(
+                task.dueDate.isAfter(
                   startOfDay.subtract(const Duration(seconds: 1)),
                 ) &&
-                task.dueDate!.isBefore(
+                task.dueDate.isBefore(
                   endOfDay.add(const Duration(seconds: 1)),
                 );
           }).toList();
 
       filteredTasks.sort((a, b) {
-        final aDate = a.dueDate ?? DateTime(2100);
-        final bDate = b.dueDate ?? DateTime(2100);
-        return aDate.compareTo(bDate); // ascending order
+        return a.dueDate.compareTo(b.dueDate); // ascending order
       });
 
       return filteredTasks;
@@ -247,17 +235,14 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final filteredTasks =
           tasks.where((task) {
             return task.status == TaskStatus.pending &&
-                task.dueDate != null &&
-                task.dueDate!.isAfter(now) &&
-                task.dueDate!.isBefore(
+                task.dueDate.isAfter(now) &&
+                task.dueDate.isBefore(
                   nextWeek.add(const Duration(seconds: 1)),
                 );
           }).toList();
 
       filteredTasks.sort((a, b) {
-        final aDate = a.dueDate ?? DateTime(2100);
-        final bDate = b.dueDate ?? DateTime(2100);
-        return aDate.compareTo(bDate); // ascending order
+        return a.dueDate.compareTo(b.dueDate); // ascending order
       });
 
       return filteredTasks;

@@ -1,7 +1,8 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' hide ConflictResolutionStrategy, Task;
 
 import '../../features/plants/data/models/plant_model.dart';
 import '../../features/tasks/data/models/task_model.dart';
+import '../../features/tasks/domain/entities/task.dart';
 import 'conflict_resolution_strategy.dart';
 
 @injectable
@@ -81,36 +82,28 @@ class ConflictResolver {
 
   /// Merge específico para TaskModel
   TaskModel _mergeTaskModel(TaskModel local, TaskModel remote) {
-    final DateTime now = DateTime.now();
-    return TaskModel(
-      id: local.id,
-      createdAt: local.createdAt,
-      updatedAt: now,
-      title: local.title.isNotEmpty ? local.title : remote.title,
-      description: local.description ?? remote.description,
-      plantId: local.plantId,
-      plantName:
-          local.plantName.isNotEmpty ? local.plantName : remote.plantName,
-      type: local.type,
-      status:
-          local.status.index > remote.status.index
-              ? local.status
-              : remote.status, // Status mais avançado
-      priority: local.priority,
-      dueDate: local.dueDate,
-      completedAt: local.completedAt ?? remote.completedAt,
-      completionNotes: local.completionNotes ?? remote.completionNotes,
-      isRecurring: local.isRecurring || remote.isRecurring,
-      recurringIntervalDays:
-          local.recurringIntervalDays ?? remote.recurringIntervalDays,
-      nextDueDate: local.nextDueDate ?? remote.nextDueDate,
-      lastSyncAt: now,
+    // Convert to Task entities to access getters
+    final localTask = local as Task;
+    final remoteTask = remote as Task;
+
+    return local.copyWith(
+      updatedAt: DateTime.now(),
       isDirty: true,
-      isDeleted: local.isDeleted || remote.isDeleted,
-      // Incremented version
-      version: local.version + 1,
-      userId: local.userId ?? remote.userId,
-      moduleName: local.moduleName ?? remote.moduleName,
+      isDeleted: localTask.isDeleted || remoteTask.isDeleted,
+      version: localTask.version + 1,
+      userId: localTask.userId ?? remoteTask.userId,
+      moduleName: localTask.moduleName ?? remoteTask.moduleName,
+      lastSyncAt: DateTime.now(),
+    ).copyWithTaskData(
+      title: localTask.title.isNotEmpty ? localTask.title : remoteTask.title,
+      description: localTask.description ?? remoteTask.description,
+      plantName: localTask.plantName.isNotEmpty ? localTask.plantName : remoteTask.plantName,
+      status: localTask.status.index > remoteTask.status.index ? localTask.status : remoteTask.status,
+      completedAt: localTask.completedAt ?? remoteTask.completedAt,
+      completionNotes: localTask.completionNotes ?? remoteTask.completionNotes,
+      isRecurring: localTask.isRecurring || remoteTask.isRecurring,
+      recurringIntervalDays: localTask.recurringIntervalDays ?? remoteTask.recurringIntervalDays,
+      nextDueDate: localTask.nextDueDate ?? remoteTask.nextDueDate,
     );
   }
 }

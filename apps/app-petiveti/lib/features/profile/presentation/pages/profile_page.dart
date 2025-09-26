@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:core/core.dart' hide User;
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../../shared/constants/profile_constants.dart';

@@ -1,5 +1,4 @@
-import 'package:core/core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart' hide User;
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/user.dart';

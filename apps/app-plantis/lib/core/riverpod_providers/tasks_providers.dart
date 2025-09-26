@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../auth/auth_state_notifier.dart';
 import '../localization/app_strings.dart';
@@ -16,7 +15,7 @@ import '../../features/tasks/domain/usecases/complete_task_usecase.dart';
 import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../features/tasks/presentation/providers/tasks_state.dart';
 
-part 'tasks_providers.g.dart';
+// part 'tasks_providers.g.dart';
 
 /// Tasks Notifier that handles all task operations with immutable state
 class TasksNotifier extends AsyncNotifier<TasksState> {
@@ -890,222 +889,140 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 }
 
 /// Main Tasks provider using Riverpod
-@riverpod
-class Tasks extends _$Tasks {
-  TasksNotifier? _notifier;
+final tasksProvider = AsyncNotifierProvider<TasksNotifier, TasksState>(() {
+  return TasksNotifier();
+});
 
-  @override
-  FutureOr<TasksState> build() async {
-    _notifier = TasksNotifier();
-    ref.onDispose(() {
-      // Cancel any ongoing operations for this provider
-      _notifier?._syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks.name);
-      _notifier?._syncCoordinator.cancelOperations(TaskSyncOperations.addTask.name);
-      _notifier?._syncCoordinator.cancelOperations(TaskSyncOperations.completeTask.name);
-
-      // Cleanup subscriptions
-      _notifier?._authSubscription?.cancel();
-    });
-
-    // Note: Notifier already has access to ref through AsyncNotifier superclass
-    return await _notifier!.build();
-  }
-
-  /// Load tasks data
-  Future<void> loadTasks() async {
-    if (_notifier != null) {
-      await _notifier!.loadTasks();
-      _syncState();
-    }
-  }
-
-  /// Complete a task
-  Future<void> completeTask(task_entity.Task task) async {
-    if (_notifier != null) {
-      await _notifier!.completeTask(task.id);
-      _syncState();
-    }
-  }
-
-  /// Undo task completion
-  Future<void> undoTaskCompletion(task_entity.Task task) async {
-    if (_notifier != null) {
-      await _notifier!.undoTaskCompletion(task.id);
-      _syncState();
-    }
-  }
-
-  /// Filter tasks
-  void filterTasks(TasksFilterType filter) {
-    if (_notifier != null) {
-      _notifier!.filterTasks(filter);
-      _syncState();
-    }
-  }
-
-  /// Refresh tasks data - delegate to notifier
-  Future<void> refresh() async {
-    if (_notifier != null) {
-      await _notifier!.refresh();
-      _syncState();
-    }
-  }
-
-  /// Sync state from notifier to provider
-  void _syncState() {
-    if (_notifier != null) {
-      final newState = _notifier!.state.valueOrNull ?? const TasksState();
-      state = AsyncData(newState);
-    }
-  }
-}
 
 // Compatibility providers for legacy code
-@riverpod
-List<task_entity.Task> allTasks(AllTasksRef ref) {
+final allTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.allTasks,
-    orElse: () => [],
+    data: (TasksState state) => state.allTasks,
+    orElse: () => <task_entity.Task>[],
   );
-}
+});
 
-@riverpod
-List<task_entity.Task> filteredTasks(FilteredTasksRef ref) {
+final filteredTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.filteredTasks,
-    orElse: () => [],
+    data: (TasksState state) => state.filteredTasks,
+    orElse: () => <task_entity.Task>[],
   );
-}
+});
 
-@riverpod
-bool tasksIsLoading(TasksIsLoadingRef ref) {
+final tasksIsLoadingProvider = Provider<bool>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.isLoading,
+    data: (TasksState state) => state.isLoading,
     loading: () => true,
     orElse: () => false,
   );
-}
+});
 
-@riverpod
-String? tasksError(TasksErrorRef ref) {
+final tasksErrorProvider = Provider<String?>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.errorMessage,
-    error: (error, _) => error.toString(),
+    data: (TasksState state) => state.errorMessage,
+    error: (Object error, _) => error.toString(),
     orElse: () => null,
   );
-}
+});
 
 // Priority-based task providers
-@riverpod
-List<task_entity.Task> highPriorityTasks(HighPriorityTasksRef ref) {
+final highPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.filteredTasks
+    data: (TasksState state) => state.filteredTasks
         .where(
-          (t) =>
+          (task_entity.Task t) =>
               t.priority == task_entity.TaskPriority.high ||
               t.priority == task_entity.TaskPriority.urgent,
         )
         .toList(),
-    orElse: () => [],
+    orElse: () => <task_entity.Task>[],
   );
-}
+});
 
-@riverpod
-List<task_entity.Task> mediumPriorityTasks(MediumPriorityTasksRef ref) {
+final mediumPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.filteredTasks
-        .where((t) => t.priority == task_entity.TaskPriority.medium)
+    data: (TasksState state) => state.filteredTasks
+        .where((task_entity.Task t) => t.priority == task_entity.TaskPriority.medium)
         .toList(),
-    orElse: () => [],
+    orElse: () => <task_entity.Task>[],
   );
-}
+});
 
-@riverpod
-List<task_entity.Task> lowPriorityTasks(LowPriorityTasksRef ref) {
+final lowPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.filteredTasks
-        .where((t) => t.priority == task_entity.TaskPriority.low)
+    data: (TasksState state) => state.filteredTasks
+        .where((task_entity.Task t) => t.priority == task_entity.TaskPriority.low)
         .toList(),
-    orElse: () => [],
+    orElse: () => <task_entity.Task>[],
   );
-}
+});
 
 // Statistics providers
-@riverpod
-int totalTasks(TotalTasksRef ref) {
+final totalTasksProvider = Provider<int>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.totalTasks,
+    data: (TasksState state) => state.totalTasks,
     orElse: () => 0,
   );
-}
+});
 
-@riverpod
-int completedTasks(CompletedTasksRef ref) {
+final completedTasksProvider = Provider<int>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.completedTasks,
+    data: (TasksState state) => state.completedTasks,
     orElse: () => 0,
   );
-}
+});
 
-@riverpod
-int pendingTasks(PendingTasksRef ref) {
+final pendingTasksProvider = Provider<int>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.pendingTasks,
+    data: (TasksState state) => state.pendingTasks,
     orElse: () => 0,
   );
-}
+});
 
-@riverpod
-int overdueTasks(OverdueTasksRef ref) {
+final overdueTasksProvider = Provider<int>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (state) => state.overdueTasks,
+    data: (TasksState state) => state.overdueTasks,
     orElse: () => 0,
   );
-}
+});
 
 // Offline sync status
-@riverpod
-bool hasPendingOfflineOperations(HasPendingOfflineOperationsRef ref) {
+final hasPendingOfflineOperationsProvider = Provider<bool>((ref) {
   // This would need to be implemented based on your offline queue service
   return offline_queue.OfflineSyncQueueService.instance.hasPendingOperations;
-}
+});
 
-@riverpod
-int pendingOfflineOperationsCount(PendingOfflineOperationsCountRef ref) {
+final pendingOfflineOperationsCountProvider = Provider<int>((ref) {
   return offline_queue.OfflineSyncQueueService.instance.pendingOperationsCount;
-}
+});
 
 // Dependency providers (these would need to be implemented based on your DI setup)
-@riverpod
-GetTasksUseCase getTasksUseCase(GetTasksUseCaseRef ref) {
+final getTasksUseCaseProvider = Provider<GetTasksUseCase>((ref) {
   throw UnimplementedError('GetTasksUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-AddTaskUseCase addTaskUseCase(AddTaskUseCaseRef ref) {
+final addTaskUseCaseProvider = Provider<AddTaskUseCase>((ref) {
   throw UnimplementedError('AddTaskUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-CompleteTaskUseCase completeTaskUseCase(CompleteTaskUseCaseRef ref) {
+final completeTaskUseCaseProvider = Provider<CompleteTaskUseCase>((ref) {
   throw UnimplementedError('CompleteTaskUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-TaskNotificationService taskNotificationService(TaskNotificationServiceRef ref) {
+final taskNotificationServiceProvider = Provider<TaskNotificationService>((ref) {
   throw UnimplementedError('TaskNotificationService provider needs to be implemented');
-}
+});
 
 /// Exception thrown when a user tries to access a task they don't own
 class UnauthorizedAccessException implements Exception {

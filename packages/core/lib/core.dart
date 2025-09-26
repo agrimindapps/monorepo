@@ -224,3 +224,50 @@ export 'services/shimmer_service.dart';
 export 'src/riverpod/common_providers.dart';
 export 'src/riverpod/riverpod_utils.dart';
 export 'src/riverpod/common_notifiers.dart';
+
+// ========== ADDITIONAL EXTERNAL PACKAGES ==========
+// Firebase
+export 'package:firebase_core/firebase_core.dart';
+export 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+export 'package:firebase_analytics/firebase_analytics.dart';
+export 'package:firebase_crashlytics/firebase_crashlytics.dart';
+export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
+
+// Storage and Preferences
+export 'package:hive/hive.dart';
+export 'package:hive_flutter/hive_flutter.dart';
+export 'package:shared_preferences/shared_preferences.dart';
+
+// Dependency Injection
+export 'package:get_it/get_it.dart';
+export 'package:injectable/injectable.dart' hide Environment, order;
+
+// Functional Programming
+export 'package:dartz/dartz.dart' hide Order, State, id;
+export 'package:equatable/equatable.dart';
+
+// Connectivity and Network
+export 'package:connectivity_plus/connectivity_plus.dart';
+
+// Notifications and Timing
+export 'package:flutter_local_notifications/flutter_local_notifications.dart';
+export 'package:timezone/timezone.dart';
+
+// URL Launcher
+export 'package:url_launcher/url_launcher.dart';
+
+// Package Info
+export 'package:package_info_plus/package_info_plus.dart';
+
+// Internationalization
+export 'package:intl/intl.dart';
+
+// JSON Serialization
+export 'package:json_annotation/json_annotation.dart';
+
+// Icons and Sharing
+export 'package:font_awesome_flutter/font_awesome_flutter.dart';
+export 'package:share_plus/share_plus.dart';
+
+// Subscriptions
+export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;

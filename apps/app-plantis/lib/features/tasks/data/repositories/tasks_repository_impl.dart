@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart' hide Task;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
@@ -75,7 +74,7 @@ class TasksRepositoryImpl implements TasksRepository {
       final userId = await _currentUserId;
       if (userId == null) {
         // CRITICAL FIX: Return proper error instead of empty list for unauthenticated users
-        return Left(AuthFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
+        return const Left(ServerFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
       }
 
       // Always get from local first for instant UI response
@@ -101,7 +100,7 @@ class TasksRepositoryImpl implements TasksRepository {
           if (kDebugMode) {
             print('❌ TasksRepository: Remote fetch failed: $e');
           }
-          return Left(NetworkFailure('Falha ao sincronizar tarefas: ${e.toString()}'));
+          return Left(ServerFailure('Falha ao sincronizar tarefas: ${e.toString()}'));
         }
       } else {
         return Right(
@@ -510,14 +509,14 @@ class TasksRepositoryImpl implements TasksRepository {
 
       // Return local data immediately (or error if not found)
       if (localTask != null) {
-        return Right(localTask);
+        return Right(localTask as Task);
       } else {
-        return const Left(NotFoundFailure('Tarefa não encontrada'));
+        return const Left(ServerFailure('Tarefa não encontrada'));
       }
     } on Exception {
       final localTask = await localDataSource.getTaskById(id);
       if (localTask != null) {
-        return Right(localTask);
+        return Right(localTask as Task);
       }
       return const Left(ServerFailure('Erro ao buscar tarefa'));
     }
@@ -549,12 +548,12 @@ class TasksRepositoryImpl implements TasksRepository {
       if (await networkInfo.isConnected) {
         final remoteTask = await remoteDataSource.addTask(taskModel, userId);
         await localDataSource.cacheTask(remoteTask);
-        return Right(remoteTask);
+        return Right(remoteTask as Task);
       } else {
         // Offline: marca como dirty para sincronizar depois
         final offlineTask = taskModel.markAsDirty();
         await localDataSource.cacheTask(offlineTask);
-        return Right(offlineTask);
+        return Right(offlineTask as Task);
       }
     } on Exception {
       return const Left(ServerFailure('Erro ao adicionar tarefa'));
@@ -574,12 +573,12 @@ class TasksRepositoryImpl implements TasksRepository {
       if (await networkInfo.isConnected) {
         final remoteTask = await remoteDataSource.updateTask(taskModel, userId);
         await localDataSource.updateTask(remoteTask);
-        return Right(remoteTask);
+        return Right(remoteTask as Task);
       } else {
         // Offline: marca como dirty para sincronizar depois
         final offlineTask = taskModel.markAsDirty();
         await localDataSource.updateTask(offlineTask);
-        return Right(offlineTask);
+        return Right(offlineTask as Task);
       }
     } on Exception catch (e) {
       return Left(ServerFailure('Erro ao atualizar tarefa: ${e.toString()}'));
@@ -654,7 +653,7 @@ class TasksRepositoryImpl implements TasksRepository {
       if (!completedTask.isRecurring ||
           completedTask.recurringIntervalDays == null) {
         return const Left(
-          ValidationFailure(
+          ServerFailure(
             'Tarefa não é recorrente ou não tem intervalo definido',
           ),
         );

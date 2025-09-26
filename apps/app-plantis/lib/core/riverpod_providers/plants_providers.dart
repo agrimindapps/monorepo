@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../auth/auth_state_notifier.dart';
 import '../../features/plants/domain/entities/plant.dart';
@@ -10,7 +9,7 @@ import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
 
-part 'plants_providers.g.dart';
+// part 'plants_providers.g.dart';
 
 /// Plants State model for Riverpod state management
 class PlantsState {
@@ -1017,158 +1016,70 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   }
 }
 
-/// Main Plants provider using Riverpod
-@riverpod
-class Plants extends _$Plants {
-  PlantsNotifier? _notifier;
-
-  @override
-  FutureOr<PlantsState> build() async {
-    _notifier = PlantsNotifier();
-    ref.onDispose(() {
-      // Cleanup subscriptions
-      _notifier?._authSubscription?.cancel();
-      _notifier?._realtimeDataSubscription?.cancel();
-    });
-
-    // Note: Notifier already has access to ref through AsyncNotifier superclass
-    return await _notifier!.build();
-  }
-
-  /// Refresh plants data
-  Future<void> refreshPlants() async {
-    if (_notifier != null) {
-      await _notifier!.loadInitialData();
-      _syncState();
-    }
-  }
-
-  /// Load initial data
-  Future<void> loadInitialData() async {
-    if (_notifier != null) {
-      await _notifier!.loadInitialData();
-      _syncState();
-    }
-  }
-
-  /// Search plants
-  Future<void> searchPlants(String query) async {
-    if (_notifier != null) {
-      await _notifier!.searchPlants(query);
-      _syncState();
-    }
-  }
-
-  /// Clear search
-  Future<void> clearSearch() async {
-    if (_notifier != null) {
-      _notifier!.clearSearch();
-      _syncState();
-    }
-  }
-
-  /// Set view mode
-  void setViewMode(ViewMode mode) {
-    if (_notifier != null) {
-      _notifier!.setViewMode(mode);
-      _syncState();
-    }
-  }
-
-  /// Set sort by
-  void setSortBy(SortBy sort) {
-    if (_notifier != null) {
-      _notifier!.setSortBy(sort);
-      _syncState();
-    }
-  }
-
-  /// Set space filter
-  void setSpaceFilter(String? spaceId) {
-    if (_notifier != null) {
-      _notifier!.setSpaceFilter(spaceId);
-      _syncState();
-    }
-  }
-
-  /// Sync state from notifier to provider
-  void _syncState() {
-    if (_notifier != null) {
-      final newState = _notifier!.state.valueOrNull ?? const PlantsState();
-      state = AsyncData(newState);
-    }
-  }
-}
+/// Main Plants provider using standard Riverpod
+final plantsProvider = AsyncNotifierProvider<PlantsNotifier, PlantsState>(() {
+  return PlantsNotifier();
+});
 
 // Compatibility providers for legacy code
-@riverpod
-List<Plant> allPlants(AllPlantsRef ref) {
+final allPlantsProvider = Provider<List<Plant>>((ref) {
   final plantsState = ref.watch(plantsProvider);
   return plantsState.maybeWhen(
-    data: (state) => state.allPlants,
-    orElse: () => [],
+    data: (PlantsState state) => state.allPlants,
+    orElse: () => <Plant>[],
   );
-}
+});
 
-@riverpod
-List<Plant> filteredPlants(FilteredPlantsRef ref) {
+final filteredPlantsProvider = Provider<List<Plant>>((ref) {
   final plantsState = ref.watch(plantsProvider);
   return plantsState.maybeWhen(
-    data: (state) => state.filteredPlants,
-    orElse: () => [],
+    data: (PlantsState state) => state.filteredPlants,
+    orElse: () => <Plant>[],
   );
-}
+});
 
-@riverpod
-bool plantsIsLoading(PlantsIsLoadingRef ref) {
+final plantsIsLoadingProvider = Provider<bool>((ref) {
   final plantsState = ref.watch(plantsProvider);
   return plantsState.maybeWhen(
-    data: (state) => state.isLoading,
+    data: (PlantsState state) => state.isLoading,
     loading: () => true,
     orElse: () => false,
   );
-}
+});
 
-@riverpod
-String? plantsError(PlantsErrorRef ref) {
+final plantsErrorProvider = Provider<String?>((ref) {
   final plantsState = ref.watch(plantsProvider);
   return plantsState.maybeWhen(
-    data: (state) => state.error,
-    error: (error, _) => error.toString(),
+    data: (PlantsState state) => state.error,
+    error: (Object error, _) => error.toString(),
     orElse: () => null,
   );
-}
+});
 
 // Dependency providers (these would need to be implemented based on your DI setup)
-@riverpod
-GetPlantsUseCase getPlantsUseCase(GetPlantsUseCaseRef ref) {
+final getPlantsUseCaseProvider = Provider<GetPlantsUseCase>((ref) {
   throw UnimplementedError('GetPlantsUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
+final getPlantByIdUseCaseProvider = Provider<GetPlantByIdUseCase>((ref) {
   throw UnimplementedError('GetPlantByIdUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-SearchPlantsUseCase searchPlantsUseCase(SearchPlantsUseCaseRef ref) {
+final searchPlantsUseCaseProvider = Provider<SearchPlantsUseCase>((ref) {
   throw UnimplementedError('SearchPlantsUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-AddPlantUseCase addPlantUseCase(AddPlantUseCaseRef ref) {
+final addPlantUseCaseProvider = Provider<AddPlantUseCase>((ref) {
   throw UnimplementedError('AddPlantUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
+final updatePlantUseCaseProvider = Provider<UpdatePlantUseCase>((ref) {
   throw UnimplementedError('UpdatePlantUseCase provider needs to be implemented');
-}
+});
 
-@riverpod
-DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
+final deletePlantUseCaseProvider = Provider<DeletePlantUseCase>((ref) {
   throw UnimplementedError('DeletePlantUseCase provider needs to be implemented');
-}
+});
 
 // Enums (ensure these are defined elsewhere or define them here)
 enum ViewMode { grid, list, groupedBySpaces, groupedBySpacesGrid, groupedBySpacesList }

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/core.dart' hide Consumer;
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 
@@ -929,7 +929,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
                   });
                   // Anunciar mudança para screen readers
                   final message = _obscureLoginPassword ? 'Senha oculta' : 'Senha visível';
-                  SemanticsService.announce(message, TextDirection.ltr);
+                  SemanticsService.announce(message, ui.TextDirection.ltr);
                 },
               ),
             ),
@@ -1419,7 +1419,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
                   });
                   // Anunciar mudança para screen readers
                   final message = _obscureRegisterPassword ? 'Senha oculta' : 'Senha visível';
-                  SemanticsService.announce(message, TextDirection.ltr);
+                  SemanticsService.announce(message, ui.TextDirection.ltr);
                 },
               ),
             ),
@@ -1463,7 +1463,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
                   });
                   // Anunciar mudança para screen readers
                   final message = _obscureRegisterConfirmPassword ? 'Confirmação de senha oculta' : 'Confirmação de senha visível';
-                  SemanticsService.announce(message, TextDirection.ltr);
+                  SemanticsService.announce(message, ui.TextDirection.ltr);
                 },
               ),
             ),

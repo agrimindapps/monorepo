@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
+import '../../../../core/riverpod_providers/tasks_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../../../../shared/widgets/feedback/feedback.dart';
-import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../../../plants/presentation/providers/plants_provider.dart';
-import '../../../../core/riverpod_providers/tasks_providers.dart';
-import '../../../../core/riverpod_providers/plants_providers.dart' as riverpod_plants;
 import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
@@ -199,10 +195,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Consumer(
-                        builder: (context, ref, child) {
+                        builder: (context, WidgetRef ref, child) {
                           final tasksAsync = ref.watch(tasksProvider);
                           return tasksAsync.when(
-                            data: (tasksState) {
+                            data: (TasksState tasksState) {
                               final state = TasksListState(
                                 isLoading: false,
                                 hasError: false,
@@ -224,7 +220,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                               );
                               return _buildTasksContent(state);
                             },
-                            error: (error, stack) {
+                            error: (Object error, StackTrace stack) {
                               final state = TasksListState(
                                 isLoading: false,
                                 hasError: true,
@@ -251,7 +247,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildHeader(BuildContext context) {
     return Consumer(
-      builder: (context, ref, _) {
+      builder: (context, WidgetRef ref, _) {
         final tasksAsync = ref.watch(tasksProvider);
         final tasksCount = tasksAsync.maybeWhen(
           data: (state) => state.allTasks.length,
@@ -280,12 +276,12 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildSimpleFilters(BuildContext context) {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (context, WidgetRef ref, child) {
         final tasksAsync = ref.watch(tasksProvider);
         return tasksAsync.when(
-          data: (tasksState) => _buildFiltersContent(tasksState, ref),
+          data: (TasksState tasksState) => _buildFiltersContent(tasksState, ref),
           loading: () => const SizedBox.shrink(),
-          error: (error, stack) => const SizedBox.shrink(),
+          error: (Object error, StackTrace stack) => const SizedBox.shrink(),
         );
       },
     );
@@ -368,10 +364,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildTasksList() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (context, WidgetRef ref, child) {
         final tasksAsync = ref.watch(tasksProvider);
         return tasksAsync.when(
-          data: (tasksState) {
+          data: (TasksState tasksState) {
             final data = TasksListData(
               filteredTasks: tasksState.filteredTasks,
               isLoading: false,
@@ -389,7 +385,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             );
             return _buildTasksListContent(data);
           },
-          error: (error, stack) {
+          error: (Object error, StackTrace stack) {
             return Center(
               child: Text('Error loading tasks: $error'),
             );
@@ -496,10 +492,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final theme = Theme.of(context);
 
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (context, WidgetRef ref, child) {
         final tasksAsync = ref.watch(tasksProvider);
         final isLoading = tasksAsync.maybeWhen(
-          data: (state) => state.individualTaskOperations.containsKey(task.id),
+          data: (TasksState state) => state.individualTaskOperations.containsKey(task.id),
           orElse: () => false,
         );
         return _buildTaskCardContent(task, isLoading, theme, ref);
@@ -613,7 +609,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     if (result != null && context.mounted) {
       try {
         // Complete the task using the provider
-        await ref.read(tasksProvider.notifier).completeTask(task);
+        await ref.read(tasksProvider.notifier).completeTask(task.id);
 
         if (context.mounted) {
           // Show success feedback
@@ -692,11 +688,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildViewAllButton() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (context, WidgetRef ref, child) {
         final theme = Theme.of(context);
         final tasksAsync = ref.watch(tasksProvider);
         final remainingTasks = tasksAsync.maybeWhen(
-          data: (state) => state.allTasks.length - state.filteredTasks.length,
+          data: (TasksState state) => state.allTasks.length - state.filteredTasks.length,
           orElse: () => 0,
         );
         return _buildViewAllButtonContent(remainingTasks, theme, ref);
@@ -729,11 +725,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildOperationOverlay() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (context, WidgetRef ref, child) {
         final theme = Theme.of(context);
         final tasksAsync = ref.watch(tasksProvider);
         return tasksAsync.when(
-          data: (tasksState) => Positioned(
+          data: (TasksState tasksState) => Positioned(
       top: 0,
       left: 0,
       right: 0,
@@ -767,7 +763,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             const SizedBox(width: 12),
             Flexible(
               child: Text(
-                tasksState.currentOperationMessage ?? 'Processando...',
+                tasksState.currentOperationMessage?.toString() ?? 'Processando...',
                 style: TextStyle(
                   color: theme.colorScheme.onPrimary,
                   fontSize: 14,
@@ -848,16 +844,16 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     }
 
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (context, WidgetRef ref, child) {
         return RefreshIndicator(
           onRefresh: () => ref.read(tasksProvider.notifier).loadTasks(),
           child: Stack(
             children: [
               Consumer(
-                builder: (context, ref, child) {
+                builder: (context, WidgetRef ref, child) {
                   final tasksAsync = ref.watch(tasksProvider);
                   return tasksAsync.when(
-                    data: (tasksState) {
+                    data: (TasksState tasksState) {
                       final data = TasksListData(
                         filteredTasks: tasksState.filteredTasks,
                         isLoading: false,
@@ -875,7 +871,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                       );
                       return _buildTasksListContent(data);
                     },
-                    error: (error, stack) {
+                    error: (Object error, StackTrace stack) {
                       return Center(
                         child: Text('Error loading tasks: $error'),
                       );

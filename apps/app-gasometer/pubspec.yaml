@@ -11,19 +11,15 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados
+  # Core Package - Serviços compartilhados (Firebase, Riverpod, Hive, GetIt, Injectable, Provider, dartz, equatable, etc.)
   core:
     path: ../../packages/core
 
-  # Dependency Injection
-  get_it: ^8.2.0
-  injectable: ^2.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  injectable_generator: ^2.6.2
 
 # The following section is specific to Flutter packages.
 flutter:

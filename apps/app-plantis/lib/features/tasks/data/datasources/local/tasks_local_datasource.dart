@@ -1,7 +1,8 @@
 import 'package:core/core.dart';
+
+import '../../../../../core/constants/plantis_environment_config.dart';
 import '../../../domain/entities/task.dart';
 import '../../models/task_model.dart';
-import '../../../../../core/constants/plantis_environment_config.dart';
 
 abstract class TasksLocalDataSource {
   Future<List<TaskModel>> getTasks();

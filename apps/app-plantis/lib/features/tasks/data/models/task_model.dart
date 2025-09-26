@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Task;
 import '../../domain/entities/task.dart';
 
 class TaskModel extends Task {
@@ -149,6 +149,7 @@ class TaskModel extends Task {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,

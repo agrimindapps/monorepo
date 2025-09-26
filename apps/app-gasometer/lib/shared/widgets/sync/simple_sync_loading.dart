@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
@@ -106,7 +107,7 @@ class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.ltr,
+      textDirection: ui.TextDirection.ltr,
       child: Center(
         child: Material(
           color: Colors.transparent,

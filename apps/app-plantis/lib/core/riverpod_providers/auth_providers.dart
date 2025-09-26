@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide User;
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../auth/auth_state_notifier.dart';
 import '../di/injection_container.dart' as di;
@@ -15,7 +13,7 @@ import '../../features/device_management/domain/usecases/revoke_device_usecase.d
 import '../../features/device_management/domain/usecases/validate_device_usecase.dart' as device_validation;
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 
-part 'auth_providers.g.dart';
+// part 'auth_providers.g.dart';
 
 /// Auth State model for Riverpod state management
 class AuthState {
@@ -695,105 +693,48 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 }
 
-/// Auth provider using Riverpod
-@riverpod
-class Auth extends _$Auth {
-  AuthNotifier? _notifier;
-
-  @override
-  FutureOr<AuthState> build() async {
-    _notifier = AuthNotifier();
-    ref.onDispose(() {
-      // Cleanup subscriptions
-      _notifier?._userSubscription?.cancel();
-      _notifier?._subscriptionStream?.cancel();
-    });
-    return await _notifier!.build();
-  }
-
-  /// Login method
-  Future<void> login(String email, String password) async {
-    if (_notifier != null) {
-      await _notifier!.login(email, password);
-      // Update state from notifier
-      final newState = _notifier!.state.valueOrNull ?? const AuthState();
-      state = AsyncData(newState);
-    }
-  }
-
-  /// Register method
-  Future<void> register(String email, String password, String name) async {
-    if (_notifier != null) {
-      await _notifier!.register(email, password, name);
-      // Update state from notifier
-      final newState = _notifier!.state.valueOrNull ?? const AuthState();
-      state = AsyncData(newState);
-    }
-  }
-
-  /// Sign in anonymously method
-  Future<void> signInAnonymously() async {
-    if (_notifier != null) {
-      await _notifier!.signInAnonymously();
-      // Update state from notifier
-      final newState = _notifier!.state.valueOrNull ?? const AuthState();
-      state = AsyncData(newState);
-    }
-  }
-
-  /// Logout method
-  Future<void> logout() async {
-    if (_notifier != null) {
-      await _notifier!.logout();
-      // Update state from notifier
-      final newState = _notifier!.state.valueOrNull ?? const AuthState();
-      state = AsyncData(newState);
-    }
-  }
-}
+/// Main Auth provider using standard Riverpod
+final authProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(() {
+  return AuthNotifier();
+});
 
 /// Legacy compatibility providers
-@riverpod
-UserEntity? currentUser(CurrentUserRef ref) {
+final currentUserProvider = Provider<UserEntity?>((ref) {
   final authState = ref.watch(authProvider);
   return authState.maybeWhen(
-    data: (state) => state.currentUser,
+    data: (AuthState state) => state.currentUser,
     orElse: () => null,
   );
-}
+});
 
-@riverpod
-bool isAuthenticated(IsAuthenticatedRef ref) {
+final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
   return authState.maybeWhen(
-    data: (state) => state.isAuthenticated,
+    data: (AuthState state) => state.isAuthenticated,
     orElse: () => false,
   );
-}
+});
 
-@riverpod
-bool isLoading(IsLoadingRef ref) {
+final isLoadingProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
   return authState.maybeWhen(
-    data: (state) => state.isLoading,
+    data: (AuthState state) => state.isLoading,
     orElse: () => false,
   );
-}
+});
 
-@riverpod
-bool isPremium(IsPremiumRef ref) {
+final isPremiumProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
   return authState.maybeWhen(
-    data: (state) => state.isPremium,
+    data: (AuthState state) => state.isPremium,
     orElse: () => false,
   );
-}
+});
 
-@riverpod
-bool isInitialized(IsInitializedRef ref) {
+final isInitializedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
   return authState.maybeWhen(
-    data: (state) => state.isInitialized,
+    data: (AuthState state) => state.isInitialized,
     orElse: () => false,
   );
-}
+});

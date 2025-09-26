@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../domain/entities/calorie_output.dart';
 import '../providers/calorie_provider.dart';

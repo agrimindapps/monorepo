@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 /// Shared app-level state providers that can be used across different features
 /// without creating circular dependencies.

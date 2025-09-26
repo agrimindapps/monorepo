@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/utils/uuid_generator.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';

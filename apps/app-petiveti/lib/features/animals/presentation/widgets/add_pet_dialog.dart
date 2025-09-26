@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/dialogs/pet_form_dialog.dart';

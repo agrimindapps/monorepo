@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart';
+import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/appointment.dart';
 import '../../domain/usecases/add_appointment.dart';
 import '../../domain/usecases/delete_appointment.dart';
@@ -214,12 +214,12 @@ class AppointmentsNotifier extends StateNotifier<AppointmentState> {
 // Provider instance
 final appointmentsProvider = StateNotifierProvider<AppointmentsNotifier, AppointmentState>((ref) {
   return AppointmentsNotifier(
-    getIt<GetAppointments>(),
-    getIt<GetUpcomingAppointments>(),
-    getIt<GetAppointmentById>(),
-    getIt<AddAppointment>(),
-    getIt<UpdateAppointment>(),
-    getIt<DeleteAppointment>(),
+    di.getIt<GetAppointments>(),
+    di.getIt<GetUpcomingAppointments>(),
+    di.getIt<GetAppointmentById>(),
+    di.getIt<AddAppointment>(),
+    di.getIt<UpdateAppointment>(),
+    di.getIt<DeleteAppointment>(),
   );
 });
 

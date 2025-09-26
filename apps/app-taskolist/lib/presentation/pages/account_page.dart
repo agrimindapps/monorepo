@@ -1,9 +1,9 @@
 import 'package:core/core.dart' show UserEntity, AuthProvider;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../domain/entities/subscription_status.dart';
+import '../../domain/entities/subscription_status.dart' as local_sub;
 import '../pages/notification_settings_page.dart';
 import '../pages/premium_page.dart';
 import '../providers/auth_providers.dart';
@@ -53,7 +53,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   Widget _buildAccountContent(
     BuildContext context, 
     UserEntity user, 
-    AsyncValue<SubscriptionStatus> subscriptionState
+    AsyncValue<local_sub.SubscriptionStatus> subscriptionState
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -189,7 +189,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildSubscriptionSection(AsyncValue<SubscriptionStatus> subscriptionState) {
+  Widget _buildSubscriptionSection(AsyncValue<local_sub.SubscriptionStatus> subscriptionState) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -510,17 +510,21 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   void _showDeleteAccountDialog() {
     final authState = ref.read(authNotifierProvider);
     
-    authState.whenData((user) async {
-      if (user == null) return;
+    authState.when(
+      data: (user) async {
+        if (user == null) return;
 
-      await showDeleteAccountConfirmation(
-        context: context,
-        userEmail: user.email,
-        onConfirmed: () async {
-          _deleteAccount();
-        },
-      );
-    });
+        await showDeleteAccountConfirmation(
+          context: context,
+          userEmail: user.email,
+          onConfirmed: () async {
+            _deleteAccount();
+          },
+        );
+      },
+      loading: () {},
+      error: (error, stackTrace) {},
+    );
   }
 
   // Action methods

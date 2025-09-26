@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
-import '../../../core/errors/failures.dart';
+import '../../../core/errors/failures.dart' as local;
 import '../../../core/theme/app_colors.dart';
 import '../../providers/auth_providers.dart';
 import 'register_page.dart';
@@ -49,7 +49,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         setState(() => _isLoading = false);
         String errorMessage = 'Erro ao fazer login';
 
-        if (e is Failure) {
+        if (e is local.Failure) {
           errorMessage = e.message;
         } else {
           errorMessage = e.toString();

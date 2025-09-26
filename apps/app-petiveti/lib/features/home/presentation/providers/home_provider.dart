@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../animals/domain/entities/animal_enums.dart';
 import '../../../animals/presentation/providers/animals_provider.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../domain/entities/usage_stats.dart' as local_stats;
 import '../../domain/entities/user_limits.dart' as local;

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/app_spacing.dart';

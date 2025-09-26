@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart';
 
 import '../../../../shared/constants/body_condition_constants.dart';
 import '../providers/body_condition_provider.dart';
@@ -281,7 +280,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
   /// Build the result tab
   Widget _buildResultTab() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final output = ref.watch(bodyConditionOutputProvider);
         
         if (output == null) {
@@ -299,7 +298,7 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
   /// Build the history tab
   Widget _buildHistoryTab() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final history = ref.watch(bodyConditionHistoryProvider);
         
         if (history.isEmpty) {

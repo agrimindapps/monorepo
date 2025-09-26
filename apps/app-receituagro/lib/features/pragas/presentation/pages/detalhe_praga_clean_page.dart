@@ -20,11 +20,13 @@ import '../widgets/praga_info_widget.dart';
 /// Responsabilidade única: coordenar providers e widgets especializados
 class DetalhePragaCleanPage extends StatefulWidget {
   final String pragaName;
+  final String? pragaId;
   final String pragaScientificName;
 
   const DetalhePragaCleanPage({
     super.key,
     required this.pragaName,
+    this.pragaId,
     required this.pragaScientificName,
   });
 
@@ -65,10 +67,15 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
   Future<void> _loadInitialData() async {
     try {
       // Inicializar provider da praga (operação local - sem timeout)
-      await _pragaProvider.initializeAsync(
-        widget.pragaName, 
-        widget.pragaScientificName
-      );
+      // Preferir ID quando disponível para melhor precisão
+      if (widget.pragaId != null && widget.pragaId!.isNotEmpty) {
+        await _pragaProvider.initializeById(widget.pragaId!);
+      } else {
+        await _pragaProvider.initializeAsync(
+          widget.pragaName, 
+          widget.pragaScientificName
+        );
+      }
 
       // Aguardar um frame para garantir que o provider foi inicializado
       await Future<void>.delayed(const Duration(milliseconds: 100));

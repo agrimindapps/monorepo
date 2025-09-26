@@ -2,11 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import 'core/database/hive_config.dart';
 import 'core/di/injection_container.dart' as di;
-import 'core/services/navigation_service.dart';
+import 'core/services/navigation_service.dart' as local_nav;
 import 'core/services/notification_actions_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/notification_test_helper.dart';
@@ -52,7 +52,7 @@ void main() async {
   final providerContainer = ProviderContainer();
 
   // Inicializar serviços com container
-  NavigationService.initialize(providerContainer);
+  local_nav.NavigationService.initialize(providerContainer);
   NotificationActionsService.initialize(providerContainer);
 
   runApp(
@@ -139,7 +139,7 @@ void _handleNotificationTap(String? payload) {
 
   if (payload != null) {
     // Usar NavigationService para gerenciar navegação
-    NavigationService.navigateFromNotification(payload);
+    local_nav.NavigationService.navigateFromNotification(payload);
   }
 }
 
@@ -163,7 +163,7 @@ class TaskManagerApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      navigatorKey: NavigationService.navigatorKey,
+      navigatorKey: local_nav.NavigationService.navigatorKey,
       home: const PromotionalPage(),
     );
   }

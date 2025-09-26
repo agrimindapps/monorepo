@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/weight.dart';
 import '../../domain/repositories/weight_repository.dart';
 import '../../domain/usecases/add_weight.dart';
@@ -174,7 +174,7 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
   Future<void> loadWeights() async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getWeights(const NoParams());
+    final result = await _getWeights(const local.NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(

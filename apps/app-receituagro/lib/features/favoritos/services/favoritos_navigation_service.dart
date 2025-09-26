@@ -64,6 +64,7 @@ class FavoritosNavigationService {
         final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalhePraga(
           pragaName: pragaReal.nomeComum,
+          pragaId: pragaReal.idReg, // Use ID for better precision
           pragaScientificName: pragaReal.nomeCientifico.isNotEmpty
               ? pragaReal.nomeCientifico
               : 'Nome científico não disponível',

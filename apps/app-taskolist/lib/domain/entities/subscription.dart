@@ -1,11 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'subscription_status.dart';
+import 'package:core/core.dart';
+import 'subscription_status.dart' as local;
 
 class Subscription {
   static final subscriptionStatusProvider = 
-    StreamProvider<SubscriptionStatus>((ref) async* {
+    StreamProvider<local.SubscriptionStatus>((ref) async* {
       // TODO: Implement actual subscription status stream
-      yield const SubscriptionStatus(
+      yield const local.SubscriptionStatus(
         isActive: false,
         expirationDate: null,
       );

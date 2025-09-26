@@ -89,6 +89,31 @@ class DetalhePragaProvider extends ChangeNotifier {
     await _loadComentarios();
   }
 
+  /// Initialize usando ID da praga para melhor precisão
+  Future<void> initializeById(String pragaId) async {
+    // Buscar praga pelo ID
+    _pragaData = _pragasRepository.getAll()
+        .where((p) => p.idReg == pragaId || p.objectId == pragaId)
+        .firstOrNull;
+    
+    if (_pragaData != null) {
+      _pragaName = _pragaData!.nomeComum;
+      _pragaScientificName = _pragaData!.nomeCientifico;
+      
+      debugPrint('✅ [PRAGA] Praga carregada por ID: $pragaId -> ${_pragaData!.nomeComum}');
+      
+      await _loadFavoritoStateAsync();
+      await _loadPragaSpecificInfo();
+      _loadPremiumStatus();
+      await _loadComentarios();
+    } else {
+      debugPrint('❌ [PRAGA] Praga não encontrada para ID: $pragaId');
+      // Fallback: deixar campos vazios para mostrar erro na UI
+      _pragaName = '';
+      _pragaScientificName = '';
+    }
+  }
+
   /// Carrega estado de favorito da praga usando sistema simplificado consistente
   Future<void> _loadFavoritoState() async {
     // Busca a praga real pelo nome para obter o ID único

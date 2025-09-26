@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/enums/task_filter.dart';
 import '../../core/theme/app_colors.dart';
+import '../../domain/entities/task_entity.dart';
 import '../pages/settings_page.dart';
 import '../providers/auth_providers.dart';
 import '../providers/task_providers.dart';
@@ -331,11 +332,11 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
         ),
       ),
       child: Consumer(
-        builder: (context, ref, child) {
-          return FutureBuilder(
+        builder: (context, WidgetRef ref, child) {
+          return FutureBuilder<List<TaskEntity>>(
             future: ref.read(getTasksProvider(const GetTasksRequest()).future),
             builder: (context, snapshot) {
-              final tasks = snapshot.data ?? [];
+              final tasks = snapshot.data ?? <TaskEntity>[];
               final pendingCount = tasks.where((t) => t.status.name == 'pending').length;
               final completedCount = tasks.where((t) => t.status.name == 'completed').length;
               final totalCount = tasks.length;

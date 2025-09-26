@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
+import '../../features/pragas/detalhe_praga_page.dart';
 import '../../features/navigation/main_navigation_page.dart';
 
 /// App router for handling named routes
@@ -27,6 +28,26 @@ class AppRouter {
               builder: (_) => DetalheDefensivoPage(
                 defensivoName: defensivoName,
                 fabricante: fabricante ?? 'N/A',
+              ),
+              settings: settings,
+            );
+          }
+        }
+        // If missing arguments, show error page or navigate to home
+        return _errorRoute(settings);
+
+      case '/praga-detail':
+        if (arguments != null) {
+          final String? pragaName = arguments['pragaName'] as String?;
+          final String? pragaId = arguments['pragaId'] as String?;
+          final String? pragaScientificName = arguments['pragaScientificName'] as String?;
+          
+          if (pragaName != null || pragaId != null) {
+            return MaterialPageRoute(
+              builder: (_) => DetalhePragaPage(
+                pragaName: pragaName ?? '',
+                pragaId: pragaId,
+                pragaScientificName: pragaScientificName ?? '',
               ),
               settings: settings,
             );

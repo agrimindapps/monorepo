@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/usecases/update_task.dart';
 import '../providers/service_providers.dart';
-import 'navigation_service.dart';
+import 'navigation_service.dart' as local_nav;
 
 /// Serviço para gerenciar ações de notificações
 class NotificationActionsService {
@@ -15,7 +15,7 @@ class NotificationActionsService {
   
   /// Executa ação baseada no actionId e payload da notificação
   static Future<void> executeNotificationAction(String actionId, String? payload) async {
-    final context = NavigationService.navigatorKey.currentContext;
+    final context = local_nav.NavigationService.navigatorKey.currentContext;
     
     try {
       debugPrint('🔔 Executing notification action: $actionId, payload: $payload');
@@ -60,7 +60,7 @@ class NotificationActionsService {
         final tasks = await tasksFuture;
         final task = tasks.firstWhere(
           (t) => t.id == taskId,
-          orElse: () => throw TaskNotFoundException(taskId),
+          orElse: () => throw local_nav.TaskNotFoundException(taskId),
         );
         
         // Atualizar status para concluída
@@ -142,7 +142,7 @@ class NotificationActionsService {
       debugPrint('📅 Opening extend deadline dialog for task: $taskId');
       
       // Navegar para tarefa com foco no deadline
-      await NavigationService.navigateFromNotification('task_deadline:$taskId');
+      await local_nav.NavigationService.navigateFromNotification('task_deadline:$taskId');
       
       if (context != null && context.mounted) {
         _showInfoSnackBar(context, '📅 Abrindo opções de prazo...');

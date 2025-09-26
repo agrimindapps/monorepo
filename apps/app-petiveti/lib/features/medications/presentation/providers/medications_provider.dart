@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../../../core/performance/performance_service.dart';
 import '../../domain/entities/medication.dart';
 import '../../domain/repositories/medication_repository.dart';
@@ -84,7 +84,7 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
     return trackAsync('loadMedications', () async {
       state = state.copyWith(isLoading: true, error: null);
 
-      final result = await _getMedications(const NoParams());
+      final result = await _getMedications(const local.NoParams());
 
       result.fold(
         (failure) => state = state.copyWith(
@@ -121,7 +121,7 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
   }
 
   Future<void> loadActiveMedications() async {
-    final result = await _getActiveMedications(const NoParams());
+    final result = await _getActiveMedications(const local.NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -133,7 +133,7 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
   }
 
   Future<void> loadExpiringMedications() async {
-    final result = await _getExpiringSoonMedications(const NoParams());
+    final result = await _getExpiringSoonMedications(const local.NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),

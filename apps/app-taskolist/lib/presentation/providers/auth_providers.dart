@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:core/core.dart' as core;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/auth_service.dart';

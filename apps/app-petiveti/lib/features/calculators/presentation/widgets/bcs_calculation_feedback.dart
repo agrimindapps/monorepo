@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../providers/body_condition_provider.dart';
 import '../../domain/entities/body_condition_output.dart';

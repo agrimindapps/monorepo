@@ -122,6 +122,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       MaterialPageRoute<void>(
         builder: (context) => DetalhePragaPage(
           pragaName: praga.nomeComum,
+          pragaId: praga.idReg, // Use ID for better precision
           pragaScientificName: praga.nomeCientifico.isNotEmpty
               ? praga.nomeCientifico
               : 'Nome científico não disponível',

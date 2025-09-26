@@ -1,6 +1,6 @@
 import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart' hide NotificationSettings;
 
 import '../../domain/entities/notification_stats.dart' as local;
 import '../providers/notification_providers.dart';
@@ -446,11 +446,11 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
           width: double.maxFinite,
           height: 300,
           child: Consumer(
-            builder: (context, ref, child) {
+            builder: (context, WidgetRef ref, child) {
               final pendingAsync = ref.watch(pendingNotificationsProvider);
               
               return pendingAsync.when(
-                data: (notifications) {
+                data: (List<core.PendingNotificationEntity> notifications) {
                   if (notifications.isEmpty) {
                     return const Center(
                       child: Text('Nenhuma notificação pendente'),
@@ -503,7 +503,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
               final navigator = Navigator.of(context);
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               navigator.pop();
-              final success = await ref.read(notificationActionsProvider).cancelAllNotifications();
+              final bool success = await ref.read(notificationActionsProvider).cancelAllNotifications();
               if (mounted) {
                 scaffoldMessenger.showSnackBar(
                   SnackBar(

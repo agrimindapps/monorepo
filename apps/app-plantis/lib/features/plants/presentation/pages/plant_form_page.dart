@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:core/core.dart' hide Provider;
+import 'package:provider/provider.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
-import 'package:core/core.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';

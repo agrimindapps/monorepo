@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/reminder.dart';

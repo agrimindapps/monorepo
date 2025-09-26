@@ -340,6 +340,7 @@ class FavoritosPragasTabWidget extends StatelessWidget {
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     navigationService.navigateToDetalhePraga(
       pragaName: praga.nomeComum,
+      pragaId: praga.id, // Use ID for better precision
       pragaScientificName: praga.nomeCientifico,
     );
   }

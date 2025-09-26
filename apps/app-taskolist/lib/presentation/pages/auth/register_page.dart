@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
-import '../../../core/errors/failures.dart';
+import '../../../core/errors/failures.dart' as local;
 import '../../providers/auth_providers.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
@@ -49,7 +49,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       if (mounted) {
         String errorMessage = 'Erro ao criar conta';
         
-        if (e is Failure) {
+        if (e is local.Failure) {
           errorMessage = e.message;
         } else {
           errorMessage = e.toString();

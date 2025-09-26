@@ -6,11 +6,13 @@ import 'presentation/pages/detalhe_praga_clean_page.dart';
 /// Redireciona para a versão refatorada seguindo Clean Architecture
 class DetalhePragaPage extends StatelessWidget {
   final String pragaName;
+  final String? pragaId;
   final String pragaScientificName;
 
   const DetalhePragaPage({
     super.key,
     required this.pragaName,
+    this.pragaId,
     required this.pragaScientificName,
   });
 
@@ -18,6 +20,7 @@ class DetalhePragaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DetalhePragaCleanPage(
       pragaName: pragaName,
+      pragaId: pragaId,
       pragaScientificName: pragaScientificName,
     );
   }

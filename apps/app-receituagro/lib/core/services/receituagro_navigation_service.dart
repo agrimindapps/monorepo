@@ -181,6 +181,7 @@ class ReceitaAgroNavigationService {
   /// Navigate to praga detail
   Future<void> navigateToDetalhePraga({
     required String pragaName,
+    String? pragaId,
     String? pragaScientificName,
     Map<String, dynamic>? extraData,
   }) async {
@@ -189,6 +190,7 @@ class ReceitaAgroNavigationService {
       pageType: AgriculturalPageType.detalhePraga.value,
       arguments: {
         'pragaName': pragaName,
+        if (pragaId != null) 'pragaId': pragaId,
         if (pragaScientificName != null) 'pragaScientificName': pragaScientificName,
         ...?extraData,
       },

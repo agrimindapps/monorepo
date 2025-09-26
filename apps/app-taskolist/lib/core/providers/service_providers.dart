@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../domain/entities/task_entity.dart';
 import '../../domain/usecases/get_tasks.dart';

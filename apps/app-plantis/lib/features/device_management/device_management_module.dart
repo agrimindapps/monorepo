@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' show ILocalStorageRepository, FirebaseDeviceService;
 import 'package:provider/provider.dart';
 
 import '../../core/auth/auth_state_notifier.dart';

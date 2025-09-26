@@ -202,6 +202,7 @@ class HomePragasProvider extends ChangeNotifier {
       }
       
       return {
+        'id': praga.idReg, // Include ID for better navigation precision
         'name': praga.nomeComum,
         'scientific': praga.nomeCientifico,
         'type': type,

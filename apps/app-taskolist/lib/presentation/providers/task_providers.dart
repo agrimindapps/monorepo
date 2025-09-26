@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/di/injection_container.dart' as di;

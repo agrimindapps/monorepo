@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../domain/calculators/diabetes_insulin_calculator.dart';
 import '../../domain/entities/calculation_result.dart';

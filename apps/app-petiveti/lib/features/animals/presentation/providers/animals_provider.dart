@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/animal.dart';
@@ -118,7 +118,7 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
 
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getAnimals(const NoParams());
+    final result = await _getAnimals(const local.NoParams());
 
     result.fold(
       (failure) {

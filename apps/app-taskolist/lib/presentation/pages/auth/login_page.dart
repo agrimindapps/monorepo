@@ -3,9 +3,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
-import '../../../core/errors/failures.dart';
+import '../../../core/errors/failures.dart' as local;
 import '../../providers/auth_providers.dart';
 import '../../widgets/sync/task_sync_loading.dart';
 import '../home_page.dart';
@@ -543,7 +543,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   String _getErrorMessage(dynamic error) {
-    if (error is Failure) {
+    if (error is local.Failure) {
       return error.message;
     }
     return error.toString();

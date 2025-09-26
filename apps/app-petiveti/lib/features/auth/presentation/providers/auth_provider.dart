@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/di/injection_container.dart';
-import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/user.dart';
-import '../../domain/usecases/auth_usecases.dart';
+import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
 
 enum AuthStatus {
   initial,
@@ -46,18 +46,18 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  final SignInWithEmail _signInWithEmail;
-  final SignUpWithEmail _signUpWithEmail;
-  final SignInWithGoogle _signInWithGoogle;
-  final SignInWithApple _signInWithApple;
-  final SignInWithFacebook _signInWithFacebook;
-  final SignInAnonymously _signInAnonymously;
-  final SignOut _signOut;
-  final GetCurrentUser _getCurrentUser;
-  final SendEmailVerification _sendEmailVerification;
-  final SendPasswordResetEmail _sendPasswordResetEmail;
-  final UpdateProfile _updateProfile;
-  final DeleteAccount _deleteAccount;
+  final auth_usecases.SignInWithEmail _signInWithEmail;
+  final auth_usecases.SignUpWithEmail _signUpWithEmail;
+  final auth_usecases.SignInWithGoogle _signInWithGoogle;
+  final auth_usecases.SignInWithApple _signInWithApple;
+  final auth_usecases.SignInWithFacebook _signInWithFacebook;
+  final auth_usecases.SignInAnonymously _signInAnonymously;
+  final auth_usecases.SignOut _signOut;
+  final auth_usecases.GetCurrentUser _getCurrentUser;
+  final auth_usecases.SendEmailVerification _sendEmailVerification;
+  final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
+  final auth_usecases.UpdateProfile _updateProfile;
+  final auth_usecases.DeleteAccount _deleteAccount;
 
   // Rate limiting properties
   DateTime? _lastLoginAttempt;
@@ -85,7 +85,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _checkAuthState() async {
-    final result = await _getCurrentUser(const NoParams());
+    final result = await _getCurrentUser(const local.NoParams());
     result.fold(
       (failure) => state = state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -157,7 +157,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final params = SignInWithEmailParams(email: email, password: password);
+    final params = auth_usecases.SignInWithEmailParams(email: email, password: password);
     final result = await _signInWithEmail(params);
 
     return result.fold(
@@ -202,7 +202,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       // 1. Fazer login primeiro
-      final params = SignInWithEmailParams(email: email, password: password);
+      final params = auth_usecases.SignInWithEmailParams(email: email, password: password);
       final loginResult = await _signInWithEmail(params);
       
       bool loginSuccess = false;
@@ -275,7 +275,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final params = SignUpWithEmailParams(email: email, password: password, name: name);
+    final params = auth_usecases.SignUpWithEmailParams(email: email, password: password, name: name);
     final result = await _signUpWithEmail(params);
 
     return result.fold(
@@ -303,7 +303,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithGoogle() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInWithGoogle(const NoParams());
+    final result = await _signInWithGoogle(const local.NoParams());
 
     return result.fold(
       (failure) {
@@ -326,7 +326,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithApple() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInWithApple(const NoParams());
+    final result = await _signInWithApple(const local.NoParams());
 
     return result.fold(
       (failure) {
@@ -349,7 +349,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithFacebook() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInWithFacebook(const NoParams());
+    final result = await _signInWithFacebook(const local.NoParams());
 
     return result.fold(
       (failure) {
@@ -372,7 +372,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInAnonymously() async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final result = await _signInAnonymously(const NoParams());
+    final result = await _signInAnonymously(const local.NoParams());
 
     return result.fold(
       (failure) {
@@ -400,7 +400,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _signOut(const NoParams());
+    final result = await _signOut(const local.NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(
@@ -415,7 +415,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> sendEmailVerification() async {
-    final result = await _sendEmailVerification(const NoParams());
+    final result = await _sendEmailVerification(const local.NoParams());
     return result.isRight();
   }
 
@@ -431,7 +431,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> updateProfile(String? name, String? photoUrl) async {
-    final params = UpdateProfileParams(name: name, photoUrl: photoUrl);
+    final params = auth_usecases.UpdateProfileParams(name: name, photoUrl: photoUrl);
     final result = await _updateProfile(params);
 
     return result.fold(
@@ -449,7 +449,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> deleteAccount() async {
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _deleteAccount(const NoParams());
+    final result = await _deleteAccount(const local.NoParams());
 
     return result.fold(
       (failure) {
@@ -510,18 +510,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
-    getIt<SignInWithEmail>(),
-    getIt<SignUpWithEmail>(),
-    getIt<SignInWithGoogle>(),
-    getIt<SignInWithApple>(),
-    getIt<SignInWithFacebook>(),
-    getIt<SignInAnonymously>(),
-    getIt<SignOut>(),
-    getIt<GetCurrentUser>(),
-    getIt<SendEmailVerification>(),
-    getIt<SendPasswordResetEmail>(),
-    getIt<UpdateProfile>(),
-    getIt<DeleteAccount>(),
+    di.getIt<auth_usecases.SignInWithEmail>(),
+    di.getIt<auth_usecases.SignUpWithEmail>(),
+    di.getIt<auth_usecases.SignInWithGoogle>(),
+    di.getIt<auth_usecases.SignInWithApple>(),
+    di.getIt<auth_usecases.SignInWithFacebook>(),
+    di.getIt<auth_usecases.SignInAnonymously>(),
+    di.getIt<auth_usecases.SignOut>(),
+    di.getIt<auth_usecases.GetCurrentUser>(),
+    di.getIt<auth_usecases.SendEmailVerification>(),
+    di.getIt<auth_usecases.SendPasswordResetEmail>(),
+    di.getIt<auth_usecases.UpdateProfile>(),
+    di.getIt<auth_usecases.DeleteAccount>(),
   );
 });
 

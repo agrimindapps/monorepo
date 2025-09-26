@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart';
-import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/promo_content.dart';
 import '../../domain/usecases/get_promo_content.dart';
 import '../../domain/usecases/submit_pre_registration.dart';
@@ -9,9 +9,9 @@ import '../../domain/usecases/track_analytics.dart';
 import '../states/promo_state.dart';
 
 // Providers para os use cases
-final getPromoContentProvider = Provider<GetPromoContent>((ref) => getIt<GetPromoContent>());
-final submitPreRegistrationProvider = Provider<SubmitPreRegistration>((ref) => getIt<SubmitPreRegistration>());
-final trackAnalyticsProvider = Provider<TrackAnalytics>((ref) => getIt<TrackAnalytics>());
+final getPromoContentProvider = Provider<GetPromoContent>((ref) => di.getIt<GetPromoContent>());
+final submitPreRegistrationProvider = Provider<SubmitPreRegistration>((ref) => di.getIt<SubmitPreRegistration>());
+final trackAnalyticsProvider = Provider<TrackAnalytics>((ref) => di.getIt<TrackAnalytics>());
 
 // Provider principal para o estado da promo
 final promoProvider = StateNotifierProvider<PromoNotifier, PromoState>((ref) {
@@ -39,7 +39,7 @@ class PromoNotifier extends StateNotifier<PromoState> {
     
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getPromoContent(NoParams());
+    final result = await _getPromoContent(local.NoParams());
     
     result.fold(
       (failure) => state = state.copyWith(

@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/di/injection_container.dart';
+import 'package:core/core.dart';
+import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/reminder.dart';
 import '../../domain/usecases/add_reminder.dart';
 import '../../domain/usecases/delete_reminder.dart';
@@ -183,13 +183,13 @@ class RemindersNotifier extends StateNotifier<RemindersState> {
 
 final remindersProvider = StateNotifierProvider<RemindersNotifier, RemindersState>((ref) {
   return RemindersNotifier(
-    getIt<GetReminders>(),
-    getIt<GetTodayReminders>(),
-    getIt<GetOverdueReminders>(),
-    getIt<AddReminder>(),
-    getIt<UpdateReminder>(),
-    getIt<CompleteReminder>(),
-    getIt<SnoozeReminder>(),
-    getIt<DeleteReminder>(),
+    di.getIt<GetReminders>(),
+    di.getIt<GetTodayReminders>(),
+    di.getIt<GetOverdueReminders>(),
+    di.getIt<AddReminder>(),
+    di.getIt<UpdateReminder>(),
+    di.getIt<CompleteReminder>(),
+    di.getIt<SnoozeReminder>(),
+    di.getIt<DeleteReminder>(),
   );
 });

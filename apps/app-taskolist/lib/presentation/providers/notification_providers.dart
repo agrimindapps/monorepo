@@ -1,5 +1,5 @@
 import 'package:core/core.dart' as core;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../domain/entities/notification_stats.dart' as local_stats;

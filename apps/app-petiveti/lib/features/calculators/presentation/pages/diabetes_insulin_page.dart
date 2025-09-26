@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart';
 
 import '../providers/diabetes_insulin_provider.dart';

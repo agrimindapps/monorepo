@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../infrastructure/services/subscription_service.dart';

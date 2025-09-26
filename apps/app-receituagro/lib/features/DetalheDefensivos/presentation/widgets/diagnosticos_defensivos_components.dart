@@ -1285,10 +1285,12 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
   void _navigateToPraga(BuildContext context) {
     final nomePraga = _getProperty('nomePraga', 'grupo');
     final nomeComumPraga = _getProperty('nomeComumPraga', 'nomeComum');
+    final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga'); // Try to get praga ID
 
     if (nomePraga != null) {
       navigationService.navigateToDetalhePraga(
         pragaName: nomePraga,
+        pragaId: idPraga, // Include ID if available
         pragaScientificName: nomeComumPraga,
       );
     }

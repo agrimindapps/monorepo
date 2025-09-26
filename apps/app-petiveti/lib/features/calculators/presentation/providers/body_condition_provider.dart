@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/body_condition_input.dart';

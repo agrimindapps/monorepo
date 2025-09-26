@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import '../providers/auth_provider.dart';
 import 'register_page_coordinator.dart';
 

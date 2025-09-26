@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import 'subscription_page_coordinator.dart';
 
 /// Widget responsible for displaying empty state when no subscription plans are available

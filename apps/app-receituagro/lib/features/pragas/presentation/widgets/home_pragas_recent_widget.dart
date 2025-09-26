@@ -127,6 +127,7 @@ class HomePragasRecentWidget extends StatelessWidget {
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     navigationService.navigateToDetalhePraga(
       pragaName: pragaName,
+      pragaId: praga.idReg, // Use ID for better precision
       pragaScientificName: scientificName,
     );
   }

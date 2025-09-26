@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart';
+import '../../../../core/di/injection_container.dart' as di;
 import '../../data/repositories/defensivo_repository_impl.dart';
 import '../../data/repositories/favorito_repository_impl.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -9,12 +9,12 @@ import '../../domain/usecases/manage_favorito_usecase.dart';
 
 /// Provider para o repositório de defensivos
 final defensivoRepositoryProvider = Provider((ref) {
-  return DefensivoRepositoryImpl(sl());
+  return DefensivoRepositoryImpl(di.sl());
 });
 
 /// Provider para o repositório de favoritos
 final favoritoRepositoryProvider = Provider((ref) {
-  return FavoritoRepositoryImpl(sl());
+  return FavoritoRepositoryImpl(di.sl());
 });
 
 /// Provider para o caso de uso de buscar detalhes do defensivo

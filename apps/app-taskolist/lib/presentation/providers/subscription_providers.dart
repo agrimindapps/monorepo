@@ -1,20 +1,19 @@
-import 'package:core/core.dart' as core;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../domain/entities/subscription_status.dart';
+import '../../domain/entities/subscription_status.dart' as local_sub;
 // Local Domain Entities
 import '../../domain/entities/usage_stats.dart' as local;
 import '../../domain/entities/user_limits.dart' as local;
 import '../../infrastructure/services/subscription_service.dart';
 
 class Subscription {
-  static final subscriptionStatusProvider = StateNotifierProvider<SubscriptionStatusNotifier, AsyncValue<SubscriptionStatus>>((ref) {
+  static final subscriptionStatusProvider = StateNotifierProvider<SubscriptionStatusNotifier, AsyncValue<local_sub.SubscriptionStatus>>((ref) {
     return SubscriptionStatusNotifier();
   });
 }
 
-class SubscriptionStatusNotifier extends StateNotifier<AsyncValue<SubscriptionStatus>> {
+class SubscriptionStatusNotifier extends StateNotifier<AsyncValue<local_sub.SubscriptionStatus>> {
   SubscriptionStatusNotifier() : super(const AsyncValue.loading()) {
     _fetchSubscriptionStatus();
   }
@@ -22,11 +21,11 @@ class SubscriptionStatusNotifier extends StateNotifier<AsyncValue<SubscriptionSt
   Future<void> _fetchSubscriptionStatus() async {
     try {
       // TODO: Implement actual subscription status fetching
-      const status = SubscriptionStatus(
+      const status = local_sub.SubscriptionStatus(
         isActive: false, 
         expirationDate: null,
       );
-      state = const AsyncValue.data(status);
+      state = AsyncValue.data(status);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
@@ -44,7 +43,7 @@ final hasPremiumProvider = FutureProvider<bool>((ref) async {
 });
 
 // Provider para o status da subscription atual
-final currentSubscriptionProvider = FutureProvider<core.SubscriptionEntity?>((ref) async {
+final currentSubscriptionProvider = FutureProvider<SubscriptionEntity?>((ref) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.getCurrentSubscription();
 });
@@ -56,7 +55,7 @@ final availableFeaturesProvider = FutureProvider<List<String>>((ref) async {
 });
 
 // Provider para produtos disponíveis
-final availableProductsProvider = FutureProvider<List<core.ProductInfo>>((ref) async {
+final availableProductsProvider = FutureProvider<List<ProductInfo>>((ref) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.getTaskManagerProducts();
 });
@@ -98,7 +97,7 @@ final canCreateTagsProvider = FutureProvider.family<bool, int>((ref, currentTagC
 });
 
 // Provider para o stream de subscription status
-final subscriptionStatusStreamProvider = StreamProvider<core.SubscriptionEntity?>((ref) {
+final subscriptionStatusStreamProvider = StreamProvider<SubscriptionEntity?>((ref) {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return subscriptionService.subscriptionStatus;
 });
@@ -116,7 +115,7 @@ final managementUrlProvider = FutureProvider<String?>((ref) async {
 });
 
 // Provider para histórico de subscriptions
-final subscriptionHistoryProvider = FutureProvider<List<core.SubscriptionEntity>>((ref) async {
+final subscriptionHistoryProvider = FutureProvider<List<SubscriptionEntity>>((ref) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.getUserSubscriptions();
 });

@@ -307,6 +307,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
             context,
             suggestion['name'] as String,
             suggestion['scientific'] as String,
+            suggestion['id'] as String, // Pass ID for better precision
           ),
           splashColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
           highlightColor: Colors.transparent,
@@ -394,12 +395,13 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     }
   }
 
-  void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName) {
+  void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName, String pragaId) {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
         builder: (context) => DetalhePragaPage(
           pragaName: pragaName,
+          pragaId: pragaId, // Use ID for better precision
           pragaScientificName: scientificName,
         ),
       ),

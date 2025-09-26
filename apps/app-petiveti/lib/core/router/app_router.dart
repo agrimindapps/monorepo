@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:core/core.dart';
 
 import '../../features/animals/presentation/pages/animals_page.dart';
@@ -36,7 +35,7 @@ import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
 import '../navigation/bottom_navigation.dart';
 
-final appRouterProvider = riverpod.Provider<GoRouter>((ref) {
+final appRouterProvider = Provider<GoRouter>((ref) {
   // CORREÇÃO: Não tentar acessar authProvider imediatamente
   // Sempre começar com splash para dar tempo da inicialização DI
   final initialRoute = '/splash';

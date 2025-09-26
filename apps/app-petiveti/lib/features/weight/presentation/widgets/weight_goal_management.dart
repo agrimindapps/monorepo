@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../animals/presentation/providers/animals_provider.dart';
 import '../providers/weights_provider.dart';

@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/di/injection_container.dart';
-import '../../../../core/interfaces/usecase.dart';
+import 'package:core/core.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/entities/user_subscription.dart';
 import '../../domain/usecases/subscription_usecases.dart';
@@ -130,7 +130,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> loadAvailablePlans() async {
     state = state.copyWith(isLoadingPlans: true, error: null);
 
-    final result = await _getAvailablePlans(const NoParams());
+    final result = await _getAvailablePlans(const local.NoParams());
 
     result.fold(
       (failure) => state = state.copyWith(
@@ -306,13 +306,13 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
 final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
   return SubscriptionNotifier(
-    getIt<GetAvailablePlans>(),
-    getIt<GetCurrentSubscription>(),
-    getIt<SubscribeToPlan>(),
-    getIt<CancelSubscription>(),
-    getIt<PauseSubscription>(),
-    getIt<ResumeSubscription>(),
-    getIt<UpgradePlan>(),
-    getIt<RestorePurchases>(),
+    di.getIt<GetAvailablePlans>(),
+    di.getIt<GetCurrentSubscription>(),
+    di.getIt<SubscribeToPlan>(),
+    di.getIt<CancelSubscription>(),
+    di.getIt<PauseSubscription>(),
+    di.getIt<ResumeSubscription>(),
+    di.getIt<UpgradePlan>(),
+    di.getIt<RestorePurchases>(),
   );
 });

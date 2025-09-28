@@ -3,13 +3,13 @@ import 'package:core/core.dart';
 /// Serviço de inspeção de database específico do GasOMeter
 /// Integra o DatabaseInspectorService do core package com as boxes do app
 class GasOMeterDatabaseInspectorService {
+
+  GasOMeterDatabaseInspectorService._internal();
   static GasOMeterDatabaseInspectorService? _instance;
   static GasOMeterDatabaseInspectorService get instance {
     _instance ??= GasOMeterDatabaseInspectorService._internal();
     return _instance!;
   }
-
-  GasOMeterDatabaseInspectorService._internal();
 
   /// Instance do serviço do core
   final DatabaseInspectorService _coreInspector = DatabaseInspectorService.instance;

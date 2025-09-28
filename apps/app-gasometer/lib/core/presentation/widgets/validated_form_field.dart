@@ -39,6 +39,45 @@ enum ValidationType {
 
 /// Widget de campo de formulário com validação robusta e feedback visual
 class ValidatedFormField extends StatefulWidget {
+
+  const ValidatedFormField({
+    super.key,
+    this.controller,
+    this.label,
+    this.hint,
+    this.helperText,
+    this.prefixIcon,
+    this.suffix,
+    this.keyboardType = TextInputType.text,
+    this.inputFormatters,
+    this.enabled = true,
+    this.required = false,
+    this.maxLines = 1,
+    this.maxLength,
+    this.obscureText = false,
+    this.textAlign = TextAlign.start,
+    this.validationType = ValidationType.none,
+    this.customValidator,
+    this.validateOnChange = false,
+    this.validateOnFocusOut = true,
+    this.showValidationIcon = true,
+    this.showCharacterCount = false,
+    this.debounceDuration = const Duration(milliseconds: 300),
+    this.minValue,
+    this.maxValue,
+    this.minLength,
+    this.maxLengthValidation,
+    this.pattern,
+    this.currentOdometer,
+    this.initialOdometer,
+    this.tankCapacity,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onSubmitted,
+    this.onValidationChanged,
+    this.decoration,
+    this.textStyle,
+  });
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -84,45 +123,6 @@ class ValidatedFormField extends StatefulWidget {
   // Estilo
   final InputDecoration? decoration;
   final TextStyle? textStyle;
-
-  const ValidatedFormField({
-    super.key,
-    this.controller,
-    this.label,
-    this.hint,
-    this.helperText,
-    this.prefixIcon,
-    this.suffix,
-    this.keyboardType = TextInputType.text,
-    this.inputFormatters,
-    this.enabled = true,
-    this.required = false,
-    this.maxLines = 1,
-    this.maxLength,
-    this.obscureText = false,
-    this.textAlign = TextAlign.start,
-    this.validationType = ValidationType.none,
-    this.customValidator,
-    this.validateOnChange = false,
-    this.validateOnFocusOut = true,
-    this.showValidationIcon = true,
-    this.showCharacterCount = false,
-    this.debounceDuration = const Duration(milliseconds: 300),
-    this.minValue,
-    this.maxValue,
-    this.minLength,
-    this.maxLengthValidation,
-    this.pattern,
-    this.currentOdometer,
-    this.initialOdometer,
-    this.tankCapacity,
-    this.onChanged,
-    this.onEditingComplete,
-    this.onSubmitted,
-    this.onValidationChanged,
-    this.decoration,
-    this.textStyle,
-  });
 
   @override
   State<ValidatedFormField> createState() => _ValidatedFormFieldState();

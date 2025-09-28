@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
@@ -10,28 +9,6 @@ part 'maintenance_model.g.dart';
 @HiveType(typeId: 4)
 // ignore: must_be_immutable
 class MaintenanceModel extends BaseSyncModel {
-  // Base sync fields (required for Hive generation)
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-
-  // Maintenance specific fields
-  @HiveField(10) final String veiculoId;
-  @HiveField(11) final String tipo; // Preventiva, Corretiva, Revisão
-  @HiveField(12) final String descricao;
-  @HiveField(13) final double valor;
-  @HiveField(14) final int data;
-  @HiveField(15) final int odometro;
-  @HiveField(16) final int? proximaRevisao;
-  @HiveField(17) final bool concluida;
-  @HiveField(18) final String? receiptImageUrl;
-  @HiveField(19) final String? receiptImagePath;
 
   MaintenanceModel({
     required this.id,
@@ -64,9 +41,6 @@ class MaintenanceModel extends BaseSyncModel {
           userId: userId,
           moduleName: moduleName,
         );
-
-  @override
-  String get collectionName => 'maintenance';
 
   /// Factory constructor for creating new maintenance
   factory MaintenanceModel.create({
@@ -132,6 +106,59 @@ class MaintenanceModel extends BaseSyncModel {
     );
   }
 
+  /// Create from Firebase map
+  factory MaintenanceModel.fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
+    
+    return MaintenanceModel(
+      id: baseFields['id'] as String,
+      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
+      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
+      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      veiculoId: map['veiculo_id']?.toString() ?? '',
+      tipo: map['tipo']?.toString() ?? '',
+      descricao: map['descricao']?.toString() ?? '',
+      valor: (map['valor'] as num? ?? 0.0).toDouble(),
+      data: (map['data'] as num?)?.toInt() ?? 0,
+      odometro: (map['odometro'] as num?)?.toInt() ?? 0,
+      proximaRevisao: (map['proxima_revisao'] as num?)?.toInt(),
+      concluida: map['concluida'] as bool? ?? false,
+      receiptImageUrl: map['receipt_image_url']?.toString(),
+      receiptImagePath: map['receipt_image_path']?.toString(),
+    );
+  }
+  // Base sync fields (required for Hive generation)
+  @HiveField(0) @override final String id;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
+
+  // Maintenance specific fields
+  @HiveField(10) final String veiculoId;
+  @HiveField(11) final String tipo; // Preventiva, Corretiva, Revisão
+  @HiveField(12) final String descricao;
+  @HiveField(13) final double valor;
+  @HiveField(14) final int data;
+  @HiveField(15) final int odometro;
+  @HiveField(16) final int? proximaRevisao;
+  @HiveField(17) final bool concluida;
+  @HiveField(18) final String? receiptImageUrl;
+  @HiveField(19) final String? receiptImagePath;
+
+  @override
+  String get collectionName => 'maintenance';
+
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
@@ -167,34 +194,6 @@ class MaintenanceModel extends BaseSyncModel {
       'receipt_image_url': receiptImageUrl,
       'receipt_image_path': receiptImagePath,
     };
-  }
-
-  /// Create from Firebase map
-  factory MaintenanceModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
-    return MaintenanceModel(
-      id: baseFields['id'] as String,
-      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
-      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
-      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      veiculoId: map['veiculo_id']?.toString() ?? '',
-      tipo: map['tipo']?.toString() ?? '',
-      descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] as num? ?? 0.0).toDouble(),
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num?)?.toInt() ?? 0,
-      proximaRevisao: (map['proxima_revisao'] as num?)?.toInt(),
-      concluida: map['concluida'] as bool? ?? false,
-      receiptImageUrl: map['receipt_image_url']?.toString(),
-      receiptImagePath: map['receipt_image_path']?.toString(),
-    );
   }
 
   /// copyWith method for immutability

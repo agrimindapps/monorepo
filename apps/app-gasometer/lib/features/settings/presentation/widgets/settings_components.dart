@@ -7,10 +7,6 @@ import 'package:flutter/material.dart';
 
 /// 🎯 Standard settings section with consistent styling
 class SettingsSection extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final List<Widget> children;
-  final EdgeInsetsGeometry? padding;
 
   const SettingsSection({
     super.key,
@@ -19,6 +15,10 @@ class SettingsSection extends StatelessWidget {
     required this.children,
     this.padding,
   });
+  final String title;
+  final String? subtitle;
+  final List<Widget> children;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -57,12 +57,6 @@ class SettingsSection extends StatelessWidget {
 
 /// 🎯 Settings item with switch control
 class SettingsSwitchItem extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final IconData? icon;
-  final bool enabled;
 
   const SettingsSwitchItem({
     super.key,
@@ -73,6 +67,12 @@ class SettingsSwitchItem extends StatelessWidget {
     this.icon,
     this.enabled = true,
   });
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final IconData? icon;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -99,12 +99,6 @@ class SettingsSwitchItem extends StatelessWidget {
 
 /// 🎯 Settings item with navigation arrow
 class SettingsNavigationItem extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final IconData? icon;
-  final Widget? trailing;
-  final bool enabled;
 
   const SettingsNavigationItem({
     super.key,
@@ -115,6 +109,12 @@ class SettingsNavigationItem extends StatelessWidget {
     this.trailing,
     this.enabled = true,
   });
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final Widget? trailing;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -138,13 +138,6 @@ class SettingsNavigationItem extends StatelessWidget {
 
 /// 🎯 Settings item for actions (like buttons)
 class SettingsActionItem extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final IconData? icon;
-  final Color? actionColor;
-  final bool enabled;
-  final bool showWarning;
 
   const SettingsActionItem({
     super.key,
@@ -156,6 +149,13 @@ class SettingsActionItem extends StatelessWidget {
     this.enabled = true,
     this.showWarning = false,
   });
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final Color? actionColor;
+  final bool enabled;
+  final bool showWarning;
 
   @override
   Widget build(BuildContext context) {
@@ -195,11 +195,6 @@ class SettingsActionItem extends StatelessWidget {
 
 /// 🎯 Settings card with custom content
 class SettingsCard extends StatelessWidget {
-  final String? title;
-  final Widget child;
-  final EdgeInsetsGeometry? margin;
-  final EdgeInsetsGeometry? padding;
-  final Color? backgroundColor;
 
   const SettingsCard({
     super.key,
@@ -209,6 +204,11 @@ class SettingsCard extends StatelessWidget {
     this.padding,
     this.backgroundColor,
   });
+  final String? title;
+  final Widget child;
+  final EdgeInsetsGeometry? margin;
+  final EdgeInsetsGeometry? padding;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -250,14 +250,14 @@ class SettingsCard extends StatelessWidget {
 
 /// 🎯 Theme selection widget
 class ThemeSelector extends StatelessWidget {
-  final ThemeMode currentTheme;
-  final ValueChanged<ThemeMode> onThemeChanged;
 
   const ThemeSelector({
     super.key,
     required this.currentTheme,
     required this.onThemeChanged,
   });
+  final ThemeMode currentTheme;
+  final ValueChanged<ThemeMode> onThemeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -296,12 +296,6 @@ class ThemeSelector extends StatelessWidget {
 }
 
 class _ThemeOption extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final ThemeMode value;
-  final ThemeMode currentValue;
-  final ValueChanged<ThemeMode> onChanged;
 
   const _ThemeOption({
     required this.title,
@@ -311,6 +305,12 @@ class _ThemeOption extends StatelessWidget {
     required this.currentValue,
     required this.onChanged,
   });
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final ThemeMode value;
+  final ThemeMode currentValue;
+  final ValueChanged<ThemeMode> onChanged;
 
   @override
   Widget build(BuildContext context) {

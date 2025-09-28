@@ -104,7 +104,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.3),
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.3),
                   blurRadius: 16,
                   offset: const Offset(0, -4),
                 ),
@@ -162,7 +162,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
             width: 48,
             height: 4,
             decoration: BoxDecoration(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -179,7 +179,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.2),
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -193,7 +193,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: PlantisColors.primary.withOpacity(0.3),
+                  color: PlantisColors.primary.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -245,10 +245,10 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: PlantisColors.primary.withOpacity(0.1),
+              color: PlantisColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: PlantisColors.primary.withOpacity(0.3),
+                color: PlantisColors.primary.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -281,7 +281,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
               color: theme.colorScheme.onSurfaceVariant,
             ),
             style: IconButton.styleFrom(
-              backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -298,7 +298,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
@@ -308,7 +308,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: PlantisColors.primary.withOpacity(0.3),
+              color: PlantisColors.primary.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

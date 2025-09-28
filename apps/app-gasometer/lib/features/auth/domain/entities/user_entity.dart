@@ -3,16 +3,6 @@ import 'package:equatable/equatable.dart';
 enum UserType { anonymous, registered, premium }
 
 class UserEntity extends Equatable {
-  final String id;
-  final String? email;
-  final String? displayName;
-  final String? photoUrl;
-  final String? avatarBase64; // Local avatar as base64 string
-  final UserType type;
-  final bool isEmailVerified;
-  final DateTime createdAt;
-  final DateTime? lastSignInAt;
-  final Map<String, dynamic> metadata;
 
   const UserEntity({
     required this.id,
@@ -26,6 +16,16 @@ class UserEntity extends Equatable {
     this.lastSignInAt,
     this.metadata = const {},
   });
+  final String id;
+  final String? email;
+  final String? displayName;
+  final String? photoUrl;
+  final String? avatarBase64; // Local avatar as base64 string
+  final UserType type;
+  final bool isEmailVerified;
+  final DateTime createdAt;
+  final DateTime? lastSignInAt;
+  final Map<String, dynamic> metadata;
 
   bool get isAnonymous => type == UserType.anonymous;
   bool get isRegistered => type == UserType.registered || type == UserType.premium;

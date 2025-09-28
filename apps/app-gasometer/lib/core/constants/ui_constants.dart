@@ -1,5 +1,6 @@
 /// Core UI constants for consistent design system
 /// Contains all hardcoded values used across the app
+library;
 
 import 'package:flutter/material.dart';
 

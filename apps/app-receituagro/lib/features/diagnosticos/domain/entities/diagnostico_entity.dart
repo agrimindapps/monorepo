@@ -559,17 +559,17 @@ class DiagnosticoFiltersData {
       identical(this, other) ||
       other is DiagnosticoFiltersData &&
           runtimeType == other.runtimeType &&
-          const ListEquality().equals(defensivos, other.defensivos) &&
-          const ListEquality().equals(culturas, other.culturas) &&
-          const ListEquality().equals(pragas, other.pragas) &&
-          const ListEquality().equals(unidadesMedida, other.unidadesMedida) &&
-          const ListEquality().equals(tiposAplicacao, other.tiposAplicacao);
+          const ListEquality<String>().equals(defensivos, other.defensivos) &&
+          const ListEquality<String>().equals(culturas, other.culturas) &&
+          const ListEquality<String>().equals(pragas, other.pragas) &&
+          const ListEquality<String>().equals(unidadesMedida, other.unidadesMedida) &&
+          const ListEquality<TipoAplicacao>().equals(tiposAplicacao, other.tiposAplicacao);
 
   @override
   int get hashCode => Object.hash(
-      const ListEquality().hash(defensivos),
-      const ListEquality().hash(culturas),
-      const ListEquality().hash(pragas),
-      const ListEquality().hash(unidadesMedida),
-      const ListEquality().hash(tiposAplicacao));
+      const ListEquality<String>().hash(defensivos),
+      const ListEquality<String>().hash(culturas),
+      const ListEquality<String>().hash(pragas),
+      const ListEquality<String>().hash(unidadesMedida),
+      const ListEquality<TipoAplicacao>().hash(tiposAplicacao));
 }

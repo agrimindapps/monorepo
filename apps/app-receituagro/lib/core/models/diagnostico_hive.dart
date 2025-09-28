@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
 part 'diagnostico_hive.g.dart';
 

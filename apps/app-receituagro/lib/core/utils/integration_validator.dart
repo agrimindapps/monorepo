@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../di/core_package_integration.dart';
 // Enhanced error handler removed - using core package services

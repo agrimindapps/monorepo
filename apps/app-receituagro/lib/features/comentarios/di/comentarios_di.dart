@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../../../core/repositories/comentarios_hive_repository.dart';
 import '../../../core/services/error_handler_service.dart';

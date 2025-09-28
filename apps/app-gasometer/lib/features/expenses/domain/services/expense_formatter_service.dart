@@ -4,12 +4,12 @@ import 'package:intl/intl.dart';
 /// Serviço especializado para formatação de campos de despesas
 /// Implementa formatação brasileira com vírgula decimal e cache para performance
 class ExpenseFormatterService {
-  // Cache para formatações recentes (memoização)
-  final Map<String, String> _formatCache = <String, String>{};
-  static const int _maxCacheSize = 100;
   
   /// Cria uma nova instância do serviço de formatação
   ExpenseFormatterService();
+  // Cache para formatações recentes (memoização)
+  final Map<String, String> _formatCache = <String, String>{};
+  static const int _maxCacheSize = 100;
 
   // Formatadores brasileiros
   final _currencyFormatter = NumberFormat.currency(
@@ -41,7 +41,7 @@ class ExpenseFormatterService {
   String formatOdometer(double value) {
     if (value == 0.0) return '';
     return _formatWithCache(value, odometerDecimals, 'odometer', () {
-      String formatted = value.toStringAsFixed(odometerDecimals);
+      final String formatted = value.toStringAsFixed(odometerDecimals);
       return formatted.replaceAll(dotSeparator, decimalSeparator);
     });
   }

@@ -5,13 +5,6 @@ import '../../../../core/theme/design_tokens.dart';
 
 /// Smart empty state that provides different experiences based on context
 class SmartEmptyState extends StatelessWidget {
-  final EmptyStateType type;
-  final String? customTitle;
-  final String? customMessage;
-  final List<ActionButton>? actions;
-  final Widget? illustration;
-  final bool showRefresh;
-  final VoidCallback? onRefresh;
 
   const SmartEmptyState({
     super.key,
@@ -23,6 +16,13 @@ class SmartEmptyState extends StatelessWidget {
     this.showRefresh = false,
     this.onRefresh,
   });
+  final EmptyStateType type;
+  final String? customTitle;
+  final String? customMessage;
+  final List<ActionButton>? actions;
+  final Widget? illustration;
+  final bool showRefresh;
+  final VoidCallback? onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -287,11 +287,6 @@ class SmartEmptyState extends StatelessWidget {
 
 /// Configuration for different empty states
 class EmptyStateConfig {
-  final String title;
-  final String message;
-  final IconData icon;
-  final Color iconColor;
-  final List<ActionButton> defaultActions;
 
   const EmptyStateConfig({
     required this.title,
@@ -300,15 +295,15 @@ class EmptyStateConfig {
     required this.iconColor,
     required this.defaultActions,
   });
+  final String title;
+  final String message;
+  final IconData icon;
+  final Color iconColor;
+  final List<ActionButton> defaultActions;
 }
 
 /// Action button configuration
 class ActionButton {
-  final String label;
-  final IconData? icon;
-  final ActionButtonType type;
-  final Color? color;
-  final VoidCallback? onPressed;
 
   const ActionButton({
     required this.label,
@@ -317,6 +312,11 @@ class ActionButton {
     this.color,
     this.onPressed,
   });
+  final String label;
+  final IconData? icon;
+  final ActionButtonType type;
+  final Color? color;
+  final VoidCallback? onPressed;
 }
 
 /// Types of empty states
@@ -339,15 +339,6 @@ enum ActionButtonType {
 
 /// Contextual empty state for reports
 class ReportsEmptyState extends StatelessWidget {
-  final bool isFirstTime;
-  final bool hasVehicles;
-  final bool isOnline;
-  final bool hasError;
-  final String? errorMessage;
-  final VoidCallback? onAddVehicle;
-  final VoidCallback? onAddFuel;
-  final VoidCallback? onRefresh;
-  final VoidCallback? onShowTutorial;
 
   const ReportsEmptyState({
     super.key,
@@ -361,6 +352,15 @@ class ReportsEmptyState extends StatelessWidget {
     this.onRefresh,
     this.onShowTutorial,
   });
+  final bool isFirstTime;
+  final bool hasVehicles;
+  final bool isOnline;
+  final bool hasError;
+  final String? errorMessage;
+  final VoidCallback? onAddVehicle;
+  final VoidCallback? onAddFuel;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onShowTutorial;
 
   @override
   Widget build(BuildContext context) {

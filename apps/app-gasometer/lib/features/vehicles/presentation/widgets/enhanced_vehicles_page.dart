@@ -1,19 +1,18 @@
 /// Enhanced vehicles page with responsive design
 /// Demonstrates the new responsive layout system with desktop/mobile adaptations
-library enhanced_vehicles_page;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/add_vehicle_page.dart';
-import '../providers/vehicles_provider.dart';
-import '../../domain/entities/vehicle_entity.dart';
 import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/responsive_content_area.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
-import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
+import '../../domain/entities/vehicle_entity.dart';
+import '../pages/add_vehicle_page.dart';
+import '../providers/vehicles_provider.dart';
 
 /// Enhanced responsive vehicles page
 class EnhancedVehiclesPage extends StatefulWidget {
@@ -248,9 +247,9 @@ class _ResponsiveVehiclesList extends StatelessWidget {
 
 /// Responsive grid that adapts to screen size and uses full width available (1120px)
 class _ResponsiveVehiclesGrid extends StatelessWidget {
-  final List<VehicleEntity> vehicles;
   
   const _ResponsiveVehiclesGrid({required this.vehicles});
+  final List<VehicleEntity> vehicles;
   
   @override
   Widget build(BuildContext context) {
@@ -291,12 +290,12 @@ class _ResponsiveVehiclesGrid extends StatelessWidget {
 
 /// Enhanced vehicle card with responsive design
 class _ResponsiveVehicleCard extends StatelessWidget {
-  final VehicleEntity vehicle;
   
   const _ResponsiveVehicleCard({
     super.key, 
     required this.vehicle,
   });
+  final VehicleEntity vehicle;
   
   @override
   Widget build(BuildContext context) {
@@ -465,15 +464,15 @@ class _ResponsiveVehicleCard extends StatelessWidget {
 
 /// Info row widget for vehicle details
 class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
   
   const _InfoRow({
     required this.icon,
     required this.label,
     required this.value,
   });
+  final IconData icon;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
@@ -508,9 +507,9 @@ class _InfoRow extends StatelessWidget {
 
 /// Error state widget
 class _ErrorState extends StatelessWidget {
-  final String errorMessage;
   
   const _ErrorState({required this.errorMessage});
+  final String errorMessage;
   
   @override
   Widget build(BuildContext context) {

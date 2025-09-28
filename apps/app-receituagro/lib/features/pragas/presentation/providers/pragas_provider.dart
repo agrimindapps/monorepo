@@ -116,7 +116,11 @@ class PragasProvider extends ChangeNotifier {
   /// Seleciona uma praga por ID
   Future<void> selectPragaById(String id) async {
     await _executeUseCase(() async {
-      _selectedPraga = await _getPragaByIdUseCase.execute(id);
+      final result = await _getPragaByIdUseCase.execute(id);
+      result.fold(
+        (failure) => throw Exception(failure.message),
+        (praga) => _selectedPraga = praga,
+      );
       
       // Atualiza lista de recentes após acessar
       if (_selectedPraga != null) {
@@ -128,9 +132,15 @@ class PragasProvider extends ChangeNotifier {
   /// Carrega pragas por cultura
   Future<void> loadPragasByCultura(String culturaId) async {
     await _executeUseCase(() async {
-      _pragas = await _getPragasByCulturaUseCase.execute(culturaId);
-      // Ordena alfabeticamente por nome comum
-      _pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+      final result = await _getPragasByCulturaUseCase.execute(culturaId);
+      result.fold(
+        (failure) => throw Exception(failure.message),
+        (pragas) {
+          _pragas = pragas;
+          // Ordena alfabeticamente por nome comum
+          _pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
+        },
+      );
     });
   }
 
@@ -146,8 +156,14 @@ class PragasProvider extends ChangeNotifier {
     }
     
     await _executeUseCase(() async {
-      _pragas = await _searchPragasUseCase.execute(trimmedTerm);
-      // Results are already sorted by relevance in repository
+      final result = await _searchPragasUseCase.execute(trimmedTerm);
+      result.fold(
+        (failure) => throw Exception(failure.message),
+        (pragas) {
+          _pragas = pragas;
+          // Results are already sorted by relevance in repository
+        },
+      );
     });
   }
 
@@ -193,7 +209,11 @@ class PragasProvider extends ChangeNotifier {
         );
       } else {
         // Fallback para use case original se não há histórico
-        _recentPragas = await _getRecentPragasUseCase.execute();
+        final result = await _getRecentPragasUseCase.execute();
+        result.fold(
+          (failure) => throw Exception(failure.message),
+          (pragas) => _recentPragas = pragas,
+        );
       }
     });
   }
@@ -203,7 +223,11 @@ class PragasProvider extends ChangeNotifier {
     await _executeUseCase(() async {
       // Tenta usar o use case original, mas com fallback para seleção aleatória
       try {
-        _suggestedPragas = await _getSuggestedPragasUseCase.execute(limit: limit);
+        final result = await _getSuggestedPragasUseCase.execute(limit: limit);
+        result.fold(
+          (failure) => throw Exception(failure.message),
+          (pragas) => _suggestedPragas = pragas,
+        );
         
         // Se não retornou sugestões, usa seleção aleatória inteligente
         if (_suggestedPragas.isEmpty) {
@@ -237,7 +261,11 @@ class PragasProvider extends ChangeNotifier {
   /// Carrega estatísticas
   Future<void> loadStats() async {
     await _executeUseCase(() async {
-      _stats = await _getPragasStatsUseCase.execute();
+      final result = await _getPragasStatsUseCase.execute();
+      result.fold(
+        (failure) => throw Exception(failure.message),
+        (stats) => _stats = stats,
+      );
     });
   }
 

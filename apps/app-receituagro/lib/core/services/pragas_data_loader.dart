@@ -22,10 +22,9 @@ class PragasDataLoader {
     try {
       developer.log('🐛 [PRAGAS] Iniciando carregamento de pragas...',
           name: 'PragasDataLoader');
-      print('🐛 [PRAGAS] Iniciando carregamento de pragas...');
 
       // Carrega JSON do asset principal - use path without 'assets/' prefix for web compatibility
-      final String assetPath = kIsWeb 
+      const String assetPath = kIsWeb 
           ? 'database/json/tbpragas/TBPRAGAS0.json'
           : 'assets/database/json/tbpragas/TBPRAGAS0.json';
       
@@ -48,8 +47,6 @@ class PragasDataLoader {
       developer.log(
           '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas',
           name: 'PragasDataLoader');
-      print(
-          '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas');
 
       // Obtém repositório do DI
       final repository = di.sl<PragasHiveRepository>();
@@ -61,7 +58,7 @@ class PragasDataLoader {
         (error) {
           developer.log('Erro ao carregar pragas: $error',
               name: 'PragasDataLoader');
-          throw error;
+          throw Exception('Erro ao carregar pragas: $error');
         },
         (_) {
           developer.log('Pragas carregadas com sucesso!',
@@ -71,21 +68,26 @@ class PragasDataLoader {
       );
 
       // Verifica se dados foram realmente salvos
-      final loadedPragas = repository.getAll();
-      developer.log(
-          'Verificação: ${loadedPragas.length} pragas disponíveis',
-          name: 'PragasDataLoader');
-
-      if (loadedPragas.isNotEmpty) {
-        developer.log(
-            'Primeiras 3 pragas: ${loadedPragas.take(3).map((p) => p.nomeCientifico).join(', ')}',
-            name: 'PragasDataLoader');
-      }
+      final loadedPragasResult = await repository.getAll();
+      loadedPragasResult.fold(
+        (error) {
+          developer.log('Erro ao verificar pragas carregadas: $error', name: 'PragasDataLoader');
+        },
+        (loadedPragas) {
+          developer.log(
+              'Verificação: ${loadedPragas.length} pragas disponíveis',
+              name: 'PragasDataLoader');
+          
+          if (loadedPragas.isNotEmpty) {
+            developer.log(
+                'Primeiras 3 pragas: ${loadedPragas.take(3).map((p) => p.nomeComum).join(', ')}',
+                name: 'PragasDataLoader');
+          }
+        },
+      );
     } catch (e) {
       developer.log('❌ [PRAGAS] Erro durante carregamento de pragas: $e',
-          name: 'PragasDataLoader');
-      print('❌ [PRAGAS] Erro durante carregamento de pragas: $e');
-      print('❌ [PRAGAS] Stack trace: ${StackTrace.current}');
+          name: 'PragasDataLoader', stackTrace: StackTrace.current);
       // Não bloqueia o app, apenas registra o erro
     }
   }
@@ -100,13 +102,21 @@ class PragasDataLoader {
   static Future<bool> isDataLoaded() async {
     try {
       final repository = di.sl<PragasHiveRepository>();
-      final pragas = repository.getAll();
-      final hasData = pragas.isNotEmpty;
+      final pragasResult = await repository.getAll();
       
-      developer.log('🔍 [PRAGAS] isDataLoaded() - Repository has ${pragas.length} items: $hasData', 
-          name: 'PragasDataLoader');
-      
-      return hasData;
+      return pragasResult.fold(
+        (error) {
+          developer.log('❌ [PRAGAS] Error checking isDataLoaded: $error', 
+              name: 'PragasDataLoader');
+          return false;
+        },
+        (pragas) {
+          final hasData = pragas.isNotEmpty;
+          developer.log('🔍 [PRAGAS] isDataLoaded() - Repository has ${pragas.length} items: $hasData', 
+              name: 'PragasDataLoader');
+          return hasData;
+        },
+      );
     } catch (e) {
       developer.log('❌ [PRAGAS] Error checking isDataLoaded: $e', 
           name: 'PragasDataLoader');
@@ -118,13 +128,20 @@ class PragasDataLoader {
   static Future<Map<String, dynamic>> getStats() async {
     try {
       final repository = di.sl<PragasHiveRepository>();
-      final pragas = repository.getAll();
+      final pragasResult = await repository.getAll();
 
-      return {
-        'total_pragas': pragas.length,
-        'is_loaded': _isLoaded,
-        'sample_pragas': pragas.take(5).map((p) => p.nomeCientifico).toList(),
-      };
+      return pragasResult.fold(
+        (error) => {
+          'total_pragas': 0,
+          'is_loaded': false,
+          'error': error.toString(),
+        },
+        (pragas) => {
+          'total_pragas': pragas.length,
+          'is_loaded': _isLoaded,
+          'sample_pragas': pragas.take(5).map((p) => p.nomeComum).toList(),
+        },
+      );
     } catch (e) {
       return {
         'total_pragas': 0,

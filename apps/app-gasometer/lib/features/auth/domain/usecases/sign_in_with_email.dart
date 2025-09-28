@@ -1,6 +1,4 @@
 import 'package:core/core.dart' hide Failure, UseCase;
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -8,9 +6,9 @@ import '../repositories/auth_repository.dart';
 
 @lazySingleton
 class SignInWithEmail implements UseCase<UserEntity, SignInWithEmailParams> {
-  final AuthRepository repository;
 
   SignInWithEmail(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, UserEntity>> call(SignInWithEmailParams params) async {
@@ -34,13 +32,13 @@ class SignInWithEmail implements UseCase<UserEntity, SignInWithEmailParams> {
 }
 
 class SignInWithEmailParams extends UseCaseParams {
-  final String email;
-  final String password;
 
   const SignInWithEmailParams({
     required this.email,
     required this.password,
   });
+  final String email;
+  final String password;
 
   @override
   List<Object> get props => [email, password];

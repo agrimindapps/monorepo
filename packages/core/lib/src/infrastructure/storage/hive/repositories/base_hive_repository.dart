@@ -382,6 +382,18 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
     }
   }
 
+  /// Método de compatibilidade para countAsync()
+  /// Retorna o count diretamente como int ao invés de Result&lt;int&gt;
+  Future<int> countAsync() async {
+    try {
+      final countResult = await count();
+      return countResult.isSuccess ? countResult.data! : 0;
+    } catch (e) {
+      debugPrint('BaseHiveRepository ($boxName): Error in countAsync - $e');
+      return 0;
+    }
+  }
+
   @override
   Future<Result<int>> countWhere(bool Function(T) predicate) async {
     try {

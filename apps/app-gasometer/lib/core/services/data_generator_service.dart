@@ -3,13 +3,13 @@ import 'package:flutter/foundation.dart';
 
 /// Serviço para geração de dados de teste realísticos para o GasOMeter
 class DataGeneratorService {
+
+  DataGeneratorService._internal();
   static DataGeneratorService? _instance;
   static DataGeneratorService get instance {
     _instance ??= DataGeneratorService._internal();
     return _instance!;
   }
-
-  DataGeneratorService._internal();
 
   final Random _random = Random();
 

@@ -2,9 +2,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class FeaturesCarousel extends StatefulWidget {
-  final List<Map<String, dynamic>> features;
 
   const FeaturesCarousel({super.key, required this.features});
+  final List<Map<String, dynamic>> features;
 
   @override
   State<FeaturesCarousel> createState() => _FeaturesCarouselState();
@@ -213,13 +213,13 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: cardColor.withOpacity(0.2),
+                    color: cardColor.withValues(alpha: 0.2),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
                 ],
                 border: Border.all(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -233,7 +233,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                     height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: cardColor.withOpacity(0.1),
+                      color: cardColor.withValues(alpha: 0.1),
                     ),
                     child: Icon(
                       feature['icon'] as IconData,
@@ -282,7 +282,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.2),
+                  color: cardColor.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -297,7 +297,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.1),
+                  color: cardColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
               ),

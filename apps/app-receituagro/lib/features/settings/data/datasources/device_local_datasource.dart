@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 /// Local data source para armazenamento de dispositivos
 /// Usa Hive para cache local temporário

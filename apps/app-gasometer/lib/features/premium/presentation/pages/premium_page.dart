@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
@@ -119,7 +119,7 @@ class _PremiumPageState extends State<PremiumPage>
             ],
           ),
         ),
-        background: Container(
+        background: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -270,7 +270,7 @@ class _PremiumPageState extends State<PremiumPage>
   }
 
   Widget _buildFeatureTabs(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -281,7 +281,7 @@ class _PremiumPageState extends State<PremiumPage>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [
               GasometerDesignTokens.colorPrimary,
               GasometerDesignTokens.colorPremiumAccent,
@@ -659,7 +659,7 @@ class _PremiumPageState extends State<PremiumPage>
                 ),
                 elevation: isPopular ? 6 : 2,
               ),
-              child: Text(
+              child: const Text(
                 'Assinar Agora',
                 style: TextStyle(
                   fontSize: 16,
@@ -675,10 +675,6 @@ class _PremiumPageState extends State<PremiumPage>
 }
 
 class _PremiumFeature {
-  final IconData icon;
-  final String title;
-  final String description;
-  final bool isEnabled;
 
   const _PremiumFeature({
     required this.icon,
@@ -686,4 +682,8 @@ class _PremiumFeature {
     required this.description,
     required this.isEnabled,
   });
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool isEnabled;
 }

@@ -158,10 +158,6 @@ class LoadingDesignTokens {
 
 /// Configuração de uma etapa de loading
 class LoadingStepConfig {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Duration duration;
 
   const LoadingStepConfig({
     required this.icon,
@@ -169,17 +165,14 @@ class LoadingStepConfig {
     required this.subtitle,
     required this.duration,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Duration duration;
 }
 
 /// Schema de cores para loading
 class LoadingColorScheme {
-  final Color primary;
-  final Color secondary;
-  final Color success;
-  final Color background;
-  final Color surface;
-  final Color onSurface;
-  final Color onSurfaceLight;
 
   const LoadingColorScheme({
     required this.primary,
@@ -190,17 +183,24 @@ class LoadingColorScheme {
     required this.onSurface,
     required this.onSurfaceLight,
   });
+  final Color primary;
+  final Color secondary;
+  final Color success;
+  final Color background;
+  final Color surface;
+  final Color onSurface;
+  final Color onSurfaceLight;
 }
 
 /// Configuração de animação
 class AnimationConfig {
-  final Duration duration;
-  final Curve curve;
 
   const AnimationConfig({
     required this.duration,
     required this.curve,
   });
+  final Duration duration;
+  final Curve curve;
 }
 
 /// Velocidades de animação disponíveis

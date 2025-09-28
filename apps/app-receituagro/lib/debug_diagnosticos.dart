@@ -12,30 +12,47 @@ class DiagnosticosDebug {
       
       // 1. Verificar repository
       final repository = di.sl<DiagnosticoHiveRepository>();
-      final allDiagnosticos = repository.getAll();
-      debugPrint('📊 [DEBUG] Diagnósticos no repository: ${allDiagnosticos.length}');
+      final allDiagnosticosResult = await repository.getAll();
       
-      if (allDiagnosticos.isEmpty) {
-        debugPrint('⚠️ [DEBUG] Box vazia! Tentando forçar carregamento...');
-        
-        // 2. Tentar carregar
-        await DiagnosticosDataLoader.forceReload();
-        
-        // 3. Verificar novamente
-        final newCount = repository.getAll().length;
-        debugPrint('📊 [DEBUG] Após reload: $newCount diagnósticos');
-        
-        if (newCount > 0) {
-          debugPrint('✅ [DEBUG] Sucesso! Carregamento funcionou');
-          _showSample(repository);
-        } else {
-          debugPrint('❌ [DEBUG] Falha! Ainda 0 diagnósticos');
+      await allDiagnosticosResult.fold(
+        (error) async {
+          debugPrint('❌ [DEBUG] Erro ao acessar repository: $error');
           await _debugLoadingProcess();
-        }
-      } else {
-        debugPrint('✅ [DEBUG] Box tem dados!');
-        _showSample(repository);
-      }
+        },
+        (allDiagnosticos) async {
+          debugPrint('📊 [DEBUG] Diagnósticos no repository: ${allDiagnosticos.length}');
+          
+          if (allDiagnosticos.isEmpty) {
+            debugPrint('⚠️ [DEBUG] Box vazia! Tentando forçar carregamento...');
+            
+            // 2. Tentar carregar
+            await DiagnosticosDataLoader.forceReload();
+            
+            // 3. Verificar novamente
+            final newResult = await repository.getAll();
+            await newResult.fold(
+              (error) async {
+                debugPrint('❌ [DEBUG] Erro após reload: $error');
+                await _debugLoadingProcess();
+              },
+              (newDiagnosticos) async {
+                debugPrint('📊 [DEBUG] Após reload: ${newDiagnosticos.length} diagnósticos');
+                
+                if (newDiagnosticos.isNotEmpty) {
+                  debugPrint('✅ [DEBUG] Sucesso! Carregamento funcionou');
+                  await _showSample(repository);
+                } else {
+                  debugPrint('❌ [DEBUG] Falha! Ainda 0 diagnósticos');
+                  await _debugLoadingProcess();
+                }
+              },
+            );
+          } else {
+            debugPrint('✅ [DEBUG] Box tem dados!');
+            await _showSample(repository);
+          }
+        },
+      );
       
       debugPrint('🔍 [DEBUG] ===== FIM DA VERIFICAÇÃO =====');
     } catch (e) {
@@ -44,16 +61,24 @@ class DiagnosticosDebug {
   }
   
   /// Mostra sample dos dados
-  static void _showSample(DiagnosticoHiveRepository repository) {
-    final sample = repository.getAll().take(5).toList();
-    debugPrint('📋 [DEBUG] SAMPLE (5 primeiros):');
-    for (int i = 0; i < sample.length; i++) {
-      final diag = sample[i];
-      debugPrint('  [$i] fkIdDefensivo: "${diag.fkIdDefensivo}"');
-      debugPrint('      nomeDefensivo: "${diag.nomeDefensivo}"');
-      debugPrint('      nomeCultura: "${diag.nomeCultura}"');
-      debugPrint('      nomePraga: "${diag.nomePraga}"');
-    }
+  static Future<void> _showSample(DiagnosticoHiveRepository repository) async {
+    final result = await repository.getAll();
+    await result.fold(
+      (error) async {
+        debugPrint('❌ [DEBUG] Erro ao obter sample: $error');
+      },
+      (allDiagnosticos) async {
+        final sample = allDiagnosticos.take(5).toList();
+        debugPrint('📋 [DEBUG] SAMPLE (5 primeiros):');
+        for (int i = 0; i < sample.length; i++) {
+          final diag = sample[i];
+          debugPrint('  [$i] fkIdDefensivo: "${diag.fkIdDefensivo}"');
+          debugPrint('      nomeDefensivo: "${diag.nomeDefensivo}"');
+          debugPrint('      nomeCultura: "${diag.nomeCultura}"');
+          debugPrint('      nomePraga: "${diag.nomePraga}"');
+        }
+      },
+    );
   }
   
   /// Debug do processo de carregamento

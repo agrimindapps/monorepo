@@ -6,9 +6,6 @@ import '../../domain/entities/expense_entity.dart';
 
 /// Widget para seleção do tipo de despesa como dropdown
 class ExpenseTypeSelector extends StatelessWidget {
-  final ExpenseType selectedType;
-  final void Function(ExpenseType) onTypeSelected;
-  final String? error;
 
   const ExpenseTypeSelector({
     super.key,
@@ -16,6 +13,9 @@ class ExpenseTypeSelector extends StatelessWidget {
     required this.onTypeSelected,
     this.error,
   });
+  final ExpenseType selectedType;
+  final void Function(ExpenseType) onTypeSelected;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class ExpenseTypeSelector extends StatelessWidget {
                 size: 20,
                 color: GasometerDesignTokens.colorPrimary,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingSm),
+              const SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(type.displayName),
             ],
           ),

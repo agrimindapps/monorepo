@@ -8,9 +8,9 @@ import '../repositories/fuel_repository.dart';
 
 @lazySingleton
 class GetAverageConsumption implements UseCase<double, GetAverageConsumptionParams> {
-  final FuelRepository repository;
 
   GetAverageConsumption(this.repository);
+  final FuelRepository repository;
 
   @override
   Future<Either<Failure, double>> call(GetAverageConsumptionParams params) async {
@@ -23,9 +23,9 @@ class GetAverageConsumption implements UseCase<double, GetAverageConsumptionPara
 }
 
 class GetAverageConsumptionParams extends UseCaseParams {
-  final String vehicleId;
 
   const GetAverageConsumptionParams({required this.vehicleId});
+  final String vehicleId;
 
   @override
   List<Object> get props => [vehicleId];
@@ -33,9 +33,9 @@ class GetAverageConsumptionParams extends UseCaseParams {
 
 @lazySingleton
 class GetTotalSpent implements UseCase<double, GetTotalSpentParams> {
-  final FuelRepository repository;
 
   GetTotalSpent(this.repository);
+  final FuelRepository repository;
 
   @override
   Future<Either<Failure, double>> call(GetTotalSpentParams params) async {
@@ -52,15 +52,15 @@ class GetTotalSpent implements UseCase<double, GetTotalSpentParams> {
 }
 
 class GetTotalSpentParams extends UseCaseParams {
-  final String vehicleId;
-  final DateTime? startDate;
-  final DateTime? endDate;
 
   const GetTotalSpentParams({
     required this.vehicleId,
     this.startDate,
     this.endDate,
   });
+  final String vehicleId;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   @override
   List<Object?> get props => [vehicleId, startDate, endDate];
@@ -68,9 +68,9 @@ class GetTotalSpentParams extends UseCaseParams {
 
 @lazySingleton
 class GetRecentFuelRecords implements UseCase<List<FuelRecordEntity>, GetRecentFuelRecordsParams> {
-  final FuelRepository repository;
 
   GetRecentFuelRecords(this.repository);
+  final FuelRepository repository;
 
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> call(GetRecentFuelRecordsParams params) async {
@@ -83,13 +83,13 @@ class GetRecentFuelRecords implements UseCase<List<FuelRecordEntity>, GetRecentF
 }
 
 class GetRecentFuelRecordsParams extends UseCaseParams {
-  final String vehicleId;
-  final int limit;
 
   const GetRecentFuelRecordsParams({
     required this.vehicleId,
     this.limit = 10,
   });
+  final String vehicleId;
+  final int limit;
 
   @override
   List<Object> get props => [vehicleId, limit];

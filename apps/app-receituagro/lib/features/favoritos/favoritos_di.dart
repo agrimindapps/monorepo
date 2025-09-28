@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import 'data/repositories/favoritos_repository_simplified.dart';
 import 'data/services/favoritos_service.dart';

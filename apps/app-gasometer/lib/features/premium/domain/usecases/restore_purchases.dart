@@ -7,9 +7,9 @@ import '../repositories/premium_repository.dart';
 /// Use case para restaurar compras
 @injectable
 class RestorePurchases implements UseCase<bool, NoParams> {
-  final PremiumRepository repository;
 
   RestorePurchases(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, bool>> call(NoParams params) async {

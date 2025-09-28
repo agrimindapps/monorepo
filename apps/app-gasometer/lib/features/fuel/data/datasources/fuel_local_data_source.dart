@@ -21,9 +21,9 @@ abstract class FuelLocalDataSource {
 
 @LazySingleton(as: FuelLocalDataSource)
 class FuelLocalDataSourceImpl implements FuelLocalDataSource {
-  final LocalDataService _localDataService;
 
   FuelLocalDataSourceImpl(this._localDataService);
+  final LocalDataService _localDataService;
 
   @override
   Future<List<FuelRecordEntity>> getAllFuelRecords() async {

@@ -7,9 +7,9 @@ import '../repositories/reports_repository.dart';
 
 @lazySingleton
 class GetFuelEfficiencyTrends implements UseCase<Map<String, dynamic>, GetFuelEfficiencyTrendsParams> {
-  final ReportsRepository repository;
 
   GetFuelEfficiencyTrends(this.repository);
+  final ReportsRepository repository;
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> call(GetFuelEfficiencyTrendsParams params) async {
@@ -26,13 +26,13 @@ class GetFuelEfficiencyTrends implements UseCase<Map<String, dynamic>, GetFuelEf
 }
 
 class GetFuelEfficiencyTrendsParams extends UseCaseParams {
-  final String vehicleId;
-  final int months;
 
   const GetFuelEfficiencyTrendsParams({
     required this.vehicleId,
     required this.months,
   });
+  final String vehicleId;
+  final int months;
 
   @override
   List<Object> get props => [vehicleId, months];
@@ -40,9 +40,9 @@ class GetFuelEfficiencyTrendsParams extends UseCaseParams {
 
 @lazySingleton
 class GetCostAnalysis implements UseCase<Map<String, dynamic>, GetCostAnalysisParams> {
-  final ReportsRepository repository;
 
   GetCostAnalysis(this.repository);
+  final ReportsRepository repository;
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> call(GetCostAnalysisParams params) async {
@@ -59,15 +59,15 @@ class GetCostAnalysis implements UseCase<Map<String, dynamic>, GetCostAnalysisPa
 }
 
 class GetCostAnalysisParams extends UseCaseParams {
-  final String vehicleId;
-  final DateTime startDate;
-  final DateTime endDate;
 
   const GetCostAnalysisParams({
     required this.vehicleId,
     required this.startDate,
     required this.endDate,
   });
+  final String vehicleId;
+  final DateTime startDate;
+  final DateTime endDate;
 
   @override
   List<Object> get props => [vehicleId, startDate, endDate];
@@ -75,9 +75,9 @@ class GetCostAnalysisParams extends UseCaseParams {
 
 @lazySingleton
 class GetUsagePatterns implements UseCase<Map<String, dynamic>, GetUsagePatternsParams> {
-  final ReportsRepository repository;
 
   GetUsagePatterns(this.repository);
+  final ReportsRepository repository;
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> call(GetUsagePatternsParams params) async {
@@ -94,13 +94,13 @@ class GetUsagePatterns implements UseCase<Map<String, dynamic>, GetUsagePatterns
 }
 
 class GetUsagePatternsParams extends UseCaseParams {
-  final String vehicleId;
-  final int months;
 
   const GetUsagePatternsParams({
     required this.vehicleId,
     required this.months,
   });
+  final String vehicleId;
+  final int months;
 
   @override
   List<Object> get props => [vehicleId, months];

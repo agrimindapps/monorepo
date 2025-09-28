@@ -1,26 +1,10 @@
 import 'package:core/core.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
-class FuelRecordEntity extends BaseSyncEntity {
-  final String vehicleId;
-  final FuelType fuelType;
-  final double liters;
-  final double pricePerLiter;
-  final double totalPrice;
-  final double odometer;
-  final DateTime date;
-  final String? gasStationName;
-  final String? gasStationBrand;
-  final double? latitude;
-  final double? longitude;
-  final bool fullTank;
-  final String? notes;
-  final double? previousOdometer;
-  final double? distanceTraveled;
-  final double? consumption; // km/l
+class FuelRecordEntity extends BaseSyncEntity { // km/l
   
   const FuelRecordEntity({
-    required String id,
+    required super.id,
     required this.vehicleId,
     required this.fuelType,
     required this.liters,
@@ -37,25 +21,31 @@ class FuelRecordEntity extends BaseSyncEntity {
     this.previousOdometer,
     this.distanceTraveled,
     this.consumption,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-  }) : super(
-    id: id,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-    lastSyncAt: lastSyncAt,
-    isDirty: isDirty,
-    isDeleted: isDeleted,
-    version: version,
-    userId: userId,
-    moduleName: moduleName,
-  );
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+  });
+  final String vehicleId;
+  final FuelType fuelType;
+  final double liters;
+  final double pricePerLiter;
+  final double totalPrice;
+  final double odometer;
+  final DateTime date;
+  final String? gasStationName;
+  final String? gasStationBrand;
+  final double? latitude;
+  final double? longitude;
+  final bool fullTank;
+  final String? notes;
+  final double? previousOdometer;
+  final double? distanceTraveled;
+  final double? consumption;
   
   @override
   List<Object?> get props => [

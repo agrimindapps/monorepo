@@ -194,46 +194,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     constraints: const BoxConstraints(maxWidth: 1120),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Consumer(
-                        builder: (context, WidgetRef ref, child) {
-                          final tasksAsync = ref.watch(tasksProvider);
-                          return tasksAsync.when(
-                            data: (TasksState tasksState) {
-                              final state = TasksListState(
-                                isLoading: false,
-                                hasError: false,
-                                errorMessage: null,
-                                isEmpty: tasksState.allTasks.isEmpty,
-                                hasActiveOperations: tasksState.activeOperations.isNotEmpty,
-                                currentOperationMessage: tasksState.currentOperationMessage,
-                              );
-                              return _buildTasksContent(state);
-                            },
-                            loading: () {
-                              final state = TasksListState(
-                                isLoading: true,
-                                hasError: false,
-                                errorMessage: null,
-                                isEmpty: false,
-                                hasActiveOperations: false,
-                                currentOperationMessage: null,
-                              );
-                              return _buildTasksContent(state);
-                            },
-                            error: (Object error, StackTrace stack) {
-                              final state = TasksListState(
-                                isLoading: false,
-                                hasError: true,
-                                errorMessage: error.toString(),
-                                isEmpty: false,
-                                hasActiveOperations: false,
-                                currentOperationMessage: null,
-                              );
-                              return _buildTasksContent(state);
-                            },
-                          );
-                        },
-                      ),
+                      child: _buildTasksAsyncContent(),
                     ), // Padding
                   ), // ConstrainedBox
                 ), // Center
@@ -246,17 +207,15 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Consumer(
-      builder: (context, WidgetRef ref, _) {
-        final tasksAsync = ref.watch(tasksProvider);
-        final tasksCount = tasksAsync.maybeWhen(
-          data: (state) => state.allTasks.length,
-          orElse: () => 0,
-        );
-        return PlantisHeader(
-          title: 'Minhas Tarefas',
-          subtitle: '$tasksCount tarefas cadastradas',
-          leading: Container(
+    final tasksAsync = ref.watch(tasksProvider);
+    final tasksCount = tasksAsync.maybeWhen(
+      data: (state) => state.allTasks.length,
+      orElse: () => 0,
+    );
+    return PlantisHeader(
+      title: 'Minhas Tarefas',
+      subtitle: '$tasksCount tarefas cadastradas',
+      leading: Container(
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -270,20 +229,53 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ),
           ),
         );
+  }
+
+  Widget _buildTasksAsyncContent() {
+    final tasksAsync = ref.watch(tasksProvider);
+    return tasksAsync.when(
+      data: (TasksState tasksState) {
+        final state = TasksListState(
+          isLoading: false,
+          hasError: false,
+          errorMessage: null,
+          isEmpty: tasksState.allTasks.isEmpty,
+          hasActiveOperations: tasksState.activeOperations.isNotEmpty,
+          currentOperationMessage: tasksState.currentOperationMessage,
+        );
+        return _buildTasksContent(state);
+      },
+      loading: () {
+        final state = TasksListState(
+          isLoading: true,
+          hasError: false,
+          errorMessage: null,
+          isEmpty: false,
+          hasActiveOperations: false,
+          currentOperationMessage: null,
+        );
+        return _buildTasksContent(state);
+      },
+      error: (Object error, StackTrace stack) {
+        final state = TasksListState(
+          isLoading: false,
+          hasError: true,
+          errorMessage: error.toString(),
+          isEmpty: false,
+          hasActiveOperations: false,
+          currentOperationMessage: null,
+        );
+        return _buildTasksContent(state);
       },
     );
   }
 
   Widget _buildSimpleFilters(BuildContext context) {
-    return Consumer(
-      builder: (context, WidgetRef ref, child) {
-        final tasksAsync = ref.watch(tasksProvider);
-        return tasksAsync.when(
-          data: (TasksState tasksState) => _buildFiltersContent(tasksState, ref),
-          loading: () => const SizedBox.shrink(),
-          error: (Object error, StackTrace stack) => const SizedBox.shrink(),
-        );
-      },
+    final tasksAsync = ref.watch(tasksProvider);
+    return tasksAsync.when(
+      data: (TasksState tasksState) => _buildFiltersContent(tasksState, ref),
+      loading: () => const SizedBox.shrink(),
+      error: (Object error, StackTrace stack) => const SizedBox.shrink(),
     );
   }
 
@@ -490,17 +482,12 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildTaskCard(task_entity.Task task) {
     final theme = Theme.of(context);
-
-    return Consumer(
-      builder: (context, WidgetRef ref, child) {
-        final tasksAsync = ref.watch(tasksProvider);
-        final isLoading = tasksAsync.maybeWhen(
-          data: (TasksState state) => state.individualTaskOperations.containsKey(task.id),
-          orElse: () => false,
-        );
-        return _buildTaskCardContent(task, isLoading, theme, ref);
-      },
+    final tasksAsync = ref.watch(tasksProvider);
+    final isLoading = tasksAsync.maybeWhen(
+      data: (TasksState state) => state.individualTaskOperations.containsKey(task.id),
+      orElse: () => false,
     );
+    return _buildTaskCardContent(task, isLoading, theme, ref);
   }
 
   Widget _buildTaskCardContent(task_entity.Task task, bool isLoading, ThemeData theme, WidgetRef ref) {
@@ -687,17 +674,13 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   // Future<void> _showAddTaskDialog(BuildContext context) async {}
 
   Widget _buildViewAllButton() {
-    return Consumer(
-      builder: (context, WidgetRef ref, child) {
-        final theme = Theme.of(context);
-        final tasksAsync = ref.watch(tasksProvider);
-        final remainingTasks = tasksAsync.maybeWhen(
-          data: (TasksState state) => state.allTasks.length - state.filteredTasks.length,
-          orElse: () => 0,
-        );
-        return _buildViewAllButtonContent(remainingTasks, theme, ref);
-      },
+    final theme = Theme.of(context);
+    final tasksAsync = ref.watch(tasksProvider);
+    final remainingTasks = tasksAsync.maybeWhen(
+      data: (TasksState state) => state.allTasks.length - state.filteredTasks.length,
+      orElse: () => 0,
     );
+    return _buildViewAllButtonContent(remainingTasks, theme, ref);
   }
 
   Widget _buildViewAllButtonContent(int remainingTasks, ThemeData theme, WidgetRef ref) {
@@ -843,47 +826,47 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       );
     }
 
-    return Consumer(
-      builder: (context, WidgetRef ref, child) {
-        return RefreshIndicator(
-          onRefresh: () => ref.read(tasksProvider.notifier).loadTasks(),
-          child: Stack(
-            children: [
-              Consumer(
-                builder: (context, WidgetRef ref, child) {
-                  final tasksAsync = ref.watch(tasksProvider);
-                  return tasksAsync.when(
-                    data: (TasksState tasksState) {
-                      final data = TasksListData(
-                        filteredTasks: tasksState.filteredTasks,
-                        isLoading: false,
-                        currentFilter: tasksState.currentFilter,
-                        totalTasks: tasksState.allTasks.length,
-                      );
-                      return _buildTasksListContent(data);
-                    },
-                    loading: () {
-                      final data = TasksListData(
-                        filteredTasks: [],
-                        isLoading: true,
-                        currentFilter: TasksFilterType.today,
-                        totalTasks: 0,
-                      );
-                      return _buildTasksListContent(data);
-                    },
-                    error: (Object error, StackTrace stack) {
-                      return Center(
-                        child: Text('Error loading tasks: $error'),
-                      );
-                    },
-                  );
-                },
-              ),
-              // Operation feedback overlay
-              if (state.hasActiveOperations || state.currentOperationMessage != null)
-                _buildOperationOverlay(),
-            ],
-          ),
+    return _buildRefreshableTasksList(state);
+  }
+
+  Widget _buildRefreshableTasksList(TasksListState state) {
+    return RefreshIndicator(
+      onRefresh: () => ref.read(tasksProvider.notifier).loadTasks(),
+      child: Stack(
+        children: [
+          _buildTasksListAsync(),
+          // Operation feedback overlay
+          if (state.hasActiveOperations || state.currentOperationMessage != null)
+            _buildOperationOverlay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTasksListAsync() {
+    final tasksAsync = ref.watch(tasksProvider);
+    return tasksAsync.when(
+      data: (TasksState tasksState) {
+        final data = TasksListData(
+          filteredTasks: tasksState.filteredTasks,
+          isLoading: false,
+          currentFilter: tasksState.currentFilter,
+          totalTasks: tasksState.allTasks.length,
+        );
+        return _buildTasksListContent(data);
+      },
+      loading: () {
+        final data = TasksListData(
+          filteredTasks: [],
+          isLoading: true,
+          currentFilter: TasksFilterType.today,
+          totalTasks: 0,
+        );
+        return _buildTasksListContent(data);
+      },
+      error: (Object error, StackTrace stack) {
+        return Center(
+          child: Text('Error loading tasks: $error'),
         );
       },
     );

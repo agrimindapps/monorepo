@@ -28,14 +28,6 @@ abstract class IVehicleService {
 
 /// Vehicle statistics data model
 class VehicleStatistics {
-  final String vehicleId;
-  final double totalKilometers;
-  final double totalFuelCost;
-  final double totalMaintenanceCost;
-  final double totalExpenses;
-  final double averageConsumption;
-  final int totalFuelUps;
-  final int totalMaintenanceRecords;
 
   const VehicleStatistics({
     required this.vehicleId,
@@ -47,15 +39,18 @@ class VehicleStatistics {
     required this.totalFuelUps,
     required this.totalMaintenanceRecords,
   });
+  final String vehicleId;
+  final double totalKilometers;
+  final double totalFuelCost;
+  final double totalMaintenanceCost;
+  final double totalExpenses;
+  final double averageConsumption;
+  final int totalFuelUps;
+  final int totalMaintenanceRecords;
 }
 
 /// Vehicle health score data model
 class VehicleHealthScore {
-  final String vehicleId;
-  final double score; // 0-100
-  final HealthCategory category;
-  final List<HealthFactor> factors;
-  final List<String> recommendations;
 
   const VehicleHealthScore({
     required this.vehicleId,
@@ -64,6 +59,11 @@ class VehicleHealthScore {
     required this.factors,
     required this.recommendations,
   });
+  final String vehicleId;
+  final double score; // 0-100
+  final HealthCategory category;
+  final List<HealthFactor> factors;
+  final List<String> recommendations;
 }
 
 /// Health category enumeration
@@ -77,10 +77,6 @@ enum HealthCategory {
 
 /// Health factor data model
 class HealthFactor {
-  final String name;
-  final double score;
-  final String description;
-  final FactorImpact impact;
 
   const HealthFactor({
     required this.name,
@@ -88,6 +84,10 @@ class HealthFactor {
     required this.description,
     required this.impact,
   });
+  final String name;
+  final double score;
+  final String description;
+  final FactorImpact impact;
 }
 
 /// Factor impact enumeration
@@ -99,11 +99,6 @@ enum FactorImpact {
 
 /// Maintenance alert data model
 class MaintenanceAlert {
-  final String type;
-  final String message;
-  final AlertSeverity severity;
-  final DateTime? dueDate;
-  final double? dueMileage;
 
   const MaintenanceAlert({
     required this.type,
@@ -112,6 +107,11 @@ class MaintenanceAlert {
     this.dueDate,
     this.dueMileage,
   });
+  final String type;
+  final String message;
+  final AlertSeverity severity;
+  final DateTime? dueDate;
+  final double? dueMileage;
 }
 
 /// Alert severity enumeration
@@ -124,11 +124,6 @@ enum AlertSeverity {
 
 /// Vehicle efficiency data model
 class VehicleEfficiency {
-  final String vehicleId;
-  final double fuelEfficiency; // km/L
-  final double costPerKilometer;
-  final EfficiencyTrend trend;
-  final Map<String, double> monthlyEfficiency;
 
   const VehicleEfficiency({
     required this.vehicleId,
@@ -137,6 +132,11 @@ class VehicleEfficiency {
     required this.trend,
     required this.monthlyEfficiency,
   });
+  final String vehicleId;
+  final double fuelEfficiency; // km/L
+  final double costPerKilometer;
+  final EfficiencyTrend trend;
+  final Map<String, double> monthlyEfficiency;
 }
 
 /// Efficiency trend enumeration
@@ -148,10 +148,6 @@ enum EfficiencyTrend {
 
 /// Vehicle comparison data model
 class VehicleComparison {
-  final List<VehicleStatistics> vehicleStats;
-  final String mostEfficientVehicleId;
-  final String mostExpensiveVehicleId;
-  final Map<String, dynamic> comparisonMetrics;
 
   const VehicleComparison({
     required this.vehicleStats,
@@ -159,15 +155,14 @@ class VehicleComparison {
     required this.mostExpensiveVehicleId,
     required this.comparisonMetrics,
   });
+  final List<VehicleStatistics> vehicleStats;
+  final String mostEfficientVehicleId;
+  final String mostExpensiveVehicleId;
+  final Map<String, dynamic> comparisonMetrics;
 }
 
 /// Vehicle recommendation data model
 class VehicleRecommendation {
-  final String type;
-  final String title;
-  final String description;
-  final RecommendationPriority priority;
-  final List<String> actions;
 
   const VehicleRecommendation({
     required this.type,
@@ -176,6 +171,11 @@ class VehicleRecommendation {
     required this.priority,
     required this.actions,
   });
+  final String type;
+  final String title;
+  final String description;
+  final RecommendationPriority priority;
+  final List<String> actions;
 }
 
 /// Recommendation priority enumeration

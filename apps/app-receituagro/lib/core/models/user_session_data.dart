@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Dados da sessão do usuário no ReceitauAgro
 /// Contém informações específicas da sessão atual

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -9,12 +9,12 @@ import 'auth_text_field_widget.dart';
 
 /// Widget para formulário de cadastro
 class SignupFormWidget extends StatelessWidget {
-  final VoidCallback? onSignupSuccess;
 
   const SignupFormWidget({
     super.key,
     this.onSignupSuccess,
   });
+  final VoidCallback? onSignupSuccess;
 
   @override
   Widget build(BuildContext context) {

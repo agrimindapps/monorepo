@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class PromoNavigationBar extends StatelessWidget {
-  final Function(GlobalKey)? onNavigate;
-  final GlobalKey? featuresKey;
-  final GlobalKey? howItWorksKey;
-  final GlobalKey? testimonialsKey;
-  final GlobalKey? faqKey;
 
   const PromoNavigationBar({
     super.key,
@@ -16,6 +11,11 @@ class PromoNavigationBar extends StatelessWidget {
     this.testimonialsKey,
     this.faqKey,
   });
+  final Function(GlobalKey)? onNavigate;
+  final GlobalKey? featuresKey;
+  final GlobalKey? howItWorksKey;
+  final GlobalKey? testimonialsKey;
+  final GlobalKey? faqKey;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class PromoNavigationBar extends StatelessWidget {
     final isMobile = screenSize.width < 800;
 
     return Container(
-      color: Colors.white.withOpacity(0.95),
+      color: Colors.white.withValues(alpha: 0.95),
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 16 : screenSize.width * 0.08,
         vertical: 16,
@@ -61,7 +61,7 @@ class PromoNavigationBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: Colors.blue.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -262,7 +262,7 @@ class PromoNavigationBar extends StatelessWidget {
               vertical: isSmallDesktop ? 6 : 8),
           decoration: BoxDecoration(
             color: isActive
-                ? Colors.blue.withOpacity(0.1)
+                ? Colors.blue.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),

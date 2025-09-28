@@ -16,20 +16,6 @@ import '../../domain/usecases/update_vehicle.dart';
 
 @injectable
 class VehiclesProvider extends ChangeNotifier {
-  final GetAllVehicles _getAllVehicles;
-  final GetVehicleById _getVehicleById;
-  final AddVehicle _addVehicle;
-  final UpdateVehicle _updateVehicle;
-  final DeleteVehicle _deleteVehicle;
-  final SearchVehicles _searchVehicles;
-  final VehicleRepository _repository;
-
-  List<VehicleEntity> _vehicles = [];
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool _isInitialized = false;
-  StreamSubscription<Either<Failure, List<VehicleEntity>>>?
-      _vehicleSubscription;
 
   VehiclesProvider({
     required GetAllVehicles getAllVehicles,
@@ -46,6 +32,20 @@ class VehiclesProvider extends ChangeNotifier {
         _deleteVehicle = deleteVehicle,
         _searchVehicles = searchVehicles,
         _repository = repository;
+  final GetAllVehicles _getAllVehicles;
+  final GetVehicleById _getVehicleById;
+  final AddVehicle _addVehicle;
+  final UpdateVehicle _updateVehicle;
+  final DeleteVehicle _deleteVehicle;
+  final SearchVehicles _searchVehicles;
+  final VehicleRepository _repository;
+
+  List<VehicleEntity> _vehicles = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _isInitialized = false;
+  StreamSubscription<Either<Failure, List<VehicleEntity>>>?
+      _vehicleSubscription;
 
   List<VehicleEntity> get vehicles => _vehicles;
   List<VehicleEntity> get activeVehicles =>

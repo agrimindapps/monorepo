@@ -229,11 +229,6 @@ class FeedbackSnackBar {
 
 /// Custom SnackBar widget with enhanced styling
 class CustomSnackBar extends StatelessWidget {
-  final String message;
-  final FeedbackType type;
-  final VoidCallback? onAction;
-  final String? actionLabel;
-  final VoidCallback? onDismiss;
 
   const CustomSnackBar({
     super.key,
@@ -243,6 +238,11 @@ class CustomSnackBar extends StatelessWidget {
     this.actionLabel,
     this.onDismiss,
   });
+  final String message;
+  final FeedbackType type;
+  final VoidCallback? onAction;
+  final String? actionLabel;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +257,7 @@ class CustomSnackBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8.0,
             offset: const Offset(0, 4),
           ),
@@ -316,10 +316,6 @@ class CustomSnackBar extends StatelessWidget {
 
 /// Floating feedback message
 class FloatingFeedback extends StatefulWidget {
-  final String message;
-  final FeedbackType type;
-  final Duration duration;
-  final VoidCallback? onDismiss;
 
   const FloatingFeedback({
     super.key,
@@ -328,6 +324,10 @@ class FloatingFeedback extends StatefulWidget {
     this.duration = const Duration(seconds: 3),
     this.onDismiss,
   });
+  final String message;
+  final FeedbackType type;
+  final Duration duration;
+  final VoidCallback? onDismiss;
 
   @override
   State<FloatingFeedback> createState() => _FloatingFeedbackState();
@@ -410,13 +410,13 @@ enum FeedbackType {
 
 /// Type configuration model
 class _TypeConfig {
-  final IconData icon;
-  final Color backgroundColor;
-  final Duration duration;
 
   const _TypeConfig({
     required this.icon,
     required this.backgroundColor,
     required this.duration,
   });
+  final IconData icon;
+  final Color backgroundColor;
+  final Duration duration;
 }

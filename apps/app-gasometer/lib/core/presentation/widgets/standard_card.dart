@@ -7,33 +7,9 @@ import '../../theme/design_tokens.dart';
 /// Baseado no design system do GasOMeter, mantém padding,
 /// border radius, elevação e estilos consistentes.
 class StandardCard extends StatelessWidget {
-  /// Conteúdo do card
-  final Widget child;
-
-  /// Padding interno do card
-  final EdgeInsets? padding;
-
-  /// Margin externa do card
-  final EdgeInsets? margin;
-
-  /// Callback para quando o card é tocado
-  final VoidCallback? onTap;
-
-  /// Se o card deve ter uma sombra
-  final bool hasElevation;
-
-  /// Cor de fundo customizada
-  final Color? backgroundColor;
-
-  /// Border radius customizado
-  final double? borderRadius;
-
-  /// Se deve mostrar border ao redor do card
-  final bool showBorder;
 
   const StandardCard({
     super.key,
-    required this.child,
     this.padding,
     this.margin,
     this.onTap,
@@ -41,6 +17,7 @@ class StandardCard extends StatelessWidget {
     this.backgroundColor,
     this.borderRadius,
     this.showBorder = true,
+    required this.child,
   });
 
   /// Factory para card com padding padrão
@@ -99,17 +76,40 @@ class StandardCard extends StatelessWidget {
         GasometerDesignTokens.spacingCardPadding,
       ),
       margin:
-          margin ?? EdgeInsets.only(bottom: GasometerDesignTokens.spacingLg),
+          margin ?? const EdgeInsets.only(bottom: GasometerDesignTokens.spacingLg),
       onTap: onTap,
       hasElevation: false,
       showBorder: showBorder,
       child: child,
     );
   }
+  /// Conteúdo do card
+  final Widget child;
+
+  /// Padding interno do card
+  final EdgeInsets? padding;
+
+  /// Margin externa do card
+  final EdgeInsets? margin;
+
+  /// Callback para quando o card é tocado
+  final VoidCallback? onTap;
+
+  /// Se o card deve ter uma sombra
+  final bool hasElevation;
+
+  /// Cor de fundo customizada
+  final Color? backgroundColor;
+
+  /// Border radius customizado
+  final double? borderRadius;
+
+  /// Se deve mostrar border ao redor do card
+  final bool showBorder;
 
   @override
   Widget build(BuildContext context) {
-    final cardChild = Container(padding: padding, child: child);
+    final cardChild = padding != null ? Padding(padding: padding!, child: child) : child;
 
     return Container(
       margin: margin,
@@ -148,23 +148,23 @@ class StandardCard extends StatelessWidget {
 
 /// Widget para título de seção dentro de um card
 class CardSectionTitle extends StatelessWidget {
+
+  const CardSectionTitle({
+    super.key,
+    this.icon,
+    this.iconColor,
+    this.trailing,
+    required this.title,
+  });
   final String title;
   final IconData? icon;
   final Color? iconColor;
   final Widget? trailing;
 
-  const CardSectionTitle({
-    super.key,
-    required this.title,
-    this.icon,
-    this.iconColor,
-    this.trailing,
-  });
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
+      padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingMd),
       child: Row(
         children: [
           if (icon != null) ...[
@@ -173,7 +173,7 @@ class CardSectionTitle extends StatelessWidget {
               size: GasometerDesignTokens.iconSizeButton,
               color: iconColor ?? Theme.of(context).colorScheme.primary,
             ),
-            SizedBox(width: GasometerDesignTokens.spacingSm),
+            const SizedBox(width: GasometerDesignTokens.spacingSm),
           ],
           Expanded(
             child: Text(
@@ -194,18 +194,18 @@ class CardSectionTitle extends StatelessWidget {
 
 /// Widget para informações em linha dentro de cards
 class CardInfoRow extends StatelessWidget {
+
+  const CardInfoRow({
+    super.key,
+    this.icon,
+    this.iconColor,
+    required this.label,
+    required this.value,
+  });
   final String label;
   final String value;
   final IconData? icon;
   final Color? iconColor;
-
-  const CardInfoRow({
-    super.key,
-    required this.label,
-    required this.value,
-    this.icon,
-    this.iconColor,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +213,7 @@ class CardInfoRow extends StatelessWidget {
       label: '$label: $value',
       readOnly: true,
       child: Padding(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           vertical: GasometerDesignTokens.spacingXs,
         ),
         child: Row(
@@ -224,17 +224,17 @@ class CardInfoRow extends StatelessWidget {
                 size: GasometerDesignTokens.iconSizeXs,
                 color:
                     iconColor ??
-                    Theme.of(context).colorScheme.onSurface.withOpacity(
-                      GasometerDesignTokens.opacitySecondary,
+                    Theme.of(context).colorScheme.onSurface.withValues(
+                      alpha: GasometerDesignTokens.opacitySecondary,
                     ),
               ),
-              SizedBox(width: GasometerDesignTokens.spacingXs + 2),
+              const SizedBox(width: GasometerDesignTokens.spacingXs + 2),
             ],
             Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(
-                  GasometerDesignTokens.opacitySecondary,
+                color: Theme.of(context).colorScheme.onSurface.withValues(
+                  alpha: GasometerDesignTokens.opacitySecondary,
                 ),
                 fontSize: GasometerDesignTokens.fontSizeMd,
               ),

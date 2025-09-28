@@ -5,41 +5,6 @@ part 'log_entry.g.dart';
 
 @HiveType(typeId: 20)
 class LogEntry extends HiveObject {
-  @HiveField(0)
-  final String id;
-
-  @HiveField(1)
-  final DateTime timestamp;
-
-  @HiveField(2)
-  final String level;
-
-  @HiveField(3)
-  final String category;
-
-  @HiveField(4)
-  final String operation;
-
-  @HiveField(5)
-  final String message;
-
-  @HiveField(6)
-  final Map<String, dynamic>? metadata;
-
-  @HiveField(7)
-  final String? userId;
-
-  @HiveField(8)
-  final String? error;
-
-  @HiveField(9)
-  final String? stackTrace;
-
-  @HiveField(10)
-  final int? duration; // milliseconds
-
-  @HiveField(11)
-  final bool synced;
 
   LogEntry({
     required this.timestamp,
@@ -142,6 +107,59 @@ class LogEntry extends HiveObject {
     );
   }
 
+  /// Cria a partir de Map JSON
+  factory LogEntry.fromJson(Map<String, dynamic> json) {
+    return LogEntry(
+      id: json['id'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      level: json['level'] as String,
+      category: json['category'] as String,
+      operation: json['operation'] as String,
+      message: json['message'] as String,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+      userId: json['userId'] as String?,
+      error: json['error'] as String?,
+      stackTrace: json['stackTrace'] as String?,
+      duration: json['duration'] as int?,
+      synced: json['synced'] as bool? ?? false,
+    );
+  }
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final DateTime timestamp;
+
+  @HiveField(2)
+  final String level;
+
+  @HiveField(3)
+  final String category;
+
+  @HiveField(4)
+  final String operation;
+
+  @HiveField(5)
+  final String message;
+
+  @HiveField(6)
+  final Map<String, dynamic>? metadata;
+
+  @HiveField(7)
+  final String? userId;
+
+  @HiveField(8)
+  final String? error;
+
+  @HiveField(9)
+  final String? stackTrace;
+
+  @HiveField(10)
+  final int? duration; // milliseconds
+
+  @HiveField(11)
+  final bool synced;
+
   /// Copia com novos valores
   LogEntry copyWith({
     String? id,
@@ -202,24 +220,6 @@ class LogEntry extends HiveObject {
       'duration': duration,
       'synced': synced,
     };
-  }
-
-  /// Cria a partir de Map JSON
-  factory LogEntry.fromJson(Map<String, dynamic> json) {
-    return LogEntry(
-      id: json['id'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-      level: json['level'] as String,
-      category: json['category'] as String,
-      operation: json['operation'] as String,
-      message: json['message'] as String,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-      userId: json['userId'] as String?,
-      error: json['error'] as String?,
-      stackTrace: json['stackTrace'] as String?,
-      duration: json['duration'] as int?,
-      synced: json['synced'] as bool? ?? false,
-    );
   }
 
   @override

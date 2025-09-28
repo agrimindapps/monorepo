@@ -1,12 +1,5 @@
 /// Entidade que representa uma solicitação de exportação de dados
 class ExportRequest {
-  final String userId;
-  final List<String> includedCategories;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final List<String> outputFormats;
-  final bool includeAttachments;
-  final Map<String, dynamic> customOptions;
 
   const ExportRequest({
     required this.userId,
@@ -31,6 +24,13 @@ class ExportRequest {
     includeAttachments: json['include_attachments'] as bool? ?? true,
     customOptions: json['custom_options'] as Map<String, dynamic>? ?? {},
   );
+  final String userId;
+  final List<String> includedCategories;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final List<String> outputFormats;
+  final bool includeAttachments;
+  final Map<String, dynamic> customOptions;
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,

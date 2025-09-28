@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 
 class FormDialog extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData headerIcon;
-  final Widget content;
-  final String cancelButtonText;
-  final String confirmButtonText;
-  final VoidCallback? onCancel;
-  final VoidCallback? onConfirm;
-  final bool isLoading;
-  final bool showCloseButton;
 
   const FormDialog({
     super.key,
@@ -25,6 +15,16 @@ class FormDialog extends StatelessWidget {
     this.isLoading = false,
     this.showCloseButton = true,
   });
+  final String title;
+  final String subtitle;
+  final IconData headerIcon;
+  final Widget content;
+  final String cancelButtonText;
+  final String confirmButtonText;
+  final VoidCallback? onCancel;
+  final VoidCallback? onConfirm;
+  final bool isLoading;
+  final bool showCloseButton;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +103,7 @@ class FormDialog extends StatelessWidget {
             child: Text(
               subtitle,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),

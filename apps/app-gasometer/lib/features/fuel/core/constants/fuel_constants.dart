@@ -1,5 +1,7 @@
 /// Constantes organizadas para o módulo de combustível
 class FuelConstants {
+  
+  FuelConstants._();
   // Limites de validação
   static const double minLiters = 0.001;
   static const double maxLiters = 999.999;
@@ -144,7 +146,5 @@ class FuelConstants {
   
   // Configurações de animação
   static const int animationDurationMs = 250;
-  static const int loadingMinDurationMs = 500;
-  
-  FuelConstants._(); // Previne instanciação
+  static const int loadingMinDurationMs = 500; // Previne instanciação
 }

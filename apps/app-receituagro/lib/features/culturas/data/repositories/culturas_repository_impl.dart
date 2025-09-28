@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../domain/entities/cultura_entity.dart';
@@ -16,7 +15,11 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, List<CulturaEntity>>> getAllCulturas() async {
     try {
-      final culturasHive = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+      }
+      final culturasHive = result.data ?? [];
       final culturasEntities = CulturaMapper.fromHiveToEntityList(culturasHive);
       
       return Right(culturasEntities);
@@ -29,7 +32,11 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   Future<Either<Failure, List<CulturaEntity>>> getCulturasByGrupo(String grupo) async {
     try {
       // CulturaHive não tem grupo, retornar lista vazia ou todas as culturas
-      final allCulturas = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+      }
+      final allCulturas = result.data ?? [];
       final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
       
       // Filtrar por grupo na camada de entidade se necessário
@@ -46,7 +53,11 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, CulturaEntity?>> getCulturaById(String id) async {
     try {
-      final cultura = _hiveRepository.getById(id);
+      final result = await _hiveRepository.getByKey(id);
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar cultura por ID: ${result.error?.message}'));
+      }
+      final cultura = result.data;
       
       if (cultura == null) {
         return const Right(null);
@@ -66,7 +77,11 @@ class CulturasRepositoryImpl implements ICulturasRepository {
         return await getAllCulturas();
       }
 
-      final allCulturas = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+      }
+      final allCulturas = result.data ?? [];
       final culturasFiltradas = allCulturas.where((cultura) {
         final nomeMatch = cultura.cultura.toLowerCase().contains(query.toLowerCase());
         // CulturaHive não tem grupo, apenas buscar por nome
@@ -96,7 +111,11 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, bool>> isCulturaActive(String culturaId) async {
     try {
-      final cultura = _hiveRepository.getById(culturaId);
+      final result = await _hiveRepository.getByKey(culturaId);
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao verificar status da cultura: ${result.error?.message}'));
+      }
+      final cultura = result.data;
       return Right(cultura != null);
     } catch (e) {
       return Left(CacheFailure('Erro ao verificar status da cultura: ${e.toString()}'));

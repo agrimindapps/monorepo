@@ -1,7 +1,7 @@
 /// Financial Conflict Resolution Strategy for GasOMeter
 /// Provides specialized conflict resolution for financial data
+library;
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../features/expenses/data/models/expense_model.dart';
 import '../../features/fuel/data/models/fuel_supply_model.dart';
@@ -24,11 +24,6 @@ enum FinancialConflictStrategy {
 
 /// Conflict resolution result
 class FinancialConflictResult {
-  final BaseSyncEntity resolvedEntity;
-  final FinancialConflictStrategy strategyUsed;
-  final bool requiresManualReview;
-  final Map<String, dynamic> resolutionDetails;
-  final List<String> warnings;
 
   const FinancialConflictResult({
     required this.resolvedEntity,
@@ -37,6 +32,11 @@ class FinancialConflictResult {
     this.resolutionDetails = const {},
     this.warnings = const [],
   });
+  final BaseSyncEntity resolvedEntity;
+  final FinancialConflictStrategy strategyUsed;
+  final bool requiresManualReview;
+  final Map<String, dynamic> resolutionDetails;
+  final List<String> warnings;
 
   /// Get formatted resolution summary
   String get resolutionSummary {
@@ -58,9 +58,9 @@ class FinancialConflictResult {
 
 /// Financial Conflict Resolver
 class FinancialConflictResolver {
-  final FinancialAuditTrailService _auditService;
 
   FinancialConflictResolver(this._auditService);
+  final FinancialAuditTrailService _auditService;
 
   /// Resolve conflict between local and remote financial entities
   Future<FinancialConflictResult> resolveConflict(
@@ -137,7 +137,7 @@ class FinancialConflictResolver {
       resolvedEntity: localEntity.copyWith(
         isDirty: true, // Keep dirty to prevent sync until resolved
         version: localEntity.version, // Don't increment version
-      ) as BaseSyncEntity,
+      ),
       strategyUsed: FinancialConflictStrategy.manualReview,
       requiresManualReview: true,
       resolutionDetails: {
@@ -166,7 +166,7 @@ class FinancialConflictResolver {
         version: [localEntity.version, remoteEntity.version].reduce((a, b) => a > b ? a : b) + 1,
         isDirty: false,
         lastSyncAt: DateTime.now(),
-      ) as BaseSyncEntity,
+      ),
       strategyUsed: FinancialConflictStrategy.mostRecent,
       requiresManualReview: requiresReview,
       resolutionDetails: {
@@ -190,7 +190,7 @@ class FinancialConflictResolver {
         version: [localEntity.version, remoteEntity.version].reduce((a, b) => a > b ? a : b) + 1,
         isDirty: false,
         lastSyncAt: DateTime.now(),
-      ) as BaseSyncEntity,
+      ),
       strategyUsed: FinancialConflictStrategy.localPreferred,
       requiresManualReview: requiresReview,
       resolutionDetails: {
@@ -214,7 +214,7 @@ class FinancialConflictResolver {
         version: [localEntity.version, remoteEntity.version].reduce((a, b) => a > b ? a : b) + 1,
         isDirty: false,
         lastSyncAt: DateTime.now(),
-      ) as BaseSyncEntity,
+      ),
       strategyUsed: FinancialConflictStrategy.remotePreferred,
       requiresManualReview: requiresReview,
       resolutionDetails: {
@@ -235,10 +235,10 @@ class FinancialConflictResolver {
     double remoteValue = 0.0;
 
     if (localEntity is FuelSupplyModel) {
-      localValue = (localEntity as FuelSupplyModel).totalPrice;
+      localValue = (localEntity).totalPrice;
       remoteValue = (remoteEntity as FuelSupplyModel).totalPrice;
     } else if (localEntity is ExpenseModel) {
-      localValue = (localEntity as ExpenseModel).valor;
+      localValue = (localEntity).valor;
       remoteValue = (remoteEntity as ExpenseModel).valor;
     }
 
@@ -251,7 +251,7 @@ class FinancialConflictResolver {
         version: [localEntity.version, remoteEntity.version].reduce((a, b) => a > b ? a : b) + 1,
         isDirty: false,
         lastSyncAt: DateTime.now(),
-      ) as BaseSyncEntity,
+      ),
       strategyUsed: FinancialConflictStrategy.highestValue,
       requiresManualReview: true, // Always review value-based decisions
       resolutionDetails: {
@@ -273,15 +273,15 @@ class FinancialConflictResolver {
     bool remoteHasReceipt = false;
 
     if (localEntity is FuelSupplyModel) {
-      localHasReceipt = (localEntity as FuelSupplyModel).receiptImageUrl?.isNotEmpty == true ||
-          (localEntity as FuelSupplyModel).receiptImagePath?.isNotEmpty == true;
+      localHasReceipt = (localEntity).receiptImageUrl?.isNotEmpty == true ||
+          (localEntity).receiptImagePath?.isNotEmpty == true;
       remoteHasReceipt = (remoteEntity as FuelSupplyModel).receiptImageUrl?.isNotEmpty == true ||
-          (remoteEntity as FuelSupplyModel).receiptImagePath?.isNotEmpty == true;
+          (remoteEntity).receiptImagePath?.isNotEmpty == true;
     } else if (localEntity is ExpenseModel) {
-      localHasReceipt = (localEntity as ExpenseModel).receiptImageUrl?.isNotEmpty == true ||
-          (localEntity as ExpenseModel).receiptImagePath?.isNotEmpty == true;
+      localHasReceipt = (localEntity).receiptImageUrl?.isNotEmpty == true ||
+          (localEntity).receiptImagePath?.isNotEmpty == true;
       remoteHasReceipt = (remoteEntity as ExpenseModel).receiptImageUrl?.isNotEmpty == true ||
-          (remoteEntity as ExpenseModel).receiptImagePath?.isNotEmpty == true;
+          (remoteEntity).receiptImagePath?.isNotEmpty == true;
     }
 
     final BaseSyncEntity chosenEntity;
@@ -303,7 +303,7 @@ class FinancialConflictResolver {
         version: [localEntity.version, remoteEntity.version].reduce((a, b) => a > b ? a : b) + 1,
         isDirty: false,
         lastSyncAt: DateTime.now(),
-      ) as BaseSyncEntity,
+      ),
       strategyUsed: FinancialConflictStrategy.preserveReceipts,
       requiresManualReview: true,
       resolutionDetails: {
@@ -338,20 +338,20 @@ class FinancialConflictResolver {
     final warnings = <String>[];
 
     // Preserve the most complete receipt information
-    String? receiptImageUrl = local.receiptImageUrl?.isNotEmpty == true
+    final String? receiptImageUrl = local.receiptImageUrl?.isNotEmpty == true
         ? local.receiptImageUrl
         : remote.receiptImageUrl;
-    String? receiptImagePath = local.receiptImagePath?.isNotEmpty == true
+    final String? receiptImagePath = local.receiptImagePath?.isNotEmpty == true
         ? local.receiptImagePath
         : remote.receiptImagePath;
 
     // Preserve the most complete gas station name
-    String? gasStationName = local.gasStationName?.isNotEmpty == true
+    final String? gasStationName = local.gasStationName?.isNotEmpty == true
         ? local.gasStationName
         : remote.gasStationName;
 
     // Preserve the most complete notes
-    String? notes = local.notes?.isNotEmpty == true
+    final String? notes = local.notes?.isNotEmpty == true
         ? local.notes
         : remote.notes;
 
@@ -398,18 +398,18 @@ class FinancialConflictResolver {
     final warnings = <String>[];
 
     // Preserve the most complete receipt information
-    String? receiptImageUrl = local.receiptImageUrl?.isNotEmpty == true
+    final String? receiptImageUrl = local.receiptImageUrl?.isNotEmpty == true
         ? local.receiptImageUrl
         : remote.receiptImageUrl;
-    String? receiptImagePath = local.receiptImagePath?.isNotEmpty == true
+    final String? receiptImagePath = local.receiptImagePath?.isNotEmpty == true
         ? local.receiptImagePath
         : remote.receiptImagePath;
 
     // Preserve the most complete location and notes
-    String? location = local.location?.isNotEmpty == true
+    final String? location = local.location?.isNotEmpty == true
         ? local.location
         : remote.location;
-    String? notes = local.notes?.isNotEmpty == true
+    final String? notes = local.notes?.isNotEmpty == true
         ? local.notes
         : remote.notes;
 

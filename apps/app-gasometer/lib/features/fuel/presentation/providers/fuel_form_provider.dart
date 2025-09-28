@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/forms/base_form_page.dart';
 import '../../../../core/services/input_sanitizer.dart';
@@ -21,6 +21,15 @@ import '../models/fuel_form_model.dart';
 /// instead of direct provider coupling to avoid circular dependencies.
 /// VehiclesProvider is accessed via BuildContext when needed.
 class FuelFormProvider extends ChangeNotifier implements IFormProvider {
+
+  FuelFormProvider({
+    String? initialVehicleId, 
+    String? userId,
+    required ReceiptImageService receiptImageService,
+  }) : _receiptImageService = receiptImageService,
+       _formModel = FuelFormModel.initial(initialVehicleId ?? '', userId ?? '') {
+    _initializeControllers();
+  }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FuelFormatterService _formatter = FuelFormatterService();
   final FuelValidatorService _validator = FuelValidatorService();
@@ -56,17 +65,8 @@ class FuelFormProvider extends ChangeNotifier implements IFormProvider {
   FuelFormModel _formModel;
   bool _isInitialized = false;
   bool _isCalculating = false;
-  bool _isLoading = false;
+  final bool _isLoading = false;
   String? _lastError;
-
-  FuelFormProvider({
-    String? initialVehicleId, 
-    String? userId,
-    required ReceiptImageService receiptImageService,
-  }) : _receiptImageService = receiptImageService,
-       _formModel = FuelFormModel.initial(initialVehicleId ?? '', userId ?? '') {
-    _initializeControllers();
-  }
 
   // Getters
   @override

@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
 
 /// Loading simples para sincronização que aparece e some automaticamente - padrão app-plantis
 class SimpleSyncLoading extends StatefulWidget {
-  final String message;
   
   const SimpleSyncLoading({
     super.key,
     this.message = 'Sincronizando dados automotivos...',
   });
+  final String message;
 
   /// Mostra loading simples que desaparece automaticamente quando sync termina
   static void show(BuildContext context, {String? message}) {

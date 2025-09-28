@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
 import '../../core/repositories/diagnostico_hive_repository.dart';
 import '../../core/services/diagnosticos_data_loader.dart';
 import '../../core/services/access_history_service.dart';
 import '../../core/models/fitossanitario_hive.dart';
+import '../../core/models/diagnostico_hive.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
@@ -124,7 +124,8 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       
       // Tentar acessar o repository diretamente
       final repository = sl<DiagnosticoHiveRepository>();
-      final allDiagnosticos = repository.getAll();
+      final result = await repository.getAll();
+      final allDiagnosticos = result.isSuccess ? result.data! : <DiagnosticoHive>[];
       debugPrint('📊 [FORCE DEBUG] Repository direto: ${allDiagnosticos.length} diagnósticos');
       
       if (allDiagnosticos.isEmpty) {
@@ -135,14 +136,16 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
         await DiagnosticosDataLoader.loadDiagnosticosData();
         
         // Verificar novamente
-        final newCount = repository.getAll().length;
+        final newResult = await repository.getAll();
+        final newCount = newResult.isSuccess ? newResult.data!.length : 0;
         debugPrint('📊 [FORCE DEBUG] Após carregamento: $newCount diagnósticos');
         
         if (newCount > 0) {
           debugPrint('✅ [FORCE DEBUG] Carregamento bem-sucedido!');
           
           // Verificar sample dos dados
-          final sample = repository.getAll().take(3).toList();
+          final sampleResult = await repository.getAll();
+          final sample = sampleResult.isSuccess ? sampleResult.data!.take(3).toList() : <DiagnosticoHive>[];
           for (int i = 0; i < sample.length; i++) {
             final diag = sample[i];
             debugPrint('[$i] SAMPLE: fkIdDefensivo="${diag.fkIdDefensivo}", nome="${diag.nomeDefensivo}"');
@@ -300,7 +303,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           isDark: isDark,
           showBackButton: true,
           showActions: true,
-          onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack(),
+          onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
           onRightIconPressed: () => _handleFavoriteToggle(provider),
         );
       },

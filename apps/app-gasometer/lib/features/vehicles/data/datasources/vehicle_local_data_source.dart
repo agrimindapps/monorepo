@@ -13,9 +13,9 @@ abstract class VehicleLocalDataSource {
 
 @LazySingleton(as: VehicleLocalDataSource)
 class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
-  final LocalDataService _localDataService;
 
   VehicleLocalDataSourceImpl(this._localDataService);
+  final LocalDataService _localDataService;
 
   @override
   Future<List<VehicleModel>> getAllVehicles() async {
@@ -83,8 +83,8 @@ class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
 }
 
 class LocalDataSourceException implements Exception {
-  final String message;
   LocalDataSourceException(this.message);
+  final String message;
 
   @override
   String toString() => 'LocalDataSourceException: $message';

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:get_it/get_it.dart';
 
 // Data  
 import '../data/repositories/subscription_repository_impl.dart';

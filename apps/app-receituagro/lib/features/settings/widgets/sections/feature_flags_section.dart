@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../../constants/settings_design_tokens.dart';
@@ -327,7 +327,7 @@ class FeatureFlagsSection extends StatelessWidget {
 
   /// Open Feature Flags Admin Panel
   Future<void> _openFeatureFlagsAdminPanel(BuildContext context, FeatureFlagsProvider featureFlagsProvider) async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => FeatureFlagsAdminDialog(provider: featureFlagsProvider),
     );

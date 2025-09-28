@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 /// Interface base para todos os use cases
 /// Segue padrão Clean Architecture

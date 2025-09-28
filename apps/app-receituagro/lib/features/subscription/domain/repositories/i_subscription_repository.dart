@@ -1,5 +1,5 @@
 import 'package:core/core.dart' hide ISubscriptionRepository;
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 // Usando as entidades do core package
 

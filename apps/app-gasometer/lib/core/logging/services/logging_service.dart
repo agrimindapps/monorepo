@@ -9,13 +9,13 @@ import '../repositories/log_repository.dart';
 /// Integra com Analytics, Crashlytics e persistência local
 @lazySingleton
 class LoggingService {
-  final LogRepository _logRepository;
-  final AnalyticsService _analyticsService;
   
   LoggingService(
     this._logRepository,
     this._analyticsService,
   );
+  final LogRepository _logRepository;
+  final AnalyticsService _analyticsService;
 
   String? _currentUserId;
   final Map<String, DateTime> _operationStartTimes = {};
@@ -32,7 +32,7 @@ class LoggingService {
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
-    final operationKey = '${category}_${operation}';
+    final operationKey = '${category}_$operation';
     _operationStartTimes[operationKey] = DateTime.now();
 
     final logEntry = LogEntry.operationStart(
@@ -46,7 +46,7 @@ class LoggingService {
     await _saveLog(logEntry);
     
     if (kDebugMode) {
-      debugPrint('🚀 [${category}] Starting $operation: $message');
+      debugPrint('🚀 [$category] Starting $operation: $message');
     }
   }
 
@@ -57,7 +57,7 @@ class LoggingService {
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
-    final operationKey = '${category}_${operation}';
+    final operationKey = '${category}_$operation';
     final startTime = _operationStartTimes.remove(operationKey);
     final duration = startTime != null 
         ? DateTime.now().difference(startTime).inMilliseconds 
@@ -87,7 +87,7 @@ class LoggingService {
     
     if (kDebugMode) {
       final durationText = duration != null ? ' (${duration}ms)' : '';
-      debugPrint('✅ [${category}] Completed $operation$durationText: $message');
+      debugPrint('✅ [$category] Completed $operation$durationText: $message');
     }
   }
 
@@ -100,7 +100,7 @@ class LoggingService {
     StackTrace? stackTrace,
     Map<String, dynamic>? metadata,
   }) async {
-    final operationKey = '${category}_${operation}';
+    final operationKey = '${category}_$operation';
     final startTime = _operationStartTimes.remove(operationKey);
     final duration = startTime != null 
         ? DateTime.now().difference(startTime).inMilliseconds 
@@ -145,7 +145,7 @@ class LoggingService {
     
     if (kDebugMode) {
       final durationText = duration != null ? ' (${duration}ms)' : '';
-      debugPrint('❌ [${category}] Failed $operation$durationText: $message');
+      debugPrint('❌ [$category] Failed $operation$durationText: $message');
       debugPrint('   Error: $error');
     }
   }
@@ -157,7 +157,7 @@ class LoggingService {
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
-    final operationKey = '${category}_${operation}';
+    final operationKey = '${category}_$operation';
     final startTime = _operationStartTimes[operationKey];
     final duration = startTime != null 
         ? DateTime.now().difference(startTime).inMilliseconds 
@@ -178,7 +178,7 @@ class LoggingService {
     await _saveLog(logEntry);
     
     if (kDebugMode) {
-      debugPrint('⚠️ [${category}] Warning in $operation: $message');
+      debugPrint('⚠️ [$category] Warning in $operation: $message');
     }
   }
 
@@ -201,7 +201,7 @@ class LoggingService {
     await _saveLog(logEntry);
     
     if (kDebugMode) {
-      debugPrint('ℹ️ [${category}] $message');
+      debugPrint('ℹ️ [$category] $message');
     }
   }
 
@@ -224,7 +224,7 @@ class LoggingService {
     );
 
     await _saveLog(logEntry);
-    debugPrint('🐛 [${category}] $message');
+    debugPrint('🐛 [$category] $message');
   }
 
   // === MÉTODOS ESPECÍFICOS DO GASOMETER ===

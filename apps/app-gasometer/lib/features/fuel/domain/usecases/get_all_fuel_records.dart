@@ -8,9 +8,9 @@ import '../repositories/fuel_repository.dart';
 
 @lazySingleton
 class GetAllFuelRecords implements NoParamsUseCase<List<FuelRecordEntity>> {
-  final FuelRepository repository;
 
   GetAllFuelRecords(this.repository);
+  final FuelRepository repository;
 
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> call() async {

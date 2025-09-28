@@ -22,17 +22,17 @@ class ExpensesEmptyState extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(60),
               ),
               child: Icon(
                 Icons.attach_money,
                 size: 60,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
               ),
             ),
             
-            SizedBox(height: GasometerDesignTokens.spacingXl),
+            const SizedBox(height: GasometerDesignTokens.spacingXl),
             
             // Título principal
             SemanticText.heading(
@@ -45,14 +45,14 @@ class ExpensesEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
             
             // Descrição
             SemanticText.subtitle(
               'Use o botão + para registrar suas despesas do veículo como seguro, IPVA, manutenções, multas e outros gastos.',
               style: TextStyle(
                 fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 height: 1.4,
               ),
               textAlign: TextAlign.center,

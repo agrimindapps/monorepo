@@ -3,40 +3,6 @@ import 'package:flutter/services.dart';
 
 /// Campo de texto customizado com validação e formatação
 class CustomTextField extends StatefulWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final String? hint;
-  final String? helperText;
-  final String? errorText;
-  final bool obscureText;
-  final bool enabled;
-  final bool readOnly;
-  final int? maxLines;
-  final int? minLines;
-  final int? maxLength;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
-  final void Function()? onTap;
-  final void Function(String)? onSubmitted;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final Widget? prefix;
-  final Widget? suffix;
-  final String? prefixText;
-  final String? suffixText;
-  final bool autofocus;
-  final FocusNode? focusNode;
-  final TextCapitalization textCapitalization;
-  final EdgeInsetsGeometry? contentPadding;
-  final InputBorder? border;
-  final InputBorder? enabledBorder;
-  final InputBorder? focusedBorder;
-  final InputBorder? errorBorder;
-  final Color? fillColor;
-  final bool filled;
 
   const CustomTextField({
     super.key,
@@ -75,9 +41,6 @@ class CustomTextField extends StatefulWidget {
     this.fillColor,
     this.filled = true,
   });
-
-  @override
-  State<CustomTextField> createState() => _CustomTextFieldState();
 
   /// Factory constructor para campo de e-mail
   factory CustomTextField.email({
@@ -199,6 +162,43 @@ class CustomTextField extends StatefulWidget {
           : null,
     );
   }
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final String? helperText;
+  final String? errorText;
+  final bool obscureText;
+  final bool enabled;
+  final bool readOnly;
+  final int? maxLines;
+  final int? minLines;
+  final int? maxLength;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final void Function()? onTap;
+  final void Function(String)? onSubmitted;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final Widget? prefix;
+  final Widget? suffix;
+  final String? prefixText;
+  final String? suffixText;
+  final bool autofocus;
+  final FocusNode? focusNode;
+  final TextCapitalization textCapitalization;
+  final EdgeInsetsGeometry? contentPadding;
+  final InputBorder? border;
+  final InputBorder? enabledBorder;
+  final InputBorder? focusedBorder;
+  final InputBorder? errorBorder;
+  final Color? fillColor;
+  final bool filled;
+
+  @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
@@ -284,7 +284,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         width: 1,
       ),
     );

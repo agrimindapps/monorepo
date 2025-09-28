@@ -1,33 +1,30 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
 import '../../features/comentarios/models/comentario_model.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
 import '../models/comentario_hive.dart';
 import '../services/device_identity_service.dart';
-import 'base_hive_repository.dart';
 
 class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive> 
     implements IComentariosRepository {
   
-  ComentariosHiveRepository() : super('comentarios');
-
-  @override
-  ComentarioHive createFromJson(Map<String, dynamic> json) {
-    return ComentarioHive.fromJson(json);
-  }
-
-  @override
-  String getKeyFromEntity(ComentarioHive entity) {
-    return entity.idReg;
-  }
+  ComentariosHiveRepository() : super(
+    hiveManager: GetIt.instance<IHiveManager>(),
+    boxName: 'comentarios',
+  );
 
   /// Implementação da interface IComentariosRepository
   @override
   Future<List<ComentarioModel>> getAllComentarios() async {
     try {
       final userId = await _getCurrentUserId();
-      final hiveitems = getAll();
+      final result = await getAll();
+      
+      if (result.isError) {
+        throw Exception('Erro ao acessar dados: ${result.error}');
+      }
+      
+      final hiveitems = result.data!;
       
       // Filtra por usuário atual e ordena por data (mais recente primeiro)
       final userComments = hiveitems
@@ -69,8 +66,12 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<void> updateComentario(ComentarioModel comentario) async {
     try {
       final userId = await _getCurrentUserId();
-      final existing = getById(comentario.idReg);
+      final result = await getByKey(comentario.idReg);
+      if (result.isError) {
+        throw Exception('Erro ao acessar comentário: ${result.error}');
+      }
       
+      final existing = result.data;
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
@@ -95,8 +96,12 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<void> deleteComentario(String id) async {
     try {
       final userId = await _getCurrentUserId();
-      final existing = getById(id);
+      final result = await getByKey(id);
+      if (result.isError) {
+        throw Exception('Erro ao acessar comentário: ${result.error}');
+      }
       
+      final existing = result.data;
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
@@ -120,7 +125,11 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<List<ComentarioModel>> getComentariosByContext(String pkIdentificador) async {
     try {
       final userId = await _getCurrentUserId();
-      final hiveitems = getAll();
+      final result = await getAll();
+      if (result.isError) {
+        throw Exception('Erro ao acessar dados: ${result.error}');
+      }
+      final hiveitems = result.data!;
       
       final contextComments = hiveitems
           .where((item) => 
@@ -144,7 +153,11 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<List<ComentarioModel>> getComentariosByTool(String ferramenta) async {
     try {
       final userId = await _getCurrentUserId();
-      final hiveitems = getAll();
+      final result = await getAll();
+      if (result.isError) {
+        throw Exception('Erro ao acessar dados: ${result.error}');
+      }
+      final hiveitems = result.data!;
       
       final toolComments = hiveitems
           .where((item) => 
@@ -170,7 +183,11 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
       final now = DateTime.now().millisecondsSinceEpoch;
       final cutoffTime = now - (90 * 24 * 60 * 60 * 1000); // 90 dias em ms
       
-      final hiveitems = getAll();
+      final result = await getAll();
+      if (result.isError) {
+        throw Exception('Erro ao acessar dados: ${result.error}');
+      }
+      final hiveitems = result.data!;
       final oldInactiveComments = hiveitems
           .where((item) => 
               !item.status && 
@@ -189,7 +206,11 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<Map<String, int>> getUserCommentStats() async {
     try {
       final userId = await _getCurrentUserId();
-      final hiveitems = getAll();
+      final result = await getAll();
+      if (result.isError) {
+        throw Exception('Erro ao acessar dados: ${result.error}');
+      }
+      final hiveitems = result.data!;
       
       final userComments = hiveitems
           .where((item) => item.userId == userId)

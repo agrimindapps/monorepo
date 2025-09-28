@@ -2,15 +2,12 @@
 /// 
 /// This module provides extended validation result classes and utilities
 /// following the Single Responsibility Principle.
+library;
 
 import '../architecture/i_form_validator.dart';
 
 /// Extended validation result with additional metadata
 class ExtendedValidationResult extends ValidationResult {
-  final String? fieldName;
-  final DateTime timestamp;
-  final String? validatorType;
-  final Map<String, dynamic> context;
   
   const ExtendedValidationResult({
     required super.isValid,
@@ -56,6 +53,10 @@ class ExtendedValidationResult extends ValidationResult {
       context: context,
     );
   }
+  final String? fieldName;
+  final DateTime timestamp;
+  final String? validatorType;
+  final Map<String, dynamic> context;
   
   /// Convert to base ValidationResult
   ValidationResult toValidationResult() {
@@ -203,8 +204,8 @@ class ValidationResultBuilder {
   String? _warningMessage;
   String? _fieldName;
   String? _validatorType;
-  Map<String, dynamic> _metadata = {};
-  Map<String, dynamic> _context = {};
+  final Map<String, dynamic> _metadata = {};
+  final Map<String, dynamic> _context = {};
   
   /// Set validation as successful
   ValidationResultBuilder valid() {

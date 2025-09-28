@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 // Data
 import '../data/repositories/culturas_repository_impl.dart';

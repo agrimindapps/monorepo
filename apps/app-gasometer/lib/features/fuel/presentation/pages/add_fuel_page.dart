@@ -10,14 +10,14 @@ import '../providers/fuel_provider.dart';
 import '../widgets/fuel_form_view.dart';
 
 class AddFuelPage extends StatefulWidget {
-  final String? vehicleId;
-  final String? editFuelRecordId;
   
   const AddFuelPage({
     super.key,
     this.vehicleId,
     this.editFuelRecordId,
   });
+  final String? vehicleId;
+  final String? editFuelRecordId;
 
   @override
   State<AddFuelPage> createState() => _AddFuelPageState();

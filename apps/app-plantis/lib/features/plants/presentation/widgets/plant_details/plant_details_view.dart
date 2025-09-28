@@ -1018,12 +1018,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
         // Content with tabs
         Expanded(
-          child: Container(
-            decoration: BoxDecoration(
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
               color:
                   Colors
                       .transparent, // Transparente para usar o fundo do BasePageScaffold
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
             ),
@@ -1033,7 +1033,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 _buildTabBar(context),
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
-                  child: Container(
+                  child: DecoratedBox(
                     decoration: const BoxDecoration(
                       color:
                           Colors

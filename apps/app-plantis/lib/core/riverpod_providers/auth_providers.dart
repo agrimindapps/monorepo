@@ -404,7 +404,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         debugPrint('🔐 Validando dispositivo após login...');
       }
 
-      final result = await _validateDeviceUseCase();
+      final result = await _validateDeviceUseCase!();
 
       result.fold(
         (failure) {
@@ -658,7 +658,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     try {
       final currentDevice = await DeviceModel.fromCurrentDevice();
-      final revokeResult = await _revokeDeviceUseCase(
+      final revokeResult = await _revokeDeviceUseCase!(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
           preventSelfRevoke: false,

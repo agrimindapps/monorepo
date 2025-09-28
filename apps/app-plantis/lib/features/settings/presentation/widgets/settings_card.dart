@@ -121,13 +121,13 @@ class _SettingsCardState extends State<SettingsCard>
       case SettingsCardCategory.general:
         return PlantisColors.getPageBackgroundColor(context);
       case SettingsCardCategory.account:
-        return PlantisColors.leafLight.withOpacity(0.1);
+        return PlantisColors.leafLight.withValues(alpha: 0.1);
       case SettingsCardCategory.premium:
-        return PlantisColors.sunLight.withOpacity(0.1);
+        return PlantisColors.sunLight.withValues(alpha: 0.1);
       case SettingsCardCategory.privacy:
-        return PlantisColors.waterLight.withOpacity(0.1);
+        return PlantisColors.waterLight.withValues(alpha: 0.1);
       case SettingsCardCategory.development:
-        return PlantisColors.soilLight.withOpacity(0.1);
+        return PlantisColors.soilLight.withValues(alpha: 0.1);
     }
   }
 
@@ -152,7 +152,7 @@ class _SettingsCardState extends State<SettingsCard>
 
   Color _getBorderColor() {
     final color = _getHeaderColor();
-    return _isHovered ? color.withOpacity(0.3) : color.withOpacity(0.1);
+    return _isHovered ? color.withValues(alpha: 0.3) : color.withValues(alpha: 0.1);
   }
 
   Widget _buildLeading() {
@@ -169,7 +169,7 @@ class _SettingsCardState extends State<SettingsCard>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: _getHeaderColor().withOpacity(0.3),
+              color: _getHeaderColor().withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -214,10 +214,10 @@ class _SettingsCardState extends State<SettingsCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.1),
+        color: badgeColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: badgeColor.withOpacity(0.3),
+          color: badgeColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -263,14 +263,14 @@ class _SettingsCardState extends State<SettingsCard>
                 boxShadow: _isHovered
                     ? [
                         BoxShadow(
-                          color: _getHeaderColor().withOpacity(0.1),
+                          color: _getHeaderColor().withValues(alpha: 0.1),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -294,8 +294,8 @@ class _SettingsCardState extends State<SettingsCard>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            _getHeaderColor().withOpacity(0.05),
-                            _getHeaderColor().withOpacity(0.02),
+                            _getHeaderColor().withValues(alpha: 0.05),
+                            _getHeaderColor().withValues(alpha: 0.02),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -460,7 +460,7 @@ class QuickSettingsCard extends StatelessWidget {
           gradient: LinearGradient(
             colors: [
               cardColor,
-              cardColor.withOpacity(0.8),
+              cardColor.withValues(alpha: 0.8),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -468,7 +468,7 @@ class QuickSettingsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: cardColor.withOpacity(0.3),
+              color: cardColor.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

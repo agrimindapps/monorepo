@@ -19,13 +19,13 @@ enum GasometerSyncErrorType {
 
 /// Handler de erros específico para o contexto automotivo do Gasometer
 class GasometerSyncErrorHandler {
+
+  GasometerSyncErrorHandler(this._analytics);
   final AnalyticsService _analytics;
   final StreamController<GasometerSyncError> _errorController = 
       StreamController<GasometerSyncError>.broadcast();
 
   Stream<GasometerSyncError> get errorStream => _errorController.stream;
-
-  GasometerSyncErrorHandler(this._analytics);
 
   /// Processa erro baseado no contexto automotivo
   Future<GasometerSyncError> handleSyncError(
@@ -210,18 +210,18 @@ class GasometerSyncErrorHandler {
     switch (type) {
       case GasometerSyncErrorType.vehicleDataConflict:
         return [
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'keep_remote',
             title: 'Usar versão da nuvem',
             description: 'Manter os dados mais recentes do servidor',
             isRecommended: true,
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'keep_local',
             title: 'Usar versão local',
             description: 'Manter os dados deste dispositivo',
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'merge_data',
             title: 'Combinar dados',
             description: 'Tentar combinar as informações de ambas as versões',
@@ -230,13 +230,13 @@ class GasometerSyncErrorHandler {
         
       case GasometerSyncErrorType.fuelRecordInvalid:
         return [
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'fix_data',
             title: 'Corrigir dados',
             description: 'Abrir formulário para corrigir as informações',
             isRecommended: true,
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'skip_record',
             title: 'Pular registro',
             description: 'Ignorar este abastecimento e continuar',
@@ -245,13 +245,13 @@ class GasometerSyncErrorHandler {
         
       case GasometerSyncErrorType.maintenanceScheduleConflict:
         return [
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'reschedule',
             title: 'Reagendar',
             description: 'Escolher nova data para a manutenção',
             isRecommended: true,
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'override',
             title: 'Sobrescrever',
             description: 'Substituir o agendamento existente',
@@ -260,13 +260,13 @@ class GasometerSyncErrorHandler {
         
       case GasometerSyncErrorType.oddometerInconsistency:
         return [
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'correct_odometer',
             title: 'Corrigir quilometragem',
             description: 'Inserir a quilometragem correta do veículo',
             isRecommended: true,
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'reset_odometer',
             title: 'Resetar hodômetro',
             description: 'Considerar que o hodômetro foi resetado ou trocado',
@@ -275,13 +275,13 @@ class GasometerSyncErrorHandler {
         
       case GasometerSyncErrorType.premiumFeatureBlocked:
         return [
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'upgrade_premium',
             title: 'Fazer upgrade',
             description: 'Assinar plano premium para acessar o recurso',
             isRecommended: true,
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'use_basic',
             title: 'Usar versão básica',
             description: 'Continuar com funcionalidades limitadas',
@@ -290,13 +290,13 @@ class GasometerSyncErrorHandler {
         
       default:
         return [
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'retry',
             title: 'Tentar novamente',
             description: 'Repetir a operação de sincronização',
             isRecommended: true,
           ),
-          GasometerRecoveryAction(
+          const GasometerRecoveryAction(
             id: 'skip',
             title: 'Pular por agora',
             description: 'Continuar sem sincronizar este item',
@@ -395,16 +395,6 @@ class GasometerSyncErrorHandler {
 
 /// Erro específico do contexto automotivo Gasometer
 class GasometerSyncError {
-  final GasometerSyncErrorType type;
-  final String userMessage;
-  final String technicalMessage;
-  final dynamic originalError;
-  final String? modelType;
-  final String? operationType;
-  final Map<String, dynamic>? data;
-  final List<GasometerRecoveryAction> recoveryActions;
-  final Map<String, dynamic>? fallbackData;
-  final DateTime timestamp;
 
   const GasometerSyncError({
     required this.type,
@@ -418,6 +408,16 @@ class GasometerSyncError {
     this.fallbackData,
     required this.timestamp,
   });
+  final GasometerSyncErrorType type;
+  final String userMessage;
+  final String technicalMessage;
+  final dynamic originalError;
+  final String? modelType;
+  final String? operationType;
+  final Map<String, dynamic>? data;
+  final List<GasometerRecoveryAction> recoveryActions;
+  final Map<String, dynamic>? fallbackData;
+  final DateTime timestamp;
 
   /// Se o erro pode ser retentado automaticamente
   bool get isRetryable {
@@ -461,11 +461,6 @@ class GasometerSyncError {
 
 /// Ação de recuperação específica do Gasometer
 class GasometerRecoveryAction {
-  final String id;
-  final String title;
-  final String description;
-  final bool isRecommended;
-  final Map<String, dynamic>? actionData;
 
   const GasometerRecoveryAction({
     required this.id,
@@ -474,6 +469,11 @@ class GasometerRecoveryAction {
     this.isRecommended = false,
     this.actionData,
   });
+  final String id;
+  final String title;
+  final String description;
+  final bool isRecommended;
+  final Map<String, dynamic>? actionData;
 }
 
 /// Extensões úteis para trabalhar com erros do Gasometer

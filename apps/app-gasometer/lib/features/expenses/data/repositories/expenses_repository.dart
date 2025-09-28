@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
@@ -16,13 +17,8 @@ import '../datasources/expenses_remote_data_source.dart';
 import '../models/expense_model.dart';
 
 /// Repository para persistência de despesas usando Hive com cache strategy e sync Firebase
+@Injectable(as: IExpensesRepository)
 class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositoryMixin implements IExpensesRepository {
-  static const String _boxName = 'expenses';
-  late Box<ExpenseModel> _box;
-  final LoggingService _loggingService;
-  final ExpensesRemoteDataSource _remoteDataSource;
-  final Connectivity _connectivity;
-  final AuthRepository _authRepository;
 
   ExpensesRepository(
     this._loggingService,
@@ -30,6 +26,12 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
     this._connectivity,
     this._authRepository,
   );
+  static const String _boxName = 'expenses';
+  late Box<ExpenseModel> _box;
+  final LoggingService _loggingService;
+  final ExpensesRemoteDataSource _remoteDataSource;
+  final Connectivity _connectivity;
+  final AuthRepository _authRepository;
 
   @override
   LoggingService get loggingService => _loggingService;

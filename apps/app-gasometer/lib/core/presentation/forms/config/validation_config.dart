@@ -233,15 +233,15 @@ class CrossFieldRules {
 
 /// Confirm password validation rule implementation
 class ConfirmPasswordRule extends CrossFieldValidationRule {
-  final String passwordField;
-  final String confirmField;
-  final String _errorMessage;
   
   ConfirmPasswordRule({
     required this.passwordField,
     required this.confirmField,
     required String errorMessage,
   }) : _errorMessage = errorMessage;
+  final String passwordField;
+  final String confirmField;
+  final String _errorMessage;
   
   @override
   List<String> get involvedFields => [passwordField, confirmField];
@@ -267,15 +267,15 @@ class ConfirmPasswordRule extends CrossFieldValidationRule {
 
 /// Date range validation rule implementation
 class DateRangeRule extends CrossFieldValidationRule {
-  final String startDateField;
-  final String endDateField;
-  final String _errorMessage;
   
   DateRangeRule({
     required this.startDateField,
     required this.endDateField,
     required String errorMessage,
   }) : _errorMessage = errorMessage;
+  final String startDateField;
+  final String endDateField;
+  final String _errorMessage;
   
   @override
   List<String> get involvedFields => [startDateField, endDateField];
@@ -301,10 +301,6 @@ class DateRangeRule extends CrossFieldValidationRule {
 
 /// Conditional required field validation rule
 class ConditionalRequiredRule extends CrossFieldValidationRule {
-  final String targetField;
-  final String conditionField;
-  final dynamic conditionValue;
-  final String _errorMessage;
   
   ConditionalRequiredRule({
     required this.targetField,
@@ -312,6 +308,10 @@ class ConditionalRequiredRule extends CrossFieldValidationRule {
     required this.conditionValue,
     required String errorMessage,
   }) : _errorMessage = errorMessage;
+  final String targetField;
+  final String conditionField;
+  final dynamic conditionValue;
+  final String _errorMessage;
   
   @override
   List<String> get involvedFields => [targetField, conditionField];
@@ -342,15 +342,15 @@ class ConditionalRequiredRule extends CrossFieldValidationRule {
 
 /// Numeric range validation rule
 class NumericRangeRule extends CrossFieldValidationRule {
-  final String minField;
-  final String maxField;
-  final String _errorMessage;
   
   NumericRangeRule({
     required this.minField,
     required this.maxField,
     required String errorMessage,
   }) : _errorMessage = errorMessage;
+  final String minField;
+  final String maxField;
+  final String _errorMessage;
   
   @override
   List<String> get involvedFields => [minField, maxField];
@@ -424,10 +424,10 @@ class ValidationConfigBuilder {
 
 /// Field validation builder for fluent API
 class FieldValidationBuilder {
-  final ValidationConfig _config;
-  final String _fieldKey;
   
   FieldValidationBuilder(this._config, this._fieldKey);
+  final ValidationConfig _config;
+  final String _fieldKey;
   
   /// Add a validator to this field
   FieldValidationBuilder addValidator(IFieldValidator validator) {

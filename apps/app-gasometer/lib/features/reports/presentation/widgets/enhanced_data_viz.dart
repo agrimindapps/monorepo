@@ -3,15 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
-import '../../../../core/theme/design_tokens.dart';
 
 /// Enhanced trend indicator with visual appeal
 class TrendIndicator extends StatelessWidget {
-  final double value;
-  final String label;
-  final bool isPositive;
-  final IconData? customIcon;
-  final Color? customColor;
 
   const TrendIndicator({
     super.key,
@@ -21,6 +15,11 @@ class TrendIndicator extends StatelessWidget {
     this.customIcon,
     this.customColor,
   });
+  final double value;
+  final String label;
+  final bool isPositive;
+  final IconData? customIcon;
+  final Color? customColor;
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +65,6 @@ class TrendIndicator extends StatelessWidget {
 
 /// Animated progress bar for visual comparisons
 class AnimatedProgressBar extends StatefulWidget {
-  final double value; // 0.0 to 1.0
-  final Color color;
-  final double height;
-  final String? label;
-  final String? valueText;
-  final Duration animationDuration;
 
   const AnimatedProgressBar({
     super.key,
@@ -82,6 +75,12 @@ class AnimatedProgressBar extends StatefulWidget {
     this.valueText,
     this.animationDuration = const Duration(milliseconds: 1500),
   });
+  final double value; // 0.0 to 1.0
+  final Color color;
+  final double height;
+  final String? label;
+  final String? valueText;
+  final Duration animationDuration;
 
   @override
   State<AnimatedProgressBar> createState() => _AnimatedProgressBarState();
@@ -165,15 +164,6 @@ class _AnimatedProgressBarState extends State<AnimatedProgressBar>
 
 /// Enhanced statistics card with micro-visualizations
 class VisualStatisticCard extends StatelessWidget {
-  final String title;
-  final String mainValue;
-  final String? subtitle;
-  final IconData icon;
-  final Color iconColor;
-  final List<DataPoint>? chartData;
-  final TrendData? trend;
-  final List<ComparisonItem>? comparisons;
-  final VoidCallback? onTap;
 
   const VisualStatisticCard({
     super.key,
@@ -187,6 +177,15 @@ class VisualStatisticCard extends StatelessWidget {
     this.comparisons,
     this.onTap,
   });
+  final String title;
+  final String mainValue;
+  final String? subtitle;
+  final IconData icon;
+  final Color iconColor;
+  final List<DataPoint>? chartData;
+  final TrendData? trend;
+  final List<ComparisonItem>? comparisons;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -315,9 +314,6 @@ class VisualStatisticCard extends StatelessWidget {
 
 /// Mini line chart for trend visualization
 class MiniLineChart extends StatelessWidget {
-  final List<DataPoint> data;
-  final Color color;
-  final double strokeWidth;
 
   const MiniLineChart({
     super.key,
@@ -325,6 +321,9 @@ class MiniLineChart extends StatelessWidget {
     required this.color,
     this.strokeWidth = 2.0,
   });
+  final List<DataPoint> data;
+  final Color color;
+  final double strokeWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -341,15 +340,15 @@ class MiniLineChart extends StatelessWidget {
 
 /// Custom painter for mini line chart
 class MiniLineChartPainter extends CustomPainter {
-  final List<DataPoint> data;
-  final Color color;
-  final double strokeWidth;
 
   MiniLineChartPainter({
     required this.data,
     required this.color,
     required this.strokeWidth,
   });
+  final List<DataPoint> data;
+  final Color color;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -429,11 +428,6 @@ class MiniLineChartPainter extends CustomPainter {
 
 /// Enhanced summary dashboard
 class EnhancedSummaryDashboard extends StatelessWidget {
-  final List<SummaryMetric> metrics;
-  final String? title;
-  final String? subtitle;
-  final Widget? headerAction;
-  final bool showTrends;
 
   const EnhancedSummaryDashboard({
     super.key,
@@ -443,6 +437,11 @@ class EnhancedSummaryDashboard extends StatelessWidget {
     this.headerAction,
     this.showTrends = true,
   });
+  final List<SummaryMetric> metrics;
+  final String? title;
+  final String? subtitle;
+  final Widget? headerAction;
+  final bool showTrends;
 
   @override
   Widget build(BuildContext context) {
@@ -548,34 +547,30 @@ class EnhancedSummaryDashboard extends StatelessWidget {
 
 /// Data models for visualizations
 class DataPoint {
-  final double value;
-  final DateTime timestamp;
-  final String? label;
 
   const DataPoint({
     required this.value,
     required this.timestamp,
     this.label,
   });
+  final double value;
+  final DateTime timestamp;
+  final String? label;
 }
 
 class TrendData {
-  final double percentage;
-  final bool isPositive;
-  final String period;
 
   const TrendData({
     required this.percentage,
     required this.isPositive,
     required this.period,
   });
+  final double percentage;
+  final bool isPositive;
+  final String period;
 }
 
 class ComparisonItem {
-  final String label;
-  final String value;
-  final double percentage;
-  final Color? color;
 
   const ComparisonItem({
     required this.label,
@@ -583,18 +578,13 @@ class ComparisonItem {
     required this.percentage,
     this.color,
   });
+  final String label;
+  final String value;
+  final double percentage;
+  final Color? color;
 }
 
 class SummaryMetric {
-  final String title;
-  final String mainValue;
-  final String? subtitle;
-  final IconData icon;
-  final Color color;
-  final List<DataPoint>? trendData;
-  final TrendData? trend;
-  final List<ComparisonItem>? comparisons;
-  final VoidCallback? onTap;
 
   const SummaryMetric({
     required this.title,
@@ -607,4 +597,13 @@ class SummaryMetric {
     this.comparisons,
     this.onTap,
   });
+  final String title;
+  final String mainValue;
+  final String? subtitle;
+  final IconData icon;
+  final Color color;
+  final List<DataPoint>? trendData;
+  final TrendData? trend;
+  final List<ComparisonItem>? comparisons;
+  final VoidCallback? onTap;
 }

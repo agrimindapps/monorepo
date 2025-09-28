@@ -242,7 +242,7 @@ class UnifiedErrorHandler {
   }) {
     if (!context.mounted) return;
     
-    String message = customMessage ?? _getErrorMessage(error);
+    final String message = customMessage ?? _getErrorMessage(error);
     
     if (useDialog) {
       showErrorDialog(

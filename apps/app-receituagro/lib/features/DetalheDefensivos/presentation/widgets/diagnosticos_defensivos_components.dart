@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
+import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/extensions/diagnostico_hive_extension.dart';
 import '../../../../core/models/cultura_hive.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/models/pragas_hive.dart';
-import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
+import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
 import '../../detalhe_defensivo_page.dart' as defensivo_page;
 import '../providers/diagnosticos_provider.dart';
@@ -423,7 +422,7 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
       for (final diagnostic in widget.diagnosticos!) {
         final idCultura = _getProperty(diagnostic, 'idCultura');
         if (idCultura != null) {
-          final culturaData = culturaRepository.getById(idCultura);
+          final culturaData = await culturaRepository.getById(idCultura);
           if (culturaData != null &&
               culturaData.cultura.toLowerCase() ==
                   widget.cultura.toLowerCase()) {
@@ -439,7 +438,7 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
       }
 
       // Se não encontrou, tenta buscar por nome
-      final culturaData = culturaRepository.findByName(widget.cultura);
+      final culturaData = await culturaRepository.findByName(widget.cultura);
       if (mounted) {
         setState(() {
           _culturaData = culturaData;
@@ -592,7 +591,7 @@ class _DiagnosticoDefensivoListItemWidgetState
 
 
       if (idPraga != null) {
-        final praga = pragasRepository.getById(idPraga);
+        final praga = await pragasRepository.getById(idPraga);
 
         if (mounted) {
           setState(() {
@@ -741,10 +740,10 @@ class _DiagnosticoDefensivoListItemWidgetState
     String nomeComumPraga = 'Praga não identificada';
     String nomeCientificoPraga = '';
 
-    // USAR A EXTENSÃO IMPLEMENTADA para resolver dinamicamente
+    // Usar propriedades diretas por enquanto (build method não pode ser async)
     if (widget.diagnostico is DiagnosticoHive) {
       final diagnosticoHive = widget.diagnostico as DiagnosticoHive;
-      nomeComumPraga = diagnosticoHive.displayNomePraga;
+      nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
     } else {
       // FALLBACK: lógica anterior para outros tipos
       final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
@@ -1259,8 +1258,8 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     
     if (diagnostico is DiagnosticoHive) {
       final diagnosticoHive = diagnostico as DiagnosticoHive;
-      nomeCultura = diagnosticoHive.displayNomeCultura;
-      nomeDefensivo = diagnosticoHive.displayNomeDefensivo;
+      nomeCultura = diagnosticoHive.nomeCultura ?? 'Cultura não identificada';
+      nomeDefensivo = diagnosticoHive.nomeDefensivo ?? 'Defensivo não identificado';
     } else {
       nomeCultura = _getProperty('nomeCultura', 'cultura') ?? 'Não especificado';
       nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? 'Não especificado';

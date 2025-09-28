@@ -1,7 +1,7 @@
 /// Audit Trail Service for Financial Data
 /// Tracks changes in financial data for compliance and debugging
+library;
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../features/expenses/data/models/expense_model.dart';
 import '../../features/fuel/data/models/fuel_supply_model.dart';
@@ -21,42 +21,7 @@ enum AuditEventType {
 
 /// Audit trail entry for financial operations
 @HiveType(typeId: 50)
-class FinancialAuditEntry extends HiveObject {
-  @HiveField(0)
-  final String id;
-
-  @HiveField(1)
-  final String entityId;
-
-  @HiveField(2)
-  final String entityType;
-
-  @HiveField(3)
-  final String eventType;
-
-  @HiveField(4)
-  final int timestamp;
-
-  @HiveField(5)
-  final String? userId;
-
-  @HiveField(6)
-  final Map<String, dynamic> beforeState;
-
-  @HiveField(7)
-  final Map<String, dynamic> afterState;
-
-  @HiveField(8)
-  final String? description;
-
-  @HiveField(9)
-  final double? monetaryValue;
-
-  @HiveField(10)
-  final Map<String, dynamic> metadata;
-
-  @HiveField(11)
-  final String? syncSource; // 'local', 'remote', 'conflict_resolution'
+class FinancialAuditEntry extends HiveObject { // 'local', 'remote', 'conflict_resolution'
 
   FinancialAuditEntry({
     required this.id,
@@ -101,6 +66,41 @@ class FinancialAuditEntry extends HiveObject {
       syncSource: syncSource,
     );
   }
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String entityId;
+
+  @HiveField(2)
+  final String entityType;
+
+  @HiveField(3)
+  final String eventType;
+
+  @HiveField(4)
+  final int timestamp;
+
+  @HiveField(5)
+  final String? userId;
+
+  @HiveField(6)
+  final Map<String, dynamic> beforeState;
+
+  @HiveField(7)
+  final Map<String, dynamic> afterState;
+
+  @HiveField(8)
+  final String? description;
+
+  @HiveField(9)
+  final double? monetaryValue;
+
+  @HiveField(10)
+  final Map<String, dynamic> metadata;
+
+  @HiveField(11)
+  final String? syncSource;
 
   DateTime get dateTime => DateTime.fromMillisecondsSinceEpoch(timestamp);
 
@@ -377,7 +377,7 @@ class FinancialAuditTrailService {
   Future<void> _cleanOldEntries() async {
     if (_auditBox == null) return;
 
-    final cutoff = DateTime.now().subtract(Duration(days: _retentionDays));
+    final cutoff = DateTime.now().subtract(const Duration(days: _retentionDays));
     final keysToDelete = <dynamic>[];
 
     for (final entry in _auditBox!.values) {

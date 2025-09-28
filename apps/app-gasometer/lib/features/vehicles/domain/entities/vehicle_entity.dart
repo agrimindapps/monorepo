@@ -64,6 +64,33 @@ enum VehicleType {
 }
 
 class VehicleEntity extends BaseSyncEntity {
+  
+  const VehicleEntity({
+    required super.id,
+    required this.name,
+    required this.brand,
+    required this.model,
+    required this.year,
+    required this.color,
+    required this.licensePlate,
+    required this.type,
+    required this.supportedFuels,
+    this.tankCapacity,
+    this.engineSize,
+    this.photoUrl,
+    required this.currentOdometer,
+    this.averageConsumption,
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+    this.isActive = true,
+    this.metadata = const {},
+  });
   final String name;
   final String brand;
   final String model;
@@ -79,43 +106,6 @@ class VehicleEntity extends BaseSyncEntity {
   final double? averageConsumption;
   final bool isActive;
   final Map<String, dynamic> metadata;
-  
-  const VehicleEntity({
-    required String id,
-    required this.name,
-    required this.brand,
-    required this.model,
-    required this.year,
-    required this.color,
-    required this.licensePlate,
-    required this.type,
-    required this.supportedFuels,
-    this.tankCapacity,
-    this.engineSize,
-    this.photoUrl,
-    required this.currentOdometer,
-    this.averageConsumption,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-    this.isActive = true,
-    this.metadata = const {},
-  }) : super(
-    id: id,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-    lastSyncAt: lastSyncAt,
-    isDirty: isDirty,
-    isDeleted: isDeleted,
-    version: version,
-    userId: userId,
-    moduleName: moduleName,
-  );
   
   @override
   List<Object?> get props => [

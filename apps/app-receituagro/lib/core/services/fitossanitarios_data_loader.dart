@@ -78,7 +78,7 @@ class FitossanitariosDataLoader {
         (error) {
           developer.log('Erro ao carregar fitossanitários: $error',
               name: 'FitossanitariosDataLoader');
-          throw error;
+          throw Exception('Erro ao carregar fitossanitários: $error');
         },
         (_) {
           developer.log('Fitossanitários carregados com sucesso!',
@@ -88,15 +88,18 @@ class FitossanitariosDataLoader {
       );
 
       // Verifica se dados foram realmente salvos
-      final loadedFitossanitarios = repository.getAll();
-      developer.log(
-          'Verificação: ${loadedFitossanitarios.length} fitossanitários disponíveis',
-          name: 'FitossanitariosDataLoader');
-
-      if (loadedFitossanitarios.isNotEmpty) {
+      final loadedResult = await repository.getAll();
+      if (loadedResult.isSuccess) {
+        final loadedFitossanitarios = loadedResult.data!;
         developer.log(
-            'Primeiros 3 fitossanitários: ${loadedFitossanitarios.take(3).map((f) => f.nomeComum).join(', ')}',
+            'Verificação: ${loadedFitossanitarios.length} fitossanitários disponíveis',
             name: 'FitossanitariosDataLoader');
+
+        if (loadedFitossanitarios.isNotEmpty) {
+          developer.log(
+              'Primeiros 3 fitossanitários: ${loadedFitossanitarios.take(3).map((f) => f.nomeComum).join(', ')}',
+              name: 'FitossanitariosDataLoader');
+        }
       }
     } catch (e) {
       developer.log('❌ [FITOSSANITARIOS] Erro durante carregamento de fitossanitários: $e',
@@ -117,13 +120,21 @@ class FitossanitariosDataLoader {
   static Future<bool> isDataLoaded() async {
     try {
       final repository = di.sl<FitossanitarioHiveRepository>();
-      final fitossanitarios = repository.getAll();
-      final hasData = fitossanitarios.isNotEmpty;
+      final result = await repository.getAll();
       
-      developer.log('🔍 [FITOSSANITARIOS] isDataLoaded() - Repository has ${fitossanitarios.length} items: $hasData', 
-          name: 'FitossanitariosDataLoader');
-      
-      return hasData;
+      if (result.isSuccess) {
+        final fitossanitarios = result.data!;
+        final hasData = fitossanitarios.isNotEmpty;
+        
+        developer.log('🔍 [FITOSSANITARIOS] isDataLoaded() - Repository has ${fitossanitarios.length} items: $hasData', 
+            name: 'FitossanitariosDataLoader');
+        
+        return hasData;
+      } else {
+        developer.log('❌ [FITOSSANITARIOS] Error getting all items: ${result.error}', 
+            name: 'FitossanitariosDataLoader');
+        return false;
+      }
     } catch (e) {
       developer.log('❌ [FITOSSANITARIOS] Error checking isDataLoaded: $e', 
           name: 'FitossanitariosDataLoader');
@@ -135,13 +146,22 @@ class FitossanitariosDataLoader {
   static Future<Map<String, dynamic>> getStats() async {
     try {
       final repository = di.sl<FitossanitarioHiveRepository>();
-      final fitossanitarios = repository.getAll();
-
-      return {
-        'total_fitossanitarios': fitossanitarios.length,
-        'is_loaded': _isLoaded,
-        'sample_fitossanitarios': fitossanitarios.take(5).map((f) => f.nomeComum).toList(),
-      };
+      final result = await repository.getAll();
+      
+      if (result.isSuccess) {
+        final fitossanitarios = result.data!;
+        return {
+          'total_fitossanitarios': fitossanitarios.length,
+          'is_loaded': _isLoaded,
+          'sample_fitossanitarios': fitossanitarios.take(5).map((f) => f.nomeComum).toList(),
+        };
+      } else {
+        return {
+          'total_fitossanitarios': 0,
+          'is_loaded': false,
+          'error': result.error.toString(),
+        };
+      }
     } catch (e) {
       return {
         'total_fitossanitarios': 0,

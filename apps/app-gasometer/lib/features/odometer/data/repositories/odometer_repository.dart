@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/logging/entities/log_entry.dart';
@@ -14,13 +15,8 @@ import '../datasources/odometer_remote_data_source.dart';
 import '../models/odometer_model.dart';
 
 /// Repository para persistência de leituras de odômetro usando Hive com cache strategy e sync Firebase
+@injectable
 class OdometerRepository with CachedRepository<OdometerEntity>, LoggableRepositoryMixin {
-  static const String _boxName = 'odometer';
-  late Box<OdometerModel> _box;
-  final LoggingService _loggingService;
-  final OdometerRemoteDataSource _remoteDataSource;
-  final Connectivity _connectivity;
-  final AuthRepository _authRepository;
 
   OdometerRepository(
     this._loggingService,
@@ -28,6 +24,12 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
     this._connectivity,
     this._authRepository,
   );
+  static const String _boxName = 'odometer';
+  late Box<OdometerModel> _box;
+  final LoggingService _loggingService;
+  final OdometerRemoteDataSource _remoteDataSource;
+  final Connectivity _connectivity;
+  final AuthRepository _authRepository;
 
   @override
   LoggingService get loggingService => _loggingService;

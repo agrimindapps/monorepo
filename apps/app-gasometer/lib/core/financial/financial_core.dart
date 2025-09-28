@@ -1,26 +1,26 @@
 /// Financial Core Module for GasOMeter
 /// Exports all financial-related services, validators, and widgets
+library;
 
 import 'package:core/core.dart';
+
 import 'audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
 import 'financial_validator.dart';
 
+export '../../features/expenses/data/models/expense_model.dart';
+// Core entities (re-export from features)
+export '../../features/fuel/data/models/fuel_supply_model.dart';
 // Services
 export 'audit_trail_service.dart';
 export 'financial_conflict_resolver.dart';
 export 'financial_sync_service.dart';
 export 'financial_validator.dart';
-
 // Widgets
 export 'widgets/financial_conflict_dialog.dart';
 export 'widgets/financial_sync_indicator.dart';
 export 'widgets/financial_warning_banner.dart';
-
-// Core entities (re-export from features)
-export '../../features/fuel/data/models/fuel_supply_model.dart';
-export '../../features/expenses/data/models/expense_model.dart';
 
 /// Financial module configuration and initialization
 class FinancialModule {

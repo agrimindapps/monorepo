@@ -25,6 +25,21 @@ import 'validated_form_field.dart';
 /// )
 /// ```
 class OdometerField extends StatelessWidget {
+
+  const OdometerField({
+    super.key,
+    required this.controller,
+    this.label,
+    this.hint,
+    this.required = true,
+    this.currentOdometer,
+    this.lastReading,
+    this.onChanged,
+    this.additionalValidator,
+    this.showLastReadingHint = true,
+    this.minValue = 0.0,
+    this.maxValue = 9999999.0,
+  });
   /// Controller do campo de texto
   final TextEditingController controller;
 
@@ -57,21 +72,6 @@ class OdometerField extends StatelessWidget {
 
   /// Valor máximo aceito (padrão: 9.999.999)
   final double maxValue;
-
-  const OdometerField({
-    super.key,
-    required this.controller,
-    this.label,
-    this.hint,
-    this.required = true,
-    this.currentOdometer,
-    this.lastReading,
-    this.onChanged,
-    this.additionalValidator,
-    this.showLastReadingHint = true,
-    this.minValue = 0.0,
-    this.maxValue = 9999999.0,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -170,12 +170,6 @@ class OdometerField extends StatelessWidget {
 
 /// Variação do OdometerField para casos específicos onde é opcional
 class OptionalOdometerField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final String? hint;
-  final double? currentOdometer;
-  final double? lastReading;
-  final void Function(String?)? onChanged;
 
   const OptionalOdometerField({
     super.key,
@@ -186,6 +180,12 @@ class OptionalOdometerField extends StatelessWidget {
     this.lastReading,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final String? hint;
+  final double? currentOdometer;
+  final double? lastReading;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -204,14 +204,14 @@ class OptionalOdometerField extends StatelessWidget {
 
 /// Variação simplificada do OdometerField para casos básicos
 class SimpleOdometerField extends StatelessWidget {
-  final TextEditingController controller;
-  final void Function(String?)? onChanged;
 
   const SimpleOdometerField({
     super.key,
     required this.controller,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {

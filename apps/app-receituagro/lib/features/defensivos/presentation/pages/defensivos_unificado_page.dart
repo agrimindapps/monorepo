@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';

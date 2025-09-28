@@ -5,16 +5,6 @@ import '../../constants/ui_constants.dart';
 /// Reusable empty state widget with illustrations and actions
 /// Provides consistent empty state handling across the app
 class EmptyStateWidget extends StatelessWidget {
-  final String title;
-  final String? message;
-  final IconData? icon;
-  final String? illustrationAsset;
-  final VoidCallback? onAction;
-  final VoidCallback? onSecondaryAction;
-  final String? actionButtonText;
-  final String? secondaryButtonText;
-  final EmptyStateStyle style;
-  final bool isCompact;
 
   const EmptyStateWidget({
     super.key,
@@ -173,6 +163,16 @@ class EmptyStateWidget extends StatelessWidget {
       ),
     );
   }
+  final String title;
+  final String? message;
+  final IconData? icon;
+  final String? illustrationAsset;
+  final VoidCallback? onAction;
+  final VoidCallback? onSecondaryAction;
+  final String? actionButtonText;
+  final String? secondaryButtonText;
+  final EmptyStateStyle style;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +194,7 @@ class EmptyStateWidget extends StatelessWidget {
             Icon(
               icon,
               size: style.iconSize ?? AppSizes.iconL,
-              color: style.iconColor ?? theme.colorScheme.onSurface.withOpacity(0.5),
+              color: style.iconColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(width: AppSpacing.large),
           ],
@@ -216,7 +216,7 @@ class EmptyStateWidget extends StatelessWidget {
                     message!,
                     style: style.messageStyle ??
                         theme.textTheme.bodyMedium?.copyWith(
-                          color: style.messageColor ?? theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: style.messageColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                   ),
               ],
@@ -257,7 +257,7 @@ class EmptyStateWidget extends StatelessWidget {
                 message!,
                 style: style.messageStyle ??
                     theme.textTheme.bodyLarge?.copyWith(
-                      color: style.messageColor ?? theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: style.messageColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -292,13 +292,13 @@ class EmptyStateWidget extends StatelessWidget {
         width: style.illustrationSize ?? AppSizes.imageThumbSize,
         height: style.illustrationSize ?? AppSizes.imageThumbSize,
         decoration: BoxDecoration(
-          color: (style.iconColor ?? theme.colorScheme.primary).withOpacity(0.1),
+          color: (style.iconColor ?? theme.colorScheme.primary).withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: style.iconSize ?? AppSizes.iconXXL,
-          color: style.iconColor ?? theme.colorScheme.primary.withOpacity(0.7),
+          color: style.iconColor ?? theme.colorScheme.primary.withValues(alpha: 0.7),
         ),
       );
     }
@@ -370,9 +370,6 @@ class EmptyStateWidget extends StatelessWidget {
 
 /// Animated empty state with fade-in animation
 class AnimatedEmptyState extends StatefulWidget {
-  final EmptyStateWidget emptyWidget;
-  final Duration animationDuration;
-  final Duration delay;
 
   const AnimatedEmptyState({
     super.key,
@@ -380,6 +377,9 @@ class AnimatedEmptyState extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 500),
     this.delay = const Duration(milliseconds: 200),
   });
+  final EmptyStateWidget emptyWidget;
+  final Duration animationDuration;
+  final Duration delay;
 
   @override
   State<AnimatedEmptyState> createState() => _AnimatedEmptyStateState();
@@ -442,19 +442,6 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
 
 /// Empty state style configuration
 class EmptyStateStyle {
-  final Color? iconColor;
-  final Color? titleColor;
-  final Color? messageColor;
-  final Color? actionButtonColor;
-  final Color? actionButtonTextColor;
-  final Color? secondaryButtonColor;
-  
-  final TextStyle? titleStyle;
-  final TextStyle? messageStyle;
-  
-  final double? iconSize;
-  final double? illustrationSize;
-  final EdgeInsetsGeometry? padding;
 
   const EmptyStateStyle({
     this.iconColor,
@@ -469,6 +456,19 @@ class EmptyStateStyle {
     this.illustrationSize,
     this.padding,
   });
+  final Color? iconColor;
+  final Color? titleColor;
+  final Color? messageColor;
+  final Color? actionButtonColor;
+  final Color? actionButtonTextColor;
+  final Color? secondaryButtonColor;
+  
+  final TextStyle? titleStyle;
+  final TextStyle? messageStyle;
+  
+  final double? iconSize;
+  final double? illustrationSize;
+  final EdgeInsetsGeometry? padding;
 
   EmptyStateStyle copyWith({
     Color? iconColor,

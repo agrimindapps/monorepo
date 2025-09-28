@@ -1,8 +1,8 @@
 /// Financial Conflict Resolution Dialog
 /// UI for manual resolution of financial data conflicts
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+library;
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../features/expenses/data/models/expense_model.dart';
 import '../../../features/fuel/data/models/fuel_supply_model.dart';
@@ -10,9 +10,6 @@ import '../financial_conflict_resolver.dart';
 
 /// Dialog for resolving financial data conflicts
 class FinancialConflictDialog extends StatefulWidget {
-  final BaseSyncEntity localEntity;
-  final BaseSyncEntity remoteEntity;
-  final Function(FinancialConflictStrategy strategy, BaseSyncEntity? customResolution) onResolved;
 
   const FinancialConflictDialog({
     super.key,
@@ -20,6 +17,9 @@ class FinancialConflictDialog extends StatefulWidget {
     required this.remoteEntity,
     required this.onResolved,
   });
+  final BaseSyncEntity localEntity;
+  final BaseSyncEntity remoteEntity;
+  final Function(FinancialConflictStrategy strategy, BaseSyncEntity? customResolution) onResolved;
 
   @override
   State<FinancialConflictDialog> createState() => _FinancialConflictDialogState();
@@ -35,13 +35,13 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
           Icon(
             Icons.warning,
             color: Colors.orange,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text('Conflito de Dados Financeiros'),
         ],
       ),
@@ -79,7 +79,7 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
                     });
                   },
                 ),
-                Text('Mostrar detalhes técnicos'),
+                const Text('Mostrar detalhes técnicos'),
               ],
             ),
 
@@ -90,13 +90,13 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancelar'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: _selectedStrategy != FinancialConflictStrategy.manualReview
               ? () => _resolveConflict(context)
               : null,
-          child: Text('Resolver'),
+          child: const Text('Resolver'),
         ),
       ],
     );
@@ -249,7 +249,7 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
     final theme = Theme.of(context);
 
     return ExpansionTile(
-      title: Text('Detalhes Técnicos'),
+      title: const Text('Detalhes Técnicos'),
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
@@ -286,7 +286,7 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
             width: 120,
             child: Text(
               '$label:',
-              style: TextStyle(fontWeight: FontWeight.w500),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
           Expanded(
@@ -310,37 +310,37 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
   _StrategyConfig _getStrategyConfig(FinancialConflictStrategy strategy) {
     switch (strategy) {
       case FinancialConflictStrategy.manualReview:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Revisão Manual',
           description: 'Manter dados locais e marcar para revisão posterior',
         );
       case FinancialConflictStrategy.mostRecent:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Mais Recente',
           description: 'Usar a versão que foi modificada mais recentemente',
         );
       case FinancialConflictStrategy.localPreferred:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Preferir Local',
           description: 'Manter a versão local (neste dispositivo)',
         );
       case FinancialConflictStrategy.remotePreferred:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Preferir Remota',
           description: 'Usar a versão remota (de outro dispositivo)',
         );
       case FinancialConflictStrategy.highestValue:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Maior Valor',
           description: 'Usar a versão com maior valor monetário',
         );
       case FinancialConflictStrategy.preserveReceipts:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Preservar Recibos',
           description: 'Preferir a versão que possui comprovantes/recibos',
         );
       case FinancialConflictStrategy.smartMerge:
-        return _StrategyConfig(
+        return const _StrategyConfig(
           title: 'Mesclagem Inteligente',
           description: 'Combinar automaticamente os melhores campos de cada versão',
         );
@@ -349,11 +349,11 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
 }
 
 class _StrategyConfig {
-  final String title;
-  final String description;
 
   const _StrategyConfig({
     required this.title,
     required this.description,
   });
+  final String title;
+  final String description;
 }

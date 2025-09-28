@@ -267,14 +267,14 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                   height: 48,
                   decoration: BoxDecoration(
                     color: widget.isSelected
-                        ? PlantisColors.primary.withOpacity(0.1)
+                        ? PlantisColors.primary.withValues(alpha: 0.1)
                         : _isHovered
-                            ? colorScheme.surfaceVariant.withOpacity(0.6)
+                            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)
                             : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: widget.isSelected
                         ? Border.all(
-                            color: PlantisColors.primary.withOpacity(0.3),
+                            color: PlantisColors.primary.withValues(alpha: 0.3),
                             width: 1,
                           )
                         : null,
@@ -297,7 +297,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                 color: widget.isSelected
                                     ? PlantisColors.primary
                                     : _isHovered
-                                        ? PlantisColors.primary.withOpacity(0.1)
+                                        ? PlantisColors.primary.withValues(alpha: 0.1)
                                         : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -331,7 +331,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: PlantisColors.flower.withOpacity(0.3),
+                                        color: PlantisColors.flower.withValues(alpha: 0.3),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
@@ -361,7 +361,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: PlantisColors.success.withOpacity(0.4),
+                                        color: PlantisColors.success.withValues(alpha: 0.4),
                                         blurRadius: 3,
                                         offset: const Offset(0, 1),
                                       ),
@@ -395,7 +395,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                       style: theme.textTheme.titleSmall?.copyWith(
                                         color: widget.isSelected
                                             ? colorScheme.onSurface
-                                            : colorScheme.onSurface.withOpacity(0.9),
+                                            : colorScheme.onSurface.withValues(alpha: 0.9),
                                         fontWeight: widget.isSelected
                                             ? FontWeight.w600
                                             : FontWeight.w500,
@@ -473,10 +473,10 @@ class ModernSidebarFooter extends StatelessWidget {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: colorScheme.outline.withOpacity(0.1),
+                color: colorScheme.outline.withValues(alpha: 0.1),
               ),
             ),
             child: Row(
@@ -494,7 +494,7 @@ class ModernSidebarFooter extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: PlantisColors.primary.withOpacity(0.2),
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -539,7 +539,7 @@ class ModernSidebarFooter extends StatelessWidget {
                 ),
                 
                 // Settings Button
-                Container(
+                DecoratedBox(
                   decoration: BoxDecoration(
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),

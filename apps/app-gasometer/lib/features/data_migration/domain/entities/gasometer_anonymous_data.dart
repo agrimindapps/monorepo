@@ -19,6 +19,35 @@ class GasometerAnonymousData extends AnonymousData {
     this.totalFuelCost = 0.0,
   }) : super(dataType: 'gasometer');
 
+  /// Create from JSON
+  factory GasometerAnonymousData.fromJson(Map<String, dynamic> json) {
+    return GasometerAnonymousData(
+      userId: json['user_id'] as String,
+      userInfo: UserEntity.fromJson(json['user_info'] as Map<String, dynamic>),
+      recordCount: json['record_count'] as int,
+      lastModified: DateTime.parse(json['last_modified'] as String),
+      additionalInfo: json['additional_info'] as Map<String, dynamic>? ?? const {},
+      vehicleCount: json['vehicle_count'] as int? ?? 0,
+      fuelRecordCount: json['fuel_record_count'] as int? ?? 0,
+      maintenanceRecordCount: json['maintenance_record_count'] as int? ?? 0,
+      totalDistance: (json['total_distance'] as num?)?.toDouble() ?? 0.0,
+      totalFuelCost: (json['total_fuel_cost'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// Create empty instance (no data)
+  factory GasometerAnonymousData.empty({
+    required String userId,
+    required UserEntity userInfo,
+  }) {
+    return GasometerAnonymousData(
+      userId: userId,
+      userInfo: userInfo,
+      recordCount: 0,
+      lastModified: DateTime.now(),
+    );
+  }
+
   /// Number of vehicles in anonymous data
   final int vehicleCount;
   
@@ -146,35 +175,6 @@ class GasometerAnonymousData extends AnonymousData {
       maintenanceRecordCount: maintenanceRecordCount ?? this.maintenanceRecordCount,
       totalDistance: totalDistance ?? this.totalDistance,
       totalFuelCost: totalFuelCost ?? this.totalFuelCost,
-    );
-  }
-
-  /// Create from JSON
-  factory GasometerAnonymousData.fromJson(Map<String, dynamic> json) {
-    return GasometerAnonymousData(
-      userId: json['user_id'] as String,
-      userInfo: UserEntity.fromJson(json['user_info'] as Map<String, dynamic>),
-      recordCount: json['record_count'] as int,
-      lastModified: DateTime.parse(json['last_modified'] as String),
-      additionalInfo: json['additional_info'] as Map<String, dynamic>? ?? const {},
-      vehicleCount: json['vehicle_count'] as int? ?? 0,
-      fuelRecordCount: json['fuel_record_count'] as int? ?? 0,
-      maintenanceRecordCount: json['maintenance_record_count'] as int? ?? 0,
-      totalDistance: (json['total_distance'] as num?)?.toDouble() ?? 0.0,
-      totalFuelCost: (json['total_fuel_cost'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
-  /// Create empty instance (no data)
-  factory GasometerAnonymousData.empty({
-    required String userId,
-    required UserEntity userInfo,
-  }) {
-    return GasometerAnonymousData(
-      userId: userId,
-      userInfo: userInfo,
-      recordCount: 0,
-      lastModified: DateTime.now(),
     );
   }
 }

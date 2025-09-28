@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
 
 import '../interfaces/network_info.dart';

@@ -4,13 +4,6 @@ import '../../../core/theme/loading_design_tokens.dart';
 /// Widget para transições suaves entre páginas
 /// Fornece animações personalizadas e profissionais para navegação
 class SmoothPageTransition extends StatefulWidget {
-  final Widget child;
-  final SmoothTransitionType transitionType;
-  final Duration duration;
-  final Duration delay;
-  final Curve curve;
-  final VoidCallback? onComplete;
-  final bool reverse;
 
   const SmoothPageTransition({
     super.key,
@@ -22,6 +15,13 @@ class SmoothPageTransition extends StatefulWidget {
     this.onComplete,
     this.reverse = false,
   });
+  final Widget child;
+  final SmoothTransitionType transitionType;
+  final Duration duration;
+  final Duration delay;
+  final Curve curve;
+  final VoidCallback? onComplete;
+  final bool reverse;
 
   /// Factory para transição de fade simples
   static SmoothPageTransition fade({
@@ -32,10 +32,10 @@ class SmoothPageTransition extends StatefulWidget {
   }) {
     return SmoothPageTransition(
       key: key,
-      child: child,
       transitionType: SmoothTransitionType.fade,
       duration: duration ?? LoadingDesignTokens.normalDuration,
       onComplete: onComplete,
+      child: child,
     );
   }
 
@@ -49,10 +49,10 @@ class SmoothPageTransition extends StatefulWidget {
   }) {
     return SmoothPageTransition(
       key: key,
-      child: child,
       transitionType: _getSlideType(direction),
       duration: duration ?? LoadingDesignTokens.normalDuration,
       onComplete: onComplete,
+      child: child,
     );
   }
 
@@ -65,10 +65,10 @@ class SmoothPageTransition extends StatefulWidget {
   }) {
     return SmoothPageTransition(
       key: key,
-      child: child,
       transitionType: SmoothTransitionType.scale,
       duration: duration ?? LoadingDesignTokens.normalDuration,
       onComplete: onComplete,
+      child: child,
     );
   }
 
@@ -82,12 +82,12 @@ class SmoothPageTransition extends StatefulWidget {
   }) {
     return SmoothPageTransition(
       key: key,
-      child: child,
       transitionType: direction == SlideDirection.fromBottom 
         ? SmoothTransitionType.fadeSlide 
         : _getFadeSlideType(direction),
       duration: duration ?? LoadingDesignTokens.normalDuration,
       onComplete: onComplete,
+      child: child,
     );
   }
 
@@ -307,13 +307,6 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
 
 /// Widget para transição entre múltiplas páginas com sequência
 class SmoothPageSequence extends StatefulWidget {
-  final List<Widget> pages;
-  final Duration pageDuration;
-  final Duration transitionDuration;
-  final SmoothTransitionType transitionType;
-  final bool autoAdvance;
-  final VoidCallback? onComplete;
-  final bool loop;
 
   const SmoothPageSequence({
     super.key,
@@ -325,6 +318,13 @@ class SmoothPageSequence extends StatefulWidget {
     this.onComplete,
     this.loop = false,
   });
+  final List<Widget> pages;
+  final Duration pageDuration;
+  final Duration transitionDuration;
+  final SmoothTransitionType transitionType;
+  final bool autoAdvance;
+  final VoidCallback? onComplete;
+  final bool loop;
 
   @override
   State<SmoothPageSequence> createState() => _SmoothPageSequenceState();
@@ -418,11 +418,6 @@ class _SmoothPageSequenceState extends State<SmoothPageSequence> {
 
 /// Utilitário para criar transições personalizadas de rota
 class SmoothPageRoute<T> extends PageRoute<T> {
-  final Widget child;
-  final SmoothTransitionType transitionType;
-  final Duration customTransitionDuration;
-  final Duration customReverseTransitionDuration;
-  final Curve curve;
 
   SmoothPageRoute({
     required this.child,
@@ -432,6 +427,11 @@ class SmoothPageRoute<T> extends PageRoute<T> {
     this.curve = Curves.easeOutCubic,
     super.settings,
   });
+  final Widget child;
+  final SmoothTransitionType transitionType;
+  final Duration customTransitionDuration;
+  final Duration customReverseTransitionDuration;
+  final Curve curve;
 
   @override
   Color? get barrierColor => null;

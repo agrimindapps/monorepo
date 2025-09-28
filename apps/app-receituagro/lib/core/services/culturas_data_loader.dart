@@ -61,7 +61,7 @@ class CulturasDataLoader {
         (error) {
           developer.log('Erro ao carregar culturas: $error',
               name: 'CulturasDataLoader');
-          throw error;
+          throw Exception('Erro ao carregar culturas: $error');
         },
         (_) {
           developer.log('Culturas carregadas com sucesso!',
@@ -71,15 +71,18 @@ class CulturasDataLoader {
       );
 
       // 4. Verifica se dados foram realmente salvos
-      final loadedCulturas = repository.getAll();
-      developer.log(
-          'Verificação: ${loadedCulturas.length} culturas disponíveis',
-          name: 'CulturasDataLoader');
-
-      if (loadedCulturas.isNotEmpty) {
+      final loadedResult = await repository.getAll();
+      if (loadedResult.isSuccess) {
+        final loadedCulturas = loadedResult.data!;
         developer.log(
-            'Primeiras 3 culturas: ${loadedCulturas.take(3).map((c) => c.cultura).join(', ')}',
+            'Verificação: ${loadedCulturas.length} culturas disponíveis',
             name: 'CulturasDataLoader');
+
+        if (loadedCulturas.isNotEmpty) {
+          developer.log(
+              'Primeiras 3 culturas: ${loadedCulturas.take(3).map((c) => c.cultura).join(', ')}',
+              name: 'CulturasDataLoader');
+        }
       }
     } catch (e) {
       developer.log('❌ [CULTURAS] Erro durante carregamento de culturas: $e',
@@ -102,8 +105,8 @@ class CulturasDataLoader {
 
     try {
       final repository = di.sl<CulturaHiveRepository>();
-      final culturas = repository.getAll();
-      return culturas.isNotEmpty;
+      final result = await repository.getAll();
+      return result.isSuccess && result.data!.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -113,13 +116,22 @@ class CulturasDataLoader {
   static Future<Map<String, dynamic>> getStats() async {
     try {
       final repository = di.sl<CulturaHiveRepository>();
-      final culturas = repository.getAll();
-
-      return {
-        'total_culturas': culturas.length,
-        'is_loaded': _isLoaded,
-        'sample_culturas': culturas.take(5).map((c) => c.cultura).toList(),
-      };
+      final result = await repository.getAll();
+      
+      if (result.isSuccess) {
+        final culturas = result.data!;
+        return {
+          'total_culturas': culturas.length,
+          'is_loaded': _isLoaded,
+          'sample_culturas': culturas.take(5).map((c) => c.cultura).toList(),
+        };
+      } else {
+        return {
+          'total_culturas': 0,
+          'is_loaded': false,
+          'error': result.error.toString(),
+        };
+      }
     } catch (e) {
       return {
         'total_culturas': 0,

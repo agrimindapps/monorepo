@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 /// Widget responsável pelo background da página de login
 class LoginBackgroundWidget extends StatelessWidget {
-  final Widget child;
 
   const LoginBackgroundWidget({
     super.key,
     required this.child,
   });
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -50,19 +50,19 @@ class LoginBackgroundWidget extends StatelessWidget {
 
 /// Painter para criar padrão de fundo
 class _BackgroundPatternPainter extends CustomPainter {
-  final bool isDark;
 
   _BackgroundPatternPainter({required this.isDark});
+  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Color primaryColor = isDark
-        ? Colors.amber.withOpacity(0.03)
-        : Colors.blue.shade700.withOpacity(0.03);
+        ? Colors.amber.withValues(alpha: 0.03)
+        : Colors.blue.shade700.withValues(alpha: 0.03);
 
     final Color secondaryColor = isDark
-        ? Colors.amber.shade200.withOpacity(0.02)
-        : Colors.blue.shade200.withOpacity(0.03);
+        ? Colors.amber.shade200.withValues(alpha: 0.02)
+        : Colors.blue.shade200.withValues(alpha: 0.03);
 
     // Linhas diagonais
     final linePaint = Paint()
@@ -89,8 +89,8 @@ class _BackgroundPatternPainter extends CustomPainter {
     // Círculos maiores
     final accentPaint = Paint()
       ..color = isDark
-          ? Colors.white.withOpacity(0.02)
-          : Colors.blue.shade700.withOpacity(0.02)
+          ? Colors.white.withValues(alpha: 0.02)
+          : Colors.blue.shade700.withValues(alpha: 0.02)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 

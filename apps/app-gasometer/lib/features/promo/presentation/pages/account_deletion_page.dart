@@ -248,12 +248,12 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   ),
                 ),
                 const SizedBox(width: 13),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
+                      Text(
                         'Exclusão de Conta',
                         style: TextStyle(
                           color: Colors.white,
@@ -264,8 +264,8 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 3),
-                      const Text(
+                      SizedBox(height: 3),
+                      Text(
                         'GasOMeter - Direito ao Esquecimento (LGPD/GDPR)',
                         style: TextStyle(
                           color: Colors.white70,
@@ -294,7 +294,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -578,7 +578,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -690,9 +690,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -794,7 +794,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1016,7 +1016,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
                     ),
@@ -1236,7 +1236,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               children: [
                 Icon(
                   Icons.local_gas_station,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -1245,7 +1245,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -1255,7 +1255,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               '© ${DateTime.now().year} Agrimind Apps. Todos os direitos reservados.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -1268,14 +1268,14 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
                   width: 1,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                 ),
                 _footerLink('Termos de Uso', () => context.go('/terms')),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
                   width: 1,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                 ),
                 _footerLink('Exclusão de Conta', () {}),
               ],
@@ -1293,7 +1293,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
         title,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -1313,9 +1313,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
 }
 
 class _PasswordDialog extends StatefulWidget {
-  final TextEditingController controller;
   
   const _PasswordDialog({required this.controller});
+  final TextEditingController controller;
   
   @override
   State<_PasswordDialog> createState() => _PasswordDialogState();

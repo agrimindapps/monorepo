@@ -70,14 +70,6 @@ abstract class IFormStateManager<T> {
 
 /// Immutable form state following Value Object pattern
 class FormState<T> {
-  final T? data;
-  final Map<String, dynamic> fieldValues;
-  final bool isLoading;
-  final String? error;
-  final FormValidationResult? validationResult;
-  final bool isDirty;
-  final DateTime lastModified;
-  final Map<String, dynamic> metadata;
   
   const FormState({
     this.data,
@@ -97,6 +89,14 @@ class FormState<T> {
       lastModified: DateTime.now(),
     );
   }
+  final T? data;
+  final Map<String, dynamic> fieldValues;
+  final bool isLoading;
+  final String? error;
+  final FormValidationResult? validationResult;
+  final bool isDirty;
+  final DateTime lastModified;
+  final Map<String, dynamic> metadata;
   
   /// Create loading state
   FormState<T> toLoading() {

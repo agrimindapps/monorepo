@@ -12,17 +12,6 @@ enum LoadingType {
 
 /// Widget de loading unificado com diferentes estilos e contextos
 class UnifiedLoadingView extends StatelessWidget {
-  const UnifiedLoadingView._({
-    required this.type,
-    this.message,
-    this.size,
-    this.color,
-  });
-
-  final LoadingType type;
-  final String? message;
-  final double? size;
-  final Color? color;
   
   /// Loading inicial para telas/formulários
   factory UnifiedLoadingView.initial({String? message}) {
@@ -59,6 +48,17 @@ class UnifiedLoadingView extends StatelessWidget {
       color: color,
     );
   }
+  const UnifiedLoadingView._({
+    required this.type,
+    this.message,
+    this.size,
+    this.color,
+  });
+
+  final LoadingType type;
+  final String? message;
+  final double? size;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +288,7 @@ class UnifiedLoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Positioned.fill(
-            child: Container(
+            child: ColoredBox(
               color: backgroundColor ?? Colors.black.withValues(alpha: 0.3),
               child: UnifiedLoadingView.initial(message: message),
             ),

@@ -19,7 +19,7 @@ class VehicleCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: GasometerDesignTokens.spacingLg,
         vertical: GasometerDesignTokens.spacingMd,
       ),
@@ -31,14 +31,14 @@ class VehicleCardContent extends StatelessWidget {
             vehicle.licensePlate,
             Icons.confirmation_number_outlined,
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildDetailRow(
             context,
             'Quilometragem',
             '${_formatNumber(vehicle.currentOdometer)} km',
             Icons.speed,
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildDetailRow(
             context,
             'Combustível',
@@ -69,7 +69,7 @@ class VehicleCardContent extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: GasometerDesignTokens.spacingSm),
+        const SizedBox(width: GasometerDesignTokens.spacingSm),
         SemanticText.label(
           label,
           style: TextStyle(

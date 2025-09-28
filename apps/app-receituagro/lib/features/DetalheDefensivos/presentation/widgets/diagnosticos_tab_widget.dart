@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as flutter_provider;
+import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
@@ -65,8 +66,8 @@ class DiagnosticosTabWidget extends StatelessWidget {
   void _retryLoadDiagnostics(BuildContext context) {
     // Implementação depende de como o provider é inicializado
     // Por enquanto, limpa o erro para permitir nova tentativa
-    final diagnosticosProvider = Provider.of<DiagnosticosProvider>(context, listen: false);
-    final defensivoProvider = Provider.of<DetalheDefensivoProvider>(context, listen: false);
+    final diagnosticosProvider = flutter_provider.Provider.of<DiagnosticosProvider>(context, listen: false);
+    final defensivoProvider = flutter_provider.Provider.of<DetalheDefensivoProvider>(context, listen: false);
     
     final idReg = defensivoProvider.defensivoData?.idReg;
     if (idReg != null) {
@@ -76,19 +77,32 @@ class DiagnosticosTabWidget extends StatelessWidget {
 
   /// Constrói lista de diagnósticos agrupados por cultura
   Widget _buildDiagnosticsList(List<dynamic> diagnosticos) {
-    final groupedDiagnostics = _groupDiagnosticsByCulture(diagnosticos);
-    
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _buildGroupedWidgets(groupedDiagnostics),
+    return FutureBuilder<Map<String, List<dynamic>>>(
+      future: _groupDiagnosticsByCulture(diagnosticos),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        if (snapshot.hasError) {
+          return Center(child: Text('Erro: ${snapshot.error}'));
+        }
+        
+        final groupedDiagnostics = snapshot.data ?? {};
+        
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _buildGroupedWidgets(groupedDiagnostics),
+        );
+      },
     );
   }
   
   /// Agrupa diagnósticos por cultura usando dados reais do repositório
-  Map<String, List<dynamic>> _groupDiagnosticsByCulture(
+  Future<Map<String, List<dynamic>>> _groupDiagnosticsByCulture(
     List<dynamic> diagnosticos,
-  ) {
+  ) async {
     final grouped = <String, List<dynamic>>{};
     final culturaRepository = sl<CulturaHiveRepository>();
     
@@ -99,7 +113,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
         // Primeiro tenta buscar pela idCultura (estrutura nova)
         final idCultura = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
         if (idCultura != null) {
-          final culturaData = culturaRepository.getById(idCultura);
+          final culturaData = await culturaRepository.getById(idCultura);
           if (culturaData != null) {
             culturaNome = culturaData.cultura;
           }

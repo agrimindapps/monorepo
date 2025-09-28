@@ -9,14 +9,14 @@ import '../widgets/enhanced_stats_card.dart';
 
 /// ✅ PERFORMANCE FIX: Single Consumer with optimized sections
 class OptimizedReportsContent extends StatelessWidget {
-  final String? selectedVehicleId;
-  final void Function(String?) onVehicleChanged;
 
   const OptimizedReportsContent({
     super.key,
     required this.selectedVehicleId,
     required this.onVehicleChanged,
   });
+  final String? selectedVehicleId;
+  final void Function(String?) onVehicleChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +65,10 @@ class OptimizedReportsContent extends StatelessWidget {
     return Container(
       height: 300,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -97,7 +97,7 @@ class OptimizedReportsContent extends StatelessWidget {
                 message,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -116,9 +116,9 @@ class OptimizedReportsContent extends StatelessWidget {
 
 /// Enhanced fuel section with performance indicators
 class EnhancedFuelSection extends StatelessWidget {
-  final ReportsProvider provider;
   
   const EnhancedFuelSection({super.key, required this.provider});
+  final ReportsProvider provider;
   
   @override
   Widget build(BuildContext context) {
@@ -152,9 +152,9 @@ class EnhancedFuelSection extends StatelessWidget {
 
 /// Enhanced consumption section with performance indicators
 class EnhancedConsumptionSection extends StatelessWidget {
-  final ReportsProvider provider;
   
   const EnhancedConsumptionSection({super.key, required this.provider});
+  final ReportsProvider provider;
   
   @override
   Widget build(BuildContext context) {
@@ -188,9 +188,9 @@ class EnhancedConsumptionSection extends StatelessWidget {
 
 /// Enhanced distance section with performance indicators
 class EnhancedDistanceSection extends StatelessWidget {
-  final ReportsProvider provider;
   
   const EnhancedDistanceSection({super.key, required this.provider});
+  final ReportsProvider provider;
   
   @override
   Widget build(BuildContext context) {
@@ -224,9 +224,6 @@ class EnhancedDistanceSection extends StatelessWidget {
 
 /// Helper widget for statistics cards
 class StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
 
   const StatCard({
     super.key,
@@ -234,13 +231,16 @@ class StatCard extends StatelessWidget {
     required this.value,
     required this.subtitle,
   });
+  final String title;
+  final String value;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -249,7 +249,7 @@ class StatCard extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 4),
@@ -263,7 +263,7 @@ class StatCard extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],

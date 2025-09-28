@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:core/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/user_settings_entity.dart';

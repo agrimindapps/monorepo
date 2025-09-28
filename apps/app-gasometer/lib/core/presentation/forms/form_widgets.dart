@@ -4,11 +4,6 @@ import '../../theme/design_tokens.dart';
 
 /// Standardized submit button for forms
 class FormSubmitButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final String text;
-  final bool isLoading;
-  final bool isEnabled;
-  final bool isDestructive;
   
   const FormSubmitButton({
     super.key,
@@ -18,6 +13,11 @@ class FormSubmitButton extends StatelessWidget {
     this.isEnabled = true,
     this.isDestructive = false,
   });
+  final VoidCallback? onPressed;
+  final String text;
+  final bool isLoading;
+  final bool isEnabled;
+  final bool isDestructive;
   
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class FormSubmitButton extends StatelessWidget {
               )
             : Text(
                 text,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeLg,
                   fontWeight: GasometerDesignTokens.fontWeightSemiBold,
                 ),
@@ -68,14 +68,14 @@ class FormSubmitButton extends StatelessWidget {
 
 /// Standardized cancel button for forms
 class FormCancelButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final String text;
   
   const FormCancelButton({
     super.key,
     this.onPressed,
     this.text = 'Cancelar',
   });
+  final VoidCallback? onPressed;
+  final String text;
   
   @override
   Widget build(BuildContext context) {
@@ -108,9 +108,6 @@ class FormCancelButton extends StatelessWidget {
 
 /// Container for form action buttons with standard spacing
 class FormActionButtons extends StatelessWidget {
-  final Widget? primaryButton;
-  final Widget? secondaryButton;
-  final EdgeInsetsGeometry? padding;
   
   const FormActionButtons({
     super.key,
@@ -145,6 +142,9 @@ class FormActionButtons extends StatelessWidget {
       ),
     );
   }
+  final Widget? primaryButton;
+  final Widget? secondaryButton;
+  final EdgeInsetsGeometry? padding;
   
   @override
   Widget build(BuildContext context) {
@@ -159,7 +159,7 @@ class FormActionButtons extends StatelessWidget {
         children: [
           if (secondaryButton != null) ...[
             secondaryButton!,
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
           ],
           if (primaryButton != null) primaryButton!,
         ],
@@ -170,9 +170,6 @@ class FormActionButtons extends StatelessWidget {
 
 /// Standardized error widget for forms
 class FormErrorWidget extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
-  final IconData? icon;
   
   const FormErrorWidget({
     super.key,
@@ -180,6 +177,9 @@ class FormErrorWidget extends StatelessWidget {
     this.onRetry,
     this.icon,
   });
+  final String message;
+  final VoidCallback? onRetry;
+  final IconData? icon;
   
   @override
   Widget build(BuildContext context) {
@@ -191,7 +191,7 @@ class FormErrorWidget extends StatelessWidget {
           GasometerDesignTokens.radiusCard,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -202,7 +202,7 @@ class FormErrorWidget extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
             size: GasometerDesignTokens.iconSizeXl,
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           Text(
             message,
             style: TextStyle(
@@ -212,7 +212,7 @@ class FormErrorWidget extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
             TextButton(
               onPressed: onRetry,
               child: const Text('Tentar Novamente'),
@@ -226,11 +226,6 @@ class FormErrorWidget extends StatelessWidget {
 
 /// Container for form fields with standard styling
 class FormFieldContainer extends StatelessWidget {
-  final Widget child;
-  final String? label;
-  final bool required;
-  final EdgeInsetsGeometry? padding;
-  final EdgeInsetsGeometry? margin;
   
   const FormFieldContainer({
     super.key,
@@ -240,6 +235,11 @@ class FormFieldContainer extends StatelessWidget {
     this.padding,
     this.margin,
   });
+  final Widget child;
+  final String? label;
+  final bool required;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
   
   @override
   Widget build(BuildContext context) {
@@ -275,7 +275,7 @@ class FormFieldContainer extends StatelessWidget {
                 ],
               ],
             ),
-            SizedBox(height: GasometerDesignTokens.spacingSm),
+            const SizedBox(height: GasometerDesignTokens.spacingSm),
           ],
           Padding(
             padding: effectivePadding,
@@ -289,20 +289,20 @@ class FormFieldContainer extends StatelessWidget {
 
 /// Loading overlay for forms
 class FormLoadingOverlay extends StatelessWidget {
-  final String? message;
-  final Color? backgroundColor;
   
   const FormLoadingOverlay({
     super.key,
     this.message,
     this.backgroundColor,
   });
+  final String? message;
+  final Color? backgroundColor;
   
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: backgroundColor ?? 
-          Theme.of(context).colorScheme.surface.withOpacity(0.8),
+          Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
       child: Center(
         child: Card(
           child: Padding(
@@ -314,7 +314,7 @@ class FormLoadingOverlay extends StatelessWidget {
               children: [
                 const CircularProgressIndicator(),
                 if (message != null) ...[
-                  SizedBox(height: GasometerDesignTokens.spacingLg),
+                  const SizedBox(height: GasometerDesignTokens.spacingLg),
                   Text(
                     message!,
                     style: TextStyle(
@@ -335,11 +335,6 @@ class FormLoadingOverlay extends StatelessWidget {
 
 /// Header widget for forms with icon and description
 class FormHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final IconData icon;
-  final Color? backgroundColor;
-  final EdgeInsetsGeometry? padding;
   
   const FormHeader({
     super.key,
@@ -349,6 +344,11 @@ class FormHeader extends StatelessWidget {
     this.backgroundColor,
     this.padding,
   });
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+  final Color? backgroundColor;
+  final EdgeInsetsGeometry? padding;
   
   @override
   Widget build(BuildContext context) {
@@ -364,11 +364,11 @@ class FormHeader extends StatelessWidget {
           GasometerDesignTokens.radiusCard,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -392,7 +392,7 @@ class FormHeader extends StatelessWidget {
               size: GasometerDesignTokens.iconSizeLg,
             ),
           ),
-          SizedBox(width: GasometerDesignTokens.spacingLg),
+          const SizedBox(width: GasometerDesignTokens.spacingLg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,13 +406,13 @@ class FormHeader extends StatelessWidget {
                   ),
                 ),
                 if (subtitle != null) ...[
-                  SizedBox(height: GasometerDesignTokens.spacingXs),
+                  const SizedBox(height: GasometerDesignTokens.spacingXs),
                   Text(
                     subtitle!,
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeMd,
                       color: Theme.of(context).colorScheme.onSurface
-                          .withOpacity(0.6),
+                          .withValues(alpha: 0.6),
                     ),
                   ),
                 ],

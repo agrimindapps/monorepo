@@ -52,9 +52,9 @@ class UnifiedFormSection extends StatelessWidget {
       title: title,
       subtitle: subtitle,
       icon: icon,
-      children: children,
       required: required,
       enabled: enabled,
+      children: children,
     );
   }
   
@@ -73,11 +73,11 @@ class UnifiedFormSection extends StatelessWidget {
       title: title,
       subtitle: subtitle,
       icon: icon,
-      children: children,
       expanded: expanded,
       onTap: onTap,
       required: required,
       enabled: enabled,
+      children: children,
     );
   }
   
@@ -95,10 +95,10 @@ class UnifiedFormSection extends StatelessWidget {
       title: title,
       subtitle: subtitle,
       icon: icon,
-      children: children,
       backgroundColor: backgroundColor,
       required: required,
       enabled: enabled,
+      children: children,
     );
   }
 
@@ -296,8 +296,8 @@ class UnifiedFormSectionDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: UnifiedDesignTokens.spacingLG),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: UnifiedDesignTokens.spacingLG),
       child: Divider(
         height: height ?? 1,
         thickness: thickness ?? 1,

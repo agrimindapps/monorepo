@@ -6,13 +6,13 @@ import 'database_inspector_service.dart';
 /// Serviço para limpeza de dados do GasOMeter
 /// Permite limpar boxes Hive e SharedPreferences de forma segura
 class DataCleanerService {
+
+  DataCleanerService._internal();
   static DataCleanerService? _instance;
   static DataCleanerService get instance {
     _instance ??= DataCleanerService._internal();
     return _instance!;
   }
-
-  DataCleanerService._internal();
 
   final _inspectorService = GasOMeterDatabaseInspectorService.instance;
 

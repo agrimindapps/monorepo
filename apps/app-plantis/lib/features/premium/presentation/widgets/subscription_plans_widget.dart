@@ -168,7 +168,7 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
     String? badge,
     required bool isSelected,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: isSelected 
             ? PlantisColors.primary.withValues(alpha: 0.15)

@@ -7,9 +7,9 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/maintenance_repository.dart';
 
 class DeleteMaintenanceRecordParams extends Equatable {
-  final String id;
 
   const DeleteMaintenanceRecordParams({required this.id});
+  final String id;
 
   @override
   List<Object> get props => [id];
@@ -17,9 +17,9 @@ class DeleteMaintenanceRecordParams extends Equatable {
 
 @injectable
 class DeleteMaintenanceRecord implements UseCase<Unit, DeleteMaintenanceRecordParams> {
-  final MaintenanceRepository repository;
 
   DeleteMaintenanceRecord(this.repository);
+  final MaintenanceRepository repository;
 
   @override
   Future<Either<Failure, Unit>> call(DeleteMaintenanceRecordParams params) async {

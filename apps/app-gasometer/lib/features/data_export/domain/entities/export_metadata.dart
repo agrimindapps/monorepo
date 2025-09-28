@@ -1,14 +1,5 @@
 /// Entidade que representa os metadados de uma exportação LGPD
 class ExportMetadata {
-  final String id;
-  final DateTime generatedAt;
-  final String version;
-  final bool lgpdCompliance;
-  final List<String> dataCategories;
-  final Map<String, dynamic> exportStats;
-  final String format;
-  final int fileSizeMb;
-  final String checksum;
 
   const ExportMetadata({
     required this.id,
@@ -33,6 +24,15 @@ class ExportMetadata {
     fileSizeMb: json['file_size_mb'] as int,
     checksum: json['checksum'] as String,
   );
+  final String id;
+  final DateTime generatedAt;
+  final String version;
+  final bool lgpdCompliance;
+  final List<String> dataCategories;
+  final Map<String, dynamic> exportStats;
+  final String format;
+  final int fileSizeMb;
+  final String checksum;
 
   Map<String, dynamic> toJson() => {
     'id': id,

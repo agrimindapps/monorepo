@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
+import '../models/diagnostico_hive.dart';
 import '../repositories/diagnostico_hive_repository.dart';
 
 /// Serviço para carregar dados de diagnósticos dos assets JSON
@@ -58,15 +59,16 @@ class DiagnosticosDataLoader {
       // 2. Salva no repositório Hive usando injeção de dependência
       final repository = di.sl<DiagnosticoHiveRepository>();
 
-      // Usa o método loadFromJson do base repository que já limpa e carrega os dados
-      final result = await repository.loadFromJson(diagnosticos, 'static_diagnosticos_v1');
-      
-      result.fold(
-        (error) {
-          throw error;
-        },
-        (_) {},
-      );
+      // Carrega diagnósticos através de batch insert
+      for (final diagnosticoData in diagnosticos) {
+        try {
+          // Converte para DiagnosticoHive
+          final diagnosticoHive = DiagnosticoHive.fromJson(diagnosticoData);
+          await repository.save(diagnosticoHive);
+        } catch (e) {
+          debugPrint('Erro ao carregar diagnóstico ${diagnosticoData['IdReg']}: $e');
+        }
+      }
 
 
 
@@ -86,7 +88,8 @@ class DiagnosticosDataLoader {
   static Future<bool> isDataLoaded() async {
     try {
       final repository = di.sl<DiagnosticoHiveRepository>();
-      final diagnosticos = repository.getAll();
+      final result = await repository.getAll();
+      final diagnosticos = result.isSuccess ? result.data! : <DiagnosticoHive>[];
       final hasData = diagnosticos.isNotEmpty;
       
       
@@ -100,7 +103,8 @@ class DiagnosticosDataLoader {
   static Future<Map<String, dynamic>> getStats() async {
     try {
       final repository = di.sl<DiagnosticoHiveRepository>();
-      final diagnosticos = repository.getAll();
+      final result = await repository.getAll();
+      final diagnosticos = result.isSuccess ? result.data! : <DiagnosticoHive>[];
 
       return {
         'total_diagnosticos': diagnosticos.length,

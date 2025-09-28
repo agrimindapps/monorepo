@@ -9,9 +9,9 @@ import '../repositories/premium_repository.dart';
 /// Use case para obter produtos disponíveis
 @injectable
 class GetAvailableProducts implements UseCase<List<core.ProductInfo>, NoParams> {
-  final PremiumRepository repository;
 
   GetAvailableProducts(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, List<core.ProductInfo>>> call(NoParams params) async {

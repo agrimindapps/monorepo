@@ -26,7 +26,7 @@ class OdometerFormatter {
     if (value == 0.0) return '';
     
     // Format with proper decimal places
-    String formatted = value.toStringAsFixed(decimalPlaces);
+    final String formatted = value.toStringAsFixed(decimalPlaces);
     
     // Replace dot with comma for Brazilian format
     return formatted.replaceAll(dotSeparator, decimalSeparator);
@@ -39,7 +39,7 @@ class OdometerFormatter {
     if (value.isEmpty) return 0.0;
     
     // Replace comma with dot for parsing
-    String cleanValue = value.replaceAll(decimalSeparator, dotSeparator);
+    final String cleanValue = value.replaceAll(decimalSeparator, dotSeparator);
     
     return double.tryParse(cleanValue) ?? 0.0;
   }
@@ -70,8 +70,8 @@ class OdometerFormatter {
     // Add thousands separator (simple implementation)
     if (value >= thousandsSeparatorThreshold) {
       final parts = formatted.split(decimalSeparator);
-      String integerPart = parts[0];
-      String decimalPart = parts.length > 1 ? parts[1] : '00';
+      final String integerPart = parts[0];
+      final String decimalPart = parts.length > 1 ? parts[1] : '00';
       
       // Add dots for thousands
       String result = '';

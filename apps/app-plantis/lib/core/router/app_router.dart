@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
+import '../riverpod_providers/auth_providers.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
@@ -16,7 +16,6 @@ import '../../features/plants/presentation/pages/plant_form_page.dart';
 import '../../features/plants/presentation/pages/plants_list_page.dart';
 import '../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../features/plants/presentation/providers/plant_form_provider.dart';
-import '../../features/plants/presentation/providers/plants_provider.dart';
 import '../../features/premium/presentation/pages/premium_subscription_page.dart';
 import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
@@ -32,7 +31,6 @@ import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
 import '../di/injection_container.dart';
-import 'package:core/core.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -60,20 +58,20 @@ class AppRouter {
   /// Helper method to navigate to plant details
   static String plantDetailsPath(String plantId) => '/plants/$plantId';
 
-  static GoRouter router(BuildContext context) {
-    final authProvider = context.read<providers.AuthProvider>();
+  static GoRouter router(WidgetRef ref) {
+    final authState = ref.watch(authProvider);
 
     // Web mostra promotional first, mobile vai direto para login
-    final initialLocation = kIsWeb ? promotional : login;
+    const initialLocation = kIsWeb ? promotional : login;
 
     return GoRouter(
       navigatorKey: NavigationService.navigatorKey,
       initialLocation: initialLocation,
-      refreshListenable: authProvider,
       redirect: (context, state) {
-        final isAuthenticated = authProvider.isAuthenticated;
-        final isAnonymous = authProvider.isAnonymous;
-        final isInitialized = authProvider.isInitialized;
+        final authStateValue = authState.valueOrNull;
+        final isAuthenticated = authStateValue?.isAuthenticated ?? false;
+        final isAnonymous = authStateValue?.isAnonymous ?? false;
+        final isInitialized = authState.hasValue;
         final isLoggingIn = state.matchedLocation == login;
         final isRegistering = state.matchedLocation == register;
         final isOnLanding = state.matchedLocation == landing;

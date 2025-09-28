@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../providers/subscription_provider.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:core/core.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/theme/plantis_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as local;
@@ -53,7 +53,7 @@ class _DesktopLayout extends StatelessWidget {
           const ModernSidebar(),
           // Área de conteúdo principal
           Expanded(
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 color: PlantisColors.getPageBackgroundColor(context),
                 borderRadius: const BorderRadius.only(

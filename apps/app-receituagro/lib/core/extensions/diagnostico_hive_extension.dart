@@ -7,7 +7,7 @@ import '../repositories/pragas_hive_repository.dart';
 /// Extensão para DiagnosticoHive com métodos display e formatação
 extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome do defensivo resolvendo dinamicamente se necessário
-  String get displayNomeDefensivo {
+  Future<String> getDisplayNomeDefensivo() async {
     // Primeiro tenta usar o nome já armazenado
     if (nomeDefensivo?.isNotEmpty == true) {
       return nomeDefensivo!;
@@ -16,7 +16,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     // Se não tiver, resolve dinamicamente usando o repository
     try {
       final repository = di.sl<FitossanitarioHiveRepository>();
-      final defensivo = repository.getById(fkIdDefensivo);
+      final defensivo = await repository.getById(fkIdDefensivo);
       if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
         return defensivo.nomeComum;
       }
@@ -28,7 +28,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   }
 
   /// Retorna o nome da cultura resolvendo dinamicamente se necessário
-  String get displayNomeCultura {
+  Future<String> getDisplayNomeCultura() async {
     // Primeiro tenta usar o nome já armazenado
     if (nomeCultura?.isNotEmpty == true) {
       return nomeCultura!;
@@ -37,7 +37,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     // Se não tiver, resolve dinamicamente usando o repository
     try {
       final repository = di.sl<CulturaHiveRepository>();
-      final cultura = repository.getById(fkIdCultura);
+      final cultura = await repository.getById(fkIdCultura);
       if (cultura != null && cultura.cultura.isNotEmpty) {
         return cultura.cultura;
       }
@@ -49,7 +49,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   }
 
   /// Retorna o nome da praga resolvendo dinamicamente se necessário
-  String get displayNomePraga {
+  Future<String> getDisplayNomePraga() async {
     // Primeiro tenta usar o nome já armazenado
     if (nomePraga?.isNotEmpty == true) {
       return nomePraga!;
@@ -58,7 +58,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     // Se não tiver, resolve dinamicamente usando o repository
     try {
       final repository = di.sl<PragasHiveRepository>();
-      final praga = repository.getById(fkIdPraga);
+      final praga = await repository.getById(fkIdPraga);
       if (praga != null && praga.nomeComum.isNotEmpty) {
         return praga.nomeComum;
       }
@@ -115,7 +115,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
       : 'Época não especificada';
 
   /// Converte para mapa de dados resolvendo informações técnicas dinamicamente
-  Map<String, String> toDataMap() {
+  Future<Map<String, String>> toDataMap() async {
     // Resolve entidades relacionadas para obter dados técnicos
     String ingredienteAtivo = 'Consulte a bula do produto';
     String toxico = 'Consulte a bula do produto';
@@ -126,7 +126,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     // Busca dados técnicos do defensivo
     try {
       final fitossanitarioRepo = di.sl<FitossanitarioHiveRepository>();
-      final defensivo = fitossanitarioRepo.getById(fkIdDefensivo);
+      final defensivo = await fitossanitarioRepo.getById(fkIdDefensivo);
       if (defensivo != null) {
         if (defensivo.ingredienteAtivo?.isNotEmpty == true) {
           ingredienteAtivo = defensivo.ingredienteAtivo!;
@@ -148,7 +148,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     // Busca nome científico da praga
     try {
       final pragaRepo = di.sl<PragasHiveRepository>();
-      final praga = pragaRepo.getById(fkIdPraga);
+      final praga = await pragaRepo.getById(fkIdPraga);
       if (praga != null && praga.nomeCientifico.isNotEmpty) {
         nomeCientifico = praga.nomeCientifico;
       }
@@ -157,9 +157,9 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     }
 
     return {
-      'nomeDefensivo': displayNomeDefensivo,
-      'nomeCultura': displayNomeCultura,
-      'nomePraga': displayNomePraga,
+      'nomeDefensivo': await getDisplayNomeDefensivo(),
+      'nomeCultura': await getDisplayNomeCultura(),
+      'nomePraga': await getDisplayNomePraga(),
       'nomeCientifico': nomeCientifico,
       'dosagem': displayDosagem,
       'vazaoTerrestre': displayVazaoTerrestre,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart' hide SubscriptionPage;
 
 import '../../../subscription/subscription_page.dart';
 import '../../constants/settings_design_tokens.dart';

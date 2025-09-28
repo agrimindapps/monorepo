@@ -4,11 +4,6 @@ import '../../interfaces/i_connectivity_service.dart';
 /// Widget that displays current connectivity status
 /// Shows offline badge when device is not connected
 class ConnectivityIndicator extends StatelessWidget {
-  final IConnectivityService connectivityService;
-  final Widget? child;
-  final bool showWhenOnline;
-  final EdgeInsetsGeometry? margin;
-  final ConnectivityIndicatorStyle style;
 
   const ConnectivityIndicator({
     super.key,
@@ -18,6 +13,11 @@ class ConnectivityIndicator extends StatelessWidget {
     this.margin,
     this.style = const ConnectivityIndicatorStyle(),
   });
+  final IConnectivityService connectivityService;
+  final Widget? child;
+  final bool showWhenOnline;
+  final EdgeInsetsGeometry? margin;
+  final ConnectivityIndicatorStyle style;
 
   @override
   Widget build(BuildContext context) {
@@ -110,14 +110,14 @@ class ConnectivityIndicator extends StatelessWidget {
 
 /// Connectivity indicator for AppBar
 class AppBarConnectivityIndicator extends StatelessWidget implements PreferredSizeWidget {
-  final IConnectivityService connectivityService;
-  final PreferredSizeWidget appBar;
 
   const AppBarConnectivityIndicator({
     super.key,
     required this.connectivityService,
     required this.appBar,
   });
+  final IConnectivityService connectivityService;
+  final PreferredSizeWidget appBar;
 
   @override
   Widget build(BuildContext context) {
@@ -138,12 +138,12 @@ class AppBarConnectivityIndicator extends StatelessWidget implements PreferredSi
 
 /// Banner that shows connectivity status
 class ConnectivityBanner extends StatelessWidget {
-  final IConnectivityService connectivityService;
 
   const ConnectivityBanner({
     super.key,
     required this.connectivityService,
   });
+  final IConnectivityService connectivityService;
 
   @override
   Widget build(BuildContext context) {
@@ -207,9 +207,6 @@ class ConnectivityBanner extends StatelessWidget {
 
 /// Floating connectivity indicator
 class FloatingConnectivityIndicator extends StatelessWidget {
-  final IConnectivityService connectivityService;
-  final Alignment alignment;
-  final EdgeInsetsGeometry margin;
 
   const FloatingConnectivityIndicator({
     super.key,
@@ -217,6 +214,9 @@ class FloatingConnectivityIndicator extends StatelessWidget {
     this.alignment = Alignment.bottomLeft,
     this.margin = const EdgeInsets.all(16.0),
   });
+  final IConnectivityService connectivityService;
+  final Alignment alignment;
+  final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
@@ -251,6 +251,30 @@ class FloatingConnectivityIndicator extends StatelessWidget {
 
 /// Style configuration for connectivity indicator
 class ConnectivityIndicatorStyle {
+
+  const ConnectivityIndicatorStyle({
+    this.onlineColor,
+    this.offlineColor,
+    this.limitedColor,
+    this.unknownColor,
+    this.onlineTextColor,
+    this.offlineTextColor,
+    this.limitedTextColor,
+    this.unknownTextColor,
+    this.onlineIcon,
+    this.offlineIcon,
+    this.limitedIcon,
+    this.unknownIcon,
+    this.onlineText,
+    this.offlineText,
+    this.limitedText,
+    this.unknownText,
+    this.showText = false,
+    this.iconSize,
+    this.textStyle,
+    this.padding,
+    this.borderRadius,
+  });
   final Color? onlineColor;
   final Color? offlineColor;
   final Color? limitedColor;
@@ -276,28 +300,4 @@ class ConnectivityIndicatorStyle {
   final TextStyle? textStyle;
   final EdgeInsetsGeometry? padding;
   final BorderRadiusGeometry? borderRadius;
-
-  const ConnectivityIndicatorStyle({
-    this.onlineColor,
-    this.offlineColor,
-    this.limitedColor,
-    this.unknownColor,
-    this.onlineTextColor,
-    this.offlineTextColor,
-    this.limitedTextColor,
-    this.unknownTextColor,
-    this.onlineIcon,
-    this.offlineIcon,
-    this.limitedIcon,
-    this.unknownIcon,
-    this.onlineText,
-    this.offlineText,
-    this.limitedText,
-    this.unknownText,
-    this.showText = false,
-    this.iconSize,
-    this.textStyle,
-    this.padding,
-    this.borderRadius,
-  });
 }

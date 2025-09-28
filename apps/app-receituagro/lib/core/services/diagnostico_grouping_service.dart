@@ -40,7 +40,7 @@ class DiagnosticoGroupingService {
   /// 
   /// Funciona com qualquer tipo de lista de diagnósticos,
   /// garantindo resolução consistente de nomes de cultura
-  Map<String, List<T>> groupByCultura<T>(
+  Future<Map<String, List<T>>> groupByCultura<T>(
     List<T> items,
     String? Function(T) getIdCultura,
     String? Function(T) getNomeCultura, {
@@ -48,7 +48,7 @@ class DiagnosticoGroupingService {
     bool sortGroups = true,
     bool sortItemsInGroup = false,
     int Function(T, T)? itemComparator,
-  }) {
+  }) async {
     final cacheKey = 'cultura_${items.length}_${T.toString()}';
     
     if (_isCacheValid && _groupingCache.containsKey(cacheKey)) {
@@ -65,7 +65,7 @@ class DiagnosticoGroupingService {
       final nomeCultura = getNomeCultura(item);
       
       // Usa o resolver para garantir consistência
-      final culturaNome = _resolver.resolveCulturaNome(
+      final culturaNome = await _resolver.resolveCulturaNome(
         idCultura: idCultura,
         nomeCultura: nomeCultura,
         defaultValue: defaultGroupName,
@@ -104,7 +104,7 @@ class DiagnosticoGroupingService {
   }
 
   /// Agrupa diagnósticos por defensivo
-  Map<String, List<T>> groupByDefensivo<T>(
+  Future<Map<String, List<T>>> groupByDefensivo<T>(
     List<T> items,
     String? Function(T) getIdDefensivo,
     String? Function(T) getNomeDefensivo, {
@@ -112,14 +112,14 @@ class DiagnosticoGroupingService {
     bool sortGroups = true,
     bool sortItemsInGroup = false,
     int Function(T, T)? itemComparator,
-  }) {
+  }) async {
     final grouped = <String, List<T>>{};
     
     for (final item in items) {
       final idDefensivo = getIdDefensivo(item);
       final nomeDefensivo = getNomeDefensivo(item);
       
-      final defensivoNome = _resolver.resolveDefensivoNome(
+      final defensivoNome = await _resolver.resolveDefensivoNome(
         idDefensivo: idDefensivo,
         nomeDefensivo: nomeDefensivo,
         defaultValue: defaultGroupName,
@@ -143,7 +143,7 @@ class DiagnosticoGroupingService {
   }
 
   /// Agrupa diagnósticos por praga
-  Map<String, List<T>> groupByPraga<T>(
+  Future<Map<String, List<T>>> groupByPraga<T>(
     List<T> items,
     String? Function(T) getIdPraga,
     String? Function(T) getNomePraga, {
@@ -151,14 +151,14 @@ class DiagnosticoGroupingService {
     bool sortGroups = true,
     bool sortItemsInGroup = false,
     int Function(T, T)? itemComparator,
-  }) {
+  }) async {
     final grouped = <String, List<T>>{};
     
     for (final item in items) {
       final idPraga = getIdPraga(item);
       final nomePraga = getNomePraga(item);
       
-      final pragaNome = _resolver.resolvePragaNome(
+      final pragaNome = await _resolver.resolvePragaNome(
         idPraga: idPraga,
         nomePraga: nomePraga,
         defaultValue: defaultGroupName,
@@ -283,7 +283,7 @@ class DiagnosticoGroupingService {
   /// Métodos de conveniência para tipos específicos
 
   /// Agrupa DiagnosticoEntity por cultura
-  Map<String, List<DiagnosticoEntity>> groupDiagnosticoEntitiesByCultura(
+  Future<Map<String, List<DiagnosticoEntity>>> groupDiagnosticoEntitiesByCultura(
     List<DiagnosticoEntity> diagnosticos, {
     bool sortByRelevance = true,
   }) {
@@ -297,7 +297,7 @@ class DiagnosticoGroupingService {
   }
 
   /// Agrupa DiagnosticoHive por cultura
-  Map<String, List<DiagnosticoHive>> groupDiagnosticoHivesByCultura(
+  Future<Map<String, List<DiagnosticoHive>>> groupDiagnosticoHivesByCultura(
     List<DiagnosticoHive> diagnosticos, {
     bool sortByRelevance = true,
   }) {
@@ -311,7 +311,7 @@ class DiagnosticoGroupingService {
   }
 
   /// Agrupa objetos dinâmicos (flexibilidade de tipos)
-  Map<String, List<dynamic>> groupDynamicByCultura(
+  Future<Map<String, List<dynamic>>> groupDynamicByCultura(
     List<dynamic> diagnosticos, {
     bool useResolver = true,
   }) {

@@ -83,7 +83,7 @@ class FirebaseStorageService {
       });
 
       final snapshot = await uploadTask.timeout(
-        Duration(seconds: _uploadTimeoutSeconds),
+        const Duration(seconds: _uploadTimeoutSeconds),
       );
       
       if (snapshot.state == TaskState.success) {
@@ -134,7 +134,7 @@ class FirebaseStorageService {
       });
 
       final snapshot = await uploadTask.timeout(
-        Duration(seconds: _uploadTimeoutSeconds),
+        const Duration(seconds: _uploadTimeoutSeconds),
       );
       
       if (snapshot.state == TaskState.success) {
@@ -166,7 +166,7 @@ class FirebaseStorageService {
   /// Generate unique filename for receipt image
   String _generateFileName(String recordId, String extension) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return '${recordId}_${timestamp}.$extension';
+    return '${recordId}_$timestamp.$extension';
   }
 
   /// Get content type based on file extension
@@ -190,7 +190,7 @@ class FirebaseStorageService {
   Stream<double> getUploadProgress(String userId, String recordId, String category) {
     // This would need to be implemented with a state management solution
     // For now, returning empty stream
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   /// Check if user has enough storage quota (Firebase has generous limits)
@@ -223,7 +223,7 @@ class FirebaseStorageService {
       final userRef = _storage.ref().child('$_receiptsBasePath/$userId');
       final result = await userRef.listAll();
       
-      List<Reference> allFiles = [];
+      final List<Reference> allFiles = [];
       for (final prefix in result.prefixes) {
         final prefixResult = await prefix.listAll();
         allFiles.addAll(prefixResult.items);

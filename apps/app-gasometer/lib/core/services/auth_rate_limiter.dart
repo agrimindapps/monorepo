@@ -6,6 +6,8 @@ import 'package:injectable/injectable.dart';
 /// Protege contra ataques de força bruta implementando backoff exponencial
 @LazySingleton()
 class AuthRateLimiter {
+  
+  AuthRateLimiter(this._secureStorage);
   final FlutterSecureStorage _secureStorage;
   
   static const String _attemptCountKey = 'auth_attempt_count';
@@ -16,8 +18,6 @@ class AuthRateLimiter {
   static const int _maxAttempts = 5;
   static const int _lockoutDurationMinutes = 15;
   static const int _attemptWindowMinutes = 10;
-  
-  AuthRateLimiter(this._secureStorage);
   
   /// Verifica se o usuário pode tentar fazer login
   /// Retorna true se pode tentar, false se está bloqueado
@@ -151,11 +151,6 @@ class AuthRateLimiter {
 
 /// Informações sobre o estado atual do rate limiting
 class AuthRateLimitInfo {
-  final bool canAttemptLogin;
-  final int attemptsRemaining;
-  final int lockoutTimeRemainingMinutes;
-  final int maxAttempts;
-  final int lockoutDurationMinutes;
   
   const AuthRateLimitInfo({
     required this.canAttemptLogin,
@@ -164,6 +159,11 @@ class AuthRateLimitInfo {
     required this.maxAttempts,
     required this.lockoutDurationMinutes,
   });
+  final bool canAttemptLogin;
+  final int attemptsRemaining;
+  final int lockoutTimeRemainingMinutes;
+  final int maxAttempts;
+  final int lockoutDurationMinutes;
   
   bool get isLocked => !canAttemptLogin;
   

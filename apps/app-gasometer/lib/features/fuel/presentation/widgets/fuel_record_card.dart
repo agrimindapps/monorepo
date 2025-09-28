@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 

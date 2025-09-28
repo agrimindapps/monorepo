@@ -9,12 +9,6 @@ import '../../features/vehicles/domain/repositories/vehicle_repository.dart';
 
 /// Service responsável por limpeza seletiva de dados específicos do Gasometer
 class GasometerDataCleanerService {
-  final VehicleRepository vehicleRepository;
-  final FuelRepository fuelRepository;
-  final MaintenanceRepository maintenanceRepository;
-  final ExpensesRepository expensesRepository;
-  final OdometerRepository odometerRepository;
-  final LogRepository logRepository;
 
   GasometerDataCleanerService({
     required this.vehicleRepository,
@@ -24,6 +18,12 @@ class GasometerDataCleanerService {
     required this.odometerRepository,
     required this.logRepository,
   });
+  final VehicleRepository vehicleRepository;
+  final FuelRepository fuelRepository;
+  final MaintenanceRepository maintenanceRepository;
+  final ExpensesRepository expensesRepository;
+  final OdometerRepository odometerRepository;
+  final LogRepository logRepository;
 
   String get appName => 'Gasometer';
   String get version => '1.0.0';

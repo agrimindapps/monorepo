@@ -33,6 +33,85 @@ class StandardLoadingView extends StatelessWidget {
     this.child,
   });
 
+  /// Factory constructors para uso conveniente
+
+  /// Loading inicial padrão para páginas
+  factory StandardLoadingView.initial({
+    String message = 'Carregando...',
+    double? height,
+    Color? color,
+  }) {
+    return StandardLoadingView(
+      type: LoadingType.initial,
+      message: message,
+      height: height,
+      color: color,
+    );
+  }
+
+  /// Loading para refresh/pull-to-refresh
+  factory StandardLoadingView.refresh({
+    String message = 'Atualizando...',
+    Color? color,
+  }) {
+    return StandardLoadingView(
+      type: LoadingType.refresh,
+      message: message,
+      color: color,
+    );
+  }
+
+  /// Loading para submits com overlay
+  factory StandardLoadingView.submit({
+    String message = 'Salvando...',
+    bool showProgress = false,
+    double? progress,
+    Color? color,
+  }) {
+    return StandardLoadingView(
+      type: LoadingType.submit,
+      message: message,
+      showProgress: showProgress,
+      progress: progress,
+      color: color,
+    );
+  }
+
+  /// Loading para ações específicas
+  factory StandardLoadingView.action({
+    String message = 'Processando...',
+    Widget? child,
+    Color? color,
+  }) {
+    return StandardLoadingView(
+      type: LoadingType.action,
+      message: message,
+      color: color,
+      showProgress: child != null,
+      child: child, // Show overlay if wrapping a child
+    );
+  }
+
+  /// Loading skeleton para listas
+  factory StandardLoadingView.list({
+    int itemCount = 3,
+  }) {
+    return StandardLoadingView(
+      type: LoadingType.list,
+      itemCount: itemCount,
+    );
+  }
+
+  /// Loading inline pequeno
+  factory StandardLoadingView.inline({
+    Color? color,
+  }) {
+    return StandardLoadingView(
+      type: LoadingType.inline,
+      color: color,
+    );
+  }
+
   /// Tipo de loading a ser exibido
   final LoadingType type;
   
@@ -106,12 +185,12 @@ class StandardLoadingView extends StatelessWidget {
                 strokeWidth: 2.0,
               ),
             ),
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
             Text(
               message,
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
               ),
             ),
           ],
@@ -134,7 +213,7 @@ class StandardLoadingView extends StatelessWidget {
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -153,7 +232,7 @@ class StandardLoadingView extends StatelessWidget {
                       CircularProgressIndicator(
                         value: progress,
                         color: color,
-                        backgroundColor: color.withOpacity(0.2),
+                        backgroundColor: color.withValues(alpha: 0.2),
                         strokeWidth: 4.0,
                       ),
                       Text(
@@ -177,7 +256,7 @@ class StandardLoadingView extends StatelessWidget {
                   ),
                 ),
               ],
-              SizedBox(height: GasometerDesignTokens.spacingLg),
+              const SizedBox(height: GasometerDesignTokens.spacingLg),
               Text(
                 message,
                 style: TextStyle(
@@ -187,12 +266,12 @@ class StandardLoadingView extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: GasometerDesignTokens.spacingSm),
+              const SizedBox(height: GasometerDesignTokens.spacingSm),
               Text(
                 'Por favor, aguarde...',
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeBody,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -212,8 +291,8 @@ class StandardLoadingView extends StatelessWidget {
           child!,
           if (showProgress) ...[
             Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
+              child: ColoredBox(
+                color: Colors.black.withValues(alpha: 0.3),
                 child: Center(
                   child: Container(
                     padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
@@ -232,7 +311,7 @@ class StandardLoadingView extends StatelessWidget {
                             strokeWidth: 3.0,
                           ),
                         ),
-                        SizedBox(height: GasometerDesignTokens.spacingMd),
+                        const SizedBox(height: GasometerDesignTokens.spacingMd),
                         Text(
                           message,
                           style: TextStyle(
@@ -253,7 +332,7 @@ class StandardLoadingView extends StatelessWidget {
     }
     
     // Standalone action loading
-    return Container(
+    return SizedBox(
       height: height ?? 60,
       child: Center(
         child: Row(
@@ -267,12 +346,12 @@ class StandardLoadingView extends StatelessWidget {
                 strokeWidth: 2.0,
               ),
             ),
-            SizedBox(width: GasometerDesignTokens.spacingMd),
+            const SizedBox(width: GasometerDesignTokens.spacingMd),
             Text(
               message,
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
               ),
             ),
           ],
@@ -294,7 +373,7 @@ class StandardLoadingView extends StatelessWidget {
             bottom: GasometerDesignTokens.spacingLg,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
             borderRadius: GasometerDesignTokens.borderRadius(
               GasometerDesignTokens.radiusSm,
             ),
@@ -310,7 +389,7 @@ class StandardLoadingView extends StatelessWidget {
               bottom: GasometerDesignTokens.spacingMd,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusCard,
               ),
@@ -324,11 +403,11 @@ class StandardLoadingView extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider * 1.5),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider * 1.5),
                       shape: BoxShape.circle,
                     ),
                   ),
-                  SizedBox(width: GasometerDesignTokens.spacingLg),
+                  const SizedBox(width: GasometerDesignTokens.spacingLg),
                   // Skeleton para texto
                   Expanded(
                     child: Column(
@@ -339,18 +418,18 @@ class StandardLoadingView extends StatelessWidget {
                           width: double.infinity,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider * 1.5),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider * 1.5),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
                           ),
                         ),
-                        SizedBox(height: GasometerDesignTokens.spacingSm),
+                        const SizedBox(height: GasometerDesignTokens.spacingSm),
                         Container(
                           width: MediaQuery.of(context).size.width * 0.4,
                           height: 14,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
@@ -379,85 +458,6 @@ class StandardLoadingView extends StatelessWidget {
       ),
     );
   }
-
-  /// Factory constructors para uso conveniente
-
-  /// Loading inicial padrão para páginas
-  factory StandardLoadingView.initial({
-    String message = 'Carregando...',
-    double? height,
-    Color? color,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.initial,
-      message: message,
-      height: height,
-      color: color,
-    );
-  }
-
-  /// Loading para refresh/pull-to-refresh
-  factory StandardLoadingView.refresh({
-    String message = 'Atualizando...',
-    Color? color,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.refresh,
-      message: message,
-      color: color,
-    );
-  }
-
-  /// Loading para submits com overlay
-  factory StandardLoadingView.submit({
-    String message = 'Salvando...',
-    bool showProgress = false,
-    double? progress,
-    Color? color,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.submit,
-      message: message,
-      showProgress: showProgress,
-      progress: progress,
-      color: color,
-    );
-  }
-
-  /// Loading para ações específicas
-  factory StandardLoadingView.action({
-    String message = 'Processando...',
-    Widget? child,
-    Color? color,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.action,
-      message: message,
-      child: child,
-      color: color,
-      showProgress: child != null, // Show overlay if wrapping a child
-    );
-  }
-
-  /// Loading skeleton para listas
-  factory StandardLoadingView.list({
-    int itemCount = 3,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.list,
-      itemCount: itemCount,
-    );
-  }
-
-  /// Loading inline pequeno
-  factory StandardLoadingView.inline({
-    Color? color,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.inline,
-      color: color,
-    );
-  }
 }
 
 /// Widget para overlay de loading que pode ser usado com qualquer widget
@@ -472,6 +472,38 @@ class StandardLoadingOverlay extends StatelessWidget {
     this.progress,
     this.color,
   });
+
+  /// Factory para overlay simples
+  factory StandardLoadingOverlay.simple({
+    required bool isLoading,
+    required Widget child,
+    String message = 'Carregando...',
+  }) {
+    return StandardLoadingOverlay(
+      isLoading: isLoading,
+      message: message,
+      type: LoadingType.action,
+      child: child,
+    );
+  }
+
+  /// Factory para overlay de submit
+  factory StandardLoadingOverlay.submit({
+    required bool isLoading,
+    required Widget child,
+    String message = 'Salvando...',
+    bool showProgress = false,
+    double? progress,
+  }) {
+    return StandardLoadingOverlay(
+      isLoading: isLoading,
+      message: message,
+      type: LoadingType.submit,
+      showProgress: showProgress,
+      progress: progress,
+      child: child,
+    );
+  }
 
   /// Se deve mostrar o loading overlay
   final bool isLoading;
@@ -505,38 +537,6 @@ class StandardLoadingOverlay extends StatelessWidget {
       progress: progress,
       color: color,
       child: child,
-    );
-  }
-
-  /// Factory para overlay simples
-  factory StandardLoadingOverlay.simple({
-    required bool isLoading,
-    required Widget child,
-    String message = 'Carregando...',
-  }) {
-    return StandardLoadingOverlay(
-      isLoading: isLoading,
-      child: child,
-      message: message,
-      type: LoadingType.action,
-    );
-  }
-
-  /// Factory para overlay de submit
-  factory StandardLoadingOverlay.submit({
-    required bool isLoading,
-    required Widget child,
-    String message = 'Salvando...',
-    bool showProgress = false,
-    double? progress,
-  }) {
-    return StandardLoadingOverlay(
-      isLoading: isLoading,
-      child: child,
-      message: message,
-      type: LoadingType.submit,
-      showProgress: showProgress,
-      progress: progress,
     );
   }
 }

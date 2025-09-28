@@ -5,10 +5,6 @@ import 'enhanced_vehicle_selector.dart';
 /// Use [EnhancedVehicleSelector] para novas implementações
 @Deprecated('Use EnhancedVehicleSelector para melhor experiência do usuário')
 class VehicleSelector extends StatelessWidget {
-  final String? selectedVehicleId;
-  final void Function(String?) onVehicleChanged;
-  final String? hintText;
-  final bool showEmptyOption;
 
   const VehicleSelector({
     super.key,
@@ -17,6 +13,10 @@ class VehicleSelector extends StatelessWidget {
     this.hintText = 'Selecione um veículo',
     this.showEmptyOption = false,
   });
+  final String? selectedVehicleId;
+  final void Function(String?) onVehicleChanged;
+  final String? hintText;
+  final bool showEmptyOption;
 
   @override
   Widget build(BuildContext context) {

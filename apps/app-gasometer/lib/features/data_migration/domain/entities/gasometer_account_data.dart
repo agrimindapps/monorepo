@@ -19,6 +19,38 @@ class GasometerAccountData extends AccountData {
     this.accountAge,
   }) : super(dataType: 'gasometer');
 
+  /// Create from JSON
+  factory GasometerAccountData.fromJson(Map<String, dynamic> json) {
+    return GasometerAccountData(
+      userId: json['user_id'] as String,
+      userInfo: UserEntity.fromJson(json['user_info'] as Map<String, dynamic>),
+      recordCount: json['record_count'] as int,
+      lastModified: DateTime.parse(json['last_modified'] as String),
+      additionalInfo: json['additional_info'] as Map<String, dynamic>? ?? const {},
+      vehicleCount: json['vehicle_count'] as int? ?? 0,
+      fuelRecordCount: json['fuel_record_count'] as int? ?? 0,
+      maintenanceRecordCount: json['maintenance_record_count'] as int? ?? 0,
+      totalDistance: (json['total_distance'] as num?)?.toDouble() ?? 0.0,
+      totalFuelCost: (json['total_fuel_cost'] as num?)?.toDouble() ?? 0.0,
+      accountAge: json['account_age_days'] != null 
+          ? Duration(days: json['account_age_days'] as int)
+          : null,
+    );
+  }
+
+  /// Create empty instance (no data)
+  factory GasometerAccountData.empty({
+    required String userId,
+    required UserEntity userInfo,
+  }) {
+    return GasometerAccountData(
+      userId: userId,
+      userInfo: userInfo,
+      recordCount: 0,
+      lastModified: DateTime.now(),
+    );
+  }
+
   /// Number of vehicles in account data
   final int vehicleCount;
   
@@ -183,38 +215,6 @@ class GasometerAccountData extends AccountData {
       totalDistance: totalDistance ?? this.totalDistance,
       totalFuelCost: totalFuelCost ?? this.totalFuelCost,
       accountAge: accountAge ?? this.accountAge,
-    );
-  }
-
-  /// Create from JSON
-  factory GasometerAccountData.fromJson(Map<String, dynamic> json) {
-    return GasometerAccountData(
-      userId: json['user_id'] as String,
-      userInfo: UserEntity.fromJson(json['user_info'] as Map<String, dynamic>),
-      recordCount: json['record_count'] as int,
-      lastModified: DateTime.parse(json['last_modified'] as String),
-      additionalInfo: json['additional_info'] as Map<String, dynamic>? ?? const {},
-      vehicleCount: json['vehicle_count'] as int? ?? 0,
-      fuelRecordCount: json['fuel_record_count'] as int? ?? 0,
-      maintenanceRecordCount: json['maintenance_record_count'] as int? ?? 0,
-      totalDistance: (json['total_distance'] as num?)?.toDouble() ?? 0.0,
-      totalFuelCost: (json['total_fuel_cost'] as num?)?.toDouble() ?? 0.0,
-      accountAge: json['account_age_days'] != null 
-          ? Duration(days: json['account_age_days'] as int)
-          : null,
-    );
-  }
-
-  /// Create empty instance (no data)
-  factory GasometerAccountData.empty({
-    required String userId,
-    required UserEntity userInfo,
-  }) {
-    return GasometerAccountData(
-      userId: userId,
-      userInfo: userInfo,
-      recordCount: 0,
-      lastModified: DateTime.now(),
     );
   }
 }

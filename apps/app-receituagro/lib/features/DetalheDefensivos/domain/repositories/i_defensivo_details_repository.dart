@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import '../entities/defensivo_details_entity.dart';
 import '../entities/diagnostico_entity.dart';
 

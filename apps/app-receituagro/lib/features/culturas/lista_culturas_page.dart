@@ -1,13 +1,12 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/models/cultura_hive.dart';
-import '../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
 import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
 import 'models/cultura_view_mode.dart';
@@ -55,7 +54,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
 
     try {
-      final culturas = _repository.getActiveCulturas();
+      final culturas = await _repository.getActiveCulturas();
       setState(() {
         _culturas = culturas;
         _filteredCulturas = culturas;
@@ -168,7 +167,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
                   isDark: isDark,
                   showBackButton: true,
                   showActions: true,
-                  onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack(),
+                  onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
                   onRightIconPressed: _toggleSort,
                 ),
                 CulturaSearchField(

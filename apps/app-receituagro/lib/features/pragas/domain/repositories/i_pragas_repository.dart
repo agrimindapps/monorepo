@@ -1,29 +1,38 @@
+import 'package:core/core.dart';
+
 import '../entities/praga_entity.dart';
 
 /// Interface do repositório de pragas (Domain Layer)
 /// Princípios: Dependency Inversion + Interface Segregation
+/// Segue padrão Either<Failure, T> para error handling consistente
 abstract class IPragasRepository {
   /// Operações básicas de consulta
-  Future<List<PragaEntity>> getAll();
-  Future<PragaEntity?> getById(String id);
-  Future<List<PragaEntity>> getByTipo(String tipo);
+  Future<Either<Failure, List<PragaEntity>>> getAll();
+  Future<Either<Failure, PragaEntity?>> getById(String id);
+  Future<Either<Failure, List<PragaEntity>>> getByTipo(String tipo);
   
   /// Busca e filtros
-  Future<List<PragaEntity>> searchByName(String searchTerm);
-  Future<List<PragaEntity>> getByFamilia(String familia);
-  Future<List<PragaEntity>> getByCultura(String culturaId);
+  Future<Either<Failure, List<PragaEntity>>> searchByName(String searchTerm);
+  Future<Either<Failure, List<PragaEntity>>> getByFamilia(String familia);
+  Future<Either<Failure, List<PragaEntity>>> getByCultura(String culturaId);
   
   /// Operações de contagem
-  Future<int> getCountByTipo(String tipo);
-  Future<int> getTotalCount();
+  Future<Either<Failure, int>> getCountByTipo(String tipo);
+  Future<Either<Failure, int>> getTotalCount();
+  
+  /// Operações avançadas
+  Future<Either<Failure, List<PragaEntity>>> getPragasRecentes({int limit = 10});
+  Future<Either<Failure, Map<String, int>>> getPragasStats();
+  Future<Either<Failure, List<String>>> getTiposPragas();
+  Future<Either<Failure, List<String>>> getFamiliasPragas();
 }
 
 /// Interface para operações de cache/histórico
 /// Princípio: Interface Segregation - Responsabilidade específica
 abstract class IPragasHistoryRepository {
-  Future<List<PragaEntity>> getRecentlyAccessed();
-  Future<void> markAsAccessed(String pragaId);
-  Future<List<PragaEntity>> getSuggested(int limit);
+  Future<Either<Failure, List<PragaEntity>>> getRecentlyAccessed();
+  Future<Either<Failure, void>> markAsAccessed(String pragaId);
+  Future<Either<Failure, List<PragaEntity>>> getSuggested(int limit);
 }
 
 /// Interface para formatação de dados
@@ -37,8 +46,8 @@ abstract class IPragasFormatter {
 /// Interface para informações adicionais de pragas
 /// Princípio: Interface Segregation - Responsabilidade específica
 abstract class IPragasInfoRepository {
-  Future<PragaInfo?> getInfoByPragaId(String pragaId);
-  Future<PlantaInfo?> getPlantaInfoByPragaId(String pragaId);
+  Future<Either<Failure, PragaInfo?>> getInfoByPragaId(String pragaId);
+  Future<Either<Failure, PlantaInfo?>> getPlantaInfoByPragaId(String pragaId);
 }
 
 /// Value Objects para informações adicionais

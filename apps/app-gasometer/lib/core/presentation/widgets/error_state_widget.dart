@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 /// Reusable error state widget with recovery actions
 /// Provides consistent error handling across the app
 class ErrorStateWidget extends StatelessWidget {
-  final String title;
-  final String? message;
-  final IconData? icon;
-  final VoidCallback? onRetry;
-  final VoidCallback? onSecondaryAction;
-  final String? retryButtonText;
-  final String? secondaryButtonText;
-  final ErrorStateStyle style;
-  final bool isCompact;
 
   const ErrorStateWidget({
     super.key,
@@ -126,6 +117,15 @@ class ErrorStateWidget extends StatelessWidget {
       ),
     );
   }
+  final String title;
+  final String? message;
+  final IconData? icon;
+  final VoidCallback? onRetry;
+  final VoidCallback? onSecondaryAction;
+  final String? retryButtonText;
+  final String? secondaryButtonText;
+  final ErrorStateStyle style;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
@@ -142,10 +142,10 @@ class ErrorStateWidget extends StatelessWidget {
     return Container(
       padding: style.padding ?? const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: style.backgroundColor ?? theme.colorScheme.errorContainer.withOpacity(0.1),
+        color: style.backgroundColor ?? theme.colorScheme.errorContainer.withValues(alpha: 0.1),
         borderRadius: style.borderRadius ?? BorderRadius.circular(8.0),
         border: Border.all(
-          color: style.borderColor ?? theme.colorScheme.error.withOpacity(0.2),
+          color: style.borderColor ?? theme.colorScheme.error.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -175,7 +175,7 @@ class ErrorStateWidget extends StatelessWidget {
                     message!,
                     style: style.messageStyle ??
                         theme.textTheme.bodySmall?.copyWith(
-                          color: style.messageColor ?? theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: style.messageColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                   ),
               ],
@@ -203,7 +203,7 @@ class ErrorStateWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
-                  color: (style.iconColor ?? theme.colorScheme.error).withOpacity(0.1),
+                  color: (style.iconColor ?? theme.colorScheme.error).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -229,7 +229,7 @@ class ErrorStateWidget extends StatelessWidget {
                 message!,
                 style: style.messageStyle ??
                     theme.textTheme.bodyMedium?.copyWith(
-                      color: style.messageColor ?? theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: style.messageColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -293,14 +293,14 @@ class ErrorStateWidget extends StatelessWidget {
 
 /// Animated error state with slide-in animation
 class AnimatedErrorState extends StatefulWidget {
-  final ErrorStateWidget errorWidget;
-  final Duration animationDuration;
 
   const AnimatedErrorState({
     super.key,
     required this.errorWidget,
     this.animationDuration = const Duration(milliseconds: 300),
   });
+  final ErrorStateWidget errorWidget;
+  final Duration animationDuration;
 
   @override
   State<AnimatedErrorState> createState() => _AnimatedErrorStateState();
@@ -359,21 +359,6 @@ class _AnimatedErrorStateState extends State<AnimatedErrorState>
 
 /// Error state style configuration
 class ErrorStateStyle {
-  final Color? backgroundColor;
-  final Color? borderColor;
-  final Color? iconColor;
-  final Color? titleColor;
-  final Color? messageColor;
-  final Color? primaryButtonColor;
-  final Color? primaryButtonTextColor;
-  final Color? secondaryButtonColor;
-  
-  final TextStyle? titleStyle;
-  final TextStyle? messageStyle;
-  
-  final double? iconSize;
-  final EdgeInsetsGeometry? padding;
-  final BorderRadiusGeometry? borderRadius;
 
   const ErrorStateStyle({
     this.backgroundColor,
@@ -390,6 +375,21 @@ class ErrorStateStyle {
     this.padding,
     this.borderRadius,
   });
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final Color? iconColor;
+  final Color? titleColor;
+  final Color? messageColor;
+  final Color? primaryButtonColor;
+  final Color? primaryButtonTextColor;
+  final Color? secondaryButtonColor;
+  
+  final TextStyle? titleStyle;
+  final TextStyle? messageStyle;
+  
+  final double? iconSize;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadiusGeometry? borderRadius;
 
   ErrorStateStyle copyWith({
     Color? backgroundColor,

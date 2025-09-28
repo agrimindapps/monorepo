@@ -1,15 +1,11 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import 'package:core/core.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Diálogo com ações para um dispositivo específico
 class DeviceActionsDialog extends StatelessWidget {
-  final DeviceEntity device;
-  final bool isCurrentDevice;
-  final Function(String action) onAction;
 
   const DeviceActionsDialog({
     super.key,
@@ -17,6 +13,9 @@ class DeviceActionsDialog extends StatelessWidget {
     required this.onAction,
     this.isCurrentDevice = false,
   });
+  final DeviceEntity device;
+  final bool isCurrentDevice;
+  final Function(String action) onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +95,7 @@ class DeviceActionsDialog extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(
@@ -199,15 +198,15 @@ class DeviceActionsDialog extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: GasometerColors.primary.withOpacity(0.1),
+        color: GasometerColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: GasometerColors.primary.withOpacity(0.3),
+          color: GasometerColors.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.info_outline,
             color: GasometerColors.primary,
             size: 24,
@@ -217,7 +216,7 @@ class DeviceActionsDialog extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Este Dispositivo',
                   style: TextStyle(
                     color: GasometerColors.primary,
@@ -228,7 +227,7 @@ class DeviceActionsDialog extends StatelessWidget {
                 Text(
                   'Você está usando este dispositivo atualmente. Não é possível desconectá-lo.',
                   style: TextStyle(
-                    color: GasometerColors.primary.withOpacity(0.8),
+                    color: GasometerColors.primary.withValues(alpha: 0.8),
                     fontSize: 13,
                   ),
                 ),
@@ -246,10 +245,10 @@ class DeviceActionsDialog extends StatelessWidget {
         margin: const EdgeInsets.only(top: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
+          color: Colors.red.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.red.withOpacity(0.3),
+            color: Colors.red.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
@@ -275,7 +274,7 @@ class DeviceActionsDialog extends StatelessWidget {
                   Text(
                     'Este dispositivo já foi desconectado e não tem mais acesso à sua conta.',
                     style: TextStyle(
-                      color: Colors.red.withOpacity(0.8),
+                      color: Colors.red.withValues(alpha: 0.8),
                       fontSize: 13,
                     ),
                   ),
@@ -351,7 +350,7 @@ class DeviceActionsDialog extends StatelessWidget {
         onTap: onTap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: color.withOpacity(0.3)),
+          side: BorderSide(color: color.withValues(alpha: 0.3)),
         ),
       ),
     );

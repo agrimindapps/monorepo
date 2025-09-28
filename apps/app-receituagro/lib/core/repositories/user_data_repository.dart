@@ -1,6 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:hive/hive.dart';
 
 import '../../features/comentarios/models/comentario_model.dart';
 import '../../features/favoritos/models/favorito_defensivo_model.dart';
@@ -11,8 +9,6 @@ import '../providers/auth_provider.dart' as app_auth;
 class UserDataRepository {
   static const String _appSettingsBoxName = 'app_settings';
   static const String _subscriptionDataBoxName = 'subscription_data';
-  static const String _favoritosBoxName = 'favoritos';
-  static const String _comentariosBoxName = 'comentarios';
 
   final app_auth.AuthProvider _authProvider;
 
@@ -212,14 +208,14 @@ class UserDataRepository {
       }
 
       // Marcar favorito com userId e como não sincronizado
-      final updatedFavorito = favorito.copyWith(
+      favorito.copyWith(
         userId: userId,
         synchronized: false,
         updatedAt: DateTime.now(),
       );
 
       // Aqui seria a integração com o repository/service que gerencia favoritos
-      // Por exemplo: await _favoritosService.save(updatedFavorito);
+      // Por exemplo: await _favoritosService.save(favorito);
 
       return const Right(null);
     } catch (e) {
@@ -274,7 +270,7 @@ class UserDataRepository {
       }
 
       // Marcar comentário com userId e como não sincronizado
-      final updatedComentario = comentario.copyWith(
+      comentario.copyWith(
         userId: userId,
         synchronized: false,
         syncedAt: null,
@@ -282,7 +278,7 @@ class UserDataRepository {
       );
 
       // Aqui seria a integração com o repository/service que gerencia comentários
-      // Por exemplo: await _comentariosService.save(updatedComentario);
+      // Por exemplo: await _comentariosService.save(comentario);
 
       return const Right(null);
     } catch (e) {

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../features/fuel/domain/repositories/fuel_repository.dart';
 import '../../features/fuel/domain/usecases/add_fuel_record.dart';

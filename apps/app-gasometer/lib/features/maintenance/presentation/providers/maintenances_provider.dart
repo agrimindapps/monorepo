@@ -10,6 +10,13 @@ import '../models/maintenance_form_model.dart';
 
 /// Provider principal para gerenciar estado e operações de manutenções
 class MaintenancesProvider extends ChangeNotifier {
+
+  MaintenancesProvider(
+    this._repository,
+    this._vehiclesProvider,
+  ) {
+    _initialize();
+  }
   final MaintenanceRepository _repository;
   final VehiclesProvider _vehiclesProvider;
   final MaintenanceFormatterService _formatter = MaintenanceFormatterService();
@@ -34,13 +41,6 @@ class MaintenancesProvider extends ChangeNotifier {
   
   // Estado de estatísticas
   Map<String, dynamic> _stats = {};
-
-  MaintenancesProvider(
-    this._repository,
-    this._vehiclesProvider,
-  ) {
-    _initialize();
-  }
 
   // Getters públicos
   List<MaintenanceEntity> get maintenances => _filteredMaintenances;

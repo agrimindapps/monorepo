@@ -313,9 +313,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           'custom_message': 'Que tal dar uma regadinha?',
         },
         actions: [
-          NotificationAction(id: 'mark_watered', title: 'Marquei como regada'),
-          NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-          NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(id: 'mark_watered', title: 'Marquei como regada'),
+          const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
+          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
         ],
       ),
 
@@ -332,9 +332,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           'custom_message': 'Vamos nutrir essa belezinha?',
         },
         actions: [
-          NotificationAction(id: 'mark_fertilized', title: 'Marquei como adubada'),
-          NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-          NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(id: 'mark_fertilized', title: 'Marquei como adubada'),
+          const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
+          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
         ],
       ),
 
@@ -351,8 +351,8 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           'custom_message': 'Hora de dar mais espaço para crescer!',
         },
         actions: [
-          NotificationAction(id: 'reschedule_care', title: 'Reagendar'),
-          NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(id: 'reschedule_care', title: 'Reagendar'),
+          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
         ],
       ),
 
@@ -369,8 +369,8 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           'custom_message': 'Vamos verificar pragas e doenças?',
         },
         actions: [
-          NotificationAction(id: 'dismiss_notification', title: 'Verificado'),
-          NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(id: 'dismiss_notification', title: 'Verificado'),
+          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
         ],
       ),
 
@@ -384,9 +384,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         pluginId: id,
         requiredFields: ['plant_name', 'plant_id', 'custom_message'],
         actions: [
-          NotificationAction(id: 'dismiss_notification', title: 'Concluído'),
-          NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-          NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(id: 'dismiss_notification', title: 'Concluído'),
+          const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
+          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
         ],
       ),
 
@@ -403,8 +403,8 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           'custom_message': 'Vamos cuidar dela agora?',
         },
         actions: [
-          NotificationAction(id: 'mark_watered', title: 'Marcar como feito'),
-          NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(id: 'mark_watered', title: 'Marcar como feito'),
+          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
         ],
       ),
     ];

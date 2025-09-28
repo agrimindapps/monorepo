@@ -170,13 +170,13 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                     boxShadow: [
                       // Glow effect
                       BoxShadow(
-                        color: PlantisColors.primary.withOpacity(_glowAnimation.value * 0.3),
+                        color: PlantisColors.primary.withValues(alpha: _glowAnimation.value * 0.3),
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),
                       // Sombra normal
                       BoxShadow(
-                        color: theme.colorScheme.shadow.withOpacity(0.1),
+                        color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -189,13 +189,13 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          PlantisColors.primary.withOpacity(0.1),
-                          PlantisColors.primaryLight.withOpacity(0.15),
+                          PlantisColors.primary.withValues(alpha: 0.1),
+                          PlantisColors.primaryLight.withValues(alpha: 0.15),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: PlantisColors.primary.withOpacity(0.3),
+                        color: PlantisColors.primary.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                     ),
@@ -207,7 +207,7 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: PlantisColors.primary.withOpacity(0.2),
+                                color: PlantisColors.primary.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -295,10 +295,10 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surface.withOpacity(0.7),
+                              color: theme.colorScheme.surface.withValues(alpha: 0.7),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: theme.colorScheme.outline.withOpacity(0.2),
+                                color: theme.colorScheme.outline.withValues(alpha: 0.2),
                               ),
                             ),
                             child: Row(
@@ -356,10 +356,10 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 1,
         ),
       ),

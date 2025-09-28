@@ -10,11 +10,6 @@ import '../logging/services/logging_service.dart';
 /// Serviço responsável por sincronização única no startup do app
 /// Substitui os syncs em background que causavam problemas de index
 class StartupSyncService {
-  final FuelRepository fuelRepository;
-  final MaintenanceRepository maintenanceRepository;
-  final VehicleRepository vehicleRepository;
-  final Connectivity connectivity;
-  final LoggingService loggingService;
 
   StartupSyncService({
     required this.fuelRepository,
@@ -23,6 +18,11 @@ class StartupSyncService {
     required this.connectivity,
     required this.loggingService,
   });
+  final FuelRepository fuelRepository;
+  final MaintenanceRepository maintenanceRepository;
+  final VehicleRepository vehicleRepository;
+  final Connectivity connectivity;
+  final LoggingService loggingService;
 
   /// Executa sincronização inicial apenas no startup do app
   Future<void> performStartupSync() async {

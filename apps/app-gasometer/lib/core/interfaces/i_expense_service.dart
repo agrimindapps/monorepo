@@ -39,13 +39,6 @@ abstract class IExpenseService {
 
 /// Expense metrics data model
 class ExpenseMetrics {
-  final double totalExpenses;
-  final double averageExpense;
-  final int totalTransactions;
-  final double highestExpense;
-  final double lowestExpense;
-  final Map<String, double> expensesByType;
-  final Map<String, double> monthlyTotals;
 
   const ExpenseMetrics({
     required this.totalExpenses,
@@ -56,14 +49,17 @@ class ExpenseMetrics {
     required this.expensesByType,
     required this.monthlyTotals,
   });
+  final double totalExpenses;
+  final double averageExpense;
+  final int totalTransactions;
+  final double highestExpense;
+  final double lowestExpense;
+  final Map<String, double> expensesByType;
+  final Map<String, double> monthlyTotals;
 }
 
 /// Expense analytics data model
 class ExpenseAnalytics {
-  final ExpenseMetrics metrics;
-  final List<ExpenseTrend> trends;
-  final List<String> topExpenseCategories;
-  final double projectedMonthlyExpense;
 
   const ExpenseAnalytics({
     required this.metrics,
@@ -71,28 +67,27 @@ class ExpenseAnalytics {
     required this.topExpenseCategories,
     required this.projectedMonthlyExpense,
   });
+  final ExpenseMetrics metrics;
+  final List<ExpenseTrend> trends;
+  final List<String> topExpenseCategories;
+  final double projectedMonthlyExpense;
 }
 
 /// Expense trend data model
 class ExpenseTrend {
-  final String period;
-  final double amount;
-  final double percentageChange;
 
   const ExpenseTrend({
     required this.period,
     required this.amount,
     required this.percentageChange,
   });
+  final String period;
+  final double amount;
+  final double percentageChange;
 }
 
 /// Expense comparison data model
 class ExpenseComparison {
-  final double period1Total;
-  final double period2Total;
-  final double difference;
-  final double percentageChange;
-  final Map<String, ExpenseTrend> categoryComparison;
 
   const ExpenseComparison({
     required this.period1Total,
@@ -101,15 +96,15 @@ class ExpenseComparison {
     required this.percentageChange,
     required this.categoryComparison,
   });
+  final double period1Total;
+  final double period2Total;
+  final double difference;
+  final double percentageChange;
+  final Map<String, ExpenseTrend> categoryComparison;
 }
 
 /// Expense report data model
 class ExpenseReport {
-  final String title;
-  final DateTime generatedAt;
-  final ExpenseMetrics metrics;
-  final List<ExpenseModel> expenses;
-  final Map<String, dynamic> summary;
 
   const ExpenseReport({
     required this.title,
@@ -118,5 +113,10 @@ class ExpenseReport {
     required this.expenses,
     required this.summary,
   });
+  final String title;
+  final DateTime generatedAt;
+  final ExpenseMetrics metrics;
+  final List<ExpenseModel> expenses;
+  final Map<String, dynamic> summary;
 }
 

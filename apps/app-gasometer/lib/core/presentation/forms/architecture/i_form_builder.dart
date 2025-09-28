@@ -51,9 +51,6 @@ enum FormValidationMode {
 
 /// Result of form building operation
 class FormResult {
-  final dynamic formWidget;
-  final String formId;
-  final Map<String, dynamic> metadata;
   
   const FormResult({
     required this.formWidget,
@@ -85,6 +82,9 @@ class FormResult {
       metadata: {'error': error, ...metadata},
     );
   }
+  final dynamic formWidget;
+  final String formId;
+  final Map<String, dynamic> metadata;
   
   /// Check if form building was successful
   bool get isSuccess => formWidget != null && formId.isNotEmpty;

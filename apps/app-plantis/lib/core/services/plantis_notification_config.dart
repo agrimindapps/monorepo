@@ -8,7 +8,7 @@ class PlantisNotificationConfig {
 
   /// Canais de notificação específicos do Plantis
   static final List<NotificationChannelEntity> plantisChannels = [
-    NotificationChannelEntity(
+    const NotificationChannelEntity(
       id: 'plantis_watering',
       name: 'Lembretes de Rega',
       description: 'Notificações para lembrar de regar suas plantas',
@@ -17,7 +17,7 @@ class PlantisNotificationConfig {
       enableLights: true,
       enableVibration: true,
     ),
-    NotificationChannelEntity(
+    const NotificationChannelEntity(
       id: 'plantis_fertilizing',
       name: 'Lembretes de Adubação',
       description: 'Notificações para lembrar de adubar suas plantas',
@@ -26,7 +26,7 @@ class PlantisNotificationConfig {
       enableLights: true,
       enableVibration: true,
     ),
-    NotificationChannelEntity(
+    const NotificationChannelEntity(
       id: 'plantis_pruning',
       name: 'Lembretes de Poda',
       description: 'Notificações para lembrar de podar suas plantas',
@@ -35,7 +35,7 @@ class PlantisNotificationConfig {
       enableLights: false,
       enableVibration: true,
     ),
-    NotificationChannelEntity(
+    const NotificationChannelEntity(
       id: 'plantis_pest_inspection',
       name: 'Inspeção de Pragas',
       description: 'Lembretes para verificar pragas nas plantas',
@@ -44,7 +44,7 @@ class PlantisNotificationConfig {
       enableLights: false,
       enableVibration: false,
     ),
-    NotificationChannelEntity(
+    const NotificationChannelEntity(
       id: 'plantis_general',
       name: 'Notificações Gerais',
       description: 'Outras notificações do Plantis',
@@ -53,7 +53,7 @@ class PlantisNotificationConfig {
       enableLights: false,
       enableVibration: false,
     ),
-    NotificationChannelEntity(
+    const NotificationChannelEntity(
       id: 'plantis_sync',
       name: 'Sincronização',
       description: 'Status de sincronização dos dados',

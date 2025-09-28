@@ -58,7 +58,7 @@ class ListaDefensivosProvider extends ChangeNotifier {
       _updateLoadingState(loading: true, error: null);
       
       // Load defensivos from repository
-      final defensivos = _repository.getActiveDefensivos();
+      final defensivos = await _repository.getActiveDefensivos();
       
       _allDefensivos.clear();
       _allDefensivos.addAll(defensivos);

@@ -57,7 +57,8 @@ class FavoritosCacheService {
     
     for (final favorito in favoritosDefensivos) {
       print('📝 Buscando defensivo com ID: ${favorito.itemId}');
-      final defensivo = _fitossanitarioRepository.getById(favorito.itemId);
+      final result = await _fitossanitarioRepository.getByKey(favorito.itemId);
+      final defensivo = result.isSuccess ? result.data : null;
       
       if (defensivo != null) {
         print('✅ Defensivo encontrado: ${defensivo.nomeComum}');
@@ -102,7 +103,8 @@ class FavoritosCacheService {
     await _preloadCulturaRelations();
     
     for (final favorito in favoritosPragas) {
-      final praga = _pragasRepository.getById(favorito.itemId);
+      final result = await _pragasRepository.getByKey(favorito.itemId);
+      final praga = result.isSuccess ? result.data : null;
       if (praga != null) {
         // Busca diagnósticos relacionados para obter mais informações
         final diagnosticosRelacionados = await _integrationService.buscarPorPraga(praga.objectId);
@@ -174,11 +176,20 @@ class FavoritosCacheService {
       return; // Cache ainda válido
     }
 
-    final culturas = _culturaRepository.getAll();
+    final result = await _culturaRepository.getAll();
+    final culturas = result.isSuccess ? result.data ?? [] : <dynamic>[];
     final Map<String, String> culturaNames = {};
     
     for (final cultura in culturas) {
-      culturaNames[cultura.idReg] = cultura.cultura;
+      try {
+        final objectId = cultura.objectId?.toString();
+        final nomeC = cultura.cultura?.toString();
+        if (objectId != null && nomeC != null) {
+          culturaNames[objectId] = nomeC;
+        }
+      } catch (e) {
+        continue;
+      }
     }
 
     _culturaNameCache[cacheKey] = _CacheEntry(culturaNames, DateTime.now());

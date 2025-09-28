@@ -7,9 +7,9 @@ import '../repositories/premium_repository.dart';
 /// Use case para verificar limites de registros de manutenção
 @injectable
 class CanAddMaintenanceRecord implements UseCase<bool, CanAddMaintenanceRecordParams> {
-  final PremiumRepository repository;
 
   CanAddMaintenanceRecord(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, bool>> call(CanAddMaintenanceRecordParams params) async {

@@ -62,19 +62,6 @@ typedef FieldCreator = Widget Function(FieldConfig config);
 
 /// Base configuration for all field types
 abstract class FieldConfig {
-  final String key;
-  final String? label;
-  final String? hint;
-  final bool isRequired;
-  final bool isEnabled;
-  final dynamic initialValue;
-  final ValueChanged<dynamic>? onChanged;
-  final VoidCallback? onTap;
-  final String? errorMessage;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final EdgeInsetsGeometry? padding;
-  final Map<String, dynamic> metadata;
   
   const FieldConfig({
     required this.key,
@@ -91,6 +78,19 @@ abstract class FieldConfig {
     this.padding,
     this.metadata = const {},
   });
+  final String key;
+  final String? label;
+  final String? hint;
+  final bool isRequired;
+  final bool isEnabled;
+  final dynamic initialValue;
+  final ValueChanged<dynamic>? onChanged;
+  final VoidCallback? onTap;
+  final String? errorMessage;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final EdgeInsetsGeometry? padding;
+  final Map<String, dynamic> metadata;
   
   /// Get field type identifier
   String get fieldType;
@@ -117,13 +117,6 @@ abstract class FieldConfig {
 
 /// Configuration for text input fields
 class TextFieldConfig extends FieldConfig {
-  final TextInputType keyboardType;
-  final int? maxLength;
-  final int maxLines;
-  final bool obscureText;
-  final List<TextInputFormatter>? inputFormatters;
-  final TextCapitalization textCapitalization;
-  final String? validationPattern;
   
   const TextFieldConfig({
     required super.key,
@@ -147,6 +140,13 @@ class TextFieldConfig extends FieldConfig {
     this.textCapitalization = TextCapitalization.none,
     this.validationPattern,
   });
+  final TextInputType keyboardType;
+  final int? maxLength;
+  final int maxLines;
+  final bool obscureText;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextCapitalization textCapitalization;
+  final String? validationPattern;
   
   @override
   String get fieldType => 'text';
@@ -200,10 +200,6 @@ class TextFieldConfig extends FieldConfig {
 
 /// Configuration for dropdown fields
 class DropdownFieldConfig extends FieldConfig {
-  final List<DropdownOption> options;
-  final bool isSearchable;
-  final String? searchHint;
-  final bool allowMultiple;
   
   const DropdownFieldConfig({
     required super.key,
@@ -224,6 +220,10 @@ class DropdownFieldConfig extends FieldConfig {
     this.searchHint,
     this.allowMultiple = false,
   });
+  final List<DropdownOption> options;
+  final bool isSearchable;
+  final String? searchHint;
+  final bool allowMultiple;
   
   @override
   String get fieldType => 'dropdown';
@@ -271,11 +271,6 @@ class DropdownFieldConfig extends FieldConfig {
 
 /// Option for dropdown fields
 class DropdownOption {
-  final dynamic value;
-  final String label;
-  final Widget? icon;
-  final bool isEnabled;
-  final Map<String, dynamic> metadata;
   
   const DropdownOption({
     required this.value,
@@ -284,6 +279,11 @@ class DropdownOption {
     this.isEnabled = true,
     this.metadata = const {},
   });
+  final dynamic value;
+  final String label;
+  final Widget? icon;
+  final bool isEnabled;
+  final Map<String, dynamic> metadata;
   
   @override
   bool operator ==(Object other) {
@@ -300,10 +300,6 @@ class DropdownOption {
 
 /// Configuration for number fields
 class NumberFieldConfig extends TextFieldConfig {
-  final num? minValue;
-  final num? maxValue;
-  final int? decimalPlaces;
-  final bool allowNegative;
   
   const NumberFieldConfig({
     required super.key,
@@ -324,6 +320,10 @@ class NumberFieldConfig extends TextFieldConfig {
     this.decimalPlaces,
     this.allowNegative = true,
   }) : super(keyboardType: TextInputType.number);
+  final num? minValue;
+  final num? maxValue;
+  final int? decimalPlaces;
+  final bool allowNegative;
   
   @override
   String get fieldType => 'number';
@@ -331,10 +331,6 @@ class NumberFieldConfig extends TextFieldConfig {
 
 /// Configuration for date fields
 class DateFieldConfig extends FieldConfig {
-  final DateTime? minDate;
-  final DateTime? maxDate;
-  final String? dateFormat;
-  final bool showTime;
   
   const DateFieldConfig({
     required super.key,
@@ -355,6 +351,10 @@ class DateFieldConfig extends FieldConfig {
     this.dateFormat,
     this.showTime = false,
   });
+  final DateTime? minDate;
+  final DateTime? maxDate;
+  final String? dateFormat;
+  final bool showTime;
   
   @override
   String get fieldType => 'date';
@@ -398,8 +398,6 @@ class DateFieldConfig extends FieldConfig {
 
 /// Configuration for time fields
 class TimeFieldConfig extends FieldConfig {
-  final bool use24HourFormat;
-  final String? timeFormat;
   
   const TimeFieldConfig({
     required super.key,
@@ -418,6 +416,8 @@ class TimeFieldConfig extends FieldConfig {
     this.use24HourFormat = true,
     this.timeFormat,
   });
+  final bool use24HourFormat;
+  final String? timeFormat;
   
   @override
   String get fieldType => 'time';
@@ -459,8 +459,6 @@ class TimeFieldConfig extends FieldConfig {
 
 /// Configuration for switch fields
 class SwitchFieldConfig extends FieldConfig {
-  final String? trueLabel;
-  final String? falseLabel;
   
   const SwitchFieldConfig({
     required super.key,
@@ -479,6 +477,8 @@ class SwitchFieldConfig extends FieldConfig {
     this.trueLabel,
     this.falseLabel,
   });
+  final String? trueLabel;
+  final String? falseLabel;
   
   @override
   String get fieldType => 'switch';
@@ -574,8 +574,6 @@ class CheckboxFieldConfig extends FieldConfig {
 
 /// Configuration for radio group fields
 class RadioGroupFieldConfig extends FieldConfig {
-  final List<RadioOption> options;
-  final Axis direction;
   
   const RadioGroupFieldConfig({
     required super.key,
@@ -594,6 +592,8 @@ class RadioGroupFieldConfig extends FieldConfig {
     super.metadata,
     this.direction = Axis.vertical,
   });
+  final List<RadioOption> options;
+  final Axis direction;
   
   @override
   String get fieldType => 'radio_group';
@@ -635,10 +635,6 @@ class RadioGroupFieldConfig extends FieldConfig {
 
 /// Option for radio group fields
 class RadioOption {
-  final dynamic value;
-  final String label;
-  final Widget? icon;
-  final bool isEnabled;
   
   const RadioOption({
     required this.value,
@@ -646,6 +642,10 @@ class RadioOption {
     this.icon,
     this.isEnabled = true,
   });
+  final dynamic value;
+  final String label;
+  final Widget? icon;
+  final bool isEnabled;
   
   @override
   bool operator ==(Object other) {
@@ -659,10 +659,6 @@ class RadioOption {
 
 /// Configuration for multi-select fields
 class MultiSelectFieldConfig extends FieldConfig {
-  final List<DropdownOption> options;
-  final int? maxSelections;
-  final String? allSelectedText;
-  final String? noneSelectedText;
   
   const MultiSelectFieldConfig({
     required super.key,
@@ -683,6 +679,10 @@ class MultiSelectFieldConfig extends FieldConfig {
     this.allSelectedText,
     this.noneSelectedText,
   });
+  final List<DropdownOption> options;
+  final int? maxSelections;
+  final String? allSelectedText;
+  final String? noneSelectedText;
   
   @override
   String get fieldType => 'multi_select';
@@ -726,10 +726,6 @@ class MultiSelectFieldConfig extends FieldConfig {
 
 /// Configuration for file picker fields
 class FileFieldConfig extends FieldConfig {
-  final List<String> allowedExtensions;
-  final int? maxFileSizeMB;
-  final bool allowMultiple;
-  final String? acceptButtonText;
   
   const FileFieldConfig({
     required super.key,
@@ -750,6 +746,10 @@ class FileFieldConfig extends FieldConfig {
     this.allowMultiple = false,
     this.acceptButtonText,
   });
+  final List<String> allowedExtensions;
+  final int? maxFileSizeMB;
+  final bool allowMultiple;
+  final String? acceptButtonText;
   
   @override
   String get fieldType => 'file';
@@ -793,8 +793,6 @@ class FileFieldConfig extends FieldConfig {
 
 /// Configuration for custom fields
 class CustomFieldConfig extends FieldConfig {
-  final String customType;
-  final Map<String, dynamic> customProperties;
   
   const CustomFieldConfig({
     required super.key,
@@ -813,6 +811,8 @@ class CustomFieldConfig extends FieldConfig {
     super.padding,
     super.metadata,
   });
+  final String customType;
+  final Map<String, dynamic> customProperties;
   
   @override
   String get fieldType => customType;

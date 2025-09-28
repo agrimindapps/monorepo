@@ -24,6 +24,28 @@ typedef SwitchAsyncValidator = Future<String?> Function(bool value);
 /// Segue os mesmos padrões visuais dos outros campos validados,
 /// garantindo consistência na experiência do usuário.
 class ValidatedSwitchField extends StatefulWidget {
+
+  const ValidatedSwitchField({
+    super.key,
+    required this.value,
+    this.onChanged,
+    this.label,
+    this.description,
+    this.helperText,
+    this.enabled = true,
+    this.required = false,
+    this.validator,
+    this.asyncValidator,
+    this.debounceDuration = const Duration(milliseconds: 500),
+    this.validateOnChange = true,
+    this.showValidationIcon = true,
+    this.onEditingComplete,
+    this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
+    this.labelPosition = SwitchLabelPosition.start,
+  });
   /// Valor inicial do switch
   final bool value;
   
@@ -80,28 +102,6 @@ class ValidatedSwitchField extends StatefulWidget {
   
   /// Layout da label em relação ao switch
   final SwitchLabelPosition labelPosition;
-
-  const ValidatedSwitchField({
-    super.key,
-    required this.value,
-    this.onChanged,
-    this.label,
-    this.description,
-    this.helperText,
-    this.enabled = true,
-    this.required = false,
-    this.validator,
-    this.asyncValidator,
-    this.debounceDuration = const Duration(milliseconds: 500),
-    this.validateOnChange = true,
-    this.showValidationIcon = true,
-    this.onEditingComplete,
-    this.activeColor,
-    this.activeTrackColor,
-    this.inactiveThumbColor,
-    this.inactiveTrackColor,
-    this.labelPosition = SwitchLabelPosition.start,
-  });
 
   @override
   State<ValidatedSwitchField> createState() => _ValidatedSwitchFieldState();
@@ -251,7 +251,7 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
 
     switch (_validationState) {
       case SwitchValidationState.validating:
-        return SizedBox(
+        return const SizedBox(
           width: GasometerDesignTokens.iconSizeXs,
           height: GasometerDesignTokens.iconSizeXs,
           child: CircularProgressIndicator(
@@ -337,7 +337,7 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
               ),
               children: [
                 if (widget.required)
-                  TextSpan(
+                  const TextSpan(
                     text: ' *',
                     style: TextStyle(
                       color: GasometerDesignTokens.colorError,
@@ -348,7 +348,7 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
             ),
           ),
         if (widget.description != null) ...[
-          SizedBox(height: GasometerDesignTokens.spacingXs),
+          const SizedBox(height: GasometerDesignTokens.spacingXs),
           Text(
             widget.description!,
             style: TextStyle(
@@ -373,10 +373,10 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
         return Row(
           children: [
             labelWidget,
-            SizedBox(width: GasometerDesignTokens.spacingMd),
+            const SizedBox(width: GasometerDesignTokens.spacingMd),
             validationIcon,
             if (_shouldShowValidationIcon) 
-              SizedBox(width: GasometerDesignTokens.spacingSm),
+              const SizedBox(width: GasometerDesignTokens.spacingSm),
             switchWidget,
           ],
         );
@@ -384,10 +384,10 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
         return Row(
           children: [
             switchWidget,
-            SizedBox(width: GasometerDesignTokens.spacingMd),
+            const SizedBox(width: GasometerDesignTokens.spacingMd),
             validationIcon,
             if (_shouldShowValidationIcon) 
-              SizedBox(width: GasometerDesignTokens.spacingSm),
+              const SizedBox(width: GasometerDesignTokens.spacingSm),
             labelWidget,
           ],
         );
@@ -396,11 +396,11 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildLabelContent(),
-            SizedBox(height: GasometerDesignTokens.spacingSm),
+            const SizedBox(height: GasometerDesignTokens.spacingSm),
             Row(
               children: [
                 switchWidget,
-                SizedBox(width: GasometerDesignTokens.spacingMd),
+                const SizedBox(width: GasometerDesignTokens.spacingMd),
                 validationIcon,
               ],
             ),
@@ -427,7 +427,7 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
         // Helper text
         if (_displayHelperText != null)
           Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: GasometerDesignTokens.spacingXs,
               left: GasometerDesignTokens.spacingXs,
             ),
@@ -443,7 +443,7 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
         // Indicador de progresso para validação
         if (_validationState == SwitchValidationState.validating)
           Padding(
-            padding: EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
+            padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
             child: LinearProgressIndicator(
               color: GasometerDesignTokens.colorPrimary,
               backgroundColor: GasometerDesignTokens.colorPrimary.withValues(alpha: 0.2),
@@ -456,6 +456,19 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
 
 /// Widget para grupo de switches relacionados
 class ValidatedSwitchGroup extends StatefulWidget {
+
+  const ValidatedSwitchGroup({
+    super.key,
+    required this.items,
+    this.title,
+    this.subtitle,
+    this.allowMultiple = true,
+    this.selectedValues,
+    this.selectedValue,
+    this.onMultipleChanged,
+    this.onSingleChanged,
+    this.enabled = true,
+  });
   /// Lista de switches no grupo
   final List<ValidatedSwitchGroupItem> items;
   
@@ -482,19 +495,6 @@ class ValidatedSwitchGroup extends StatefulWidget {
   
   /// Se o grupo está habilitado
   final bool enabled;
-
-  const ValidatedSwitchGroup({
-    super.key,
-    required this.items,
-    this.title,
-    this.subtitle,
-    this.allowMultiple = true,
-    this.selectedValues,
-    this.selectedValue,
-    this.onMultipleChanged,
-    this.onSingleChanged,
-    this.enabled = true,
-  });
 
   @override
   State<ValidatedSwitchGroup> createState() => _ValidatedSwitchGroupState();
@@ -548,10 +548,10 @@ class _ValidatedSwitchGroupState extends State<ValidatedSwitchGroup> {
         // Título do grupo
         if (widget.title != null)
           Padding(
-            padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingXs),
+            padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingXs),
             child: Text(
               widget.title!,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: GasometerDesignTokens.fontWeightMedium,
                 color: GasometerDesignTokens.colorTextPrimary,
                 fontSize: GasometerDesignTokens.fontSizeBodyLarge,
@@ -562,10 +562,10 @@ class _ValidatedSwitchGroupState extends State<ValidatedSwitchGroup> {
         // Subtítulo do grupo
         if (widget.subtitle != null)
           Padding(
-            padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
+            padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
             child: Text(
               widget.subtitle!,
-              style: TextStyle(
+              style: const TextStyle(
                 color: GasometerDesignTokens.colorTextSecondary,
                 fontSize: GasometerDesignTokens.fontSizeCaption,
               ),
@@ -596,6 +596,13 @@ class _ValidatedSwitchGroupState extends State<ValidatedSwitchGroup> {
 
 /// Item para grupo de switches
 class ValidatedSwitchGroupItem {
+
+  const ValidatedSwitchGroupItem({
+    required this.key,
+    required this.label,
+    this.description,
+    this.enabled = true,
+  });
   /// Chave única do item
   final String key;
   
@@ -607,13 +614,6 @@ class ValidatedSwitchGroupItem {
   
   /// Se o item está habilitado
   final bool enabled;
-
-  const ValidatedSwitchGroupItem({
-    required this.key,
-    required this.label,
-    this.description,
-    this.enabled = true,
-  });
 }
 
 /// Extension para facilitar o uso de validadores comuns para switches

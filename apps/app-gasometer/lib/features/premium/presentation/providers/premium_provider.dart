@@ -19,6 +19,22 @@ import '../../domain/usecases/restore_purchases.dart';
 
 @injectable
 class PremiumProvider extends ChangeNotifier {
+
+  PremiumProvider(
+    this._checkPremiumStatus,
+    this._canUseFeature,
+    this._canAddVehicle,
+    this._canAddFuelRecord,
+    this._canAddMaintenanceRecord,
+    this._purchasePremium,
+    this._getAvailableProducts,
+    this._restorePurchases,
+    this._generateLocalLicense,
+    this._revokeLocalLicense,
+    this._premiumRepository,
+  ) {
+    _initialize();
+  }
   final CheckPremiumStatus _checkPremiumStatus;
   final CanUseFeature _canUseFeature;
   final CanAddVehicle _canAddVehicle;
@@ -36,22 +52,6 @@ class PremiumProvider extends ChangeNotifier {
   PremiumStatus _premiumStatus = PremiumStatus.free;
   List<core.ProductInfo> _availableProducts = [];
   StreamSubscription<PremiumStatus>? _statusSubscription;
-
-  PremiumProvider(
-    this._checkPremiumStatus,
-    this._canUseFeature,
-    this._canAddVehicle,
-    this._canAddFuelRecord,
-    this._canAddMaintenanceRecord,
-    this._purchasePremium,
-    this._getAvailableProducts,
-    this._restorePurchases,
-    this._generateLocalLicense,
-    this._revokeLocalLicense,
-    this._premiumRepository,
-  ) {
-    _initialize();
-  }
   
   // Getters
   bool get isLoading => _isLoading;

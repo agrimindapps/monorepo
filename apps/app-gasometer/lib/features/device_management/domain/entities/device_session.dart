@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-
 import 'package:core/core.dart';
 
 /// Entidade que representa uma sessão de dispositivo

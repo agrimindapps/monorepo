@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as flutter_provider;
+import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/feature_flags_provider.dart';
@@ -443,7 +444,7 @@ class UserProfileSection extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
               // Chamar o método de criar conta
-              final authProvider = Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
+              final authProvider = flutter_provider.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
               _showSignupDialog(context, authProvider);
             },
             child: const Text('Criar Conta'),

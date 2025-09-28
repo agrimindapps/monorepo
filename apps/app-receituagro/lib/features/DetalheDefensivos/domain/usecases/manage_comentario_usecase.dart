@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/errors/failures.dart';
+import 'package:core/core.dart';
+import '../../../../core/errors/failures.dart' as app_failures;
 import '../../../../core/utils/typedef.dart';
 import '../../../comentarios/domain/entities/comentario_entity.dart';
 import '../repositories/comentario_repository.dart';
@@ -18,14 +18,14 @@ class ManageComentarioUseCase {
     // Validação de entrada
     if (!params.isValid) {
       return const Left(
-        ServerFailure('Dados inválidos para adicionar comentário'),
+        app_failures.ServerFailure('Dados inválidos para adicionar comentário'),
       );
     }
 
     // Validação do conteúdo
     if (!_isValidContent(params.conteudo)) {
       return const Left(
-        ServerFailure('Comentário deve ter entre 5 e 300 caracteres'),
+        app_failures.ServerFailure('Comentário deve ter entre 5 e 300 caracteres'),
       );
     }
 
@@ -44,7 +44,7 @@ class ManageComentarioUseCase {
 
       return await _repository.addComentario(comentario);
     } catch (e) {
-      return Left(ServerFailure('Erro ao adicionar comentário: ${e.toString()}'));
+      return Left(app_failures.ServerFailure('Erro ao adicionar comentário: ${e.toString()}'));
     }
   }
 
@@ -52,14 +52,14 @@ class ManageComentarioUseCase {
   ResultFuture<void> deleteComentario(String comentarioId) async {
     if (comentarioId.isEmpty) {
       return const Left(
-        ServerFailure('ID do comentário é obrigatório'),
+        app_failures.ServerFailure('ID do comentário é obrigatório'),
       );
     }
 
     try {
       return await _repository.deleteComentario(comentarioId);
     } catch (e) {
-      return Left(ServerFailure('Erro ao deletar comentário: ${e.toString()}'));
+      return Left(app_failures.ServerFailure('Erro ao deletar comentário: ${e.toString()}'));
     }
   }
 
@@ -67,14 +67,14 @@ class ManageComentarioUseCase {
   ResultFuture<List<ComentarioEntity>> getComentarios(String pkIdentificador) async {
     if (pkIdentificador.isEmpty) {
       return const Left(
-        ServerFailure('Identificador é obrigatório'),
+        app_failures.ServerFailure('Identificador é obrigatório'),
       );
     }
 
     try {
       return await _repository.getComentariosByPkIdentificador(pkIdentificador);
     } catch (e) {
-      return Left(ServerFailure('Erro ao buscar comentários: ${e.toString()}'));
+      return Left(app_failures.ServerFailure('Erro ao buscar comentários: ${e.toString()}'));
     }
   }
 

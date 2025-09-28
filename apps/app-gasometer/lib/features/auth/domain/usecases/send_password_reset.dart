@@ -7,9 +7,9 @@ import '../repositories/auth_repository.dart';
 
 @lazySingleton
 class SendPasswordReset implements UseCase<Unit, SendPasswordResetParams> {
-  final AuthRepository repository;
 
   SendPasswordReset(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, Unit>> call(SendPasswordResetParams params) async {
@@ -24,9 +24,9 @@ class SendPasswordReset implements UseCase<Unit, SendPasswordResetParams> {
 }
 
 class SendPasswordResetParams extends UseCaseParams {
-  final String email;
 
   const SendPasswordResetParams({required this.email});
+  final String email;
 
   @override
   List<Object> get props => [email];

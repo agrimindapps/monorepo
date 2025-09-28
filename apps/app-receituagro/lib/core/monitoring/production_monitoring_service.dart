@@ -371,7 +371,7 @@ class ProductionMonitoringService {
       parameters: {
         'session_id': sessionId,
         'session_duration_ms': sessionDuration.inMilliseconds,
-        'error_count': _errorCounts.values.fold(0, (sum, count) => sum + count),
+        'error_count': _errorCounts.values.fold(0, (acc, value) => acc + value),
         'most_common_error': _getMostCommonError(),
         ...sessionData,
       },
@@ -408,7 +408,7 @@ class ProductionMonitoringService {
   Future<Map<String, dynamic>> performHealthCheck() async {
     return {
       'monitoring_initialized': _isInitialized,
-      'error_count': _errorCounts.values.fold(0, (sum, count) => sum + count),
+      'error_count': _errorCounts.values.fold(0, (acc, value) => acc + value),
       'performance_tracking_active': _performanceStartTimes.isNotEmpty,
       'most_common_error': _getMostCommonError(),
       'memory_usage': _getMemoryUsage(),

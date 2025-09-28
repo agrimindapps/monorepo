@@ -113,7 +113,7 @@ class _ExportDataSectionState extends State<ExportDataSection> {
     DataExportProvider exportProvider, 
     String userId,
   ) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
@@ -307,8 +307,8 @@ class _ExportDataSectionState extends State<ExportDataSection> {
 
   void _showLimitMessage(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Você já fez uma exportação nas últimas 24 horas'),
+      const SnackBar(
+        content: Text('Você já fez uma exportação nas últimas 24 horas'),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
       ),

@@ -1,8 +1,10 @@
 import 'dart:convert';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../entities/log_entry.dart';
@@ -12,15 +14,15 @@ import '../datasources/log_remote_data_source.dart';
 
 @LazySingleton(as: LogRepository)
 class LogRepositoryImpl implements LogRepository {
-  final LogLocalDataSource localDataSource;
-  final LogRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
 
   LogRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.connectivity,
   });
+  final LogLocalDataSource localDataSource;
+  final LogRemoteDataSource remoteDataSource;
+  final Connectivity connectivity;
 
   Future<bool> get _isConnected async {
     final connectivityResults = await connectivity.checkConnectivity();

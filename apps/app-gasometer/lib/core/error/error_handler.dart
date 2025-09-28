@@ -6,9 +6,6 @@ import 'error_logger.dart';
 
 /// Result wrapper for operations that can fail
 class Result<T> {
-  final T? data;
-  final AppError? error;
-  final bool isSuccess;
 
   const Result._({this.data, this.error, required this.isSuccess});
 
@@ -17,6 +14,9 @@ class Result<T> {
 
   /// Create a failed result
   const Result.failure(AppError error) : this._(error: error, isSuccess: false);
+  final T? data;
+  final AppError? error;
+  final bool isSuccess;
 
   /// Execute callback if successful
   Result<U> map<U>(U Function(T data) callback) {
@@ -73,7 +73,7 @@ class Result<T> {
     }
     
     // Ensure we have a valid error before calling onError
-    final errorToUse = error ?? UnexpectedError(
+    final errorToUse = error ?? const UnexpectedError(
       message: 'Unknown error occurred in Result.fold',
       technicalDetails: 'Result was marked as failure but no error was provided',
     );
@@ -91,11 +91,6 @@ class Result<T> {
 
 /// Configuration for retry policies
 class RetryPolicy {
-  final int maxAttempts;
-  final Duration initialDelay;
-  final Duration maxDelay;
-  final double backoffMultiplier;
-  final bool Function(AppError error)? retryCondition;
 
   const RetryPolicy({
     this.maxAttempts = 3,
@@ -104,6 +99,11 @@ class RetryPolicy {
     this.backoffMultiplier = 2.0,
     this.retryCondition,
   });
+  final int maxAttempts;
+  final Duration initialDelay;
+  final Duration maxDelay;
+  final double backoffMultiplier;
+  final bool Function(AppError error)? retryCondition;
 
   /// Policy for network operations
   static const network = RetryPolicy(
@@ -162,9 +162,9 @@ class RetryPolicy {
 /// Main error handler service
 @injectable
 class ErrorHandler {
-  final ErrorLogger _logger;
 
   const ErrorHandler(this._logger);
+  final ErrorLogger _logger;
 
   /// Execute operation with error handling and retry
   Future<Result<T>> execute<T>(

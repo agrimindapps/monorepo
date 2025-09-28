@@ -11,15 +11,6 @@ import '../providers/expenses_paginated_provider.dart';
 /// Widget de lista paginada eficiente para despesas
 /// Implementa infinite scrolling com lazy loading real
 class ExpensesPaginatedList extends StatefulWidget {
-  final Widget Function(BuildContext context, ExpenseEntity expense, int index) itemBuilder;
-  final Widget? loadingBuilder;
-  final Widget? errorBuilder;
-  final Widget? emptyBuilder;
-  final EdgeInsets? padding;
-  final double? itemExtent;
-  final bool shrinkWrap;
-  final ScrollPhysics? physics;
-  final ScrollController? controller;
   
   const ExpensesPaginatedList({
     super.key,
@@ -33,6 +24,15 @@ class ExpensesPaginatedList extends StatefulWidget {
     this.physics,
     this.controller,
   });
+  final Widget Function(BuildContext context, ExpenseEntity expense, int index) itemBuilder;
+  final Widget? loadingBuilder;
+  final Widget? errorBuilder;
+  final Widget? emptyBuilder;
+  final EdgeInsets? padding;
+  final double? itemExtent;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+  final ScrollController? controller;
 
   @override
   State<ExpensesPaginatedList> createState() => _ExpensesPaginatedListState();
@@ -208,14 +208,14 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
 
 /// Widget de filtros para a lista paginada
 class ExpensesPaginatedFilters extends StatelessWidget {
-  final bool showStats;
-  final VoidCallback? onFiltersChanged;
   
   const ExpensesPaginatedFilters({
     super.key,
     this.showStats = true,
     this.onFiltersChanged,
   });
+  final bool showStats;
+  final VoidCallback? onFiltersChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +327,7 @@ class ExpensesPaginatedFilters extends StatelessWidget {
     ExpensesPaginatedProvider provider,
   ) {
     return Card(
-      color: AppTheme.colors.primary.withOpacity(0.1),
+      color: AppTheme.colors.primary.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(

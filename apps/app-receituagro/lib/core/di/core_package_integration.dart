@@ -1,12 +1,14 @@
-import 'package:core/core.dart' as core;
+// Flutter imports
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
-import '../services/receituagro_validation_service.dart';
-import '../services/device_identity_service.dart';
-// sync_orchestrator.dart removed - using UnifiedSyncManager from core package
+// Package imports
+import 'package:core/core.dart' as core;
+
+// Local imports
 import '../../features/analytics/enhanced_analytics_provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/device_identity_service.dart';
+import '../services/receituagro_validation_service.dart';
 import 'injection_container.dart' as di;
 
 /// Core Package Integration Configuration for ReceitaAgro
@@ -14,7 +16,7 @@ import 'injection_container.dart' as di;
 /// Following the patterns established in app-gasometer and app-plantis
 class CorePackageIntegration {
   // Use the same GetIt instance as injection_container.dart
-  static GetIt get _sl => di.sl;
+  static core.GetIt get _sl => di.sl;
 
   /// Initialize all Core Package services for ReceitaAgro
   static Future<void> initializeCoreServices() async {

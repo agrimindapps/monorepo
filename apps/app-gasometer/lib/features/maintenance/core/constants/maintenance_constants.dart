@@ -3,6 +3,8 @@ import '../../domain/entities/maintenance_entity.dart';
 
 /// Constantes organizadas para o módulo de manutenção
 class MaintenanceConstants {
+  
+  MaintenanceConstants._();
   // Limites de validação
   static const double minCost = 0.01;
   static const double maxCost = 999999.99;
@@ -226,21 +228,11 @@ class MaintenanceConstants {
       icon: Icons.check_circle,
       priority: 1,
     ),
-  };
-  
-  MaintenanceConstants._(); // Previne instanciação
+  }; // Previne instanciação
 }
 
 /// Classe para propriedades específicas de cada tipo de manutenção
 class MaintenanceTypeProperties {
-  final String displayName;
-  final IconData icon;
-  final int color;
-  final bool isRecurring;
-  final double? minExpectedValue;
-  final double? maxExpectedValue;
-  final String description;
-  final double? typicalInterval;
 
   const MaintenanceTypeProperties({
     required this.displayName,
@@ -252,16 +244,20 @@ class MaintenanceTypeProperties {
     required this.description,
     this.typicalInterval,
   });
+  final String displayName;
+  final IconData icon;
+  final int color;
+  final bool isRecurring;
+  final double? minExpectedValue;
+  final double? maxExpectedValue;
+  final String description;
+  final double? typicalInterval;
 
   Color get colorValue => Color(color);
 }
 
 /// Classe para propriedades específicas de cada status
 class MaintenanceStatusProperties {
-  final String displayName;
-  final IconData icon;
-  final int color;
-  final String description;
 
   const MaintenanceStatusProperties({
     required this.displayName,
@@ -269,16 +265,16 @@ class MaintenanceStatusProperties {
     required this.color,
     required this.description,
   });
+  final String displayName;
+  final IconData icon;
+  final int color;
+  final String description;
 
   Color get colorValue => Color(color);
 }
 
 /// Classe para propriedades de urgência
 class UrgencyProperties {
-  final String displayName;
-  final int color;
-  final IconData icon;
-  final int priority;
 
   const UrgencyProperties({
     required this.displayName,
@@ -286,6 +282,10 @@ class UrgencyProperties {
     required this.icon,
     required this.priority,
   });
+  final String displayName;
+  final int color;
+  final IconData icon;
+  final int priority;
 
   Color get colorValue => Color(color);
 }

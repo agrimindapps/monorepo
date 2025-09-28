@@ -1,26 +1,20 @@
-import 'package:core/core.dart';
-import 'package:core/core.dart' as core;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// Flutter imports
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
+// Package imports
+import 'package:core/core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+// Local imports
 import 'core/di/injection_container.dart' as di;
-import 'core/services/receituagro_navigation_service.dart';
+import 'core/inspector/receita_agro_data_inspector_initializer.dart';
+import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/auth_provider.dart';
-import 'core/sync/receituagro_sync_config.dart';
 import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
-import 'core/utils/theme_preference_migration.dart';
-import 'features/analytics/analytics_service.dart';
-import 'features/settings/presentation/providers/profile_provider.dart';
-import 'features/settings/presentation/providers/settings_provider.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 import 'core/services/diagnosticos_data_loader.dart';
@@ -29,15 +23,14 @@ import 'core/services/premium_service.dart';
 import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
-// navigation_service.dart moved to core package - available via 'package:core/core.dart'
-// Emergency stub removed
-// revenuecat_service.dart removed - consolidated into premium_service.dart
-// startup_optimization_service.dart removed - unused
 import 'core/setup/receituagro_data_setup.dart';
+import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
-import 'core/inspector/receita_agro_data_inspector_initializer.dart';
-import 'core/navigation/app_router.dart';
+import 'core/utils/theme_preference_migration.dart';
+import 'features/analytics/analytics_service.dart';
 import 'features/navigation/main_navigation_page.dart';
+import 'features/settings/presentation/providers/profile_provider.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
 import 'firebase_options.dart';
 
 /// Handler para mensagens em background (deve ser top-level function)
@@ -123,7 +116,7 @@ void main() async {
 
     // Initialize EnhancedConnectivityService for rural optimization
     debugPrint('🌾 [MAIN] Initializing EnhancedConnectivityService for rural environments...');
-    final enhancedConnectivity = di.sl<core.EnhancedConnectivityService>();
+    final enhancedConnectivity = di.sl<EnhancedConnectivityService>();
     final enhancedResult = await enhancedConnectivity.initialize(
       customPingHost: '1.1.1.1', // Cloudflare DNS for better rural access
       enableQualityMonitoring: true,
@@ -171,7 +164,6 @@ void main() async {
   // Inicializar Firebase Messaging Service
   try {
     final messagingService = di.sl<ReceitaAgroFirebaseMessagingService>();
-    final navigationService = di.sl<ReceitaAgroNavigationService>();
     await messagingService.initialize();
 
     // Inicializar Promotional Notification Manager
@@ -343,7 +335,7 @@ class ReceitaAgroApp extends StatelessWidget {
             darkTheme: ReceitaAgroTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             home: const MainNavigationPage(),
-            onGenerateRoute: AppRouter.generateRoute,
+            onGenerateRoute: app_router.AppRouter.generateRoute,
             navigatorKey: NavigationService.navigatorKey,
             debugShowCheckedModeBanner: false,
           );

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../data/repositories/odometer_repository.dart';
@@ -10,7 +11,15 @@ import '../services/odometer_validation_service.dart';
 ///
 /// This provider handles CRUD operations for odometer records and integrates
 /// with the vehicles provider to maintain data consistency.
+@injectable
 class OdometerProvider extends ChangeNotifier {
+
+  OdometerProvider(
+    this._repository,
+    this._vehiclesProvider,
+  ) : _validationService = OdometerValidationService(_vehiclesProvider) {
+    _initialize();
+  }
   final OdometerRepository _repository;
   final VehiclesProvider _vehiclesProvider;
   final OdometerValidationService _validationService;
@@ -19,13 +28,6 @@ class OdometerProvider extends ChangeNotifier {
   final List<OdometerEntity> _odometers = [];
   bool _isLoading = false;
   String _error = '';
-
-  OdometerProvider(
-    this._repository,
-    this._vehiclesProvider,
-  ) : _validationService = OdometerValidationService(_vehiclesProvider) {
-    _initialize();
-  }
 
   /// Initializes the provider
   Future<void> _initialize() async {

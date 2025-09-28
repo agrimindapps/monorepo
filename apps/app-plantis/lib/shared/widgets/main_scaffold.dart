@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 class MainScaffold extends StatefulWidget {
   final Widget child;
@@ -12,26 +12,39 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _getCurrentIndex(BuildContext context) {
-    final location = GoRouterState.of(context).uri.path;
+    try {
+      final location = GoRouterState.of(context).uri.path;
 
-    if (location.startsWith('/tasks')) return 0;
-    if (location.startsWith('/plants')) return 1;
-    if (location.startsWith('/settings')) return 2;
+      if (location.startsWith('/tasks')) return 0;
+      if (location.startsWith('/plants')) return 1;
+      if (location.startsWith('/settings')) return 2;
 
-    return 0;
+      return 0;
+    } catch (e) {
+      // GoRouterState não está disponível no contexto atual
+      return 0;
+    }
   }
 
   void _onTabTapped(int index) {
-    switch (index) {
-      case 0:
-        context.go('/tasks');
-        break;
-      case 1:
-        context.go('/plants');
-        break;
-      case 2:
-        context.go('/settings');
-        break;
+    // Verificar se o contexto tem acesso ao GoRouter antes de navegar
+    if (!mounted) return;
+    
+    try {
+      switch (index) {
+        case 0:
+          context.go('/tasks');
+          break;
+        case 1:
+          context.go('/plants');
+          break;
+        case 2:
+          context.go('/settings');
+          break;
+      }
+    } catch (e) {
+      // Se a navegação falhar, pode ser que o contexto não tenha acesso ao GoRouter
+      debugPrint('Erro na navegação: $e');
     }
   }
 

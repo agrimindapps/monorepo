@@ -3,12 +3,6 @@ import 'package:equatable/equatable.dart';
 /// Base class for all application errors
 /// Provides consistent error handling across the entire app
 abstract class AppError extends Equatable {
-  final String message;
-  final String? technicalDetails;
-  final String? userFriendlyMessage;
-  final ErrorSeverity severity;
-  final bool isRecoverable;
-  final Map<String, dynamic>? metadata;
   
   const AppError({
     required this.message,
@@ -18,6 +12,12 @@ abstract class AppError extends Equatable {
     this.isRecoverable = true,
     this.metadata,
   });
+  final String message;
+  final String? technicalDetails;
+  final String? userFriendlyMessage;
+  final ErrorSeverity severity;
+  final bool isRecoverable;
+  final Map<String, dynamic>? metadata;
   
   /// Get user-friendly message with fallback
   String get displayMessage => 
@@ -105,7 +105,6 @@ class NoInternetError extends NetworkError {
 // ============================================================================
 
 class ServerError extends AppError {
-  final int? statusCode;
   
   const ServerError({
     required super.message,
@@ -117,6 +116,7 @@ class ServerError extends AppError {
     severity: ErrorSeverity.error,
     isRecoverable: true,
   );
+  final int? statusCode;
 
   @override
   String _getDefaultUserMessage() =>
@@ -183,7 +183,6 @@ class InternalServerError extends ServerError {
 // ============================================================================
 
 class ValidationError extends AppError {
-  final Map<String, List<String>> fieldErrors;
   
   const ValidationError({
     required super.message,
@@ -195,6 +194,7 @@ class ValidationError extends AppError {
     severity: ErrorSeverity.warning,
     isRecoverable: true,
   );
+  final Map<String, List<String>> fieldErrors;
 
   @override
   String _getDefaultUserMessage() =>
@@ -382,7 +382,6 @@ class AccountDisabledError extends AuthenticationError {
 // ============================================================================
 
 class PermissionError extends AppError {
-  final String permission;
   
   const PermissionError({
     required this.permission,
@@ -394,6 +393,7 @@ class PermissionError extends AppError {
     severity: ErrorSeverity.warning,
     isRecoverable: true,
   );
+  final String permission;
 
   @override
   String _getDefaultUserMessage() =>

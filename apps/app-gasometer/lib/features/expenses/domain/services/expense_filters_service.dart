@@ -1,15 +1,8 @@
-import '../entities/expense_entity.dart';
 import '../../core/constants/expense_constants.dart';
+import '../entities/expense_entity.dart';
 
 /// Configuração de filtros para despesas
 class ExpenseFiltersConfig {
-  final String? vehicleId;
-  final ExpenseType? type;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final String searchQuery;
-  final String sortBy;
-  final bool sortAscending;
 
   const ExpenseFiltersConfig({
     this.vehicleId,
@@ -20,6 +13,13 @@ class ExpenseFiltersConfig {
     this.sortBy = 'date',
     this.sortAscending = false,
   });
+  final String? vehicleId;
+  final ExpenseType? type;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String searchQuery;
+  final String sortBy;
+  final bool sortAscending;
 
   /// Cria nova configuração com valores atualizados
   ExpenseFiltersConfig copyWith({

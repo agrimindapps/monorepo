@@ -2,12 +2,6 @@ import 'export_metadata.dart';
 
 /// Resultado de uma operação de exportação de dados
 class ExportResult {
-  final bool success;
-  final String? filePath;
-  final ExportMetadata? metadata;
-  final String? errorMessage;
-  final DateTime completedAt;
-  final Duration processingTime;
 
   const ExportResult({
     required this.success,
@@ -40,15 +34,6 @@ class ExportResult {
     processingTime: processingTime,
   );
 
-  Map<String, dynamic> toJson() => {
-    'success': success,
-    'file_path': filePath,
-    'metadata': metadata?.toJson(),
-    'error_message': errorMessage,
-    'completed_at': completedAt.toIso8601String(),
-    'processing_time_ms': processingTime.inMilliseconds,
-  };
-
   factory ExportResult.fromJson(Map<String, dynamic> json) => ExportResult(
     success: json['success'] as bool,
     filePath: json['file_path'] as String?,
@@ -59,6 +44,21 @@ class ExportResult {
     completedAt: DateTime.parse(json['completed_at'] as String),
     processingTime: Duration(milliseconds: json['processing_time_ms'] as int),
   );
+  final bool success;
+  final String? filePath;
+  final ExportMetadata? metadata;
+  final String? errorMessage;
+  final DateTime completedAt;
+  final Duration processingTime;
+
+  Map<String, dynamic> toJson() => {
+    'success': success,
+    'file_path': filePath,
+    'metadata': metadata?.toJson(),
+    'error_message': errorMessage,
+    'completed_at': completedAt.toIso8601String(),
+    'processing_time_ms': processingTime.inMilliseconds,
+  };
 
   @override
   bool operator ==(Object other) =>

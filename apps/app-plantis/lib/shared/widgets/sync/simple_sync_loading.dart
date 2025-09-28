@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
+import 'package:core/core.dart';
 
 import '../../../core/theme/plantis_colors.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../features/auth/presentation/providers/auth_provider.dart' as local_auth;
 
 /// Loading simples para sincronização que aparece e some automaticamente
 class SimpleSyncLoading extends StatefulWidget {
@@ -57,10 +58,10 @@ class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
 
   /// Monitora automaticamente o estado da sincronização
   void _startListeningToSync() {
-    final authProvider = context.read<AuthProvider>();
+    final authProvider = context.read<local_auth.AuthProvider>();
     
     // Verificar periodicamente se a sincronização terminou
-    _syncSubscription = Stream.periodic(const Duration(milliseconds: 500))
+    _syncSubscription = Stream<void>.periodic(const Duration(milliseconds: 500))
         .listen((_) {
       if (!mounted) return;
       

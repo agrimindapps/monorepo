@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/services/device_identity_service.dart';
-import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_provider.dart';
 import '../dialogs/device_management_dialog.dart';
 

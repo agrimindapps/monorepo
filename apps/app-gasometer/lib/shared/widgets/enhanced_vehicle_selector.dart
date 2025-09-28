@@ -9,11 +9,6 @@ import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 
 /// Seletor de veículos aprimorado com dropdown, persistência e melhorias visuais
 class EnhancedVehicleSelector extends StatefulWidget {
-  final String? selectedVehicleId;
-  final void Function(String?) onVehicleChanged;
-  final String? hintText;
-  final bool enabled;
-
   const EnhancedVehicleSelector({
     super.key,
     required this.selectedVehicleId,
@@ -21,6 +16,11 @@ class EnhancedVehicleSelector extends StatefulWidget {
     this.hintText = 'Selecione um veículo',
     this.enabled = true,
   });
+
+  final String? selectedVehicleId;
+  final void Function(String?) onVehicleChanged;
+  final String? hintText;
+  final bool enabled;
 
   @override
   State<EnhancedVehicleSelector> createState() =>

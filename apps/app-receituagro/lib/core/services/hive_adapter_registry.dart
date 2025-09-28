@@ -1,4 +1,5 @@
-import 'package:hive_flutter/hive_flutter.dart';
+
+import 'package:core/core.dart';
 
 import '../models/comentario_hive.dart';
 import '../models/cultura_hive.dart';

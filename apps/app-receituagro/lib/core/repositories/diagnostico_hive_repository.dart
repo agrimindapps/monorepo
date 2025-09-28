@@ -1,71 +1,90 @@
+import 'package:core/core.dart';
 import '../models/diagnostico_hive.dart';
-import 'base_hive_repository.dart';
 
 /// Repositório para DiagnosticoHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
-  DiagnosticoHiveRepository() : super('receituagro_diagnosticos');
-
-  @override
-  DiagnosticoHive createFromJson(Map<String, dynamic> json) {
-    return DiagnosticoHive.fromJson(json);
-  }
-
-  @override
-  String getKeyFromEntity(DiagnosticoHive entity) {
-    return entity.idReg;
-  }
+  DiagnosticoHiveRepository() : super(
+    hiveManager: GetIt.instance<IHiveManager>(),
+    boxName: 'receituagro_diagnosticos',
+  );
 
   /// Busca por objectId (ID do Firebase) se idReg não funcionar
-  @override
-  DiagnosticoHive? getById(String id) {
+  Future<DiagnosticoHive?> getByIdOrObjectId(String id) async {
     try {
       // Primeiro tenta buscar pela chave normal (idReg)
-      final result = super.getById(id);
-      if (result != null) {
-        return result;
+      final result = await getByKey(id);
+      if (result.isSuccess && result.data != null) {
+        return result.data;
       }
       
       // Se não encontrou, tenta buscar por objectId
-      final matches = findBy((item) => item.objectId == id);
-      return matches.isNotEmpty ? matches.first : null;
+      final matches = await findBy((item) => item.objectId == id);
+      if (matches.isSuccess && matches.data!.isNotEmpty) {
+        return matches.data!.first;
+      }
+      return null;
     } catch (e) {
       return null;
     }
   }
 
   /// Busca diagnósticos por defensivo
-  List<DiagnosticoHive> findByDefensivo(String fkIdDefensivo) {
-    return findBy((item) => item.fkIdDefensivo == fkIdDefensivo);
+  Future<List<DiagnosticoHive>> findByDefensivo(String fkIdDefensivo) async {
+    final result = await findBy((item) => item.fkIdDefensivo == fkIdDefensivo);
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Busca diagnósticos por cultura
-  List<DiagnosticoHive> findByCultura(String fkIdCultura) {
-    return findBy((item) => item.fkIdCultura == fkIdCultura);
+  Future<List<DiagnosticoHive>> findByCultura(String fkIdCultura) async {
+    final result = await findBy((item) => item.fkIdCultura == fkIdCultura);
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Busca diagnósticos por praga
-  List<DiagnosticoHive> findByPraga(String fkIdPraga) {
-    return findBy((item) => item.fkIdPraga == fkIdPraga);
+  Future<List<DiagnosticoHive>> findByPraga(String fkIdPraga) async {
+    final result = await findBy((item) => item.fkIdPraga == fkIdPraga);
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Busca diagnósticos por cultura e defensivo
-  List<DiagnosticoHive> findByCulturaAndDefensivo(String fkIdCultura, String fkIdDefensivo) {
-    return findBy((item) => 
+  Future<List<DiagnosticoHive>> findByCulturaAndDefensivo(String fkIdCultura, String fkIdDefensivo) async {
+    final result = await findBy((item) => 
         item.fkIdCultura == fkIdCultura && item.fkIdDefensivo == fkIdDefensivo);
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Busca diagnósticos por múltiplos critérios
-  List<DiagnosticoHive> findByMultipleCriteria({
+  Future<List<DiagnosticoHive>> findByMultipleCriteria({
     String? defensivoId,
     String? culturaId, 
     String? pragaId,
-  }) {
-    return findBy((item) {
+  }) async {
+    final result = await findBy((item) {
       if (defensivoId != null && item.fkIdDefensivo != defensivoId) return false;
       if (culturaId != null && item.fkIdCultura != culturaId) return false;
       if (pragaId != null && item.fkIdPraga != pragaId) return false;
       return true;
     });
+    return result.isSuccess ? result.data! : [];
+  }
+
+  /// Carrega dados do JSON para o repositório
+  Future<Result<void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+    try {
+      final Map<dynamic, DiagnosticoHive> items = {};
+      
+      for (final json in jsonData) {
+        final diagnostico = DiagnosticoHive.fromJson(json);
+        items[diagnostico.idReg] = diagnostico;
+      }
+      
+      return await saveAll(items);
+    } catch (e) {
+      return Result.error(StorageError(
+        message: 'Failed to load from JSON',
+        code: 'LOAD_FROM_JSON_ERROR',
+      ));
+    }
   }
 }

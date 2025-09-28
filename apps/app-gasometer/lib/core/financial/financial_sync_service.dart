@@ -1,25 +1,17 @@
 /// Financial Sync Service for GasOMeter
 /// Provides enhanced sync capabilities with retry mechanism and prioritization for financial data
+library;
 import 'dart:async';
 import 'dart:math';
 
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 
-import '../../features/expenses/data/models/expense_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
 import 'audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_validator.dart';
 
 /// Sync operation result
 class FinancialSyncResult {
-  final bool success;
-  final String? error;
-  final int attemptCount;
-  final Duration totalTime;
-  final bool requiresManualReview;
-  final List<String> warnings;
 
   const FinancialSyncResult({
     required this.success,
@@ -57,6 +49,12 @@ class FinancialSyncResult {
       totalTime: totalTime,
     );
   }
+  final bool success;
+  final String? error;
+  final int attemptCount;
+  final Duration totalTime;
+  final bool requiresManualReview;
+  final List<String> warnings;
 
   @override
   String toString() {
@@ -70,12 +68,6 @@ class FinancialSyncResult {
 
 /// Sync queue item with priority
 class FinancialSyncQueueItem {
-  final BaseSyncEntity entity;
-  final int priority;
-  final DateTime queuedAt;
-  final int retryCount;
-  final DateTime? lastAttempt;
-  final String? lastError;
 
   FinancialSyncQueueItem({
     required this.entity,
@@ -85,6 +77,12 @@ class FinancialSyncQueueItem {
     this.lastAttempt,
     this.lastError,
   });
+  final BaseSyncEntity entity;
+  final int priority;
+  final DateTime queuedAt;
+  final int retryCount;
+  final DateTime? lastAttempt;
+  final String? lastError;
 
   FinancialSyncQueueItem copyWithRetry(String error) {
     return FinancialSyncQueueItem(
@@ -121,6 +119,16 @@ class FinancialSyncQueueItem {
 
 /// Financial Sync Service
 class FinancialSyncService {
+
+  FinancialSyncService({
+    required FinancialValidator validator,
+    required FinancialAuditTrailService auditService,
+    required FinancialConflictResolver conflictResolver,
+    required UnifiedSyncManager coreSync,
+  })  : _validator = validator,
+        _auditService = auditService,
+        _conflictResolver = conflictResolver,
+        _coreSync = coreSync;
   final FinancialValidator _validator;
   final FinancialAuditTrailService _auditService;
   final FinancialConflictResolver _conflictResolver;
@@ -139,16 +147,6 @@ class FinancialSyncService {
   static const Duration _syncInterval = Duration(minutes: 5);
   static const Duration _financialSyncInterval = Duration(minutes: 2); // More frequent for financial data
   static const int _maxConcurrentSyncs = 3;
-
-  FinancialSyncService({
-    required FinancialValidator validator,
-    required FinancialAuditTrailService auditService,
-    required FinancialConflictResolver conflictResolver,
-    required UnifiedSyncManager coreSync,
-  })  : _validator = validator,
-        _auditService = auditService,
-        _conflictResolver = conflictResolver,
-        _coreSync = coreSync;
 
   /// Initialize the financial sync service
   Future<void> initialize() async {

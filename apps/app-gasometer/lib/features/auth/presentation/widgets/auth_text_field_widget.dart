@@ -3,18 +3,6 @@ import 'package:flutter/material.dart';
 /// Widget reutilizável para campos de texto de autenticação
 /// Segue o princípio da Responsabilidade Única e Open/Closed
 class AuthTextFieldWidget extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData prefixIcon;
-  final Widget? suffixIcon;
-  final bool obscureText;
-  final TextInputType keyboardType;
-  final String? Function(String?)? validator;
-  final void Function(String)? onFieldSubmitted;
-  final void Function(String)? onChanged;
-  final FocusNode? focusNode;
-  final bool enabled;
 
   const AuthTextFieldWidget({
     super.key,
@@ -31,6 +19,18 @@ class AuthTextFieldWidget extends StatelessWidget {
     this.focusNode,
     this.enabled = true,
   });
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final IconData prefixIcon;
+  final Widget? suffixIcon;
+  final bool obscureText;
+  final TextInputType keyboardType;
+  final String? Function(String?)? validator;
+  final void Function(String)? onFieldSubmitted;
+  final void Function(String)? onChanged;
+  final FocusNode? focusNode;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,7 @@ class AuthTextFieldWidget extends StatelessWidget {
         ),
         filled: true,
         fillColor: isDark
-            ? Colors.grey[900]!.withOpacity(0.5)
+            ? Colors.grey[900]!.withValues(alpha: 0.5)
             : Colors.grey[50]!,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

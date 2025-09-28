@@ -8,6 +8,14 @@ import '../../domain/extensions/vehicle_device_extension.dart';
 /// Provider otimizado para gerenciamento de dispositivos veiculares
 /// Usa DeviceManagementService do core package com extensões específicas de veículos
 class VehicleDeviceProvider extends ChangeNotifier {
+
+  VehicleDeviceProvider({
+    core.DeviceManagementService? coreDeviceService,
+    required core.ConnectivityService connectivityService,
+  }) : _coreDeviceService = coreDeviceService,
+       _connectivityService = connectivityService {
+    _initializeConnectivity();
+  }
   final core.DeviceManagementService? _coreDeviceService;
   final core.ConnectivityService _connectivityService;
   StreamSubscription<bool>? _connectivitySubscription;
@@ -18,14 +26,6 @@ class VehicleDeviceProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isOnline = true;
-
-  VehicleDeviceProvider({
-    core.DeviceManagementService? coreDeviceService,
-    required core.ConnectivityService connectivityService,
-  }) : _coreDeviceService = coreDeviceService,
-       _connectivityService = connectivityService {
-    _initializeConnectivity();
-  }
 
   // Getters
   List<core.DeviceEntity> get devices => List.unmodifiable(_devices);
@@ -370,11 +370,6 @@ class VehicleDeviceProvider extends ChangeNotifier {
 
 /// Informações sobre limite de dispositivos
 class DeviceLimitInfo {
-  final int currentCount;
-  final int limit;
-  final bool canAddMore;
-  final String planName;
-  final bool requiresUpgrade;
 
   const DeviceLimitInfo({
     required this.currentCount,
@@ -383,6 +378,11 @@ class DeviceLimitInfo {
     required this.planName,
     required this.requiresUpgrade,
   });
+  final int currentCount;
+  final int limit;
+  final bool canAddMore;
+  final String planName;
+  final bool requiresUpgrade;
 
   /// Porcentagem do limite utilizada
   double get usagePercentage => limit > 0 ? (currentCount / limit) : 0.0;

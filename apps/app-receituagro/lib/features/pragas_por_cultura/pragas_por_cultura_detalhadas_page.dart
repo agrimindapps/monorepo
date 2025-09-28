@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/extensions/diagnostico_detalhado_extension.dart';
@@ -50,36 +50,45 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
   void initState() {
     super.initState();
     _culturaIdSelecionada = widget.culturaIdInicial;
-    _carregarCulturas();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _carregarCulturas();
     if (_culturaIdSelecionada != null) {
-      _carregarPragasDaCultura();
+      await _carregarPragasDaCultura();
     }
   }
 
-  void _carregarCulturas() {
+  Future<void> _carregarCulturas() async {
     try {
-      final culturas = _culturaRepo.getAll();
-      _culturas = culturas.map((c) => {
-        'id': c.idReg,
-        'nome': c.cultura,
-      }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-      
-      // Se há cultura selecionada, buscar o nome
-      if (_culturaIdSelecionada != null) {
-        final cultura = _culturas.firstWhere(
-          (c) => c['id'] == _culturaIdSelecionada,
-          orElse: () => {'nome': 'Cultura não encontrada'},
-        );
-        _nomeCulturaSelecionada = cultura['nome'];
+      final result = await _culturaRepo.getAll();
+      if (result.isSuccess) {
+        final culturas = result.data!;
+        _culturas = culturas.map((c) => {
+          'id': c.idReg,
+          'nome': c.cultura,
+        }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+        
+        // Se há cultura selecionada, buscar o nome
+        if (_culturaIdSelecionada != null) {
+          final cultura = _culturas.firstWhere(
+            (c) => c['id'] == _culturaIdSelecionada,
+            orElse: () => {'nome': 'Cultura não encontrada'},
+          );
+          _nomeCulturaSelecionada = cultura['nome'];
+        }
+        
+        if (mounted) setState(() {});
+      } else {
+        debugPrint('Erro ao carregar culturas: ${result.error}');
       }
-      
-      if (mounted) setState(() {});
     } catch (e) {
-      print('Erro ao carregar culturas: $e');
+      debugPrint('Erro ao carregar culturas: $e');
     }
   }
 
-  void _carregarPragasDaCultura() async {
+  Future<void> _carregarPragasDaCultura() async {
     if (_culturaIdSelecionada == null) return;
 
     setState(() {
@@ -125,8 +134,9 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
     filtradas.sort((a, b) {
       switch (_ordenacao) {
         case 'nome':
-          return (a.praga.nomeComum ?? a.praga.nomeCientifico)
-              .compareTo(b.praga.nomeComum ?? b.praga.nomeCientifico);
+          final aNome = a.praga.nomeComum ?? a.praga.nomeCientifico;
+          final bNome = b.praga.nomeComum ?? b.praga.nomeCientifico;
+          return aNome.compareTo(bNome);
         case 'diagnosticos':
           return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
         case 'ameaca':
@@ -151,7 +161,7 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
       _nomeCulturaSelecionada = cultura['nome'];
       _pragasPorCultura.clear();
     });
-    _carregarPragasDaCultura();
+    _carregarPragasDaCultura(); // Fire and forget - will handle errors internally
   }
 
   @override

@@ -1,6 +1,6 @@
 import '../architecture/i_field_factory.dart';
-import '../architecture/i_form_validator.dart';
 import '../architecture/i_form_builder.dart' show FormValidationMode;
+import '../architecture/i_form_validator.dart';
 
 /// Abstract base class for form configurations following Template Method pattern
 /// 
@@ -174,10 +174,6 @@ abstract class FormCrossValidator<T> {
 
 /// Result of form submission
 class FormSubmissionResult<T> {
-  final bool isSuccess;
-  final T? data;
-  final String? errorMessage;
-  final Map<String, dynamic> metadata;
   
   const FormSubmissionResult({
     required this.isSuccess,
@@ -203,6 +199,10 @@ class FormSubmissionResult<T> {
       metadata: metadata ?? {},
     );
   }
+  final bool isSuccess;
+  final T? data;
+  final String? errorMessage;
+  final Map<String, dynamic> metadata;
   
   @override
   String toString() {

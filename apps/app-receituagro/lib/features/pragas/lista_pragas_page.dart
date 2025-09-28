@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../../core/design/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';

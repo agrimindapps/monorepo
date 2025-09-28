@@ -364,7 +364,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
     final theme = Theme.of(context);
     
     if (!widget.enabled) {
-      return theme.colorScheme.outline.withOpacity(0.5);
+      return theme.colorScheme.outline.withValues(alpha: 0.5);
     }
     
     switch (_validationResult.status) {

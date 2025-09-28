@@ -10,9 +10,9 @@ import '../interfaces/validation_result.dart';
 /// - Padronização de mensagens de erro
 /// - Validações de segurança (XSS, injection)
 class ValidationService {
-  static final ValidationService _instance = ValidationService._internal();
   factory ValidationService() => _instance;
   ValidationService._internal();
+  static final ValidationService _instance = ValidationService._internal();
 
   // Cache para validações complexas
   final Map<String, Timer> _debounceTimers = {};
@@ -20,7 +20,7 @@ class ValidationService {
 
   /// Limpa todos os timers de debounce
   void dispose() {
-    for (var timer in _debounceTimers.values) {
+    for (final timer in _debounceTimers.values) {
       timer.cancel();
     }
     _debounceTimers.clear();
@@ -270,7 +270,7 @@ class ValidationService {
 
   /// Combina múltiplas validações
   ValidationResult combineValidations(List<ValidationResult> results) {
-    for (var result in results) {
+    for (final result in results) {
       if (!result.isValid) {
         return result;
       }
@@ -456,7 +456,7 @@ class ValidationService {
   Map<String, ValidationResult> validateForm(Map<String, dynamic> formData) {
     final results = <String, ValidationResult>{};
     
-    for (var entry in formData.entries) {
+    for (final entry in formData.entries) {
       final key = entry.key;
       final value = entry.value;
       

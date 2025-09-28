@@ -16,35 +16,6 @@ enum InfoItemLayout {
 /// Usado para mostrar dados como "Combustível: Gasolina", "Valor: R$ 45,80"
 /// de forma consistente em todos os list items.
 class InfoItemWidget extends StatelessWidget {
-  /// Texto do rótulo/label
-  final String label;
-  
-  /// Valor a ser exibido
-  final String value;
-  
-  /// Ícone opcional
-  final IconData? icon;
-  
-  /// Cor customizada para o valor
-  final Color? valueColor;
-  
-  /// Cor customizada para o ícone
-  final Color? iconColor;
-  
-  /// Estilo customizado para o valor
-  final TextStyle? customValueStyle;
-  
-  /// Estilo customizado para o label
-  final TextStyle? customLabelStyle;
-  
-  /// Layout do componente
-  final InfoItemLayout layout;
-  
-  /// Se deve truncar texto longo
-  final bool truncateText;
-  
-  /// Máximo de linhas para o valor
-  final int? maxLines;
 
   const InfoItemWidget({
     super.key,
@@ -59,99 +30,6 @@ class InfoItemWidget extends StatelessWidget {
     this.truncateText = true,
     this.maxLines,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (layout) {
-      case InfoItemLayout.vertical:
-        return _buildVerticalLayout(context);
-      case InfoItemLayout.horizontal:
-        return _buildHorizontalLayout(context);
-      case InfoItemLayout.inline:
-        return _buildInlineLayout(context);
-    }
-  }
-
-  Widget _buildVerticalLayout(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildLabel(context),
-        const SizedBox(height: 2),
-        Row(
-          children: [
-            if (icon != null) ...[
-              _buildIcon(),
-              const SizedBox(width: 4),
-            ],
-            Expanded(child: _buildValue(context)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHorizontalLayout(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (icon != null) ...[
-          _buildIcon(),
-          const SizedBox(width: 4),
-        ],
-        _buildLabel(context),
-        const SizedBox(width: 8),
-        Expanded(child: _buildValue(context)),
-      ],
-    );
-  }
-
-  Widget _buildInlineLayout(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon != null) ...[
-          _buildIcon(),
-          const SizedBox(width: 4),
-        ],
-        _buildValue(context),
-      ],
-    );
-  }
-
-  Widget _buildIcon() {
-    return Icon(
-      icon,
-      size: 14,
-      color: iconColor ?? ListItemDesignTokens.infoLabelStyle.color,
-    );
-  }
-
-  Widget _buildLabel(BuildContext context) {
-    return Text(
-      label,
-      style: customLabelStyle ?? ListItemDesignTokens.infoLabelStyle,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildValue(BuildContext context) {
-    final effectiveStyle = customValueStyle ?? 
-        ListItemDesignTokens.infoValueStyle.copyWith(
-          color: valueColor ?? ListItemDesignTokens.infoValueStyle.color,
-        );
-
-    return Text(
-      value,
-      style: effectiveStyle,
-      maxLines: maxLines ?? (truncateText ? 1 : null),
-      overflow: truncateText ? TextOverflow.ellipsis : null,
-      textAlign: layout == InfoItemLayout.horizontal ? TextAlign.end : TextAlign.start,
-    );
-  }
   
   /// Factory para criar item de combustível
   factory InfoItemWidget.fuel({
@@ -266,6 +144,128 @@ class InfoItemWidget extends StatelessWidget {
       icon: icon,
       valueColor: color,
       layout: InfoItemLayout.inline,
+    );
+  }
+  /// Texto do rótulo/label
+  final String label;
+  
+  /// Valor a ser exibido
+  final String value;
+  
+  /// Ícone opcional
+  final IconData? icon;
+  
+  /// Cor customizada para o valor
+  final Color? valueColor;
+  
+  /// Cor customizada para o ícone
+  final Color? iconColor;
+  
+  /// Estilo customizado para o valor
+  final TextStyle? customValueStyle;
+  
+  /// Estilo customizado para o label
+  final TextStyle? customLabelStyle;
+  
+  /// Layout do componente
+  final InfoItemLayout layout;
+  
+  /// Se deve truncar texto longo
+  final bool truncateText;
+  
+  /// Máximo de linhas para o valor
+  final int? maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (layout) {
+      case InfoItemLayout.vertical:
+        return _buildVerticalLayout(context);
+      case InfoItemLayout.horizontal:
+        return _buildHorizontalLayout(context);
+      case InfoItemLayout.inline:
+        return _buildInlineLayout(context);
+    }
+  }
+
+  Widget _buildVerticalLayout(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildLabel(context),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            if (icon != null) ...[
+              _buildIcon(),
+              const SizedBox(width: 4),
+            ],
+            Expanded(child: _buildValue(context)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHorizontalLayout(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          _buildIcon(),
+          const SizedBox(width: 4),
+        ],
+        _buildLabel(context),
+        const SizedBox(width: 8),
+        Expanded(child: _buildValue(context)),
+      ],
+    );
+  }
+
+  Widget _buildInlineLayout(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) ...[
+          _buildIcon(),
+          const SizedBox(width: 4),
+        ],
+        _buildValue(context),
+      ],
+    );
+  }
+
+  Widget _buildIcon() {
+    return Icon(
+      icon,
+      size: 14,
+      color: iconColor ?? ListItemDesignTokens.infoLabelStyle.color,
+    );
+  }
+
+  Widget _buildLabel(BuildContext context) {
+    return Text(
+      label,
+      style: customLabelStyle ?? ListItemDesignTokens.infoLabelStyle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildValue(BuildContext context) {
+    final effectiveStyle = customValueStyle ?? 
+        ListItemDesignTokens.infoValueStyle.copyWith(
+          color: valueColor ?? ListItemDesignTokens.infoValueStyle.color,
+        );
+
+    return Text(
+      value,
+      style: effectiveStyle,
+      maxLines: maxLines ?? (truncateText ? 1 : null),
+      overflow: truncateText ? TextOverflow.ellipsis : null,
+      textAlign: layout == InfoItemLayout.horizontal ? TextAlign.end : TextAlign.start,
     );
   }
 }

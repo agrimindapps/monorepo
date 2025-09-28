@@ -1,13 +1,12 @@
 import 'package:core/core.dart';
-import 'package:get_it/get_it.dart';
 import '../constants/gasometer_environment_config.dart';
 
 /// Gasometer-specific storage service that manages app-specific boxes
 /// This prevents contamination with other apps while using the core infrastructure
 class GasometerStorageService {
-  static final GasometerStorageService _instance = GasometerStorageService._internal();
   factory GasometerStorageService() => _instance;
   GasometerStorageService._internal();
+  static final GasometerStorageService _instance = GasometerStorageService._internal();
 
   late final IBoxRegistryService _boxRegistry;
   late final ILocalStorageRepository _storage;

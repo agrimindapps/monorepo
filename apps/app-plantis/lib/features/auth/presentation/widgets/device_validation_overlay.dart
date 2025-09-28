@@ -1,20 +1,22 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/auth_provider.dart';
+import '../../../../core/riverpod_providers/auth_providers.dart';
 
 /// Overlay que mostra o status da validação de dispositivo durante o login
-class DeviceValidationOverlay extends StatelessWidget {
+class DeviceValidationOverlay extends ConsumerWidget {
   const DeviceValidationOverlay({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+    
+    return authState.when(
+      data: (state) {
         // Só mostra se está validando dispositivo ou houve erro
-        if (!authProvider.isValidatingDevice &&
-            authProvider.deviceValidationError == null &&
-            !authProvider.deviceLimitExceeded) {
+        if (!state.isValidatingDevice &&
+            state.deviceValidationError == null &&
+            !state.deviceLimitExceeded) {
           return const SizedBox.shrink();
         }
 
@@ -31,29 +33,31 @@ class DeviceValidationOverlay extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildContent(context, authProvider),
+                  _buildContent(context, state, ref),
                   const SizedBox(height: 16),
-                  _buildActions(context, authProvider),
+                  _buildActions(context, state, ref),
                 ],
               ),
             ),
           ),
         );
       },
+      loading: () => const SizedBox.shrink(),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 
-  Widget _buildContent(BuildContext context, AuthProvider authProvider) {
-    if (authProvider.isValidatingDevice) {
+  Widget _buildContent(BuildContext context, AuthState state, WidgetRef ref) {
+    if (state.isValidatingDevice) {
       return _buildValidatingContent(context);
     }
 
-    if (authProvider.deviceLimitExceeded) {
+    if (state.deviceLimitExceeded) {
       return _buildLimitExceededContent(context);
     }
 
-    if (authProvider.deviceValidationError != null) {
-      return _buildErrorContent(context, authProvider.deviceValidationError!);
+    if (state.deviceValidationError != null) {
+      return _buildErrorContent(context, state.deviceValidationError!);
     }
 
     return const SizedBox.shrink();
@@ -167,17 +171,17 @@ class DeviceValidationOverlay extends StatelessWidget {
     );
   }
 
-  Widget _buildActions(BuildContext context, AuthProvider authProvider) {
-    if (authProvider.isValidatingDevice) {
+  Widget _buildActions(BuildContext context, AuthState state, WidgetRef ref) {
+    if (state.isValidatingDevice) {
       return const SizedBox.shrink(); // Sem ações durante validação
     }
 
-    if (authProvider.deviceLimitExceeded) {
+    if (state.deviceLimitExceeded) {
       return Row(
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => authProvider.logout(),
+              onPressed: () => ref.read(authProvider.notifier).logout(),
               child: const Text('Fazer logout agora'),
             ),
           ),
@@ -197,12 +201,12 @@ class DeviceValidationOverlay extends StatelessWidget {
       );
     }
 
-    if (authProvider.deviceValidationError != null) {
+    if (state.deviceValidationError != null) {
       return Row(
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => authProvider.clearDeviceValidationError(),
+              onPressed: () => ref.read(authProvider.notifier).clearDeviceValidationError(),
               child: const Text('Continuar'),
             ),
           ),

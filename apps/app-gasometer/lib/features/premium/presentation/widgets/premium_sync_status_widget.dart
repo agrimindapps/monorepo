@@ -10,14 +10,14 @@ import '../providers/premium_provider.dart';
 /// - Botão para força sincronização
 /// - Indicadores de erro/sucesso
 class PremiumSyncStatusWidget extends StatelessWidget {
-  final bool showSyncButton;
-  final bool compact;
 
   const PremiumSyncStatusWidget({
     super.key,
     this.showSyncButton = true,
     this.compact = false,
   });
+  final bool showSyncButton;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {

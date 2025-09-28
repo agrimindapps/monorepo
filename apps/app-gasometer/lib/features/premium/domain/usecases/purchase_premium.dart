@@ -9,9 +9,9 @@ import '../repositories/premium_repository.dart';
 /// Use case para comprar premium
 @injectable
 class PurchasePremium implements UseCase<core.SubscriptionEntity, PurchasePremiumParams> {
-  final PremiumRepository repository;
 
   PurchasePremium(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, core.SubscriptionEntity>> call(PurchasePremiumParams params) async {
@@ -22,9 +22,9 @@ class PurchasePremium implements UseCase<core.SubscriptionEntity, PurchasePremiu
 /// Use case para iniciar trial gratuito
 @injectable
 class StartFreeTrial implements UseCase<bool, NoParams> {
-  final PremiumRepository repository;
 
   StartFreeTrial(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, bool>> call(NoParams params) async {
@@ -35,9 +35,9 @@ class StartFreeTrial implements UseCase<bool, NoParams> {
 /// Use case para verificar elegibilidade para trial
 @injectable
 class IsEligibleForTrial implements UseCase<bool, NoParams> {
-  final PremiumRepository repository;
 
   IsEligibleForTrial(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, bool>> call(NoParams params) async {
@@ -48,9 +48,9 @@ class IsEligibleForTrial implements UseCase<bool, NoParams> {
 /// Use case para obter URL de gerenciamento
 @injectable
 class GetManagementUrl implements UseCase<String?, NoParams> {
-  final PremiumRepository repository;
 
   GetManagementUrl(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, String?>> call(NoParams params) async {

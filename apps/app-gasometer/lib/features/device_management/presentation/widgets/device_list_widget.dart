@@ -1,13 +1,10 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import 'package:core/core.dart';
 import 'device_card_widget.dart';
 
 /// Widget que exibe lista de dispositivos
 class DeviceListWidget extends StatelessWidget {
-  final List<DeviceEntity> devices;
-  final String? currentDeviceUuid;
-  final Function(String deviceUuid, String action) onDeviceAction;
 
   const DeviceListWidget({
     super.key,
@@ -15,6 +12,9 @@ class DeviceListWidget extends StatelessWidget {
     required this.onDeviceAction,
     this.currentDeviceUuid,
   });
+  final List<DeviceEntity> devices;
+  final String? currentDeviceUuid;
+  final Function(String deviceUuid, String action) onDeviceAction;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +128,7 @@ class DeviceListWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

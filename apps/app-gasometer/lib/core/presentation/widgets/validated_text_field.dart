@@ -1,7 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../theme/app_theme.dart';
+
 import '../../theme/design_tokens.dart';
 
 /// Estados de validação para feedback visual
@@ -23,6 +24,34 @@ typedef AsyncValidator = Future<String?> Function(String value);
 
 /// Campo de texto com validação em tempo real e feedback visual melhorado
 class ValidatedTextField extends StatefulWidget {
+
+  const ValidatedTextField({
+    super.key,
+    this.controller,
+    this.label,
+    this.hint,
+    this.helperText,
+    this.prefixIcon,
+    this.suffix,
+    this.keyboardType = TextInputType.text,
+    this.inputFormatters,
+    this.enabled = true,
+    this.required = false,
+    this.maxLines = 1,
+    this.maxLength,
+    this.obscureText = false,
+    this.validator,
+    this.asyncValidator,
+    this.debounceDuration = const Duration(milliseconds: 500),
+    this.validateOnChange = true,
+    this.showValidationIcon = true,
+    this.showCharacterCount = false,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onSubmitted,
+    this.decoration,
+    this.textStyle,
+  });
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -53,34 +82,6 @@ class ValidatedTextField extends StatefulWidget {
   // Estilo customizado
   final InputDecoration? decoration;
   final TextStyle? textStyle;
-
-  const ValidatedTextField({
-    super.key,
-    this.controller,
-    this.label,
-    this.hint,
-    this.helperText,
-    this.prefixIcon,
-    this.suffix,
-    this.keyboardType = TextInputType.text,
-    this.inputFormatters,
-    this.enabled = true,
-    this.required = false,
-    this.maxLines = 1,
-    this.maxLength,
-    this.obscureText = false,
-    this.validator,
-    this.asyncValidator,
-    this.debounceDuration = const Duration(milliseconds: 500),
-    this.validateOnChange = true,
-    this.showValidationIcon = true,
-    this.showCharacterCount = false,
-    this.onChanged,
-    this.onEditingComplete,
-    this.onSubmitted,
-    this.decoration,
-    this.textStyle,
-  });
 
   @override
   State<ValidatedTextField> createState() => _ValidatedTextFieldState();
@@ -228,7 +229,7 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
 
     switch (_validationState) {
       case ValidationState.validating:
-        return SizedBox(
+        return const SizedBox(
           width: 16,
           height: 16,
           child: CircularProgressIndicator(

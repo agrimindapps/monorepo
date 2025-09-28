@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../theme/design_tokens.dart';
 import 'validated_form_field.dart';
 
 /// Tipos de campo monetário pré-configurados
@@ -37,6 +36,22 @@ enum MoneyFieldType {
 /// )
 /// ```
 class MoneyFormField extends StatelessWidget {
+
+  const MoneyFormField({
+    super.key,
+    required this.controller,
+    required this.type,
+    this.customLabel,
+    this.customHint,
+    this.required = true,
+    this.onChanged,
+    this.additionalValidator,
+    this.minValue = 0.01,
+    this.maxValue = 999999.99,
+    this.showHelperText = false,
+    this.customHelperText,
+    this.enableRealTimeFormatting = true,
+  });
   /// Controller do campo de texto
   final TextEditingController controller;
 
@@ -72,22 +87,6 @@ class MoneyFormField extends StatelessWidget {
 
   /// Se deve aplicar formatação em tempo real
   final bool enableRealTimeFormatting;
-
-  const MoneyFormField({
-    super.key,
-    required this.controller,
-    required this.type,
-    this.customLabel,
-    this.customHint,
-    this.required = true,
-    this.onChanged,
-    this.additionalValidator,
-    this.minValue = 0.01,
-    this.maxValue = 999999.99,
-    this.showHelperText = false,
-    this.customHelperText,
-    this.enableRealTimeFormatting = true,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -236,22 +235,22 @@ class MoneyFormField extends StatelessWidget {
 
 /// Configuração interna para tipos de campo
 class _MoneyFieldConfig {
-  final String label;
-  final String hint;
-  final IconData icon;
 
   const _MoneyFieldConfig({
     required this.label,
     required this.hint,
     required this.icon,
   });
+  final String label;
+  final String hint;
+  final IconData icon;
 }
 
 /// Formatador customizado para entrada de dinheiro
 class _MoneyInputFormatter extends TextInputFormatter {
-  final int decimalPlaces;
 
   _MoneyInputFormatter({this.decimalPlaces = 2});
+  final int decimalPlaces;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -265,7 +264,7 @@ class _MoneyInputFormatter extends TextInputFormatter {
     if (newText.contains(',')) {
       final parts = newText.split(',');
       if (parts.length == 2 && parts[1].length > decimalPlaces) {
-        final truncated = parts[0] + ',' + parts[1].substring(0, decimalPlaces);
+        final truncated = '${parts[0]},${parts[1].substring(0, decimalPlaces)}';
         return TextEditingValue(
           text: truncated,
           selection: TextSelection.collapsed(offset: truncated.length),
@@ -279,10 +278,6 @@ class _MoneyInputFormatter extends TextInputFormatter {
 
 /// Variações pré-configuradas para casos específicos
 class AmountFormField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const AmountFormField({
     super.key,
@@ -291,6 +286,10 @@ class AmountFormField extends StatelessWidget {
     this.required = true,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -305,10 +304,6 @@ class AmountFormField extends StatelessWidget {
 }
 
 class PriceFormField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const PriceFormField({
     super.key,
@@ -317,6 +312,10 @@ class PriceFormField extends StatelessWidget {
     this.required = true,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -332,10 +331,6 @@ class PriceFormField extends StatelessWidget {
 }
 
 class CostFormField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const CostFormField({
     super.key,
@@ -344,6 +339,10 @@ class CostFormField extends StatelessWidget {
     this.required = true,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {

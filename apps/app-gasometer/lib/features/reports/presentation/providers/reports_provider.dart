@@ -13,6 +13,26 @@ import '../../domain/usecases/get_reports_analytics.dart';
 
 @injectable
 class ReportsProvider extends ChangeNotifier {
+
+  ReportsProvider({
+    required GenerateMonthlyReport generateMonthlyReport,
+    required GenerateYearlyReport generateYearlyReport,
+    required GenerateCustomReport generateCustomReport,
+    required CompareMonthlyReports compareMonthlyReports,
+    required CompareYearlyReports compareYearlyReports,
+    required GetFuelEfficiencyTrends getFuelEfficiencyTrends,
+    required GetCostAnalysis getCostAnalysis,
+    required GetUsagePatterns getUsagePatterns,
+    required ExportReportToCSV exportReportToCSV,
+  })  : _generateMonthlyReport = generateMonthlyReport,
+        _generateYearlyReport = generateYearlyReport,
+        _generateCustomReport = generateCustomReport,
+        _compareMonthlyReports = compareMonthlyReports,
+        _compareYearlyReports = compareYearlyReports,
+        _getFuelEfficiencyTrends = getFuelEfficiencyTrends,
+        _getCostAnalysis = getCostAnalysis,
+        _getUsagePatterns = getUsagePatterns,
+        _exportReportToCSV = exportReportToCSV;
   final GenerateMonthlyReport _generateMonthlyReport;
   final GenerateYearlyReport _generateYearlyReport;
   final GenerateCustomReport _generateCustomReport;
@@ -39,26 +59,6 @@ class ReportsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String _selectedVehicleId = '';
-
-  ReportsProvider({
-    required GenerateMonthlyReport generateMonthlyReport,
-    required GenerateYearlyReport generateYearlyReport,
-    required GenerateCustomReport generateCustomReport,
-    required CompareMonthlyReports compareMonthlyReports,
-    required CompareYearlyReports compareYearlyReports,
-    required GetFuelEfficiencyTrends getFuelEfficiencyTrends,
-    required GetCostAnalysis getCostAnalysis,
-    required GetUsagePatterns getUsagePatterns,
-    required ExportReportToCSV exportReportToCSV,
-  })  : _generateMonthlyReport = generateMonthlyReport,
-        _generateYearlyReport = generateYearlyReport,
-        _generateCustomReport = generateCustomReport,
-        _compareMonthlyReports = compareMonthlyReports,
-        _compareYearlyReports = compareYearlyReports,
-        _getFuelEfficiencyTrends = getFuelEfficiencyTrends,
-        _getCostAnalysis = getCostAnalysis,
-        _getUsagePatterns = getUsagePatterns,
-        _exportReportToCSV = exportReportToCSV;
 
   // Getters
   ReportSummaryEntity? get currentMonthReport => _currentMonthReport;

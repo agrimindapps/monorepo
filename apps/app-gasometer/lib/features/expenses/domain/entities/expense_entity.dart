@@ -3,19 +3,9 @@ import 'package:flutter/material.dart';
 
 /// Entidade de despesa do veículo
 class ExpenseEntity extends BaseSyncEntity {
-  final String vehicleId;
-  final ExpenseType type;
-  final String description;
-  final double amount;
-  final DateTime date;
-  final double odometer;
-  final String? receiptImagePath;
-  final String? location;
-  final String? notes;
-  final Map<String, dynamic> metadata;
 
   const ExpenseEntity({
-    required String id,
+    required super.id,
     required this.vehicleId,
     required this.type,
     required this.description,
@@ -26,25 +16,25 @@ class ExpenseEntity extends BaseSyncEntity {
     this.location,
     this.notes,
     this.metadata = const {},
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-  }) : super(
-    id: id,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-    lastSyncAt: lastSyncAt,
-    isDirty: isDirty,
-    isDeleted: isDeleted,
-    version: version,
-    userId: userId,
-    moduleName: moduleName,
-  );
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+  });
+  final String vehicleId;
+  final ExpenseType type;
+  final String description;
+  final double amount;
+  final DateTime date;
+  final double odometer;
+  final String? receiptImagePath;
+  final String? location;
+  final String? notes;
+  final Map<String, dynamic> metadata;
 
   @override
   List<Object?> get props => [

@@ -34,7 +34,7 @@ class PremiumBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(dimensions.borderRadius),
         boxShadow: [
           BoxShadow(
-            color: PlantisColors.sun.withOpacity(0.3),
+            color: PlantisColors.sun.withValues(alpha: 0.3),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -313,7 +313,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: PlantisColors.primary.withOpacity(0.3),
+                    color: PlantisColors.primary.withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -328,7 +328,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -354,7 +354,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -373,7 +373,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
                   Text(
                     widget.description,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                       height: 1.4,
                     ),
@@ -396,7 +396,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
                             child: Text(
                               feature,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 14,
                               ),
                             ),
@@ -558,19 +558,19 @@ class _PlantThemedPremiumIndicatorState extends State<PlantThemedPremiumIndicato
                   child: AnimatedBuilder(
                     animation: widget.isActive ? _glowAnimation : const AlwaysStoppedAnimation(1),
                     builder: (context, child) {
-                      return Container(
+                      return DecoratedBox(
                         decoration: widget.isActive
                             ? BoxDecoration(
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.white.withOpacity(_glowAnimation.value * 0.8),
+                                    color: Colors.white.withValues(alpha: _glowAnimation.value * 0.8),
                                     blurRadius: 8,
                                     spreadRadius: 2,
                                   ),
                                 ],
                               )
-                            : null,
+                            : const BoxDecoration(),
                         child: Icon(
                           Icons.eco,
                           size: 16,

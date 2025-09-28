@@ -2,9 +2,9 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
 /// Serviço especializado para validação contextual de campos de combustível
 class FuelValidatorService {
-  static final FuelValidatorService _instance = FuelValidatorService._internal();
   factory FuelValidatorService() => _instance;
   FuelValidatorService._internal();
+  static final FuelValidatorService _instance = FuelValidatorService._internal();
 
   /// Valida quantidade de litros
   String? validateLiters(String? value, {double? tankCapacity}) {

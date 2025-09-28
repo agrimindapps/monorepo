@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../core/services/backup_service.dart';
 import '../../core/services/plantis_notification_service.dart';
@@ -423,14 +424,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
 /// Provider do repositório de configurações (obtido via DI)
 final settingsRepositoryProvider = Provider<ISettingsRepository>((ref) {
-  // TODO: Integrar com GetIt ou criar factory
-  throw UnimplementedError('SettingsRepository deve ser fornecido via DI');
+  return GetIt.instance<ISettingsRepository>();
 });
 
 /// Provider do serviço de notificações (obtido via DI)
 final plantisNotificationServiceProvider = Provider<PlantisNotificationService>((ref) {
-  // TODO: Integrar com GetIt ou criar factory
-  throw UnimplementedError('PlantisNotificationService deve ser fornecido via DI');
+  return PlantisNotificationService();
 });
 
 /// Provider do serviço de backup (obtido via DI, opcional)

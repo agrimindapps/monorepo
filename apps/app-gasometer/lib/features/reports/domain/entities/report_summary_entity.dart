@@ -1,6 +1,28 @@
 import 'package:equatable/equatable.dart';
 
 class ReportSummaryEntity extends Equatable {
+  
+  const ReportSummaryEntity({
+    required this.vehicleId,
+    required this.startDate,
+    required this.endDate,
+    required this.period,
+    required this.totalFuelSpent,
+    required this.totalFuelLiters,
+    required this.averageFuelPrice,
+    required this.fuelRecordsCount,
+    required this.totalDistanceTraveled,
+    required this.averageConsumption,
+    required this.lastOdometerReading,
+    required this.firstOdometerReading,
+    this.totalMaintenanceSpent = 0.0,
+    this.maintenanceRecordsCount = 0,
+    this.totalExpensesSpent = 0.0,
+    this.expenseRecordsCount = 0,
+    required this.costPerKm,
+    this.trends = const {},
+    this.metadata = const {},
+  });
   final String vehicleId;
   final DateTime startDate;
   final DateTime endDate;
@@ -30,28 +52,6 @@ class ReportSummaryEntity extends Equatable {
   final double costPerKm;
   final Map<String, dynamic> trends; // Growth rates, comparisons, etc.
   final Map<String, dynamic> metadata;
-  
-  const ReportSummaryEntity({
-    required this.vehicleId,
-    required this.startDate,
-    required this.endDate,
-    required this.period,
-    required this.totalFuelSpent,
-    required this.totalFuelLiters,
-    required this.averageFuelPrice,
-    required this.fuelRecordsCount,
-    required this.totalDistanceTraveled,
-    required this.averageConsumption,
-    required this.lastOdometerReading,
-    required this.firstOdometerReading,
-    this.totalMaintenanceSpent = 0.0,
-    this.maintenanceRecordsCount = 0,
-    this.totalExpensesSpent = 0.0,
-    this.expenseRecordsCount = 0,
-    required this.costPerKm,
-    this.trends = const {},
-    this.metadata = const {},
-  });
   
   @override
   List<Object?> get props => [

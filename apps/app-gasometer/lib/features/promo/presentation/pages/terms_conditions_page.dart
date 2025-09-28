@@ -132,14 +132,14 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   ),
                 ),
                 const SizedBox(width: 13),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'Termos e Condições',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
@@ -148,10 +148,10 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 3),
+                      SizedBox(height: 3),
                       Text(
                         'GasOMeter - Última atualização: 01/01/2025',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white70,
                           fontSize: 13,
                           height: 1.3,
@@ -178,7 +178,7 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

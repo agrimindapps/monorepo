@@ -20,10 +20,10 @@ abstract class FuelRemoteDataSource {
 
 @LazySingleton(as: FuelRemoteDataSource)
 class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
-  final FirebaseFirestore _firestore;
-  static const String _collection = 'fuel_records';
 
   FuelRemoteDataSourceImpl(this._firestore);
+  final FirebaseFirestore _firestore;
+  static const String _collection = 'fuel_records';
 
   CollectionReference _getUserFuelCollection(String userId) {
     return _firestore.collection('users').doc(userId).collection(_collection);

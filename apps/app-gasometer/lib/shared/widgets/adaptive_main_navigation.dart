@@ -3,21 +3,20 @@
 /// - Mobile: Bottom navigation bar
 /// - Tablet: Navigation rail
 /// - Desktop: Collapsible sidebar
-library adaptive_main_navigation;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/presentation/widgets/responsive_content_area.dart';
-import '../../core/theme/gasometer_colors.dart';
 import 'responsive_sidebar.dart';
 
 /// Main adaptive navigation shell that changes layout based on screen size
 class AdaptiveMainNavigation extends StatefulWidget {
-  final Widget child;
   
   const AdaptiveMainNavigation({super.key, required this.child});
+  final Widget child;
 
   @override
   State<AdaptiveMainNavigation> createState() => _AdaptiveMainNavigationState();
@@ -54,7 +53,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
             onToggle: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
           ),
           Expanded(
-            child: Container(
+            child: DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -104,7 +103,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: Container(
+            child: DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -270,9 +269,6 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
 
 /// Responsive floating action button that adapts to layout
 class AdaptiveFloatingActionButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final Widget child;
-  final String? tooltip;
   
   const AdaptiveFloatingActionButton({
     super.key,
@@ -280,6 +276,9 @@ class AdaptiveFloatingActionButton extends StatelessWidget {
     required this.child,
     this.tooltip,
   });
+  final VoidCallback onPressed;
+  final Widget child;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,8 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart' as core;
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
-import 'package:core/core.dart' as core;
 
 import '../di_module.dart';
 
@@ -57,8 +56,8 @@ class CoreModule implements DIModule {
       debugPrint('⚠️ Warning: Could not register core repositories: $e');
     }
 
-    // Connectivity (always available)
-    getIt.registerLazySingleton<Connectivity>(() => Connectivity());
+    // NOTE: Connectivity is now registered by injectable
+    // via dependency injection to avoid duplicate registration errors
 
     // NOTE: SharedPreferences is now registered by injectable via RegisterModule
     // with @preResolve to ensure it's available during DI initialization

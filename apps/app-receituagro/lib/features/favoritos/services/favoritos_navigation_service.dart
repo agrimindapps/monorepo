@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
@@ -33,14 +33,15 @@ class FavoritosNavigationService {
   ) async {
     try {
       // Busca dados atualizados do defensivo
-      final defensivoReal = _fitossanitarioRepository.getById(defensivo.idReg);
+      final result = await _fitossanitarioRepository.getByKey(defensivo.idReg);
+      final defensivoReal = result.isSuccess ? result.data : null;
       
       if (defensivoReal != null) {
         final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalheDefensivo(
-          defensivoName: defensivoReal.nomeComum.isNotEmpty
-              ? defensivoReal.nomeComum
-              : defensivoReal.nomeTecnico,
+          defensivoName: defensivoReal.nomeComum?.isNotEmpty == true
+              ? defensivoReal.nomeComum!
+              : defensivoReal.nomeTecnico ?? 'Nome não disponível',
           extraData: {'fabricante': defensivoReal.fabricante ?? 'Fabricante não informado'},
         );
       } else {
@@ -58,15 +59,16 @@ class FavoritosNavigationService {
   ) async {
     try {
       // Busca dados atualizados da praga
-      final pragaReal = _pragasRepository.getById(praga.idReg);
+      final result = await _pragasRepository.getByKey(praga.idReg);
+      final pragaReal = result.isSuccess ? result.data : null;
       
       if (pragaReal != null) {
         final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalhePraga(
-          pragaName: pragaReal.nomeComum,
-          pragaId: pragaReal.idReg, // Use ID for better precision
-          pragaScientificName: pragaReal.nomeCientifico.isNotEmpty
-              ? pragaReal.nomeCientifico
+          pragaName: pragaReal.nomeComum ?? 'Nome não disponível',
+          pragaId: pragaReal.objectId ?? praga.idReg, // Use objectId for better precision
+          pragaScientificName: pragaReal.nomeCientifico?.isNotEmpty == true
+              ? pragaReal.nomeCientifico!
               : 'Nome científico não disponível',
         );
       } else {
@@ -179,9 +181,11 @@ class FavoritosNavigationService {
     try {
       switch (tipo) {
         case 'defensivos':
-          return _fitossanitarioRepository.getById(itemId) != null;
+          final result = await _fitossanitarioRepository.getByKey(itemId);
+          return result.isSuccess && result.data != null;
         case 'pragas':
-          return _pragasRepository.getById(itemId) != null;
+          final result = await _pragasRepository.getByKey(itemId);
+          return result.isSuccess && result.data != null;
         case 'diagnosticos':
           final diagnostico = await _integrationService.getDiagnosticoCompleto(itemId);
           return diagnostico != null;
@@ -198,22 +202,24 @@ class FavoritosNavigationService {
     try {
       switch (tipo) {
         case 'defensivos':
-          final item = _fitossanitarioRepository.getById(itemId);
+          final result = await _fitossanitarioRepository.getByKey(itemId);
+          final item = result.isSuccess ? result.data : null;
           if (item != null) {
             return {
-              'nome': item.nomeComum.isNotEmpty ? item.nomeComum : item.nomeTecnico,
+              'nome': item.nomeComum?.isNotEmpty == true ? item.nomeComum! : (item.nomeTecnico ?? 'Nome não disponível'),
               'subtitulo': item.ingredienteAtivo ?? 'Ingrediente não informado',
-              'detalhes': '${item.fabricante} • ${item.classeAgronomica}',
+              'detalhes': '${item.fabricante ?? ''} • ${item.classeAgronomica ?? ''}',
             };
           }
           break;
         case 'pragas':
-          final item = _pragasRepository.getById(itemId);
+          final result = await _pragasRepository.getByKey(itemId);
+          final item = result.isSuccess ? result.data : null;
           if (item != null) {
             return {
-              'nome': item.nomeComum,
-              'subtitulo': item.nomeCientifico.isNotEmpty 
-                  ? item.nomeCientifico 
+              'nome': item.nomeComum ?? 'Nome não disponível',
+              'subtitulo': item.nomeCientifico?.isNotEmpty == true 
+                  ? item.nomeCientifico! 
                   : 'Nome científico não disponível',
               'detalhes': 'Praga agrícola',
             };

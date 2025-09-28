@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
@@ -10,23 +9,6 @@ part 'odometer_model.g.dart';
 @HiveType(typeId: 2)
 // ignore: must_be_immutable
 class OdometerModel extends BaseSyncModel {
-  // Base sync fields (required for Hive generation)
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-
-  // Odometer specific fields
-  @HiveField(10) final String vehicleId;
-  @HiveField(11) final int registrationDate;
-  @HiveField(12) final double value;
-  @HiveField(13) final String description;
-  @HiveField(14) final String? type;
 
   OdometerModel({
     required this.id,
@@ -54,9 +36,6 @@ class OdometerModel extends BaseSyncModel {
           userId: userId,
           moduleName: moduleName,
         );
-
-  @override
-  String get collectionName => 'odometer_readings';
 
   /// Factory constructor for creating new odometer reading
   factory OdometerModel.create({
@@ -107,6 +86,51 @@ class OdometerModel extends BaseSyncModel {
     );
   }
 
+  /// Create from Firebase map
+  factory OdometerModel.fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
+    
+    return OdometerModel(
+      id: baseFields['id'] as String,
+      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
+      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
+      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      vehicleId: map['vehicle_id']?.toString() ?? '',
+      registrationDate: (map['registration_date'] as num?)?.toInt() ?? 0,
+      value: (map['value'] as num? ?? 0.0).toDouble(),
+      description: map['description']?.toString() ?? '',
+      type: map['type']?.toString(),
+    );
+  }
+
+  factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromHiveMap(json);
+  // Base sync fields (required for Hive generation)
+  @HiveField(0) @override final String id;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
+
+  // Odometer specific fields
+  @HiveField(10) final String vehicleId;
+  @HiveField(11) final int registrationDate;
+  @HiveField(12) final double value;
+  @HiveField(13) final String description;
+  @HiveField(14) final String? type;
+
+  @override
+  String get collectionName => 'odometer_readings';
+
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
@@ -132,29 +156,6 @@ class OdometerModel extends BaseSyncModel {
       'description': description,
       'type': type,
     };
-  }
-
-  /// Create from Firebase map
-  factory OdometerModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
-    return OdometerModel(
-      id: baseFields['id'] as String,
-      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
-      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
-      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      vehicleId: map['vehicle_id']?.toString() ?? '',
-      registrationDate: (map['registration_date'] as num?)?.toInt() ?? 0,
-      value: (map['value'] as num? ?? 0.0).toDouble(),
-      description: map['description']?.toString() ?? '',
-      type: map['type']?.toString(),
-    );
   }
 
   /// copyWith method for immutability
@@ -192,8 +193,6 @@ class OdometerModel extends BaseSyncModel {
       type: type ?? this.type,
     );
   }
-
-  factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromHiveMap(json);
 
   @override
   bool operator ==(Object other) {

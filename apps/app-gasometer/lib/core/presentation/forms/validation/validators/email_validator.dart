@@ -1,5 +1,5 @@
-import 'base_validator.dart';
 import '../../architecture/i_form_validator.dart';
+import 'base_validator.dart';
 
 /// Validator for email addresses
 /// 
@@ -7,15 +7,47 @@ import '../../architecture/i_form_validator.dart';
 /// Supports various validation modes from simple to strict RFC compliance.
 /// Follows Single Responsibility Principle by focusing solely on email validation.
 class EmailValidator extends StringValidator {
-  final EmailValidationMode mode;
-  final bool allowInternational;
   
   const EmailValidator({
     this.mode = EmailValidationMode.standard,
     this.allowInternational = true,
-    String errorMessage = 'Email inválido',
+    super.errorMessage = 'Email inválido',
     super.metadata,
-  }) : super(errorMessage: errorMessage);
+  });
+  
+  /// Create simple email validator
+  factory EmailValidator.simple({String? errorMessage}) {
+    return EmailValidator(
+      mode: EmailValidationMode.simple,
+      errorMessage: errorMessage ?? 'Email inválido',
+    );
+  }
+  
+  /// Create standard email validator
+  factory EmailValidator.standard({String? errorMessage}) {
+    return EmailValidator(
+      mode: EmailValidationMode.standard,
+      errorMessage: errorMessage ?? 'Email inválido',
+    );
+  }
+  
+  /// Create strict email validator
+  factory EmailValidator.strict({String? errorMessage}) {
+    return EmailValidator(
+      mode: EmailValidationMode.strict,
+      errorMessage: errorMessage ?? 'Email inválido',
+    );
+  }
+  
+  /// Create RFC 5322 compliant email validator
+  factory EmailValidator.rfc5322({String? errorMessage}) {
+    return EmailValidator(
+      mode: EmailValidationMode.rfc5322,
+      errorMessage: errorMessage ?? 'Email inválido',
+    );
+  }
+  final EmailValidationMode mode;
+  final bool allowInternational;
   
   @override
   String get validatorType => 'email';
@@ -163,38 +195,6 @@ class EmailValidator extends StringValidator {
     return RegExp(allowedChars).hasMatch(part);
   }
   
-  /// Create simple email validator
-  factory EmailValidator.simple({String? errorMessage}) {
-    return EmailValidator(
-      mode: EmailValidationMode.simple,
-      errorMessage: errorMessage ?? 'Email inválido',
-    );
-  }
-  
-  /// Create standard email validator
-  factory EmailValidator.standard({String? errorMessage}) {
-    return EmailValidator(
-      mode: EmailValidationMode.standard,
-      errorMessage: errorMessage ?? 'Email inválido',
-    );
-  }
-  
-  /// Create strict email validator
-  factory EmailValidator.strict({String? errorMessage}) {
-    return EmailValidator(
-      mode: EmailValidationMode.strict,
-      errorMessage: errorMessage ?? 'Email inválido',
-    );
-  }
-  
-  /// Create RFC 5322 compliant email validator
-  factory EmailValidator.rfc5322({String? errorMessage}) {
-    return EmailValidator(
-      mode: EmailValidationMode.rfc5322,
-      errorMessage: errorMessage ?? 'Email inválido',
-    );
-  }
-  
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -230,56 +230,14 @@ enum EmailValidationMode {
 
 /// Email domain validator
 class EmailDomainValidator extends StringValidator {
-  final List<String> allowedDomains;
-  final List<String> blockedDomains;
-  final bool caseSensitive;
   
   const EmailDomainValidator({
     this.allowedDomains = const [],
     this.blockedDomains = const [],
     this.caseSensitive = false,
-    String errorMessage = 'Domínio de email não permitido',
+    super.errorMessage = 'Domínio de email não permitido',
     super.metadata,
-  }) : super(errorMessage: errorMessage);
-  
-  @override
-  String get validatorType => 'email_domain';
-  
-  @override
-  ValidationResult validateString(String value) {
-    final email = caseSensitive ? value.trim() : value.trim().toLowerCase();
-    
-    // Basic email format check
-    if (!email.contains('@')) {
-      return ValidationResult.invalid('Email inválido');
-    }
-    
-    final domain = email.split('@').last;
-    
-    // Check blocked domains
-    if (blockedDomains.isNotEmpty) {
-      final normalizedBlockedDomains = caseSensitive 
-          ? blockedDomains 
-          : blockedDomains.map((d) => d.toLowerCase()).toList();
-      
-      if (normalizedBlockedDomains.contains(domain)) {
-        return ValidationResult.invalid(errorMessage);
-      }
-    }
-    
-    // Check allowed domains
-    if (allowedDomains.isNotEmpty) {
-      final normalizedAllowedDomains = caseSensitive 
-          ? allowedDomains 
-          : allowedDomains.map((d) => d.toLowerCase()).toList();
-      
-      if (!normalizedAllowedDomains.contains(domain)) {
-        return ValidationResult.invalid(errorMessage);
-      }
-    }
-    
-    return ValidationResult.valid();
-  }
+  });
   
   /// Create validator with allowed domains
   factory EmailDomainValidator.allowOnly(
@@ -318,6 +276,48 @@ class EmailDomainValidator extends StringValidator {
       blockedDomains: blockedDomains,
       errorMessage: errorMessage ?? 'Use um email corporativo',
     );
+  }
+  final List<String> allowedDomains;
+  final List<String> blockedDomains;
+  final bool caseSensitive;
+  
+  @override
+  String get validatorType => 'email_domain';
+  
+  @override
+  ValidationResult validateString(String value) {
+    final email = caseSensitive ? value.trim() : value.trim().toLowerCase();
+    
+    // Basic email format check
+    if (!email.contains('@')) {
+      return ValidationResult.invalid('Email inválido');
+    }
+    
+    final domain = email.split('@').last;
+    
+    // Check blocked domains
+    if (blockedDomains.isNotEmpty) {
+      final normalizedBlockedDomains = caseSensitive 
+          ? blockedDomains 
+          : blockedDomains.map((d) => d.toLowerCase()).toList();
+      
+      if (normalizedBlockedDomains.contains(domain)) {
+        return ValidationResult.invalid(errorMessage);
+      }
+    }
+    
+    // Check allowed domains
+    if (allowedDomains.isNotEmpty) {
+      final normalizedAllowedDomains = caseSensitive 
+          ? allowedDomains 
+          : allowedDomains.map((d) => d.toLowerCase()).toList();
+      
+      if (!normalizedAllowedDomains.contains(domain)) {
+        return ValidationResult.invalid(errorMessage);
+      }
+    }
+    
+    return ValidationResult.valid();
   }
   
   @override

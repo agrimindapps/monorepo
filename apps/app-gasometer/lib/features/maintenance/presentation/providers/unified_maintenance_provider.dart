@@ -16,12 +16,6 @@ import '../../domain/usecases/update_maintenance_record.dart';
 /// Replaces both MaintenanceProvider and MaintenancesProvider
 @injectable
 class UnifiedMaintenanceProvider extends ChangeNotifier {
-  final GetAllMaintenanceRecords _getAllMaintenanceRecords;
-  final GetMaintenanceRecordsByVehicle _getMaintenanceRecordsByVehicle;
-  final AddMaintenanceRecord _addMaintenanceRecord;
-  final UpdateMaintenanceRecord _updateMaintenanceRecord;
-  final DeleteMaintenanceRecord _deleteMaintenanceRecord;
-  final MaintenanceFilterService _filterService;
 
   UnifiedMaintenanceProvider(
     this._getAllMaintenanceRecords,
@@ -31,6 +25,12 @@ class UnifiedMaintenanceProvider extends ChangeNotifier {
     this._deleteMaintenanceRecord,
     this._filterService,
   );
+  final GetAllMaintenanceRecords _getAllMaintenanceRecords;
+  final GetMaintenanceRecordsByVehicle _getMaintenanceRecordsByVehicle;
+  final AddMaintenanceRecord _addMaintenanceRecord;
+  final UpdateMaintenanceRecord _updateMaintenanceRecord;
+  final DeleteMaintenanceRecord _deleteMaintenanceRecord;
+  final MaintenanceFilterService _filterService;
 
   // Core data state
   List<MaintenanceEntity> _allMaintenances = [];

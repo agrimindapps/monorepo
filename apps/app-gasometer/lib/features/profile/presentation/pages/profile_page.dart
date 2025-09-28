@@ -9,17 +9,16 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/services/gasometer_data_cleaner_service.dart';
+import '../../../../core/theme/design_tokens.dart';
 // import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
+import '../../domain/services/profile_image_service.dart';
 import '../widgets/devices_section_widget.dart';
 import '../widgets/profile_image_picker_widget.dart';
-import '../../domain/services/profile_image_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -125,9 +124,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  const Text(
                     'Meu Perfil',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -166,40 +165,40 @@ class _ProfilePageState extends State<ProfilePage> {
         
         // Seção de dispositivos conectados (apenas para usuários registrados)
         if (!isAnonymous) ...[
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const DevicesSectionWidget(),
         ],
         
         // Informações da conta (apenas para usuários registrados)
         if (!isAnonymous) ...[
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildAccountInfoSection(context, user, authProvider),
         ],
         
         // Sincronização (apenas para usuários registrados)
         if (!isAnonymous) ...[
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildSyncSection(context),
         ],
         
         // Configurações e privacidade
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildSettingsSection(context, isAnonymous),
         
         // Exportação de dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const ExportDataSection(),
         ],
         
         // Limpeza de Dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildDataManagementSection(context, authProvider),
         ],
 
         // Ações da conta
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildActionsSection(context, authProvider, isAnonymous),
       ],
     );
@@ -324,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Expanded(
+                            const Expanded(
                               child: Text(
                                 'Conta Premium Ativa',
                                 style: TextStyle(
@@ -381,7 +380,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildSyncSection(BuildContext context) {
     // TODO: Phase 2 - Replace with UnifiedSync
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
@@ -389,9 +388,9 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: ListTile(
         leading: Icon(Icons.sync, color: Theme.of(context).colorScheme.primary),
-        title: Text('Sincronização'),
-        subtitle: Text('Aguardando Phase 2 - UnifiedSync'),
-        trailing: Icon(Icons.info_outline),
+        title: const Text('Sincronização'),
+        subtitle: const Text('Aguardando Phase 2 - UnifiedSync'),
+        trailing: const Icon(Icons.info_outline),
       ),
     );
     // Original sync implementation commented out for Phase 2
@@ -871,7 +870,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           child: ClipOval(
             child: hasAvatar
-                ? _buildAvatarImage(photoUrl!)
+                ? _buildAvatarImage(photoUrl)
                 : _buildDefaultAvatar(context, user, isAnonymous),
           ),
         ),
@@ -1411,11 +1410,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Mostrar mensagem de sucesso e navegar
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Logout realizado com sucesso'),
+          const SnackBar(
+            content: Text('Logout realizado com sucesso'),
             backgroundColor: GasometerDesignTokens.colorSuccess,
             behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: 2),
           ),
         );
 
@@ -1843,9 +1842,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
 
 /// Dialog stateful para confirmação de limpeza de dados
 class _DataClearDialog extends StatefulWidget {
-  final AuthProvider authProvider;
 
   const _DataClearDialog({required this.authProvider});
+  final AuthProvider authProvider;
 
   @override
   State<_DataClearDialog> createState() => __DataClearDialogState();
@@ -1893,7 +1892,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
               color: GasometerDesignTokens.colorWarning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(32),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.delete_sweep,
               size: 32,
               color: GasometerDesignTokens.colorWarning,
@@ -1903,7 +1902,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
           const SizedBox(height: 20),
 
           // Título
-          Text(
+          const Text(
             'Limpar Dados do App',
             style: TextStyle(
               fontSize: 20,
@@ -1949,10 +1948,10 @@ class __DataClearDialogState extends State<_DataClearDialog> {
             'Todas as despesas registradas',
           ),
           const SizedBox(height: 16),
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.shield, color: GasometerDesignTokens.colorSuccess, size: 20),
-              const SizedBox(width: 8),
+              Icon(Icons.shield, color: GasometerDesignTokens.colorSuccess, size: 20),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Serão mantidos: perfil, configurações, tema e assinatura',
@@ -1984,7 +1983,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: GasometerDesignTokens.colorWarning,
                   width: 2,
                 ),

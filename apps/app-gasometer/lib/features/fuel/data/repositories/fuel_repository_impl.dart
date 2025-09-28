@@ -17,11 +17,6 @@ import '../datasources/fuel_remote_data_source.dart';
 
 @LazySingleton(as: FuelRepository)
 class FuelRepositoryImpl implements FuelRepository {
-  final FuelLocalDataSource localDataSource;
-  final FuelRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
-  final AuthRepository authRepository;
-  final LoggingService loggingService;
 
   FuelRepositoryImpl({
     required this.localDataSource,
@@ -30,6 +25,11 @@ class FuelRepositoryImpl implements FuelRepository {
     required this.authRepository,
     required this.loggingService,
   });
+  final FuelLocalDataSource localDataSource;
+  final FuelRemoteDataSource remoteDataSource;
+  final Connectivity connectivity;
+  final AuthRepository authRepository;
+  final LoggingService loggingService;
 
   Future<bool> _isConnected() async {
     final connectivityResults = await connectivity.checkConnectivity();

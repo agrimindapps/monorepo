@@ -1,8 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
@@ -28,6 +27,9 @@ Future<void> main() async {
         return true;
       };
     }
+
+    // Initialize date formatting for Portuguese/Brazil
+    await initializeDateFormatting('pt_BR', null);
 
     // Initialize dependency injection (includes Hive initialization)
     await di.init();

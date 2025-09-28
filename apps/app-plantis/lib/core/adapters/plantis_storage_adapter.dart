@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
-import '../models/user_credentials.dart';
+import 'package:core/core.dart';
+
 import '../models/location_data.dart';
 import '../models/personal_info.dart';
-import '../services/secure_storage_service.dart' hide UserCredentials, LocationData, PersonalInfo;
+import '../models/user_credentials.dart';
 
 /// Plantis-specific storage adapter providing backward compatibility
 /// Bridges enhanced core services with existing Plantis storage interfaces
@@ -33,7 +32,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to store user credentials: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -60,7 +59,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to store location data: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -87,7 +86,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to store personal info: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -122,7 +121,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to store biometric data: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -137,7 +136,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to clear secure data: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -203,7 +202,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to store secure data: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -237,7 +236,7 @@ class PlantisStorageAdapter {
 
     result.fold(
       (failure) => throw Exception('Failed to store encrypted data: ${failure.message}'),
-      (_) => {},
+      (_) => <String, dynamic>{},
     );
   }
 
@@ -305,43 +304,33 @@ class SecureStorageServiceAdapter {
 
   SecureStorageServiceAdapter(this._adapter);
 
-  @override
   Future<void> storeUserCredentials(UserCredentials credentials) =>
       _adapter.storeUserCredentials(credentials);
 
-  @override
   Future<UserCredentials?> getUserCredentials() =>
       _adapter.getUserCredentials();
 
-  @override
   Future<void> storeLocationData(LocationData locationData) =>
       _adapter.storeLocationData(locationData);
 
-  @override
   Future<LocationData?> getLocationData() =>
       _adapter.getLocationData();
 
-  @override
   Future<void> storePersonalInfo(PersonalInfo personalInfo) =>
       _adapter.storePersonalInfo(personalInfo);
 
-  @override
   Future<PersonalInfo?> getPersonalInfo() =>
       _adapter.getPersonalInfo();
 
-  @override
   Future<List<int>> getOrCreateHiveEncryptionKey() =>
       _adapter.getOrCreateHiveEncryptionKey();
 
-  @override
   Future<void> storeBiometricData(String biometricHash) =>
       _adapter.storeBiometricData(biometricHash);
 
-  @override
   Future<bool> isSecureStorageAvailable() =>
       _adapter.isSecureStorageAvailable();
 
-  @override
   Future<void> clearAllSecureData() =>
       _adapter.clearAllSecureData();
 }

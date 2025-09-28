@@ -1,11 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'report_summary_entity.dart';
 
-class ReportComparisonEntity extends Equatable {
-  final String vehicleId;
-  final ReportSummaryEntity currentPeriod;
-  final ReportSummaryEntity previousPeriod;
-  final String comparisonType; // 'month_to_month', 'year_to_year', etc.
+class ReportComparisonEntity extends Equatable { // 'month_to_month', 'year_to_year', etc.
   
   const ReportComparisonEntity({
     required this.vehicleId,
@@ -13,6 +9,10 @@ class ReportComparisonEntity extends Equatable {
     required this.previousPeriod,
     required this.comparisonType,
   });
+  final String vehicleId;
+  final ReportSummaryEntity currentPeriod;
+  final ReportSummaryEntity previousPeriod;
+  final String comparisonType;
   
   @override
   List<Object> get props => [vehicleId, currentPeriod, previousPeriod, comparisonType];

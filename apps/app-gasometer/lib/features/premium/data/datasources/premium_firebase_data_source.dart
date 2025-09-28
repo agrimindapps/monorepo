@@ -15,6 +15,10 @@ import '../../domain/entities/premium_status.dart';
 /// do status de assinatura premium
 @injectable
 class PremiumFirebaseDataSource {
+
+  PremiumFirebaseDataSource(this._firestore, this._authService) {
+    _initializeFirebaseSync();
+  }
   final FirebaseFirestore _firestore;
   final core.IAuthRepository _authService;
 
@@ -23,10 +27,6 @@ class PremiumFirebaseDataSource {
 
   StreamSubscription<DocumentSnapshot>? _firebaseSubscription;
   Timer? _syncTimer;
-
-  PremiumFirebaseDataSource(this._firestore, this._authService) {
-    _initializeFirebaseSync();
-  }
 
   Stream<PremiumStatus> get premiumStatusStream => _statusController.stream;
 

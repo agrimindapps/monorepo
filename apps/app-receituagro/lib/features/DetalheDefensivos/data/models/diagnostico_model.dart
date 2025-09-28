@@ -1,4 +1,4 @@
-import '../../../diagnosticos/domain/entities/diagnostico_entity.dart' as DiagnosticsEntity;
+import '../../../diagnosticos/domain/entities/diagnostico_entity.dart' as diagnostics_entity;
 import '../../domain/entities/diagnostico_entity.dart';
 
 /// Modelo de dados para Diagnostico
@@ -25,7 +25,7 @@ class DiagnosticoModel extends DiagnosticoEntity {
   });
 
   /// Cria um DiagnosticoModel a partir de uma entidade do módulo de diagnósticos
-  factory DiagnosticoModel.fromDiagnosticsEntity(DiagnosticsEntity.DiagnosticoEntity entity) {
+  factory DiagnosticoModel.fromDiagnosticsEntity(diagnostics_entity.DiagnosticoEntity entity) {
     return DiagnosticoModel(
       id: entity.id,
       idDefensivo: entity.idDefensivo,

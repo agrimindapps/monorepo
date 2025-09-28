@@ -1,7 +1,5 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-
-import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedef.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';

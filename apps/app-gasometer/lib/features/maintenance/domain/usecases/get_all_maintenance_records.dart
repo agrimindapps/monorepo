@@ -8,9 +8,9 @@ import '../repositories/maintenance_repository.dart';
 
 @injectable
 class GetAllMaintenanceRecords implements UseCase<List<MaintenanceEntity>, NoParams> {
-  final MaintenanceRepository repository;
 
   GetAllMaintenanceRecords(this.repository);
+  final MaintenanceRepository repository;
 
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> call(NoParams params) async {

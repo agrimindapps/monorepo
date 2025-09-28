@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
 part 'fitossanitario_info_hive.g.dart';
 

@@ -3,19 +3,15 @@ import 'package:core/core.dart' hide AuthProvider;
 // ✅ ThemeProvider now used from core package
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/presentation/widgets/standard_loading_view.dart';
 // ThemeProvider now imported from core package (line 2)
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/gasometer_colors.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../widgets/account_section_widget.dart';
 // Keep existing widgets for now to avoid breaking changes
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
-import '../widgets/account_section_widget.dart';
 import 'database_inspector_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -90,14 +86,14 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(width: 13),
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'Configurações',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -106,10 +102,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   Text(
                     'Gerencie suas preferências',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
                       height: 1.3,
@@ -122,7 +118,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             provider.Consumer<ThemeProvider>(
               builder: (context, themeProvider, _) {
-                return Container(
+                return DecoratedBox(
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(9),
@@ -158,13 +154,13 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       children: [
         _buildAccountContentWithoutCard(context),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildNotificationSection(context),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildDevelopmentSection(context),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildSupportSection(context),
-        SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildInformationSection(context),
       ],
     );
@@ -212,7 +208,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
@@ -355,7 +351,7 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           trailing: Icon(
             Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
           ),
         ),
       ],
@@ -385,7 +381,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
                   ),
                   child: Icon(
@@ -433,7 +429,7 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
               size: GasometerDesignTokens.iconSizeListItem,
             ),
             const SizedBox(width: 16),
@@ -454,7 +450,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
@@ -549,7 +545,7 @@ class _SettingsPageState extends State<SettingsPage> {
               icon,
               color: isSelected 
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -569,7 +565,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],

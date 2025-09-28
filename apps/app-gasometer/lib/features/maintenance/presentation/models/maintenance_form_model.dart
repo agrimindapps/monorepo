@@ -6,40 +6,6 @@ import '../../domain/entities/maintenance_entity.dart';
 
 /// Model reativo para o formulário de manutenção
 class MaintenanceFormModel extends Equatable {
-  final String id;
-  final String userId;
-  final String vehicleId;
-  final VehicleEntity? vehicle;
-  final MaintenanceType type;
-  final MaintenanceStatus status;
-  final String title;
-  final String description;
-  final double cost;
-  final DateTime serviceDate;
-  final double odometer;
-  
-  // Informações da oficina
-  final String workshopName;
-  final String workshopPhone;
-  final String workshopAddress;
-  
-  // Próximo serviço
-  final DateTime? nextServiceDate;
-  final double? nextServiceOdometer;
-  
-  // Anexos
-  final List<String> photosPaths;
-  final List<String> invoicesPaths;
-  
-  // Peças e informações técnicas
-  final Map<String, String> parts;
-  final String notes;
-  
-  // Estado do formulário
-  final bool isLoading;
-  final bool hasChanges;
-  final Map<String, String> errors;
-  final String? lastError;
 
   const MaintenanceFormModel({
     required this.id,
@@ -127,6 +93,40 @@ class MaintenanceFormModel extends Equatable {
       lastError: null,
     );
   }
+  final String id;
+  final String userId;
+  final String vehicleId;
+  final VehicleEntity? vehicle;
+  final MaintenanceType type;
+  final MaintenanceStatus status;
+  final String title;
+  final String description;
+  final double cost;
+  final DateTime serviceDate;
+  final double odometer;
+  
+  // Informações da oficina
+  final String workshopName;
+  final String workshopPhone;
+  final String workshopAddress;
+  
+  // Próximo serviço
+  final DateTime? nextServiceDate;
+  final double? nextServiceOdometer;
+  
+  // Anexos
+  final List<String> photosPaths;
+  final List<String> invoicesPaths;
+  
+  // Peças e informações técnicas
+  final Map<String, String> parts;
+  final String notes;
+  
+  // Estado do formulário
+  final bool isLoading;
+  final bool hasChanges;
+  final Map<String, String> errors;
+  final String? lastError;
 
   @override
   List<Object?> get props => [

@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 import 'defensivo_group_entity.dart';
 

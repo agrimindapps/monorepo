@@ -732,15 +732,15 @@ class ExpenseValidationService {
 
 /// Resultado de validação de despesa
 class ValidationResult {
-  final bool isValid;
-  final Map<String, String> errors;
-  final Map<String, String> warnings;
 
   ValidationResult({
     required this.isValid,
     required this.errors,
     required this.warnings,
   });
+  final bool isValid;
+  final Map<String, String> errors;
+  final Map<String, String> warnings;
 
   bool get hasWarnings => warnings.isNotEmpty;
   bool get hasErrors => errors.isNotEmpty;
@@ -748,15 +748,6 @@ class ValidationResult {
 
 /// Análise de padrões de despesas
 class ExpensePatternAnalysis {
-  final int totalRecords;
-  final double totalAmount;
-  final double averageAmount;
-  final Map<ExpenseType, double> expensesByType;
-  final List<ExpenseAnomaly> anomalies;
-  final Map<String, dynamic> trends;
-  final ExpenseEntity lastExpense;
-  final ExpenseEntity firstExpense;
-  final Duration period;
 
   ExpensePatternAnalysis({
     required this.totalRecords,
@@ -790,6 +781,15 @@ class ExpensePatternAnalysis {
       period: Duration.zero,
     );
   }
+  final int totalRecords;
+  final double totalAmount;
+  final double averageAmount;
+  final Map<ExpenseType, double> expensesByType;
+  final List<ExpenseAnomaly> anomalies;
+  final Map<String, dynamic> trends;
+  final ExpenseEntity lastExpense;
+  final ExpenseEntity firstExpense;
+  final Duration period;
 
   bool get hasAnomalies => anomalies.isNotEmpty;
   String get totalAmountFormatted => 'R\$ ${totalAmount.toStringAsFixed(2)}';
@@ -800,10 +800,6 @@ class ExpensePatternAnalysis {
 
 /// Anomalia detectada em despesas
 class ExpenseAnomaly {
-  final String expenseId;
-  final AnomalyType type;
-  final String description;
-  final AnomalySeverity severity;
 
   ExpenseAnomaly({
     required this.expenseId,
@@ -811,6 +807,10 @@ class ExpenseAnomaly {
     required this.description,
     required this.severity,
   });
+  final String expenseId;
+  final AnomalyType type;
+  final String description;
+  final AnomalySeverity severity;
 }
 
 enum AnomalyType {

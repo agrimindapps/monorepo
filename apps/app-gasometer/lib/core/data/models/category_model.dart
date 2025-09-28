@@ -8,24 +8,6 @@ part 'category_model.g.dart';
 @HiveType(typeId: 5)
 // ignore: must_be_immutable
 class CategoryModel extends BaseSyncModel {
-  @override
-  void removeFromHive() {
-    // Stub implementation to satisfy HiveObjectMixin
-  }
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-
-  // Category specific fields
-  @HiveField(10) final int categoria;
-  @HiveField(11) final String descricao;
 
   CategoryModel({
     required this.id,
@@ -50,9 +32,6 @@ class CategoryModel extends BaseSyncModel {
           userId: userId,
           moduleName: moduleName,
         );
-
-  @override
-  String get collectionName => 'categories';
 
   /// Factory constructor for creating new category
   factory CategoryModel.create({
@@ -94,6 +73,49 @@ class CategoryModel extends BaseSyncModel {
     );
   }
 
+  /// Create from Firebase map
+  factory CategoryModel.fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
+    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
+    
+    return CategoryModel(
+      id: baseFields['id'] as String,
+      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
+      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
+      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      categoria: (map['categoria'] as num?)?.toInt() ?? 0,
+      descricao: map['descricao']?.toString() ?? '',
+    );
+  }
+  factory CategoryModel.fromMap(Map<String, dynamic> map) => CategoryModel.fromHiveMap(map);
+  factory CategoryModel.fromJson(Map<String, dynamic> json) => CategoryModel.fromHiveMap(json);
+  @override
+  void removeFromHive() {
+    // Stub implementation to satisfy HiveObjectMixin
+  }
+  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
+  @HiveField(0) @override final String id;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
+
+  // Category specific fields
+  @HiveField(10) final int categoria;
+  @HiveField(11) final String descricao;
+
+  @override
+  String get collectionName => 'categories';
+
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
@@ -113,26 +135,6 @@ class CategoryModel extends BaseSyncModel {
       'categoria': categoria,
       'descricao': descricao,
     };
-  }
-
-  /// Create from Firebase map
-  factory CategoryModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseFirebaseFields(map);
-    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
-    return CategoryModel(
-      id: baseFields['id'] as String,
-      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
-      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
-      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      categoria: (map['categoria'] as num?)?.toInt() ?? 0,
-      descricao: map['descricao']?.toString() ?? '',
-    );
   }
 
   /// copyWith method for immutability
@@ -168,8 +170,6 @@ class CategoryModel extends BaseSyncModel {
   // Convenience methods for different serialization formats
   Map<String, dynamic> toMap() => toHiveMap();
   Map<String, dynamic> toJson() => toHiveMap();
-  factory CategoryModel.fromMap(Map<String, dynamic> map) => CategoryModel.fromHiveMap(map);
-  factory CategoryModel.fromJson(Map<String, dynamic> json) => CategoryModel.fromHiveMap(json);
 
   @override
   bool operator ==(Object other) {

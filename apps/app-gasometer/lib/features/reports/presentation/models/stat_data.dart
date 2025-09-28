@@ -3,6 +3,15 @@
 /// This class contains data for showing statistical information
 /// with comparison values and trend indicators
 class StatData {
+
+  const StatData({
+    required this.label,
+    required this.value,
+    required this.comparison,
+    required this.comparisonValue,
+    this.percentage,
+    this.isPositive,
+  });
   /// The label/title of the statistic
   final String label;
   
@@ -20,13 +29,4 @@ class StatData {
   
   /// Whether the percentage change is positive (true) or negative (false)
   final bool? isPositive;
-
-  const StatData({
-    required this.label,
-    required this.value,
-    required this.comparison,
-    required this.comparisonValue,
-    this.percentage,
-    this.isPositive,
-  });
 }

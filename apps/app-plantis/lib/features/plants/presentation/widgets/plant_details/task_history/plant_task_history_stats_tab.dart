@@ -426,7 +426,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.2),
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
             ),
           ),
           child: Column(
@@ -455,7 +455,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                                 fontWeight: FontWeight.bold,
                                 color: count > 0
                                     ? PlantisColors.primary
-                                    : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -473,7 +473,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                                   ],
                                 ) : null,
                                 color: count == 0
-                                    ? theme.colorScheme.outline.withOpacity(0.2)
+                                    ? theme.colorScheme.outline.withValues(alpha: 0.2)
                                     : null,
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -522,7 +522,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -544,10 +544,10 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: color.withOpacity(0.3),
+                  color: color.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -572,7 +572,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                         const SizedBox(height: 4),
                         LinearProgressIndicator(
                           value: percentage / 100,
-                          backgroundColor: color.withOpacity(0.2),
+                          backgroundColor: color.withValues(alpha: 0.2),
                           valueColor: AlwaysStoppedAnimation<Color>(color),
                           borderRadius: BorderRadius.circular(4),
                           minHeight: 6,
@@ -648,14 +648,14 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.1),
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.1),
           ],
         ) : null,
-        color: achieved ? null : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: achieved ? null : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: achieved ? color.withOpacity(0.5) : theme.colorScheme.outline.withOpacity(0.3),
+          color: achieved ? color.withValues(alpha: 0.5) : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -665,7 +665,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             children: [
               Icon(
                 achievement['icon'] as IconData,
-                color: achieved ? color : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                color: achieved ? color : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 size: 24,
               ),
               const Spacer(),
@@ -689,7 +689,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           Text(
             achievement['description'] as String,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -698,7 +698,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           // Progress bar
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: achieved ? color.withOpacity(0.3) : theme.colorScheme.outline.withOpacity(0.3),
+            backgroundColor: achieved ? color.withValues(alpha: 0.3) : theme.colorScheme.outline.withValues(alpha: 0.3),
             valueColor: AlwaysStoppedAnimation<Color>(achieved ? color : theme.colorScheme.onSurfaceVariant),
             borderRadius: BorderRadius.circular(4),
             minHeight: 4,
@@ -707,7 +707,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           Text(
             '${achievement['current']}/${achievement['target']}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: achieved ? color : theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              color: achieved ? color : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -744,13 +744,13 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
-                  color.withOpacity(0.1),
-                  color.withOpacity(0.05),
+                  color.withValues(alpha: 0.1),
+                  color.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -758,7 +758,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(

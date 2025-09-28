@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
@@ -11,30 +9,6 @@ part 'fuel_supply_model.g.dart';
 @HiveType(typeId: 1)
 // ignore: must_be_immutable
 class FuelSupplyModel extends BaseSyncModel {
-  // Base sync fields (required for Hive generation)
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-
-  // Fuel supply specific fields - using English names aligned with Entity
-  @HiveField(10) final String vehicleId;
-  @HiveField(11) final int date;
-  @HiveField(12) final double odometer;
-  @HiveField(13) final double liters;
-  @HiveField(14) final double totalPrice;
-  @HiveField(15) final bool? fullTank;
-  @HiveField(16) final double pricePerLiter;
-  @HiveField(17) final String? gasStationName;
-  @HiveField(18) final String? notes;
-  @HiveField(19) final int fuelType;
-  @HiveField(20) final String? receiptImageUrl;
-  @HiveField(21) final String? receiptImagePath;
 
   FuelSupplyModel({
     required this.id,
@@ -69,9 +43,6 @@ class FuelSupplyModel extends BaseSyncModel {
           userId: userId,
           moduleName: moduleName,
         );
-
-  @override
-  String get collectionName => 'fuel_supplies';
 
   /// Factory constructor for creating new fuel supply
   factory FuelSupplyModel.create({
@@ -143,6 +114,77 @@ class FuelSupplyModel extends BaseSyncModel {
     );
   }
 
+  /// Create from Firebase map
+  factory FuelSupplyModel.fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
+    
+    return FuelSupplyModel(
+      id: baseFields['id'] as String,
+      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
+      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
+      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      vehicleId: map['vehicle_id']?.toString() ?? '',
+      date: (map['date'] as num?)?.toInt() ?? 0,
+      odometer: (map['odometer'] as num? ?? 0.0).toDouble(),
+      liters: (map['liters'] as num? ?? 0.0).toDouble(),
+      totalPrice: (map['total_price'] as num? ?? 0.0).toDouble(),
+      fullTank: map['full_tank'] as bool?,
+      pricePerLiter: (map['price_per_liter'] as num? ?? 0.0).toDouble(),
+      gasStationName: map['gas_station_name']?.toString(),
+      notes: map['notes']?.toString(),
+      fuelType: (map['fuel_type'] as num?)?.toInt() ?? 0,
+      receiptImageUrl: map['receipt_image_url']?.toString(),
+      receiptImagePath: map['receipt_image_path']?.toString(),
+    );
+  }
+
+  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
+  factory FuelSupplyModel.fromJson(Map<String, dynamic> json) {
+    // Check if this is Firebase data (contains Timestamp objects)
+    final hasTimestamp = json.values.any((value) => value is Timestamp);
+    
+    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
+      // Use Firebase parsing for data from remote source
+      return FuelSupplyModel.fromFirebaseMap(json);
+    } else {
+      // Use Hive parsing for local data
+      return FuelSupplyModel.fromHiveMap(json);
+    }
+  }
+  // Base sync fields (required for Hive generation)
+  @HiveField(0) @override final String id;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
+
+  // Fuel supply specific fields - using English names aligned with Entity
+  @HiveField(10) final String vehicleId;
+  @HiveField(11) final int date;
+  @HiveField(12) final double odometer;
+  @HiveField(13) final double liters;
+  @HiveField(14) final double totalPrice;
+  @HiveField(15) final bool? fullTank;
+  @HiveField(16) final double pricePerLiter;
+  @HiveField(17) final String? gasStationName;
+  @HiveField(18) final String? notes;
+  @HiveField(19) final int fuelType;
+  @HiveField(20) final String? receiptImageUrl;
+  @HiveField(21) final String? receiptImagePath;
+
+  @override
+  String get collectionName => 'fuel_supplies';
+
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
@@ -182,36 +224,6 @@ class FuelSupplyModel extends BaseSyncModel {
       'receipt_image_url': receiptImageUrl,
       'receipt_image_path': receiptImagePath,
     };
-  }
-
-  /// Create from Firebase map
-  factory FuelSupplyModel.fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
-    return FuelSupplyModel(
-      id: baseFields['id'] as String,
-      createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
-      updatedAtMs: timestamps['updatedAt']?.millisecondsSinceEpoch,
-      lastSyncAtMs: timestamps['lastSyncAt']?.millisecondsSinceEpoch,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      vehicleId: map['vehicle_id']?.toString() ?? '',
-      date: (map['date'] as num?)?.toInt() ?? 0,
-      odometer: (map['odometer'] as num? ?? 0.0).toDouble(),
-      liters: (map['liters'] as num? ?? 0.0).toDouble(),
-      totalPrice: (map['total_price'] as num? ?? 0.0).toDouble(),
-      fullTank: map['full_tank'] as bool?,
-      pricePerLiter: (map['price_per_liter'] as num? ?? 0.0).toDouble(),
-      gasStationName: map['gas_station_name']?.toString(),
-      notes: map['notes']?.toString(),
-      fuelType: (map['fuel_type'] as num?)?.toInt() ?? 0,
-      receiptImageUrl: map['receipt_image_url']?.toString(),
-      receiptImagePath: map['receipt_image_path']?.toString(),
-    );
   }
 
   /// copyWith method for immutability
@@ -262,20 +274,6 @@ class FuelSupplyModel extends BaseSyncModel {
       receiptImageUrl: receiptImageUrl ?? this.receiptImageUrl,
       receiptImagePath: receiptImagePath ?? this.receiptImagePath,
     );
-  }
-
-  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
-  factory FuelSupplyModel.fromJson(Map<String, dynamic> json) {
-    // Check if this is Firebase data (contains Timestamp objects)
-    final hasTimestamp = json.values.any((value) => value is Timestamp);
-    
-    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
-      // Use Firebase parsing for data from remote source
-      return FuelSupplyModel.fromFirebaseMap(json);
-    } else {
-      // Use Hive parsing for local data
-      return FuelSupplyModel.fromHiveMap(json);
-    }
   }
 
   

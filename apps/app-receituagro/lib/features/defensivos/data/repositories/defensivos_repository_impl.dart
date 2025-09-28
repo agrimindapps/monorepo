@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -17,7 +16,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getAllDefensivos() async {
     try {
-      final defensivosHive = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final defensivosHive = result.data ?? [];
       final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosHive);
       
       return Right(defensivosEntities);
@@ -29,7 +32,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosByClasse(String classe) async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final defensivosFiltrados = allDefensivos
           .where((defensivo) => 
               defensivo.classeAgronomica?.toLowerCase().contains(classe.toLowerCase()) == true)
@@ -45,7 +52,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, DefensivoEntity?>> getDefensivoById(String id) async {
     try {
-      final defensivo = _repository.getById(id);
+      final result = await _repository.getByKey(id);
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivo por ID: ${result.error?.message}'));
+      }
+      final defensivo = result.data;
       
       if (defensivo == null) {
         return const Right(null);
@@ -65,7 +76,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return await getAllDefensivos();
       }
 
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final defensivosFiltrados = allDefensivos.where((defensivo) {
         final nomeComumMatch = defensivo.nomeComum.toLowerCase().contains(query.toLowerCase());
         final nomeTecnicoMatch = defensivo.nomeTecnico.toLowerCase().contains(query.toLowerCase());
@@ -84,7 +99,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosByFabricante(String fabricante) async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final defensivosFiltrados = allDefensivos
           .where((defensivo) => 
               defensivo.fabricante?.toLowerCase().contains(fabricante.toLowerCase()) == true)
@@ -100,7 +119,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosByModoAcao(String modoAcao) async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final defensivosFiltrados = allDefensivos
           .where((defensivo) => 
               defensivo.modoAcao?.toLowerCase().contains(modoAcao.toLowerCase()) == true)
@@ -116,7 +139,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<String>>> getClassesAgronomicas() async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final classes = allDefensivos
           .map((defensivo) => defensivo.classeAgronomica)
           .where((classe) => classe != null && classe.isNotEmpty)
@@ -134,7 +161,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<String>>> getFabricantes() async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final fabricantes = allDefensivos
           .map((defensivo) => defensivo.fabricante)
           .where((fabricante) => fabricante != null && fabricante.isNotEmpty)
@@ -152,7 +183,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<String>>> getModosAcao() async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final modosAcao = allDefensivos
           .map((defensivo) => defensivo.modoAcao)
           .where((modo) => modo != null && modo.isNotEmpty)
@@ -170,7 +205,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosRecentes({int limit = 10}) async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       
       // Como não temos timestamp real, vamos pegar os primeiros N
       final defensivosRecentes = allDefensivos.take(limit).toList();
@@ -185,7 +224,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, Map<String, int>>> getDefensivosStats() async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       
       final stats = <String, int>{
         'total': allDefensivos.length,
@@ -215,7 +258,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, bool>> isDefensivoActive(String defensivoId) async {
     try {
-      final defensivo = _repository.getById(defensivoId);
+      final result = await _repository.getByKey(defensivoId);
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao verificar status do defensivo: ${result.error?.message}'));
+      }
+      final defensivo = result.data;
       return Right(defensivo != null);
     } catch (e) {
       return Left(CacheFailure('Erro ao verificar status do defensivo: ${e.toString()}'));
@@ -228,7 +275,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     String? filtroTexto,
   }) async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       var defensivosFiltrados = allDefensivos.toList();
       
       // Aplicar filtro de texto se fornecido
@@ -255,7 +306,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     try {
       // Esta implementação seria expandida para incluir dados de diagnósticos
       // Por agora, retorna todos os defensivos com informações básicas
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       final defensivosEntities = allDefensivos.map((hive) {
         return DefensivoMapper.fromHiveToEntity(hive).copyWith(
           quantidadeDiagnosticos: 0, // TODO: integrar com DiagnosticoIntegrationService
@@ -280,7 +335,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     bool apenasElegiveis = false,
   }) async {
     try {
-      final allDefensivos = _repository.getAll();
+      final result = await _repository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+      }
+      final allDefensivos = result.data ?? [];
       var defensivosFiltrados = DefensivoMapper.fromHiveToEntityList(allDefensivos);
       
       // Aplicar filtros

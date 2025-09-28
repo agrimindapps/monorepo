@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 /// Widget reutilizável para botões de autenticação
 /// Segue o princípio da Responsabilidade Única
 class AuthButtonWidget extends StatelessWidget {
-  final String text;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final bool isSecondary;
-  final IconData? icon;
-  final double? width;
-  final double height;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
 
   const AuthButtonWidget({
     super.key,
@@ -25,6 +16,15 @@ class AuthButtonWidget extends StatelessWidget {
     this.backgroundColor,
     this.foregroundColor,
   });
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isSecondary;
+  final IconData? icon;
+  final double? width;
+  final double height;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class AuthButtonWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         elevation: 3,
-        shadowColor: primaryColor.withOpacity(0.3),
+        shadowColor: primaryColor.withValues(alpha: 0.3),
       ),
       child: isLoading
           ? SizedBox(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
 import '../auth/auth_state_notifier.dart';
 import '../../features/plants/domain/entities/plant.dart';
@@ -345,6 +346,13 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
     // Initialize real-time data stream
     _initializeRealtimeDataStream();
+
+    // Setup cleanup when provider is disposed
+    ref.onDispose(() {
+      debugPrint('🧹 PlantsNotifier: Disposing subscriptions...');
+      _authSubscription?.cancel();
+      _realtimeDataSubscription?.cancel();
+    });
 
     // Start with empty state
     return const PlantsState();
@@ -1056,29 +1064,29 @@ final plantsErrorProvider = Provider<String?>((ref) {
   );
 });
 
-// Dependency providers (these would need to be implemented based on your DI setup)
+// Dependency providers using GetIt DI
 final getPlantsUseCaseProvider = Provider<GetPlantsUseCase>((ref) {
-  throw UnimplementedError('GetPlantsUseCase provider needs to be implemented');
+  return GetIt.instance<GetPlantsUseCase>();
 });
 
 final getPlantByIdUseCaseProvider = Provider<GetPlantByIdUseCase>((ref) {
-  throw UnimplementedError('GetPlantByIdUseCase provider needs to be implemented');
+  return GetIt.instance<GetPlantByIdUseCase>();
 });
 
 final searchPlantsUseCaseProvider = Provider<SearchPlantsUseCase>((ref) {
-  throw UnimplementedError('SearchPlantsUseCase provider needs to be implemented');
+  return GetIt.instance<SearchPlantsUseCase>();
 });
 
 final addPlantUseCaseProvider = Provider<AddPlantUseCase>((ref) {
-  throw UnimplementedError('AddPlantUseCase provider needs to be implemented');
+  return GetIt.instance<AddPlantUseCase>();
 });
 
 final updatePlantUseCaseProvider = Provider<UpdatePlantUseCase>((ref) {
-  throw UnimplementedError('UpdatePlantUseCase provider needs to be implemented');
+  return GetIt.instance<UpdatePlantUseCase>();
 });
 
 final deletePlantUseCaseProvider = Provider<DeletePlantUseCase>((ref) {
-  throw UnimplementedError('DeletePlantUseCase provider needs to be implemented');
+  return GetIt.instance<DeletePlantUseCase>();
 });
 
 // Enums (ensure these are defined elsewhere or define them here)

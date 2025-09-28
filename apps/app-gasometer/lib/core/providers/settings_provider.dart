@@ -3,14 +3,6 @@ import 'dependency_providers.dart';
 
 // Settings State class
 class SettingsState {
-  final bool isDarkMode;
-  final String selectedLanguage;
-  final String selectedCurrency;
-  final bool notificationsEnabled;
-  final bool analyticsEnabled;
-  final bool autoBackupEnabled;
-  final bool isLoading;
-  final String? errorMessage;
 
   const SettingsState({
     this.isDarkMode = false,
@@ -22,6 +14,25 @@ class SettingsState {
     this.isLoading = false,
     this.errorMessage,
   });
+
+  factory SettingsState.fromJson(Map<String, dynamic> json) {
+    return SettingsState(
+      isDarkMode: json['isDarkMode'] as bool? ?? false,
+      selectedLanguage: json['selectedLanguage'] as String? ?? 'pt',
+      selectedCurrency: json['selectedCurrency'] as String? ?? 'BRL',
+      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      analyticsEnabled: json['analyticsEnabled'] as bool? ?? true,
+      autoBackupEnabled: json['autoBackupEnabled'] as bool? ?? true,
+    );
+  }
+  final bool isDarkMode;
+  final String selectedLanguage;
+  final String selectedCurrency;
+  final bool notificationsEnabled;
+  final bool analyticsEnabled;
+  final bool autoBackupEnabled;
+  final bool isLoading;
+  final String? errorMessage;
 
   SettingsState copyWith({
     bool? isDarkMode,
@@ -55,27 +66,16 @@ class SettingsState {
       'autoBackupEnabled': autoBackupEnabled,
     };
   }
-
-  factory SettingsState.fromJson(Map<String, dynamic> json) {
-    return SettingsState(
-      isDarkMode: json['isDarkMode'] as bool? ?? false,
-      selectedLanguage: json['selectedLanguage'] as String? ?? 'pt',
-      selectedCurrency: json['selectedCurrency'] as String? ?? 'BRL',
-      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      analyticsEnabled: json['analyticsEnabled'] as bool? ?? true,
-      autoBackupEnabled: json['autoBackupEnabled'] as bool? ?? true,
-    );
-  }
 }
 
 // Settings State Notifier
 class SettingsNotifier extends StateNotifier<SettingsState> {
-  final HiveStorageService _storage;
-  static const String _settingsKey = 'gasometer_settings';
 
   SettingsNotifier(this._storage) : super(const SettingsState()) {
     _loadSettings();
   }
+  final HiveStorageService _storage;
+  static const String _settingsKey = 'gasometer_settings';
 
   Future<void> _loadSettings() async {
     try {

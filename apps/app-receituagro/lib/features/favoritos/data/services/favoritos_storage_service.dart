@@ -28,7 +28,7 @@ class FavoritosStorageService implements IFavoritosStorage {
       final tipoKey = _storageKeys[tipo];
       if (tipoKey == null) return [];
 
-      final favoritos = _repository.getFavoritosByTipo(tipoKey);
+      final favoritos = await _repository.getFavoritosByTipoAsync(tipoKey);
       return favoritos.map((f) => f.itemId).toList();
     } catch (e) {
       throw FavoritosException('Erro ao buscar IDs favoritos: $e', tipo: tipo);
@@ -75,7 +75,7 @@ class FavoritosStorageService implements IFavoritosStorage {
       final tipoKey = _storageKeys[tipo];
       if (tipoKey == null) return false;
 
-      return _repository.isFavorito(tipoKey, id);
+      return await _repository.isFavorito(tipoKey, id);
     } catch (e) {
       throw FavoritosException('Erro ao verificar favorito: $e', tipo: tipo, id: id);
     }
@@ -111,7 +111,7 @@ class FavoritosStorageService implements IFavoritosStorage {
       // Futura integração com Firebase será implementada quando necessário
       
       // Por enquanto, invalida estatísticas para forçar reload
-      final stats = _repository.getFavoritosStats();
+      final stats = await _repository.getFavoritosStats();
       developer.log('Favoritos sincronizados - Stats: $stats', name: 'FavoritosStorageService');
     } catch (e) {
       throw FavoritosException('Erro ao sincronizar favoritos: $e');
@@ -215,7 +215,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
     try {
-      final defensivo = ReceitaAgroHiveService.getFitossanitarioById(id);
+      final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(id);
       if (defensivo != null) {
         return {
           'nomeComum': defensivo.nomeComum,
@@ -240,7 +240,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolvePraga(String id) async {
     try {
-      final praga = ReceitaAgroHiveService.getPragaById(id);
+      final praga = await ReceitaAgroHiveService.getPragaById(id);
       if (praga != null) {
         return {
           'nomeComum': praga.nomeComum,
@@ -266,7 +266,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveDiagnostico(String id) async {
     try {
-      final diagnostico = ReceitaAgroHiveService.getDiagnosticoById(id);
+      final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(id);
       if (diagnostico != null) {
         return {
           'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
@@ -293,7 +293,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveCultura(String id) async {
     try {
-      final cultura = ReceitaAgroHiveService.getCulturaById(id);
+      final cultura = await ReceitaAgroHiveService.getCulturaById(id);
       if (cultura != null) {
         return {
           'nomeCultura': cultura.cultura,
@@ -408,13 +408,17 @@ class FavoritosValidatorService implements IFavoritosValidator {
     try {
       switch (tipo) {
         case TipoFavorito.defensivo:
-          return ReceitaAgroHiveService.getFitossanitarioById(id) != null;
+          final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(id);
+          return defensivo != null;
         case TipoFavorito.praga:
-          return ReceitaAgroHiveService.getPragaById(id) != null;
+          final praga = await ReceitaAgroHiveService.getPragaById(id);
+          return praga != null;
         case TipoFavorito.diagnostico:
-          return ReceitaAgroHiveService.getDiagnosticoById(id) != null;
+          final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(id);
+          return diagnostico != null;
         case TipoFavorito.cultura:
-          return ReceitaAgroHiveService.getCulturaById(id) != null;
+          final cultura = await ReceitaAgroHiveService.getCulturaById(id);
+          return cultura != null;
         default:
           return false;
       }

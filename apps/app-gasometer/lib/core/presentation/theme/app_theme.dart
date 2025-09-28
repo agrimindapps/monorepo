@@ -6,10 +6,10 @@ import '../../theme/gasometer_theme.dart';
 /// Wrapper para manter compatibilidade com código existente
 /// Mapeia para o GasometerTheme atual
 class AppTheme {
-  /// Instância única para acesso estático
-  static final AppTheme _instance = AppTheme._internal();
   factory AppTheme() => _instance;
   AppTheme._internal();
+  /// Instância única para acesso estático
+  static final AppTheme _instance = AppTheme._internal();
 
   /// Cores do tema
   static AppColors get colors => AppColors._instance;
@@ -46,9 +46,9 @@ class AppTheme {
 
 /// Classe para cores do tema com compatibility layer
 class AppColors {
-  static final AppColors _instance = AppColors._internal();
   factory AppColors() => _instance;
   AppColors._internal();
+  static final AppColors _instance = AppColors._internal();
 
   // Cores primárias
   Color get primary => GasometerColors.primary;
@@ -73,7 +73,7 @@ class AppColors {
   Color get onSurfaceVariant => Colors.black54;
 
   // Cores de container de erro
-  Color get errorContainer => GasometerColors.danger.withOpacity(0.1);
+  Color get errorContainer => GasometerColors.danger.withValues(alpha: 0.1);
   Color get onErrorContainer => GasometerColors.danger;
 
   // Cores de outline
@@ -82,9 +82,9 @@ class AppColors {
 
 /// Classe para estilos de texto com compatibility layer
 class AppTextStyles {
-  static final AppTextStyles _instance = AppTextStyles._internal();
   factory AppTextStyles() => _instance;
   AppTextStyles._internal();
+  static final AppTextStyles _instance = AppTextStyles._internal();
 
   // Display styles
   TextStyle? get displayLarge => const TextStyle(

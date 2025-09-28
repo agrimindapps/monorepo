@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 /// Interface para repositórios de dados estáticos
 /// Princípio: Dependency Inversion Principle

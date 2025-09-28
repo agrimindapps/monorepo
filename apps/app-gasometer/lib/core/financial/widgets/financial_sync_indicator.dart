@@ -1,5 +1,6 @@
 /// Financial Sync Status Indicator Widget
 /// Shows sync status for financial data with appropriate visual cues
+library;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,10 +8,6 @@ import '../financial_sync_service.dart';
 
 /// Financial sync status indicator widget
 class FinancialSyncIndicator extends StatelessWidget {
-  final String? entityId;
-  final bool showLabel;
-  final double size;
-  final bool showDetails;
 
   const FinancialSyncIndicator({
     super.key,
@@ -19,6 +16,10 @@ class FinancialSyncIndicator extends StatelessWidget {
     this.size = 24.0,
     this.showDetails = false,
   });
+  final String? entityId;
+  final bool showLabel;
+  final double size;
+  final bool showDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +214,7 @@ class FinancialSyncIndicator extends StatelessWidget {
   _StatusConfig _getStatusConfig(FinancialSyncStatus status, ThemeData theme) {
     switch (status) {
       case FinancialSyncStatus.synced:
-        return _StatusConfig(
+        return const _StatusConfig(
           icon: Icons.check_circle,
           color: Colors.green,
           label: 'Sincronizado',
@@ -221,7 +222,7 @@ class FinancialSyncIndicator extends StatelessWidget {
         );
 
       case FinancialSyncStatus.pending:
-        return _StatusConfig(
+        return const _StatusConfig(
           icon: Icons.schedule,
           color: Colors.orange,
           label: 'Pendente',
@@ -229,7 +230,7 @@ class FinancialSyncIndicator extends StatelessWidget {
         );
 
       case FinancialSyncStatus.syncing:
-        return _StatusConfig(
+        return const _StatusConfig(
           icon: Icons.sync,
           color: Colors.blue,
           label: 'Sincronizando',
@@ -237,7 +238,7 @@ class FinancialSyncIndicator extends StatelessWidget {
         );
 
       case FinancialSyncStatus.retrying:
-        return _StatusConfig(
+        return const _StatusConfig(
           icon: Icons.refresh,
           color: Colors.amber,
           label: 'Tentando novamente',
@@ -245,7 +246,7 @@ class FinancialSyncIndicator extends StatelessWidget {
         );
 
       case FinancialSyncStatus.failed:
-        return _StatusConfig(
+        return const _StatusConfig(
           icon: Icons.error,
           color: Colors.red,
           label: 'Falhou',
@@ -253,7 +254,7 @@ class FinancialSyncIndicator extends StatelessWidget {
         );
 
       case FinancialSyncStatus.validationFailed:
-        return _StatusConfig(
+        return const _StatusConfig(
           icon: Icons.warning,
           color: Colors.deepOrange,
           label: 'Validação falhou',
@@ -265,10 +266,6 @@ class FinancialSyncIndicator extends StatelessWidget {
 
 /// Status configuration class
 class _StatusConfig {
-  final IconData icon;
-  final Color color;
-  final String label;
-  final String description;
 
   const _StatusConfig({
     required this.icon,
@@ -276,4 +273,8 @@ class _StatusConfig {
     required this.label,
     required this.description,
   });
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String description;
 }

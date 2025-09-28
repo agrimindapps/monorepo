@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/core.dart';
 
 import '../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../core/services/diagnostico_entity_resolver.dart';
@@ -82,19 +82,29 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
     setState(() => _isLoadingCompatibility = false);
   }
 
-  void _onSearchChanged(String query) {
-    setState(() {
-      if (query.isEmpty) {
+  void _onSearchChanged(String query) async {
+    if (query.isEmpty) {
+      setState(() {
         _filteredDefensivos = List.from(_allDefensivos);
-      } else {
-        _filteredDefensivos = _allDefensivos.where((defensivo) {
-          final resolvedName = _resolver.resolveDefensivoNome(
-            nomeDefensivo: defensivo,
-          );
-          return resolvedName.toLowerCase().contains(query.toLowerCase());
-        }).toList();
+      });
+      return;
+    }
+
+    final filtered = <String>[];
+    for (final defensivo in _allDefensivos) {
+      final resolvedName = await _resolver.resolveDefensivoNome(
+        nomeDefensivo: defensivo,
+      );
+      if (resolvedName.toLowerCase().contains(query.toLowerCase())) {
+        filtered.add(defensivo);
       }
-    });
+    }
+    
+    if (mounted) {
+      setState(() {
+        _filteredDefensivos = filtered;
+      });
+    }
   }
 
   @override
@@ -127,10 +137,9 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName = _resolver.resolvePragaNome(
-      idPraga: widget.pragaPorCultura.praga.idReg,
-      nomePraga: widget.pragaPorCultura.praga.nomeComum,
-    );
+    final pragaName = widget.pragaPorCultura.praga.nomeComum ?? 
+                     widget.pragaPorCultura.praga.nomeCientifico ??
+                     'Praga não identificada';
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -328,85 +337,91 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
 
   Widget _buildDefensivoTile(BuildContext context, String defensivo, int index) {
     final theme = Theme.of(context);
-    final resolvedName = _resolver.resolveDefensivoNome(nomeDefensivo: defensivo);
     final compatibility = _compatibilityCache[defensivo];
 
-    return RepaintBoundary(
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _getCompatibilityBorderColor(compatibility),
-          ),
-        ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: Container(
-            width: 40,
-            height: 40,
+    return FutureBuilder<String>(
+      future: _resolver.resolveDefensivoNome(nomeDefensivo: defensivo),
+      builder: (context, snapshot) {
+        final resolvedName = snapshot.data ?? defensivo;
+        
+        return RepaintBoundary(
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
-              color: _getCompatibilityColor(compatibility).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _getCompatibilityBorderColor(compatibility),
+              ),
             ),
-            child: Icon(
-              FontAwesomeIcons.vial,
-              color: _getCompatibilityColor(compatibility),
-              size: 16,
-            ),
-          ),
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  resolvedName,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _getCompatibilityColor(compatibility).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  FontAwesomeIcons.vial,
+                  color: _getCompatibilityColor(compatibility),
+                  size: 16,
                 ),
               ),
-              _buildCompatibilityIndicator(compatibility),
-            ],
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Defensivo registrado para esta praga',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (compatibility != null && !compatibility.isValid)
-                ...compatibility.issues.take(1).map((issue) => Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '⚠️ $issue',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange.shade700,
-                      fontWeight: FontWeight.w500,
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      resolvedName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   ),
-                )),
-            ],
+                  _buildCompatibilityIndicator(compatibility),
+                ],
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Defensivo registrado para esta praga',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (compatibility != null && !compatibility.isValid)
+                    ...compatibility.issues.take(1).map((issue) => Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '⚠️ $issue',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )),
+                ],
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                widget.onDefensivoTap?.call();
+                // Implementar navegação para detalhes do defensivo
+              },
+            ),
           ),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            size: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          onTap: () {
-            Navigator.of(context).pop();
-            widget.onDefensivoTap?.call();
-            // Implementar navegação para detalhes do defensivo
-          },
-        ),
-      ),
+        );
+      },
     );
   }
 

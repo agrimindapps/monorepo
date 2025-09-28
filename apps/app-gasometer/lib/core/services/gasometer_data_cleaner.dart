@@ -1,7 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data_cleaner_service.dart';
 import 'database_inspector_service.dart';

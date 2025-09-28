@@ -10,9 +10,6 @@ import '../theme/design_tokens.dart';
 /// 
 /// TODO: Considerar unificação das APIs no futuro
 class FormSectionWidget extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
 
   const FormSectionWidget({
     super.key,
@@ -34,12 +31,15 @@ class FormSectionWidget extends StatelessWidget {
       children: children,
     );
   }
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding:
-          EdgeInsets.only(bottom: GasometerDesignTokens.spacingSectionSpacing),
+          const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSectionSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,7 +50,7 @@ class FormSectionWidget extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
                 size: GasometerDesignTokens.iconSizeButton,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingSm),
+              const SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(
                 title,
                 style: TextStyle(
@@ -61,7 +61,7 @@ class FormSectionWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: GasometerDesignTokens.spacingLg),
+          const SizedBox(height: GasometerDesignTokens.spacingLg),
           ...children,
         ],
       ),

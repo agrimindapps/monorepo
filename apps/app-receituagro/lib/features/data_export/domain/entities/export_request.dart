@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Enumeration of available export formats
 enum ExportFormat {

@@ -6,16 +6,6 @@ import '../errors/unified_error_handler.dart';
 
 /// ✅ UX ENHANCEMENT: Enhanced image picker with progress, retry, and better feedback
 class EnhancedImagePicker extends StatefulWidget {
-  final String? currentImagePath;
-  final Function(String?) onImageChanged;
-  final String label;
-  final String? hint;
-  final bool required;
-  final double? maxWidth;
-  final double? maxHeight;
-  final int? imageQuality;
-  final bool showPreview;
-  final String? emptyStateText;
 
   const EnhancedImagePicker({
     super.key,
@@ -30,6 +20,16 @@ class EnhancedImagePicker extends StatefulWidget {
     this.showPreview = true,
     this.emptyStateText,
   });
+  final String? currentImagePath;
+  final Function(String?) onImageChanged;
+  final String label;
+  final String? hint;
+  final bool required;
+  final double? maxWidth;
+  final double? maxHeight;
+  final int? imageQuality;
+  final bool showPreview;
+  final String? emptyStateText;
 
   @override
   State<EnhancedImagePicker> createState() => _EnhancedImagePickerState();
@@ -99,7 +99,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.primary,
@@ -142,7 +142,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         ),
       ),
       child: widget.showPreview ? _buildFullPreview() : _buildCompactPreview(),
@@ -153,7 +153,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
     return Stack(
       children: [
         // Image preview
-        Container(
+        SizedBox(
           width: double.infinity,
           height: double.infinity,
           child: ClipRRect(
@@ -176,10 +176,10 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.6),
+                Colors.black.withValues(alpha: 0.6),
                 Colors.transparent,
                 Colors.transparent,
-                Colors.black.withOpacity(0.6),
+                Colors.black.withValues(alpha: 0.6),
               ],
             ),
           ),
@@ -215,10 +215,10 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
@@ -226,10 +226,10 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
                   color: Colors.green,
                   size: 16,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   'Imagem adicionada',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -255,7 +255,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             child: ClipRRect(
@@ -283,7 +283,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
               children: [
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       color: Colors.green,
                       size: 16,
@@ -340,10 +340,10 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
             style: BorderStyle.solid,
           ),
         ),
@@ -381,7 +381,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(11),
       ),
       child: Column(
@@ -416,9 +416,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
     required String tooltip,
     bool isDestructive = false,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         shape: BoxShape.circle,
       ),
       child: IconButton(

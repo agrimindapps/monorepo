@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/core.dart';
 
 /// Handler de estados para a página de pragas por cultura
 /// Centraliza todos os estados: inicial, loading, error, empty

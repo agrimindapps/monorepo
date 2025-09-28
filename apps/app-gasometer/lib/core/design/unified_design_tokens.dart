@@ -237,7 +237,7 @@ abstract class UnifiedDesignTokens {
 
   /// Retorna cor premium com opacidade especificada
   static Color getPremiumBackgroundWithOpacity(double opacity) {
-    return colorPremiumBackground.withOpacity(opacity);
+    return colorPremiumBackground.withValues(alpha: opacity);
   }
 
   /// Retorna cor de superfície baseada no nível de elevação
@@ -254,7 +254,7 @@ abstract class UnifiedDesignTokens {
 
   /// Helper para cores com opacidade
   static Color withOpacity(Color color, double opacity) {
-    return color.withOpacity(opacity);
+    return color.withValues(alpha: opacity);
   }
 
   /// Helper para padding

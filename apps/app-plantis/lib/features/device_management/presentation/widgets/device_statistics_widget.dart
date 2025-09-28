@@ -72,7 +72,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
             Text(
               'Registre pelo menos um dispositivo para ver estatísticas.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -179,9 +179,9 @@ class DeviceStatisticsWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -323,7 +323,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
                   value: count / total,
                   backgroundColor: Colors.grey.shade200,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor.withOpacity(0.7),
+                    Theme.of(context).primaryColor.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -370,7 +370,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -472,7 +472,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
         Icon(
           icon,
           size: 20,
-          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -542,7 +542,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
                       'Seus dispositivos estão bem gerenciados.',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                       ),
                     ),
                   ],

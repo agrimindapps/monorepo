@@ -7,38 +7,6 @@ import '../../theme/design_tokens.dart';
 /// Fornece interface mais engajante para quando não há dados
 /// para exibir, com ícones, mensagens e ações customizáveis.
 class EnhancedEmptyState extends StatelessWidget {
-  /// Ícone principal do estado vazio
-  final IconData icon;
-  
-  /// Título principal
-  final String title;
-  
-  /// Descrição/subtítulo
-  final String description;
-  
-  /// Texto do botão de ação principal
-  final String? actionLabel;
-  
-  /// Callback do botão de ação
-  final VoidCallback? onAction;
-  
-  /// Texto do botão de ação secundária
-  final String? secondaryActionLabel;
-  
-  /// Callback do botão de ação secundária
-  final VoidCallback? onSecondaryAction;
-  
-  /// Cor do ícone
-  final Color? iconColor;
-  
-  /// Cor de fundo do container do ícone
-  final Color? iconBackgroundColor;
-  
-  /// Tamanho do ícone
-  final double? iconSize;
-  
-  /// Altura total do widget
-  final double? height;
 
   const EnhancedEmptyState({
     super.key,
@@ -60,7 +28,7 @@ class EnhancedEmptyState extends StatelessWidget {
     VoidCallback? onAddMaintenance,
     VoidCallback? onViewGuides,
   }) {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       icon: Icons.build_outlined,
       title: 'Nenhuma manutenção registrada',
       description: 'Use o botão + para registrar a primeira manutenção do seu veículo e acompanhar o histórico',
@@ -103,6 +71,38 @@ class EnhancedEmptyState extends StatelessWidget {
       height: height ?? 300,
     );
   }
+  /// Ícone principal do estado vazio
+  final IconData icon;
+  
+  /// Título principal
+  final String title;
+  
+  /// Descrição/subtítulo
+  final String description;
+  
+  /// Texto do botão de ação principal
+  final String? actionLabel;
+  
+  /// Callback do botão de ação
+  final VoidCallback? onAction;
+  
+  /// Texto do botão de ação secundária
+  final String? secondaryActionLabel;
+  
+  /// Callback do botão de ação secundária
+  final VoidCallback? onSecondaryAction;
+  
+  /// Cor do ícone
+  final Color? iconColor;
+  
+  /// Cor de fundo do container do ícone
+  final Color? iconBackgroundColor;
+  
+  /// Tamanho do ícone
+  final double? iconSize;
+  
+  /// Altura total do widget
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -113,12 +113,12 @@ class EnhancedEmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildIconContainer(context),
-            SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             _buildTitle(context),
-            SizedBox(height: GasometerDesignTokens.spacingSm),
+            const SizedBox(height: GasometerDesignTokens.spacingSm),
             _buildDescription(context),
             if (actionLabel != null || secondaryActionLabel != null)
-              SizedBox(height: GasometerDesignTokens.spacingXxxl),
+              const SizedBox(height: GasometerDesignTokens.spacingXxxl),
             if (actionLabel != null || secondaryActionLabel != null)
               _buildActions(context),
           ],
@@ -140,7 +140,7 @@ class EnhancedEmptyState extends StatelessWidget {
       child: Icon(
         icon,
         color: iconColor ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+            Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
         size: iconSize ?? GasometerDesignTokens.iconSizeXxxl + 16,
       ),
     );
@@ -167,7 +167,7 @@ class EnhancedEmptyState extends StatelessWidget {
         description,
         style: TextStyle(
           fontSize: GasometerDesignTokens.fontSizeMd,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
         ),
         textAlign: TextAlign.center,
       ),
@@ -209,7 +209,7 @@ class EnhancedEmptyState extends StatelessWidget {
 
     if (actionLabel != null && onAction != null) {
       if (actions.isNotEmpty) {
-        actions.add(SizedBox(width: GasometerDesignTokens.spacingLg));
+        actions.add(const SizedBox(width: GasometerDesignTokens.spacingLg));
       }
       
       actions.add(
@@ -231,7 +231,7 @@ class EnhancedEmptyState extends StatelessWidget {
             ),
             child: Text(
               actionLabel!,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeLg,
                 fontWeight: GasometerDesignTokens.fontWeightSemiBold,
               ),

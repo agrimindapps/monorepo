@@ -289,7 +289,7 @@ class AccountSectionWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
         ),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -353,7 +353,7 @@ class AccountSectionWidget extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text(
+                              const Text(
                                 'Premium Ativo',
                                 style: TextStyle(
                                   fontSize: 18,
@@ -365,7 +365,7 @@ class AccountSectionWidget extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
+                                  gradient: const LinearGradient(
                                     colors: [
                                       GasometerDesignTokens.colorPremiumAccent,
                                       GasometerDesignTokens.colorPrimary,
@@ -380,7 +380,7 @@ class AccountSectionWidget extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'ATIVO',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
@@ -422,7 +422,7 @@ class AccountSectionWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Benefícios Ativos',
                         style: TextStyle(
                           fontSize: 14,
@@ -464,7 +464,7 @@ class AccountSectionWidget extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () => context.go('/premium'),
                     icon: const Icon(Icons.settings, size: 20),
-                    label: Text(
+                    label: const Text(
                       'Gerenciar Assinatura',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -544,14 +544,14 @@ class AccountSectionWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.auto_awesome,
                                 color: Colors.white,
                                 size: 16,
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6),
                               Text(
                                 'GasOMeter Premium',
                                 style: TextStyle(
@@ -560,8 +560,8 @@ class AccountSectionWidget extends StatelessWidget {
                                   color: Colors.white,
                                 ),
                               ),
-                              const SizedBox(width: 6),
-                              const Icon(
+                              SizedBox(width: 6),
+                              Icon(
                                 Icons.auto_awesome,
                                 color: Colors.white,
                                 size: 16,

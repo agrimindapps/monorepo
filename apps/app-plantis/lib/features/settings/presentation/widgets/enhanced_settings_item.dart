@@ -86,7 +86,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
   Color _getIconColor(ThemeData theme) {
     if (!widget.enabled) {
-      return theme.colorScheme.onSurface.withOpacity(0.38);
+      return theme.colorScheme.onSurface.withValues(alpha: 0.38);
     }
 
     if (widget.iconColor != null) {
@@ -109,21 +109,21 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
   Color _getBackgroundColor(ThemeData theme) {
     if (!widget.enabled) {
-      return theme.colorScheme.surfaceContainerHighest.withOpacity(0.5);
+      return theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     }
 
     if (_isHovered) {
       switch (widget.type) {
         case SettingsItemType.normal:
-          return PlantisColors.primaryLight.withOpacity(0.08);
+          return PlantisColors.primaryLight.withValues(alpha: 0.08);
         case SettingsItemType.premium:
-          return PlantisColors.sunLight.withOpacity(0.08);
+          return PlantisColors.sunLight.withValues(alpha: 0.08);
         case SettingsItemType.danger:
-          return PlantisColors.errorLight.withOpacity(0.08);
+          return PlantisColors.errorLight.withValues(alpha: 0.08);
         case SettingsItemType.info:
-          return PlantisColors.waterLight.withOpacity(0.08);
+          return PlantisColors.waterLight.withValues(alpha: 0.08);
         case SettingsItemType.success:
-          return PlantisColors.successLight.withOpacity(0.08);
+          return PlantisColors.successLight.withValues(alpha: 0.08);
       }
     }
 
@@ -135,9 +135,9 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
       return SizedBox(
         width: 32,
         height: 32,
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: _getIconColor(theme).withOpacity(0.1),
+            color: _getIconColor(theme).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
@@ -164,7 +164,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
             widget.enabled
                 ? [
                   BoxShadow(
-                    color: _getIconColor(theme).withOpacity(0.3),
+                    color: _getIconColor(theme).withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -214,7 +214,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
       color:
           widget.enabled
               ? theme.colorScheme.onSurfaceVariant
-              : theme.colorScheme.onSurface.withOpacity(0.38),
+              : theme.colorScheme.onSurface.withValues(alpha: 0.38),
       size: 20,
     );
   }
@@ -254,7 +254,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                         !widget.isLast
                             ? Border(
                               bottom: BorderSide(
-                                color: theme.colorScheme.outline.withOpacity(
+                                color: theme.colorScheme.outline.withValues(alpha: 
                                   0.3,
                                 ),
                                 width: 0.5,
@@ -290,7 +290,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                           widget.enabled
                                               ? theme.colorScheme.onSurface
                                               : theme.colorScheme.onSurface
-                                                  .withOpacity(0.38),
+                                                  .withValues(alpha: 0.38),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -338,7 +338,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                       widget.enabled
                                           ? theme.colorScheme.onSurfaceVariant
                                           : theme.colorScheme.onSurface
-                                              .withOpacity(0.38),
+                                              .withValues(alpha: 0.38),
                                   fontSize: 14,
                                 ),
                               ),

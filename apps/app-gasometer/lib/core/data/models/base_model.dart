@@ -3,6 +3,20 @@ import 'package:hive/hive.dart';
 /// Base model class for all Hive models in the GasOMeter app
 /// Provides common fields for sync and versioning
 abstract class BaseModel extends HiveObject {
+
+  BaseModel({
+    this.id,
+    this.createdAt,
+    this.updatedAt,
+    isDeleted = false,
+    this.needsSync = true,
+    this.lastSyncAt,
+    version = 1,
+  }) {
+    id ??= DateTime.now().millisecondsSinceEpoch.toString();
+    createdAt ??= DateTime.now().millisecondsSinceEpoch;
+    updatedAt ??= DateTime.now().millisecondsSinceEpoch;
+  }
   @HiveField(0)
   String? id;
 
@@ -23,20 +37,6 @@ abstract class BaseModel extends HiveObject {
 
   @HiveField(6)
   int version = 1;
-
-  BaseModel({
-    this.id,
-    this.createdAt,
-    this.updatedAt,
-    isDeleted = false,
-    this.needsSync = true,
-    this.lastSyncAt,
-    version = 1,
-  }) {
-    id ??= DateTime.now().millisecondsSinceEpoch.toString();
-    createdAt ??= DateTime.now().millisecondsSinceEpoch;
-    updatedAt ??= DateTime.now().millisecondsSinceEpoch;
-  }
 
   /// Convert to map for JSON serialization
   Map<String, dynamic> toMap() {

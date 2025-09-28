@@ -15,18 +15,18 @@ enum ProviderState {
 
 /// Base provider with consistent error handling
 abstract class BaseProvider extends ChangeNotifier {
-  final ErrorHandler _errorHandler;
-  final ErrorLogger _logger;
-
-  ProviderState _state = ProviderState.initial;
-  AppError? _error;
-  bool _disposed = false;
 
   BaseProvider({
     ErrorHandler? errorHandler,
     ErrorLogger? errorLogger,
   })  : _errorHandler = errorHandler ?? ErrorHandler(ErrorLogger()),
         _logger = errorLogger ?? ErrorLogger();
+  final ErrorHandler _errorHandler;
+  final ErrorLogger _logger;
+
+  ProviderState _state = ProviderState.initial;
+  AppError? _error;
+  bool _disposed = false;
 
   // State getters
   ProviderState get state => _state;

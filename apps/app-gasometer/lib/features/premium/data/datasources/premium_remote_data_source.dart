@@ -41,9 +41,9 @@ abstract class PremiumRemoteDataSource {
 
 @LazySingleton(as: PremiumRemoteDataSource)
 class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
-  final core.ISubscriptionRepository subscriptionRepository;
 
   PremiumRemoteDataSourceImpl(this.subscriptionRepository);
+  final core.ISubscriptionRepository subscriptionRepository;
 
   @override
   Stream<core.SubscriptionEntity?> get subscriptionStatus =>

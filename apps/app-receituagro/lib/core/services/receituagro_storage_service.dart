@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 /// Classe para representar falhas no sistema
 class Failure {

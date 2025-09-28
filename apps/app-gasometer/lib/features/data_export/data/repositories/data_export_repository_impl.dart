@@ -14,9 +14,9 @@ import '../../domain/services/data_export_service.dart';
 /// Implementação do repositório de exportação de dados LGPD
 @LazySingleton(as: DataExportRepository)
 class DataExportRepositoryImpl implements DataExportRepository {
-  final DataExportService _exportService;
   
   DataExportRepositoryImpl() : _exportService = DataExportService.instance;
+  final DataExportService _exportService;
 
   @override
   Future<ExportResult> exportUserData(
@@ -201,7 +201,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       final userData = await _exportService.collectUserData(request, null);
       
       int totalRecords = 0;
-      int totalCategories = userData.keys.length;
+      final int totalCategories = userData.keys.length;
       
       for (final data in userData.values) {
         if (data is List) {

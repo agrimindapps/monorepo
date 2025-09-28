@@ -1,24 +1,20 @@
 import 'dart:io';
 
+import 'package:core/core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-
-import 'package:core/core.dart';
 
 import '../presentation/providers/vehicle_device_provider.dart';
 
 /// Serviço de integração do Device Management com o fluxo de autenticação
-@lazySingleton
 class DeviceIntegrationService {
-  final DeviceManagementService _coreDeviceService;
-  final DeviceInfoPlugin _deviceInfoPlugin;
 
   DeviceIntegrationService(
     this._coreDeviceService,
     this._deviceInfoPlugin,
   );
+  final DeviceManagementService _coreDeviceService;
+  final DeviceInfoPlugin _deviceInfoPlugin;
 
   /// Valida e registra dispositivo durante o login
   /// Retorna true se o dispositivo foi validado com sucesso
@@ -175,9 +171,6 @@ class DeviceIntegrationService {
 
 /// Resultado da validação de dispositivo
 class DeviceValidationResult {
-  final bool isSuccess;
-  final String? errorMessage;
-  final DeviceEntity? deviceEntity;
 
   DeviceValidationResult._(
     this.isSuccess,
@@ -190,15 +183,15 @@ class DeviceValidationResult {
 
   factory DeviceValidationResult.failure(String errorMessage) =>
       DeviceValidationResult._(false, errorMessage, null);
+  final bool isSuccess;
+  final String? errorMessage;
+  final DeviceEntity? deviceEntity;
 
   bool get isFailure => !isSuccess;
 }
 
 /// Resultado da obtenção de informações do dispositivo
 class DeviceInfoResult {
-  final bool isSuccess;
-  final String? error;
-  final DeviceEntity? deviceEntity;
 
   DeviceInfoResult._(this.isSuccess, this.error, this.deviceEntity);
 
@@ -207,6 +200,9 @@ class DeviceInfoResult {
 
   factory DeviceInfoResult.failure(String error) =>
       DeviceInfoResult._(false, error, null);
+  final bool isSuccess;
+  final String? error;
+  final DeviceEntity? deviceEntity;
 
   bool get isFailure => !isSuccess;
 }

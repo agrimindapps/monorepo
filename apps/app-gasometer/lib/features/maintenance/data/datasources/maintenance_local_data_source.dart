@@ -21,9 +21,9 @@ abstract class MaintenanceLocalDataSource {
 
 @LazySingleton(as: MaintenanceLocalDataSource)
 class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
-  final LocalDataService _localDataService;
 
   MaintenanceLocalDataSourceImpl(this._localDataService);
+  final LocalDataService _localDataService;
 
   @override
   Future<List<MaintenanceEntity>> getAllMaintenanceRecords() async {

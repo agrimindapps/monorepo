@@ -19,12 +19,6 @@ import '../../domain/usecases/update_fuel_record.dart';
 
 // Statistics models for caching
 class FuelStatistics {
-  final double totalLiters;
-  final double totalCost;
-  final double averagePrice;
-  final double averageConsumption;
-  final int totalRecords;
-  final DateTime lastUpdated;
 
   const FuelStatistics({
     required this.totalLiters,
@@ -34,6 +28,12 @@ class FuelStatistics {
     required this.totalRecords,
     required this.lastUpdated,
   });
+  final double totalLiters;
+  final double totalCost;
+  final double averagePrice;
+  final double averageConsumption;
+  final int totalRecords;
+  final DateTime lastUpdated;
 
   bool get needsRecalculation {
     final now = DateTime.now();
@@ -44,6 +44,34 @@ class FuelStatistics {
 
 @injectable
 class FuelProvider extends ChangeNotifier {
+
+  FuelProvider({
+    required GetAllFuelRecords getAllFuelRecords,
+    required GetFuelRecordsByVehicle getFuelRecordsByVehicle,
+    required AddFuelRecord addFuelRecord,
+    required UpdateFuelRecord updateFuelRecord,
+    required DeleteFuelRecord deleteFuelRecord,
+    required SearchFuelRecords searchFuelRecords,
+    required GetAverageConsumption getAverageConsumption,
+    required GetTotalSpent getTotalSpent,
+    required GetRecentFuelRecords getRecentFuelRecords,
+    required ErrorHandler errorHandler,
+    required ErrorReporter errorReporter,
+    required core.ConnectivityService connectivityService,
+  })  : _getAllFuelRecords = getAllFuelRecords,
+        _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
+        _addFuelRecord = addFuelRecord,
+        _updateFuelRecord = updateFuelRecord,
+        _deleteFuelRecord = deleteFuelRecord,
+        _searchFuelRecords = searchFuelRecords,
+        _getAverageConsumption = getAverageConsumption,
+        _getTotalSpent = getTotalSpent,
+        _getRecentFuelRecords = getRecentFuelRecords,
+        _errorHandler = errorHandler,
+        _errorReporter = errorReporter,
+        _connectivityService = connectivityService {
+    _initializeConnectivity();
+  }
   final GetAllFuelRecords _getAllFuelRecords;
   final GetFuelRecordsByVehicle _getFuelRecordsByVehicle;
   final AddFuelRecord _addFuelRecord;
@@ -77,34 +105,6 @@ class FuelProvider extends ChangeNotifier {
   // Cached statistics
   FuelStatistics? _cachedStatistics;
   bool _statisticsNeedRecalculation = true;
-
-  FuelProvider({
-    required GetAllFuelRecords getAllFuelRecords,
-    required GetFuelRecordsByVehicle getFuelRecordsByVehicle,
-    required AddFuelRecord addFuelRecord,
-    required UpdateFuelRecord updateFuelRecord,
-    required DeleteFuelRecord deleteFuelRecord,
-    required SearchFuelRecords searchFuelRecords,
-    required GetAverageConsumption getAverageConsumption,
-    required GetTotalSpent getTotalSpent,
-    required GetRecentFuelRecords getRecentFuelRecords,
-    required ErrorHandler errorHandler,
-    required ErrorReporter errorReporter,
-    required core.ConnectivityService connectivityService,
-  })  : _getAllFuelRecords = getAllFuelRecords,
-        _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
-        _addFuelRecord = addFuelRecord,
-        _updateFuelRecord = updateFuelRecord,
-        _deleteFuelRecord = deleteFuelRecord,
-        _searchFuelRecords = searchFuelRecords,
-        _getAverageConsumption = getAverageConsumption,
-        _getTotalSpent = getTotalSpent,
-        _getRecentFuelRecords = getRecentFuelRecords,
-        _errorHandler = errorHandler,
-        _errorReporter = errorReporter,
-        _connectivityService = connectivityService {
-    _initializeConnectivity();
-  }
 
   List<FuelRecordEntity> get fuelRecords {
     // Se há busca ativa, retornar os filtrados; senão, retornar todos
@@ -448,11 +448,11 @@ class FuelProvider extends ChangeNotifier {
 
   AppError _convertFailureToError(Failure failure) {
     if (failure is NetworkFailure) {
-      return NetworkError(
+      return const NetworkError(
         message: 'Erro de conexão ao carregar dados de combustível',
       );
     } else if (failure is ServerFailure) {
-      return ServerError(
+      return const ServerError(
         message: 'Erro do servidor ao processar dados de combustível',
         statusCode: 500,
       );

@@ -1,17 +1,12 @@
 /// Responsive content container with max-width constraints
 /// Provides consistent content layout across different screen sizes
 /// Centers content and applies appropriate padding based on screen size
-library responsive_content_area;
+library;
 
 import 'package:flutter/material.dart';
 import '../../constants/responsive_constants.dart';
 
 class ResponsiveContentArea extends StatelessWidget {
-  final Widget child;
-  final bool constrainWidth;
-  final EdgeInsets? padding;
-  final bool applyHorizontalPadding;
-  final bool applyVerticalPadding;
   
   const ResponsiveContentArea({
     super.key,
@@ -21,6 +16,11 @@ class ResponsiveContentArea extends StatelessWidget {
     this.applyHorizontalPadding = true,
     this.applyVerticalPadding = true,
   });
+  final Widget child;
+  final bool constrainWidth;
+  final EdgeInsets? padding;
+  final bool applyHorizontalPadding;
+  final bool applyVerticalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +65,6 @@ class ResponsiveContentArea extends StatelessWidget {
 
 /// Specialized content area for dashboard/grid layouts
 class ResponsiveGridArea extends StatelessWidget {
-  final Widget child;
-  final int? forceColumns;
-  final double? childAspectRatio;
-  final double mainAxisSpacing;
-  final double crossAxisSpacing;
   
   const ResponsiveGridArea({
     super.key,
@@ -79,6 +74,11 @@ class ResponsiveGridArea extends StatelessWidget {
     this.mainAxisSpacing = 16.0,
     this.crossAxisSpacing = 16.0,
   });
+  final Widget child;
+  final int? forceColumns;
+  final double? childAspectRatio;
+  final double mainAxisSpacing;
+  final double crossAxisSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -95,11 +95,6 @@ class ResponsiveGridArea extends StatelessWidget {
 
 /// Page header that adapts to desktop/mobile layouts
 class ResponsivePageHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final IconData icon;
-  final List<Widget>? actions;
-  final bool showOnMobile;
   
   const ResponsivePageHeader({
     super.key,
@@ -109,6 +104,11 @@ class ResponsivePageHeader extends StatelessWidget {
     this.actions,
     this.showOnMobile = false,
   });
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+  final List<Widget>? actions;
+  final bool showOnMobile;
 
   @override
   Widget build(BuildContext context) {
@@ -181,10 +181,6 @@ class ResponsivePageHeader extends StatelessWidget {
 
 /// Responsive card container with adaptive padding and spacing
 class ResponsiveCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets? padding;
-  final double? elevation;
-  final BorderRadius? borderRadius;
   
   const ResponsiveCard({
     super.key,
@@ -193,6 +189,10 @@ class ResponsiveCard extends StatelessWidget {
     this.elevation,
     this.borderRadius,
   });
+  final Widget child;
+  final EdgeInsets? padding;
+  final double? elevation;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {

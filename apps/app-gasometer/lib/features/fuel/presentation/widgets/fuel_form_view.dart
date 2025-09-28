@@ -20,14 +20,14 @@ import '../../domain/services/fuel_formatter_service.dart';
 import '../providers/fuel_form_provider.dart';
 
 class FuelFormView extends StatelessWidget {
-  final FuelFormProvider formProvider;
-  final VoidCallback? onSubmit;
 
   const FuelFormView({
     super.key,
     required this.formProvider,
     this.onSubmit,
   });
+  final FuelFormProvider formProvider;
+  final VoidCallback? onSubmit;
 
   @override
   Widget build(BuildContext context) {

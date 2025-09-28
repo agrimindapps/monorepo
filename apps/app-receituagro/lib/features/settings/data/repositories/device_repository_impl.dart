@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../datasources/device_local_datasource.dart';

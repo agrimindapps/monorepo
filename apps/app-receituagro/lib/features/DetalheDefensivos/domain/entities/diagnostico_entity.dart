@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entidade de domínio que representa um diagnóstico
 /// 

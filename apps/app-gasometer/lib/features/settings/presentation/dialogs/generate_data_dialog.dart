@@ -149,13 +149,13 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
 
 /// 🎯 Reusable component for vehicle count selection
 class _VehicleCountSelector extends StatelessWidget {
-  final int value;
-  final ValueChanged<int> onChanged;
 
   const _VehicleCountSelector({
     required this.value,
     required this.onChanged,
   });
+  final int value;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -198,13 +198,13 @@ class _VehicleCountSelector extends StatelessWidget {
 
 /// 🎯 Reusable component for history months selection  
 class _HistoryMonthsSelector extends StatelessWidget {
-  final int value;
-  final ValueChanged<int> onChanged;
 
   const _HistoryMonthsSelector({
     required this.value,
     required this.onChanged,
   });
+  final int value;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -247,9 +247,9 @@ class _HistoryMonthsSelector extends StatelessWidget {
 
 /// 🎯 Component to display generation results
 class _GenerationResults extends StatelessWidget {
-  final Map<String, dynamic> results;
 
   const _GenerationResults({required this.results});
+  final Map<String, dynamic> results;
 
   @override
   Widget build(BuildContext context) {

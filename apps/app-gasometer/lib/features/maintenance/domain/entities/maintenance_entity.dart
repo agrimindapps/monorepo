@@ -79,6 +79,36 @@ enum MaintenanceStatus {
 
 /// Entidade principal para manutenções
 class MaintenanceEntity extends BaseSyncEntity {
+
+  const MaintenanceEntity({
+    required super.id,
+    required this.vehicleId,
+    required this.type,
+    required this.status,
+    required this.title,
+    required this.description,
+    required this.cost,
+    required this.serviceDate,
+    required this.odometer,
+    this.workshopName,
+    this.workshopPhone,
+    this.workshopAddress,
+    this.nextServiceDate,
+    this.nextServiceOdometer,
+    this.photosPaths = const [],
+    this.invoicesPaths = const [],
+    this.parts = const {},
+    this.notes,
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+    this.metadata = const {},
+  });
   final String vehicleId;
   final MaintenanceType type;
   final MaintenanceStatus status;
@@ -107,46 +137,6 @@ class MaintenanceEntity extends BaseSyncEntity {
   
   // Metadados do sistema
   final Map<String, dynamic> metadata;
-
-  const MaintenanceEntity({
-    required String id,
-    required this.vehicleId,
-    required this.type,
-    required this.status,
-    required this.title,
-    required this.description,
-    required this.cost,
-    required this.serviceDate,
-    required this.odometer,
-    this.workshopName,
-    this.workshopPhone,
-    this.workshopAddress,
-    this.nextServiceDate,
-    this.nextServiceOdometer,
-    this.photosPaths = const [],
-    this.invoicesPaths = const [],
-    this.parts = const {},
-    this.notes,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-    this.metadata = const {},
-  }) : super(
-    id: id,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-    lastSyncAt: lastSyncAt,
-    isDirty: isDirty,
-    isDeleted: isDeleted,
-    version: version,
-    userId: userId,
-    moduleName: moduleName,
-  );
 
   @override
   List<Object?> get props => [

@@ -11,14 +11,14 @@ import '../widgets/expense_form_view.dart';
 
 /// Dialog modal para adicionar/editar despesas
 class AddExpensePage extends StatefulWidget {
-  final String? vehicleId;
-  final String? editExpenseId;
   
   const AddExpensePage({
     super.key,
     this.vehicleId,
     this.editExpenseId,
   });
+  final String? vehicleId;
+  final String? editExpenseId;
 
   @override
   State<AddExpensePage> createState() => _AddExpensePageState();

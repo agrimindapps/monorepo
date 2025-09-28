@@ -14,6 +14,7 @@
 ///   isRequired: true,
 /// );
 /// ```
+library;
 
 // Import to ensure proper resolution
 import '../architecture/i_field_factory.dart';
@@ -140,7 +141,7 @@ class DropdownFieldConfigBuilder {
   bool _isRequired = false;
   bool _isEnabled = true;
   dynamic _initialValue;
-  List<DropdownOption> _options = [];
+  final List<DropdownOption> _options = [];
   bool _isSearchable = false;
   String? _searchHint;
   bool _allowMultiple = false;

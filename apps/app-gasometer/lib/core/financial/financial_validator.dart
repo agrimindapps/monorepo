@@ -1,5 +1,6 @@
 /// Financial Data Validator for GasOMeter
 /// Provides validation for monetary values and financial data integrity
+library;
 import 'package:core/core.dart';
 
 import '../../features/expenses/data/models/expense_model.dart';
@@ -7,9 +8,6 @@ import '../../features/fuel/data/models/fuel_supply_model.dart';
 
 /// Result class for financial validation
 class FinancialValidationResult {
-  final bool isValid;
-  final List<String> errors;
-  final List<String> warnings;
 
   const FinancialValidationResult({
     required this.isValid,
@@ -28,6 +26,9 @@ class FinancialValidationResult {
       warnings: warnings,
     );
   }
+  final bool isValid;
+  final List<String> errors;
+  final List<String> warnings;
 
   /// Get formatted error message
   String get errorMessage => errors.join('; ');

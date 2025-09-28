@@ -8,9 +8,9 @@ import '../repositories/fuel_repository.dart';
 
 @lazySingleton
 class GetFuelRecordsByVehicle implements UseCase<List<FuelRecordEntity>, GetFuelRecordsByVehicleParams> {
-  final FuelRepository repository;
 
   GetFuelRecordsByVehicle(this.repository);
+  final FuelRepository repository;
 
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> call(GetFuelRecordsByVehicleParams params) async {
@@ -19,9 +19,9 @@ class GetFuelRecordsByVehicle implements UseCase<List<FuelRecordEntity>, GetFuel
 }
 
 class GetFuelRecordsByVehicleParams extends UseCaseParams {
-  final String vehicleId;
 
   const GetFuelRecordsByVehicleParams({required this.vehicleId});
+  final String vehicleId;
 
   @override
   List<Object> get props => [vehicleId];

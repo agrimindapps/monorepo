@@ -170,11 +170,6 @@ class ImagePickerService {
 
 /// Classe para customização de textos do modal
 class ImagePickerTexts {
-  final String cameraTitle;
-  final String cameraSubtitle;
-  final String galleryTitle;
-  final String gallerySubtitle;
-  final String cancelTitle;
 
   const ImagePickerTexts({
     required this.cameraTitle,
@@ -216,6 +211,11 @@ class ImagePickerTexts {
       cancelTitle: 'Cancelar',
     );
   }
+  final String cameraTitle;
+  final String cameraSubtitle;
+  final String galleryTitle;
+  final String gallerySubtitle;
+  final String cancelTitle;
 }
 
 /// Resultado da seleção de imagem

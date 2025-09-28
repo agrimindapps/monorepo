@@ -195,7 +195,7 @@ class DiagnosticoCompatibilityService {
     final issues = <ValidationIssue>[];
 
     // Valida defensivo
-    final defensivo = _defensivoRepository.getById(idDefensivo);
+    final defensivo = await _defensivoRepository.getById(idDefensivo);
     if (defensivo == null) {
       issues.add(ValidationIssue.error(
         'Defensivo com ID $idDefensivo não encontrado'));
@@ -205,14 +205,14 @@ class DiagnosticoCompatibilityService {
     }
 
     // Valida cultura
-    final cultura = _culturaRepository.getById(idCultura);
+    final cultura = await _culturaRepository.getById(idCultura);
     if (cultura == null) {
       issues.add(ValidationIssue.error(
         'Cultura com ID $idCultura não encontrada'));
     }
 
     // Valida praga
-    final praga = _pragasRepository.getById(idPraga);
+    final praga = await _pragasRepository.getById(idPraga);
     if (praga == null) {
       issues.add(ValidationIssue.error(
         'Praga com ID $idPraga não encontrada'));
@@ -291,7 +291,7 @@ class DiagnosticoCompatibilityService {
     final issues = <ValidationIssue>[];
     final warnings = <ValidationWarning>[];
 
-    final defensivo = _defensivoRepository.getById(idDefensivo);
+    final defensivo = await _defensivoRepository.getById(idDefensivo);
     if (defensivo != null) {
       // Verifica se está comercializado
       if (defensivo.comercializado != 1) {

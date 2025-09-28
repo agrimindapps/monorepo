@@ -1,83 +1,100 @@
-import 'package:get_it/get_it.dart';
-import '../../../../core/models/pragas_hive.dart';
+import 'package:core/core.dart';
+
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
+import '../mappers/praga_mapper.dart';
 
 /// Implementação do repositório de pragas usando Hive (Data Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
+/// Segue padrão Either for error handling consistente
 class PragasRepositoryImpl implements IPragasRepository {
   final PragasHiveRepository _hiveRepository;
 
-  PragasRepositoryImpl({PragasHiveRepository? hiveRepository})
-    : _hiveRepository =
-          hiveRepository ?? GetIt.instance<PragasHiveRepository>();
+  PragasRepositoryImpl(this._hiveRepository);
 
   @override
-  Future<List<PragaEntity>> getAll() async {
+  Future<Either<Failure, List<PragaEntity>>> getAll() async {
     try {
-      // Usa método assíncrono para aguardar box estar aberto
-      final hivePragas = await _hiveRepository.getAllAsync();
-      return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final pragasHive = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(pragasHive);
+      
+      return Right(pragasEntities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao carregar todas as pragas: $e');
+      return Left(CacheFailure('Erro ao buscar pragas: ${e.toString()}'));
     }
   }
 
   @override
-  Future<PragaEntity?> getById(String id) async {
+  Future<Either<Failure, PragaEntity?>> getById(String id) async {
     try {
       if (id.isEmpty) {
-        throw ArgumentError('ID não pode ser vazio');
+        return Left(CacheFailure('ID não pode ser vazio'));
       }
 
-      final hivePraga = _hiveRepository.getById(id);
-      return hivePraga != null ? PragaEntity.fromHive(hivePraga) : null;
+      final result = await _hiveRepository.getByKey(id);
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar praga por ID: ${result.error?.message}'));
+      }
+      final praga = result.data;
+      
+      if (praga == null) {
+        return const Right(null);
+      }
+      
+      final pragaEntity = PragaMapper.fromHiveToEntity(praga);
+      return Right(pragaEntity);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao buscar praga por ID: $e');
+      return Left(CacheFailure('Erro ao buscar praga por ID: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<PragaEntity>> getByTipo(String tipo) async {
+  Future<Either<Failure, List<PragaEntity>>> getByTipo(String tipo) async {
     try {
-      // Usa método assíncrono para aguardar box estar aberto
-      final hivePragas = await _hiveRepository.findByTipoAsync(tipo);
-      return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      final result = await _hiveRepository.findByTipo(tipo);
+      final pragasEntities = PragaMapper.fromHiveToEntityList(result);
+      return Right(pragasEntities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao buscar pragas por tipo: $e');
+      return Left(CacheFailure('Erro ao buscar pragas por tipo: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<PragaEntity>> searchByName(String searchTerm) async {
+  Future<Either<Failure, List<PragaEntity>>> searchByName(String searchTerm) async {
     try {
-      if (searchTerm.trim().isEmpty) return [];
+      if (searchTerm.trim().isEmpty) {
+        return const Right([]);
+      }
 
-      // Usa método assíncrono para aguardar box estar aberto
-      final allPragas = await _hiveRepository.getAllAsync();
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      
+      final allPragas = result.data ?? [];
       final term = searchTerm.trim().toLowerCase();
       
       // Performance optimization: use more efficient filtering
-      final filteredPragas = <PragasHive>[];
-      
-      for (final praga in allPragas) {
+      final filteredPragas = allPragas.where((praga) {
         final nomeComumLower = praga.nomeComum.toLowerCase();
         final nomeCientificoLower = praga.nomeCientifico.toLowerCase();
         
         // Case-insensitive search with multiple criteria
-        if (nomeComumLower.contains(term) || 
-            nomeCientificoLower.contains(term) ||
-            // Also search in alternative names if available
-            (praga.nomeComum.contains(';') && 
-             praga.nomeComum.toLowerCase().split(';').any((name) => 
-               name.trim().toLowerCase().contains(term)))) {
-          filteredPragas.add(praga);
-        }
-      }
+        return nomeComumLower.contains(term) || 
+               nomeCientificoLower.contains(term) ||
+               // Also search in alternative names if available
+               (praga.nomeComum.contains(';') && 
+                praga.nomeComum.toLowerCase().split(';').any((name) => 
+                  name.trim().toLowerCase().contains(term)));
+      }).toList();
       
       // Convert to entities and sort by relevance
-      final entities = filteredPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      final entities = PragaMapper.fromHiveToEntityList(filteredPragas);
       
       // Sort by relevance: exact matches first, then startsWith, then contains
       entities.sort((a, b) {
@@ -98,58 +115,156 @@ class PragasRepositoryImpl implements IPragasRepository {
         return a.nomeComum.compareTo(b.nomeComum);
       });
 
-      return entities;
+      return Right(entities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao buscar pragas por nome: $e');
+      return Left(CacheFailure('Erro ao buscar pragas por nome: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<PragaEntity>> getByFamilia(String familia) async {
+  Future<Either<Failure, List<PragaEntity>>> getByFamilia(String familia) async {
     try {
-      if (familia.isEmpty) return [];
+      if (familia.isEmpty) {
+        return const Right([]);
+      }
 
-      // Usa método assíncrono para aguardar box estar aberto
-      final hivePragas = await _hiveRepository.findByFamiliaAsync(familia);
-      return hivePragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      final result = await _hiveRepository.findByFamilia(familia);
+      final pragasEntities = PragaMapper.fromHiveToEntityList(result);
+      return Right(pragasEntities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao buscar pragas por família: $e');
+      return Left(CacheFailure('Erro ao buscar pragas por família: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<PragaEntity>> getByCultura(String culturaId) async {
+  Future<Either<Failure, List<PragaEntity>>> getByCultura(String culturaId) async {
     try {
-      if (culturaId.isEmpty) return [];
+      if (culturaId.isEmpty) {
+        return const Right([]);
+      }
 
-      // Por enquanto retorna todas as pragas usando método assíncrono
+      // Por enquanto retorna todas as pragas
       // TODO: Implementar busca por cultura usando DiagnosticoHiveRepository
-      final allPragas = await _hiveRepository.getAllAsync();
-      return allPragas.map((hive) => PragaEntity.fromHive(hive)).toList();
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final pragasEntities = PragaMapper.fromHiveToEntityList(result.data ?? []);
+      return Right(pragasEntities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao buscar pragas por cultura: $e');
+      return Left(CacheFailure('Erro ao buscar pragas por cultura: ${e.toString()}'));
     }
   }
 
   @override
-  Future<int> getCountByTipo(String tipo) async {
+  Future<Either<Failure, int>> getCountByTipo(String tipo) async {
     try {
-      // Usa método assíncrono para aguardar box estar aberto
-      final pragasByTipo = await _hiveRepository.findByTipoAsync(tipo);
-      return pragasByTipo.length;
+      final result = await _hiveRepository.findByTipo(tipo);
+      return Right(result.length);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao contar pragas por tipo: $e');
+      return Left(CacheFailure('Erro ao contar pragas por tipo: ${e.toString()}'));
     }
   }
 
   @override
-  Future<int> getTotalCount() async {
+  Future<Either<Failure, int>> getTotalCount() async {
     try {
-      // Usa método assíncrono para aguardar box estar aberto
-      final allPragas = await _hiveRepository.getAllAsync();
-      return allPragas.length;
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      return Right(result.data?.length ?? 0);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao contar total de pragas: $e');
+      return Left(CacheFailure('Erro ao contar total de pragas: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PragaEntity>>> getPragasRecentes({int limit = 10}) async {
+    try {
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final allPragas = result.data ?? [];
+      
+      // Como não temos timestamp real, vamos pegar os primeiros N
+      final pragasRecentes = allPragas.take(limit).toList();
+      final pragasEntities = PragaMapper.fromHiveToEntityList(pragasRecentes);
+      
+      return Right(pragasEntities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar pragas recentes: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, int>>> getPragasStats() async {
+    try {
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final allPragas = result.data ?? [];
+      
+      final stats = <String, int>{
+        'total': allPragas.length,
+        'insetos': allPragas.where((p) => p.tipoPraga == '1').length,
+        'doencas': allPragas.where((p) => p.tipoPraga == '2').length,
+        'plantas': allPragas.where((p) => p.tipoPraga == '3').length,
+        'familias': allPragas
+            .map((p) => p.familia)
+            .where((f) => f != null && f.isNotEmpty)
+            .toSet()
+            .length,
+      };
+      
+      return Right(stats);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar estatísticas das pragas: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getTiposPragas() async {
+    try {
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final allPragas = result.data ?? [];
+      final tipos = allPragas
+          .map((praga) => praga.tipoPraga)
+          .where((tipo) => tipo.isNotEmpty)
+          .toSet()
+          .toList();
+      
+      tipos.sort();
+      return Right(tipos);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar tipos de pragas: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getFamiliasPragas() async {
+    try {
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final allPragas = result.data ?? [];
+      final familias = allPragas
+          .map((praga) => praga.familia)
+          .where((familia) => familia != null && familia.isNotEmpty)
+          .cast<String>()
+          .toSet()
+          .toList();
+      
+      familias.sort();
+      return Right(familias);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar famílias de pragas: ${e.toString()}'));
     }
   }
 }
@@ -162,57 +277,63 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
   static const int _maxRecentItems = 7;
   static const int _maxSuggestedItems = 5;
 
-  PragasHistoryRepositoryImpl({PragasHiveRepository? hiveRepository})
-    : _hiveRepository =
-          hiveRepository ?? GetIt.instance<PragasHiveRepository>();
+  PragasHistoryRepositoryImpl(this._hiveRepository);
 
   @override
-  Future<List<PragaEntity>> getRecentlyAccessed() async {
+  Future<Either<Failure, List<PragaEntity>>> getRecentlyAccessed() async {
     try {
       // Por enquanto retorna algumas pragas aleatórias como "recentes"
       // TODO: Implementar com LocalStorage real para histórico
-      final allPragas = await _hiveRepository.getAllAsync();
-      if (allPragas.isEmpty) return [];
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final allPragas = result.data ?? [];
+      if (allPragas.isEmpty) return const Right([]);
 
       // Pega algumas pragas como mock de recentes
       final recentHivePragas = allPragas.take(_maxRecentItems).toList();
-      return recentHivePragas
-          .map((hive) => PragaEntity.fromHive(hive))
-          .toList();
+      final pragasEntities = PragaMapper.fromHiveToEntityList(recentHivePragas);
+      return Right(pragasEntities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao carregar pragas recentes: $e');
+      return Left(CacheFailure('Erro ao carregar pragas recentes: ${e.toString()}'));
     }
   }
 
   @override
-  Future<void> markAsAccessed(String pragaId) async {
+  Future<Either<Failure, void>> markAsAccessed(String pragaId) async {
     try {
       if (pragaId.isEmpty) {
-        throw ArgumentError('ID da praga não pode ser vazio');
+        return Left(CacheFailure('ID da praga não pode ser vazio'));
       }
 
       // TODO: Implementar com LocalStorage real
       // await _localStorage.setRecentItem('acessadosPragas', pragaId);
+      return const Right(null);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao marcar praga como acessada: $e');
+      return Left(CacheFailure('Erro ao marcar praga como acessada: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<PragaEntity>> getSuggested(int limit) async {
+  Future<Either<Failure, List<PragaEntity>>> getSuggested(int limit) async {
     try {
-      final allPragas = await _hiveRepository.getAllAsync();
-      if (allPragas.isEmpty) return [];
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+      final allPragas = result.data ?? [];
+      if (allPragas.isEmpty) return const Right([]);
 
       // Algoritmo simples de sugestão (pode ser melhorado)
-      final shuffledPragas = List<PragasHive>.from(allPragas)..shuffle();
-      final suggestedHivePragas =
-          shuffledPragas.take(limit.clamp(1, _maxSuggestedItems)).toList();
-      return suggestedHivePragas
-          .map((hive) => PragaEntity.fromHive(hive))
+      final shuffledPragas = allPragas.toList()..shuffle();
+      final suggestedHivePragas = shuffledPragas
+          .take(limit.clamp(1, _maxSuggestedItems))
           .toList();
+      final pragasEntities = PragaMapper.fromHiveToEntityList(suggestedHivePragas);
+      return Right(pragasEntities);
     } catch (e) {
-      throw PragasRepositoryException('Erro ao buscar pragas sugeridas: $e');
+      return Left(CacheFailure('Erro ao buscar pragas sugeridas: ${e.toString()}'));
     }
   }
 }
@@ -254,13 +375,4 @@ class PragasFormatterImpl implements IPragasFormatter {
     final nomeList = nomeCompleto.split(';');
     return nomeList[0].split('-')[0].trim();
   }
-}
-
-/// Exception customizada para o repositório
-class PragasRepositoryException implements Exception {
-  final String message;
-  const PragasRepositoryException(this.message);
-
-  @override
-  String toString() => 'PragasRepositoryException: $message';
 }

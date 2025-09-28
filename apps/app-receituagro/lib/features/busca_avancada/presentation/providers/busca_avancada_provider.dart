@@ -99,25 +99,40 @@ class BuscaAvancadaProvider with ChangeNotifier {
     
     try {
       // Carregar culturas
-      final culturas = _culturaRepo.getAll();
-      _culturas = culturas.map((c) => {
-        'id': c.idReg,
-        'nome': c.cultura,
-      }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+      final culturasResult = await _culturaRepo.getAll();
+      culturasResult.fold(
+        (error) => debugPrint('Erro ao carregar culturas: $error'),
+        (culturas) {
+          _culturas = culturas.map((c) => {
+            'id': c.idReg,
+            'nome': c.cultura,
+          }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+        },
+      );
 
       // Carregar pragas
-      final pragas = _pragasRepo.getAll();
-      _pragas = pragas.map((p) => {
-        'id': p.idReg,
-        'nome': p.nomeComum.isNotEmpty ? p.nomeComum : p.nomeCientifico,
-      }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+      final pragasResult = await _pragasRepo.getAll();
+      pragasResult.fold(
+        (error) => debugPrint('Erro ao carregar pragas: $error'),
+        (pragas) {
+          _pragas = pragas.map((p) => {
+            'id': p.idReg,
+            'nome': p.nomeComum.isNotEmpty ? p.nomeComum : p.nomeCientifico,
+          }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+        },
+      );
 
       // Carregar defensivos
-      final defensivos = _fitossanitarioRepo.getAll();
-      _defensivos = defensivos.map((d) => {
-        'id': d.idReg,
-        'nome': d.nomeComum.isNotEmpty ? d.nomeComum : d.nomeTecnico,
-      }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+      final defensivosResult = await _fitossanitarioRepo.getAll();
+      defensivosResult.fold(
+        (error) => debugPrint('Erro ao carregar defensivos: $error'),
+        (defensivos) {
+          _defensivos = defensivos.map((d) => {
+            'id': d.idReg,
+            'nome': d.nomeComum.isNotEmpty ? d.nomeComum : d.nomeTecnico,
+          }).toList()..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+        },
+      );
 
       _dadosCarregados = true;
       notifyListeners();

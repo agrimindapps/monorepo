@@ -192,7 +192,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.3),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -200,7 +200,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: provider.statusColor.withOpacity(0.1),
+              color: provider.statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -226,7 +226,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
                   provider.deviceLimitText,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -341,7 +341,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
             Text(
               'Este é seu primeiro dispositivo.\nVocê pode adicionar até 3 dispositivos.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),

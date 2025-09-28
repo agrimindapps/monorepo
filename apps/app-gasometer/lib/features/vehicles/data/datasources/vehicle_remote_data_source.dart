@@ -15,10 +15,10 @@ abstract class VehicleRemoteDataSource {
 
 @LazySingleton(as: VehicleRemoteDataSource)
 class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
-  final FirebaseFirestore _firestore;
-  static const String _collection = 'vehicles';
 
   VehicleRemoteDataSourceImpl(this._firestore);
+  final FirebaseFirestore _firestore;
+  static const String _collection = 'vehicles';
 
   CollectionReference _getVehiclesCollection(String userId) {
     return _firestore
@@ -143,8 +143,8 @@ class VehicleRemoteDataSourceImpl implements VehicleRemoteDataSource {
 }
 
 class RemoteDataSourceException implements Exception {
-  final String message;
   RemoteDataSourceException(this.message);
+  final String message;
 
   @override
   String toString() => 'RemoteDataSourceException: $message';

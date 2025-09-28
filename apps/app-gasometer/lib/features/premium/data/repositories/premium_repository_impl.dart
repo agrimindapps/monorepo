@@ -13,15 +13,15 @@ import '../services/premium_sync_service.dart';
 
 @LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
-  final PremiumRemoteDataSource remoteDataSource;
-  final PremiumLocalDataSource localDataSource;
-  final PremiumSyncService _syncService;
 
   PremiumRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required PremiumSyncService syncService,
   }) : _syncService = syncService;
+  final PremiumRemoteDataSource remoteDataSource;
+  final PremiumLocalDataSource localDataSource;
+  final PremiumSyncService _syncService;
 
   @override
   Stream<PremiumStatus> get premiumStatus => _syncService.premiumStatusStream;
@@ -226,6 +226,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
   }
 
   /// Força sincronização imediata do status premium
+  @override
   Future<Either<Failure, void>> forceSyncPremiumStatus() async {
     try {
       return await _syncService.forceSync();
@@ -235,9 +236,11 @@ class PremiumRepositoryImpl implements PremiumRepository {
   }
 
   /// Stream de eventos de sincronização
+  @override
   Stream<PremiumSyncEvent> get syncEvents => _syncService.syncEvents;
 
   /// Processa webhook do RevenueCat
+  @override
   Future<Either<Failure, void>> processWebhook({
     required Map<String, dynamic> payload,
     String? signature,

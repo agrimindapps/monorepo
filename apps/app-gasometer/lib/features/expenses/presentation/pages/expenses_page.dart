@@ -5,9 +5,8 @@ import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/gasometer_colors.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
@@ -187,24 +186,24 @@ class _ExpensesPageState extends State<ExpensesPage> {
               ),
             ),
             const SizedBox(width: 13),
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SemanticText.heading(
                     'Despesas',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   SemanticText.subtitle(
                     'Histórico de despesas dos seus veículos',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
                       height: 1.3,
@@ -333,7 +332,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
     return Center(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.6,
-        child: ExpensesEmptyState(),
+        child: const ExpensesEmptyState(),
       ),
     );
   }
@@ -602,8 +601,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: SemanticText.heading('Confirmar exclusão'),
-        content: SemanticText(
+        title: const SemanticText.heading('Confirmar exclusão'),
+        content: const SemanticText(
           'Tem certeza que deseja excluir este registro de despesa?\n\nEsta ação não pode ser desfeita.',
         ),
         actions: [
@@ -729,11 +728,6 @@ class _ExpensesPageState extends State<ExpensesPage> {
 
 /// Widget otimizado para card de despesa
 class _OptimizedExpenseRecordCard extends StatelessWidget {
-  final ExpenseEntity record;
-  final VehiclesProvider vehiclesProvider;
-  final VoidCallback onLongPress;
-  final VoidCallback onTap;
-  final String Function(String) getVehicleName;
 
   const _OptimizedExpenseRecordCard({
     super.key,
@@ -743,6 +737,11 @@ class _OptimizedExpenseRecordCard extends StatelessWidget {
     required this.onTap,
     required this.getVehicleName,
   });
+  final ExpenseEntity record;
+  final VehiclesProvider vehiclesProvider;
+  final VoidCallback onLongPress;
+  final VoidCallback onTap;
+  final String Function(String) getVehicleName;
 
   @override
   Widget build(BuildContext context) {

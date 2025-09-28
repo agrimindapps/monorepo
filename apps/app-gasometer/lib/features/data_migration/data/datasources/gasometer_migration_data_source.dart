@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/gasometer_account_data.dart';
 import '../../domain/entities/gasometer_anonymous_data.dart';

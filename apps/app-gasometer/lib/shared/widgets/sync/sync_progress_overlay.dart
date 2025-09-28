@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
 
@@ -15,15 +15,7 @@ enum SyncProgressState {
 }
 
 /// Etapa individual de sincronização específica do contexto automotivo
-class SyncStep {
-  final String id;
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-  final bool isCompleted;
-  final bool hasError;
-  final double progress; // 0.0 to 1.0
+class SyncStep { // 0.0 to 1.0
 
   const SyncStep({
     required this.id,
@@ -35,6 +27,14 @@ class SyncStep {
     this.hasError = false,
     this.progress = 0.0,
   });
+  final String id;
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+  final bool isCompleted;
+  final bool hasError;
+  final double progress;
 
   SyncStep copyWith({
     String? id,
@@ -86,35 +86,35 @@ class SyncProgressController {
   /// Inicializa as etapas de sincronização específicas do Gasometer
   void initializeGasometerSteps() {
     final syncSteps = [
-      SyncStep(
+      const SyncStep(
         id: 'vehicles_data',
         title: 'Sincronizando Veículos',
         description: 'Carregando seus carros e motos...',
         icon: Icons.directions_car,
         color: GasometerColors.primary,
       ),
-      SyncStep(
+      const SyncStep(
         id: 'fuel_data', 
         title: 'Sincronizando Abastecimentos',
         description: 'Carregando histórico de combustível...',
         icon: Icons.local_gas_station,
         color: GasometerColors.secondary,
       ),
-      SyncStep(
+      const SyncStep(
         id: 'maintenance_data',
         title: 'Sincronizando Manutenções', 
         description: 'Carregando serviços programados...',
         icon: Icons.build,
         color: Colors.orange,
       ),
-      SyncStep(
+      const SyncStep(
         id: 'expense_data',
         title: 'Sincronizando Despesas',
         description: 'Carregando gastos registrados...',
         icon: Icons.attach_money,
         color: GasometerColors.accent,
       ),
-      SyncStep(
+      const SyncStep(
         id: 'reports_data',
         title: 'Sincronizando Relatórios',
         description: 'Atualizando análises e estatísticas...',
@@ -303,14 +303,6 @@ class SyncProgressController {
 
 /// Overlay não-bloqueante de progresso de sincronização para Gasometer
 class SyncProgressOverlay extends StatefulWidget {
-  final SyncProgressController controller;
-  final VoidCallback? onContinueInBackground;
-  final VoidCallback? onCancel;
-  final VoidCallback? onRetry;
-  final VoidCallback? onClose;
-  final bool showContinueOption;
-  final bool showCloseButton;
-  final Duration autoHideDuration;
 
   const SyncProgressOverlay({
     super.key,
@@ -323,6 +315,14 @@ class SyncProgressOverlay extends StatefulWidget {
     this.showCloseButton = false,
     this.autoHideDuration = const Duration(seconds: 3),
   });
+  final SyncProgressController controller;
+  final VoidCallback? onContinueInBackground;
+  final VoidCallback? onCancel;
+  final VoidCallback? onRetry;
+  final VoidCallback? onClose;
+  final bool showContinueOption;
+  final bool showCloseButton;
+  final Duration autoHideDuration;
 
   @override
   State<SyncProgressOverlay> createState() => _SyncProgressOverlayState();

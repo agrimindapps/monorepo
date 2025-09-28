@@ -16,9 +16,9 @@ abstract class ReportsDataSource {
 
 @LazySingleton(as: ReportsDataSource)
 class ReportsDataSourceImpl implements ReportsDataSource {
-  final FuelRepository _fuelRepository;
 
   ReportsDataSourceImpl(this._fuelRepository);
+  final FuelRepository _fuelRepository;
 
   @override
   Future<ReportSummaryEntity> generateReport(String vehicleId, DateTime startDate, DateTime endDate, String period) async {

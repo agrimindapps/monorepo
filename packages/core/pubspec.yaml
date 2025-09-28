@@ -101,13 +101,13 @@ dependencies:
 
   # Icons and Sharing
   font_awesome_flutter: ^10.7.0
-  share_plus: ^11.1.0
+  share_plus: ^12.0.0
   
   # JSON Serialization
   json_annotation: ^4.9.0
 
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   
 dev_dependencies:
   flutter_test:

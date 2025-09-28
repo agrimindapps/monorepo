@@ -214,7 +214,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     final theme = Theme.of(context);
     final color = _getTaskColor(task);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark

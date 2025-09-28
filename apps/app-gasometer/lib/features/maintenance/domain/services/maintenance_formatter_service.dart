@@ -3,9 +3,9 @@ import '../entities/maintenance_entity.dart';
 
 /// Serviço especializado para formatação de dados de manutenção
 class MaintenanceFormatterService {
-  static final MaintenanceFormatterService _instance = MaintenanceFormatterService._internal();
   factory MaintenanceFormatterService() => _instance;
   MaintenanceFormatterService._internal();
+  static final MaintenanceFormatterService _instance = MaintenanceFormatterService._internal();
 
   // Formatadores brasileiros
   final NumberFormat _currencyFormatter = NumberFormat.currency(

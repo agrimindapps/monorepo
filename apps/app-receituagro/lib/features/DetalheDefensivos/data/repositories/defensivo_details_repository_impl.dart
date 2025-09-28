@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
@@ -28,7 +27,12 @@ class DefensivoDetailsRepositoryImpl implements IDefensivoDetailsRepository {
   @override
   Future<Either<Failure, DefensivoDetailsEntity?>> getDefensivoByName(String name) async {
     try {
-      final defensivos = _fitossanitarioRepository.getAll()
+      final result = await _fitossanitarioRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      final defensivos = result.data!
           .where((d) => d.nomeComum == name || d.nomeTecnico == name);
       
       if (defensivos.isEmpty) {
@@ -64,7 +68,7 @@ class DefensivoDetailsRepositoryImpl implements IDefensivoDetailsRepository {
   @override
   Future<Either<Failure, bool>> isFavorited(String defensivoId) async {
     try {
-      final isFavorited = _favoritosRepository.isFavorito('defensivos', defensivoId);
+      final isFavorited = await _favoritosRepository.isFavorito('defensivos', defensivoId);
       return Right(isFavorited);
     } catch (e) {
       return Left(CacheFailure( 'Erro ao verificar favorito: ${e.toString()}'));
@@ -74,7 +78,7 @@ class DefensivoDetailsRepositoryImpl implements IDefensivoDetailsRepository {
   @override
   Future<Either<Failure, bool>> toggleFavorite(String defensivoId, Map<String, dynamic> defensivoData) async {
     try {
-      final isCurrentlyFavorited = _favoritosRepository.isFavorito('defensivos', defensivoId);
+      final isCurrentlyFavorited = await _favoritosRepository.isFavorito('defensivos', defensivoId);
       
       bool success;
       if (isCurrentlyFavorited) {

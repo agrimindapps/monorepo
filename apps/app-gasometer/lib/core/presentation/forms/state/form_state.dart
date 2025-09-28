@@ -2,6 +2,7 @@
 /// 
 /// This module provides convenient access to form state classes
 /// following the Single Responsibility Principle.
+library;
 
 import '../architecture/i_form_state_manager.dart';
 
@@ -121,14 +122,6 @@ extension FormStateExtensions<T> on FormState<T> {
 
 /// Summary of form state for quick overview
 class FormStateSummary {
-  final bool isValid;
-  final bool isDirty;
-  final bool isLoading;
-  final bool hasError;
-  final String? errorMessage;
-  final int fieldCount;
-  final int invalidFieldCount;
-  final DateTime lastModified;
   
   const FormStateSummary({
     required this.isValid,
@@ -140,6 +133,14 @@ class FormStateSummary {
     required this.invalidFieldCount,
     required this.lastModified,
   });
+  final bool isValid;
+  final bool isDirty;
+  final bool isLoading;
+  final bool hasError;
+  final String? errorMessage;
+  final int fieldCount;
+  final int invalidFieldCount;
+  final DateTime lastModified;
   
   /// Check if form is ready for submission
   bool get canSubmit {
@@ -164,10 +165,10 @@ class FormStateSummary {
 
 /// Form state change tracker for debugging and analytics
 class FormStateTracker<T> {
-  final List<FormStateChange<T>> _changes = [];
-  final int maxHistorySize;
   
   FormStateTracker({this.maxHistorySize = 100});
+  final List<FormStateChange<T>> _changes = [];
+  final int maxHistorySize;
   
   /// Track a state change
   void trackChange(FormState<T> oldState, FormState<T> newState, String action) {
@@ -243,10 +244,6 @@ class FormStateTracker<T> {
 
 /// Individual form state change record
 class FormStateChange<T> {
-  final FormState<T> oldState;
-  final FormState<T> newState;
-  final String action;
-  final DateTime timestamp;
   
   const FormStateChange({
     required this.oldState,
@@ -254,6 +251,10 @@ class FormStateChange<T> {
     required this.action,
     required this.timestamp,
   });
+  final FormState<T> oldState;
+  final FormState<T> newState;
+  final String action;
+  final DateTime timestamp;
   
   /// Get the duration since this change
   Duration get timeSinceChange => DateTime.now().difference(timestamp);
@@ -291,11 +292,6 @@ class FormStateChange<T> {
 
 /// Statistics about form state changes
 class FormChangeStatistics {
-  final int totalChanges;
-  final Map<String, int> actionCounts;
-  final Map<String, int> fieldChangeCounts;
-  final DateTime? firstChange;
-  final DateTime? lastChange;
   
   const FormChangeStatistics({
     required this.totalChanges,
@@ -313,6 +309,11 @@ class FormChangeStatistics {
       fieldChangeCounts: {},
     );
   }
+  final int totalChanges;
+  final Map<String, int> actionCounts;
+  final Map<String, int> fieldChangeCounts;
+  final DateTime? firstChange;
+  final DateTime? lastChange;
   
   /// Get total session duration
   Duration? get sessionDuration {

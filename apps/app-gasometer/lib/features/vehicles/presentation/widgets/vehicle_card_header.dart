@@ -42,7 +42,7 @@ class VehicleCardHeader extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: GasometerDesignTokens.spacingMd),
+            const SizedBox(width: GasometerDesignTokens.spacingMd),
           ],
           Expanded(
             child: Column(

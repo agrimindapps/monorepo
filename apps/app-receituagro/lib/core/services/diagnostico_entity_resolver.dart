@@ -59,11 +59,11 @@ class DiagnosticoEntityResolver {
   /// 2. Busca por idCultura no repositório
   /// 3. Usa nomeCultura fornecido
   /// 4. Retorna valor padrão
-  String resolveCulturaNome({
+  Future<String> resolveCulturaNome({
     String? idCultura,
     String? nomeCultura,
     String defaultValue = 'Cultura não especificada',
-  }) {
+  }) async {
     try {
       // 1. Verifica cache primeiro
       final cacheKey = idCultura ?? nomeCultura ?? '';
@@ -73,7 +73,7 @@ class DiagnosticoEntityResolver {
 
       // 2. Tenta resolver por ID
       if (idCultura?.isNotEmpty == true) {
-        final culturaData = _culturaRepository.getById(idCultura!);
+        final culturaData = await _culturaRepository.getById(idCultura!);
         if (culturaData != null && culturaData.cultura.isNotEmpty) {
           final resolvedName = culturaData.cultura;
           _culturaCache[cacheKey] = resolvedName;
@@ -83,10 +83,10 @@ class DiagnosticoEntityResolver {
       }
 
       // 3. Usa nome fornecido como fallback
-      if (nomeCultura?.isNotEmpty == true) {
-        _culturaCache[cacheKey] = nomeCultura!;
+      if (nomeCultura != null && nomeCultura.isNotEmpty) {
+        _culturaCache[cacheKey] = nomeCultura;
         _updateCacheTimestamp();
-        return nomeCultura!;
+        return nomeCultura;
       }
 
       // 4. Retorna valor padrão
@@ -100,11 +100,11 @@ class DiagnosticoEntityResolver {
   }
 
   /// Resolve nome de defensivo com múltiplas estratégias
-  String resolveDefensivoNome({
+  Future<String> resolveDefensivoNome({
     String? idDefensivo,
     String? nomeDefensivo,
     String defaultValue = 'Defensivo não especificado',
-  }) {
+  }) async {
     try {
       // 1. Verifica cache primeiro
       final cacheKey = idDefensivo ?? nomeDefensivo ?? '';
@@ -114,7 +114,7 @@ class DiagnosticoEntityResolver {
 
       // 2. Tenta resolver por ID
       if (idDefensivo?.isNotEmpty == true) {
-        final defensivoData = _defensivoRepository.getById(idDefensivo!);
+        final defensivoData = await _defensivoRepository.getById(idDefensivo!);
         if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
           final resolvedName = defensivoData.nomeComum;
           _defensivoCache[cacheKey] = resolvedName;
@@ -124,10 +124,10 @@ class DiagnosticoEntityResolver {
       }
 
       // 3. Usa nome fornecido como fallback
-      if (nomeDefensivo?.isNotEmpty == true) {
-        _defensivoCache[cacheKey] = nomeDefensivo!;
+      if (nomeDefensivo != null && nomeDefensivo.isNotEmpty) {
+        _defensivoCache[cacheKey] = nomeDefensivo;
         _updateCacheTimestamp();
-        return nomeDefensivo!;
+        return nomeDefensivo;
       }
 
       // 4. Retorna valor padrão
@@ -141,11 +141,11 @@ class DiagnosticoEntityResolver {
   }
 
   /// Resolve nome de praga com múltiplas estratégias
-  String resolvePragaNome({
+  Future<String> resolvePragaNome({
     String? idPraga,
     String? nomePraga,
     String defaultValue = 'Praga não especificada',
-  }) {
+  }) async {
     try {
       // 1. Verifica cache primeiro
       final cacheKey = idPraga ?? nomePraga ?? '';
@@ -155,7 +155,7 @@ class DiagnosticoEntityResolver {
 
       // 2. Tenta resolver por ID
       if (idPraga?.isNotEmpty == true) {
-        final pragaData = _pragasRepository.getById(idPraga!);
+        final pragaData = await _pragasRepository.getById(idPraga!);
         if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
           final resolvedName = pragaData.nomeComum;
           _pragaCache[cacheKey] = resolvedName;
@@ -165,10 +165,10 @@ class DiagnosticoEntityResolver {
       }
 
       // 3. Usa nome fornecido como fallback
-      if (nomePraga?.isNotEmpty == true) {
-        _pragaCache[cacheKey] = nomePraga!;
+      if (nomePraga != null && nomePraga.isNotEmpty) {
+        _pragaCache[cacheKey] = nomePraga;
         _updateCacheTimestamp();
-        return nomePraga!;
+        return nomePraga;
       }
 
       // 4. Retorna valor padrão
@@ -182,12 +182,12 @@ class DiagnosticoEntityResolver {
   }
 
   /// Resolve múltiplas entidades em batch para otimização
-  Map<String, String> resolveBatchCulturas(List<ResolveRequest> requests) {
+  Future<Map<String, String>> resolveBatchCulturas(List<ResolveRequest> requests) async {
     final results = <String, String>{};
     
     for (final request in requests) {
       final key = request.key;
-      final resolvedName = resolveCulturaNome(
+      final resolvedName = await resolveCulturaNome(
         idCultura: request.id,
         nomeCultura: request.nome,
         defaultValue: request.defaultValue ?? 'Cultura não especificada',
@@ -199,12 +199,12 @@ class DiagnosticoEntityResolver {
   }
 
   /// Resolve múltiplos defensivos em batch
-  Map<String, String> resolveBatchDefensivos(List<ResolveRequest> requests) {
+  Future<Map<String, String>> resolveBatchDefensivos(List<ResolveRequest> requests) async {
     final results = <String, String>{};
     
     for (final request in requests) {
       final key = request.key;
-      final resolvedName = resolveDefensivoNome(
+      final resolvedName = await resolveDefensivoNome(
         idDefensivo: request.id,
         nomeDefensivo: request.nome,
         defaultValue: request.defaultValue ?? 'Defensivo não especificado',
@@ -216,12 +216,12 @@ class DiagnosticoEntityResolver {
   }
 
   /// Resolve múltiplas pragas em batch
-  Map<String, String> resolveBatchPragas(List<ResolveRequest> requests) {
+  Future<Map<String, String>> resolveBatchPragas(List<ResolveRequest> requests) async {
     final results = <String, String>{};
     
     for (final request in requests) {
       final key = request.key;
-      final resolvedName = resolvePragaNome(
+      final resolvedName = await resolvePragaNome(
         idPraga: request.id,
         nomePraga: request.nome,
         defaultValue: request.defaultValue ?? 'Praga não especificada',
@@ -249,29 +249,29 @@ class DiagnosticoEntityResolver {
   }
 
   /// Valida se uma entidade existe nos repositórios
-  ValidationResult validateEntity({
+  Future<ValidationResult> validateEntity({
     String? idCultura,
     String? idDefensivo, 
     String? idPraga,
-  }) {
+  }) async {
     final issues = <String>[];
     
     if (idCultura?.isNotEmpty == true) {
-      final cultura = _culturaRepository.getById(idCultura!);
+      final cultura = await _culturaRepository.getById(idCultura!);
       if (cultura == null) {
         issues.add('Cultura com ID $idCultura não encontrada');
       }
     }
     
     if (idDefensivo?.isNotEmpty == true) {
-      final defensivo = _defensivoRepository.getById(idDefensivo!);
+      final defensivo = await _defensivoRepository.getById(idDefensivo!);
       if (defensivo == null) {
         issues.add('Defensivo com ID $idDefensivo não encontrado');
       }
     }
     
     if (idPraga?.isNotEmpty == true) {
-      final praga = _pragasRepository.getById(idPraga!);
+      final praga = await _pragasRepository.getById(idPraga!);
       if (praga == null) {
         issues.add('Praga com ID $idPraga não encontrada');
       }

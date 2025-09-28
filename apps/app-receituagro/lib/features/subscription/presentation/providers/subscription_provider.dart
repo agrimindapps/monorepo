@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../domain/usecases/subscription_usecase.dart';
 
@@ -19,7 +18,6 @@ class SubscriptionProvider with ChangeNotifier {
   late final GetAvailableProductsUseCase _getAvailableProductsUseCase;
   late final PurchaseProductUseCase _purchaseProductUseCase;
   late final RestorePurchasesUseCase _restorePurchasesUseCase;
-  late final CheckFeatureAccessUseCase _checkFeatureAccessUseCase;
   late final RefreshSubscriptionStatusUseCase _refreshSubscriptionStatusUseCase;
   late final ManageSubscriptionUseCase _manageSubscriptionUseCase;
   
@@ -43,7 +41,6 @@ class SubscriptionProvider with ChangeNotifier {
     _getAvailableProductsUseCase = getIt<GetAvailableProductsUseCase>();
     _purchaseProductUseCase = getIt<PurchaseProductUseCase>();
     _restorePurchasesUseCase = getIt<RestorePurchasesUseCase>();
-    _checkFeatureAccessUseCase = getIt<CheckFeatureAccessUseCase>();
     _refreshSubscriptionStatusUseCase = getIt<RefreshSubscriptionStatusUseCase>();
     _manageSubscriptionUseCase = getIt<ManageSubscriptionUseCase>();
   }

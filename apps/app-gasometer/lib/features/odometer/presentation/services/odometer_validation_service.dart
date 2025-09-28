@@ -11,6 +11,8 @@ import '../constants/odometer_constants.dart';
 /// This service provides advanced validation that considers vehicle context,
 /// such as validating against the vehicle's initial and current odometer readings.
 class OdometerValidationService {
+
+  OdometerValidationService(this._vehiclesProvider);
   // Validation constants
   static const double maxAllowedRollbackKm = 100.0;
   static const double maxDailyIncreaseKm = 2000.0;
@@ -18,8 +20,6 @@ class OdometerValidationService {
   static const double significantOdometerDifferenceThreshold = 1000.0;
   static const double typicalKmPerYear = 15000.0;
   final VehiclesProvider _vehiclesProvider;
-
-  OdometerValidationService(this._vehiclesProvider);
 
   /// Validates odometer value with complete vehicle context
   ///
@@ -297,10 +297,6 @@ class OdometerValidationService {
 
 /// Result of contextual validation with detailed error information
 class OdometerContextValidationResult {
-  final bool isValid;
-  final String? errorMessage;
-  final ValidationErrorType? errorType;
-  final bool isWarning;
 
   const OdometerContextValidationResult({
     required this.isValid,
@@ -308,14 +304,14 @@ class OdometerContextValidationResult {
     this.errorType,
     this.isWarning = false,
   });
+  final bool isValid;
+  final String? errorMessage;
+  final ValidationErrorType? errorType;
+  final bool isWarning;
 }
 
 /// Result of complete form validation with context
 class FormContextValidationResult {
-  final bool isValid;
-  final Map<String, String> errors;
-  final Map<String, String> warnings;
-  final bool hasWarnings;
 
   const FormContextValidationResult({
     required this.isValid,
@@ -323,6 +319,10 @@ class FormContextValidationResult {
     required this.warnings,
     required this.hasWarnings,
   });
+  final bool isValid;
+  final Map<String, String> errors;
+  final Map<String, String> warnings;
+  final bool hasWarnings;
 }
 
 /// Types of validation errors for better error handling
@@ -336,15 +336,15 @@ enum ValidationErrorType {
 
 /// Validation suggestion for user guidance
 class ValidationSuggestion {
-  final SuggestionType type;
-  final String message;
-  final double? suggestedValue;
 
   const ValidationSuggestion({
     required this.type,
     required this.message,
     this.suggestedValue,
   });
+  final SuggestionType type;
+  final String message;
+  final double? suggestedValue;
 }
 
 /// Types of validation suggestions

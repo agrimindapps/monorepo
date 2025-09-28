@@ -9,9 +9,6 @@ import '../services/plantis_notification_service_v2.dart';
 /// This class provides a centralized way to configure which notification
 /// service implementation to use, with feature flags and migration support.
 class NotificationServiceConfig {
-  static const String _featureFlagKey = 'enhanced_notifications_enabled';
-  static const String _migrationCompleteKey = 'notification_migration_complete';
-
   // Feature flags
   static bool _enhancedNotificationsEnabled = true;
   static bool _autoMigrateOnInit = true;

@@ -55,7 +55,7 @@ class CentralizedLoadingWidget extends StatelessWidget {
                 effectiveMessage,
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeBody,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                   fontWeight: GasometerDesignTokens.fontWeightMedium,
                 ),
                 textAlign: TextAlign.center,
@@ -123,7 +123,7 @@ class ListLoadingWidget extends StatelessWidget {
               bottom: GasometerDesignTokens.spacingLg,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusSm,
               ),
@@ -139,7 +139,7 @@ class ListLoadingWidget extends StatelessWidget {
               bottom: GasometerDesignTokens.spacingMd,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusLg,
               ),
@@ -152,11 +152,11 @@ class ListLoadingWidget extends StatelessWidget {
                     width: GasometerDesignTokens.iconSizeFeature,
                     height: GasometerDesignTokens.iconSizeFeature,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider * 2),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider * 2),
                       shape: BoxShape.circle,
                     ),
                   ),
-                  SizedBox(width: GasometerDesignTokens.spacingLg),
+                  const SizedBox(width: GasometerDesignTokens.spacingLg),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,18 +166,18 @@ class ListLoadingWidget extends StatelessWidget {
                           width: double.infinity,
                           height: GasometerDesignTokens.fontSizeBodyLarge,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider * 2),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider * 2),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
                           ),
                         ),
-                        SizedBox(height: GasometerDesignTokens.spacingSm),
+                        const SizedBox(height: GasometerDesignTokens.spacingSm),
                         Container(
                           width: MediaQuery.of(context).size.width * 0.4,
                           height: GasometerDesignTokens.fontSizeBody,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityDivider),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
@@ -230,7 +230,7 @@ class OperationLoadingWidget extends StatelessWidget {
                     child: CircularProgressIndicator(
                       value: progress,
                       color: Theme.of(context).colorScheme.primary,
-                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityDivider),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: GasometerDesignTokens.opacityDivider),
                       strokeWidth: 8.0,
                     ),
                   ),
@@ -255,7 +255,7 @@ class OperationLoadingWidget extends StatelessWidget {
               ),
             ),
           ],
-          SizedBox(height: GasometerDesignTokens.spacingXxl),
+          const SizedBox(height: GasometerDesignTokens.spacingXxl),
           Text(
             operation,
             style: TextStyle(
@@ -265,12 +265,12 @@ class OperationLoadingWidget extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: GasometerDesignTokens.spacingSm),
+          const SizedBox(height: GasometerDesignTokens.spacingSm),
           Text(
             'Por favor, aguarde...',
             style: TextStyle(
               fontSize: GasometerDesignTokens.fontSizeBody,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
             ),
             textAlign: TextAlign.center,
           ),

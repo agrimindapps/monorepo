@@ -20,10 +20,10 @@ class PremiumDevControls extends StatelessWidget {
       builder: (context, premiumProvider, child) {
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.warning.withOpacity(0.1),
+            color: AppColors.warning.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: AppColors.warning.withOpacity(0.3),
+              color: AppColors.warning.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -33,7 +33,7 @@ class PremiumDevControls extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.2),
+                  color: AppColors.warning.withValues(alpha: 0.2),
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(12),
                   ),

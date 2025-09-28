@@ -1,5 +1,5 @@
-import 'base_validator.dart';
 import '../../architecture/i_form_validator.dart';
+import 'base_validator.dart';
 
 /// Validator for required fields
 /// 
@@ -7,6 +7,44 @@ import '../../architecture/i_form_validator.dart';
 /// It follows Single Responsibility Principle by focusing solely on
 /// required field validation.
 class RequiredValidator extends BaseFieldValidator {
+  
+  const RequiredValidator({
+    super.errorMessage = 'Este campo é obrigatório',
+    this.trimWhitespace = true,
+    this.treatZeroAsEmpty = false,
+    this.treatEmptyCollectionAsEmpty = true,
+    super.metadata,
+  });
+  
+  /// Create a required validator with custom message
+  factory RequiredValidator.withMessage(String message) {
+    return RequiredValidator(errorMessage: message);
+  }
+  
+  /// Create a required validator for specific field
+  factory RequiredValidator.forField(String fieldName) {
+    return RequiredValidator(
+      errorMessage: '$fieldName é obrigatório',
+    );
+  }
+  
+  /// Create a strict required validator (zero and empty collections are invalid)
+  factory RequiredValidator.strict({String? errorMessage}) {
+    return RequiredValidator(
+      errorMessage: errorMessage ?? 'Este campo é obrigatório',
+      treatZeroAsEmpty: true,
+      treatEmptyCollectionAsEmpty: true,
+    );
+  }
+  
+  /// Create a lenient required validator (zero and empty collections are valid)
+  factory RequiredValidator.lenient({String? errorMessage}) {
+    return RequiredValidator(
+      errorMessage: errorMessage ?? 'Este campo é obrigatório',
+      treatZeroAsEmpty: false,
+      treatEmptyCollectionAsEmpty: false,
+    );
+  }
   /// Whether to trim whitespace before validation (for strings)
   final bool trimWhitespace;
   
@@ -15,14 +53,6 @@ class RequiredValidator extends BaseFieldValidator {
   
   /// Whether to consider empty collections as invalid
   final bool treatEmptyCollectionAsEmpty;
-  
-  const RequiredValidator({
-    String errorMessage = 'Este campo é obrigatório',
-    this.trimWhitespace = true,
-    this.treatZeroAsEmpty = false,
-    this.treatEmptyCollectionAsEmpty = true,
-    super.metadata,
-  }) : super(errorMessage: errorMessage);
   
   @override
   String get validatorType => 'required';
@@ -88,36 +118,6 @@ class RequiredValidator extends BaseFieldValidator {
     return 0;
   }
   
-  /// Create a required validator with custom message
-  factory RequiredValidator.withMessage(String message) {
-    return RequiredValidator(errorMessage: message);
-  }
-  
-  /// Create a required validator for specific field
-  factory RequiredValidator.forField(String fieldName) {
-    return RequiredValidator(
-      errorMessage: '$fieldName é obrigatório',
-    );
-  }
-  
-  /// Create a strict required validator (zero and empty collections are invalid)
-  factory RequiredValidator.strict({String? errorMessage}) {
-    return RequiredValidator(
-      errorMessage: errorMessage ?? 'Este campo é obrigatório',
-      treatZeroAsEmpty: true,
-      treatEmptyCollectionAsEmpty: true,
-    );
-  }
-  
-  /// Create a lenient required validator (zero and empty collections are valid)
-  factory RequiredValidator.lenient({String? errorMessage}) {
-    return RequiredValidator(
-      errorMessage: errorMessage ?? 'Este campo é obrigatório',
-      treatZeroAsEmpty: false,
-      treatEmptyCollectionAsEmpty: false,
-    );
-  }
-  
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -143,18 +143,41 @@ class RequiredValidator extends BaseFieldValidator {
 /// This validator makes a field required based on a condition.
 /// Useful for form fields that become required based on other field values.
 class ConditionalRequiredValidator extends BaseFieldValidator {
+  
+  const ConditionalRequiredValidator({
+    required this.isRequired,
+    super.errorMessage = 'Este campo é obrigatório',
+    this.trimWhitespace = true,
+    super.metadata,
+  });
+  
+  /// Create conditional required validator based on another field value
+  factory ConditionalRequiredValidator.dependsOn({
+    required dynamic Function() getValue,
+    required dynamic requiredWhenValue,
+    String? errorMessage,
+  }) {
+    return ConditionalRequiredValidator(
+      isRequired: () => getValue() == requiredWhenValue,
+      errorMessage: errorMessage ?? 'Este campo é obrigatório',
+    );
+  }
+  
+  /// Create conditional required validator based on multiple conditions
+  factory ConditionalRequiredValidator.when({
+    required bool Function() condition,
+    String? errorMessage,
+  }) {
+    return ConditionalRequiredValidator(
+      isRequired: condition,
+      errorMessage: errorMessage ?? 'Este campo é obrigatório',
+    );
+  }
   /// Function that determines if the field should be required
   final bool Function() isRequired;
   
   /// Whether to trim whitespace before validation (for strings)
   final bool trimWhitespace;
-  
-  const ConditionalRequiredValidator({
-    required this.isRequired,
-    String errorMessage = 'Este campo é obrigatório',
-    this.trimWhitespace = true,
-    super.metadata,
-  }) : super(errorMessage: errorMessage);
   
   @override
   String get validatorType => 'conditional_required';
@@ -190,29 +213,6 @@ class ConditionalRequiredValidator extends BaseFieldValidator {
     ).validate(value);
   }
   
-  /// Create conditional required validator based on another field value
-  factory ConditionalRequiredValidator.dependsOn({
-    required dynamic Function() getValue,
-    required dynamic requiredWhenValue,
-    String? errorMessage,
-  }) {
-    return ConditionalRequiredValidator(
-      isRequired: () => getValue() == requiredWhenValue,
-      errorMessage: errorMessage ?? 'Este campo é obrigatório',
-    );
-  }
-  
-  /// Create conditional required validator based on multiple conditions
-  factory ConditionalRequiredValidator.when({
-    required bool Function() condition,
-    String? errorMessage,
-  }) {
-    return ConditionalRequiredValidator(
-      isRequired: condition,
-      errorMessage: errorMessage ?? 'Este campo é obrigatório',
-    );
-  }
-  
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -232,7 +232,6 @@ class ConditionalRequiredValidator extends BaseFieldValidator {
 
 /// Required validator for collections with minimum count
 class MinCountRequiredValidator extends CollectionValidator {
-  final int minCount;
   
   const MinCountRequiredValidator({
     required this.minCount,
@@ -241,17 +240,6 @@ class MinCountRequiredValidator extends CollectionValidator {
   }) : super(
     errorMessage: errorMessage ?? 'Selecione pelo menos $minCount item(s)',
   );
-  
-  @override
-  String get validatorType => 'min_count_required';
-  
-  @override
-  ValidationResult validateCollection(dynamic value, int length) {
-    if (length < minCount) {
-      return ValidationResult.invalid(errorMessage);
-    }
-    return ValidationResult.valid();
-  }
   
   /// Create validator with custom error message
   factory MinCountRequiredValidator.withMessage({
@@ -262,6 +250,18 @@ class MinCountRequiredValidator extends CollectionValidator {
       minCount: minCount,
       errorMessage: errorMessage,
     );
+  }
+  final int minCount;
+  
+  @override
+  String get validatorType => 'min_count_required';
+  
+  @override
+  ValidationResult validateCollection(dynamic value, int length) {
+    if (length < minCount) {
+      return ValidationResult.invalid(errorMessage);
+    }
+    return ValidationResult.valid();
   }
   
   @override

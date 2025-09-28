@@ -2,19 +2,6 @@ import 'package:flutter/material.dart';
 
 /// ✅ UX ENHANCEMENT: Enhanced dropdown with better UX and validation
 class EnhancedDropdown<T> extends StatefulWidget {
-  final String label;
-  final String? hint;
-  final T? value;
-  final List<EnhancedDropdownItem<T>> items;
-  final ValueChanged<T?>? onChanged;
-  final bool required;
-  final String? errorText;
-  final bool enabled;
-  final Widget? prefixIcon;
-  final String? helperText;
-  final double? maxHeight;
-  final bool searchable;
-  final String Function(T)? searchFilter;
 
   const EnhancedDropdown({
     super.key,
@@ -32,6 +19,19 @@ class EnhancedDropdown<T> extends StatefulWidget {
     this.searchable = false,
     this.searchFilter,
   });
+  final String label;
+  final String? hint;
+  final T? value;
+  final List<EnhancedDropdownItem<T>> items;
+  final ValueChanged<T?>? onChanged;
+  final bool required;
+  final String? errorText;
+  final bool enabled;
+  final Widget? prefixIcon;
+  final String? helperText;
+  final double? maxHeight;
+  final bool searchable;
+  final String Function(T)? searchFilter;
 
   @override
   State<EnhancedDropdown<T>> createState() => _EnhancedDropdownState<T>();
@@ -111,7 +111,7 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
     final T? currentValue = widget.value;
     final selectedItem = widget.items.firstWhere(
       (item) => item.value == currentValue,
-      orElse: () => EnhancedDropdownItem<T>(value: currentValue, child: Text('Valor inválido')),
+      orElse: () => EnhancedDropdownItem<T>(value: currentValue, child: const Text('Valor inválido')),
     );
 
     return InkWell(
@@ -122,14 +122,14 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
         decoration: BoxDecoration(
           color: widget.enabled
               ? Theme.of(context).colorScheme.surface
-              : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+              : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hasError
                 ? Theme.of(context).colorScheme.error
                 : _isExpanded
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                    : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
             width: hasError ? 2 : 1,
           ),
         ),
@@ -145,22 +145,22 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                         color: widget.enabled
                             ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       child: selectedItem.child,
                     )
                   : Text(
                       widget.hint ?? 'Selecione uma opção',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
             ),
             Icon(
               _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
               color: widget.enabled
-                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                  ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -178,7 +178,7 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: hasError
               ? Theme.of(context).colorScheme.error
-              : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
       ),
     );
@@ -238,7 +238,7 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
               child: Column(
@@ -269,13 +269,13 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
             ),
           ),
           focusedBorder: OutlineInputBorder(
@@ -300,13 +300,13 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
             Icon(
               Icons.search_off,
               size: 32,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 8),
             Text(
               'Nenhum item encontrado',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -331,7 +331,7 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5)
                   : null,
             ),
             child: Row(
@@ -369,7 +369,7 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
     } else {
       _filteredItems = widget.items.where((item) {
         if (widget.searchFilter != null) {
-          return widget.searchFilter!(item.value!)
+          return widget.searchFilter!(item.value as T)
               .toLowerCase()
               .contains(query.toLowerCase());
         }
@@ -396,24 +396,19 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
 
 /// Data class for dropdown items
 class EnhancedDropdownItem<T> {
-  final T? value;
-  final Widget child;
-  final bool enabled;
 
   const EnhancedDropdownItem({
     required this.value,
     required this.child,
     this.enabled = true,
   });
+  final T? value;
+  final Widget child;
+  final bool enabled;
 }
 
 /// Pre-built vehicle dropdown for common use case
 class VehicleDropdown extends StatelessWidget {
-  final String? selectedVehicleId;
-  final ValueChanged<String?> onChanged;
-  final List<VehicleDropdownData> vehicles;
-  final bool required;
-  final String? errorText;
 
   const VehicleDropdown({
     super.key,
@@ -423,6 +418,11 @@ class VehicleDropdown extends StatelessWidget {
     this.required = false,
     this.errorText,
   });
+  final String? selectedVehicleId;
+  final ValueChanged<String?> onChanged;
+  final List<VehicleDropdownData> vehicles;
+  final bool required;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +453,7 @@ class VehicleDropdown extends StatelessWidget {
                 '${vehicle.year ?? ''} ${vehicle.licensePlate != null ? '• ${vehicle.licensePlate}' : ''}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
           ],
@@ -470,11 +470,6 @@ class VehicleDropdown extends StatelessWidget {
 
 /// Data class for vehicle dropdown
 class VehicleDropdownData {
-  final String id;
-  final String brand;
-  final String model;
-  final int? year;
-  final String? licensePlate;
 
   const VehicleDropdownData({
     required this.id,
@@ -483,4 +478,9 @@ class VehicleDropdownData {
     this.year,
     this.licensePlate,
   });
+  final String id;
+  final String brand;
+  final String model;
+  final int? year;
+  final String? licensePlate;
 }

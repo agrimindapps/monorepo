@@ -1,39 +1,26 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import '../models/favorito_item_hive.dart';
-import 'base_hive_repository.dart';
 
 /// Repositório para gerenciar favoritos usando Hive
 /// Substitui o mock repository por armazenamento real
 class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
-  FavoritosHiveRepository() : super('receituagro_user_favorites');
+  FavoritosHiveRepository() : super(
+    hiveManager: GetIt.instance<IHiveManager>(),
+    boxName: 'receituagro_user_favorites',
+  );
 
-  @override
-  FavoritoItemHive createFromJson(Map<String, dynamic> json) {
-    return FavoritoItemHive.fromJson(json);
-  }
-
-  @override
-  String getKeyFromEntity(FavoritoItemHive entity) {
-    return '${entity.tipo}_${entity.itemId}';
-  }
 
   /// Busca favoritos por tipo
-  List<FavoritoItemHive> getFavoritosByTipo(String tipo) {
-    return findBy((item) => item.tipo == tipo);
+  Future<List<FavoritoItemHive>> getFavoritosByTipo(String tipo) async {
+    final result = await findBy((item) => item.tipo == tipo);
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Versão async para garantir que o box esteja aberto
-  @override
   Future<List<FavoritoItemHive>> getAllAsync() async {
-    try {
-      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
-      print('📦 [getAllAsync] Box aberto com ${box.length} itens');
-      return box.values.toList();
-    } catch (e) {
-      print('❌ [getAllAsync] Erro: $e');
-      return [];
-    }
+    final result = await getAll();
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Versão async para buscar por tipo
@@ -50,21 +37,15 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
   }
 
   /// Verifica se um item é favorito
-  bool isFavorito(String tipo, String itemId) {
+  Future<bool> isFavorito(String tipo, String itemId) async {
     final key = '${tipo}_$itemId';
-    return getById(key) != null;
+    final result = await getByKey(key);
+    return result.isSuccess && result.data != null;
   }
 
   /// Verifica se um item é favorito (versão assíncrona)
   Future<bool> isFavoritoAsync(String tipo, String itemId) async {
-    try {
-      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
-      final key = '${tipo}_$itemId';
-      return box.containsKey(key);
-    } catch (e) {
-      print('❌ [isFavoritoAsync] Erro: $e');
-      return false;
-    }
+    return await isFavorito(tipo, itemId);
   }
 
   /// Adiciona um item aos favoritos
@@ -79,9 +60,9 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
         itemData: jsonEncode(itemData),
       );
       
-      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
-      await box.put(getKeyFromEntity(favorito), favorito);
-      return true;
+      final key = '${tipo}_$itemId';
+      final result = await save(favorito, key: key);
+      return result.isSuccess;
     } catch (e) {
       return false;
     }
@@ -91,22 +72,21 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
   Future<bool> removeFavorito(String tipo, String itemId) async {
     try {
       final key = '${tipo}_$itemId';
-      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
-      await box.delete(key);
-      return true;
+      final result = await deleteByKey(key);
+      return result.isSuccess;
     } catch (e) {
       return false;
     }
   }
 
   /// Busca dados de um favorito específico
-  Map<String, dynamic>? getFavoritoData(String tipo, String itemId) {
+  Future<Map<String, dynamic>?> getFavoritoData(String tipo, String itemId) async {
     final key = '${tipo}_$itemId';
-    final favorito = getById(key);
+    final result = await getByKey(key);
     
-    if (favorito != null && favorito.itemData.isNotEmpty) {
+    if (result.isSuccess && result.data != null && result.data!.itemData.isNotEmpty) {
       try {
-        return jsonDecode(favorito.itemData) as Map<String, dynamic>;
+        return jsonDecode(result.data!.itemData) as Map<String, dynamic>;
       } catch (e) {
         return null;
       }
@@ -117,37 +97,20 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
 
   /// Busca dados de um favorito específico (versão assíncrona)
   Future<Map<String, dynamic>?> getFavoritoDataAsync(String tipo, String itemId) async {
-    try {
-      final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
-      final key = '${tipo}_$itemId';
-      final favorito = box.get(key);
-      
-      if (favorito != null && favorito.itemData.isNotEmpty) {
-        try {
-          return jsonDecode(favorito.itemData) as Map<String, dynamic>;
-        } catch (e) {
-          return null;
-        }
-      }
-      
-      return null;
-    } catch (e) {
-      print('❌ [getFavoritoDataAsync] Erro: $e');
-      return null;
-    }
+    return await getFavoritoData(tipo, itemId);
   }
 
   /// Limpa todos os favoritos de um tipo
   Future<void> clearFavoritosByTipo(String tipo) async {
-    final favoritos = getFavoritosByTipo(tipo);
-    final box = await Hive.openBox<FavoritoItemHive>('receituagro_user_favorites');
+    final favoritos = await getFavoritosByTipo(tipo);
     for (final favorito in favoritos) {
-      await box.delete(getKeyFromEntity(favorito));
+      final key = '${favorito.tipo}_${favorito.itemId}';
+      await deleteByKey(key);
     }
   }
 
   /// Retorna estatísticas dos favoritos
-  Map<String, int> getFavoritosStats() {
+  Future<Map<String, int>> getFavoritosStats() async {
     final stats = <String, int>{
       'defensivos': 0,
       'pragas': 0,
@@ -155,25 +118,26 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
       'culturas': 0,
     };
     
-    for (final favorito in getAll()) {
-      final tipo = favorito.tipo;
-      stats[tipo] = (stats[tipo] ?? 0) + 1;
+    final result = await getAll();
+    if (result.isSuccess) {
+      for (final favorito in result.data!) {
+        final tipo = favorito.tipo;
+        stats[tipo] = (stats[tipo] ?? 0) + 1;
+      }
     }
     
     return stats;
   }
 
   /// Busca favoritos por lista de IDs
-  List<FavoritoItemHive> findByIds(List<String> ids) {
+  Future<List<FavoritoItemHive>> findByIds(List<String> ids) async {
     final results = <FavoritoItemHive>[];
     
     for (final id in ids) {
       // Tenta encontrar por itemId em todos os favoritos
-      for (final favorito in getAll()) {
-        if (favorito.itemId == id) {
-          results.add(favorito);
-          break;
-        }
+      final result = await findBy((favorito) => favorito.itemId == id);
+      if (result.isSuccess && result.data!.isNotEmpty) {
+        results.add(result.data!.first);
       }
     }
     

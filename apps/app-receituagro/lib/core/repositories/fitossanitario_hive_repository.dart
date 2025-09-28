@@ -1,46 +1,68 @@
+import 'package:core/core.dart';
 import '../models/fitossanitario_hive.dart';
-import 'base_hive_repository.dart';
 
 /// Repositório para FitossanitarioHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class FitossanitarioHiveRepository extends BaseHiveRepository<FitossanitarioHive> {
-  FitossanitarioHiveRepository() : super('receituagro_fitossanitarios');
-
-  @override
-  FitossanitarioHive createFromJson(Map<String, dynamic> json) {
-    return FitossanitarioHive.fromJson(json);
-  }
-
-  @override
-  String getKeyFromEntity(FitossanitarioHive entity) {
-    return entity.idReg;
-  }
+  FitossanitarioHiveRepository() : super(
+    hiveManager: GetIt.instance<IHiveManager>(),
+    boxName: 'receituagro_fitossanitarios',
+  );
 
   /// Busca defensivo por nome comum
-  FitossanitarioHive? findByNomeComum(String nomeComum) {
-    final results = findBy((item) => item.nomeComum.toLowerCase() == nomeComum.toLowerCase());
-    return results.isNotEmpty ? results.first : null;
+  Future<FitossanitarioHive?> findByNomeComum(String nomeComum) async {
+    final result = await findBy((item) => item.nomeComum.toLowerCase() == nomeComum.toLowerCase());
+    return result.isSuccess && result.data!.isNotEmpty ? result.data!.first : null;
   }
 
   /// Lista defensivos por classe agronômica
-  List<FitossanitarioHive> findByClasseAgronomica(String classeAgronomica) {
-    return findBy((item) => 
+  Future<List<FitossanitarioHive>> findByClasseAgronomica(String classeAgronomica) async {
+    final result = await findBy((item) => 
         item.classeAgronomica?.toLowerCase() == classeAgronomica.toLowerCase());
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Lista defensivos por fabricante
-  List<FitossanitarioHive> findByFabricante(String fabricante) {
-    return findBy((item) => 
+  Future<List<FitossanitarioHive>> findByFabricante(String fabricante) async {
+    final result = await findBy((item) => 
         item.fabricante?.toLowerCase() == fabricante.toLowerCase());
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Lista defensivos ativos/comercializados
-  List<FitossanitarioHive> getActiveDefensivos() {
-    return findBy((item) => item.status && item.comercializado == 1);
+  Future<List<FitossanitarioHive>> getActiveDefensivos() async {
+    final result = await findBy((item) => item.status && item.comercializado == 1);
+    return result.isSuccess ? result.data! : [];
   }
 
   /// Lista defensivos elegíveis
-  List<FitossanitarioHive> getElegibleDefensivos() {
-    return findBy((item) => item.elegivel);
+  Future<List<FitossanitarioHive>> getElegibleDefensivos() async {
+    final result = await findBy((item) => item.elegivel);
+    return result.isSuccess ? result.data! : [];
+  }
+
+  /// Busca por ID para manter compatibilidade com extensões
+  Future<FitossanitarioHive?> getById(String id) async {
+    final result = await getByKey(id);
+    return result.isSuccess ? result.data : null;
+  }
+
+  /// Carrega dados do JSON para o repositório
+  Future<Result<void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+    try {
+      final Map<dynamic, FitossanitarioHive> items = {};
+      
+      for (final json in jsonData) {
+        final fitossanitario = FitossanitarioHive.fromJson(json);
+        items[fitossanitario.idReg] = fitossanitario;
+      }
+      
+      return await saveAll(items);
+    } catch (e) {
+      return Result.error(StorageError(
+        message: 'Failed to load from JSON',
+        code: 'LOAD_FROM_JSON_ERROR',
+      ));
+    }
   }
 }

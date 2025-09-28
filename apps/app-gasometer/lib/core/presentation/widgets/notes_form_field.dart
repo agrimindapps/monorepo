@@ -37,6 +37,21 @@ enum NotesFieldType {
 /// )
 /// ```
 class NotesFormField extends StatelessWidget {
+
+  const NotesFormField({
+    super.key,
+    required this.controller,
+    required this.type,
+    this.customLabel,
+    this.customHint,
+    this.required = false,
+    this.onChanged,
+    this.additionalValidator,
+    this.customMaxLength,
+    this.customMaxLines,
+    this.showCharacterCount = true,
+    this.customHelperText,
+  });
   /// Controller do campo de texto
   final TextEditingController controller;
 
@@ -69,21 +84,6 @@ class NotesFormField extends StatelessWidget {
 
   /// Helper text customizado
   final String? customHelperText;
-
-  const NotesFormField({
-    super.key,
-    required this.controller,
-    required this.type,
-    this.customLabel,
-    this.customHint,
-    this.required = false,
-    this.onChanged,
-    this.additionalValidator,
-    this.customMaxLength,
-    this.customMaxLines,
-    this.showCharacterCount = true,
-    this.customHelperText,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -198,12 +198,6 @@ class NotesFormField extends StatelessWidget {
 
 /// Configuração interna para tipos de campo
 class _NotesFieldConfig {
-  final String label;
-  final String hint;
-  final IconData icon;
-  final int maxLength;
-  final int maxLines;
-  final String? helperText;
 
   const _NotesFieldConfig({
     required this.label,
@@ -213,15 +207,16 @@ class _NotesFieldConfig {
     required this.maxLines,
     this.helperText,
   });
+  final String label;
+  final String hint;
+  final IconData icon;
+  final int maxLength;
+  final int maxLines;
+  final String? helperText;
 }
 
 /// Variações pré-configuradas para casos específicos
 class ObservationsField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final String? hint;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const ObservationsField({
     super.key,
@@ -231,6 +226,11 @@ class ObservationsField extends StatelessWidget {
     this.required = false,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final String? hint;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -246,11 +246,6 @@ class ObservationsField extends StatelessWidget {
 }
 
 class DescriptionField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final String? hint;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const DescriptionField({
     super.key,
@@ -260,6 +255,11 @@ class DescriptionField extends StatelessWidget {
     this.required = false,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final String? hint;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -275,11 +275,6 @@ class DescriptionField extends StatelessWidget {
 }
 
 class LocationField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final String? hint;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const LocationField({
     super.key,
@@ -289,6 +284,11 @@ class LocationField extends StatelessWidget {
     this.required = false,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final String? hint;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -304,11 +304,6 @@ class LocationField extends StatelessWidget {
 }
 
 class CommentsField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final String? hint;
-  final bool required;
-  final void Function(String?)? onChanged;
 
   const CommentsField({
     super.key,
@@ -318,6 +313,11 @@ class CommentsField extends StatelessWidget {
     this.required = false,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String? label;
+  final String? hint;
+  final bool required;
+  final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {

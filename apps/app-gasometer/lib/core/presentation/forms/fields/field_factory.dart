@@ -578,9 +578,9 @@ class _MaterialFileFieldState extends BaseFormFieldState<_MaterialFileField> {}
 
 /// Custom text input formatter for decimal places
 class _DecimalTextInputFormatter extends TextInputFormatter {
-  final int decimalPlaces;
   
   _DecimalTextInputFormatter(this.decimalPlaces);
+  final int decimalPlaces;
   
   @override
   TextEditingValue formatEditUpdate(

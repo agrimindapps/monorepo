@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
@@ -98,12 +97,12 @@ class DiagnosticosRepositoryStub implements IDiagnosticosRepository {
       completos: 0,
       parciais: 0,
       incompletos: 0,
-      porDefensivo: const <String, int>{},
-      porCultura: const <String, int>{},
-      porPraga: const <String, int>{},
-      topDiagnosticos: const <DiagnosticoPopular>[],
+      porDefensivo: <String, int>{},
+      porCultura: <String, int>{},
+      porPraga: <String, int>{},
+      topDiagnosticos: <DiagnosticoPopular>[],
     );
-    return Right(stats);
+    return const Right(stats);
   }
 
   @override

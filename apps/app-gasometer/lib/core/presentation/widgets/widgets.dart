@@ -1,5 +1,6 @@
 /// Core presentation widgets barrel file
 /// Exports all reusable widgets for easy importing
+library;
 
 // Image handling widgets
 export 'cached_image_widget.dart';

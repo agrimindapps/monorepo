@@ -39,7 +39,7 @@ class DiagnosticoIntegrationService {
   /// Obtém um diagnóstico completo com todos os dados relacionais
   Future<DiagnosticoDetalhado?> getDiagnosticoCompleto(String idReg) async {
     try {
-      final diagnostico = _diagnosticoRepo.getById(idReg);
+      final diagnostico = await _diagnosticoRepo.getByIdOrObjectId(idReg);
       if (diagnostico == null) return null;
 
       // Buscar dados relacionados com cache
@@ -69,17 +69,17 @@ class DiagnosticoIntegrationService {
   /// Busca diagnósticos por cultura com dados relacionais
   Future<List<DiagnosticoDetalhado>> buscarPorCultura(String culturaId) async {
     try {
-      final diagnosticos = _diagnosticoRepo.findByCultura(culturaId);
-      final List<DiagnosticoDetalhado> result = [];
+      final diagnosticos = await _diagnosticoRepo.findByCultura(culturaId);
+      final List<DiagnosticoDetalhado> detalhados = [];
 
       for (final diagnostico in diagnosticos) {
         final detalhado = await getDiagnosticoCompleto(diagnostico.idReg);
         if (detalhado != null) {
-          result.add(detalhado);
+          detalhados.add(detalhado);
         }
       }
 
-      return result;
+      return detalhados;
     } catch (e) {
       // TODO: Implement proper logging
       return [];
@@ -89,17 +89,17 @@ class DiagnosticoIntegrationService {
   /// Busca diagnósticos por praga com dados relacionais
   Future<List<DiagnosticoDetalhado>> buscarPorPraga(String pragaId) async {
     try {
-      final diagnosticos = _diagnosticoRepo.findBy((item) => item.fkIdPraga == pragaId);
-      final List<DiagnosticoDetalhado> result = [];
+      final diagnosticos = await _diagnosticoRepo.findByPraga(pragaId);
+      final List<DiagnosticoDetalhado> detalhados = [];
 
       for (final diagnostico in diagnosticos) {
         final detalhado = await getDiagnosticoCompleto(diagnostico.idReg);
         if (detalhado != null) {
-          result.add(detalhado);
+          detalhados.add(detalhado);
         }
       }
 
-      return result;
+      return detalhados;
     } catch (e) {
       // TODO: Implement proper logging
       return [];
@@ -109,17 +109,17 @@ class DiagnosticoIntegrationService {
   /// Busca diagnósticos por defensivo com dados relacionais
   Future<List<DiagnosticoDetalhado>> buscarPorDefensivo(String defensivoId) async {
     try {
-      final diagnosticos = _diagnosticoRepo.findByDefensivo(defensivoId);
-      final List<DiagnosticoDetalhado> result = [];
+      final diagnosticos = await _diagnosticoRepo.findByDefensivo(defensivoId);
+      final List<DiagnosticoDetalhado> detalhados = [];
 
       for (final diagnostico in diagnosticos) {
         final detalhado = await getDiagnosticoCompleto(diagnostico.idReg);
         if (detalhado != null) {
-          result.add(detalhado);
+          detalhados.add(detalhado);
         }
       }
 
-      return result;
+      return detalhados;
     } catch (e) {
       // TODO: Implement proper logging
       return [];
@@ -133,7 +133,8 @@ class DiagnosticoIntegrationService {
     String? defensivoId,
   }) async {
     try {
-      List<DiagnosticoHive> diagnosticos = _diagnosticoRepo.getAll();
+      final result = await _diagnosticoRepo.getAll();
+      List<DiagnosticoHive> diagnosticos = result.isSuccess ? result.data! : [];
 
       // Aplicar filtros
       if (culturaId != null && culturaId.isNotEmpty) {
@@ -149,15 +150,15 @@ class DiagnosticoIntegrationService {
       }
 
       // Converter para diagnósticos detalhados
-      final List<DiagnosticoDetalhado> result = [];
+      final List<DiagnosticoDetalhado> detalhados = [];
       for (final diagnostico in diagnosticos) {
         final detalhado = await getDiagnosticoCompleto(diagnostico.idReg);
         if (detalhado != null) {
-          result.add(detalhado);
+          detalhados.add(detalhado);
         }
       }
 
-      return result;
+      return detalhados;
     } catch (e) {
       // TODO: Implement proper logging
       return [];
@@ -167,8 +168,9 @@ class DiagnosticoIntegrationService {
   /// Obtém defensivos completos com informações detalhadas
   Future<List<DefensivoCompleto>> getDefensivosCompletos() async {
     try {
-      final defensivos = _fitossanitarioRepo.getAll();
-      final List<DefensivoCompleto> result = [];
+      final defensivosResult = await _fitossanitarioRepo.getAll();
+      final defensivos = defensivosResult.isSuccess ? defensivosResult.data! : <FitossanitarioHive>[];
+      final List<DefensivoCompleto> defensivosCompletos = [];
 
       for (final defensivo in defensivos) {
         final info = await _getInfoDefensivoById(defensivo.idReg);
@@ -176,14 +178,14 @@ class DiagnosticoIntegrationService {
         // Buscar diagnósticos relacionados
         final diagnosticosRelacionados = await buscarPorDefensivo(defensivo.idReg);
         
-        result.add(DefensivoCompleto(
+        defensivosCompletos.add(DefensivoCompleto(
           defensivo: defensivo,
           infoDetalhada: info,
           diagnosticosRelacionados: diagnosticosRelacionados,
         ));
       }
 
-      return result;
+      return defensivosCompletos;
     } catch (e) {
       // TODO: Implement proper logging
       return [];
@@ -208,18 +210,18 @@ class DiagnosticoIntegrationService {
       }
 
       // Converter para resultado
-      final List<PragaPorCultura> result = [];
+      final List<PragaPorCultura> pragasPorCultura = [];
       for (final entry in pragasMap.entries) {
         final praga = await _getPragaById(entry.key);
         if (praga != null) {
-          result.add(PragaPorCultura(
+          pragasPorCultura.add(PragaPorCultura(
             praga: praga,
             diagnosticosRelacionados: entry.value,
           ));
         }
       }
 
-      return result;
+      return pragasPorCultura;
     } catch (e) {
       // TODO: Implement proper logging
       return [];
@@ -233,7 +235,8 @@ class DiagnosticoIntegrationService {
       return _defensivoCache[id];
     }
 
-    final defensivo = _fitossanitarioRepo.getById(id);
+    final result = await _fitossanitarioRepo.getByKey(id);
+    final defensivo = result.isSuccess ? result.data : null;
     if (defensivo != null) {
       _defensivoCache[id] = defensivo;
     }
@@ -245,7 +248,8 @@ class DiagnosticoIntegrationService {
       return _culturaCache[id];
     }
 
-    final cultura = _culturaRepo.getById(id);
+    final result = await _culturaRepo.getByKey(id);
+    final cultura = result.isSuccess ? result.data : null;
     if (cultura != null) {
       _culturaCache[id] = cultura;
     }
@@ -257,7 +261,8 @@ class DiagnosticoIntegrationService {
       return _pragaCache[id];
     }
 
-    final praga = _pragasRepo.getById(id);
+    final result = await _pragasRepo.getByKey(id);
+    final praga = result.isSuccess ? result.data : null;
     if (praga != null) {
       _pragaCache[id] = praga;
     }
@@ -269,7 +274,8 @@ class DiagnosticoIntegrationService {
       return _infoDefensivoCache[id];
     }
 
-    final info = _fitossanitarioInfoRepo.getById(id);
+    final result = await _fitossanitarioInfoRepo.getByKey(id);
+    final info = result.isSuccess ? result.data : null;
     if (info != null) {
       _infoDefensivoCache[id] = info;
     }

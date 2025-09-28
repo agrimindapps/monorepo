@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/core.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget especializado para exibir um diagnóstico com dados relacionais

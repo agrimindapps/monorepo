@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:core/core.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/extensions/user_entity_gasometer_extension.dart';
@@ -22,6 +20,11 @@ abstract class AuthLocalDataSource {
 
 @LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
+
+  AuthLocalDataSourceImpl(
+    this._sharedPreferences,
+    this._secureStorage,
+  );
   final SharedPreferences _sharedPreferences;
   final FlutterSecureStorage _secureStorage;
   
@@ -29,11 +32,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _firstLaunchKey = 'first_launch';
   static const String _cachedEmailKey = 'cached_email';
   static const String _cachedPasswordKey = 'cached_password_hash';
-
-  AuthLocalDataSourceImpl(
-    this._sharedPreferences,
-    this._secureStorage,
-  );
 
   @override
   Future<UserEntity?> getCachedUser() async {

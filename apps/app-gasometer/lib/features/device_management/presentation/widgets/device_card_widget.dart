@@ -1,15 +1,11 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import 'package:core/core.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Widget de card para exibir informações de um dispositivo
 class DeviceCardWidget extends StatelessWidget {
-  final DeviceEntity device;
-  final bool isCurrentDevice;
-  final Function(String action) onAction;
 
   const DeviceCardWidget({
     super.key,
@@ -17,6 +13,9 @@ class DeviceCardWidget extends StatelessWidget {
     required this.onAction,
     this.isCurrentDevice = false,
   });
+  final DeviceEntity device;
+  final bool isCurrentDevice;
+  final Function(String action) onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,7 @@ class DeviceCardWidget extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -148,7 +147,7 @@ class DeviceCardWidget extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(

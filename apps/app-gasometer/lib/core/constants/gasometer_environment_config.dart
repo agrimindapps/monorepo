@@ -3,9 +3,9 @@ import 'package:core/core.dart';
 /// Gasometer-specific environment configuration
 /// Extends the generic AppEnvironmentConfig with gasometer-specific settings
 class GasometerEnvironmentConfig extends AppEnvironmentConfig {
-  static final GasometerEnvironmentConfig _instance = GasometerEnvironmentConfig._internal();
   factory GasometerEnvironmentConfig() => _instance;
   GasometerEnvironmentConfig._internal();
+  static final GasometerEnvironmentConfig _instance = GasometerEnvironmentConfig._internal();
 
   @override
   String get appId => 'gasometer';

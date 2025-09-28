@@ -10,11 +10,6 @@ import '../../../../core/theme/design_tokens.dart';
 /// Widget modal elegante para seleção de imagem de perfil
 /// Permite escolher entre câmera, galeria ou remover foto atual
 class ProfileImagePickerWidget extends StatelessWidget {
-  final VoidCallback? onCameraTap;
-  final VoidCallback? onGalleryTap;
-  final VoidCallback? onRemoveTap;
-  final bool hasCurrentImage;
-  final bool isLoading;
 
   const ProfileImagePickerWidget({
     super.key,
@@ -24,6 +19,11 @@ class ProfileImagePickerWidget extends StatelessWidget {
     this.hasCurrentImage = false,
     this.isLoading = false,
   });
+  final VoidCallback? onCameraTap;
+  final VoidCallback? onGalleryTap;
+  final VoidCallback? onRemoveTap;
+  final bool hasCurrentImage;
+  final bool isLoading;
 
   /// Método estático para mostrar o modal
   static Future<void> show({
@@ -50,7 +50,7 @@ class ProfileImagePickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -277,15 +277,15 @@ class ProfileImagePickerWidget extends StatelessWidget {
 
 /// Modal interno para seleção de imagem
 class _ProfileImagePickerModal extends StatefulWidget {
-  final Function(File) onImageSelected;
-  final VoidCallback? onRemoveImage;
-  final bool hasCurrentImage;
 
   const _ProfileImagePickerModal({
     required this.onImageSelected,
     this.onRemoveImage,
     this.hasCurrentImage = false,
   });
+  final Function(File) onImageSelected;
+  final VoidCallback? onRemoveImage;
+  final bool hasCurrentImage;
 
   @override
   State<_ProfileImagePickerModal> createState() => __ProfileImagePickerModalState();

@@ -1,14 +1,15 @@
+// Dart imports
 import 'dart:async';
 
-import 'package:core/core.dart' as core;
+// Flutter imports
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
-import '../interfaces/i_premium_service.dart';
-import '../services/mock_premium_service.dart';
-import '../services/enhanced_diagnostic_integration_service.dart';
+// Package imports
+import 'package:core/core.dart' as core;
 
+// Local imports
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
+import '../../features/analytics/analytics_service.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/services/comentarios_service.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
@@ -19,10 +20,12 @@ import '../../features/favoritos/favoritos_di.dart';
 import '../../features/favoritos/services/favoritos_cache_service.dart';
 import '../../features/favoritos/services/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
-import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/device_management_di.dart';
+import '../../features/settings/di/settings_di.dart';
+import '../interfaces/i_premium_service.dart';
 import '../navigation/agricultural_navigation_extension.dart';
-import '../services/receituagro_navigation_service.dart';
+import '../providers/feature_flags_provider.dart';
+import '../providers/remote_config_provider.dart';
 import '../repositories/comentarios_hive_repository.dart';
 import '../repositories/cultura_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
@@ -34,26 +37,22 @@ import '../repositories/plantas_inf_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
+import '../services/cloud_functions_service.dart';
 import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
-// Enhanced diagnostic service removed
-// Navigation service moved to core package
-import '../providers/feature_flags_provider.dart';
-import '../providers/remote_config_provider.dart';
-import '../../features/analytics/analytics_service.dart';
-import '../services/cloud_functions_service.dart';
-import '../services/premium_service.dart';
-// premium_service_real.dart removed - consolidated into premium_service.dart
-import '../services/receituagro_notification_service.dart';
+import '../services/enhanced_diagnostic_integration_service.dart';
 import '../services/firebase_messaging_service.dart';
+import '../services/mock_premium_service.dart';
+import '../services/premium_service.dart';
 import '../services/promotional_notification_manager.dart';
-// Emergency stub removed
+import '../services/receituagro_navigation_service.dart';
+import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
 import '../sync/receituagro_sync_config.dart';
 import 'core_package_integration.dart';
 import 'repositories_di.dart';
 
-final sl = GetIt.instance;
+final sl = core.GetIt.instance;
 
 Future<void> init() async {
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
@@ -124,7 +123,7 @@ Future<void> init() async {
   // Execute sync initialization synchronously during DI setup
   unawaited(ReceitaAgroSyncConfig.configure().then((_) {
     if (kDebugMode) print('✅ DI_CONTAINER: ReceitaAgro sync inicializado com sucesso!');
-  }).catchError((error) {
+  }).catchError((Object error) {
     if (kDebugMode) print('❌ DI_CONTAINER: ReceitaAgro sync initialization failed: $error');
   }));
   

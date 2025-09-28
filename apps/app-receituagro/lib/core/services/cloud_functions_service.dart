@@ -2,9 +2,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Model for device management

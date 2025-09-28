@@ -318,13 +318,13 @@ class _PlantTaskHistoryOverviewTabState
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.1),
-            color.withOpacity(0.05),
+            color.withValues(alpha: 0.1),
+            color.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -356,7 +356,7 @@ class _PlantTaskHistoryOverviewTabState
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               fontSize: 10,
             ),
             textAlign: TextAlign.center,
@@ -416,10 +416,10 @@ class _PlantTaskHistoryOverviewTabState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -436,7 +436,7 @@ class _PlantTaskHistoryOverviewTabState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -469,7 +469,7 @@ class _PlantTaskHistoryOverviewTabState
             Text(
               'Nunca realizado',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
         ],
@@ -489,13 +489,13 @@ class _PlantTaskHistoryOverviewTabState
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.orange.withOpacity(0.1),
-            Colors.deepOrange.withOpacity(0.05),
+            Colors.orange.withValues(alpha: 0.1),
+            Colors.deepOrange.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.orange.withOpacity(0.3),
+          color: Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -540,7 +540,7 @@ class _PlantTaskHistoryOverviewTabState
           const SizedBox(height: 16),
           LinearProgressIndicator(
             value: progress.clamp(0.0, 1.0),
-            backgroundColor: Colors.orange.withOpacity(0.2),
+            backgroundColor: Colors.orange.withValues(alpha: 0.2),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
             borderRadius: BorderRadius.circular(4),
             minHeight: 8,
@@ -568,7 +568,7 @@ class _PlantTaskHistoryOverviewTabState
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -577,7 +577,7 @@ class _PlantTaskHistoryOverviewTabState
                   Icon(
                     Icons.history,
                     size: 48,
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -627,11 +627,11 @@ class _PlantTaskHistoryOverviewTabState
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -642,7 +642,7 @@ class _PlantTaskHistoryOverviewTabState
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(

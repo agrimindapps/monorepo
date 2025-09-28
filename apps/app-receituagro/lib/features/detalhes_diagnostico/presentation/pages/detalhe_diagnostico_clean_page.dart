@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/services/premium_status_notifier.dart';
 import '../../../../core/mixins/premium_status_listener.dart';

@@ -6,24 +6,6 @@ import '../../domain/entities/fuel_record_entity.dart';
 
 /// Model reativo para o formulário de abastecimento
 class FuelFormModel extends Equatable {
-  final String id;
-  final String userId;
-  final String vehicleId;
-  final VehicleEntity? vehicle;
-  final FuelType fuelType;
-  final double liters;
-  final double pricePerLiter;
-  final double totalPrice;
-  final double odometer;
-  final DateTime date;
-  final String gasStationName;
-  final String gasStationBrand;
-  final bool fullTank;
-  final String notes;
-  final bool isLoading;
-  final bool hasChanges;
-  final Map<String, String> errors;
-  final String? lastError;
 
   const FuelFormModel({
     required this.id,
@@ -93,6 +75,24 @@ class FuelFormModel extends Equatable {
       lastError: null,
     );
   }
+  final String id;
+  final String userId;
+  final String vehicleId;
+  final VehicleEntity? vehicle;
+  final FuelType fuelType;
+  final double liters;
+  final double pricePerLiter;
+  final double totalPrice;
+  final double odometer;
+  final DateTime date;
+  final String gasStationName;
+  final String gasStationBrand;
+  final bool fullTank;
+  final String notes;
+  final bool isLoading;
+  final bool hasChanges;
+  final Map<String, String> errors;
+  final String? lastError;
 
   @override
   List<Object?> get props => [

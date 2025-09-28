@@ -14,25 +14,6 @@ import 'error_state_widget.dart';
 /// Enhanced scaffold with built-in connectivity and sync indicators
 /// Provides consistent UX patterns across all pages
 class EnhancedAppScaffold extends StatelessWidget {
-  final PreferredSizeWidget? appBar;
-  final Widget body;
-  final Widget? drawer;
-  final Widget? endDrawer;
-  final Widget? floatingActionButton;
-  final Widget? bottomNavigationBar;
-  final Widget? bottomSheet;
-  final Color? backgroundColor;
-  final bool resizeToAvoidBottomInset;
-  final bool extendBody;
-  final bool extendBodyBehindAppBar;
-  
-  // Enhanced features
-  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
-  final IConnectivityService? connectivityService;
-  final bool showConnectivityBanner;
-  final bool showSyncStatus;
-  final bool showFloatingSyncIndicator;
-  final VoidCallback? onSyncTap;
 
   const EnhancedAppScaffold({
     super.key,
@@ -54,10 +35,29 @@ class EnhancedAppScaffold extends StatelessWidget {
     this.showFloatingSyncIndicator = false,
     this.onSyncTap,
   });
+  final PreferredSizeWidget? appBar;
+  final Widget body;
+  final Widget? drawer;
+  final Widget? endDrawer;
+  final Widget? floatingActionButton;
+  final Widget? bottomNavigationBar;
+  final Widget? bottomSheet;
+  final Color? backgroundColor;
+  final bool resizeToAvoidBottomInset;
+  final bool extendBody;
+  final bool extendBodyBehindAppBar;
+  
+  // Enhanced features
+  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
+  final IConnectivityService? connectivityService;
+  final bool showConnectivityBanner;
+  final bool showSyncStatus;
+  final bool showFloatingSyncIndicator;
+  final VoidCallback? onSyncTap;
 
   @override
   Widget build(BuildContext context) {
-    Widget scaffoldBody = body;
+    final Widget scaffoldBody = body;
 
     // TODO: Phase 2 - Replace with UnifiedSync widgets
     // Wrap body with sync status if enabled
@@ -85,7 +85,7 @@ class EnhancedAppScaffold extends StatelessWidget {
     //   );
     // }
 
-    Widget scaffold = Scaffold(
+    final Widget scaffold = Scaffold(
       appBar: _buildEnhancedAppBar(),
       body: scaffoldBody,
       drawer: drawer,
@@ -119,21 +119,6 @@ class EnhancedAppScaffold extends StatelessWidget {
 
 /// Enhanced app bar with sync and connectivity indicators
 class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final List<Widget>? actions;
-  final Widget? leading;
-  final bool automaticallyImplyLeading;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final double? elevation;
-  final bool centerTitle;
-  
-  // Enhanced features
-  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
-  final IConnectivityService? connectivityService;
-  final bool showSyncIndicator;
-  final bool showConnectivityIndicator;
-  final VoidCallback? onSyncTap;
 
   const EnhancedAppBar({
     super.key,
@@ -151,6 +136,21 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showConnectivityIndicator = true,
     this.onSyncTap,
   });
+  final String title;
+  final List<Widget>? actions;
+  final Widget? leading;
+  final bool automaticallyImplyLeading;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double? elevation;
+  final bool centerTitle;
+  
+  // Enhanced features
+  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
+  final IConnectivityService? connectivityService;
+  final bool showSyncIndicator;
+  final bool showConnectivityIndicator;
+  final VoidCallback? onSyncTap;
 
   @override
   Widget build(BuildContext context) {
@@ -195,14 +195,6 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// Enhanced page wrapper with common patterns
 class EnhancedPageWrapper extends StatelessWidget {
-  final Widget child;
-  final bool isLoading;
-  final String? errorMessage;
-  final VoidCallback? onRetry;
-  final bool isEmpty;
-  final Widget? emptyWidget;
-  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
-  final IConnectivityService? connectivityService;
 
   const EnhancedPageWrapper({
     super.key,
@@ -215,6 +207,14 @@ class EnhancedPageWrapper extends StatelessWidget {
     // this.syncService, // TODO: Replace with UnifiedSync in Phase 2
     this.connectivityService,
   });
+  final Widget child;
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
+  final bool isEmpty;
+  final Widget? emptyWidget;
+  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
+  final IConnectivityService? connectivityService;
 
   @override
   Widget build(BuildContext context) {
@@ -256,13 +256,6 @@ class EnhancedPageWrapper extends StatelessWidget {
 
 /// Enhanced list widget with offline indicators
 class EnhancedListView<T> extends StatelessWidget {
-  final List<T> items;
-  final Widget Function(BuildContext, T, int) itemBuilder;
-  final bool Function(T)? isItemUnsynced;
-  final Widget? emptyWidget;
-  final ScrollController? controller;
-  final EdgeInsetsGeometry? padding;
-  final bool shrinkWrap;
 
   const EnhancedListView({
     super.key,
@@ -274,6 +267,13 @@ class EnhancedListView<T> extends StatelessWidget {
     this.padding,
     this.shrinkWrap = false,
   });
+  final List<T> items;
+  final Widget Function(BuildContext, T, int) itemBuilder;
+  final bool Function(T)? isItemUnsynced;
+  final Widget? emptyWidget;
+  final ScrollController? controller;
+  final EdgeInsetsGeometry? padding;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {

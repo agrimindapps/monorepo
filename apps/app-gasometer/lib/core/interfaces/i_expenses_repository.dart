@@ -76,13 +76,6 @@ abstract class IExpensesRepository {
 
 /// Paged result wrapper
 class PagedResult<T> {
-  final List<T> items;
-  final int currentPage;
-  final int pageSize;
-  final int totalItems;
-  final int totalPages;
-  final bool hasNext;
-  final bool hasPrevious;
 
   const PagedResult({
     required this.items,
@@ -93,6 +86,13 @@ class PagedResult<T> {
     required this.hasNext,
     required this.hasPrevious,
   });
+  final List<T> items;
+  final int currentPage;
+  final int pageSize;
+  final int totalItems;
+  final int totalPages;
+  final bool hasNext;
+  final bool hasPrevious;
 }
 
 /// Sort options for expenses

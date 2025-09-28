@@ -81,13 +81,18 @@ class DetalheDefensivoProvider extends ChangeNotifier {
   /// Carrega dados reais do defensivo com cache otimizado
   Future<void> _loadDefensivoData(String defensivoName) async {
     // Busca por nome comum primeiro (mais comum)
-    var defensivos = _fitossanitarioRepository.getAll().where(
+    final result = await _fitossanitarioRepository.getAll();
+    if (result.isError) {
+      throw Exception('Erro ao acessar dados: ${result.error}');
+    }
+    
+    var defensivos = result.data!.where(
       (d) => d.nomeComum == defensivoName,
     );
     
     // Se não encontrar, busca por nome técnico
     if (defensivos.isEmpty) {
-      defensivos = _fitossanitarioRepository.getAll().where(
+      defensivos = result.data!.where(
         (d) => d.nomeTecnico == defensivoName,
       );
     }
@@ -111,7 +116,7 @@ class DetalheDefensivoProvider extends ChangeNotifier {
       try {
         _isFavorited = await _favoritosRepository.isFavoritoAsync('defensivos', itemId);
       } catch (fallbackError) {
-        _isFavorited = _favoritosRepository.isFavorito('defensivos', itemId);
+        _isFavorited = await _favoritosRepository.isFavorito('defensivos', itemId);
       }
     }
     notifyListeners();

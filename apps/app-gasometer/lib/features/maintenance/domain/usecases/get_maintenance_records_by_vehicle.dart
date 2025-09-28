@@ -8,9 +8,9 @@ import '../entities/maintenance_entity.dart';
 import '../repositories/maintenance_repository.dart';
 
 class GetMaintenanceRecordsByVehicleParams extends Equatable {
-  final String vehicleId;
 
   const GetMaintenanceRecordsByVehicleParams({required this.vehicleId});
+  final String vehicleId;
 
   @override
   List<Object> get props => [vehicleId];
@@ -18,9 +18,9 @@ class GetMaintenanceRecordsByVehicleParams extends Equatable {
 
 @injectable
 class GetMaintenanceRecordsByVehicle implements UseCase<List<MaintenanceEntity>, GetMaintenanceRecordsByVehicleParams> {
-  final MaintenanceRepository repository;
 
   GetMaintenanceRecordsByVehicle(this.repository);
+  final MaintenanceRepository repository;
 
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> call(GetMaintenanceRecordsByVehicleParams params) async {

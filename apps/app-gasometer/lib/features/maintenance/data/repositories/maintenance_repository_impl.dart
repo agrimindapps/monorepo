@@ -16,6 +16,13 @@ import '../datasources/maintenance_remote_data_source.dart';
 
 @LazySingleton(as: MaintenanceRepository)
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
+
+  MaintenanceRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.connectivity,
+    required this.loggingService,
+  });
   final MaintenanceRemoteDataSource remoteDataSource;
   final MaintenanceLocalDataSource localDataSource;
   final Connectivity connectivity;
@@ -25,13 +32,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   Completer<void>? _syncInProgress;
   Timer? _debounceTimer;
   static const Duration _debounceDelay = Duration(seconds: 5);
-
-  MaintenanceRepositoryImpl({
-    required this.remoteDataSource,
-    required this.localDataSource,
-    required this.connectivity,
-    required this.loggingService,
-  });
 
   Future<bool> get _isConnected async {
     final result = await connectivity.checkConnectivity();

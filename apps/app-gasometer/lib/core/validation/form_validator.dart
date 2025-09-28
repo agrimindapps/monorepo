@@ -204,21 +204,6 @@ class FormValidator {
 
 /// Dados de um campo do formulário
 class FormFieldData {
-  final String fieldId;
-  final TextEditingController controller;
-  final ValidationType validationType;
-  final bool required;
-  final String? Function(String?)? customValidator;
-  final GlobalKey scrollKey;
-  final int? minLength;
-  final int? maxLength;
-  final double? minValue;
-  final double? maxValue;
-  final String label;
-  final String? pattern;
-  final double? currentOdometer;
-  final double? initialOdometer;
-  final double? tankCapacity;
 
   FormFieldData({
     required this.fieldId,
@@ -237,19 +222,34 @@ class FormFieldData {
     this.initialOdometer,
     this.tankCapacity,
   });
+  final String fieldId;
+  final TextEditingController controller;
+  final ValidationType validationType;
+  final bool required;
+  final String? Function(String?)? customValidator;
+  final GlobalKey scrollKey;
+  final int? minLength;
+  final int? maxLength;
+  final double? minValue;
+  final double? maxValue;
+  final String label;
+  final String? pattern;
+  final double? currentOdometer;
+  final double? initialOdometer;
+  final double? tankCapacity;
 }
 
 /// Resultado de validação de um campo específico
 class FieldValidationResult {
-  final String fieldId;
-  final String label;
-  final ValidationResult result;
 
   FieldValidationResult({
     required this.fieldId,
     required this.label,
     required this.result,
   });
+  final String fieldId;
+  final String label;
+  final ValidationResult result;
 
   @override
   String toString() {
@@ -658,21 +658,6 @@ extension FormValidatorExtensions on FormValidator {
 
 /// Configuração para adicionar um campo
 class FormFieldConfig {
-  final String fieldId;
-  final TextEditingController controller;
-  final ValidationType validationType;
-  final bool required;
-  final String? Function(String?)? customValidator;
-  final GlobalKey? scrollKey;
-  final int? minLength;
-  final int? maxLength;
-  final double? minValue;
-  final double? maxValue;
-  final String? label;
-  final String? pattern;
-  final double? currentOdometer;
-  final double? initialOdometer;
-  final double? tankCapacity;
 
   FormFieldConfig({
     required this.fieldId,
@@ -691,4 +676,19 @@ class FormFieldConfig {
     this.initialOdometer,
     this.tankCapacity,
   });
+  final String fieldId;
+  final TextEditingController controller;
+  final ValidationType validationType;
+  final bool required;
+  final String? Function(String?)? customValidator;
+  final GlobalKey? scrollKey;
+  final int? minLength;
+  final int? maxLength;
+  final double? minValue;
+  final double? maxValue;
+  final String? label;
+  final String? pattern;
+  final double? currentOdometer;
+  final double? initialOdometer;
+  final double? tankCapacity;
 }

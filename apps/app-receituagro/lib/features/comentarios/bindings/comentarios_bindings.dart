@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:provider/single_child_widget.dart';
+
+import 'package:core/core.dart';
 
 import '../../../core/interfaces/i_premium_service.dart';
 import '../comentarios_page.dart';
@@ -79,9 +82,9 @@ class _MockPremiumService extends ChangeNotifier implements IPremiumService {
 /// Centralized provider configuration for comentarios module
 class ComentariosProviders {
   /// Get change notifier providers for reactive services
-  static List<ChangeNotifierProvider> getProviders() {
+  static List<provider.ChangeNotifierProvider> getProviders() {
     return [
-      ChangeNotifierProvider<ComentariosService>(
+      provider.ChangeNotifierProvider<ComentariosService>(
         create: (_) => ComentariosService(
           repository: MockComentariosRepository(),
           premiumService: _MockPremiumService(),
@@ -91,9 +94,9 @@ class ComentariosProviders {
   }
 
   /// Get proxy providers that depend on other services
-  static List<ChangeNotifierProxyProvider> getProxyProviders() {
+  static List<provider.ChangeNotifierProxyProvider<ComentariosService, ComentariosController>> getProxyProviders() {
     return [
-      ChangeNotifierProxyProvider<ComentariosService, ComentariosController>(
+      provider.ChangeNotifierProxyProvider<ComentariosService, ComentariosController>(
         create: (context) => ComentariosController(
           service: context.read<ComentariosService>(),
         ),
@@ -104,19 +107,19 @@ class ComentariosProviders {
   }
 
   /// Get static providers that don't need change notification
-  static List<Provider> getStaticProviders() {
+  static List<provider.Provider<dynamic>> getStaticProviders() {
     return [
-      Provider<IComentariosRepository>(
+      provider.Provider<IComentariosRepository>(
         create: (_) => MockComentariosRepository(),
       ),
-      Provider<IPremiumService>.value(
-        value: _MockPremiumService(),
+      provider.Provider<IPremiumService>(
+        create: (_) => _MockPremiumService(),
       ),
     ];
   }
 
   /// Get all providers in a single list for easier integration
-  static List<InheritedProvider> getAllProviders() {
+  static List<SingleChildWidget> getAllProviders() {
     return [
       ...getProviders(),
       ...getProxyProviders(),
@@ -138,7 +141,7 @@ class ComentariosPageWithProviders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider.MultiProvider(
       providers: ComentariosProviders.getAllProviders(),
       child: ComentariosPage(
         pkIdentificador: pkIdentificador,

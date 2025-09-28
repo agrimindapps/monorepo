@@ -230,11 +230,6 @@ class AvatarService {
 
 /// Result wrapper for avatar operations
 class AvatarResult {
-  final bool success;
-  final String? base64Data;
-  final double? sizeKB;
-  final String? errorMessage;
-  final bool cancelled;
 
   const AvatarResult._({
     required this.success,
@@ -265,4 +260,9 @@ class AvatarResult {
       cancelled: true,
     );
   }
+  final bool success;
+  final String? base64Data;
+  final double? sizeKB;
+  final String? errorMessage;
+  final bool cancelled;
 }

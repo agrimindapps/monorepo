@@ -22,6 +22,15 @@ import '../models/expense_form_model.dart';
 /// instead of direct provider coupling to avoid circular dependencies.
 /// VehiclesProvider is accessed via BuildContext when needed.
 class ExpenseFormProvider extends BaseProvider {
+
+  ExpenseFormProvider({
+    String? initialVehicleId, 
+    String? userId,
+    required ReceiptImageService receiptImageService,
+  }) : _receiptImageService = receiptImageService,
+       _formModel = ExpenseFormModel.initial(initialVehicleId ?? '', userId ?? '') {
+    _initializeControllers();
+  }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
   final ExpenseValidationService _validator = const ExpenseValidationService();
@@ -53,15 +62,6 @@ class ExpenseFormProvider extends BaseProvider {
   ExpenseFormModel _formModel;
   bool _isInitialized = false;
   final bool _isUpdating = false;
-
-  ExpenseFormProvider({
-    String? initialVehicleId, 
-    String? userId,
-    required ReceiptImageService receiptImageService,
-  }) : _receiptImageService = receiptImageService,
-       _formModel = ExpenseFormModel.initial(initialVehicleId ?? '', userId ?? '') {
-    _initializeControllers();
-  }
 
   // Getters
   GlobalKey<FormState> get formKey => _formKey;

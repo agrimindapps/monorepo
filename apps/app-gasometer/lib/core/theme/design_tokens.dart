@@ -104,7 +104,7 @@ class GasometerDesignTokens {
   
   /// Returns premium background color with specified opacity
   static Color getPremiumBackgroundWithOpacity(double opacity) {
-    return colorPremiumBackground.withOpacity(opacity);
+    return colorPremiumBackground.withValues(alpha: opacity);
   }
   
   /// Returns surface color based on elevation level
@@ -264,7 +264,7 @@ class GasometerDesignTokens {
   
   /// Helper para cores do tema com opacidade
   static Color withOpacity(Color color, double opacity) {
-    return color.withOpacity(opacity);
+    return color.withValues(alpha: opacity);
   }
   
   /// Helper para tamanhos responsivos

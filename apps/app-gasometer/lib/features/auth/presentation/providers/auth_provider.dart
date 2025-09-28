@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Failure, UseCase, NoParamsUseCase, AuthenticationFailure, NetworkFailure, ServerFailure, ValidationFailure, UserEntity, AuthProvider;
 import 'package:core/core.dart' as core show UserEntity, AuthProvider;
+import 'package:core/core.dart' hide Failure, UseCase, NoParamsUseCase, AuthenticationFailure, NetworkFailure, ServerFailure, ValidationFailure, UserEntity, AuthProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
-import '../../domain/entities/user_entity.dart' as gasometer_entity;
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
+import '../../data/datasources/auth_local_data_source.dart';
+import '../../domain/entities/user_entity.dart' as gasometer_entity;
 import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
@@ -21,39 +21,9 @@ import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/update_profile.dart';
 import '../../domain/usecases/watch_auth_state.dart';
-import '../../data/datasources/auth_local_data_source.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {
-  final GetCurrentUser _getCurrentUser;
-  final WatchAuthState _watchAuthState;
-  final SignInWithEmail _signInWithEmail;
-  final SignUpWithEmail _signUpWithEmail;
-  final SignInAnonymously _signInAnonymously;
-  final SignOut _signOut;
-  final DeleteAccount _deleteAccount;
-  final UpdateProfile _updateProfile;
-  final SendPasswordReset _sendPasswordReset;
-  final AnalyticsService _analytics;
-  final PlatformService _platformService;
-  final AuthRateLimiter _rateLimiter;
-  final AuthLocalDataSource _authLocalDataSource;
-  
-  // MonorepoAuthCache instance for cross-module security
-  final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
-  
-  gasometer_entity.UserEntity? _currentUser;
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool _isInitialized = false;
-  bool _isPremium = false;
-  StreamSubscription<void>? _authStateSubscription;
-  
-  // Flags de sincronização simplificadas
-  bool _isSyncing = false;
-  
-  // SECURITY + UX FIX: Flag to prevent automatic anonymous login during active login attempts
-  bool _isInLoginAttempt = false;
   
   AuthProvider({
     required GetCurrentUser getCurrentUser,
@@ -86,6 +56,35 @@ class AuthProvider extends ChangeNotifier {
     // Initialize MonorepoAuthCache for cross-module security
     _initializeMonorepoAuthCache();
   }
+  final GetCurrentUser _getCurrentUser;
+  final WatchAuthState _watchAuthState;
+  final SignInWithEmail _signInWithEmail;
+  final SignUpWithEmail _signUpWithEmail;
+  final SignInAnonymously _signInAnonymously;
+  final SignOut _signOut;
+  final DeleteAccount _deleteAccount;
+  final UpdateProfile _updateProfile;
+  final SendPasswordReset _sendPasswordReset;
+  final AnalyticsService _analytics;
+  final PlatformService _platformService;
+  final AuthRateLimiter _rateLimiter;
+  final AuthLocalDataSource _authLocalDataSource;
+  
+  // MonorepoAuthCache instance for cross-module security
+  final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
+  
+  gasometer_entity.UserEntity? _currentUser;
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _isInitialized = false;
+  bool _isPremium = false;
+  StreamSubscription<void>? _authStateSubscription;
+  
+  // Flags de sincronização simplificadas
+  bool _isSyncing = false;
+  
+  // SECURITY + UX FIX: Flag to prevent automatic anonymous login during active login attempts
+  bool _isInLoginAttempt = false;
   
   gasometer_entity.UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
@@ -164,7 +163,7 @@ class AuthProvider extends ChangeNotifier {
             // If no user and should use anonymous mode, initialize anonymously
             final shouldUseAnonymous = await shouldUseAnonymousMode();
             if (kDebugMode) {
-              debugPrint('🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=${_isInLoginAttempt})');
+              debugPrint('🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=$_isInLoginAttempt)');
             }
             
             if (shouldUseAnonymous) {

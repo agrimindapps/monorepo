@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as flutter_provider;
+import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../providers/diagnosticos_praga_provider.dart';
@@ -64,7 +65,7 @@ class DiagnosticosPragaWidget extends StatelessWidget {
   void _retryLoadDiagnostics(BuildContext context) {
     // Implementação depende de como o provider é inicializado
     // Por enquanto, limpa o erro para permitir nova tentativa
-    final provider = Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+    final provider = flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
     provider.clearError();
   }
 

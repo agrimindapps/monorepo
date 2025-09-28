@@ -1,9 +1,5 @@
 /// Classe para representar progresso da exportação de dados LGPD
 class ExportProgress {
-  final String phase;
-  final double percentage;
-  final String currentTask;
-  final Map<String, int> processedCounts;
 
   const ExportProgress({
     required this.phase,
@@ -49,6 +45,10 @@ class ExportProgress {
     currentTask: json['current_task'] as String,
     processedCounts: Map<String, int>.from(json['processed_counts'] as Map? ?? {}),
   );
+  final String phase;
+  final double percentage;
+  final String currentTask;
+  final Map<String, int> processedCounts;
 
   Map<String, dynamic> toJson() => {
     'phase': phase,

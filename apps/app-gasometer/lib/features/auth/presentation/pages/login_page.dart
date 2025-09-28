@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/analytics_service.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
 import '../controllers/login_controller.dart';
@@ -18,12 +18,12 @@ import '../widgets/signup_form_widget.dart';
 /// Página de login seguindo padrões SOLID
 /// Responsabilidade única: Orquestrar widgets de autenticação
 class LoginPage extends StatefulWidget {
-  final bool? showBackButton;
 
   const LoginPage({
     super.key,
     this.showBackButton,
   });
+  final bool? showBackButton;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => LoginController(
-        authProvider: context.read<AuthProvider>(),
+        authProvider: di.getIt<AuthProvider>(),
         analytics: AnalyticsService(),
       ),
       child: Consumer<LoginController>(
@@ -381,7 +381,7 @@ class _LoginPageState extends State<LoginPage>
   void _handleAuthSuccess() {
     if (!mounted) return;
     
-    final authProvider = context.read<AuthProvider>();
+    final authProvider = di.getIt<AuthProvider>();
     final router = GoRouter.of(context);
     
     // Seguir padrão do app-plantis: mostrar loading simples se sync estiver ativo

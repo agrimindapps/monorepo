@@ -2,34 +2,44 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../comentarios/models/comentario_model.dart';
+import '../../../comentarios/services/comentarios_service.dart';
+import '../../../favoritos/favoritos_di.dart';
+import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/pragas_hive.dart';
 import '../../../../core/models/pragas_inf_hive.dart';
 import '../../../../core/models/plantas_inf_hive.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
-import '../../../favoritos/favoritos_di.dart';
-import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../../core/repositories/pragas_inf_hive_repository.dart';
 import '../../../../core/repositories/plantas_inf_hive_repository.dart';
 import '../../../../core/services/premium_status_notifier.dart';
-import '../../../comentarios/models/comentario_model.dart';
-import '../../../comentarios/services/comentarios_service.dart';
 
 /// Provider para gerenciar estado da página de detalhes da praga
 /// Responsabilidade única: coordenar dados e estado da praga
 class DetalhePragaProvider extends ChangeNotifier {
   // Services e Repositories
-  final FavoritosHiveRepository _favoritosRepository = sl<FavoritosHiveRepository>();
-  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
-  final PragasInfHiveRepository _pragasInfRepository = sl<PragasInfHiveRepository>();
-  final PlantasInfHiveRepository _plantasInfRepository = sl<PlantasInfHiveRepository>();
-  final IPremiumService _premiumService = sl<IPremiumService>();
-  final ComentariosService _comentariosService = sl<ComentariosService>();
+  late final FavoritosHiveRepository _favoritosRepository;
+  late final PragasHiveRepository _pragasRepository;
+  late final PragasInfHiveRepository _pragasInfRepository;
+  late final PlantasInfHiveRepository _plantasInfRepository;
+  late final IPremiumService _premiumService;
+  late final ComentariosService _comentariosService;
   late final FavoritosProviderSimplified _favoritosProvider;
 
   DetalhePragaProvider() {
+    _initializeDependencies();
+  }
+
+  void _initializeDependencies() {
+    _favoritosRepository = sl<FavoritosHiveRepository>();
+    _pragasRepository = sl<PragasHiveRepository>();
+    _pragasInfRepository = sl<PragasInfHiveRepository>();
+    _plantasInfRepository = sl<PlantasInfHiveRepository>();
+    _premiumService = sl<IPremiumService>();
+    _comentariosService = sl<ComentariosService>();
     _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
   }
 
@@ -41,7 +51,7 @@ class DetalhePragaProvider extends ChangeNotifier {
   bool _isPremium = false;
   
   // Estados de carregamento
-  final bool _isLoading = false;
+  bool _isLoading = false;
   bool _isLoadingComments = false;
   String? _errorMessage;
 
@@ -70,31 +80,55 @@ class DetalhePragaProvider extends ChangeNotifier {
 
   /// Inicializa o provider com dados da praga
   Future<void> initialize(String pragaName, String pragaScientificName) async {
-    _pragaName = pragaName;
-    _pragaScientificName = pragaScientificName;
-    
-    await _loadFavoritoState();
-    _loadPremiumStatus();
-    await _loadComentarios();
+    _setLoading(true);
+    try {
+      _pragaName = pragaName;
+      _pragaScientificName = pragaScientificName;
+      
+      await _loadFavoritoState();
+      _loadPremiumStatus();
+      await _loadComentarios();
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Versão assíncrona de initialize que aguarda dados estarem disponíveis
   Future<void> initializeAsync(String pragaName, String pragaScientificName) async {
-    _pragaName = pragaName;
-    _pragaScientificName = pragaScientificName;
-    
-    await _loadFavoritoStateAsync();
-    await _loadPragaSpecificInfo();
-    _loadPremiumStatus();
-    await _loadComentarios();
+    _setLoading(true);
+    try {
+      _pragaName = pragaName;
+      _pragaScientificName = pragaScientificName;
+      
+      await _loadFavoritoStateAsync();
+      await _loadPragaSpecificInfo();
+      _loadPremiumStatus();
+      await _loadComentarios();
+    } catch (e) {
+      _errorMessage = 'Erro ao inicializar dados da praga: $e';
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Initialize usando ID da praga para melhor precisão
   Future<void> initializeById(String pragaId) async {
-    // Buscar praga pelo ID
-    _pragaData = _pragasRepository.getAll()
-        .where((p) => p.idReg == pragaId || p.objectId == pragaId)
-        .firstOrNull;
+    _setLoading(true);
+    try {
+      // Buscar praga pelo ID
+      final allPragasResult = await _pragasRepository.getAll();
+      allPragasResult.fold(
+        (failure) {
+          debugPrint('❌ [PRAGA] Erro ao carregar pragas: ${failure.toString()}');
+          _pragaData = null;
+        },
+        (allPragas) {
+          final matchingPragas = allPragas
+              .where((PragasHive p) => p.idReg == pragaId || p.objectId == pragaId);
+          _pragaData = matchingPragas.isNotEmpty ? matchingPragas.first : null;
+        },
+      );
     
     if (_pragaData != null) {
       _pragaName = _pragaData!.nomeComum;
@@ -112,14 +146,25 @@ class DetalhePragaProvider extends ChangeNotifier {
       _pragaName = '';
       _pragaScientificName = '';
     }
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Carrega estado de favorito da praga usando sistema simplificado consistente
   Future<void> _loadFavoritoState() async {
     // Busca a praga real pelo nome para obter o ID único
-    final pragas = _pragasRepository.getAll()
-        .where((p) => p.nomeComum == _pragaName);
-    _pragaData = pragas.isNotEmpty ? pragas.first : null;
+    final allPragasResult = await _pragasRepository.getAll();
+    allPragasResult.fold(
+      (failure) {
+        debugPrint('❌ [PRAGA] Erro ao carregar pragas: ${failure.toString()}');
+        _pragaData = null;
+      },
+      (allPragas) {
+        final pragas = allPragas.where((PragasHive p) => p.nomeComum == _pragaName);
+        _pragaData = pragas.isNotEmpty ? pragas.first : null;
+      },
+    );
     
     debugPrint('🔍 [PRAGA] Buscando praga: $_pragaName');
     debugPrint('🔍 [PRAGA] Praga encontrada: ${_pragaData != null ? _pragaData!.idReg : "null"}');
@@ -130,7 +175,7 @@ class DetalhePragaProvider extends ChangeNotifier {
       _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
     } catch (e) {
       // Fallback para repository direto em caso de erro
-      _isFavorited = _favoritosRepository.isFavorito('pragas', itemId);
+      _isFavorited = await _favoritosRepository.isFavorito('pragas', itemId);
     }
     
     notifyListeners();
@@ -141,18 +186,24 @@ class DetalhePragaProvider extends ChangeNotifier {
     debugPrint('🔍 Buscando praga: $_pragaName');
     
     // Tenta usar dados síncronos primeiro
-    final pragas = _pragasRepository.getAll()
-        .where((p) => p.nomeComum == _pragaName);
-    
-    // Se não encontrou, tenta versão assíncrona
-    if (pragas.isEmpty) {
-      debugPrint('⏳ Dados síncronos não encontrados, tentando busca assíncrona...');
-      final allPragas = await _pragasRepository.getAllAsync();
-      final pragasAsync = allPragas.where((p) => p.nomeComum == _pragaName);
-      _pragaData = pragasAsync.isNotEmpty ? pragasAsync.first : null;
-    } else {
-      _pragaData = pragas.first;
-    }
+    final allPragasResult = await _pragasRepository.getAll();
+    allPragasResult.fold(
+      (failure) {
+        debugPrint('❌ [PRAGA] Erro ao carregar pragas: ${failure.toString()}');
+        _pragaData = null;
+      },
+      (allPragas) {
+        final pragas = allPragas.where((PragasHive p) => p.nomeComum == _pragaName);
+        
+        // Se não encontrou, usa a lista completa já carregada
+        if (pragas.isEmpty) {
+          debugPrint('⏳ Praga não encontrada nos dados disponíveis');
+          _pragaData = null;
+        } else {
+          _pragaData = pragas.first;
+        }
+      },
+    );
     
     final itemId = _pragaData?.idReg ?? _pragaName;
     
@@ -166,7 +217,7 @@ class DetalhePragaProvider extends ChangeNotifier {
       _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
     } catch (e) {
       // Fallback para repository direto em caso de erro  
-      _isFavorited = _favoritosRepository.isFavorito('pragas', itemId);
+      _isFavorited = await _favoritosRepository.isFavorito('pragas', itemId);
     }
     
     notifyListeners();
@@ -181,19 +232,19 @@ class DetalhePragaProvider extends ChangeNotifier {
     try {
       // Para pragas do tipo "inseto" (tipoPraga = "1"), usa PragasInfHive
       if (_pragaData!.tipoPraga == '1') {
-        _pragaInfo = _pragasInfRepository.findByIdReg(_pragaData!.idReg);
+        _pragaInfo = await _pragasInfRepository.findByIdReg(_pragaData!.idReg);
         debugPrint('📋 PragaInfo carregada: ${_pragaInfo != null ? 'Sim' : 'Não'}');
       }
       
       // Para pragas do tipo "planta" (tipoPraga = "3"), usa PlantasInfHive  
       else if (_pragaData!.tipoPraga == '3') {
-        _plantaInfo = _plantasInfRepository.findByIdReg(_pragaData!.idReg);
+        _plantaInfo = await _plantasInfRepository.findByIdReg(_pragaData!.idReg);
         debugPrint('🌿 PlantaInfo carregada: ${_plantaInfo != null ? 'Sim' : 'Não'}');
       }
       
       // Para doenças (tipoPraga = "2"), também pode usar PragasInfHive
       else if (_pragaData!.tipoPraga == '2') {
-        _pragaInfo = _pragasInfRepository.findByIdReg(_pragaData!.idReg);
+        _pragaInfo = await _pragasInfRepository.findByIdReg(_pragaData!.idReg);
         debugPrint('🦠 DoençaInfo carregada: ${_pragaInfo != null ? 'Sim' : 'Não'}');
       }
       
@@ -364,6 +415,14 @@ class DetalhePragaProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Define estado de loading
+  void _setLoading(bool loading) {
+    if (_isLoading != loading) {
+      _isLoading = loading;
+      notifyListeners();
+    }
   }
 
   /// Recarrega comentários

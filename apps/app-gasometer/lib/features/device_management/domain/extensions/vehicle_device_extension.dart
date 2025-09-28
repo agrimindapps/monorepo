@@ -82,12 +82,6 @@ extension VehicleDeviceExtension on DeviceEntity {
 
 /// Classe para estatísticas específicas de dispositivos veiculares
 class VehicleDeviceStatistics {
-  final int totalDevices;
-  final int activeDevices;
-  final int trustedDevices;
-  final int recentlyActiveDevices;
-  final List<DeviceEntity> syncPriorityDevices;
-  final DateTime lastCalculatedAt;
 
   const VehicleDeviceStatistics({
     required this.totalDevices,
@@ -97,6 +91,12 @@ class VehicleDeviceStatistics {
     required this.syncPriorityDevices,
     required this.lastCalculatedAt,
   });
+  final int totalDevices;
+  final int activeDevices;
+  final int trustedDevices;
+  final int recentlyActiveDevices;
+  final List<DeviceEntity> syncPriorityDevices;
+  final DateTime lastCalculatedAt;
 
   /// Taxa de dispositivos ativos
   double get activeDeviceRate =>

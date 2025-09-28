@@ -4,15 +4,6 @@ import '../../providers/base_provider.dart';
 
 /// Enhanced error widget with better UX and retry mechanisms
 class EnhancedErrorWidget extends StatelessWidget {
-  final AppError error;
-  final VoidCallback? onRetry;
-  final VoidCallback? onGoBack;
-  final bool showRetryButton;
-  final bool showGoBackButton;
-  final Widget? customActionButton;
-  final String? customTitle;
-  final String? customMessage;
-  final bool isCompact;
 
   const EnhancedErrorWidget({
     super.key,
@@ -75,6 +66,15 @@ class EnhancedErrorWidget extends StatelessWidget {
       isCompact: isCompact,
     );
   }
+  final AppError error;
+  final VoidCallback? onRetry;
+  final VoidCallback? onGoBack;
+  final bool showRetryButton;
+  final bool showGoBackButton;
+  final Widget? customActionButton;
+  final String? customTitle;
+  final String? customMessage;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
@@ -92,10 +92,10 @@ class EnhancedErrorWidget extends StatelessWidget {
       margin: const EdgeInsets.all(8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: _getErrorColor(colorScheme).withOpacity(0.1),
+        color: _getErrorColor(colorScheme).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
-          color: _getErrorColor(colorScheme).withOpacity(0.3),
+          color: _getErrorColor(colorScheme).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -126,7 +126,7 @@ class EnhancedErrorWidget extends StatelessWidget {
           Text(
             customMessage ?? error.displayMessage,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.7),
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           if (error is ValidationError) ...[
@@ -154,7 +154,7 @@ class EnhancedErrorWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                color: _getErrorColor(colorScheme).withOpacity(0.1),
+                color: _getErrorColor(colorScheme).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -176,7 +176,7 @@ class EnhancedErrorWidget extends StatelessWidget {
             Text(
               customMessage ?? error.displayMessage,
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -203,10 +203,10 @@ class EnhancedErrorWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: colorScheme.errorContainer.withOpacity(0.1),
+        color: colorScheme.errorContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8.0),
         border: Border.all(
-          color: colorScheme.errorContainer.withOpacity(0.3),
+          color: colorScheme.errorContainer.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -246,7 +246,7 @@ class EnhancedErrorWidget extends StatelessWidget {
                         ...entry.value.map((error) => Text(
                           error,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onErrorContainer.withOpacity(0.8),
+                            color: colorScheme.onErrorContainer.withValues(alpha: 0.8),
                           ),
                         )),
                       ],
@@ -405,12 +405,6 @@ class EnhancedErrorWidget extends StatelessWidget {
 
 /// Loading state with error handling
 class LoadingWithErrorWidget extends StatelessWidget {
-  final bool isLoading;
-  final AppError? error;
-  final Widget child;
-  final VoidCallback? onRetry;
-  final String? loadingText;
-  final bool showErrorInline;
 
   const LoadingWithErrorWidget({
     super.key,
@@ -421,6 +415,12 @@ class LoadingWithErrorWidget extends StatelessWidget {
     this.loadingText,
     this.showErrorInline = false,
   });
+  final bool isLoading;
+  final AppError? error;
+  final Widget child;
+  final VoidCallback? onRetry;
+  final String? loadingText;
+  final bool showErrorInline;
 
   @override
   Widget build(BuildContext context) {
@@ -456,12 +456,6 @@ class LoadingWithErrorWidget extends StatelessWidget {
 
 /// Provider state builder with error handling
 class ProviderStateBuilder extends StatelessWidget {
-  final BaseProvider provider;
-  final Widget Function(BuildContext context) loadingBuilder;
-  final Widget Function(BuildContext context) emptyBuilder;
-  final Widget Function(BuildContext context) contentBuilder;
-  final Widget Function(BuildContext context, AppError error)? errorBuilder;
-  final VoidCallback? onRetry;
 
   const ProviderStateBuilder({
     super.key,
@@ -472,6 +466,12 @@ class ProviderStateBuilder extends StatelessWidget {
     this.errorBuilder,
     this.onRetry,
   });
+  final BaseProvider provider;
+  final Widget Function(BuildContext context) loadingBuilder;
+  final Widget Function(BuildContext context) emptyBuilder;
+  final Widget Function(BuildContext context) contentBuilder;
+  final Widget Function(BuildContext context, AppError error)? errorBuilder;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {

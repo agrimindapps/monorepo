@@ -6,13 +6,13 @@ import '../../architecture/i_form_validator.dart';
 /// while allowing subclasses to implement specific validation logic.
 /// Follows Single Responsibility Principle and Open/Closed Principle.
 abstract class BaseFieldValidator implements IFieldValidator {
-  final String _errorMessage;
-  final Map<String, dynamic> _metadata;
   
   const BaseFieldValidator({
     required String errorMessage,
     Map<String, dynamic> metadata = const {},
   }) : _errorMessage = errorMessage, _metadata = metadata;
+  final String _errorMessage;
+  final Map<String, dynamic> _metadata;
   
   @override
   String get errorMessage => _errorMessage;
@@ -221,8 +221,6 @@ abstract class CollectionValidator extends BaseFieldValidator {
 
 /// Composite validator that combines multiple validators
 class CompositeValidator extends BaseFieldValidator {
-  final List<IFieldValidator> validators;
-  final bool stopOnFirstError;
   
   const CompositeValidator({
     required this.validators,
@@ -230,6 +228,8 @@ class CompositeValidator extends BaseFieldValidator {
     super.errorMessage = 'Validation failed',
     super.metadata,
   });
+  final List<IFieldValidator> validators;
+  final bool stopOnFirstError;
   
   @override
   String get validatorType => 'composite';
@@ -307,8 +307,6 @@ class CompositeValidator extends BaseFieldValidator {
 
 /// Conditional validator that only runs when a condition is met
 class ConditionalValidator extends BaseFieldValidator {
-  final IFieldValidator validator;
-  final bool Function(dynamic value) condition;
   
   const ConditionalValidator({
     required this.validator,
@@ -316,6 +314,8 @@ class ConditionalValidator extends BaseFieldValidator {
     super.errorMessage = 'Conditional validation failed',
     super.metadata,
   });
+  final IFieldValidator validator;
+  final bool Function(dynamic value) condition;
   
   @override
   String get validatorType => 'conditional_${validator.validatorType}';

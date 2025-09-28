@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import '../entities/busca_entity.dart';
 import '../repositories/i_busca_repository.dart';
 

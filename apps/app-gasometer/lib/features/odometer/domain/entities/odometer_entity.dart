@@ -2,16 +2,6 @@ import 'package:equatable/equatable.dart';
 
 /// Represents an odometer reading record
 class OdometerEntity extends Equatable {
-  final String id;
-  final String vehicleId;
-  final String userId;
-  final double value;
-  final DateTime registrationDate;
-  final String description;
-  final OdometerType type;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final Map<String, dynamic>? metadata;
 
   const OdometerEntity({
     required this.id,
@@ -25,6 +15,38 @@ class OdometerEntity extends Equatable {
     required this.updatedAt,
     this.metadata,
   });
+
+  /// Creates an entity from a map
+  factory OdometerEntity.fromMap(Map<String, dynamic> map) {
+    return OdometerEntity(
+      id: map['id']?.toString() ?? '',
+      vehicleId: map['vehicleId']?.toString() ?? '',
+      userId: map['userId']?.toString() ?? '',
+      value: (map['value'] as num?)?.toDouble() ?? 0.0,
+      registrationDate: DateTime.fromMillisecondsSinceEpoch(
+        (map['registrationDate'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      ),
+      description: map['description']?.toString() ?? '',
+      type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      ),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      ),
+      metadata: map['metadata'] as Map<String, dynamic>?,
+    );
+  }
+  final String id;
+  final String vehicleId;
+  final String userId;
+  final double value;
+  final DateTime registrationDate;
+  final String description;
+  final OdometerType type;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final Map<String, dynamic>? metadata;
 
   /// Creates a copy of this entity with the given fields replaced
   OdometerEntity copyWith({
@@ -67,28 +89,6 @@ class OdometerEntity extends Equatable {
       'updatedAt': updatedAt.millisecondsSinceEpoch,
       'metadata': metadata,
     };
-  }
-
-  /// Creates an entity from a map
-  factory OdometerEntity.fromMap(Map<String, dynamic> map) {
-    return OdometerEntity(
-      id: map['id']?.toString() ?? '',
-      vehicleId: map['vehicleId']?.toString() ?? '',
-      userId: map['userId']?.toString() ?? '',
-      value: (map['value'] as num?)?.toDouble() ?? 0.0,
-      registrationDate: DateTime.fromMillisecondsSinceEpoch(
-        (map['registrationDate'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      description: map['description']?.toString() ?? '',
-      type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(
-        (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      metadata: map['metadata'] as Map<String, dynamic>?,
-    );
   }
 
   @override

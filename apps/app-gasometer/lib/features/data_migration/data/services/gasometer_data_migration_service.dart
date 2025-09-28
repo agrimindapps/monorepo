@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/gasometer_account_data.dart';
 import '../../domain/entities/gasometer_anonymous_data.dart';
@@ -16,9 +14,9 @@ import '../datasources/gasometer_migration_data_source.dart';
 /// maintenance records, and other gasometer-specific data.
 @LazySingleton()
 class GasometerDataMigrationService implements DataMigrationService {
-  final GasometerMigrationDataSource _dataSource;
   
   GasometerDataMigrationService(this._dataSource);
+  final GasometerMigrationDataSource _dataSource;
 
   @override
   Future<Either<Failure, DataConflictResult>> detectConflicts({

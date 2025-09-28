@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 /// Serviço especializado para formatação de campos de combustível
 /// Implementa formatação brasileira com vírgula decimal e cache para performance
 class FuelFormatterService {
-  static final FuelFormatterService _instance = FuelFormatterService._internal();
   factory FuelFormatterService() => _instance;
   FuelFormatterService._internal();
+  static final FuelFormatterService _instance = FuelFormatterService._internal();
 
   // Cache para formatações recentes (memoização)
   final Map<String, String> _formatCache = {};

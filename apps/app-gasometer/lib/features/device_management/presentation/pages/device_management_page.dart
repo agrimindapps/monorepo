@@ -97,15 +97,15 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            GasometerColors.primary.withOpacity(0.1),
-            GasometerColors.secondary.withOpacity(0.1),
+            GasometerColors.primary.withValues(alpha: 0.1),
+            GasometerColors.secondary.withValues(alpha: 0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: GasometerColors.primary.withOpacity(0.2),
+          color: GasometerColors.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -113,7 +113,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.devices,
                 color: GasometerColors.primary,
                 size: 28,
@@ -181,7 +181,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

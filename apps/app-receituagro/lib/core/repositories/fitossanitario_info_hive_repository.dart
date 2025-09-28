@@ -1,23 +1,37 @@
+import 'package:core/core.dart';
 import '../models/fitossanitario_info_hive.dart';
-import 'base_hive_repository.dart';
 
 /// Repositório para FitossanitarioInfoHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class FitossanitarioInfoHiveRepository extends BaseHiveRepository<FitossanitarioInfoHive> {
-  FitossanitarioInfoHiveRepository() : super('receituagro_fitossanitarios_info');
+  FitossanitarioInfoHiveRepository() : super(
+    hiveManager: GetIt.instance<IHiveManager>(),
+    boxName: 'receituagro_fitossanitarios_info',
+  );
 
-  @override
-  FitossanitarioInfoHive createFromJson(Map<String, dynamic> json) {
-    return FitossanitarioInfoHive.fromJson(json);
-  }
-
-  @override
-  String getKeyFromEntity(FitossanitarioInfoHive entity) {
-    return entity.idReg;
-  }
 
   /// Busca informações complementares de um fitossanitário
-  FitossanitarioInfoHive? findByIdReg(String idReg) {
-    return getById(idReg);
+  Future<FitossanitarioInfoHive?> findByIdReg(String idReg) async {
+    final result = await getByKey(idReg);
+    return result.isSuccess ? result.data : null;
+  }
+
+  /// Carrega dados do JSON para o repositório
+  Future<Result<void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+    try {
+      final Map<dynamic, FitossanitarioInfoHive> items = {};
+      
+      for (final json in jsonData) {
+        final fitossanitarioInfo = FitossanitarioInfoHive.fromJson(json);
+        items[fitossanitarioInfo.idReg] = fitossanitarioInfo;
+      }
+      
+      return await saveAll(items);
+    } catch (e) {
+      return Result.error(StorageError(
+        message: 'Failed to load from JSON',
+        code: 'LOAD_FROM_JSON_ERROR',
+      ));
+    }
   }
 }

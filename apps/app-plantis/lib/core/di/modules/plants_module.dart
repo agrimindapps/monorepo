@@ -53,17 +53,7 @@ abstract class PlantsDIModule {
     sl.registerLazySingleton(() => UpdatePlantUseCase(sl()));
     sl.registerLazySingleton(() => DeletePlantUseCase(sl()));
 
-    // Providers
-    sl.registerFactory(
-      () => PlantsProvider(
-        getPlantsUseCase: sl(),
-        getPlantByIdUseCase: sl(),
-        searchPlantsUseCase: sl(),
-        addPlantUseCase: sl(),
-        updatePlantUseCase: sl(),
-        deletePlantUseCase: sl(),
-      ),
-    );
+    // Legacy PlantsProvider removed - now using Riverpod PlantsNotifier
 
 
     sl.registerFactory(

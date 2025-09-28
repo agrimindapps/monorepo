@@ -1,19 +1,11 @@
 import 'dart:developer' as developer;
 
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../di/injection_container.dart';
-
 /// Stub/adapter class to replace the removed ReceitaAgroHiveService
 /// Provides the same interface but delegates to individual repository instances
 /// This maintains compatibility while using the new architecture
+/// 
+/// Note: This is a transitional class. New code should use repositories directly.
 class ReceitaAgroHiveService {
-  static CulturaHiveRepository get _culturaRepo => sl<CulturaHiveRepository>();
-  static PragasHiveRepository get _pragasRepo => sl<PragasHiveRepository>();
-  static FitossanitarioHiveRepository get _fitossanitarioRepo => sl<FitossanitarioHiveRepository>();
-  static DiagnosticoHiveRepository get _diagnosticoRepo => sl<DiagnosticoHiveRepository>();
 
   // Initialization methods
   static Future<void> initialize() async {
@@ -63,76 +55,54 @@ class ReceitaAgroHiveService {
   }
 
   // Individual entity access methods
+  // Note: These methods are deprecated. Use repositories directly for new code.
   static dynamic getFitossanitarioById(String id) {
-    try {
-      return _fitossanitarioRepo.getById(id);
-    } catch (e) {
-      developer.log('Error getting fitossanitario by id $id: $e', name: 'ReceitaAgroHiveService');
-      return null;
-    }
+    developer.log('getFitossanitarioById is deprecated. Use FitossanitarioHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return null;
   }
 
   static dynamic getPragaById(String id) {
-    try {
-      return _pragasRepo.getById(id);
-    } catch (e) {
-      developer.log('Error getting praga by id $id: $e', name: 'ReceitaAgroHiveService');
-      return null;
-    }
+    developer.log('getPragaById is deprecated. Use PragasHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return null;
   }
 
   static dynamic getDiagnosticoById(String id) {
-    try {
-      return _diagnosticoRepo.getById(id);
-    } catch (e) {
-      developer.log('Error getting diagnostico by id $id: $e', name: 'ReceitaAgroHiveService');
-      return null;
-    }
+    developer.log('getDiagnosticoById is deprecated. Use DiagnosticoHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return null;
   }
 
   static dynamic getCulturaById(String id) {
-    try {
-      return _culturaRepo.getById(id);
-    } catch (e) {
-      developer.log('Error getting cultura by id $id: $e', name: 'ReceitaAgroHiveService');
-      return null;
-    }
+    developer.log('getCulturaById is deprecated. Use CulturaHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return null;
   }
 
   // List access methods
+  // Note: These methods are deprecated. Use repositories directly for new code.
   static List<dynamic> getPragas() {
-    try {
-      return _pragasRepo.getAll();
-    } catch (e) {
-      developer.log('Error getting pragas: $e', name: 'ReceitaAgroHiveService');
-      return [];
-    }
+    developer.log('getPragas is deprecated. Use PragasHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return [];
   }
 
   static List<dynamic> getCulturas() {
-    try {
-      return _culturaRepo.getAll();
-    } catch (e) {
-      developer.log('Error getting culturas: $e', name: 'ReceitaAgroHiveService');
-      return [];
-    }
+    developer.log('getCulturas is deprecated. Use CulturaHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return [];
   }
 
   static List<dynamic> getFitossanitarios() {
-    try {
-      return _fitossanitarioRepo.getAll();
-    } catch (e) {
-      developer.log('Error getting fitossanitarios: $e', name: 'ReceitaAgroHiveService');
-      return [];
-    }
+    developer.log('getFitossanitarios is deprecated. Use FitossanitarioHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return [];
   }
 
   static List<dynamic> getDiagnosticos() {
-    try {
-      return _diagnosticoRepo.getAll();
-    } catch (e) {
-      developer.log('Error getting diagnosticos: $e', name: 'ReceitaAgroHiveService');
-      return [];
-    }
+    developer.log('getDiagnosticos is deprecated. Use DiagnosticoHiveRepository directly.', 
+        name: 'ReceitaAgroHiveService');
+    return [];
   }
 }

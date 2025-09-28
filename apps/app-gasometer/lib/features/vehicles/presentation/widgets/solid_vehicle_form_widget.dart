@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/presentation/forms/forms.dart';
-import '../../../../core/presentation/forms/fields/field_factory.dart';
-import '../forms/vehicle_form_config.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../forms/vehicle_form_config.dart';
 
 /// Vehicle form widget using SOLID architecture
 /// 
@@ -13,9 +13,6 @@ import '../../domain/entities/vehicle_entity.dart';
 /// - Interface Segregation: Clean field configuration interfaces
 /// - Dependency Inversion: Depends on abstractions, not concrete implementations
 class SolidVehicleFormWidget extends StatefulWidget {
-  final VehicleEntity? initialVehicle;
-  final Function(VehicleEntity)? onSubmit;
-  final VoidCallback? onCancel;
 
   const SolidVehicleFormWidget({
     super.key,
@@ -23,6 +20,9 @@ class SolidVehicleFormWidget extends StatefulWidget {
     this.onSubmit,
     this.onCancel,
   });
+  final VehicleEntity? initialVehicle;
+  final Function(VehicleEntity)? onSubmit;
+  final VoidCallback? onCancel;
 
   @override
   State<SolidVehicleFormWidget> createState() => _SolidVehicleFormWidgetState();

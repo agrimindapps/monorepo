@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 /// Remote data source para operações de dispositivos via Firebase
 abstract class DeviceRemoteDataSource {

@@ -11,6 +11,16 @@ import '../../domain/services/odometer_validator.dart';
 /// This provider follows the MVVM pattern and provides reactive state management
 /// for the odometer form, handling validation, formatting, and business logic.
 class OdometerFormProvider extends ChangeNotifier {
+
+  // ===========================================
+  // CONSTRUCTOR
+  // ===========================================
+
+  OdometerFormProvider({String? initialUserId}) {
+    if (initialUserId != null) {
+      _userId = initialUserId;
+    }
+  }
   // ===========================================
   // PRIVATE FIELDS
   // ===========================================
@@ -25,16 +35,6 @@ class OdometerFormProvider extends ChangeNotifier {
   bool _isLoading = false;
   String _error = '';
   OdometerEntity? _currentOdometer;
-
-  // ===========================================
-  // CONSTRUCTOR
-  // ===========================================
-
-  OdometerFormProvider({String? initialUserId}) {
-    if (initialUserId != null) {
-      _userId = initialUserId;
-    }
-  }
 
   // ===========================================
   // GETTERS

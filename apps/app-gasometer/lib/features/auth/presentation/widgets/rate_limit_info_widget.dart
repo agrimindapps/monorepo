@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
 
 /// Widget para mostrar informações de rate limiting de login
-class RateLimitInfoWidget extends StatelessWidget {
-  final AuthRateLimitInfo rateLimitInfo;
-  final VoidCallback? onReset; // Para desenvolvimento/admin apenas
+class RateLimitInfoWidget extends StatelessWidget { // Para desenvolvimento/admin apenas
   
   const RateLimitInfoWidget({
     super.key,
     required this.rateLimitInfo,
     this.onReset,
   });
+  final AuthRateLimitInfo rateLimitInfo;
+  final VoidCallback? onReset;
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +63,14 @@ class RateLimitInfoWidget extends StatelessWidget {
               const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: 1 - (rateLimitInfo.lockoutTimeRemainingMinutes / rateLimitInfo.lockoutDurationMinutes),
-                backgroundColor: theme.colorScheme.error.withOpacity(0.3),
+                backgroundColor: theme.colorScheme.error.withValues(alpha: 0.3),
                 valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.error),
               ),
               const SizedBox(height: 4),
               Text(
                 'Tempo restante: ${rateLimitInfo.lockoutTimeRemainingMinutes} min',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onErrorContainer.withOpacity(0.8),
+                  color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -126,7 +126,7 @@ class RateLimitInfoWidget extends StatelessWidget {
 extension ColorSchemeWarning on ColorScheme {
   Color? get warningContainer => brightness == Brightness.light
       ? Colors.orange.shade50
-      : Colors.orange.shade900.withOpacity(0.3);
+      : Colors.orange.shade900.withValues(alpha: 0.3);
       
   Color? get onWarningContainer => brightness == Brightness.light
       ? Colors.orange.shade800

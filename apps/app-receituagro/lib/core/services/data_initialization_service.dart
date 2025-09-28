@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../repositories/cultura_hive_repository.dart';
 import '../repositories/diagnostico_hive_repository.dart';
@@ -181,7 +180,7 @@ class DataInitializationService {
       ]);
       
       // Verifica se pelo menos uma box tem dados
-      return counts.any((count) => count > 0);
+      return counts.any((itemCount) => itemCount > 0);
     } catch (e) {
       developer.log('Erro ao verificar se dados estão carregados: $e', name: 'DataInitializationService');
       return false;

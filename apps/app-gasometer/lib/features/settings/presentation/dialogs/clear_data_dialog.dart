@@ -260,9 +260,9 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
 
 /// 🎯 Component to display current data statistics
 class _CurrentStatsCard extends StatelessWidget {
-  final Map<String, dynamic> stats;
 
   const _CurrentStatsCard({required this.stats});
+  final Map<String, dynamic> stats;
 
   @override
   Widget build(BuildContext context) {
@@ -299,13 +299,13 @@ class _CurrentStatsCard extends StatelessWidget {
 
 /// 🎯 Component for clear type selection
 class _ClearTypeSelector extends StatelessWidget {
-  final String selectedType;
-  final ValueChanged<String> onChanged;
 
   const _ClearTypeSelector({
     required this.selectedType,
     required this.onChanged,
   });
+  final String selectedType;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -335,13 +335,13 @@ class _ClearTypeSelector extends StatelessWidget {
 
 /// 🎯 Component for module selection
 class _ModuleSelector extends StatelessWidget {
-  final Set<String> selectedModules;
-  final ValueChanged<String> onModuleToggle;
 
   const _ModuleSelector({
     required this.selectedModules,
     required this.onModuleToggle,
   });
+  final Set<String> selectedModules;
+  final ValueChanged<String> onModuleToggle;
 
   static const List<String> _availableModules = [
     'vehicles',
@@ -371,9 +371,9 @@ class _ModuleSelector extends StatelessWidget {
 
 /// 🎯 Component to display clear results
 class _ClearResults extends StatelessWidget {
-  final Map<String, dynamic> results;
 
   const _ClearResults({required this.results});
+  final Map<String, dynamic> results;
 
   @override
   Widget build(BuildContext context) {

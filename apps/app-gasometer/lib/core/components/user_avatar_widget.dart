@@ -8,13 +8,6 @@ import 'avatar_selection_dialog.dart';
 
 /// Customizable user avatar widget with support for local and remote images
 class UserAvatarWidget extends StatelessWidget {
-  final UserEntity? user;
-  final double size;
-  final bool showBorder;
-  final Color? borderColor;
-  final bool isEditable;
-  final VoidCallback? onTap;
-  final String? placeholderText;
   
   const UserAvatarWidget({
     super.key,
@@ -26,6 +19,13 @@ class UserAvatarWidget extends StatelessWidget {
     this.onTap,
     this.placeholderText,
   });
+  final UserEntity? user;
+  final double size;
+  final bool showBorder;
+  final Color? borderColor;
+  final bool isEditable;
+  final VoidCallback? onTap;
+  final String? placeholderText;
 
   @override
   Widget build(BuildContext context) {
@@ -178,9 +178,6 @@ class UserAvatarWidget extends StatelessWidget {
 
 /// Simplified avatar widget for small displays (like app bars)
 class UserAvatarSmall extends StatelessWidget {
-  final UserEntity? user;
-  final double size;
-  final VoidCallback? onTap;
 
   const UserAvatarSmall({
     super.key,
@@ -188,6 +185,9 @@ class UserAvatarSmall extends StatelessWidget {
     this.size = 32.0,
     this.onTap,
   });
+  final UserEntity? user;
+  final double size;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -203,9 +203,6 @@ class UserAvatarSmall extends StatelessWidget {
 
 /// Large avatar for profile pages with edit capability
 class UserAvatarLarge extends StatelessWidget {
-  final UserEntity? user;
-  final double size;
-  final bool showEditIcon;
 
   const UserAvatarLarge({
     super.key,
@@ -213,6 +210,9 @@ class UserAvatarLarge extends StatelessWidget {
     this.size = 120.0,
     this.showEditIcon = true,
   });
+  final UserEntity? user;
+  final double size;
+  final bool showEditIcon;
 
   @override
   Widget build(BuildContext context) {

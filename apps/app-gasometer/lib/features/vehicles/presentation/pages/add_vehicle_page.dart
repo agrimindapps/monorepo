@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart' as core;
 
 import '../../../../core/presentation/widgets/form_section_header.dart';
 import '../../../../core/presentation/widgets/notes_form_field.dart';
@@ -23,9 +23,9 @@ import '../providers/vehicles_provider.dart';
 // TODO: Extract image picker, form sections, and validation into separate components
 // TODO: Create VehicleFormView, VehicleImagePicker, and VehicleFormActions widgets
 class AddVehiclePage extends StatefulWidget {
-  final VehicleEntity? vehicle;
 
   const AddVehiclePage({super.key, this.vehicle});
+  final VehicleEntity? vehicle;
 
   @override
   State<AddVehiclePage> createState() => _AddVehiclePageState();
@@ -255,7 +255,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
       child: Column(
         children: [
         _buildPhotoUploadSection(provider),
-        SizedBox(height: GasometerDesignTokens.spacingLg),
+        const SizedBox(height: GasometerDesignTokens.spacingLg),
         Container(
           key: _fieldKeys['marca'],
           child: ValidatedFormField(
@@ -295,7 +295,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                 child: _buildYearDropdown(provider),
               ),
             ),
-            SizedBox(width: GasometerDesignTokens.spacingMd),
+            const SizedBox(width: GasometerDesignTokens.spacingMd),
             Expanded(
               child: Container(
                 key: _fieldKeys['cor'],
@@ -472,7 +472,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
               ' (opcional)',
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeMd,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -491,7 +491,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                 Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.vertical(
+                      borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(GasometerDesignTokens.radiusLg),
                       ),
                       child: _buildOptimizedImage(
@@ -542,17 +542,17 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                       Icon(
                         Icons.directions_car,
                         size: GasometerDesignTokens.iconSizeXxxl + 16,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacityHint),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
                       ),
-                      SizedBox(height: GasometerDesignTokens.spacingLg),
+                      const SizedBox(height: GasometerDesignTokens.spacingLg),
                       Text(
                         'Nenhuma foto selecionada',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                           fontSize: GasometerDesignTokens.fontSizeLg,
                         ),
                       ),
-                      SizedBox(height: GasometerDesignTokens.spacingLg),
+                      const SizedBox(height: GasometerDesignTokens.spacingLg),
                       ElevatedButton.icon(
                         onPressed: _showImageSourceDialog,
                         icon: const Icon(Icons.add_a_photo),
@@ -591,7 +591,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
             color: Theme.of(context).colorScheme.error,
             size: 48,
           ),
-          SizedBox(height: GasometerDesignTokens.spacingSm),
+          const SizedBox(height: GasometerDesignTokens.spacingSm),
           Text(
             'Erro ao carregar imagem',
             style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -638,7 +638,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
       height: height,
       baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       highlightColor: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.vertical(
+      borderRadius: const BorderRadius.vertical(
         top: Radius.circular(GasometerDesignTokens.radiusLg),
       ),
     );
@@ -658,9 +658,9 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                 Navigator.of(context).pop();
                 _pickImageFromGallery();
               },
-              child: Directionality(
+              child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.photo_library),
@@ -675,9 +675,9 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                 Navigator.of(context).pop();
                 _takePhoto();
               },
-              child: Directionality(
+              child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.camera_alt),
@@ -838,7 +838,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
                       Icon(
                         combustivel['icon'] as IconData,
                         size: 14,
-                        color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 6),
                       Text(

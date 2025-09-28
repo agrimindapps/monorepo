@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Overlay de carregamento que pode ser sobreposto a qualquer widget
 class LoadingOverlay extends StatelessWidget {
-  final bool isLoading;
-  final Widget child;
-  final String? loadingText;
-  final Color? overlayColor;
-  final Color? indicatorColor;
-  final double? indicatorSize;
-  final Widget? customLoadingWidget;
 
   const LoadingOverlay({
     super.key,
@@ -20,69 +13,6 @@ class LoadingOverlay extends StatelessWidget {
     this.indicatorSize,
     this.customLoadingWidget,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        if (isLoading) _buildOverlay(context),
-      ],
-    );
-  }
-
-  Widget _buildOverlay(BuildContext context) {
-    return Positioned.fill(
-      child: Material(
-        color: overlayColor ?? Colors.black.withOpacity(0.3),
-        child: Center(
-          child: customLoadingWidget ?? _buildDefaultLoading(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDefaultLoading(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: indicatorSize ?? 32,
-            height: indicatorSize ?? 32,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                indicatorColor ?? Theme.of(context).primaryColor,
-              ),
-              strokeWidth: 3,
-            ),
-          ),
-          if (loadingText != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              loadingText!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 
   /// Factory constructor para overlay simples
   factory LoadingOverlay.simple({
@@ -128,7 +58,7 @@ class LoadingOverlay extends StatelessWidget {
     return LoadingOverlay(
       isLoading: isLoading,
       loadingText: text,
-      overlayColor: backgroundColor ?? Colors.black.withOpacity(0.5),
+      overlayColor: backgroundColor ?? Colors.black.withValues(alpha: 0.5),
       child: child,
     );
   }
@@ -143,9 +73,79 @@ class LoadingOverlay extends StatelessWidget {
     return LoadingOverlay(
       isLoading: isLoading,
       loadingText: text,
-      overlayColor: Colors.black.withOpacity(0.7),
+      overlayColor: Colors.black.withValues(alpha: 0.7),
       customLoadingWidget: customWidget,
       child: child,
+    );
+  }
+  final bool isLoading;
+  final Widget child;
+  final String? loadingText;
+  final Color? overlayColor;
+  final Color? indicatorColor;
+  final double? indicatorSize;
+  final Widget? customLoadingWidget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        child,
+        if (isLoading) _buildOverlay(context),
+      ],
+    );
+  }
+
+  Widget _buildOverlay(BuildContext context) {
+    return Positioned.fill(
+      child: Material(
+        color: overlayColor ?? Colors.black.withValues(alpha: 0.3),
+        child: Center(
+          child: customLoadingWidget ?? _buildDefaultLoading(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultLoading(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: indicatorSize ?? 32,
+            height: indicatorSize ?? 32,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                indicatorColor ?? Theme.of(context).primaryColor,
+              ),
+              strokeWidth: 3,
+            ),
+          ),
+          if (loadingText != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              loadingText!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

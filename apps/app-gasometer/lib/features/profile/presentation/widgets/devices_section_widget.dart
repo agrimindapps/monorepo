@@ -1,9 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-
-import 'package:core/core.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../device_management/presentation/providers/vehicle_device_provider.dart';
@@ -118,7 +115,7 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
       return _buildErrorState(context, provider);
     }
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
@@ -548,8 +545,8 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
               final success = await provider.revokeAllOtherDevices();
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Outros dispositivos desconectados'),
+                  const SnackBar(
+                    content: Text('Outros dispositivos desconectados'),
                     backgroundColor: GasometerDesignTokens.colorSuccess,
                     behavior: SnackBarBehavior.floating,
                   ),

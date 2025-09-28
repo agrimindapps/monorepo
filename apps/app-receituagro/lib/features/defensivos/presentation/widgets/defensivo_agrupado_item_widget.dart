@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/core.dart';
 import '../../models/defensivo_agrupado_item_model.dart';
 import '../../models/defensivos_agrupados_category.dart';
 import '../../models/defensivos_agrupados_view_mode.dart';

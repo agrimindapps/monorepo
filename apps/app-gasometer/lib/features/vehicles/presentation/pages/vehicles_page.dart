@@ -7,7 +7,6 @@ import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/gasometer_colors.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicles_provider.dart';
 import '../widgets/vehicle_card.dart';
@@ -208,14 +207,14 @@ class _OptimizedHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 13),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Veículos',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
@@ -224,10 +223,10 @@ class _OptimizedHeader extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: 3),
                     Text(
                       'Gerencie sua frota de veículos',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white70,
                         fontSize: 13,
                         height: 1.3,
@@ -248,13 +247,13 @@ class _OptimizedHeader extends StatelessWidget {
 
 /// Conteúdo principal otimizado com Selector
 class _OptimizedVehiclesContent extends StatelessWidget {
-  final void Function(BuildContext, VehicleEntity) onEditVehicle;
-  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
   
   const _OptimizedVehiclesContent({
     required this.onEditVehicle,
     required this.onDeleteVehicle,
   });
+  final void Function(BuildContext, VehicleEntity) onEditVehicle;
+  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
   
 
   @override
@@ -324,9 +323,9 @@ class _OptimizedVehiclesContent extends StatelessWidget {
 
 /// Estado de erro otimizado
 class _ErrorState extends StatelessWidget {
-  final String errorMessage;
   
   const _ErrorState({required this.errorMessage});
+  final String errorMessage;
   
   @override
   Widget build(BuildContext context) {
@@ -359,7 +358,7 @@ class _ErrorState extends StatelessWidget {
               errorMessage,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -369,9 +368,9 @@ class _ErrorState extends StatelessWidget {
               semanticHint: 'Tenta recarregar a lista de veículos após o erro',
               type: ButtonType.elevated,
               onPressed: () => context.read<VehiclesProvider>().loadVehicles(),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Icon(Icons.refresh),
                   SizedBox(width: 8),
                   Text('Tentar novamente'),
@@ -389,15 +388,15 @@ class _ErrorState extends StatelessWidget {
 /// ✅ PERFORMANCE FIX: Grid com CustomScrollView e SliverGrid para virtualização
 /// ✅ LAYOUT FIX: Conteúdo limitado a 1120px centralizado dentro da área total
 class _OptimizedVehiclesGrid extends StatelessWidget {
-  final List<VehicleEntity> vehicles;
-  final void Function(BuildContext, VehicleEntity) onEditVehicle;
-  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
   
   const _OptimizedVehiclesGrid({
     required this.vehicles,
     required this.onEditVehicle,
     required this.onDeleteVehicle,
   });
+  final List<VehicleEntity> vehicles;
+  final void Function(BuildContext, VehicleEntity) onEditVehicle;
+  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
   
   @override
   Widget build(BuildContext context) {

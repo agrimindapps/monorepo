@@ -1,20 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../providers/auth_provider.dart';
 import 'rate_limit_info_widget.dart';
 
 /// Formulário de login aprimorado com rate limiting de segurança
 class EnhancedLoginForm extends StatefulWidget {
-  final VoidCallback? onRegisterTap;
-  final VoidCallback? onForgotPasswordTap;
 
   const EnhancedLoginForm({
     super.key,
     this.onRegisterTap,
     this.onForgotPasswordTap,
   });
+  final VoidCallback? onRegisterTap;
+  final VoidCallback? onForgotPasswordTap;
 
   @override
   State<EnhancedLoginForm> createState() => _EnhancedLoginFormState();
@@ -36,8 +36,10 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
+    final authProvider = di.getIt<AuthProvider>();
+    
+    return StatefulBuilder(
+      builder: (context, setState) {
         return Form(
           key: _formKey,
           child: Column(

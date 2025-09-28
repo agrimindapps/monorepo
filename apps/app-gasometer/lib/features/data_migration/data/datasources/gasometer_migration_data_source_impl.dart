@@ -1,9 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
@@ -18,11 +14,6 @@ import 'gasometer_migration_data_source.dart';
 /// gasometer-specific data during migration operations.
 @LazySingleton(as: GasometerMigrationDataSource)
 class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
-  final FirebaseAuth _firebaseAuth;
-  final FirebaseFirestore _firestore;
-  final VehicleRepository _vehicleRepository;
-  final FuelRepository _fuelRepository;
-  final DataCleanerService _dataCleanerService;
 
   GasometerMigrationDataSourceImpl({
     FirebaseAuth? firebaseAuth,
@@ -35,6 +26,11 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
         _vehicleRepository = vehicleRepository,
         _fuelRepository = fuelRepository,
         _dataCleanerService = dataCleanerService;
+  final FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
+  final VehicleRepository _vehicleRepository;
+  final FuelRepository _fuelRepository;
+  final DataCleanerService _dataCleanerService;
 
   @override
   Future<Either<Failure, GasometerAnonymousData>> getAnonymousData(String anonymousUserId) async {

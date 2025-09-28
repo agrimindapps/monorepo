@@ -73,7 +73,7 @@ class AnalyticsService {
         parameters: cleanParameters,
       );
       debugPrint('📊 Event logged: $eventName');
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('Failed to report to Analytics: $e');
       // Don't recursively call crashlytics if analytics fails
     }

@@ -68,9 +68,9 @@ class _CrashlyticsHelper {
 /// Integrates with Firebase Crashlytics and Analytics
 @injectable
 class ErrorReporter {
-  final AnalyticsService _analyticsService;
 
   const ErrorReporter(this._analyticsService);
+  final AnalyticsService _analyticsService;
 
   /// Report error to all configured services
   Future<void> reportError(
@@ -359,7 +359,7 @@ class ErrorReporter {
 
   /// Test error reporting (for debugging)
   Future<void> testErrorReporting() async {
-    final testError = UnexpectedError(
+    const testError = UnexpectedError(
       message: 'Test error for validation',
       technicalDetails: 'This is a test error to validate error reporting',
     );

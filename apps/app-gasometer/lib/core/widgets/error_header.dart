@@ -13,6 +13,18 @@ import 'package:flutter/material.dart';
 /// )
 /// ```
 class ErrorHeader extends StatefulWidget {
+
+  const ErrorHeader({
+    super.key,
+    required this.errorMessage,
+    this.onDismiss,
+    this.showDismissButton = true,
+    this.errorStyle,
+    this.errorIcon = Icons.error_outline,
+    this.backgroundColor,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.animationDuration = const Duration(milliseconds: 300),
+  });
   /// Mensagem de erro a ser exibida. Se null, o widget não será exibido.
   final String? errorMessage;
 
@@ -36,18 +48,6 @@ class ErrorHeader extends StatefulWidget {
 
   /// Duração da animação de entrada/saída
   final Duration animationDuration;
-
-  const ErrorHeader({
-    super.key,
-    required this.errorMessage,
-    this.onDismiss,
-    this.showDismissButton = true,
-    this.errorStyle,
-    this.errorIcon = Icons.error_outline,
-    this.backgroundColor,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    this.animationDuration = const Duration(milliseconds: 300),
-  });
 
   @override
   State<ErrorHeader> createState() => _ErrorHeaderState();
@@ -208,6 +208,13 @@ class _ErrorHeaderState extends State<ErrorHeader>
 /// Variação do ErrorHeader otimizada para uso em cabeçalhos de formulários
 /// com estilos pré-configurados para consistência visual.
 class FormValidationErrorHeader extends StatelessWidget {
+
+  const FormValidationErrorHeader({
+    super.key,
+    required this.errorMessage,
+    this.onClear,
+    this.showClearButton = true,
+  });
   /// Mensagem de erro de validação
   final String? errorMessage;
 
@@ -216,13 +223,6 @@ class FormValidationErrorHeader extends StatelessWidget {
 
   /// Se deve mostrar botão para limpar o erro
   final bool showClearButton;
-
-  const FormValidationErrorHeader({
-    super.key,
-    required this.errorMessage,
-    this.onClear,
-    this.showClearButton = true,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +248,13 @@ class FormValidationErrorHeader extends StatelessWidget {
 /// Usado para mostrar erros específicos de campo diretamente
 /// abaixo do campo com problema.
 class InlineErrorMessage extends StatelessWidget {
+
+  const InlineErrorMessage({
+    super.key,
+    required this.errorMessage,
+    this.padding = const EdgeInsets.only(top: 4, left: 12, right: 12),
+    this.textStyle,
+  });
   /// Mensagem de erro
   final String? errorMessage;
 
@@ -256,13 +263,6 @@ class InlineErrorMessage extends StatelessWidget {
 
   /// Estilo do texto
   final TextStyle? textStyle;
-
-  const InlineErrorMessage({
-    super.key,
-    required this.errorMessage,
-    this.padding = const EdgeInsets.only(top: 4, left: 12, right: 12),
-    this.textStyle,
-  });
 
   @override
   Widget build(BuildContext context) {

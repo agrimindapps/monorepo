@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/core.dart';
 
 import '../../../core/extensions/pragas_hive_extension.dart';
 import '../../../core/models/pragas_hive.dart';

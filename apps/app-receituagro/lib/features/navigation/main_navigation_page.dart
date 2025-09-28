@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 
-import '../../core/services/receituagro_navigation_service.dart';
-import '../../core/navigation/agricultural_page_types.dart';
-import '../../core/widgets/responsive_content_wrapper.dart';
-import '../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../comentarios/comentarios_page.dart';
-import '../culturas/lista_culturas_page.dart';
 import '../defensivos/home_defensivos_page.dart';
-import '../defensivos/presentation/pages/defensivos_unificado_page.dart';
-import '../defensivos/presentation/providers/defensivos_unificado_provider.dart';
 import '../favoritos/favoritos_page.dart';
-import '../pragas/detalhe_praga_page.dart';
-import '../pragas/lista_pragas_page.dart';
 import '../pragas/pragas_page.dart';
 import '../settings/settings_page.dart';
-import '../subscription/subscription_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -30,32 +19,26 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-  late ReceitaAgroNavigationService _navigationService;
   int _currentBottomNavIndex = 0;
-  bool _isNavigating = false;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     _currentBottomNavIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          _buildCurrentPage(),
-          if (_isNavigating)
-            Container(
-              color: Colors.black26,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ],
-      ),
+      body: _buildCurrentPage(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -98,9 +81,18 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   void _onBottomNavTap(int index) {
+    if (_currentBottomNavIndex == index) return; // Evita rebuilds desnecessários
+    
     setState(() {
       _currentBottomNavIndex = index;
     });
+
+    // Anima para a página selecionada
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
 
     // Recarrega favoritos quando a tab for selecionada
     if (index == 2) { // Index 2 é a página de favoritos
@@ -125,67 +117,4 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     }
   }
 
-  // Legacy method support for existing navigation calls
-  Widget _buildPageForAgriculturalType(AgriculturalPageType pageType, Map<String, dynamic>? arguments) {
-    Widget page;
-
-    switch (pageType) {
-      // Páginas principais
-      case AgriculturalPageType.favoritos:
-        page = const FavoritosPage();
-        break;
-      case AgriculturalPageType.settings:
-        page = const SettingsPage();
-        break;
-
-      // Páginas de lista
-      case AgriculturalPageType.listaDefensivos:
-        page = const DefensivosUnificadoPage();
-        break;
-      case AgriculturalPageType.listaPragas:
-        page = const ListaPragasPage();
-        break;
-      case AgriculturalPageType.listaCulturas:
-        page = const ListaCulturasPage();
-        break;
-
-      // Páginas de detalhes
-      case AgriculturalPageType.detalheDefensivo:
-        final defensivoName = arguments?['defensivoName'] as String?;
-        final fabricante = arguments?['fabricante'] as String? ?? 'Fabricante não informado';
-        if (defensivoName != null) {
-          page = DetalheDefensivoPage(
-            defensivoName: defensivoName,
-            fabricante: fabricante,
-          );
-        } else {
-          page = const HomeDefensivosPage(); // Fallback
-        }
-        break;
-
-      case AgriculturalPageType.detalhePraga:
-        final pragaName = arguments?['pragaName'] as String?;
-        final pragaScientificName = arguments?['pragaScientificName'] as String?;
-        if (pragaName != null && pragaScientificName != null) {
-          page = DetalhePragaPage(
-            pragaName: pragaName,
-            pragaScientificName: pragaScientificName,
-          );
-        } else {
-          page = const PragasPage(); // Fallback
-        }
-        break;
-
-      // Páginas especiais
-      case AgriculturalPageType.premium:
-        page = const SubscriptionPage();
-        break;
-
-      default:
-        page = const HomeDefensivosPage();
-        break;
-    }
-
-    return ResponsiveContentWrapper(child: page);
-  }
 }

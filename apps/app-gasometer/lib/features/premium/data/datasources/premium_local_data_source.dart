@@ -18,11 +18,11 @@ abstract class PremiumLocalDataSource {
 
 @LazySingleton(as: PremiumLocalDataSource)
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
+
+  PremiumLocalDataSourceImpl(this.sharedPreferences);
   static const String _localLicenseKey = 'gasometer_local_license';
   
   final SharedPreferences sharedPreferences;
-
-  PremiumLocalDataSourceImpl(this.sharedPreferences);
 
   @override
   Future<void> generateLocalLicense({int days = 30}) async {

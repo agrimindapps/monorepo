@@ -8,9 +8,9 @@ import '../repositories/reports_repository.dart';
 
 @lazySingleton
 class GenerateMonthlyReport implements UseCase<ReportSummaryEntity, GenerateMonthlyReportParams> {
-  final ReportsRepository repository;
 
   GenerateMonthlyReport(this.repository);
+  final ReportsRepository repository;
 
   @override
   Future<Either<Failure, ReportSummaryEntity>> call(GenerateMonthlyReportParams params) async {
@@ -23,13 +23,13 @@ class GenerateMonthlyReport implements UseCase<ReportSummaryEntity, GenerateMont
 }
 
 class GenerateMonthlyReportParams extends UseCaseParams {
-  final String vehicleId;
-  final DateTime month;
 
   const GenerateMonthlyReportParams({
     required this.vehicleId,
     required this.month,
   });
+  final String vehicleId;
+  final DateTime month;
 
   @override
   List<Object> get props => [vehicleId, month];

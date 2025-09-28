@@ -8,9 +8,9 @@ import '../repositories/vehicle_repository.dart';
 
 @lazySingleton
 class GetAllVehicles implements NoParamsUseCase<List<VehicleEntity>> {
-  final VehicleRepository repository;
 
   GetAllVehicles(this.repository);
+  final VehicleRepository repository;
 
   @override
   Future<Either<Failure, List<VehicleEntity>>> call() async {

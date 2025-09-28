@@ -22,6 +22,106 @@ enum BadgeType {
 /// Usado para mostrar categorias, tipos e status de forma consistente
 /// em todos os tipos de list items.
 class TypeBadgeWidget extends StatelessWidget {
+
+  const TypeBadgeWidget({
+    super.key,
+    this.backgroundColor,
+    this.textColor,
+    this.icon,
+    this.compact = false,
+    this.iconOnly = false,
+    required this.label,
+    required this.type,
+  });
+  
+  /// Factory para criar badge de combustível
+  factory TypeBadgeWidget.fuel({
+    required String fuelType,
+    IconData? icon,
+    bool compact = false,
+  }) {
+    return TypeBadgeWidget(
+      icon: icon ?? Icons.local_gas_station,
+      compact: compact,
+      label: fuelType,
+      type: BadgeType.fuel,
+    );
+  }
+  
+  /// Factory para criar badge de despesa
+  factory TypeBadgeWidget.expense({
+    required String expenseType,
+    IconData? icon,
+    bool compact = false,
+  }) {
+    return TypeBadgeWidget(
+      icon: icon ?? Icons.receipt_long,
+      compact: compact,
+      label: expenseType,
+      type: BadgeType.expense,
+    );
+  }
+  
+  /// Factory para criar badge de manutenção
+  factory TypeBadgeWidget.maintenance({
+    required String maintenanceType,
+    IconData? icon,
+    bool compact = false,
+  }) {
+    return TypeBadgeWidget(
+      icon: icon ?? Icons.build,
+      compact: compact,
+      label: maintenanceType,
+      type: BadgeType.maintenance,
+    );
+  }
+  
+  /// Factory para criar badge de categoria
+  factory TypeBadgeWidget.category({
+    required String category,
+    IconData? icon,
+    bool compact = false,
+  }) {
+    return TypeBadgeWidget(
+      icon: icon ?? Icons.category,
+      compact: compact,
+      label: category,
+      type: BadgeType.category,
+    );
+  }
+  
+  /// Factory para criar badge de status
+  factory TypeBadgeWidget.status({
+    required String status,
+    IconData? icon,
+    bool compact = false,
+    Color? customColor,
+  }) {
+    return TypeBadgeWidget(
+      icon: icon ?? Icons.check_circle,
+      compact: compact,
+      textColor: customColor,
+      label: status,
+      type: BadgeType.status,
+    );
+  }
+  
+  /// Factory para criar badge apenas com ícone
+  factory TypeBadgeWidget.iconOnly({
+    required IconData icon,
+    required BadgeType type,
+    bool compact = true,
+    Color? customColor,
+  }) {
+    return TypeBadgeWidget(
+      icon: icon,
+      compact: compact,
+      iconOnly: true,
+      textColor: customColor,
+      label: '',
+      type: type,
+    );
+  }
   /// Texto do badge
   final String label;
   
@@ -43,17 +143,6 @@ class TypeBadgeWidget extends StatelessWidget {
   /// Se deve mostrar apenas o ícone (sem texto)
   final bool iconOnly;
 
-  const TypeBadgeWidget({
-    super.key,
-    required this.label,
-    required this.type,
-    this.backgroundColor,
-    this.textColor,
-    this.icon,
-    this.compact = false,
-    this.iconOnly = false,
-  });
-
   @override
   Widget build(BuildContext context) {
     final colors = _getColors();
@@ -67,8 +156,7 @@ class TypeBadgeWidget extends StatelessWidget {
             vertical: GasometerDesignTokens.spacingXs,
           );
 
-    return Container(
-      padding: padding,
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor ?? colors.background,
         borderRadius: ListItemDesignTokens.badgeBorderRadius,
@@ -77,9 +165,12 @@ class TypeBadgeWidget extends StatelessWidget {
           width: 0.5,
         ),
       ),
-      child: iconOnly 
-          ? _buildIconOnly(colors)
-          : _buildWithText(colors),
+      child: Padding(
+        padding: padding,
+        child: iconOnly 
+            ? _buildIconOnly(colors)
+            : _buildWithText(colors),
+      ),
     );
   }
 
@@ -140,7 +231,7 @@ class TypeBadgeWidget extends StatelessWidget {
           border: GasometerDesignTokens.colorWarning.withValues(alpha: 0.3),
         );
       case BadgeType.category:
-        return _BadgeColors(
+        return const _BadgeColors(
           background: GasometerDesignTokens.colorSurface,
           text: GasometerDesignTokens.colorTextSecondary,
           border: GasometerDesignTokens.colorNeutral300,
@@ -152,95 +243,6 @@ class TypeBadgeWidget extends StatelessWidget {
           border: GasometerDesignTokens.colorSuccess.withValues(alpha: 0.3),
         );
     }
-  }
-  
-  /// Factory para criar badge de combustível
-  factory TypeBadgeWidget.fuel({
-    required String fuelType,
-    IconData? icon,
-    bool compact = false,
-  }) {
-    return TypeBadgeWidget(
-      label: fuelType,
-      type: BadgeType.fuel,
-      icon: icon ?? Icons.local_gas_station,
-      compact: compact,
-    );
-  }
-  
-  /// Factory para criar badge de despesa
-  factory TypeBadgeWidget.expense({
-    required String expenseType,
-    IconData? icon,
-    bool compact = false,
-  }) {
-    return TypeBadgeWidget(
-      label: expenseType,
-      type: BadgeType.expense,
-      icon: icon ?? Icons.receipt_long,
-      compact: compact,
-    );
-  }
-  
-  /// Factory para criar badge de manutenção
-  factory TypeBadgeWidget.maintenance({
-    required String maintenanceType,
-    IconData? icon,
-    bool compact = false,
-  }) {
-    return TypeBadgeWidget(
-      label: maintenanceType,
-      type: BadgeType.maintenance,
-      icon: icon ?? Icons.build,
-      compact: compact,
-    );
-  }
-  
-  /// Factory para criar badge de categoria
-  factory TypeBadgeWidget.category({
-    required String category,
-    IconData? icon,
-    bool compact = false,
-  }) {
-    return TypeBadgeWidget(
-      label: category,
-      type: BadgeType.category,
-      icon: icon ?? Icons.category,
-      compact: compact,
-    );
-  }
-  
-  /// Factory para criar badge de status
-  factory TypeBadgeWidget.status({
-    required String status,
-    IconData? icon,
-    bool compact = false,
-    Color? customColor,
-  }) {
-    return TypeBadgeWidget(
-      label: status,
-      type: BadgeType.status,
-      icon: icon ?? Icons.check_circle,
-      compact: compact,
-      textColor: customColor,
-    );
-  }
-  
-  /// Factory para criar badge apenas com ícone
-  factory TypeBadgeWidget.iconOnly({
-    required IconData icon,
-    required BadgeType type,
-    bool compact = true,
-    Color? customColor,
-  }) {
-    return TypeBadgeWidget(
-      label: '',
-      type: type,
-      icon: icon,
-      compact: compact,
-      iconOnly: true,
-      textColor: customColor,
-    );
   }
 }
 

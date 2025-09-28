@@ -5,14 +5,14 @@ import '../../domain/entities/export_request.dart';
 
 /// Dialog para customização da exportação de dados LGPD
 class ExportCustomizationDialog extends StatefulWidget {
-  final String userId;
-  final Function(ExportRequest) onStartExport;
 
   const ExportCustomizationDialog({
     super.key,
     required this.userId,
     required this.onStartExport,
   });
+  final String userId;
+  final Function(ExportRequest) onStartExport;
 
   @override
   State<ExportCustomizationDialog> createState() => _ExportCustomizationDialogState();
@@ -126,10 +126,10 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
           ],
         ),
         const SizedBox(height: 16),
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -202,7 +202,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
         Text(
           'Deixe em branco para incluir todos os dados',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 16),
@@ -267,7 +267,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -306,7 +306,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -315,7 +315,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
             Icon(
               Icons.calendar_today,
               size: 16,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -326,7 +326,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
                   Text(
                     label,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   Text(
@@ -344,7 +344,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
                 child: Icon(
                   Icons.close,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
           ],

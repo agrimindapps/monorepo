@@ -29,9 +29,6 @@ class SettingsContent extends StatelessWidget {
 
 /// Reusable settings section widget
 class SettingsSection extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
 
   const SettingsSection({
     super.key,
@@ -39,15 +36,18 @@ class SettingsSection extends StatelessWidget {
     required this.icon,
     required this.children,
   });
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -62,7 +62,7 @@ class SettingsSection extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   size: 24,
                 ),
-                SizedBox(width: GasometerDesignTokens.spacingMd),
+                const SizedBox(width: GasometerDesignTokens.spacingMd),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -73,7 +73,7 @@ class SettingsSection extends StatelessWidget {
             ),
           ),
           Divider(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             height: 1,
           ),
           Padding(
@@ -90,11 +90,6 @@ class SettingsSection extends StatelessWidget {
 
 /// Settings item with title, subtitle, and optional trailing widget
 class SettingsItem extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-  final IconData? leadingIcon;
 
   const SettingsItem({
     super.key,
@@ -104,6 +99,11 @@ class SettingsItem extends StatelessWidget {
     this.onTap,
     this.leadingIcon,
   });
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final IconData? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class SettingsItem extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurface,
                 size: 20,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingMd),
+              const SizedBox(width: GasometerDesignTokens.spacingMd),
             ],
             Expanded(
               child: Column(
@@ -134,7 +134,7 @@ class SettingsItem extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                 ],

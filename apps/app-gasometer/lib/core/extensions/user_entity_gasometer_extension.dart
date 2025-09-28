@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' hide AuthProvider;
 import 'package:core/core.dart' as core show AuthProvider;
-import 'package:firebase_auth/firebase_auth.dart';
 
 /// Enum para tipos de usuário específicos do Gasometer
 /// Migrado da implementação local UserEntity

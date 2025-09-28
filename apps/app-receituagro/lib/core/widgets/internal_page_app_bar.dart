@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../services/receituagro_navigation_service.dart';
 

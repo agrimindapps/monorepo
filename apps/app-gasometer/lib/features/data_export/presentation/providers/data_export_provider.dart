@@ -13,9 +13,6 @@ import '../../domain/services/platform_export_service.dart';
 /// Provider para gerenciar o estado da exportação de dados LGPD
 @injectable
 class DataExportProvider extends ChangeNotifier {
-  final DataExportRepository _repository;
-  final PlatformExportService _platformService;
-  final AnalyticsService? _analyticsService;
 
   DataExportProvider({
     DataExportRepository? repository,
@@ -24,6 +21,9 @@ class DataExportProvider extends ChangeNotifier {
   }) : _repository = repository ?? DataExportRepositoryImpl(),
        _platformService = platformService ?? PlatformExportServiceFactory.create(),
        _analyticsService = analyticsService;
+  final DataExportRepository _repository;
+  final PlatformExportService _platformService;
+  final AnalyticsService? _analyticsService;
 
   // Estado da exportação
   bool _isExporting = false;

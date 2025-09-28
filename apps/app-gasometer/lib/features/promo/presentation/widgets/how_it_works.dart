@@ -175,7 +175,7 @@ class HowItWorks extends StatelessWidget {
             color: color,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

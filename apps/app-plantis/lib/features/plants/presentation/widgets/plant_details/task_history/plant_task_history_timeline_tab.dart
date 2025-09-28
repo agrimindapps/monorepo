@@ -190,10 +190,10 @@ class _PlantTaskHistoryTimelineTabState
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.2),
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -257,8 +257,8 @@ class _PlantTaskHistoryTimelineTabState
                         ActionChip(
                           label: const Text('Limpar'),
                           onPressed: _clearFilters,
-                          backgroundColor: Colors.red.withOpacity(0.1),
-                          side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                          backgroundColor: Colors.red.withValues(alpha: 0.1),
+                          side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
                           labelStyle: const TextStyle(color: Colors.red),
                           avatar: const Icon(Icons.clear, size: 16, color: Colors.red),
                         ),
@@ -288,12 +288,12 @@ class _PlantTaskHistoryTimelineTabState
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: _selectedPeriod != 'all'
-              ? PlantisColors.primary.withOpacity(0.1)
+              ? PlantisColors.primary.withValues(alpha: 0.1)
               : theme.colorScheme.surface,
           border: Border.all(
             color: _selectedPeriod != 'all'
-                ? PlantisColors.primary.withOpacity(0.3)
-                : theme.colorScheme.outline.withOpacity(0.3),
+                ? PlantisColors.primary.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -353,12 +353,12 @@ class _PlantTaskHistoryTimelineTabState
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: _selectedType != null
-              ? PlantisColors.primary.withOpacity(0.1)
+              ? PlantisColors.primary.withValues(alpha: 0.1)
               : theme.colorScheme.surface,
           border: Border.all(
             color: _selectedType != null
-                ? PlantisColors.primary.withOpacity(0.3)
-                : theme.colorScheme.outline.withOpacity(0.3),
+                ? PlantisColors.primary.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -421,7 +421,7 @@ class _PlantTaskHistoryTimelineTabState
             Icon(
               Icons.timeline,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -434,7 +434,7 @@ class _PlantTaskHistoryTimelineTabState
             Text(
               'Tente ajustar os filtros ou realizar alguns cuidados com sua planta.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -503,13 +503,13 @@ class _PlantTaskHistoryTimelineTabState
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [
-                PlantisColors.primary.withOpacity(0.1),
-                PlantisColors.primaryLight.withOpacity(0.05),
+                PlantisColors.primary.withValues(alpha: 0.1),
+                PlantisColors.primaryLight.withValues(alpha: 0.05),
               ],
             ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: PlantisColors.primary.withOpacity(0.3),
+              color: PlantisColors.primary.withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -531,7 +531,7 @@ class _PlantTaskHistoryTimelineTabState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: PlantisColors.primary.withOpacity(0.2),
+                  color: PlantisColors.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -577,7 +577,7 @@ class _PlantTaskHistoryTimelineTabState
                 border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.3),
+                    color: color.withValues(alpha: 0.3),
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),
@@ -588,7 +588,7 @@ class _PlantTaskHistoryTimelineTabState
               Container(
                 width: 2,
                 height: 60,
-                color: theme.colorScheme.outline.withOpacity(0.3),
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
               ),
           ],
         ),
@@ -604,11 +604,11 @@ class _PlantTaskHistoryTimelineTabState
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.05),
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -622,7 +622,7 @@ class _PlantTaskHistoryTimelineTabState
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Icon(
@@ -684,7 +684,7 @@ class _PlantTaskHistoryTimelineTabState
         label: Text(_isLoadingMore ? 'Carregando...' : 'Carregar mais'),
         style: OutlinedButton.styleFrom(
           foregroundColor: PlantisColors.primary,
-          side: BorderSide(color: PlantisColors.primary.withOpacity(0.5)),
+          side: BorderSide(color: PlantisColors.primary.withValues(alpha: 0.5)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
@@ -700,7 +700,7 @@ class _PlantTaskHistoryTimelineTabState
           width: 8,
           height: 8,
           decoration: BoxDecoration(
-            color: theme.colorScheme.outline.withOpacity(0.5),
+            color: theme.colorScheme.outline.withValues(alpha: 0.5),
             shape: BoxShape.circle,
           ),
         ),
@@ -708,7 +708,7 @@ class _PlantTaskHistoryTimelineTabState
         Text(
           'Início do histórico',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             fontStyle: FontStyle.italic,
           ),
         ),

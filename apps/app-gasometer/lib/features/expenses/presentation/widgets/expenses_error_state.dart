@@ -5,14 +5,14 @@ import '../../../../core/theme/design_tokens.dart';
 
 /// Widget para estado de erro da listagem de despesas
 class ExpensesErrorState extends StatelessWidget {
-  final String error;
-  final VoidCallback onRetry;
 
   const ExpensesErrorState({
     super.key,
     required this.error,
     required this.onRetry,
   });
+  final String error;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class ExpensesErrorState extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(60),
               ),
               child: const Icon(
@@ -37,7 +37,7 @@ class ExpensesErrorState extends StatelessWidget {
               ),
             ),
             
-            SizedBox(height: GasometerDesignTokens.spacingXl),
+            const SizedBox(height: GasometerDesignTokens.spacingXl),
             
             // Título
             SemanticText.heading(
@@ -50,20 +50,20 @@ class ExpensesErrorState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             
-            SizedBox(height: GasometerDesignTokens.spacingMd),
+            const SizedBox(height: GasometerDesignTokens.spacingMd),
             
             // Descrição do erro
             SemanticText.subtitle(
               error,
               style: TextStyle(
                 fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
             ),
             
-            SizedBox(height: GasometerDesignTokens.spacingXxl),
+            const SizedBox(height: GasometerDesignTokens.spacingXxl),
             
             // Botão de tentar novamente
             SemanticButton(
@@ -73,12 +73,12 @@ class ExpensesErrorState extends StatelessWidget {
               onPressed: onRetry,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.refresh),
+                    Icon(Icons.refresh),
                     SizedBox(width: GasometerDesignTokens.spacingMd),
-                    const Text(
+                    Text(
                       'Tentar Novamente',
                       style: TextStyle(
                         fontSize: 16,
@@ -90,7 +90,7 @@ class ExpensesErrorState extends StatelessWidget {
               ),
             ),
             
-            SizedBox(height: GasometerDesignTokens.spacingXl),
+            const SizedBox(height: GasometerDesignTokens.spacingXl),
             
             // Sugestões
             _buildSuggestionsSection(context),
@@ -104,10 +104,10 @@ class ExpensesErrorState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -120,7 +120,7 @@ class ExpensesErrorState extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
                 size: 20,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingSm),
+              const SizedBox(width: GasometerDesignTokens.spacingSm),
               SemanticText.heading(
                 'Possíveis soluções:',
                 style: TextStyle(
@@ -132,7 +132,7 @@ class ExpensesErrorState extends StatelessWidget {
             ],
           ),
           
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           
           ...const [
             '• Verifique sua conexão com a internet',
@@ -146,11 +146,11 @@ class ExpensesErrorState extends StatelessWidget {
               suggestion,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 height: 1.3,
               ),
             ),
-          )).toList(),
+          )),
         ],
       ),
     );

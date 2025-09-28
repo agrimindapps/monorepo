@@ -4,9 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/standard_card.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/gasometer_colors.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_form_provider.dart';
@@ -23,7 +22,7 @@ class OdometerPage extends StatefulWidget {
 class _OdometerPageState extends State<OdometerPage> {
   String? _selectedVehicleId;
   int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
-  bool _showStatistics = true;
+  final bool _showStatistics = true;
 
   // Generate month list dynamically
   List<String> get _months {
@@ -267,7 +266,7 @@ class _OdometerPageState extends State<OdometerPage> {
               children: [
                 if (_showStatistics && odometers.isNotEmpty) ...[
                   _buildStatisticsCard(odometers),
-                  SizedBox(height: GasometerDesignTokens.spacingLg),
+                  const SizedBox(height: GasometerDesignTokens.spacingLg),
                 ],
                 _buildOdometerList(odometers),
               ],
@@ -298,11 +297,11 @@ class _OdometerPageState extends State<OdometerPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CardSectionTitle(
+          const CardSectionTitle(
             title: 'Estatísticas do Mês',
             icon: Icons.assessment,
           ),
-          SizedBox(height: GasometerDesignTokens.spacingXl),
+          const SizedBox(height: GasometerDesignTokens.spacingXl),
           Row(
             children: [
               Expanded(
@@ -391,7 +390,7 @@ class _OdometerPageState extends State<OdometerPage> {
             size: GasometerDesignTokens.iconSizeListItem,
           ),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingSm),
+        const SizedBox(height: GasometerDesignTokens.spacingSm),
         Text(
           value,
           style: TextStyle(

@@ -57,10 +57,6 @@ abstract class IFieldValidator {
 
 /// Validation result for individual fields
 class ValidationResult {
-  final bool isValid;
-  final String? errorMessage;
-  final String? warningMessage;
-  final Map<String, dynamic> metadata;
   
   const ValidationResult({
     required this.isValid,
@@ -92,6 +88,10 @@ class ValidationResult {
       warningMessage: warningMessage,
     );
   }
+  final bool isValid;
+  final String? errorMessage;
+  final String? warningMessage;
+  final Map<String, dynamic> metadata;
   
   @override
   String toString() {
@@ -106,11 +106,6 @@ class ValidationResult {
 
 /// Comprehensive validation result for entire forms
 class FormValidationResult {
-  final bool isValid;
-  final Map<String, ValidationResult> fieldResults;
-  final List<String> globalErrors;
-  final List<String> globalWarnings;
-  final Map<String, dynamic> metadata;
   
   const FormValidationResult({
     required this.isValid,
@@ -143,6 +138,11 @@ class FormValidationResult {
       globalErrors: globalErrors,
     );
   }
+  final bool isValid;
+  final Map<String, ValidationResult> fieldResults;
+  final List<String> globalErrors;
+  final List<String> globalWarnings;
+  final Map<String, dynamic> metadata;
   
   /// Get all error messages (field + global)
   List<String> get allErrors {

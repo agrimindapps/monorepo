@@ -6,6 +6,13 @@ import '../theme/loading_design_tokens.dart';
 /// Exibe um indicador de loading não-cancelável com mensagem
 /// personalizada e design consistente com o app
 class LogoutLoadingDialog extends StatefulWidget {
+
+  const LogoutLoadingDialog({
+    super.key,
+    this.message = 'Saindo...',
+    this.minDuration = const Duration(seconds: 2),
+    this.onCompleted,
+  });
   /// Mensagem a ser exibida no dialog
   final String message;
 
@@ -14,13 +21,6 @@ class LogoutLoadingDialog extends StatefulWidget {
 
   /// Callback executado quando o dialog deve ser fechado
   final VoidCallback? onCompleted;
-
-  const LogoutLoadingDialog({
-    super.key,
-    this.message = 'Saindo...',
-    this.minDuration = const Duration(seconds: 2),
-    this.onCompleted,
-  });
 
   @override
   State<LogoutLoadingDialog> createState() => _LogoutLoadingDialogState();

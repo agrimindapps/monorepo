@@ -20,7 +20,6 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   late final IDiagnosticosRepository _repository = sl<IDiagnosticosRepository>();
   
   // Serviços centralizados
-  // final _cacheService = EnhancedDiagnosticoCacheService.instance; // Temporariamente desabilitado
   final _resolver = DiagnosticoEntityResolver.instance;
   final _groupingService = DiagnosticoGroupingService.instance;
   final _compatibilityService = DiagnosticoCompatibilityService.instance;
@@ -46,7 +45,7 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   // Getters públicos
   List<DiagnosticoEntity> get diagnosticos => _diagnosticos;
   List<DiagnosticoEntity> get filteredDiagnosticos => _applyFilters();
-  Map<String, List<DiagnosticoEntity>> get groupedDiagnosticos => _getGroupedDiagnosticos();
+  Map<String, List<DiagnosticoEntity>> get groupedDiagnosticos => _cachedGrouping ?? {};
   
   bool get isLoading => _isLoading;
   bool get isLoadingFilters => _isLoadingFilters;
@@ -83,20 +82,20 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   Future<void> loadDiagnosticos(String pragaId) async {
 
     _currentPragaId = pragaId;
-    _currentPragaName = _resolver.resolvePragaNome(idPraga: pragaId);
+    _currentPragaName = await _resolver.resolvePragaNome(idPraga: pragaId);
     _setLoadingState(true);
 
     try {
       // Direct repository call for optimal performance
       final result = await _repository.getByPraga(pragaId);
 
-      result.fold(
-        (failure) {
+      await result.fold(
+        (failure) async {
           _setErrorState('Erro ao carregar diagnósticos: ${failure.toString()}');
         },
-        (entities) {
+        (entities) async {
           _setSuccessState(entities);
-          _updateAvailableCulturas();
+          await _updateAvailableCulturas();
         },
       );
     } catch (e) {
@@ -139,7 +138,7 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
         }
         
         _setSuccessState(filteredResults);
-        _updateAvailableCulturas();
+        await _updateAvailableCulturas();
         updateSearchQuery(query);
       } else {
         _setSuccessState([]);
@@ -189,13 +188,10 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
       }).toList();
     }
 
-    // Filtro por cultura
+    // Filtro por cultura - usa dados já resolvidos no nomeCultura se disponível
     if (_selectedCultura != 'Todas') {
       filtered = filtered.where((diag) {
-        final culturaNome = _resolver.resolveCulturaNome(
-          idCultura: diag.idCultura,
-          nomeCultura: diag.nomeCultura,
-        );
+        final culturaNome = diag.nomeCultura ?? '';
         return culturaNome == _selectedCultura;
       }).toList();
     }
@@ -203,16 +199,16 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
     return filtered;
   }
 
-  /// Obtém diagnósticos agrupados por cultura
-  Map<String, List<DiagnosticoEntity>> _getGroupedDiagnosticos() {
+  /// Atualiza agrupamentos de forma assíncrona
+  Future<void> updateGroupings() async {
     // Verifica cache de agrupamento
     if (_isGroupingCacheValid() && _cachedGrouping != null) {
-      return _cachedGrouping!;
+      return;
     }
 
     // Gera novo agrupamento usando serviço centralizado
     final filtered = filteredDiagnosticos;
-    final grouped = _groupingService.groupDiagnosticoEntitiesByCultura(
+    final grouped = await _groupingService.groupDiagnosticoEntitiesByCultura(
       filtered,
       sortByRelevance: true,
     );
@@ -220,8 +216,7 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
     // Cache resultado
     _cachedGrouping = grouped;
     _lastGroupingUpdate = DateTime.now();
-
-    return grouped;
+    notifyListeners();
   }
 
   /// Verifica se cache de agrupamento é válido
@@ -237,11 +232,11 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   }
 
   /// Atualiza lista de culturas disponíveis
-  void _updateAvailableCulturas() {
+  Future<void> _updateAvailableCulturas() async {
     final culturas = <String>{'Todas'};
     
     for (final diag in _diagnosticos) {
-      final culturaNome = _resolver.resolveCulturaNome(
+      final culturaNome = await _resolver.resolveCulturaNome(
         idCultura: diag.idCultura,
         nomeCultura: diag.nomeCultura,
       );

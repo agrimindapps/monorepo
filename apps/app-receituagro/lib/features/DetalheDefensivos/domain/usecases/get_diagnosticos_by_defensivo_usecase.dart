@@ -1,7 +1,7 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/errors/failures.dart' as app_failures;
+import '../../../../core/usecases/usecase.dart' as app_usecase;
 import '../../../../core/utils/typedef.dart';
 import '../entities/diagnostico_entity.dart';
 import '../repositories/diagnostico_repository.dart';
@@ -10,7 +10,7 @@ import '../repositories/diagnostico_repository.dart';
 /// 
 /// Este use case encapsula a lógica de negócio para buscar
 /// diagnósticos relacionados a um defensivo específico
-class GetDiagnosticosByDefensivoUseCase implements UseCase<List<DiagnosticoEntity>, GetDiagnosticosByDefensivoParams> {
+class GetDiagnosticosByDefensivoUseCase implements app_usecase.UseCase<List<DiagnosticoEntity>, GetDiagnosticosByDefensivoParams> {
   const GetDiagnosticosByDefensivoUseCase(this._repository);
 
   final DiagnosticoRepository _repository;
@@ -29,7 +29,7 @@ class GetDiagnosticosByDefensivoUseCase implements UseCase<List<DiagnosticoEntit
     if (params.idDefensivo.isEmpty) {
       debugPrint('❌ ERRO: ID do defensivo está vazio');
       return const Left(
-        ServerFailure('ID do defensivo é obrigatório'),
+        app_failures.ServerFailure('ID do defensivo é obrigatório'),
       );
     }
 
@@ -101,7 +101,7 @@ class GetDiagnosticosByDefensivoUseCase implements UseCase<List<DiagnosticoEntit
     } catch (e) {
       debugPrint('❌ EXCEÇÃO no UseCase: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
-      return Left(ServerFailure('Erro ao buscar diagnósticos: ${e.toString()}'));
+      return Left(app_failures.ServerFailure('Erro ao buscar diagnósticos: ${e.toString()}'));
     }
   }
 }

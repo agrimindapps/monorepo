@@ -19,10 +19,10 @@ abstract class OdometerRemoteDataSource {
 
 @LazySingleton(as: OdometerRemoteDataSource)
 class OdometerRemoteDataSourceImpl implements OdometerRemoteDataSource {
-  final FirebaseFirestore _firestore;
-  static const String _collection = 'odometer_readings';
 
   OdometerRemoteDataSourceImpl(this._firestore);
+  final FirebaseFirestore _firestore;
+  static const String _collection = 'odometer_readings';
 
   CollectionReference _getUserOdometerCollection(String userId) {
     return _firestore.collection('users').doc(userId).collection(_collection);

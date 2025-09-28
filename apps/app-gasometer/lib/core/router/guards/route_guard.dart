@@ -8,10 +8,10 @@ import '../../services/platform_service.dart';
 /// Esta classe extrai a lógica complexa de redirecionamento do router principal,
 /// melhorando legibilidade, testabilidade e manutenibilidade.
 class RouteGuard {
-  final AuthProvider? _authProvider;
-  final PlatformService _platformService;
 
   const RouteGuard(this._authProvider, this._platformService);
+  final AuthProvider? _authProvider;
+  final PlatformService _platformService;
 
   /// Determina se deve redirecionar baseado no estado atual da rota e autenticação
   /// 
@@ -20,13 +20,13 @@ class RouteGuard {
   String? handleRedirect(String currentLocation) {
     // If AuthProvider is not available or not initialized yet, allow navigation to continue
     // This prevents race conditions during app initialization
-    if (_authProvider == null || !_authProvider!.isInitialized) {
+    if (_authProvider == null || !_authProvider.isInitialized) {
       return null;
     }
     
-    final isAuthenticated = _authProvider!.isAuthenticated;
-    final hasAuthError = _authProvider!.errorMessage != null;
-    final isLoading = _authProvider!.isLoading;
+    final isAuthenticated = _authProvider.isAuthenticated;
+    final hasAuthError = _authProvider.errorMessage != null;
+    final isLoading = _authProvider.isLoading;
     final routeType = _getRouteType(currentLocation);
 
     // SECURITY + UX FIX: If there's an authentication error and we're on login page,

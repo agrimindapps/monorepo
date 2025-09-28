@@ -1,5 +1,6 @@
 /// Financial Warning Banner Widget
 /// Shows warnings and notifications for financial data operations
+library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,12 +20,6 @@ enum FinancialWarningType {
 
 /// Financial warning banner widget
 class FinancialWarningBanner extends StatelessWidget {
-  final FinancialWarningType? warningType;
-  final String? customMessage;
-  final VoidCallback? onAction;
-  final String? actionLabel;
-  final bool dismissible;
-  final VoidCallback? onDismiss;
 
   const FinancialWarningBanner({
     super.key,
@@ -45,6 +40,12 @@ class FinancialWarningBanner extends StatelessWidget {
     this.onDismiss,
   })  : warningType = null,
         customMessage = null;
+  final FinancialWarningType? warningType;
+  final String? customMessage;
+  final VoidCallback? onAction;
+  final String? actionLabel;
+  final bool dismissible;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -67,8 +68,8 @@ class FinancialWarningBanner extends StatelessWidget {
 
     final config = type != null ? _getWarningConfig(type, syncService) : _getCustomConfig();
 
-    return Container(
-      margin: const EdgeInsets.all(8),
+    return Padding(
+      padding: const EdgeInsets.all(8),
       child: Material(
         elevation: 2,
         borderRadius: BorderRadius.circular(8),
@@ -280,15 +281,6 @@ class FinancialWarningBanner extends StatelessWidget {
 
 /// Warning configuration class
 class _WarningConfig {
-  final IconData icon;
-  final String title;
-  final String message;
-  final Color backgroundColor;
-  final Color iconColor;
-  final Color textColor;
-  final bool showAction;
-  final String actionLabel;
-  final VoidCallback? defaultAction;
 
   const _WarningConfig({
     required this.icon,
@@ -301,6 +293,15 @@ class _WarningConfig {
     required this.actionLabel,
     this.defaultAction,
   });
+  final IconData icon;
+  final String title;
+  final String message;
+  final Color backgroundColor;
+  final Color iconColor;
+  final Color textColor;
+  final bool showAction;
+  final String actionLabel;
+  final VoidCallback? defaultAction;
 }
 
 /// Extension for easy banner display

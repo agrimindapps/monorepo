@@ -27,7 +27,7 @@ class SettingsHeader extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onPrimary,
                 size: 32,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingMd),
+              const SizedBox(width: GasometerDesignTokens.spacingMd),
               Text(
                 'Configurações',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(

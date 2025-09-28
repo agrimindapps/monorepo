@@ -3,10 +3,6 @@ import 'package:core/core.dart';
 
 // Auth State class to represent authentication status
 class AuthState {
-  final UserEntity? user;
-  final bool isLoading;
-  final String? errorMessage;
-  final bool isInitialized;
 
   const AuthState({
     this.user,
@@ -14,6 +10,10 @@ class AuthState {
     this.errorMessage,
     this.isInitialized = false,
   });
+  final UserEntity? user;
+  final bool isLoading;
+  final String? errorMessage;
+  final bool isInitialized;
 
   bool get isAuthenticated => user != null;
   bool get isAnonymous => user?.provider == AuthProvider.anonymous;
@@ -35,12 +35,12 @@ class AuthState {
 
 // Auth State Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
-  final FirebaseAuthService _authService;
-  late final StreamSubscription<UserEntity?> _authStateSubscription;
 
   AuthNotifier(this._authService) : super(const AuthState()) {
     _initializeAuth();
   }
+  final FirebaseAuthService _authService;
+  late final StreamSubscription<UserEntity?> _authStateSubscription;
 
   Future<void> _initializeAuth() async {
     try {

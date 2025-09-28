@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 // Busca Avançada
 import '../../features/busca_avancada/di/busca_di.dart';

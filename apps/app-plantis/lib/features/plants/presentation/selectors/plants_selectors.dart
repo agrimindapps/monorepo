@@ -1,4 +1,5 @@
-import 'package:provider/provider.dart';
+import 'package:flutter/widgets.dart' show SizedBox;
+import 'package:provider/provider.dart' show Selector;
 
 import '../../domain/entities/plant.dart';
 import '../providers/plants_provider.dart';
@@ -10,7 +11,7 @@ class PlantsSelectors {
   static Selector<PlantsProvider, int> plantsCount() {
     return Selector<PlantsProvider, int>(
       selector: (_, provider) => provider.plantsCount,
-      builder: (context, plantsCount, child) => child!,
+      builder: (context, plantsCount, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -18,7 +19,7 @@ class PlantsSelectors {
   static Selector<PlantsProvider, String> searchQuery() {
     return Selector<PlantsProvider, String>(
       selector: (_, provider) => provider.searchQuery,
-      builder: (context, searchQuery, child) => child!,
+      builder: (context, searchQuery, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -26,7 +27,7 @@ class PlantsSelectors {
   static Selector<PlantsProvider, ViewMode> viewMode() {
     return Selector<PlantsProvider, ViewMode>(
       selector: (_, provider) => provider.viewMode,
-      builder: (context, viewMode, child) => child!,
+      builder: (context, viewMode, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -34,7 +35,7 @@ class PlantsSelectors {
   static Selector<PlantsProvider, bool> isLoading() {
     return Selector<PlantsProvider, bool>(
       selector: (_, provider) => provider.isLoading,
-      builder: (context, isLoading, child) => child!,
+      builder: (context, isLoading, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -42,7 +43,7 @@ class PlantsSelectors {
   static Selector<PlantsProvider, String?> error() {
     return Selector<PlantsProvider, String?>(
       selector: (_, provider) => provider.error,
-      builder: (context, error, child) => child!,
+      builder: (context, error, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -61,7 +62,7 @@ class PlantsSelectors {
 
         return false;
       },
-      builder: (context, plants, child) => child!,
+      builder: (context, plants, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -80,7 +81,7 @@ class PlantsSelectors {
 
         return false;
       },
-      builder: (context, searchResults, child) => child!,
+      builder: (context, searchResults, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -101,7 +102,7 @@ class PlantsSelectors {
             previous.isSearching != next.isSearching ||
             previous.searchQuery != next.searchQuery;
       },
-      builder: (context, displayData, child) => child!,
+      builder: (context, displayData, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -119,7 +120,7 @@ class PlantsSelectors {
             previous.searchQuery != next.searchQuery ||
             previous.viewMode != next.viewMode;
       },
-      builder: (context, appBarData, child) => child!,
+      builder: (context, appBarData, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -137,7 +138,7 @@ class PlantsSelectors {
             previous.error != next.error ||
             previous.hasPlants != next.hasPlants;
       },
-      builder: (context, state, child) => child!,
+      builder: (context, state, child) => child ?? const SizedBox.shrink(),
     );
   }
 }

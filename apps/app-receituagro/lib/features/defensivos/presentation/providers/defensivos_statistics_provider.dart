@@ -85,7 +85,7 @@ class DefensivosStatisticsProvider extends ChangeNotifier {
       _clearError();
       
       // Load data from repository on main thread (required for Hive)
-      var defensivos = _repository.getActiveDefensivos();
+      var defensivos = await _repository.getActiveDefensivos();
       
       // Se não há dados, verifica se precisa aguardar o carregamento
       if (defensivos.isEmpty) {
@@ -95,7 +95,7 @@ class DefensivosStatisticsProvider extends ChangeNotifier {
         if (!isDataLoaded) {
           // Aguarda um pouco e tenta novamente (dados podem estar sendo carregados)
           await Future<void>.delayed(const Duration(milliseconds: 500));
-          defensivos = _repository.getActiveDefensivos();
+          defensivos = await _repository.getActiveDefensivos();
           
           // Se ainda estiver vazio após aguardar
           if (defensivos.isEmpty) {
@@ -122,7 +122,7 @@ class DefensivosStatisticsProvider extends ChangeNotifier {
     try {
       _clearError();
       
-      var defensivos = _repository.getActiveDefensivos();
+      var defensivos = await _repository.getActiveDefensivos();
       
       // Se não há dados, não mostra erro - apenas calcula com dados vazios
       // (durante refresh, não queremos mostrar mensagens de erro)

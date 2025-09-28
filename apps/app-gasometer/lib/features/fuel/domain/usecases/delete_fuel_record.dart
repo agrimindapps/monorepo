@@ -7,9 +7,9 @@ import '../repositories/fuel_repository.dart';
 
 @lazySingleton
 class DeleteFuelRecord implements UseCase<Unit, DeleteFuelRecordParams> {
-  final FuelRepository repository;
 
   DeleteFuelRecord(this.repository);
+  final FuelRepository repository;
 
   @override
   Future<Either<Failure, Unit>> call(DeleteFuelRecordParams params) async {
@@ -22,9 +22,9 @@ class DeleteFuelRecord implements UseCase<Unit, DeleteFuelRecordParams> {
 }
 
 class DeleteFuelRecordParams extends UseCaseParams {
-  final String id;
 
   const DeleteFuelRecordParams({required this.id});
+  final String id;
 
   @override
   List<Object> get props => [id];

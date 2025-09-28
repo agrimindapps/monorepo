@@ -50,11 +50,6 @@ enum ConnectionType {
 
 /// Connection quality data model
 class ConnectionQuality {
-  final ConnectionType type;
-  final int? signalStrength; // ${AppDefaults.minSignalStrength}-${AppDefaults.maxSignalStrength}
-  final double? speed; // Mbps
-  final int? latency; // milliseconds
-  final bool isStable;
 
   const ConnectionQuality({
     required this.type,
@@ -63,15 +58,15 @@ class ConnectionQuality {
     this.latency,
     required this.isStable,
   });
+  final ConnectionType type;
+  final int? signalStrength; // ${AppDefaults.minSignalStrength}-${AppDefaults.maxSignalStrength}
+  final double? speed; // Mbps
+  final int? latency; // milliseconds
+  final bool isStable;
 }
 
 /// Network info data model
 class NetworkInfo {
-  final String? ssid;
-  final String? bssid;
-  final String? ipAddress;
-  final String? gateway;
-  final ConnectionType type;
 
   const NetworkInfo({
     this.ssid,
@@ -80,4 +75,9 @@ class NetworkInfo {
     this.gateway,
     required this.type,
   });
+  final String? ssid;
+  final String? bssid;
+  final String? ipAddress;
+  final String? gateway;
+  final ConnectionType type;
 }

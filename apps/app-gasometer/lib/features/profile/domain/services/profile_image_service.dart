@@ -10,13 +10,13 @@ import '../../../../core/services/analytics_service.dart';
 
 /// Alias para Result até encontrarmos o import correto
 class Result<T> {
-  final T? _data;
-  final Failure? _failure;
 
   const Result._(this._data, this._failure);
 
   factory Result.success(T data) => Result._(data, null);
   factory Result.failure(Failure failure) => Result._(null, failure);
+  final T? _data;
+  final Failure? _failure;
 
   bool get isSuccess => _failure == null;
   bool get isFailure => _failure != null;
@@ -31,7 +31,7 @@ class Result<T> {
     if (isFailure) {
       onFailure(_failure!);
     } else {
-      onSuccess(_data!);
+      onSuccess(_data as T);
     }
   }
 }
@@ -40,9 +40,9 @@ class Result<T> {
 /// Focado em operações locais com base64 encoding
 @injectable
 class GasometerProfileImageService {
-  final AnalyticsService _analytics;
 
   GasometerProfileImageService(this._analytics);
+  final AnalyticsService _analytics;
 
   /// Processa imagem e converte para base64
   Future<Result<String>> processImageToBase64(File imageFile) async {
@@ -54,7 +54,7 @@ class GasometerProfileImageService {
       // Validar arquivo
       if (!await imageFile.exists()) {
         return Result.failure(
-          ValidationFailure('Arquivo de imagem não encontrado'),
+          const ValidationFailure('Arquivo de imagem não encontrado'),
         );
       }
 
@@ -64,7 +64,7 @@ class GasometerProfileImageService {
       
       if (fileSizeInBytes > maxSizeInBytes) {
         return Result.failure(
-          ValidationFailure('Imagem muito grande. Máximo permitido: 5MB'),
+          const ValidationFailure('Imagem muito grande. Máximo permitido: 5MB'),
         );
       }
 
@@ -75,7 +75,7 @@ class GasometerProfileImageService {
       final image = img.decodeImage(imageBytes);
       if (image == null) {
         return Result.failure(
-          ValidationFailure('Formato de imagem não suportado'),
+          const ValidationFailure('Formato de imagem não suportado'),
         );
       }
 
@@ -136,7 +136,7 @@ class GasometerProfileImageService {
       // Verificar se o arquivo existe
       if (!imageFile.existsSync()) {
         return Result.failure(
-          ValidationFailure('Arquivo não encontrado'),
+          const ValidationFailure('Arquivo não encontrado'),
         );
       }
 
@@ -144,10 +144,10 @@ class GasometerProfileImageService {
       final extension = imageFile.path.toLowerCase();
       final validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
       
-      bool hasValidExtension = validExtensions.any(extension.endsWith);
+      final bool hasValidExtension = validExtensions.any(extension.endsWith);
       if (!hasValidExtension) {
         return Result.failure(
-          ValidationFailure('Formato não suportado. Use JPG, PNG ou WebP'),
+          const ValidationFailure('Formato não suportado. Use JPG, PNG ou WebP'),
         );
       }
 
@@ -157,13 +157,13 @@ class GasometerProfileImageService {
       
       if (fileSizeInBytes > maxSizeInBytes) {
         return Result.failure(
-          ValidationFailure('Arquivo muito grande. Máximo: 5MB'),
+          const ValidationFailure('Arquivo muito grande. Máximo: 5MB'),
         );
       }
 
       if (fileSizeInBytes == 0) {
         return Result.failure(
-          ValidationFailure('Arquivo está vazio'),
+          const ValidationFailure('Arquivo está vazio'),
         );
       }
 
@@ -217,7 +217,7 @@ class GasometerProfileImageService {
       
       if (image == null) {
         return Result.failure(
-          ValidationFailure('Não foi possível decodificar a imagem'),
+          const ValidationFailure('Não foi possível decodificar a imagem'),
         );
       }
 
@@ -241,11 +241,6 @@ class GasometerProfileImageService {
 
 /// Classe para representar resultado de processamento
 class ImageProcessingResult {
-  final String base64String;
-  final int originalSizeKB;
-  final int processedSizeKB;
-  final String originalDimensions;
-  final String processedDimensions;
 
   ImageProcessingResult({
     required this.base64String,
@@ -254,6 +249,11 @@ class ImageProcessingResult {
     required this.originalDimensions,
     required this.processedDimensions,
   });
+  final String base64String;
+  final int originalSizeKB;
+  final int processedSizeKB;
+  final String originalDimensions;
+  final String processedDimensions;
 
   Map<String, dynamic> toMap() {
     return {

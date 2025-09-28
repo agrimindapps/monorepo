@@ -1,5 +1,4 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/errors/failures.dart';
+import 'package:core/core.dart';
 import '../../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/utils/typedef.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -18,7 +17,12 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
   @override
   ResultFuture<DefensivoEntity> getDefensivoById(String idReg) async {
     try {
-      final defensivos = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      final defensivos = result.data!;
       final defensivo = defensivos
           .where((d) => d.idReg == idReg)
           .firstOrNull;
@@ -37,7 +41,12 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
   @override
   ResultFuture<DefensivoEntity> getDefensivoByName(String nome) async {
     try {
-      final defensivos = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      final defensivos = result.data!;
       final defensivo = defensivos
           .where((d) => 
               d.nomeComum.toLowerCase() == nome.toLowerCase() ||
@@ -58,7 +67,12 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
   @override
   ResultFuture<List<DefensivoEntity>> getDefensivosByFabricante(String fabricante) async {
     try {
-      final defensivos = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      final defensivos = result.data!;
       final filteredDefensivos = defensivos
           .where((d) => d.fabricante?.toLowerCase().contains(fabricante.toLowerCase()) == true)
           .map((hive) => DefensivoModel.fromHive(hive))
@@ -73,7 +87,12 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
   @override
   ResultFuture<List<DefensivoEntity>> getDefensivosByIngredienteAtivo(String ingredienteAtivo) async {
     try {
-      final defensivos = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      final defensivos = result.data!;
       final filteredDefensivos = defensivos
           .where((d) => d.ingredienteAtivo?.toLowerCase().contains(ingredienteAtivo.toLowerCase()) == true)
           .map((hive) => DefensivoModel.fromHive(hive))
@@ -94,7 +113,12 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
     int? offset,
   }) async {
     try {
-      var defensivos = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      var defensivos = result.data!;
 
       // Aplicar filtros
       if (fabricante != null && fabricante.isNotEmpty) {
@@ -145,7 +169,12 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
       }
 
       final searchQuery = query.toLowerCase();
-      final defensivos = _hiveRepository.getAll();
+      final result = await _hiveRepository.getAll();
+      if (result.isError) {
+        return Left(CacheFailure('Erro ao acessar dados: ${result.error}'));
+      }
+      
+      final defensivos = result.data!;
       
       final filteredDefensivos = defensivos
           .where((d) => 
@@ -179,7 +208,14 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
       // Como o Hive não oferece streams nativamente, 
       // podemos simular com refresh periódico
       while (true) {
-        final defensivos = _hiveRepository.getAll();
+        final result = await _hiveRepository.getAll();
+        if (result.isError) {
+          yield [];
+          await Future<void>.delayed(const Duration(seconds: 5));
+          continue;
+        }
+        
+        final defensivos = result.data!;
         final models = defensivos
             .map((hive) => DefensivoModel.fromHive(hive))
             .toList();

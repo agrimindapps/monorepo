@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import '../repositories/i_subscription_repository.dart';
 
 /// Use case para verificar status premium do usuário ReceitaAgro

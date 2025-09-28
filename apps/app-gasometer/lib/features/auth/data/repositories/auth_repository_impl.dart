@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:core/core.dart' hide Failure, AuthenticationFailure, ServerFailure, CacheFailure, NetworkFailure, ValidationFailure, UnexpectedFailure, NetworkException;
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -14,13 +12,13 @@ import '../datasources/auth_remote_data_source.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
-  final AuthLocalDataSource localDataSource;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
   });
+  final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
 
   @override
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {

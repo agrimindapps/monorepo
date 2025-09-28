@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/services/diagnostico_compatibility_service.dart';

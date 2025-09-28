@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity para Cultura seguindo princípios Clean Architecture
 /// Representa uma cultura agrícola no domínio da aplicação

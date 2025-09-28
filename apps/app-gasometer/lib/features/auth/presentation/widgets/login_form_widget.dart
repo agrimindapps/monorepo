@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../controllers/login_controller.dart';
 import '../providers/auth_provider.dart';
 import 'auth_button_widget.dart';
@@ -11,12 +12,12 @@ import 'social_login_buttons_widget.dart';
 /// Widget responsável apenas pelo formulário de login
 /// Segue o princípio da Responsabilidade Única
 class LoginFormWidget extends StatelessWidget {
-  final VoidCallback? onLoginSuccess;
 
   const LoginFormWidget({
     super.key,
     this.onLoginSuccess,
   });
+  final VoidCallback? onLoginSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -248,24 +249,24 @@ class LoginFormWidget extends StatelessWidget {
   }
 
   Widget _buildAnonymousLoginButton(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        return SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: OutlinedButton(
-            onPressed: authProvider.isLoading
-                ? null
-                : () async {
-                    await authProvider.signInAnonymously();
-                    if (context.mounted && authProvider.isAuthenticated && onLoginSuccess != null) {
-                      onLoginSuccess!();
-                    }
-                  },
+    final authProvider = di.getIt<AuthProvider>();
+    
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: authProvider.isLoading
+            ? null
+            : () async {
+                await authProvider.signInAnonymously();
+                if (context.mounted && authProvider.isAuthenticated && onLoginSuccess != null) {
+                  onLoginSuccess!();
+                }
+              },
             style: OutlinedButton.styleFrom(
               foregroundColor: Theme.of(context).primaryColor,
               side: BorderSide(
-                color: Theme.of(context).primaryColor.withOpacity(0.3),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -301,10 +302,8 @@ class LoginFormWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-          ),
-        );
-      },
-    );
+        ),
+      );
   }
 
   void _handleLogin(BuildContext context) async {

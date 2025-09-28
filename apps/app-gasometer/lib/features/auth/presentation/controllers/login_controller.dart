@@ -8,6 +8,15 @@ import '../providers/auth_provider.dart';
 /// Controller para a página de login seguindo princípios SOLID
 /// Responsabilidade única: Gerenciar estado e lógica da tela de login
 class LoginController extends ChangeNotifier {
+
+  LoginController({
+    required AuthProvider authProvider,
+    AnalyticsService? analytics,
+  })  : _authProvider = authProvider,
+        _analytics = analytics ?? AnalyticsService() {
+    _loadSavedData();
+    _analytics.logScreenView('LoginPage');
+  }
   final AuthProvider _authProvider;
   final AnalyticsService _analytics;
 
@@ -30,15 +39,6 @@ class LoginController extends ChangeNotifier {
   // Step control para signup
   int _currentSignUpStep = 0;
   static const int _maxSignUpSteps = 3;
-
-  LoginController({
-    required AuthProvider authProvider,
-    AnalyticsService? analytics,
-  })  : _authProvider = authProvider,
-        _analytics = analytics ?? AnalyticsService() {
-    _loadSavedData();
-    _analytics.logScreenView('LoginPage');
-  }
 
   // Getters
   TextEditingController get nameController => _nameController;

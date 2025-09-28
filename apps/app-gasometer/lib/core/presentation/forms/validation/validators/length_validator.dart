@@ -1,5 +1,5 @@
-import 'base_validator.dart';
 import '../../architecture/i_form_validator.dart';
+import 'base_validator.dart';
 
 /// Validator for string and collection length constraints
 /// 
@@ -7,9 +7,6 @@ import '../../architecture/i_form_validator.dart';
 /// lists, and other collections. Follows Single Responsibility
 /// Principle by focusing solely on length validation.
 class LengthValidator extends BaseFieldValidator {
-  final int? minLength;
-  final int? maxLength;
-  final bool trimWhitespace;
   
   LengthValidator({
     this.minLength,
@@ -18,6 +15,44 @@ class LengthValidator extends BaseFieldValidator {
     this.trimWhitespace = true,
     super.metadata,
   }) : super(errorMessage: errorMessage ?? _generateErrorMessage(minLength, maxLength));
+  
+  /// Create minimum length validator
+  factory LengthValidator.min(int minLength, {String? errorMessage}) {
+    return LengthValidator(
+      minLength: minLength,
+      errorMessage: errorMessage,
+    );
+  }
+  
+  /// Create maximum length validator
+  factory LengthValidator.max(int maxLength, {String? errorMessage}) {
+    return LengthValidator(
+      maxLength: maxLength,
+      errorMessage: errorMessage,
+    );
+  }
+  
+  /// Create exact length validator
+  factory LengthValidator.exact(int length, {String? errorMessage}) {
+    return LengthValidator(
+      minLength: length,
+      maxLength: length,
+      errorMessage: errorMessage ?? 'Deve ter exatamente $length caractere(s)',
+    );
+  }
+  
+  /// Create range length validator
+  factory LengthValidator.range(int minLength, int maxLength, {String? errorMessage}) {
+    assert(minLength <= maxLength, 'minLength must be <= maxLength');
+    return LengthValidator(
+      minLength: minLength,
+      maxLength: maxLength,
+      errorMessage: errorMessage,
+    );
+  }
+  final int? minLength;
+  final int? maxLength;
+  final bool trimWhitespace;
   
   @override
   String get validatorType => 'length';
@@ -92,41 +127,6 @@ class LengthValidator extends BaseFieldValidator {
     return 'Deve ter no máximo $maxLength caractere(s)';
   }
   
-  /// Create minimum length validator
-  factory LengthValidator.min(int minLength, {String? errorMessage}) {
-    return LengthValidator(
-      minLength: minLength,
-      errorMessage: errorMessage,
-    );
-  }
-  
-  /// Create maximum length validator
-  factory LengthValidator.max(int maxLength, {String? errorMessage}) {
-    return LengthValidator(
-      maxLength: maxLength,
-      errorMessage: errorMessage,
-    );
-  }
-  
-  /// Create exact length validator
-  factory LengthValidator.exact(int length, {String? errorMessage}) {
-    return LengthValidator(
-      minLength: length,
-      maxLength: length,
-      errorMessage: errorMessage ?? 'Deve ter exatamente $length caractere(s)',
-    );
-  }
-  
-  /// Create range length validator
-  factory LengthValidator.range(int minLength, int maxLength, {String? errorMessage}) {
-    assert(minLength <= maxLength, 'minLength must be <= maxLength');
-    return LengthValidator(
-      minLength: minLength,
-      maxLength: maxLength,
-      errorMessage: errorMessage,
-    );
-  }
-  
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -149,8 +149,6 @@ class LengthValidator extends BaseFieldValidator {
 
 /// Validator for word count in text
 class WordCountValidator extends StringValidator {
-  final int? minWords;
-  final int? maxWords;
   
   WordCountValidator({
     this.minWords,
@@ -158,6 +156,33 @@ class WordCountValidator extends StringValidator {
     String? errorMessage,
     super.metadata,
   }) : super(errorMessage: errorMessage ?? _generateErrorMessage(minWords, maxWords));
+  
+  /// Create minimum word count validator
+  factory WordCountValidator.min(int minWords, {String? errorMessage}) {
+    return WordCountValidator(
+      minWords: minWords,
+      errorMessage: errorMessage,
+    );
+  }
+  
+  /// Create maximum word count validator
+  factory WordCountValidator.max(int maxWords, {String? errorMessage}) {
+    return WordCountValidator(
+      maxWords: maxWords,
+      errorMessage: errorMessage,
+    );
+  }
+  
+  /// Create exact word count validator
+  factory WordCountValidator.exact(int words, {String? errorMessage}) {
+    return WordCountValidator(
+      minWords: words,
+      maxWords: words,
+      errorMessage: errorMessage ?? 'Deve ter exatamente $words palavra(s)',
+    );
+  }
+  final int? minWords;
+  final int? maxWords;
   
   @override
   String get validatorType => 'word_count';
@@ -214,31 +239,6 @@ class WordCountValidator extends StringValidator {
     return 'Deve ter no máximo $maxWords palavra(s)';
   }
   
-  /// Create minimum word count validator
-  factory WordCountValidator.min(int minWords, {String? errorMessage}) {
-    return WordCountValidator(
-      minWords: minWords,
-      errorMessage: errorMessage,
-    );
-  }
-  
-  /// Create maximum word count validator
-  factory WordCountValidator.max(int maxWords, {String? errorMessage}) {
-    return WordCountValidator(
-      maxWords: maxWords,
-      errorMessage: errorMessage,
-    );
-  }
-  
-  /// Create exact word count validator
-  factory WordCountValidator.exact(int words, {String? errorMessage}) {
-    return WordCountValidator(
-      minWords: words,
-      maxWords: words,
-      errorMessage: errorMessage ?? 'Deve ter exatamente $words palavra(s)',
-    );
-  }
-  
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -254,9 +254,6 @@ class WordCountValidator extends StringValidator {
 
 /// Validator for character count excluding whitespace
 class CharacterCountValidator extends StringValidator {
-  final int? minChars;
-  final int? maxChars;
-  final bool excludeWhitespace;
   
   CharacterCountValidator({
     this.minChars,
@@ -265,6 +262,25 @@ class CharacterCountValidator extends StringValidator {
     String? errorMessage,
     super.metadata,
   }) : super(errorMessage: errorMessage ?? _generateErrorMessage(minChars, maxChars));
+  
+  /// Create minimum character count validator
+  factory CharacterCountValidator.min(int minChars, {String? errorMessage}) {
+    return CharacterCountValidator(
+      minChars: minChars,
+      errorMessage: errorMessage,
+    );
+  }
+  
+  /// Create maximum character count validator
+  factory CharacterCountValidator.max(int maxChars, {String? errorMessage}) {
+    return CharacterCountValidator(
+      maxChars: maxChars,
+      errorMessage: errorMessage,
+    );
+  }
+  final int? minChars;
+  final int? maxChars;
+  final bool excludeWhitespace;
   
   @override
   String get validatorType => 'character_count';
@@ -315,22 +331,6 @@ class CharacterCountValidator extends StringValidator {
   String _getMaxCharsMessage() {
     if (maxChars == null) return errorMessage;
     return 'Deve ter no máximo $maxChars caractere(s)';
-  }
-  
-  /// Create minimum character count validator
-  factory CharacterCountValidator.min(int minChars, {String? errorMessage}) {
-    return CharacterCountValidator(
-      minChars: minChars,
-      errorMessage: errorMessage,
-    );
-  }
-  
-  /// Create maximum character count validator
-  factory CharacterCountValidator.max(int maxChars, {String? errorMessage}) {
-    return CharacterCountValidator(
-      maxChars: maxChars,
-      errorMessage: errorMessage,
-    );
   }
   
   @override

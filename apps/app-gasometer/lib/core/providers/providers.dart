@@ -5,10 +5,9 @@
 export 'app_state_providers.dart';
 export 'auth_provider.dart';
 export 'dependency_providers.dart';
-export 'settings_provider.dart';
-
 // Business logic providers
 export 'fuel_provider.dart';
+export 'settings_provider.dart';
 export 'vehicles_provider.dart';
 
 // This file serves as the main entry point for all Riverpod providers

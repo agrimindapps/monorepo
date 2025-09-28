@@ -5,7 +5,6 @@ import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/gasometer_colors.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
@@ -211,24 +210,24 @@ class _FuelPageState extends State<FuelPage> {
               ),
             ),
             const SizedBox(width: 13),
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SemanticText.heading(
                     'Abastecimentos',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   SemanticText.subtitle(
                     'Histórico de abastecimentos dos seus veículos',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
                       height: 1.3,
@@ -347,12 +346,12 @@ class _FuelPageState extends State<FuelPage> {
             }
           },
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         
         
         if (fuelProvider.hasActiveFilters) ...[
           _buildFilterStatus(fuelProvider),
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         ],
         
         if (fuelProvider.isLoading)
@@ -366,7 +365,7 @@ class _FuelPageState extends State<FuelPage> {
           _buildEmptyState()
         else ...[
           _buildStatistics(fuelProvider),
-          SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildRecordsList(_filteredRecords, vehiclesProvider),
         ],
       ],
@@ -393,7 +392,7 @@ class _FuelPageState extends State<FuelPage> {
                   GasometerDesignTokens.spacingSm,
                 ),
                 decoration: BoxDecoration(
-                  color: GasometerDesignTokens.withOpacity(color, 0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: GasometerDesignTokens.borderRadius(
                     GasometerDesignTokens.radiusMd,
                   ),
@@ -404,17 +403,17 @@ class _FuelPageState extends State<FuelPage> {
                   size: GasometerDesignTokens.iconSizeButton,
                 ),
               ),
-              SizedBox(width: GasometerDesignTokens.spacingMd),
+              const SizedBox(width: GasometerDesignTokens.spacingMd),
               SemanticText.label(
                 title,
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           SemanticText(
             value,
             style: TextStyle(
@@ -514,7 +513,7 @@ class _FuelPageState extends State<FuelPage> {
           bottom: GasometerDesignTokens.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: GasometerDesignTokens.opacityOverlay),
           borderRadius: GasometerDesignTokens.borderRadius(
             GasometerDesignTokens.radiusSm,
           ),
@@ -527,7 +526,7 @@ class _FuelPageState extends State<FuelPage> {
               size: GasometerDesignTokens.fontSizeMd,
               color: Theme.of(context).colorScheme.primary,
             ),
-            SizedBox(width: GasometerDesignTokens.spacingXs),
+            const SizedBox(width: GasometerDesignTokens.spacingXs),
             Text(
               'Tanque cheio',
               style: TextStyle(
@@ -547,7 +546,7 @@ class _FuelPageState extends State<FuelPage> {
     return Center(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.6,
-        child: FuelEmptyState(),
+        child: const FuelEmptyState(),
       ),
     );
   }
@@ -783,8 +782,8 @@ class _FuelPageState extends State<FuelPage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: SemanticText.heading('Confirmar exclusão'),
-        content: SemanticText(
+        title: const SemanticText.heading('Confirmar exclusão'),
+        content: const SemanticText(
           'Tem certeza que deseja excluir este registro de abastecimento?\n\nEsta ação não pode ser desfeita.',
         ),
         actions: [
@@ -843,9 +842,9 @@ class _FuelPageState extends State<FuelPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -896,7 +895,7 @@ class _FuelPageState extends State<FuelPage> {
           Text(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 14,
             ),
           ),
@@ -960,11 +959,6 @@ class _FuelPageState extends State<FuelPage> {
 
 /// Widget otimizado para card de abastecimento
 class _OptimizedFuelRecordCard extends StatelessWidget {
-  final FuelRecordEntity record;
-  final VehiclesProvider vehiclesProvider;
-  final VoidCallback onLongPress;
-  final VoidCallback onTap;
-  final String Function(String) getVehicleName;
 
   const _OptimizedFuelRecordCard({
     super.key,
@@ -974,6 +968,11 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
     required this.onTap,
     required this.getVehicleName,
   });
+  final FuelRecordEntity record;
+  final VehiclesProvider vehiclesProvider;
+  final VoidCallback onLongPress;
+  final VoidCallback onTap;
+  final String Function(String) getVehicleName;
 
   @override
   Widget build(BuildContext context) {
@@ -1002,7 +1001,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
     return Row(
       children: [
         _buildRecordIcon(context),
-        SizedBox(width: GasometerDesignTokens.spacingLg),
+        const SizedBox(width: GasometerDesignTokens.spacingLg),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1022,17 +1021,17 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
                     formattedDate,
                     style: TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeMd,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: GasometerDesignTokens.spacingXs),
+              const SizedBox(height: GasometerDesignTokens.spacingXs),
               SemanticText.subtitle(
                 record.gasStationName ?? 'Posto não informado',
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeMd,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
                 ),
               ),
             ],
@@ -1048,7 +1047,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
         GasometerDesignTokens.spacingMd - 2,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: GasometerDesignTokens.opacityOverlay),
         borderRadius: GasometerDesignTokens.borderRadius(
           GasometerDesignTokens.radiusMd + 2,
         ),
@@ -1064,12 +1063,12 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
   Widget _buildRecordDivider(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
         Divider(
           height: 1,
-          color: Theme.of(context).colorScheme.outline.withOpacity(GasometerDesignTokens.opacityDivider),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: GasometerDesignTokens.opacityDivider),
         ),
-        SizedBox(height: GasometerDesignTokens.spacingMd),
+        const SizedBox(height: GasometerDesignTokens.spacingMd),
       ],
     );
   }
@@ -1157,7 +1156,7 @@ class _OptimizedFuelRecordCard extends StatelessWidget {
           bottom: GasometerDesignTokens.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(GasometerDesignTokens.opacityOverlay),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: GasometerDesignTokens.opacityOverlay),
           borderRadius: GasometerDesignTokens.borderRadius(
             GasometerDesignTokens.radiusSm,
           ),

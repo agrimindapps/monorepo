@@ -182,7 +182,7 @@ abstract class MaintenanceMapper {
 
   /// Get conversion errors for model to entity
   static List<String> getModelToEntityErrors(MaintenanceModel model) {
-    List<String> errors = [];
+    final List<String> errors = [];
     
     if (model.id.isEmpty) {
       errors.add('ID é obrigatório');
@@ -208,7 +208,7 @@ abstract class MaintenanceMapper {
 
   /// Get conversion errors for entity to model
   static List<String> getEntityToModelErrors(MaintenanceEntity entity) {
-    List<String> errors = [];
+    final List<String> errors = [];
     
     if (entity.id.isEmpty) {
       errors.add('ID é obrigatório');

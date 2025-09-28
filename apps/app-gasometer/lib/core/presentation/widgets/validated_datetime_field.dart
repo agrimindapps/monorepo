@@ -35,6 +35,31 @@ typedef DateTimeAsyncValidator = Future<String?> Function(DateTime? value);
 /// Segue os mesmos padrões visuais e de validação dos outros campos validados,
 /// garantindo consistência na experiência do usuário.
 class ValidatedDateTimeField extends StatefulWidget {
+
+  const ValidatedDateTimeField({
+    super.key,
+    this.type = DateTimePickerType.date,
+    this.initialValue,
+    this.onChanged,
+    this.label,
+    this.hint,
+    this.helperText,
+    this.prefixIcon,
+    this.suffix,
+    this.enabled = true,
+    this.required = false,
+    this.firstDate,
+    this.lastDate,
+    this.format,
+    this.use24HourFormat = true,
+    this.validator,
+    this.asyncValidator,
+    this.debounceDuration = const Duration(milliseconds: 500),
+    this.validateOnChange = true,
+    this.showValidationIcon = true,
+    this.onEditingComplete,
+    this.decoration,
+  });
   /// Tipo de seleção (data, hora ou data+hora)
   final DateTimePickerType type;
   
@@ -100,31 +125,6 @@ class ValidatedDateTimeField extends StatefulWidget {
   // Estilo customizado
   /// Decoração customizada
   final InputDecoration? decoration;
-
-  const ValidatedDateTimeField({
-    super.key,
-    this.type = DateTimePickerType.date,
-    this.initialValue,
-    this.onChanged,
-    this.label,
-    this.hint,
-    this.helperText,
-    this.prefixIcon,
-    this.suffix,
-    this.enabled = true,
-    this.required = false,
-    this.firstDate,
-    this.lastDate,
-    this.format,
-    this.use24HourFormat = true,
-    this.validator,
-    this.asyncValidator,
-    this.debounceDuration = const Duration(milliseconds: 500),
-    this.validateOnChange = true,
-    this.showValidationIcon = true,
-    this.onEditingComplete,
-    this.decoration,
-  });
 
   @override
   State<ValidatedDateTimeField> createState() => _ValidatedDateTimeFieldState();
@@ -312,7 +312,7 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
 
     switch (_validationState) {
       case DateTimeValidationState.validating:
-        return SizedBox(
+        return const SizedBox(
           width: GasometerDesignTokens.iconSizeXs,
           height: GasometerDesignTokens.iconSizeXs,
           child: CircularProgressIndicator(
@@ -530,18 +530,18 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         // Label
         if (widget.label != null)
           Padding(
-            padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
+            padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
             child: RichText(
               text: TextSpan(
                 text: widget.label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: GasometerDesignTokens.fontWeightMedium,
                   color: GasometerDesignTokens.colorTextPrimary,
                   fontSize: GasometerDesignTokens.fontSizeBody,
                 ),
                 children: [
                   if (widget.required)
-                    TextSpan(
+                    const TextSpan(
                       text: ' *',
                       style: TextStyle(
                         color: GasometerDesignTokens.colorError,
@@ -581,7 +581,7 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
                         : GasometerDesignTokens.colorNeutral400,
                     size: GasometerDesignTokens.iconSizeSm,
                   ),
-                  SizedBox(width: GasometerDesignTokens.spacingMd),
+                  const SizedBox(width: GasometerDesignTokens.spacingMd),
                 ],
                 
                 // Texto da data/hora
@@ -605,10 +605,10 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
                   children: [
                     _buildValidationIcon(),
                     if (widget.suffix != null) ...[
-                      SizedBox(width: GasometerDesignTokens.spacingSm),
+                      const SizedBox(width: GasometerDesignTokens.spacingSm),
                       widget.suffix!,
                     ],
-                    SizedBox(width: GasometerDesignTokens.spacingSm),
+                    const SizedBox(width: GasometerDesignTokens.spacingSm),
                     Icon(
                       _suffixIcon,
                       color: widget.enabled
@@ -626,7 +626,7 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         // Helper text
         if (_displayHelperText != null)
           Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: GasometerDesignTokens.spacingXs,
               left: GasometerDesignTokens.spacingLg,
             ),
@@ -642,7 +642,7 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         // Indicador de progresso para validação
         if (_validationState == DateTimeValidationState.validating)
           Padding(
-            padding: EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
+            padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
             child: LinearProgressIndicator(
               color: GasometerDesignTokens.colorPrimary,
               backgroundColor: GasometerDesignTokens.colorPrimary.withValues(alpha: 0.2),

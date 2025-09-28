@@ -15,15 +15,6 @@ import '../../domain/usecases/update_maintenance_record.dart';
 
 // Statistics models for caching
 class MaintenanceStatistics {
-  final double totalCost;
-  final int preventiveCount;
-  final int correctiveCount;
-  final int inspectionCount;
-  final int emergencyCount;
-  final int totalRecords;
-  final List<MaintenanceEntity> recentRecords;
-  final DateTime lastUpdated;
-
   const MaintenanceStatistics({
     required this.totalCost,
     required this.preventiveCount,
@@ -34,6 +25,15 @@ class MaintenanceStatistics {
     required this.recentRecords,
     required this.lastUpdated,
   });
+
+  final double totalCost;
+  final int preventiveCount;
+  final int correctiveCount;
+  final int inspectionCount;
+  final int emergencyCount;
+  final int totalRecords;
+  final List<MaintenanceEntity> recentRecords;
+  final DateTime lastUpdated;
 
   bool get needsRecalculation {
     final now = DateTime.now();
@@ -50,14 +50,6 @@ class MaintenanceStatistics {
 
 @injectable
 class MaintenanceProvider extends BaseProvider {
-  final GetAllMaintenanceRecords _getAllMaintenanceRecords;
-  final GetMaintenanceRecordsByVehicle _getMaintenanceRecordsByVehicle;
-  final AddMaintenanceRecord _addMaintenanceRecord;
-  final UpdateMaintenanceRecord _updateMaintenanceRecord;
-  final DeleteMaintenanceRecord _deleteMaintenanceRecord;
-  final GetUpcomingMaintenanceRecords _getUpcomingMaintenanceRecords;
-  final GetMaintenanceAnalytics _getMaintenanceAnalytics;
-
   MaintenanceProvider(
     this._getAllMaintenanceRecords,
     this._getMaintenanceRecordsByVehicle,
@@ -67,6 +59,14 @@ class MaintenanceProvider extends BaseProvider {
     this._getUpcomingMaintenanceRecords,
     this._getMaintenanceAnalytics,
   );
+
+  final GetAllMaintenanceRecords _getAllMaintenanceRecords;
+  final GetMaintenanceRecordsByVehicle _getMaintenanceRecordsByVehicle;
+  final AddMaintenanceRecord _addMaintenanceRecord;
+  final UpdateMaintenanceRecord _updateMaintenanceRecord;
+  final DeleteMaintenanceRecord _deleteMaintenanceRecord;
+  final GetUpcomingMaintenanceRecords _getUpcomingMaintenanceRecords;
+  final GetMaintenanceAnalytics _getMaintenanceAnalytics;
 
   // State variables
   List<MaintenanceEntity> _maintenanceRecords = [];
@@ -88,6 +88,7 @@ class MaintenanceProvider extends BaseProvider {
   List<MaintenanceEntity> get upcomingRecords => _upcomingRecords;
   MaintenanceAnalytics? get analytics => _analytics;
   
+  @override
   bool get isLoading => _isLoading;
   bool get isLoadingUpcoming => _isLoadingUpcoming;
   bool get isLoadingAnalytics => _isLoadingAnalytics;

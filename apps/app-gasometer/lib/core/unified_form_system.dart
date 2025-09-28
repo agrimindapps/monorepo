@@ -21,7 +21,7 @@
 ///   required: true,
 /// )
 /// ```
-library unified_form_system;
+library;
 
 // Core Components
 export 'components/unified_date_picker.dart';

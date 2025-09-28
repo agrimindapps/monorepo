@@ -8,50 +8,6 @@ import '../../constants/ui_constants.dart';
 /// Widget reutilizável para carregamento otimizado de imagens
 /// com cache, shimmer loading e error handling
 class CachedImageWidget extends StatelessWidget {
-  /// URL da imagem de rede
-  final String? networkUrl;
-  
-  /// Caminho da imagem local
-  final String? localPath;
-  
-  /// Arquivo de imagem local
-  final File? imageFile;
-  
-  /// Caminho do asset
-  final String? assetPath;
-  
-  /// Altura da imagem
-  final double? height;
-  
-  /// Largura da imagem
-  final double? width;
-  
-  /// Como ajustar a imagem
-  final BoxFit fit;
-  
-  /// Border radius personalizado
-  final BorderRadiusGeometry? borderRadius;
-  
-  /// Widget de placeholder personalizado
-  final Widget? placeholder;
-  
-  /// Widget de erro personalizado
-  final Widget? errorWidget;
-  
-  /// Ícone para placeholder padrão
-  final IconData? placeholderIcon;
-  
-  /// Cor base do shimmer
-  final Color? shimmerBaseColor;
-  
-  /// Cor de highlight do shimmer
-  final Color? shimmerHighlightColor;
-  
-  /// Se deve excluir da semântica
-  final bool excludeFromSemantics;
-  
-  /// Se é uma visualização em tela cheia
-  final bool isFullScreen;
 
   const CachedImageWidget({
     super.key,
@@ -154,6 +110,50 @@ class CachedImageWidget extends StatelessWidget {
       excludeFromSemantics: excludeFromSemantics,
     );
   }
+  /// URL da imagem de rede
+  final String? networkUrl;
+  
+  /// Caminho da imagem local
+  final String? localPath;
+  
+  /// Arquivo de imagem local
+  final File? imageFile;
+  
+  /// Caminho do asset
+  final String? assetPath;
+  
+  /// Altura da imagem
+  final double? height;
+  
+  /// Largura da imagem
+  final double? width;
+  
+  /// Como ajustar a imagem
+  final BoxFit fit;
+  
+  /// Border radius personalizado
+  final BorderRadiusGeometry? borderRadius;
+  
+  /// Widget de placeholder personalizado
+  final Widget? placeholder;
+  
+  /// Widget de erro personalizado
+  final Widget? errorWidget;
+  
+  /// Ícone para placeholder padrão
+  final IconData? placeholderIcon;
+  
+  /// Cor base do shimmer
+  final Color? shimmerBaseColor;
+  
+  /// Cor de highlight do shimmer
+  final Color? shimmerHighlightColor;
+  
+  /// Se deve excluir da semântica
+  final bool excludeFromSemantics;
+  
+  /// Se é uma visualização em tela cheia
+  final bool isFullScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -262,14 +262,14 @@ class CachedImageWidget extends StatelessWidget {
             Icon(
               placeholderIcon ?? Icons.image_outlined,
               size: isFullScreen ? AppSizes.iconXXL : AppSizes.iconL,
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
             ),
             if (!isFullScreen) ...[
               const SizedBox(height: AppSpacing.small),
               Text(
                 'Carregando...',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -289,7 +289,7 @@ class CachedImageWidget extends StatelessWidget {
     return Container(
       height: height,
       width: width,
-      color: theme.colorScheme.errorContainer.withOpacity(0.3),
+      color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -2,25 +2,27 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget, WidgetRef;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod show Consumer;
 import 'package:get_it/get_it.dart';
 
+import '../../core/riverpod_providers/auth_providers.dart';
+import '../../core/riverpod_providers/sync_providers.dart';
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/data_sanitization_service.dart';
 import '../../core/theme/plantis_colors.dart';
 import '../../shared/widgets/base_page_scaffold.dart';
 import '../../shared/widgets/loading/loading_components.dart';
 import '../../shared/widgets/responsive_layout.dart';
-import '../auth/presentation/providers/auth_provider.dart' as auth_providers;
 
-class AccountProfilePage extends StatefulWidget {
+class AccountProfilePage extends ConsumerStatefulWidget {
   const AccountProfilePage({super.key});
 
   @override
-  State<AccountProfilePage> createState() => _AccountProfilePageState();
+  ConsumerState<AccountProfilePage> createState() => _AccountProfilePageState();
 }
 
-class _AccountProfilePageState extends State<AccountProfilePage>
+class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     with LoadingPageMixin {
   @override
   Widget build(BuildContext context) {
@@ -46,10 +48,10 @@ class _AccountProfilePageState extends State<AccountProfilePage>
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: Consumer<auth_providers.AuthProvider>(
-                  builder: (context, authProvider, _) {
-                    final user = authProvider.currentUser;
-                    final isAnonymous = authProvider.isAnonymous;
+                child: ref.watch(authProvider).when(
+                  data: (authState) {
+                    final user = authState.currentUser;
+                    final isAnonymous = authState.isAnonymous;
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +283,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
 
                         // Informações detalhadas da conta (apenas para usuários registrados)
                         if (!isAnonymous) ...[
-                          _buildAccountInfoSection(context, user, authProvider),
+                          _buildAccountInfoSection(context, user, authState),
                           const SizedBox(height: 24),
                         ],
 
@@ -293,7 +295,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
 
                         // Dados e Sincronização (apenas para usuários registrados)
                         if (!isAnonymous) ...[
-                          _buildDataSyncSection(context, authProvider),
+                          _buildDataSyncSection(context, authState),
                           const SizedBox(height: 24),
                         ],
 
@@ -316,7 +318,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                                   'Limpar plantas e tarefas mantendo conta',
                                 ),
                                 onTap: () {
-                                  _showClearDataDialog(context, authProvider);
+                                  _showClearDataDialog(context, authState);
                                 },
                               ),
                               ListTile(
@@ -334,7 +336,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                                   'Fazer logout da aplicação',
                                 ),
                                 onTap: () {
-                                  _showLogoutDialog(context, authProvider);
+                                  _showLogoutDialog(context, authState);
                                 },
                               ),
                               if (!isAnonymous) ...[
@@ -355,7 +357,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                                   onTap: () {
                                     _showDeleteAccountDialog(
                                       context,
-                                      authProvider,
+                                      authState,
                                     );
                                   },
                                 ),
@@ -368,7 +370,11 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                       ],
                     );
                   },
-                ), // Consumer
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Center(
+                    child: Text('Erro ao carregar perfil: $error'),
+                  ),
+                ),
               ), // SingleChildScrollView
             ), // Expanded
           ],
@@ -380,7 +386,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
   Widget _buildAccountInfoSection(
     BuildContext context,
     dynamic user,
-    auth_providers.AuthProvider authProvider,
+    AuthState authState,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,7 +399,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
             children: [
               _buildInfoRow(
                 'Tipo de Conta',
-                authProvider.isPremium ? 'Premium' : 'Gratuita',
+                authState.isPremium ? 'Premium' : 'Gratuita',
               ),
               if (user?.createdAt != null) ...[
                 const SizedBox(height: 12),
@@ -448,11 +454,15 @@ class _AccountProfilePageState extends State<AccountProfilePage>
 
   Widget _buildDataSyncSection(
     BuildContext context,
-    auth_providers.AuthProvider authProvider,
+    AuthState authState,
   ) {
     final theme = Theme.of(context);
-    final isSyncing = authProvider.isSyncInProgress;
-    final lastSyncMessage = authProvider.syncMessage;
+    
+    return riverpod.Consumer(
+      builder: (context, ref, _) {
+        final syncState = ref.watch(syncProvider);
+        final isSyncing = syncState.isSyncing;
+        final lastSyncMessage = syncState.statusMessage;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,7 +508,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
                         )
                         : IconButton(
                           onPressed: () {
-                            authProvider.startAutoSyncIfNeeded();
+                            ref.read(syncProvider.notifier).triggerManualSync();
                           },
                           icon: const Icon(Icons.refresh),
                           tooltip: 'Sincronizar agora',
@@ -548,6 +558,8 @@ class _AccountProfilePageState extends State<AccountProfilePage>
           ),
         ),
       ],
+    );
+      }
     );
   }
 
@@ -751,7 +763,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
 
   void _showLogoutDialog(
     BuildContext context,
-    auth_providers.AuthProvider authProvider,
+    AuthState authState,
   ) {
     final theme = Theme.of(context);
     showDialog<void>(
@@ -846,7 +858,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
               ElevatedButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
-                  await _performLogoutWithProgressDialog(context, authProvider);
+                  await _performLogoutWithProgressDialog(context, authState);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
@@ -886,33 +898,33 @@ class _AccountProfilePageState extends State<AccountProfilePage>
 
   void _showClearDataDialog(
     BuildContext context,
-    auth_providers.AuthProvider authProvider,
+    AuthState authState,
   ) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return _DataClearDialog(authProvider: authProvider);
+        return _DataClearDialog(authState: authState);
       },
     );
   }
 
   void _showDeleteAccountDialog(
     BuildContext context,
-    auth_providers.AuthProvider authProvider,
+    AuthState authState,
   ) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return _AccountDeletionDialog(authProvider: authProvider);
+        return _AccountDeletionDialog(authState: authState);
       },
     );
   }
 
   Future<void> _performLogoutWithProgressDialog(
     BuildContext context,
-    auth_providers.AuthProvider authProvider,
+    AuthState authState,
   ) async {
     // Show progress dialog
     unawaited(showDialog<void>(
@@ -926,7 +938,7 @@ class _AccountProfilePageState extends State<AccountProfilePage>
       await Future<void>.delayed(const Duration(milliseconds: 800));
       
       // Perform actual logout
-      await authProvider.logout();
+      await ref.read(authProvider.notifier).logout();
 
       // Close progress dialog
       if (context.mounted) {
@@ -1164,9 +1176,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
 
 /// Dialog stateful para confirmação de limpeza de dados
 class _DataClearDialog extends StatefulWidget {
-  final auth_providers.AuthProvider authProvider;
+  final AuthState authState;
 
-  const _DataClearDialog({required this.authProvider});
+  const _DataClearDialog({required this.authState});
 
   @override
   State<_DataClearDialog> createState() => __DataClearDialogState();
@@ -1444,16 +1456,16 @@ class __DataClearDialogState extends State<_DataClearDialog> {
 }
 
 /// Dialog stateful para confirmação de exclusão de conta
-class _AccountDeletionDialog extends StatefulWidget {
-  final auth_providers.AuthProvider authProvider;
+class _AccountDeletionDialog extends ConsumerStatefulWidget {
+  final AuthState authState;
 
-  const _AccountDeletionDialog({required this.authProvider});
+  const _AccountDeletionDialog({required this.authState});
 
   @override
-  State<_AccountDeletionDialog> createState() => __AccountDeletionDialogState();
+  ConsumerState<_AccountDeletionDialog> createState() => __AccountDeletionDialogState();
 }
 
-class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
+class __AccountDeletionDialogState extends ConsumerState<_AccountDeletionDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
 
@@ -1597,26 +1609,17 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
                   ? () async {
                     Navigator.of(context).pop();
 
-                    final success = await widget.authProvider.deleteAccount(
-                      password: '', // Plantis não requer senha para exclusão
-                      downloadData: false,
-                    );
-
+                    // TODO: Implement deleteAccount method in Riverpod AuthNotifier
                     if (context.mounted) {
-                      if (success) {
-                        _showDeletionSuccessDialog(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              widget.authProvider.errorMessage ??
-                                  'Erro ao excluir conta. Tente novamente.',
-                            ),
-                            backgroundColor: theme.colorScheme.error,
-                            behavior: SnackBarBehavior.floating,
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Funcionalidade de exclusão de conta será implementada em breve.',
                           ),
-                        );
-                      }
+                          backgroundColor: Colors.orange,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
                     }
                   }
                   : null,

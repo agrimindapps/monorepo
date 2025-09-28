@@ -17,6 +17,42 @@ enum DateDisplayStyle {
 /// Segue o padrão estabelecido pelo componente de odômetro,
 /// garantindo consistência visual em todos os tipos de list items.
 class DateDisplayWidget extends StatelessWidget {
+
+  const DateDisplayWidget({
+    super.key,
+    required this.date,
+    this.style = DateDisplayStyle.compact,
+    this.showRelativeTime = false,
+    this.textColor,
+    this.textAlign = TextAlign.center,
+  });
+  
+  /// Factory para criar data no estilo do odômetro (padrão atual)
+  factory DateDisplayWidget.odometer(DateTime date) {
+    return DateDisplayWidget(
+      date: date,
+      style: DateDisplayStyle.compact,
+      showRelativeTime: false,
+    );
+  }
+  
+  /// Factory para criar data com tempo relativo
+  factory DateDisplayWidget.withRelativeTime(DateTime date) {
+    return DateDisplayWidget(
+      date: date,
+      style: DateDisplayStyle.compact,
+      showRelativeTime: true,
+    );
+  }
+  
+  /// Factory para criar data em formato padrão brasileiro
+  factory DateDisplayWidget.standard(DateTime date) {
+    return DateDisplayWidget(
+      date: date,
+      style: DateDisplayStyle.standard,
+      showRelativeTime: false,
+    );
+  }
   /// Data a ser exibida
   final DateTime date;
   
@@ -31,15 +67,6 @@ class DateDisplayWidget extends StatelessWidget {
   
   /// Alinhamento do texto
   final TextAlign textAlign;
-
-  const DateDisplayWidget({
-    super.key,
-    required this.date,
-    this.style = DateDisplayStyle.compact,
-    this.showRelativeTime = false,
-    this.textColor,
-    this.textAlign = TextAlign.center,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -155,37 +182,10 @@ class DateDisplayWidget extends StatelessWidget {
       return 'há ${difference.inDays}d';
     } else if (difference.inDays <= 30) {
       final weeks = (difference.inDays / 7).floor();
-      return weeks == 1 ? 'há 1 sem' : 'há ${weeks} sem';
+      return weeks == 1 ? 'há 1 sem' : 'há $weeks sem';
     } else {
       final months = (difference.inDays / 30).floor();
-      return months == 1 ? 'há 1 mês' : 'há ${months} meses';
+      return months == 1 ? 'há 1 mês' : 'há $months meses';
     }
-  }
-  
-  /// Factory para criar data no estilo do odômetro (padrão atual)
-  factory DateDisplayWidget.odometer(DateTime date) {
-    return DateDisplayWidget(
-      date: date,
-      style: DateDisplayStyle.compact,
-      showRelativeTime: false,
-    );
-  }
-  
-  /// Factory para criar data com tempo relativo
-  factory DateDisplayWidget.withRelativeTime(DateTime date) {
-    return DateDisplayWidget(
-      date: date,
-      style: DateDisplayStyle.compact,
-      showRelativeTime: true,
-    );
-  }
-  
-  /// Factory para criar data em formato padrão brasileiro
-  factory DateDisplayWidget.standard(DateTime date) {
-    return DateDisplayWidget(
-      date: date,
-      style: DateDisplayStyle.standard,
-      showRelativeTime: false,
-    );
   }
 }

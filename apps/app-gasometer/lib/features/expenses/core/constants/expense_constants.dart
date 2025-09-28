@@ -3,6 +3,8 @@ import '../../domain/entities/expense_entity.dart';
 
 /// Constantes organizadas para o módulo de despesas
 class ExpenseConstants {
+  
+  ExpenseConstants._();
   // Limites de validação
   static const double minAmount = 0.01;
   static const double maxAmount = 999999.99;
@@ -218,20 +220,11 @@ class ExpenseConstants {
   // Configurações de imagem
   static const int imageMaxWidth = 1200;
   static const int imageMaxHeight = 1200;
-  static const int imageQuality = 85;
-  
-  ExpenseConstants._(); // Previne instanciação
+  static const int imageQuality = 85; // Previne instanciação
 }
 
 /// Classe para propriedades específicas de cada tipo de despesa
 class ExpenseTypeProperties {
-  final String displayName;
-  final IconData icon;
-  final int color;
-  final bool isRecurring;
-  final double? minExpectedValue;
-  final double? maxExpectedValue;
-  final String description;
 
   const ExpenseTypeProperties({
     required this.displayName,
@@ -242,6 +235,13 @@ class ExpenseTypeProperties {
     this.maxExpectedValue,
     required this.description,
   });
+  final String displayName;
+  final IconData icon;
+  final int color;
+  final bool isRecurring;
+  final double? minExpectedValue;
+  final double? maxExpectedValue;
+  final String description;
 
   Color get colorValue => Color(color);
 }

@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import '../entities/defensivo_entity.dart';
 import '../repositories/i_defensivos_repository.dart';
 

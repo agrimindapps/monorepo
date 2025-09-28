@@ -17,20 +17,32 @@ class ModularInjectionContainer {
 
   /// Initialize all dependencies using modular approach
   static Future<void> init() async {
-    // Initialize Hive with all adapters and boxes
-    await HiveService.instance.init();
+    try {
+      print('🚀 Starting GasOMeter dependency initialization...');
+      
+      // Initialize Hive with all adapters and boxes
+      print('📦 Initializing Hive...');
+      await HiveService.instance.init();
+      print('✅ Hive initialized');
 
-    // Initialize injectable dependencies (includes SharedPreferences, Firebase services, etc.)
-    configureDependencies();
+      // Initialize injectable dependencies (includes SharedPreferences, Firebase services, etc.)
+      print('📦 Configuring injectable dependencies...');
+      await configureDependencies(_getIt);
 
-    // Register additional modules in dependency order
-    final modules = _createModules();
+      // Register additional modules in dependency order
+      print('📦 Registering additional modules...');
+      final modules = _createModules();
 
-    for (final module in modules) {
-      await module.register(_getIt);
+      for (final module in modules) {
+        await module.register(_getIt);
+      }
+
+      print('✅ GasOMeter dependencies initialized successfully');
+    } catch (e, stackTrace) {
+      print('❌ Error during GasOMeter dependency initialization: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
-
-    print('✅ GasOMeter dependencies initialized successfully');
   }
 
   /// Create list of modules in dependency order

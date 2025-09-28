@@ -12,13 +12,13 @@ abstract class LogRemoteDataSource {
 
 @LazySingleton(as: LogRemoteDataSource)
 class LogRemoteDataSourceImpl implements LogRemoteDataSource {
-  final FirebaseFirestore firestore;
-  
-  static const String _logsCollection = 'user_logs';
   
   LogRemoteDataSourceImpl({
     required this.firestore,
   });
+  final FirebaseFirestore firestore;
+  
+  static const String _logsCollection = 'user_logs';
 
   @override
   Future<void> syncLogs(List<LogEntry> logs) async {

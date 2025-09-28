@@ -8,9 +8,9 @@ import '../repositories/premium_repository.dart';
 /// Use case para verificar o status premium do usuário
 @injectable
 class CheckPremiumStatus implements UseCase<PremiumStatus, NoParams> {
-  final PremiumRepository repository;
 
   CheckPremiumStatus(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, PremiumStatus>> call(NoParams params) async {

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../entities/praga_entity.dart';
 import '../repositories/i_pragas_repository.dart';
@@ -16,12 +15,7 @@ class GetPragasUseCase {
   /// Busca todas as pragas
   /// Retorna `Either<Failure, List<PragaEntity>>`
   Future<Either<Failure, List<PragaEntity>>> execute() async {
-    try {
-      final pragas = await _repository.getAll();
-      return Right(pragas);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao buscar pragas: ${e.toString()}'));
-    }
+    return await _repository.getAll();
   }
 }
 
@@ -34,15 +28,10 @@ class GetPragasByTipoUseCase {
   }) : _repository = repository;
 
   Future<Either<Failure, List<PragaEntity>>> execute(String tipo) async {
-    try {
-      if (tipo.isEmpty) {
-        return const Left(ValidationFailure('Tipo não pode ser vazio'));
-      }
-      final pragas = await _repository.getByTipo(tipo);
-      return Right(pragas);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao buscar pragas por tipo: ${e.toString()}'));
+    if (tipo.isEmpty) {
+      return const Left(ValidationFailure('Tipo não pode ser vazio'));
     }
+    return await _repository.getByTipo(tipo);
   }
 }
 
@@ -57,19 +46,24 @@ class GetPragaByIdUseCase {
   }) : _repository = repository,
        _historyRepository = historyRepository;
 
-  Future<PragaEntity?> execute(String id) async {
+  Future<Either<Failure, PragaEntity?>> execute(String id) async {
     if (id.isEmpty) {
-      throw ArgumentError('ID não pode ser vazio');
+      return const Left(ValidationFailure('ID não pode ser vazio'));
     }
 
-    final praga = await _repository.getById(id);
+    final result = await _repository.getById(id);
     
     // Marca como acessada se encontrada
-    if (praga != null) {
-      await _historyRepository.markAsAccessed(id);
-    }
+    await result.fold(
+      (failure) async => null, // Não faz nada em caso de erro
+      (praga) async {
+        if (praga != null) {
+          await _historyRepository.markAsAccessed(id);
+        }
+      },
+    );
     
-    return praga;
+    return result;
   }
 }
 
@@ -81,9 +75,9 @@ class GetPragasByCulturaUseCase {
     required IPragasRepository repository,
   }) : _repository = repository;
 
-  Future<List<PragaEntity>> execute(String culturaId) async {
+  Future<Either<Failure, List<PragaEntity>>> execute(String culturaId) async {
     if (culturaId.isEmpty) {
-      throw ArgumentError('ID da cultura não pode ser vazio');
+      return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
     }
     return await _repository.getByCultura(culturaId);
   }
@@ -97,9 +91,9 @@ class SearchPragasUseCase {
     required IPragasRepository repository,
   }) : _repository = repository;
 
-  Future<List<PragaEntity>> execute(String searchTerm) async {
+  Future<Either<Failure, List<PragaEntity>>> execute(String searchTerm) async {
     if (searchTerm.trim().isEmpty) {
-      return [];
+      return const Right([]);
     }
     return await _repository.searchByName(searchTerm.trim());
   }
@@ -113,7 +107,7 @@ class GetRecentPragasUseCase {
     required IPragasHistoryRepository historyRepository,
   }) : _historyRepository = historyRepository;
 
-  Future<List<PragaEntity>> execute() async {
+  Future<Either<Failure, List<PragaEntity>>> execute() async {
     return await _historyRepository.getRecentlyAccessed();
   }
 }
@@ -126,7 +120,7 @@ class GetSuggestedPragasUseCase {
     required IPragasHistoryRepository historyRepository,
   }) : _historyRepository = historyRepository;
 
-  Future<List<PragaEntity>> execute({int limit = 5}) async {
+  Future<Either<Failure, List<PragaEntity>>> execute({int limit = 5}) async {
     return await _historyRepository.getSuggested(limit);
   }
 }
@@ -139,20 +133,9 @@ class GetPragasStatsUseCase {
     required IPragasRepository repository,
   }) : _repository = repository;
 
-  Future<PragasStats> execute() async {
-    final futures = await Future.wait([
-      _repository.getCountByTipo(PragaEntity.tipoInseto),
-      _repository.getCountByTipo(PragaEntity.tipoDoenca),
-      _repository.getCountByTipo(PragaEntity.tipoPlanta),
-      _repository.getTotalCount(),
-    ]);
-
-    return PragasStats(
-      insetos: futures[0],
-      doencas: futures[1],
-      plantas: futures[2],
-      total: futures[3],
-    );
+  Future<Either<Failure, PragasStats>> execute() async {
+    final result = await _repository.getPragasStats();
+    return result.map((stats) => PragasStats.fromMap(stats));
   }
 }
 
@@ -169,6 +152,15 @@ class PragasStats {
     required this.plantas,
     required this.total,
   });
+
+  factory PragasStats.fromMap(Map<String, int> map) {
+    return PragasStats(
+      insetos: map['insetos'] ?? 0,
+      doencas: map['doencas'] ?? 0,
+      plantas: map['plantas'] ?? 0,
+      total: map['total'] ?? 0,
+    );
+  }
 
   double get percentualInsetos => total > 0 ? (insetos / total) * 100 : 0;
   double get percentualDoencas => total > 0 ? (doencas / total) * 100 : 0;

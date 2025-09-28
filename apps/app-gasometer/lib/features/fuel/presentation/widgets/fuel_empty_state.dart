@@ -16,7 +16,7 @@ class FuelEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       icon: Icons.local_gas_station_outlined,
       title: 'Nenhum abastecimento registrado',
       description: 'Use o botão + para registrar seu primeiro abastecimento e acompanhar seus gastos com combustível',

@@ -2,16 +2,6 @@ import 'package:flutter/material.dart';
 
 /// AppBar comum usado em todo o aplicativo
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final bool showBackButton;
-  final List<Widget>? actions;
-  final Widget? leading;
-  final bool centerTitle;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final double? elevation;
-  final Widget? flexibleSpace;
-  final PreferredSizeWidget? bottom;
 
   const CommonAppBar({
     super.key,
@@ -26,37 +16,6 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.flexibleSpace,
     this.bottom,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: Text(title),
-      centerTitle: centerTitle,
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      elevation: elevation,
-      flexibleSpace: flexibleSpace,
-      bottom: bottom,
-      leading: leading ?? (showBackButton ? _buildBackButton(context) : null),
-      automaticallyImplyLeading: showBackButton && leading == null,
-      actions: actions,
-    );
-  }
-
-  Widget? _buildBackButton(BuildContext context) {
-    if (!showBackButton) return null;
-    
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () => Navigator.of(context).pop(),
-      tooltip: 'Voltar',
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(
-    kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
-  );
 
   /// Factory constructor para página principal
   factory CommonAppBar.main({
@@ -108,4 +67,45 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
     );
   }
+  final String title;
+  final bool showBackButton;
+  final List<Widget>? actions;
+  final Widget? leading;
+  final bool centerTitle;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double? elevation;
+  final Widget? flexibleSpace;
+  final PreferredSizeWidget? bottom;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Text(title),
+      centerTitle: centerTitle,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: elevation,
+      flexibleSpace: flexibleSpace,
+      bottom: bottom,
+      leading: leading ?? (showBackButton ? _buildBackButton(context) : null),
+      automaticallyImplyLeading: showBackButton && leading == null,
+      actions: actions,
+    );
+  }
+
+  Widget? _buildBackButton(BuildContext context) {
+    if (!showBackButton) return null;
+    
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () => Navigator.of(context).pop(),
+      tooltip: 'Voltar',
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+    kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
+  );
 }

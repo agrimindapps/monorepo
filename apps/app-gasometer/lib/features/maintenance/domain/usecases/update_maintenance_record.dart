@@ -8,9 +8,9 @@ import '../entities/maintenance_entity.dart';
 import '../repositories/maintenance_repository.dart';
 
 class UpdateMaintenanceRecordParams extends Equatable {
-  final MaintenanceEntity maintenance;
 
   const UpdateMaintenanceRecordParams({required this.maintenance});
+  final MaintenanceEntity maintenance;
 
   @override
   List<Object> get props => [maintenance];
@@ -18,9 +18,9 @@ class UpdateMaintenanceRecordParams extends Equatable {
 
 @injectable
 class UpdateMaintenanceRecord implements UseCase<MaintenanceEntity, UpdateMaintenanceRecordParams> {
-  final MaintenanceRepository repository;
 
   UpdateMaintenanceRecord(this.repository);
+  final MaintenanceRepository repository;
 
   @override
   Future<Either<Failure, MaintenanceEntity>> call(UpdateMaintenanceRecordParams params) async {

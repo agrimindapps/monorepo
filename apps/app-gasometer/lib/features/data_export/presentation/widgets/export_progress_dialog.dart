@@ -5,14 +5,14 @@ import '../../domain/entities/export_progress.dart';
 
 /// Dialog para mostrar o progresso da exportação
 class ExportProgressDialog extends StatelessWidget {
-  final ExportProgress? progress;
-  final VoidCallback? onCancel;
 
   const ExportProgressDialog({
     super.key,
     this.progress,
     this.onCancel,
   });
+  final ExportProgress? progress;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +125,7 @@ class ExportProgressDialog extends StatelessWidget {
     final percentage = progress?.percentage ?? 0.0;
     
     if (progress?.phase == 'completed') {
-      return Icon(
+      return const Icon(
         Icons.check_circle_outline,
         size: 64,
         color: Colors.green,

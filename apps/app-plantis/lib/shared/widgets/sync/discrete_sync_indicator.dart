@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
+import 'package:core/core.dart';
 
 import '../../../core/providers/background_sync_provider.dart';
 import '../../../core/sync/background_sync_status.dart';
@@ -50,7 +51,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
       iconColor = Colors.green.shade600;
       icon = Icons.check_circle_outline;
     } else {
-      backgroundColor = PlantisColors.primaryLight.withOpacity(0.1);
+      backgroundColor = PlantisColors.primaryLight.withValues(alpha: 0.1);
       textColor = PlantisColors.primary;
       iconColor = PlantisColors.primary;
       icon = Icons.sync;
@@ -64,12 +65,12 @@ class DiscreteSyncIndicator extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: iconColor.withOpacity(0.3),
+          color: iconColor.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -113,7 +114,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
                       syncProvider.getSyncStatusMessage(),
                       style: TextStyle(
                         fontSize: 12,
-                        color: textColor.withOpacity(0.8),
+                        color: textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
@@ -139,7 +140,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
               icon: Icon(
                 Icons.close,
                 size: 16,
-                color: iconColor.withOpacity(0.7),
+                color: iconColor.withValues(alpha: 0.7),
               ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(
@@ -217,11 +218,11 @@ class FloatingSyncIndicator extends StatelessWidget {
           border: Border.all(
             color: isError
                 ? Colors.red.shade300
-                : PlantisColors.primary.withOpacity(0.3),
+                : PlantisColors.primary.withValues(alpha: 0.3),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -332,7 +333,7 @@ class SyncDotIndicator extends StatelessWidget {
               boxShadow: [
                 if (isInProgress)
                   BoxShadow(
-                    color: color.withOpacity(0.5),
+                    color: color.withValues(alpha: 0.5),
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),

@@ -1,37 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import '../models/premium_status_hive.dart';
-import '../repositories/base_hive_repository.dart';
 
 /// Repository para gerenciar dados premium com cache local Hive
 class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   static const String _boxName = 'receituagro_premium_status';
 
-  PremiumHiveRepository() : super(_boxName);
+  PremiumHiveRepository() : super(
+    hiveManager: GetIt.instance<IHiveManager>(),
+    boxName: _boxName,
+  );
 
-  @override
-  PremiumStatusHive createFromJson(Map<String, dynamic> json) {
-    return PremiumStatusHive(
-      objectId: json['objectId'] as String?,
-      createdAt: json['createdAt'] as int?,
-      updatedAt: json['updatedAt'] as int?,
-      userId: (json['userId'] as String?) ?? '',
-      isActive: (json['isActive'] as bool?) ?? false,
-      isTestSubscription: (json['isTestSubscription'] as bool?) ?? false,
-      expiryDateTimestamp: json['expiryDateTimestamp'] as int?,
-      planType: json['planType'] as String?,
-      subscriptionId: json['subscriptionId'] as String?,
-      productId: json['productId'] as String?,
-      lastSyncTimestamp: json['lastSyncTimestamp'] as int?,
-      needsOnlineSync: (json['needsOnlineSync'] as bool?) ?? true,
-    );
-  }
-
-  @override
-  String getKeyFromEntity(PremiumStatusHive entity) {
-    return entity.userId;
-  }
 
   /// Obtém ID do usuário atual
   String _getCurrentUserId() {
@@ -40,15 +19,16 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   }
 
   /// Obtém status premium do usuário atual
-  PremiumStatusHive? getCurrentUserPremiumStatus() {
+  Future<PremiumStatusHive?> getCurrentUserPremiumStatus() async {
     try {
       final userId = _getCurrentUserId();
-      final box = Hive.box<PremiumStatusHive>(_boxName);
-
-      return box.values.firstWhere(
-        (status) => status.userId == userId,
-        orElse: () => _createDefaultStatus(userId),
-      );
+      final result = await getByKey(userId);
+      
+      if (result.isSuccess && result.data != null) {
+        return result.data;
+      } else {
+        return _createDefaultStatus(userId);
+      }
     } catch (e) {
       debugPrint('Error getting current user premium status: $e');
       return _createDefaultStatus(_getCurrentUserId());
@@ -62,8 +42,10 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
       status.userId = userId;
       status.updatedAt = DateTime.now().millisecondsSinceEpoch;
 
-      final box = Hive.box<PremiumStatusHive>(_boxName);
-      await box.put(userId, status);
+      final result = await save(status, key: userId);
+      if (result.isError) {
+        throw Exception('Falha ao salvar status premium: ${result.error}');
+      }
 
       debugPrint('Premium status saved for user: $userId');
     } catch (e) {
@@ -73,20 +55,20 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   }
 
   /// Verifica se usuário atual tem premium válido
-  bool isCurrentUserPremium() {
-    final status = getCurrentUserPremiumStatus();
+  Future<bool> isCurrentUserPremium() async {
+    final status = await getCurrentUserPremiumStatus();
     return status?.isValidPremium ?? false;
   }
 
   /// Verifica se precisa sincronizar online
-  bool shouldSyncOnline() {
-    final status = getCurrentUserPremiumStatus();
+  Future<bool> shouldSyncOnline() async {
+    final status = await getCurrentUserPremiumStatus();
     return status?.shouldSyncOnline ?? true;
   }
 
   /// Marca status como sincronizado
   Future<void> markCurrentUserAsSynced() async {
-    final status = getCurrentUserPremiumStatus();
+    final status = await getCurrentUserPremiumStatus();
     if (status != null) {
       status.markAsSynced();
       await saveCurrentUserPremiumStatus(status);
@@ -95,7 +77,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
 
   /// Marca como necessitando sincronização
   Future<void> markCurrentUserNeedsSync() async {
-    final status = getCurrentUserPremiumStatus();
+    final status = await getCurrentUserPremiumStatus();
     if (status != null) {
       status.markNeedsSync();
       await saveCurrentUserPremiumStatus(status);
@@ -128,8 +110,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   /// Remove premium de teste
   Future<void> removeTestPremium() async {
     final userId = _getCurrentUserId();
-    final box = Hive.box<PremiumStatusHive>(_boxName);
-    await box.delete(userId);
+    await deleteByKey(userId);
     debugPrint('Test premium removed for user: $userId');
   }
 
@@ -140,8 +121,8 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   }
 
   /// Obtém informações detalhadas do status premium
-  Map<String, dynamic> getCurrentUserPremiumInfo() {
-    final status = getCurrentUserPremiumStatus();
+  Future<Map<String, dynamic>> getCurrentUserPremiumInfo() async {
+    final status = await getCurrentUserPremiumStatus();
 
     return {
       'isPremium': status?.isValidPremium ?? false,
@@ -171,8 +152,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   /// Limpa dados de todos os usuários (apenas para desenvolvimento)
   Future<void> clearAllPremiumData() async {
     try {
-      final box = Hive.box<PremiumStatusHive>(_boxName);
-      await box.clear();
+      await clear();
       debugPrint('All premium data cleared');
     } catch (e) {
       debugPrint('Error clearing premium data: $e');
@@ -180,10 +160,14 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
   }
 
   /// Obtém estatísticas do cache premium
-  Map<String, dynamic> getCacheStats() {
+  Future<Map<String, dynamic>> getCacheStats() async {
     try {
-      final box = Hive.box<PremiumStatusHive>(_boxName);
-      final allStatuses = box.values.toList();
+      final result = await getAll();
+      if (result.isError) {
+        return {'error': result.error.toString()};
+      }
+      
+      final allStatuses = result.data!;
 
       return {
         'totalUsers': allStatuses.length,
@@ -192,7 +176,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
             allStatuses.where((s) => s.isTestSubscription).length,
         'needingSync': allStatuses.where((s) => s.shouldSyncOnline).length,
         'currentUserId': _getCurrentUserId(),
-        'currentUserStatus': getCurrentUserPremiumInfo(),
+        'currentUserStatus': await getCurrentUserPremiumInfo(),
       };
     } catch (e) {
       debugPrint('Error getting cache stats: $e');

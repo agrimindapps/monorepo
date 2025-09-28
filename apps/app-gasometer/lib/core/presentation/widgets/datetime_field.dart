@@ -24,6 +24,18 @@ import 'package:intl/intl.dart';
 /// )
 /// ```
 class DateTimeField extends StatelessWidget {
+
+  const DateTimeField({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    required this.label,
+    this.firstDate,
+    this.lastDate,
+    this.suffixIcon = Icons.calendar_today,
+    this.enabled = true,
+    this.helperText,
+  });
   /// Valor atual da data/hora
   final DateTime value;
 
@@ -47,18 +59,6 @@ class DateTimeField extends StatelessWidget {
 
   /// Texto de helper (opcional)
   final String? helperText;
-
-  const DateTimeField({
-    super.key,
-    required this.value,
-    required this.onChanged,
-    required this.label,
-    this.firstDate,
-    this.lastDate,
-    this.suffixIcon = Icons.calendar_today,
-    this.enabled = true,
-    this.helperText,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -181,13 +181,6 @@ class DateTimeField extends StatelessWidget {
 
 /// Variação do DateTimeField para casos onde pode ser opcional/futuro
 class FutureDateTimeField extends StatelessWidget {
-  final DateTime? value;
-  final ValueChanged<DateTime?> onChanged;
-  final String label;
-  final String placeholder;
-  final IconData suffixIcon;
-  final bool enabled;
-  final String? helperText;
 
   const FutureDateTimeField({
     super.key,
@@ -199,6 +192,13 @@ class FutureDateTimeField extends StatelessWidget {
     this.enabled = true,
     this.helperText,
   });
+  final DateTime? value;
+  final ValueChanged<DateTime?> onChanged;
+  final String label;
+  final String placeholder;
+  final IconData suffixIcon;
+  final bool enabled;
+  final String? helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -327,13 +327,6 @@ class FutureDateTimeField extends StatelessWidget {
 
 /// Variação simplificada para casos específicos com ranges customizados
 class CustomRangeDateTimeField extends StatelessWidget {
-  final DateTime value;
-  final ValueChanged<DateTime> onChanged;
-  final String label;
-  final DateTime firstDate;
-  final DateTime lastDate;
-  final IconData suffixIcon;
-  final bool enabled;
 
   const CustomRangeDateTimeField({
     super.key,
@@ -345,6 +338,13 @@ class CustomRangeDateTimeField extends StatelessWidget {
     this.suffixIcon = Icons.calendar_today,
     this.enabled = true,
   });
+  final DateTime value;
+  final ValueChanged<DateTime> onChanged;
+  final String label;
+  final DateTime firstDate;
+  final DateTime lastDate;
+  final IconData suffixIcon;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {

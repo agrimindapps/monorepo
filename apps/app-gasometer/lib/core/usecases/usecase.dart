@@ -31,9 +31,9 @@ class NoParams extends UseCaseParams {
 
 /// Parâmetros para verificar features
 class CanUseFeatureParams extends UseCaseParams {
-  final String featureId;
   
   const CanUseFeatureParams({required this.featureId});
+  final String featureId;
   
   @override
   List<Object> get props => [featureId];
@@ -41,9 +41,9 @@ class CanUseFeatureParams extends UseCaseParams {
 
 /// Parâmetros para verificar limite de veículos
 class CanAddVehicleParams extends UseCaseParams {
-  final int currentCount;
   
   const CanAddVehicleParams({required this.currentCount});
+  final int currentCount;
   
   @override
   List<Object> get props => [currentCount];
@@ -51,9 +51,9 @@ class CanAddVehicleParams extends UseCaseParams {
 
 /// Parâmetros para verificar limite de registros de combustível
 class CanAddFuelRecordParams extends UseCaseParams {
-  final int currentCount;
   
   const CanAddFuelRecordParams({required this.currentCount});
+  final int currentCount;
   
   @override
   List<Object> get props => [currentCount];
@@ -61,9 +61,9 @@ class CanAddFuelRecordParams extends UseCaseParams {
 
 /// Parâmetros para verificar limite de registros de manutenção
 class CanAddMaintenanceRecordParams extends UseCaseParams {
-  final int currentCount;
   
   const CanAddMaintenanceRecordParams({required this.currentCount});
+  final int currentCount;
   
   @override
   List<Object> get props => [currentCount];
@@ -71,9 +71,9 @@ class CanAddMaintenanceRecordParams extends UseCaseParams {
 
 /// Parâmetros para compra de premium
 class PurchasePremiumParams extends UseCaseParams {
-  final String productId;
   
   const PurchasePremiumParams({required this.productId});
+  final String productId;
   
   @override
   List<Object> get props => [productId];
@@ -81,9 +81,9 @@ class PurchasePremiumParams extends UseCaseParams {
 
 /// Parâmetros para gerar licença local
 class GenerateLocalLicenseParams extends UseCaseParams {
-  final int days;
   
   const GenerateLocalLicenseParams({this.days = AppDefaults.defaultLicenseDays});
+  final int days;
   
   @override
   List<Object> get props => [days];

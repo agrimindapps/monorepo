@@ -4,15 +4,6 @@ import '../entities/maintenance_entity.dart';
 
 /// Filters for maintenance records
 class MaintenanceFilters {
-  final String? vehicleId;
-  final MaintenanceType? type;
-  final MaintenanceStatus? status;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final String searchQuery;
-  final double? minCost;
-  final double? maxCost;
-  final String urgencyLevel;
   
   const MaintenanceFilters({
     this.vehicleId,
@@ -25,6 +16,15 @@ class MaintenanceFilters {
     this.maxCost,
     this.urgencyLevel = 'all', // all, overdue, urgent, soon, normal
   });
+  final String? vehicleId;
+  final MaintenanceType? type;
+  final MaintenanceStatus? status;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String searchQuery;
+  final double? minCost;
+  final double? maxCost;
+  final String urgencyLevel;
 
   MaintenanceFilters copyWith({
     String? vehicleId,
@@ -83,13 +83,13 @@ enum MaintenanceSortField {
 }
 
 class MaintenanceSorting {
-  final MaintenanceSortField field;
-  final bool ascending;
   
   const MaintenanceSorting({
     this.field = MaintenanceSortField.serviceDate,
     this.ascending = false, // Most recent first by default
   });
+  final MaintenanceSortField field;
+  final bool ascending;
 
   MaintenanceSorting copyWith({
     MaintenanceSortField? field,

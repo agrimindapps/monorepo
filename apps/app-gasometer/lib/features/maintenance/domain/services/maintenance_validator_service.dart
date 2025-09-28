@@ -3,9 +3,9 @@ import '../entities/maintenance_entity.dart';
 
 /// Serviço especializado para validação de campos de manutenção
 class MaintenanceValidatorService {
-  static final MaintenanceValidatorService _instance = MaintenanceValidatorService._internal();
   factory MaintenanceValidatorService() => _instance;
   MaintenanceValidatorService._internal();
+  static final MaintenanceValidatorService _instance = MaintenanceValidatorService._internal();
 
   /// Valida tipo de manutenção
   String? validateType(MaintenanceType? value) {

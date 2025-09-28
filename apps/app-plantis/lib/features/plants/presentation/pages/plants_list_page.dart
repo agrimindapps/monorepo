@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/background_sync_provider.dart';
 import 'package:core/core.dart' as core;
 import '../../../../core/di/injection_container.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
@@ -13,14 +12,10 @@ import '../../../../core/riverpod_providers/plants_providers.dart' as riverpod_p
 import '../../../../core/riverpod_providers/auth_providers.dart' as providers;
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
-import '../providers/plant_form_provider.dart';
 // Plants providers now imported from Riverpod - using plants_providers.dart
-import '../selectors/plants_selectors.dart';
-import '../../../../core/riverpod_providers/plants_providers.dart' show SortBy;
+import '../../../../core/riverpod_providers/plants_providers.dart' show SortBy, ViewMode;
 import '../../../../core/riverpod_providers/plants_providers.dart' as riverpod_plants_types;
-import '../providers/plants_provider.dart' show ViewMode;
 import '../widgets/empty_plants_widget.dart';
-import '../widgets/plant_form_dialog.dart';
 import '../widgets/plants_app_bar.dart';
 import '../widgets/plants_error_widget.dart';
 import '../widgets/plants_fab.dart';
@@ -28,6 +23,32 @@ import '../widgets/plants_grid_view.dart';
 import '../widgets/plants_grouped_by_spaces_view.dart';
 import '../widgets/plants_list_view.dart';
 import '../widgets/plants_loading_widget.dart';
+
+/// Simple data class for app bar
+class AppBarData {
+  final int plantsCount;
+  final String searchQuery;
+  final ViewMode viewMode;
+
+  const AppBarData({
+    required this.plantsCount,
+    required this.searchQuery,
+    required this.viewMode,
+  });
+}
+
+/// Data class for plants display
+class PlantsDisplayData {
+  final List<Plant> plants;
+  final bool isSearching;
+  final String searchQuery;
+
+  const PlantsDisplayData({
+    required this.plants,
+    required this.isSearching,
+    required this.searchQuery,
+  });
+}
 
 /// Plants List Page - Clean Architecture View Layer
 /// 
@@ -107,15 +128,13 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
 
   /// Monitora sincronização em background e atualiza dados quando necessário
   void _monitorBackgroundSync() {
-    final syncProvider = context.read<BackgroundSyncProvider?>();
-    if (syncProvider == null) return;
-
-    // Escutar mudanças no status de sync
-    _syncStatusSubscription?.cancel();
-    _syncStatusSubscription = syncProvider.syncStatusStream.listen((status) {
-      if (mounted && status.toString().contains('completed')) {
-        // Sync completado - recarregar dados das plantas
+    // TODO: Implement background sync monitoring with Riverpod
+    // For now, using periodic refresh since BackgroundSyncProvider is being migrated
+    Timer.periodic(const Duration(minutes: 5), (timer) {
+      if (mounted) {
         ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
+      } else {
+        timer.cancel();
       }
     });
   }
@@ -173,40 +192,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
   }
 
   void _onViewModeChanged(ViewMode mode) {
-    final riverpodMode = _convertToRiverpodViewMode(mode);
-    ref.read(riverpod_plants.plantsProvider.notifier).setViewMode(riverpodMode);
-  }
-
-  // Helper function to convert between ViewMode enums
-  riverpod_plants_types.ViewMode _convertToRiverpodViewMode(ViewMode mode) {
-    switch (mode) {
-      case ViewMode.grid:
-        return riverpod_plants_types.ViewMode.grid;
-      case ViewMode.list:
-        return riverpod_plants_types.ViewMode.list;
-      case ViewMode.groupedBySpaces:
-        return riverpod_plants_types.ViewMode.groupedBySpaces;
-      case ViewMode.groupedBySpacesGrid:
-        return riverpod_plants_types.ViewMode.groupedBySpacesGrid;
-      case ViewMode.groupedBySpacesList:
-        return riverpod_plants_types.ViewMode.groupedBySpacesList;
-    }
-  }
-
-  // Helper function to convert from Riverpod ViewMode to widget ViewMode
-  ViewMode _convertFromRiverpodViewMode(riverpod_plants_types.ViewMode mode) {
-    switch (mode) {
-      case riverpod_plants_types.ViewMode.grid:
-        return ViewMode.grid;
-      case riverpod_plants_types.ViewMode.list:
-        return ViewMode.list;
-      case riverpod_plants_types.ViewMode.groupedBySpaces:
-        return ViewMode.groupedBySpaces;
-      case riverpod_plants_types.ViewMode.groupedBySpacesGrid:
-        return ViewMode.groupedBySpacesGrid;
-      case riverpod_plants_types.ViewMode.groupedBySpacesList:
-        return ViewMode.groupedBySpacesList;
-    }
+    ref.read(riverpod_plants.plantsProvider.notifier).setViewMode(mode);
   }
 
   // ignore: unused_element
@@ -233,28 +219,14 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
   }
 
   Future<void> _navigateToAddPlant(BuildContext context) async {
-    // Criar um novo provider para a dialog
-    final plantFormProvider = sl<PlantFormProvider>();
-
-    // Mostrar dialog com o provider e capturar o resultado
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => core.ChangeNotifierProvider.value(
-        value: plantFormProvider,
-        child: const PlantFormDialog(),
+    // TODO: Migrate PlantFormDialog to Riverpod
+    // For now, showing a simple dialog until PlantFormDialog is migrated
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Funcionalidade de adicionar planta será migrada para Riverpod em breve'),
+        backgroundColor: Colors.orange,
       ),
     );
-
-    // Limpar o provider após fechar a dialog
-    plantFormProvider.dispose();
-
-    // Se salvou com sucesso, forçar atualização da lista
-    if (result == true && mounted) {
-      await ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
-      // Scroll para o topo para mostrar a nova planta
-      _scrollToTop();
-    }
   }
 
   @override
@@ -283,7 +255,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
                     data: (state) => AppBarData(
                       plantsCount: state.allPlants.length,
                       searchQuery: state.searchQuery,
-                      viewMode: _convertFromRiverpodViewMode(state.viewMode),
+                      viewMode: state.viewMode,
                     ),
                     loading: () => AppBarData(
                       plantsCount: 0,
@@ -326,7 +298,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
     return Consumer(
       builder: (context, ref, _) {
         final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
-        final syncProvider = context.read<BackgroundSyncProvider?>();
 
         return plantsAsync.when(
           data: (plantsState) => Column(
@@ -352,24 +323,24 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
                   GestureDetector(
                     onTap: () {
                       final currentMode = plantsState.viewMode;
-                      riverpod_plants.ViewMode newMode;
+                      ViewMode newMode;
 
                       // Se já está agrupado, volta para o modo anterior (grid ou list)
-                      if (currentMode == riverpod_plants.ViewMode.groupedBySpaces ||
-                          currentMode == riverpod_plants.ViewMode.groupedBySpacesGrid ||
-                          currentMode == riverpod_plants.ViewMode.groupedBySpacesList) {
+                      if (currentMode == ViewMode.groupedBySpaces ||
+                          currentMode == ViewMode.groupedBySpacesGrid ||
+                          currentMode == ViewMode.groupedBySpacesList) {
                         // Volta para list como padrão
-                        newMode = riverpod_plants.ViewMode.list;
+                        newMode = ViewMode.list;
                       } else {
                         // Aplica agrupamento mantendo o modo atual (grid ou list)
-                        if (currentMode == riverpod_plants.ViewMode.grid) {
-                          newMode = riverpod_plants.ViewMode.groupedBySpacesGrid;
+                        if (currentMode == ViewMode.grid) {
+                          newMode = ViewMode.groupedBySpacesGrid;
                         } else {
-                          newMode = riverpod_plants.ViewMode.groupedBySpacesList;
+                          newMode = ViewMode.groupedBySpacesList;
                         }
                       }
 
-                      _onViewModeChanged(_convertFromRiverpodViewMode(newMode));
+                      _onViewModeChanged(newMode);
                     },
                     child: Container(
                       width: 36,
@@ -392,9 +363,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
                   ),
                 ],
               ),
-              // Discrete sync indicator
-              if (syncProvider?.shouldShowSyncIndicator() == true)
-                _buildDiscreteSyncIndicator(syncProvider!),
+              // TODO: Add sync indicator when background sync is migrated to Riverpod
             ],
           ),
           loading: () => PlantisHeader(
@@ -436,70 +405,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
     );
   }
 
-  Widget _buildDiscreteSyncIndicator(BackgroundSyncProvider syncProvider) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Row(
-        children: [
-          if (syncProvider.isSyncInProgress)
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-              ),
-            )
-          else
-            Icon(
-              syncProvider.syncStatus.toString().contains('error')
-                  ? Icons.error_outline
-                  : Icons.check_circle_outline,
-              size: 16,
-              color: syncProvider.syncStatus.toString().contains('error')
-                  ? Colors.red
-                  : Colors.green,
-            ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              syncProvider.getSyncStatusMessage(),
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-          if (syncProvider.syncStatus.toString().contains('error'))
-            TextButton(
-              onPressed: () {
-                final authState = ref.read(authProvider);
-                if (authState.hasValue && authState.value!.isAuthenticated) {
-                  final userEntity = authState.value!.currentUser;
-                  if (userEntity != null) {
-                    syncProvider.retrySync(userEntity.id);
-                  }
-                }
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-              ),
-              child: const Text(
-                'Tentar novamente',
-                style: TextStyle(fontSize: 12),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 
   /// ARCHITECTURE: Optimized content builder using granular selectors for performance
   /// Uses LoadingErrorState selector to minimize rebuilds - only rebuilds when
@@ -581,18 +486,18 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
 
   /// ARCHITECTURE: Build view based on current view mode
   /// Uses Riverpod ViewMode enum for proper type safety
-  Widget _buildViewForMode(riverpod_plants.ViewMode viewMode, PlantsDisplayData displayData) {
+  Widget _buildViewForMode(ViewMode viewMode, PlantsDisplayData displayData) {
     switch (viewMode) {
-      case riverpod_plants.ViewMode.groupedBySpaces:
-      case riverpod_plants.ViewMode.groupedBySpacesGrid:
-      case riverpod_plants.ViewMode.groupedBySpacesList:
+      case ViewMode.groupedBySpaces:
+      case ViewMode.groupedBySpacesGrid:
+      case ViewMode.groupedBySpacesList:
         return Consumer(
           builder: (context, ref, child) {
             final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
             return plantsAsync.when(
               data: (plantsState) {
-                final useGridLayout = viewMode == riverpod_plants.ViewMode.groupedBySpacesGrid ||
-                                      viewMode == riverpod_plants.ViewMode.groupedBySpaces; // Default to grid for groupedBySpaces
+                final useGridLayout = viewMode == ViewMode.groupedBySpacesGrid ||
+                                      viewMode == ViewMode.groupedBySpaces; // Default to grid for groupedBySpaces
                 return PlantsGroupedBySpacesView(
                   groupedPlants: plantsState.plantsGroupedBySpaces,
                   scrollController: _scrollController,
@@ -604,12 +509,12 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
             );
           },
         );
-      case riverpod_plants.ViewMode.grid:
+      case ViewMode.grid:
         return PlantsGridView(
           plants: displayData.plants,
           scrollController: _scrollController,
         );
-      case riverpod_plants.ViewMode.list:
+      case ViewMode.list:
         return PlantsListView(
           plants: displayData.plants,
           scrollController: _scrollController,
@@ -618,10 +523,10 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
   }
 
   /// Check if current view mode is grouped by spaces
-  bool _isGroupedBySpaces(riverpod_plants.ViewMode viewMode) {
-    return viewMode == riverpod_plants.ViewMode.groupedBySpaces ||
-           viewMode == riverpod_plants.ViewMode.groupedBySpacesGrid ||
-           viewMode == riverpod_plants.ViewMode.groupedBySpacesList;
+  bool _isGroupedBySpaces(ViewMode viewMode) {
+    return viewMode == ViewMode.groupedBySpaces ||
+           viewMode == ViewMode.groupedBySpacesGrid ||
+           viewMode == ViewMode.groupedBySpacesList;
   }
 
   /// PERFORMANCE: Efficient list comparison to avoid unnecessary rebuilds

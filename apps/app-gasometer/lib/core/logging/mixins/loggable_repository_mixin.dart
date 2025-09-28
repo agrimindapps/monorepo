@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../entities/log_entry.dart';
 import '../services/logging_service.dart';
 

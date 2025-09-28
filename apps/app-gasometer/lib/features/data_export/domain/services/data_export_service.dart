@@ -9,13 +9,13 @@ import '../entities/export_request.dart';
 
 /// Serviço principal para coleta e exportação de dados LGPD
 class DataExportService {
+
+  DataExportService._internal();
   static DataExportService? _instance;
   static DataExportService get instance {
     _instance ??= DataExportService._internal();
     return _instance!;
   }
-
-  DataExportService._internal();
 
   final _databaseInspector = GasOMeterDatabaseInspectorService.instance;
 

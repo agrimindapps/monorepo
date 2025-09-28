@@ -22,10 +22,10 @@ abstract class MaintenanceRemoteDataSource {
 
 @LazySingleton(as: MaintenanceRemoteDataSource)
 class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
-  final FirebaseAuth _firebaseAuth;
-  final FirebaseFirestore _firestore;
 
   MaintenanceRemoteDataSourceImpl(this._firebaseAuth, this._firestore);
+  final FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
 
   String get _userId {
     final user = _firebaseAuth.currentUser;

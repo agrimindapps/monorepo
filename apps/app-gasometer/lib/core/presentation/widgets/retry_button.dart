@@ -7,15 +7,6 @@ import '../widgets/semantic_widgets.dart';
 
 /// Retry button component with built-in loading state and accessibility
 class RetryButton extends StatefulWidget {
-  final VoidCallback onRetry;
-  final String? label;
-  final String? semanticLabel;
-  final String? semanticHint;
-  final IconData? icon;
-  final ButtonStyle? style;
-  final RetryButtonType type;
-  final bool enabled;
-  final Duration? cooldownDuration;
 
   const RetryButton({
     super.key,
@@ -118,6 +109,15 @@ class RetryButton extends StatefulWidget {
       enabled: enabled,
     );
   }
+  final VoidCallback onRetry;
+  final String? label;
+  final String? semanticLabel;
+  final String? semanticHint;
+  final IconData? icon;
+  final ButtonStyle? style;
+  final RetryButtonType type;
+  final bool enabled;
+  final Duration? cooldownDuration;
 
   @override
   State<RetryButton> createState() => _RetryButtonState();
@@ -195,7 +195,7 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
     final label = widget.label ?? 'Tentar Novamente';
     final icon = widget.icon ?? Icons.refresh;
 
-    Widget child = Row(
+    final Widget child = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (_isLoading)
@@ -217,7 +217,7 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
             size: _getIconSize(),
           ),
         if (widget.type != RetryButtonType.iconOnly) ...[
-          SizedBox(width: GasometerDesignTokens.spacingSm),
+          const SizedBox(width: GasometerDesignTokens.spacingSm),
           Text(
             _inCooldown ? 'Aguarde...' : label,
             style: _getTextStyle(context),
@@ -264,7 +264,7 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
   ButtonStyle? _getButtonStyle(BuildContext context, bool isDisabled) {
     final theme = Theme.of(context);
     
-    ButtonStyle baseStyle = widget.style ?? ButtonStyle();
+    ButtonStyle baseStyle = widget.style ?? const ButtonStyle();
 
     if (widget.type == RetryButtonType.compact) {
       baseStyle = baseStyle.copyWith(
@@ -278,7 +278,7 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
     if (_inCooldown) {
       baseStyle = baseStyle.copyWith(
         foregroundColor: WidgetStateProperty.all(
-          theme.colorScheme.onSurface.withOpacity(0.5),
+          theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
       );
     }
@@ -299,11 +299,6 @@ enum RetryButtonType {
 
 /// Retry button with countdown timer
 class RetryButtonWithCountdown extends StatefulWidget {
-  final VoidCallback onRetry;
-  final Duration countdownDuration;
-  final String? label;
-  final IconData? icon;
-  final RetryButtonType type;
 
   const RetryButtonWithCountdown({
     super.key,
@@ -313,6 +308,11 @@ class RetryButtonWithCountdown extends StatefulWidget {
     this.icon,
     this.type = RetryButtonType.elevated,
   });
+  final VoidCallback onRetry;
+  final Duration countdownDuration;
+  final String? label;
+  final IconData? icon;
+  final RetryButtonType type;
 
   @override
   State<RetryButtonWithCountdown> createState() => _RetryButtonWithCountdownState();
@@ -370,12 +370,6 @@ class _RetryButtonWithCountdownState extends State<RetryButtonWithCountdown> {
 
 /// Retry button with attempt counter
 class RetryButtonWithCounter extends StatefulWidget {
-  final VoidCallback onRetry;
-  final int maxAttempts;
-  final String? label;
-  final IconData? icon;
-  final RetryButtonType type;
-  final VoidCallback? onMaxAttemptsReached;
 
   const RetryButtonWithCounter({
     super.key,
@@ -386,6 +380,12 @@ class RetryButtonWithCounter extends StatefulWidget {
     this.type = RetryButtonType.elevated,
     this.onMaxAttemptsReached,
   });
+  final VoidCallback onRetry;
+  final int maxAttempts;
+  final String? label;
+  final IconData? icon;
+  final RetryButtonType type;
+  final VoidCallback? onMaxAttemptsReached;
 
   @override
   State<RetryButtonWithCounter> createState() => _RetryButtonWithCounterState();
@@ -417,7 +417,7 @@ class _RetryButtonWithCounterState extends State<RetryButtonWithCounter> {
     
     String label = widget.label ?? 'Tentar Novamente';
     if (_attemptCount > 0 && !hasReachedMax) {
-      label += ' (${_attemptCount}/${widget.maxAttempts})';
+      label += ' ($_attemptCount/${widget.maxAttempts})';
     }
 
     return RetryButton(

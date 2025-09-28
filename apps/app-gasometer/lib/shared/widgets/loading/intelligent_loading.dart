@@ -5,14 +5,6 @@ import '../../../core/theme/loading_design_tokens.dart';
 /// Widget de loading inteligente com múltiplas etapas
 /// Fornece feedback visual detalhado durante processos longos
 class IntelligentLoading extends StatefulWidget {
-  final List<LoadingStepConfig> steps;
-  final VoidCallback? onComplete;
-  final bool autoAdvance;
-  final Duration? customStepDuration;
-  final Color? primaryColor;
-  final Color? backgroundColor;
-  final bool showProgress;
-  final bool expandedView;
 
   const IntelligentLoading({
     super.key,
@@ -25,6 +17,14 @@ class IntelligentLoading extends StatefulWidget {
     this.showProgress = true,
     this.expandedView = true,
   });
+  final List<LoadingStepConfig> steps;
+  final VoidCallback? onComplete;
+  final bool autoAdvance;
+  final Duration? customStepDuration;
+  final Color? primaryColor;
+  final Color? backgroundColor;
+  final bool showProgress;
+  final bool expandedView;
 
   /// Factory para login flow padrão
   static IntelligentLoading loginFlow({
@@ -176,7 +176,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
         borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusLg),
         boxShadow: [
           BoxShadow(
-            color: colors.onSurface.withOpacity(0.1),
+            color: colors.onSurface.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -188,13 +188,13 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
           // Indicador de progresso
           if (widget.showProgress && widget.expandedView) ...[
             _buildProgressIndicator(colors),
-            SizedBox(height: LoadingDesignTokens.spacingLg),
+            const SizedBox(height: LoadingDesignTokens.spacingLg),
           ],
 
           // Ícone animado
           _buildAnimatedIcon(currentStep, colors),
           
-          SizedBox(height: LoadingDesignTokens.spacingMd),
+          const SizedBox(height: LoadingDesignTokens.spacingMd),
 
           // Título
           AnimatedSwitcher(
@@ -210,7 +210,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
           ),
 
           if (widget.expandedView) ...[
-            SizedBox(height: LoadingDesignTokens.spacingSm),
+            const SizedBox(height: LoadingDesignTokens.spacingSm),
 
             // Subtítulo
             AnimatedSwitcher(
@@ -225,7 +225,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
               ),
             ),
 
-            SizedBox(height: LoadingDesignTokens.spacingLg),
+            const SizedBox(height: LoadingDesignTokens.spacingLg),
 
             // Indicador de loading circular
             _buildCircularIndicator(colors),
@@ -243,14 +243,14 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
           borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
           child: LinearProgressIndicator(
             value: (currentStepIndex + 1) / widget.steps.length,
-            backgroundColor: colors.onSurface.withOpacity(0.1),
+            backgroundColor: colors.onSurface.withValues(alpha: 0.1),
             valueColor: AlwaysStoppedAnimation(
               widget.primaryColor ?? colors.primary,
             ),
             minHeight: 6,
           ),
         ),
-        SizedBox(height: LoadingDesignTokens.spacingSm),
+        const SizedBox(height: LoadingDesignTokens.spacingSm),
         
         // Texto do progresso
         Text(
@@ -271,7 +271,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
         height: LoadingDesignTokens.largeIconSize + 16,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: (widget.primaryColor ?? colors.primary).withOpacity(0.1),
+          color: (widget.primaryColor ?? colors.primary).withValues(alpha: 0.1),
           border: Border.all(
             color: widget.primaryColor ?? colors.primary,
             width: 2,
@@ -340,7 +340,7 @@ class IntelligentLoadingOverlay {
     
     overlayEntry = OverlayEntry(
       builder: (context) => Material(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         child: Center(
           child: IntelligentLoading(
             steps: steps,

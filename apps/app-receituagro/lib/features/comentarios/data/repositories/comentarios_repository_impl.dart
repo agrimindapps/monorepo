@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/repositories/comentarios_hive_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
@@ -32,9 +32,10 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
 
   @override
   Future<ComentarioEntity?> getComentarioById(String id) async {
-    final hiveItem = _hiveRepository.getById(id);
-    if (hiveItem == null) return null;
+    final result = await _hiveRepository.getByKey(id);
+    if (result.isFailure || result.data == null) return null;
     
+    final hiveItem = result.data!;
     final model = hiveItem.toComentarioModel();
     return _modelToEntity(model);
   }

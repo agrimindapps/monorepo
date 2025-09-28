@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_provider_simplified.dart';
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as flutter_provider;
+import 'package:core/core.dart';
 import '../../../../core/providers/auth_provider.dart';
 import '../../constants/settings_design_tokens.dart';
 
@@ -20,7 +21,7 @@ class _SyncDataSectionState extends State<SyncDataSection> {
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
 
-    final authProvider = Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
+    final authProvider = flutter_provider.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
     
     if (!authProvider.isAuthenticated) {
       _showMessage('Faça login para sincronizar seus dados', isError: true);

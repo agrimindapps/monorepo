@@ -6,22 +6,6 @@ import '../../domain/entities/expense_entity.dart';
 
 /// Model reativo para o formulário de despesas
 class ExpenseFormModel extends Equatable {
-  final String id;
-  final String userId;
-  final String vehicleId;
-  final VehicleEntity? vehicle;
-  final ExpenseType expenseType;
-  final String description;
-  final double amount;
-  final double odometer;
-  final DateTime date;
-  final String location;
-  final String notes;
-  final String? receiptImagePath;
-  final bool isLoading;
-  final bool hasChanges;
-  final Map<String, String> errors;
-  final String? lastError;
 
   const ExpenseFormModel({
     required this.id,
@@ -85,6 +69,22 @@ class ExpenseFormModel extends Equatable {
       lastError: null,
     );
   }
+  final String id;
+  final String userId;
+  final String vehicleId;
+  final VehicleEntity? vehicle;
+  final ExpenseType expenseType;
+  final String description;
+  final double amount;
+  final double odometer;
+  final DateTime date;
+  final String location;
+  final String notes;
+  final String? receiptImagePath;
+  final bool isLoading;
+  final bool hasChanges;
+  final Map<String, String> errors;
+  final String? lastError;
 
   @override
   List<Object?> get props => [

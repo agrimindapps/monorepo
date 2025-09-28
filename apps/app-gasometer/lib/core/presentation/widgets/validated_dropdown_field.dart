@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+
 import '../../theme/design_tokens.dart';
 
 /// Estados de validação para feedback visual
@@ -22,17 +24,6 @@ typedef DropdownAsyncValidator<T> = Future<String?> Function(T? value);
 
 /// Item de dropdown padronizado
 class ValidatedDropdownItem<T> {
-  /// Valor do item
-  final T value;
-  
-  /// Widget que representa o item visualmente
-  final Widget child;
-  
-  /// Se o item está habilitado para seleção
-  final bool enabled;
-  
-  /// Texto para busca (opcional - se não fornecido, extrairá do child)
-  final String? searchText;
 
   const ValidatedDropdownItem({
     required this.value,
@@ -49,6 +40,17 @@ class ValidatedDropdownItem<T> {
       searchText: text,
     );
   }
+  /// Valor do item
+  final T value;
+  
+  /// Widget que representa o item visualmente
+  final Widget child;
+  
+  /// Se o item está habilitado para seleção
+  final bool enabled;
+  
+  /// Texto para busca (opcional - se não fornecido, extrairá do child)
+  final String? searchText;
 }
 
 /// Dropdown com validação em tempo real e feedback visual padronizado
@@ -56,6 +58,29 @@ class ValidatedDropdownItem<T> {
 /// Segue os mesmos padrões visuais e de validação do ValidatedTextField,
 /// garantindo consistência na experiência do usuário.
 class ValidatedDropdownField<T> extends StatefulWidget {
+
+  const ValidatedDropdownField({
+    super.key,
+    required this.items,
+    this.value,
+    this.onChanged,
+    this.label,
+    this.hint,
+    this.helperText,
+    this.prefixIcon,
+    this.suffix,
+    this.enabled = true,
+    this.required = false,
+    this.maxHeight = 300,
+    this.searchable = false,
+    this.validator,
+    this.asyncValidator,
+    this.debounceDuration = const Duration(milliseconds: 500),
+    this.validateOnChange = true,
+    this.showValidationIcon = true,
+    this.onEditingComplete,
+    this.decoration,
+  });
   /// Lista de itens disponíveis
   final List<ValidatedDropdownItem<T>> items;
   
@@ -115,29 +140,6 @@ class ValidatedDropdownField<T> extends StatefulWidget {
   // Estilo customizado
   /// Decoração customizada
   final InputDecoration? decoration;
-
-  const ValidatedDropdownField({
-    super.key,
-    required this.items,
-    this.value,
-    this.onChanged,
-    this.label,
-    this.hint,
-    this.helperText,
-    this.prefixIcon,
-    this.suffix,
-    this.enabled = true,
-    this.required = false,
-    this.maxHeight = 300,
-    this.searchable = false,
-    this.validator,
-    this.asyncValidator,
-    this.debounceDuration = const Duration(milliseconds: 500),
-    this.validateOnChange = true,
-    this.showValidationIcon = true,
-    this.onEditingComplete,
-    this.decoration,
-  });
 
   @override
   State<ValidatedDropdownField<T>> createState() => _ValidatedDropdownFieldState<T>();
@@ -295,7 +297,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
 
     switch (_validationState) {
       case DropdownValidationState.validating:
-        return SizedBox(
+        return const SizedBox(
           width: GasometerDesignTokens.iconSizeXs,
           height: GasometerDesignTokens.iconSizeXs,
           child: CircularProgressIndicator(
@@ -444,17 +446,17 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
         controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Buscar...',
-          prefixIcon: Icon(Icons.search, size: GasometerDesignTokens.iconSizeSm),
+          prefixIcon: const Icon(Icons.search, size: GasometerDesignTokens.iconSizeSm),
           contentPadding: GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingSm),
           border: OutlineInputBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
-            borderSide: BorderSide(
+            borderSide: const BorderSide(
               color: GasometerDesignTokens.colorNeutral300,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
-            borderSide: BorderSide(
+            borderSide: const BorderSide(
               color: GasometerDesignTokens.colorPrimary,
             ),
           ),
@@ -468,7 +470,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
     if (_filteredItems.isEmpty) {
       return Container(
         padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXxl),
-        child: Column(
+        child: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
@@ -529,7 +531,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                   ),
                 ),
                 if (isSelected)
-                  Icon(
+                  const Icon(
                     Icons.check,
                     size: GasometerDesignTokens.iconSizeSm,
                     color: GasometerDesignTokens.colorPrimary,
@@ -580,18 +582,18 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
         // Label
         if (widget.label != null)
           Padding(
-            padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
+            padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
             child: RichText(
               text: TextSpan(
                 text: widget.label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: GasometerDesignTokens.fontWeightMedium,
                   color: GasometerDesignTokens.colorTextPrimary,
                   fontSize: GasometerDesignTokens.fontSizeBody,
                 ),
                 children: [
                   if (widget.required)
-                    TextSpan(
+                    const TextSpan(
                       text: ' *',
                       style: TextStyle(
                         color: GasometerDesignTokens.colorError,
@@ -632,7 +634,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                           : GasometerDesignTokens.colorNeutral400,
                       size: GasometerDesignTokens.iconSizeSm,
                     ),
-                    SizedBox(width: GasometerDesignTokens.spacingMd),
+                    const SizedBox(width: GasometerDesignTokens.spacingMd),
                   ],
                   Expanded(
                     child: selectedItem != null
@@ -647,7 +649,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                           )
                         : Text(
                             widget.hint ?? 'Selecione uma opção',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: GasometerDesignTokens.colorTextSecondary,
                               fontSize: GasometerDesignTokens.fontSizeBody,
                             ),
@@ -658,10 +660,10 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                     children: [
                       _buildValidationIcon(),
                       if (widget.suffix != null) ...[
-                        SizedBox(width: GasometerDesignTokens.spacingSm),
+                        const SizedBox(width: GasometerDesignTokens.spacingSm),
                         widget.suffix!,
                       ],
-                      SizedBox(width: GasometerDesignTokens.spacingSm),
+                      const SizedBox(width: GasometerDesignTokens.spacingSm),
                       Icon(
                         _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                         color: widget.enabled
@@ -680,7 +682,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
         // Helper text
         if (_displayHelperText != null)
           Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: GasometerDesignTokens.spacingXs,
               left: GasometerDesignTokens.spacingLg,
             ),
@@ -696,7 +698,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
         // Indicador de progresso para validação
         if (_validationState == DropdownValidationState.validating)
           Padding(
-            padding: EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
+            padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
             child: LinearProgressIndicator(
               color: GasometerDesignTokens.colorPrimary,
               backgroundColor: GasometerDesignTokens.colorPrimary.withValues(alpha: 0.2),

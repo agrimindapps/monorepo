@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../features/expenses/presentation/widgets/receipt_image_picker.dart';
 import '../../services/image_picker_service.dart';
 import '../../theme/design_tokens.dart';
-import '../../../features/expenses/presentation/widgets/receipt_image_picker.dart';
 import 'form_section_header.dart';
 
 /// Seção unificada para upload de comprovantes/recibos
@@ -29,6 +29,23 @@ import 'form_section_header.dart';
 /// )
 /// ```
 class ReceiptSection extends StatelessWidget {
+
+  const ReceiptSection({
+    super.key,
+    this.imagePath,
+    this.hasImage = false,
+    this.isUploading = false,
+    this.uploadError,
+    this.onCameraSelected,
+    this.onGallerySelected,
+    this.onImageRemoved,
+    this.title = 'Comprovante',
+    this.description,
+    this.required = false,
+    this.icon = Icons.receipt,
+    this.showStatusIndicators = true,
+    this.placeholderText,
+  });
   /// Caminho da imagem atual (se houver)
   final String? imagePath;
 
@@ -68,23 +85,6 @@ class ReceiptSection extends StatelessWidget {
   /// Texto customizado para o placeholder
   final String? placeholderText;
 
-  const ReceiptSection({
-    super.key,
-    this.imagePath,
-    this.hasImage = false,
-    this.isUploading = false,
-    this.uploadError,
-    this.onCameraSelected,
-    this.onGallerySelected,
-    this.onImageRemoved,
-    this.title = 'Comprovante',
-    this.description,
-    this.required = false,
-    this.icon = Icons.receipt,
-    this.showStatusIndicators = true,
-    this.placeholderText,
-  });
-
   @override
   Widget build(BuildContext context) {
     return FormSectionHeader(
@@ -97,13 +97,13 @@ class ReceiptSection extends StatelessWidget {
           if (description != null) ...[
             Text(
               description!,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeCaption,
                 color: GasometerDesignTokens.colorTextSecondary,
                 fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: GasometerDesignTokens.spacingSm),
+            const SizedBox(height: GasometerDesignTokens.spacingSm),
           ],
 
           // Picker de imagem
@@ -140,7 +140,7 @@ class ReceiptSection extends StatelessWidget {
   /// Indicador de upload em progresso
   Widget _buildUploadingIndicator() {
     return Padding(
-      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+      padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
       child: Row(
         children: [
           SizedBox(
@@ -153,8 +153,8 @@ class ReceiptSection extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: GasometerDesignTokens.spacingSm),
-          Text(
+          const SizedBox(width: GasometerDesignTokens.spacingSm),
+          const Text(
             'Processando imagem...',
             style: TextStyle(
               fontSize: GasometerDesignTokens.fontSizeSm,
@@ -169,19 +169,19 @@ class ReceiptSection extends StatelessWidget {
   /// Indicador de erro no upload
   Widget _buildErrorIndicator(String error) {
     return Padding(
-      padding: EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+      padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.error_outline,
             size: 16,
             color: GasometerDesignTokens.colorError,
           ),
-          SizedBox(width: GasometerDesignTokens.spacingSm),
+          const SizedBox(width: GasometerDesignTokens.spacingSm),
           Expanded(
             child: Text(
               error,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeSm,
                 color: GasometerDesignTokens.colorError,
               ),
@@ -195,14 +195,6 @@ class ReceiptSection extends StatelessWidget {
 
 /// Variação específica para comprovantes obrigatórios
 class RequiredReceiptSection extends StatelessWidget {
-  final String? imagePath;
-  final bool hasImage;
-  final bool isUploading;
-  final String? uploadError;
-  final VoidCallback? onCameraSelected;
-  final VoidCallback? onGallerySelected;
-  final VoidCallback? onImageRemoved;
-  final String? title;
 
   const RequiredReceiptSection({
     super.key,
@@ -215,6 +207,14 @@ class RequiredReceiptSection extends StatelessWidget {
     this.onImageRemoved,
     this.title,
   });
+  final String? imagePath;
+  final bool hasImage;
+  final bool isUploading;
+  final String? uploadError;
+  final VoidCallback? onCameraSelected;
+  final VoidCallback? onGallerySelected;
+  final VoidCallback? onImageRemoved;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -235,15 +235,6 @@ class RequiredReceiptSection extends StatelessWidget {
 
 /// Variação específica para comprovantes opcionais
 class OptionalReceiptSection extends StatelessWidget {
-  final String? imagePath;
-  final bool hasImage;
-  final bool isUploading;
-  final String? uploadError;
-  final VoidCallback? onCameraSelected;
-  final VoidCallback? onGallerySelected;
-  final VoidCallback? onImageRemoved;
-  final String? title;
-  final String? description;
 
   const OptionalReceiptSection({
     super.key,
@@ -257,6 +248,15 @@ class OptionalReceiptSection extends StatelessWidget {
     this.title,
     this.description,
   });
+  final String? imagePath;
+  final bool hasImage;
+  final bool isUploading;
+  final String? uploadError;
+  final VoidCallback? onCameraSelected;
+  final VoidCallback? onGallerySelected;
+  final VoidCallback? onImageRemoved;
+  final String? title;
+  final String? description;
 
   @override
   Widget build(BuildContext context) {
@@ -277,13 +277,6 @@ class OptionalReceiptSection extends StatelessWidget {
 
 /// Variação para documentos do veículo
 class VehicleDocumentSection extends StatelessWidget {
-  final String? imagePath;
-  final bool hasImage;
-  final bool isUploading;
-  final String? uploadError;
-  final VoidCallback? onCameraSelected;
-  final VoidCallback? onGallerySelected;
-  final VoidCallback? onImageRemoved;
 
   const VehicleDocumentSection({
     super.key,
@@ -295,6 +288,13 @@ class VehicleDocumentSection extends StatelessWidget {
     this.onGallerySelected,
     this.onImageRemoved,
   });
+  final String? imagePath;
+  final bool hasImage;
+  final bool isUploading;
+  final String? uploadError;
+  final VoidCallback? onCameraSelected;
+  final VoidCallback? onGallerySelected;
+  final VoidCallback? onImageRemoved;
 
   @override
   Widget build(BuildContext context) {

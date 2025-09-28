@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity para resultado de busca seguindo princípios Clean Architecture
 class BuscaResultEntity extends Equatable {

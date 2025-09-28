@@ -1,27 +1,27 @@
 /// Modern minimalist sidebar navigation component inspired by Alphabank design
 /// Provides clean, hierarchical navigation with proper spacing and typography
 /// Features: Section grouping, minimalist design, enhanced readability
-library responsive_sidebar;
+library;
 
 import 'package:flutter/material.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/theme/design_tokens.dart';
-import '../../core/theme/gasometer_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
 class ResponsiveSidebar extends StatelessWidget {
-  final bool isCollapsed;
-  final VoidCallback onToggle;
   
   const ResponsiveSidebar({
     super.key,
     required this.isCollapsed,
     required this.onToggle,
   });
+  final bool isCollapsed;
+  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class ResponsiveSidebar extends StatelessWidget {
           : ResponsiveBreakpoints.sidebarWidth,
       child: Material(
         elevation: 0,
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface, // Fundo branco para contraste
             border: Border(
@@ -80,13 +80,13 @@ class ResponsiveSidebar extends StatelessWidget {
 
 /// Minimal sidebar header following Alphabank design pattern
 class _SidebarHeader extends StatelessWidget {
-  final bool isCollapsed;
-  final VoidCallback onToggle;
   
   const _SidebarHeader({
     required this.isCollapsed,
     required this.onToggle,
   });
+  final bool isCollapsed;
+  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -144,9 +144,9 @@ class _SidebarHeader extends StatelessWidget {
 
 /// Navigation section with clean hierarchy following Alphabank pattern  
 class _SidebarNavigationItems extends StatelessWidget {
-  final bool isCollapsed;
   
   const _SidebarNavigationItems({required this.isCollapsed});
+  final bool isCollapsed;
 
   @override
   Widget build(BuildContext context) {
@@ -235,12 +235,6 @@ class _SidebarNavigationItems extends StatelessWidget {
 
 /// Clean navigation item following Alphabank minimalist design
 class _SidebarNavigationItem extends StatefulWidget {
-  final IconData icon;
-  final IconData? activeIcon;
-  final String label;
-  final String route;
-  final bool isActive;
-  final bool isCollapsed;
   
   const _SidebarNavigationItem({
     required this.icon,
@@ -250,6 +244,12 @@ class _SidebarNavigationItem extends StatefulWidget {
     required this.isActive,
     required this.isCollapsed,
   });
+  final IconData icon;
+  final IconData? activeIcon;
+  final String label;
+  final String route;
+  final bool isActive;
+  final bool isCollapsed;
 
   @override
   State<_SidebarNavigationItem> createState() => _SidebarNavigationItemState();
@@ -338,9 +338,9 @@ class _SidebarNavigationItemState extends State<_SidebarNavigationItem> {
 
 /// User and settings section grouped together
 class _SidebarFooter extends StatelessWidget {
-  final bool isCollapsed;
   
   const _SidebarFooter({required this.isCollapsed});
+  final bool isCollapsed;
 
   @override
   Widget build(BuildContext context) {

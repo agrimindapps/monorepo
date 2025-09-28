@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity unificada para Defensivo seguindo princípios Clean Architecture
 /// Representa um defensivo agrícola no domínio da aplicação

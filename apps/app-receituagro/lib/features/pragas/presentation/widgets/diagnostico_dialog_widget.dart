@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as flutter_provider;
+import 'package:core/core.dart';
 
 import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
@@ -166,7 +167,7 @@ class DiagnosticoDialogWidget extends StatelessWidget {
     // Tenta obter provider, mas não falha se não estiver disponível
     DiagnosticosPragaProvider? provider;
     try {
-      provider = Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+      provider = flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
     } catch (e) {
       // Provider não disponível - continuamos sem ele
       provider = null;

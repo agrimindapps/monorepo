@@ -36,7 +36,7 @@ class AboutSection extends StatelessWidget {
   void _showAboutDialog(BuildContext context) {
     final theme = Theme.of(context);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,

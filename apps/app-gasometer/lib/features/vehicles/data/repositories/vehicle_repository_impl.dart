@@ -18,11 +18,6 @@ import '../models/vehicle_model.dart';
 
 @LazySingleton(as: VehicleRepository)
 class VehicleRepositoryImpl implements VehicleRepository {
-  final VehicleLocalDataSource localDataSource;
-  final VehicleRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
-  final AuthRepository authRepository;
-  final LoggingService loggingService;
 
   VehicleRepositoryImpl({
     required this.localDataSource,
@@ -31,6 +26,11 @@ class VehicleRepositoryImpl implements VehicleRepository {
     required this.authRepository,
     required this.loggingService,
   });
+  final VehicleLocalDataSource localDataSource;
+  final VehicleRemoteDataSource remoteDataSource;
+  final Connectivity connectivity;
+  final AuthRepository authRepository;
+  final LoggingService loggingService;
 
   Future<bool> get _isConnected async {
     final connectivityResults = await connectivity.checkConnectivity();

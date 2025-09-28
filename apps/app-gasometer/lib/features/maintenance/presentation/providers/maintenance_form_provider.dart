@@ -20,6 +20,15 @@ import '../models/maintenance_form_model.dart';
 /// instead of direct provider coupling to avoid circular dependencies.
 /// VehiclesProvider is accessed via BuildContext when needed.
 class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
+
+  MaintenanceFormProvider({
+    String? initialVehicleId, 
+    String? userId,
+    required ReceiptImageService receiptImageService,
+  }) : _receiptImageService = receiptImageService,
+       _formModel = MaintenanceFormModel.initial(initialVehicleId ?? '', userId ?? '') {
+    _initializeControllers();
+  }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final MaintenanceFormatterService _formatter = MaintenanceFormatterService();
   final MaintenanceValidatorService _validator = MaintenanceValidatorService();
@@ -56,15 +65,6 @@ class MaintenanceFormProvider extends ChangeNotifier implements IFormProvider {
   MaintenanceFormModel _formModel;
   bool _isInitialized = false;
   final bool _isUpdating = false;
-
-  MaintenanceFormProvider({
-    String? initialVehicleId, 
-    String? userId,
-    required ReceiptImageService receiptImageService,
-  }) : _receiptImageService = receiptImageService,
-       _formModel = MaintenanceFormModel.initial(initialVehicleId ?? '', userId ?? '') {
-    _initializeControllers();
-  }
 
   // Getters
   @override

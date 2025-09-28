@@ -7,37 +7,37 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/maintenance_repository.dart';
 
 class GetMaintenanceAnalyticsParams extends Equatable {
-  final String vehicleId;
-  final DateTime? startDate;
-  final DateTime? endDate;
 
   const GetMaintenanceAnalyticsParams({
     required this.vehicleId,
     this.startDate,
     this.endDate,
   });
+  final String vehicleId;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   @override
   List<Object?> get props => [vehicleId, startDate, endDate];
 }
 
 class MaintenanceAnalytics {
-  final double totalCost;
-  final double averageCost;
-  final Map<String, int> countByType;
 
   const MaintenanceAnalytics({
     required this.totalCost,
     required this.averageCost,
     required this.countByType,
   });
+  final double totalCost;
+  final double averageCost;
+  final Map<String, int> countByType;
 }
 
 @injectable
 class GetMaintenanceAnalytics implements UseCase<MaintenanceAnalytics, GetMaintenanceAnalyticsParams> {
-  final MaintenanceRepository repository;
 
   GetMaintenanceAnalytics(this.repository);
+  final MaintenanceRepository repository;
 
   @override
   Future<Either<Failure, MaintenanceAnalytics>> call(GetMaintenanceAnalyticsParams params) async {

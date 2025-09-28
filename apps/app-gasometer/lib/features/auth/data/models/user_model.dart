@@ -17,6 +17,22 @@ class UserModel extends UserEntity {
     super.metadata,
   });
 
+  // Create from entity
+  factory UserModel.fromEntity(UserEntity entity) {
+    return UserModel(
+      id: entity.id,
+      email: entity.email,
+      displayName: entity.displayName,
+      photoUrl: entity.photoUrl,
+      avatarBase64: entity.avatarBase64,
+      type: entity.type,
+      isEmailVerified: entity.isEmailVerified,
+      createdAt: entity.createdAt,
+      lastSignInAt: entity.lastSignInAt,
+      metadata: entity.metadata,
+    );
+  }
+
   // From Firebase User
   factory UserModel.fromFirebaseUser(User firebaseUser) {
     UserType userType = UserType.anonymous;
@@ -124,22 +140,6 @@ class UserModel extends UserEntity {
       createdAt: createdAt,
       lastSignInAt: lastSignInAt,
       metadata: metadata,
-    );
-  }
-
-  // Create from entity
-  factory UserModel.fromEntity(UserEntity entity) {
-    return UserModel(
-      id: entity.id,
-      email: entity.email,
-      displayName: entity.displayName,
-      photoUrl: entity.photoUrl,
-      avatarBase64: entity.avatarBase64,
-      type: entity.type,
-      isEmailVerified: entity.isEmailVerified,
-      createdAt: entity.createdAt,
-      lastSignInAt: entity.lastSignInAt,
-      metadata: entity.metadata,
     );
   }
 

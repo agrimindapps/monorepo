@@ -18,6 +18,15 @@ import '../datasources/premium_webhook_data_source.dart';
 /// para fornecer sincronização em tempo real e cross-device
 @injectable
 class PremiumSyncService {
+
+  PremiumSyncService(
+    this._remoteDataSource,
+    this._firebaseDataSource,
+    this._webhookDataSource,
+    this._authService,
+  ) {
+    _initializeStreams();
+  }
   final PremiumRemoteDataSource _remoteDataSource;
   final PremiumFirebaseDataSource _firebaseDataSource;
   final PremiumWebhookDataSource _webhookDataSource;
@@ -44,15 +53,6 @@ class PremiumSyncService {
   int _retryCount = 0;
   final int _maxRetries = 3;
   Timer? _retryTimer;
-
-  PremiumSyncService(
-    this._remoteDataSource,
-    this._firebaseDataSource,
-    this._webhookDataSource,
-    this._authService,
-  ) {
-    _initializeStreams();
-  }
 
   // Getters públicos
   Stream<PremiumStatus> get premiumStatusStream => _masterStatusController.stream.distinct();
@@ -319,7 +319,7 @@ class PremiumSyncService {
       _retryCount++;
       final delay = Duration(seconds: _retryCount * 2); // Backoff exponencial
 
-      debugPrint('[PremiumSyncService] Retry ${_retryCount}/${_maxRetries} em ${delay.inSeconds}s');
+      debugPrint('[PremiumSyncService] Retry $_retryCount/$_maxRetries em ${delay.inSeconds}s');
 
       _retryTimer?.cancel();
       _retryTimer = Timer(delay, () {
@@ -390,8 +390,8 @@ sealed class PremiumSyncEvent {
 }
 
 class _UserLoggedIn extends PremiumSyncEvent {
-  final String userId;
   const _UserLoggedIn(this.userId);
+  final String userId;
 }
 
 class _UserLoggedOut extends PremiumSyncEvent {
@@ -399,20 +399,20 @@ class _UserLoggedOut extends PremiumSyncEvent {
 }
 
 class _StatusUpdated extends PremiumSyncEvent {
-  final PremiumStatus oldStatus;
-  final PremiumStatus newStatus;
-  final PremiumSyncSource source;
 
   const _StatusUpdated({
     required this.oldStatus,
     required this.newStatus,
     required this.source,
   });
+  final PremiumStatus oldStatus;
+  final PremiumStatus newStatus;
+  final PremiumSyncSource source;
 }
 
 class _WebhookReceived extends PremiumSyncEvent {
-  final String eventType;
   const _WebhookReceived(this.eventType);
+  final String eventType;
 }
 
 class _SyncStarted extends PremiumSyncEvent {
@@ -424,11 +424,11 @@ class _SyncCompleted extends PremiumSyncEvent {
 }
 
 class _SyncFailed extends PremiumSyncEvent {
-  final String error;
   const _SyncFailed(this.error);
+  final String error;
 }
 
 class _RetryScheduled extends PremiumSyncEvent {
-  final int attempt;
   const _RetryScheduled(this.attempt);
+  final int attempt;
 }

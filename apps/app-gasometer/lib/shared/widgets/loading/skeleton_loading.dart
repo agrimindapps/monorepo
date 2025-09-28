@@ -4,22 +4,22 @@ import '../../../core/theme/loading_design_tokens.dart';
 /// Widget para skeleton loading que simula o conteúdo da página
 /// Usado para dar preview do que está sendo carregado
 class SkeletonLoading extends StatefulWidget {
+
+  const SkeletonLoading({
+    super.key,
+    this.itemCount = 3,
+    this.padding,
+    this.animate = true,
+    this.baseColor,
+    this.highlightColor,
+    required this.type,
+  });
   final SkeletonType type;
   final int itemCount;
   final EdgeInsetsGeometry? padding;
   final bool animate;
   final Color? baseColor;
   final Color? highlightColor;
-
-  const SkeletonLoading({
-    super.key,
-    required this.type,
-    this.itemCount = 3,
-    this.padding,
-    this.animate = true,
-    this.baseColor,
-    this.highlightColor,
-  });
 
   /// Factory para skeleton de veículos
   static SkeletonLoading vehicles({
@@ -29,9 +29,9 @@ class SkeletonLoading extends StatefulWidget {
   }) {
     return SkeletonLoading(
       key: key,
-      type: SkeletonType.vehicles,
       itemCount: itemCount,
       padding: padding,
+      type: SkeletonType.vehicles,
     );
   }
 
@@ -43,9 +43,9 @@ class SkeletonLoading extends StatefulWidget {
   }) {
     return SkeletonLoading(
       key: key,
-      type: SkeletonType.list,
       itemCount: itemCount,
       padding: padding,
+      type: SkeletonType.list,
     );
   }
 
@@ -145,7 +145,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
   }
 
   Widget _buildVehiclesSkeleton(LoadingColorScheme colors) {
-    return Container(
+    return Padding(
       padding: widget.padding ?? const EdgeInsets.all(LoadingDesignTokens.spacingMd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,14 +156,14 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
             height: LoadingDesignTokens.skeletonHeightLg,
             colors: colors,
           ),
-          SizedBox(height: LoadingDesignTokens.spacingLg),
+          const SizedBox(height: LoadingDesignTokens.spacingLg),
 
           // Lista de veículos
           ...List.generate(widget.itemCount, (index) => 
             _buildVehicleCard(colors, index)
           ),
 
-          SizedBox(height: LoadingDesignTokens.spacingLg),
+          const SizedBox(height: LoadingDesignTokens.spacingLg),
 
           // Botão adicionar
           _buildSkeletonBox(
@@ -179,7 +179,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
 
   Widget _buildVehicleCard(LoadingColorScheme colors, int index) {
     return Container(
-      margin: EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
+      margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
       child: Card(
         color: colors.surface,
         elevation: 2,
@@ -198,7 +198,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                 isCircular: true,
               ),
               
-              SizedBox(width: LoadingDesignTokens.spacingMd),
+              const SizedBox(width: LoadingDesignTokens.spacingMd),
               
               // Informações do veículo
               Expanded(
@@ -212,7 +212,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                       colors: colors,
                     ),
                     
-                    SizedBox(height: LoadingDesignTokens.spacingSm),
+                    const SizedBox(height: LoadingDesignTokens.spacingSm),
                     
                     // Modelo/Ano
                     _buildSkeletonBox(
@@ -232,7 +232,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                     height: LoadingDesignTokens.skeletonHeightSm,
                     colors: colors,
                   ),
-                  SizedBox(height: LoadingDesignTokens.spacingXs),
+                  const SizedBox(height: LoadingDesignTokens.spacingXs),
                   _buildSkeletonBox(
                     width: 80,
                     height: LoadingDesignTokens.skeletonHeightSm,
@@ -253,7 +253,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
       child: Column(
         children: List.generate(widget.itemCount, (index) => 
           Container(
-            margin: EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
+            margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
             child: Row(
               children: [
                 _buildSkeletonBox(
@@ -263,7 +263,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                   isCircular: true,
                 ),
                 
-                SizedBox(width: LoadingDesignTokens.spacingMd),
+                const SizedBox(width: LoadingDesignTokens.spacingMd),
                 
                 Expanded(
                   child: Column(
@@ -275,7 +275,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                         colors: colors,
                       ),
                       
-                      SizedBox(height: LoadingDesignTokens.spacingXs),
+                      const SizedBox(height: LoadingDesignTokens.spacingXs),
                       
                       _buildSkeletonBox(
                         width: 200,
@@ -299,7 +299,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
       child: Column(
         children: List.generate(widget.itemCount, (index) => 
           Container(
-            margin: EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
+            margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
             child: Card(
               color: colors.surface,
               child: Padding(
@@ -313,7 +313,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                       colors: colors,
                     ),
                     
-                    SizedBox(height: LoadingDesignTokens.spacingMd),
+                    const SizedBox(height: LoadingDesignTokens.spacingMd),
                     
                     _buildSkeletonBox(
                       width: 150,
@@ -321,7 +321,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                       colors: colors,
                     ),
                     
-                    SizedBox(height: LoadingDesignTokens.spacingSm),
+                    const SizedBox(height: LoadingDesignTokens.spacingSm),
                     
                     _buildSkeletonBox(
                       width: double.infinity,
@@ -351,7 +351,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
             isCircular: true,
           ),
           
-          SizedBox(height: LoadingDesignTokens.spacingMd),
+          const SizedBox(height: LoadingDesignTokens.spacingMd),
           
           // Nome
           _buildSkeletonBox(
@@ -360,7 +360,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
             colors: colors,
           ),
           
-          SizedBox(height: LoadingDesignTokens.spacingSm),
+          const SizedBox(height: LoadingDesignTokens.spacingSm),
           
           // Email
           _buildSkeletonBox(
@@ -369,12 +369,12 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
             colors: colors,
           ),
           
-          SizedBox(height: LoadingDesignTokens.spacingLg),
+          const SizedBox(height: LoadingDesignTokens.spacingLg),
           
           // Informações adicionais
           ...List.generate(3, (index) => 
             Container(
-              margin: EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
+              margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
               child: Row(
                 children: [
                   _buildSkeletonBox(
@@ -384,7 +384,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                     isCircular: true,
                   ),
                   
-                  SizedBox(width: LoadingDesignTokens.spacingMd),
+                  const SizedBox(width: LoadingDesignTokens.spacingMd),
                   
                   _buildSkeletonBox(
                     width: 180,
@@ -412,14 +412,14 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
               Expanded(
                 child: _buildStatCard(colors),
               ),
-              SizedBox(width: LoadingDesignTokens.spacingMd),
+              const SizedBox(width: LoadingDesignTokens.spacingMd),
               Expanded(
                 child: _buildStatCard(colors),
               ),
             ],
           ),
           
-          SizedBox(height: LoadingDesignTokens.spacingLg),
+          const SizedBox(height: LoadingDesignTokens.spacingLg),
           
           // Título de seção
           _buildSkeletonBox(
@@ -428,12 +428,12 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
             colors: colors,
           ),
           
-          SizedBox(height: LoadingDesignTokens.spacingMd),
+          const SizedBox(height: LoadingDesignTokens.spacingMd),
           
           // Lista de itens
           ...List.generate(widget.itemCount, (index) => 
             Container(
-              margin: EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
+              margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
               child: _buildSkeletonBox(
                 width: double.infinity,
                 height: 60,
@@ -461,7 +461,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
               colors: colors,
             ),
             
-            SizedBox(height: LoadingDesignTokens.spacingSm),
+            const SizedBox(height: LoadingDesignTokens.spacingSm),
             
             _buildSkeletonBox(
               width: 80,
@@ -485,7 +485,7 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: widget.baseColor ?? colors.onSurface.withOpacity(0.1),
+        color: widget.baseColor ?? colors.onSurface.withValues(alpha: 0.1),
         borderRadius: isCircular 
           ? null 
           : BorderRadius.circular(borderRadius ?? LoadingDesignTokens.borderRadiusSm),
@@ -497,9 +497,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
 
 /// Widget especializado para skeleton da página de veículos
 class VehiclesSkeleton extends StatelessWidget {
-  final int vehicleCount;
-  final bool showStats;
-  final EdgeInsetsGeometry? padding;
 
   const VehiclesSkeleton({
     super.key,
@@ -507,6 +504,9 @@ class VehiclesSkeleton extends StatelessWidget {
     this.showStats = true,
     this.padding,
   });
+  final int vehicleCount;
+  final bool showStats;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -520,12 +520,12 @@ class VehiclesSkeleton extends StatelessWidget {
           // Header com título e ações
           _buildHeader(colors),
           
-          SizedBox(height: LoadingDesignTokens.spacingLg),
+          const SizedBox(height: LoadingDesignTokens.spacingLg),
           
           // Cards de estatísticas se habilitado
           if (showStats) ...[
             _buildStatsSection(colors),
-            SizedBox(height: LoadingDesignTokens.spacingLg),
+            const SizedBox(height: LoadingDesignTokens.spacingLg),
           ],
           
           // Lista de veículos
@@ -546,16 +546,16 @@ class VehiclesSkeleton extends StatelessWidget {
               width: 140,
               height: 24,
               decoration: BoxDecoration(
-                color: colors.onSurface.withOpacity(0.1),
+                color: colors.onSurface.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
               ),
             ),
-            SizedBox(height: LoadingDesignTokens.spacingSm),
+            const SizedBox(height: LoadingDesignTokens.spacingSm),
             Container(
               width: 200,
               height: 14,
               decoration: BoxDecoration(
-                color: colors.onSurface.withOpacity(0.08),
+                color: colors.onSurface.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
               ),
             ),
@@ -567,7 +567,7 @@ class VehiclesSkeleton extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: colors.onSurface.withOpacity(0.1),
+            color: colors.onSurface.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
         ),
@@ -579,9 +579,9 @@ class VehiclesSkeleton extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: _buildStatCard(colors, 'Total')),
-        SizedBox(width: LoadingDesignTokens.spacingMd),
+        const SizedBox(width: LoadingDesignTokens.spacingMd),
         Expanded(child: _buildStatCard(colors, 'Ativo')),
-        SizedBox(width: LoadingDesignTokens.spacingMd),
+        const SizedBox(width: LoadingDesignTokens.spacingMd),
         Expanded(child: _buildStatCard(colors, 'Km/mês')),
       ],
     );
@@ -593,7 +593,7 @@ class VehiclesSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusMd),
-        border: Border.all(color: colors.onSurface.withOpacity(0.1)),
+        border: Border.all(color: colors.onSurface.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -602,16 +602,16 @@ class VehiclesSkeleton extends StatelessWidget {
             width: 40,
             height: 12,
             decoration: BoxDecoration(
-              color: colors.onSurface.withOpacity(0.08),
+              color: colors.onSurface.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
             ),
           ),
-          SizedBox(height: LoadingDesignTokens.spacingSm),
+          const SizedBox(height: LoadingDesignTokens.spacingSm),
           Container(
             width: 60,
             height: 20,
             decoration: BoxDecoration(
-              color: colors.onSurface.withOpacity(0.1),
+              color: colors.onSurface.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
             ),
           ),
@@ -624,12 +624,12 @@ class VehiclesSkeleton extends StatelessWidget {
     return Column(
       children: List.generate(vehicleCount, (index) => 
         Container(
-          margin: EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
+          margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
           padding: const EdgeInsets.all(LoadingDesignTokens.spacingMd),
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusMd),
-            border: Border.all(color: colors.onSurface.withOpacity(0.1)),
+            border: Border.all(color: colors.onSurface.withValues(alpha: 0.1)),
           ),
           child: Row(
             children: [
@@ -638,12 +638,12 @@ class VehiclesSkeleton extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
               ),
               
-              SizedBox(width: LoadingDesignTokens.spacingMd),
+              const SizedBox(width: LoadingDesignTokens.spacingMd),
               
               // Informações principais
               Expanded(
@@ -654,16 +654,16 @@ class VehiclesSkeleton extends StatelessWidget {
                       width: 120 + (index * 20.0),
                       height: 16,
                       decoration: BoxDecoration(
-                        color: colors.onSurface.withOpacity(0.1),
+                        color: colors.onSurface.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
                       ),
                     ),
-                    SizedBox(height: LoadingDesignTokens.spacingXs),
+                    const SizedBox(height: LoadingDesignTokens.spacingXs),
                     Container(
                       width: 80,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: colors.onSurface.withOpacity(0.08),
+                        color: colors.onSurface.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
                       ),
                     ),
@@ -679,16 +679,16 @@ class VehiclesSkeleton extends StatelessWidget {
                     width: 50,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: colors.onSurface.withOpacity(0.08),
+                      color: colors.onSurface.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
                     ),
                   ),
-                  SizedBox(height: LoadingDesignTokens.spacingXs),
+                  const SizedBox(height: LoadingDesignTokens.spacingXs),
                   Container(
                     width: 70,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: colors.onSurface.withOpacity(0.08),
+                      color: colors.onSurface.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
                     ),
                   ),

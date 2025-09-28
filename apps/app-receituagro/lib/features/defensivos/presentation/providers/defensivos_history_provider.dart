@@ -37,7 +37,7 @@ class DefensivosHistoryProvider extends ChangeNotifier {
       _setLoading(true);
       _clearError();
       
-      final allDefensivos = _repository.getActiveDefensivos();
+      final allDefensivos = await _repository.getActiveDefensivos();
       
       // If no data, return empty lists
       if (allDefensivos.isEmpty) {
@@ -51,7 +51,7 @@ class DefensivosHistoryProvider extends ChangeNotifier {
     } catch (e) {
       _setError('Erro ao carregar histórico: ${e.toString()}');
       // Use random selection as fallback
-      final allDefensivos = _repository.getActiveDefensivos();
+      final allDefensivos = await _repository.getActiveDefensivos();
       if (allDefensivos.isNotEmpty) {
         _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 3);
         _newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 4);
@@ -69,7 +69,7 @@ class DefensivosHistoryProvider extends ChangeNotifier {
     try {
       _clearError();
       
-      final allDefensivos = _repository.getActiveDefensivos();
+      final allDefensivos = await _repository.getActiveDefensivos();
       await _loadHistoryData(allDefensivos);
       
       notifyListeners();
@@ -137,7 +137,7 @@ class DefensivosHistoryProvider extends ChangeNotifier {
       // ÚLTIMOS ACESSADOS: Se não há histórico, inicializar com 10 aleatórios
       if (historicDefensivos.isEmpty) {
         print('⚠️ Nenhum histórico de acesso encontrado. Inicializando "Últimos Acessados" com 10 defensivos aleatórios.');
-        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>();
+        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10);
       } else {
         print('✅ ${historicDefensivos.length} defensivos encontrados no histórico de acesso.');
         _recentDefensivos = historicDefensivos;
@@ -151,7 +151,7 @@ class DefensivosHistoryProvider extends ChangeNotifier {
       // In case of error, use random selection as fallback for both lists
       if (allDefensivos.isNotEmpty) {
         print('🔄 Usando seleção aleatória como fallback para ambas as listas');
-        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>();
+        _recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10);
         _newDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>();
       } else {
         _recentDefensivos = [];

@@ -21,14 +21,14 @@ import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
 
 class AddMaintenancePage extends StatefulWidget {
-  final MaintenanceEntity? maintenanceToEdit;
-  final String? vehicleId;
 
   const AddMaintenancePage({
     super.key,
     this.maintenanceToEdit,
     this.vehicleId,
   });
+  final MaintenanceEntity? maintenanceToEdit;
+  final String? vehicleId;
 
   @override
   State<AddMaintenancePage> createState() => _AddMaintenancePageState();
@@ -194,11 +194,11 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(type.displayName, style: TextStyle(
+                  Text(type.displayName, style: const TextStyle(
                     fontWeight: GasometerDesignTokens.fontWeightMedium,
                     color: GasometerDesignTokens.colorTextPrimary,
                   )),
-                  Text(type.description, style: TextStyle(
+                  Text(type.description, style: const TextStyle(
                     fontSize: GasometerDesignTokens.fontSizeCaption,
                     color: GasometerDesignTokens.colorTextSecondary,
                   )),
@@ -307,7 +307,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Defina quando será necessária a próxima manutenção (opcional)',
             style: TextStyle(
               fontSize: GasometerDesignTokens.fontSizeCaption,

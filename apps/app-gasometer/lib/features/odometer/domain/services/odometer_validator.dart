@@ -182,22 +182,22 @@ class OdometerValidator {
 
 /// Result of odometer validation with vehicle context
 class OdometerValidationResult {
-  final bool isValid;
-  final String? errorMessage;
 
   const OdometerValidationResult({
     required this.isValid,
     this.errorMessage,
   });
+  final bool isValid;
+  final String? errorMessage;
 }
 
 /// Result of complete form validation
 class FormValidationResult {
-  final bool isValid;
-  final Map<String, String> errors;
 
   const FormValidationResult({
     required this.isValid,
     required this.errors,
   });
+  final bool isValid;
+  final Map<String, String> errors;
 }

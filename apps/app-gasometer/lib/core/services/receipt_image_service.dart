@@ -5,10 +5,6 @@ import 'firebase_storage_service.dart';
 
 /// Result of image processing operation
 class ImageProcessingResult {
-  final String localPath;
-  final String? downloadUrl;
-  final Map<String, dynamic> compressionStats;
-  final bool wasCompressed;
 
   const ImageProcessingResult({
     required this.localPath,
@@ -16,20 +12,24 @@ class ImageProcessingResult {
     this.compressionStats = const {},
     this.wasCompressed = false,
   });
+  final String localPath;
+  final String? downloadUrl;
+  final Map<String, dynamic> compressionStats;
+  final bool wasCompressed;
 }
 
 /// Unified service for handling receipt images
 /// Combines compression and upload in a single operation
 class ReceiptImageService {
-  final core.ImageCompressionService _compressionService;
-  final FirebaseStorageService _storageService;
-  final core.ConnectivityService _connectivityService;
 
   ReceiptImageService(
     this._compressionService,
     this._storageService,
     this._connectivityService,
   );
+  final core.ImageCompressionService _compressionService;
+  final FirebaseStorageService _storageService;
+  final core.ConnectivityService _connectivityService;
 
   /// Process and upload fuel receipt image
   Future<ImageProcessingResult> processFuelReceiptImage({

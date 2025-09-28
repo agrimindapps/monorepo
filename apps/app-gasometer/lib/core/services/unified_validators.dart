@@ -30,10 +30,6 @@ class UnifiedValidationResult {
     this.metadata,
   });
   
-  final ValidationStatus status;
-  final String? message;
-  final Map<String, dynamic>? metadata;
-  
   factory UnifiedValidationResult.initial() => 
       const UnifiedValidationResult(status: ValidationStatus.initial);
   
@@ -48,6 +44,10 @@ class UnifiedValidationResult {
   
   factory UnifiedValidationResult.error(String message) =>
       UnifiedValidationResult(status: ValidationStatus.error, message: message);
+  
+  final ValidationStatus status;
+  final String? message;
+  final Map<String, dynamic>? metadata;
   
   bool get isValid => status == ValidationStatus.valid || status == ValidationStatus.warning;
   bool get hasError => status == ValidationStatus.error;

@@ -7,9 +7,9 @@ import '../repositories/auth_repository.dart';
 
 @lazySingleton
 class DeleteAccount implements NoParamsUseCase<Unit> {
-  final AuthRepository repository;
 
   DeleteAccount(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, Unit>> call() async {

@@ -1,107 +1,106 @@
 import 'package:flutter/material.dart';
 
+import '../../features/defensivos/home_defensivos_page.dart';
+import '../../features/defensivos/presentation/pages/defensivos_unificado_page.dart';
 import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../../features/pragas/detalhe_praga_page.dart';
-import '../../features/navigation/main_navigation_page.dart';
+import '../../features/subscription/presentation/pages/subscription_clean_page.dart';
 
-/// App router for handling named routes
+/// Classe responsável por gerenciar o roteamento da aplicação
+/// Implementa padrão Clean Architecture para navegação
 class AppRouter {
-  /// Generate routes for the app
-  static Route<dynamic>? generateRoute(RouteSettings settings) {
-    final String routeName = settings.name ?? '';
-    final Map<String, dynamic>? arguments = settings.arguments as Map<String, dynamic>?;
+  /// Gera rotas baseadas nas configurações fornecidas
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    final String routeName = settings.name ?? '/';
+    final dynamic arguments = settings.arguments;
 
     switch (routeName) {
       case '/':
         return MaterialPageRoute(
-          builder: (_) => const MainNavigationPage(),
+          builder: (_) => const HomeDefensivosPage(),
           settings: settings,
         );
 
-      case '/defensivo-detail':
-        if (arguments != null) {
-          final String? defensivoName = arguments['defensivoName'] as String?;
-          final String? fabricante = arguments['fabricante'] as String?;
-          
-          if (defensivoName != null) {
-            return MaterialPageRoute(
-              builder: (_) => DetalheDefensivoPage(
-                defensivoName: defensivoName,
-                fabricante: fabricante ?? 'N/A',
-              ),
-              settings: settings,
-            );
-          }
-        }
-        // If missing arguments, show error page or navigate to home
-        return _errorRoute(settings);
+      case '/defensivos':
+        return MaterialPageRoute(
+          builder: (_) => const HomeDefensivosPage(),
+          settings: settings,
+        );
 
-      case '/praga-detail':
-        if (arguments != null) {
-          final String? pragaName = arguments['pragaName'] as String?;
-          final String? pragaId = arguments['pragaId'] as String?;
-          final String? pragaScientificName = arguments['pragaScientificName'] as String?;
-          
-          if (pragaName != null || pragaId != null) {
-            return MaterialPageRoute(
-              builder: (_) => DetalhePragaPage(
-                pragaName: pragaName ?? '',
-                pragaId: pragaId,
-                pragaScientificName: pragaScientificName ?? '',
-              ),
-              settings: settings,
-            );
-          }
-        }
-        // If missing arguments, show error page or navigate to home
-        return _errorRoute(settings);
+      case '/defensivos-unificado':
+        final args = arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => DefensivosUnificadoPage(
+            tipoAgrupamento: args?['tipoAgrupamento'] as String?,
+            textoFiltro: args?['textoFiltro'] as String?,
+            modoCompleto: args?['modoCompleto'] as bool? ?? false,
+            isAgrupados: args?['isAgrupados'] as bool? ?? false,
+          ),
+          settings: settings,
+        );
+
+      case '/detalhe-defensivo':
+        final args = arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => DetalheDefensivoPage(
+            defensivoName: args?['defensivoName'] as String? ?? '',
+            fabricante: args?['fabricante'] as String? ?? '',
+          ),
+          settings: settings,
+        );
+
+      case '/subscription':
+        return MaterialPageRoute(
+          builder: (_) => const SubscriptionCleanPage(),
+          settings: settings,
+        );
 
       default:
-        return _errorRoute(settings);
+        return MaterialPageRoute(
+          builder: (_) => const _RouteNotFoundPage(),
+          settings: settings,
+        );
     }
   }
+}
 
-  /// Error route when route is not found
-  static Route<dynamic> _errorRoute(RouteSettings settings) {
-    return MaterialPageRoute(
-      builder: (context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Erro'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
+/// Página exibida quando uma rota não é encontrada
+class _RouteNotFoundPage extends StatelessWidget {
+  const _RouteNotFoundPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Página não encontrada'),
+      ),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Página não encontrada',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Página não encontrada',
-                style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'A página que você está procurando não existe.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Rota: ${settings.name}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/',
-                    (route) => false,
-                  );
-                },
-                child: const Text('Voltar ao início'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-      settings: settings,
     );
   }
 }

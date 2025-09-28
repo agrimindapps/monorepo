@@ -7,9 +7,9 @@ import '../repositories/premium_repository.dart';
 /// Use case para verificar se pode usar uma feature
 @injectable
 class CanUseFeature implements UseCase<bool, CanUseFeatureParams> {
-  final PremiumRepository repository;
 
   CanUseFeature(this.repository);
+  final PremiumRepository repository;
 
   @override
   Future<Either<Failure, bool>> call(CanUseFeatureParams params) async {

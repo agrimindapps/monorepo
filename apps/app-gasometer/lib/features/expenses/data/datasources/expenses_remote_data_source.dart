@@ -19,10 +19,10 @@ abstract class ExpensesRemoteDataSource {
 
 @LazySingleton(as: ExpensesRemoteDataSource)
 class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
-  final FirebaseFirestore _firestore;
-  static const String _collection = 'expenses';
 
   ExpensesRemoteDataSourceImpl(this._firestore);
+  final FirebaseFirestore _firestore;
+  static const String _collection = 'expenses';
 
   CollectionReference _getUserExpensesCollection(String userId) {
     return _firestore.collection('users').doc(userId).collection(_collection);

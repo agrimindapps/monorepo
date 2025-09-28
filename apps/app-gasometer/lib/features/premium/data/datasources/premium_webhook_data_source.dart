@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
@@ -14,12 +13,12 @@ import '../../../../core/error/failures.dart';
 /// do status de assinatura entre dispositivos
 @injectable
 class PremiumWebhookDataSource {
+
+  PremiumWebhookDataSource(this._firestore);
   final FirebaseFirestore _firestore;
 
   final StreamController<Map<String, dynamic>> _webhookController =
       StreamController<Map<String, dynamic>>.broadcast();
-
-  PremiumWebhookDataSource(this._firestore);
 
   Stream<Map<String, dynamic>> get webhookEvents => _webhookController.stream;
 
@@ -32,7 +31,7 @@ class PremiumWebhookDataSource {
       final appUserId = payload['app_user_id'] as String?;
 
       if (eventType == null || appUserId == null) {
-        return Left(ServerFailure('Payload de webhook inválido'));
+        return const Left(ServerFailure('Payload de webhook inválido'));
       }
 
       // Processa diferentes tipos de eventos

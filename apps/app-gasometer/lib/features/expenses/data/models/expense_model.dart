@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
@@ -11,40 +9,6 @@ part 'expense_model.g.dart';
 @HiveType(typeId: 3)
 // ignore: must_be_immutable
 class ExpenseModel extends BaseSyncModel {
-  // Base sync fields (required for Hive generation)
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-
-  // Expense specific fields
-  @HiveField(10)
-  final String veiculoId;
-  @HiveField(11)
-  final String tipo;
-  @HiveField(12)
-  final String descricao;
-  @HiveField(13)
-  final double valor;
-  @HiveField(14)
-  final int data;
-  @HiveField(15)
-  final double odometro;
-  @HiveField(16)
-  final String? receiptImagePath;
-  @HiveField(17)
-  final String? location;
-  @HiveField(18)
-  final String? notes;
-  @HiveField(19)
-  final Map<String, dynamic> metadata;
-  @HiveField(20)
-  final String? receiptImageUrl;
 
   ExpenseModel({
     required this.id,
@@ -78,9 +42,6 @@ class ExpenseModel extends BaseSyncModel {
           userId: userId,
           moduleName: moduleName,
         );
-
-  @override
-  String get collectionName => 'expenses';
 
   /// Factory constructor for creating new expense
   factory ExpenseModel.create({
@@ -149,44 +110,6 @@ class ExpenseModel extends BaseSyncModel {
     );
   }
 
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
-      'veiculoId': veiculoId,
-      'tipo': tipo,
-      'descricao': descricao,
-      'valor': valor,
-      'data': data,
-      'odometro': odometro,
-      'receiptImagePath': receiptImagePath,
-      'location': location,
-      'notes': notes,
-      'metadata': metadata,
-      'receiptImageUrl': receiptImageUrl,
-    });
-  }
-
-  /// Convert to Firebase map
-  @override
-  Map<String, dynamic> toFirebaseMap() {
-    return {
-      ...baseFirebaseFields,
-      ...firebaseTimestampFields,
-      'veiculo_id': veiculoId,
-      'tipo': tipo,
-      'descricao': descricao,
-      'valor': valor,
-      'data': data,
-      'odometro': odometro,
-      'receipt_image_path': receiptImagePath,
-      'location': location,
-      'notes': notes,
-      'metadata': metadata,
-      'receipt_image_url': receiptImageUrl,
-    };
-  }
-
   /// Create from Firebase map
   factory ExpenseModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
@@ -229,6 +152,81 @@ class ExpenseModel extends BaseSyncModel {
       // Use Hive parsing for local data
       return ExpenseModel.fromHiveMap(json);
     }
+  }
+  // Base sync fields (required for Hive generation)
+  @HiveField(0) @override final String id;
+  @HiveField(1) final int? createdAtMs;
+  @HiveField(2) final int? updatedAtMs;
+  @HiveField(3) final int? lastSyncAtMs;
+  @HiveField(4) @override final bool isDirty;
+  @HiveField(5) @override final bool isDeleted;
+  @HiveField(6) @override final int version;
+  @HiveField(7) @override final String? userId;
+  @HiveField(8) @override final String? moduleName;
+
+  // Expense specific fields
+  @HiveField(10)
+  final String veiculoId;
+  @HiveField(11)
+  final String tipo;
+  @HiveField(12)
+  final String descricao;
+  @HiveField(13)
+  final double valor;
+  @HiveField(14)
+  final int data;
+  @HiveField(15)
+  final double odometro;
+  @HiveField(16)
+  final String? receiptImagePath;
+  @HiveField(17)
+  final String? location;
+  @HiveField(18)
+  final String? notes;
+  @HiveField(19)
+  final Map<String, dynamic> metadata;
+  @HiveField(20)
+  final String? receiptImageUrl;
+
+  @override
+  String get collectionName => 'expenses';
+
+  /// Convert to Hive map
+  @override
+  Map<String, dynamic> toHiveMap() {
+    return super.toHiveMap()..addAll({
+      'veiculoId': veiculoId,
+      'tipo': tipo,
+      'descricao': descricao,
+      'valor': valor,
+      'data': data,
+      'odometro': odometro,
+      'receiptImagePath': receiptImagePath,
+      'location': location,
+      'notes': notes,
+      'metadata': metadata,
+      'receiptImageUrl': receiptImageUrl,
+    });
+  }
+
+  /// Convert to Firebase map
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      ...firebaseTimestampFields,
+      'veiculo_id': veiculoId,
+      'tipo': tipo,
+      'descricao': descricao,
+      'valor': valor,
+      'data': data,
+      'odometro': odometro,
+      'receipt_image_path': receiptImagePath,
+      'location': location,
+      'notes': notes,
+      'metadata': metadata,
+      'receipt_image_url': receiptImageUrl,
+    };
   }
 
   /// copyWith method for immutability

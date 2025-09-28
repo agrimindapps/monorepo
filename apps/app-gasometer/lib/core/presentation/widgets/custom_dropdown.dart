@@ -2,27 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Dropdown customizado com validação e formatação
 class CustomDropdown<T> extends StatelessWidget {
-  final T? value;
-  final List<DropdownMenuItem<T>> items;
-  final void Function(T?)? onChanged;
-  final String? label;
-  final String? hint;
-  final String? helperText;
-  final String? errorText;
-  final bool enabled;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final String? Function(T?)? validator;
-  final bool isExpanded;
-  final EdgeInsetsGeometry? contentPadding;
-  final InputBorder? border;
-  final InputBorder? enabledBorder;
-  final InputBorder? focusedBorder;
-  final InputBorder? errorBorder;
-  final Color? fillColor;
-  final bool filled;
-  final double? dropdownMaxHeight;
-  final Widget? disabledHint;
 
   const CustomDropdown({
     super.key,
@@ -48,6 +27,27 @@ class CustomDropdown<T> extends StatelessWidget {
     this.dropdownMaxHeight,
     this.disabledHint,
   });
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
+  final void Function(T?)? onChanged;
+  final String? label;
+  final String? hint;
+  final String? helperText;
+  final String? errorText;
+  final bool enabled;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final String? Function(T?)? validator;
+  final bool isExpanded;
+  final EdgeInsetsGeometry? contentPadding;
+  final InputBorder? border;
+  final InputBorder? enabledBorder;
+  final InputBorder? focusedBorder;
+  final InputBorder? errorBorder;
+  final Color? fillColor;
+  final bool filled;
+  final double? dropdownMaxHeight;
+  final Widget? disabledHint;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class CustomDropdown<T> extends StatelessWidget {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         width: 1,
       ),
     );
@@ -261,16 +261,6 @@ class CustomDropdown<T> extends StatelessWidget {
 
 /// Widget auxiliar para dropdown com busca
 class SearchableDropdown<T> extends StatefulWidget {
-  final T? value;
-  final List<T> items;
-  final String Function(T) getLabel;
-  final void Function(T?)? onChanged;
-  final String? label;
-  final String? hint;
-  final String? searchHint;
-  final bool enabled;
-  final Widget? prefixIcon;
-  final String? Function(T?)? validator;
 
   const SearchableDropdown({
     super.key,
@@ -285,6 +275,16 @@ class SearchableDropdown<T> extends StatefulWidget {
     this.prefixIcon,
     this.validator,
   });
+  final T? value;
+  final List<T> items;
+  final String Function(T) getLabel;
+  final void Function(T?)? onChanged;
+  final String? label;
+  final String? hint;
+  final String? searchHint;
+  final bool enabled;
+  final Widget? prefixIcon;
+  final String? Function(T?)? validator;
 
   @override
   State<SearchableDropdown<T>> createState() => _SearchableDropdownState<T>();

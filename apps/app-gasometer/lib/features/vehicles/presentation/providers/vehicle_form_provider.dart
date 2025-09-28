@@ -9,6 +9,8 @@ import '../../domain/entities/vehicle_entity.dart';
 
 /// Provider para gerenciar o estado do formulário de veículos
 class VehicleFormProvider extends ChangeNotifier {
+
+  VehicleFormProvider(this._authProvider);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AuthProvider _authProvider;
   
@@ -29,8 +31,6 @@ class VehicleFormProvider extends ChangeNotifier {
   String? _lastError;
   bool _hasChanges = false;
   VehicleEntity? _editingVehicle;
-
-  VehicleFormProvider(this._authProvider);
 
   // Getters
   GlobalKey<FormState> get formKey => _formKey;
@@ -212,7 +212,7 @@ class VehicleFormProvider extends ChangeNotifier {
     setError(null);
     
     // Primeiro validar campos obrigatórios individualmente
-    List<String> missingFields = [];
+    final List<String> missingFields = [];
     
     if (marcaController.text.trim().isEmpty) {
       missingFields.add('Marca');

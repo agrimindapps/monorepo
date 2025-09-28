@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import '../../../features/comentarios/models/comentario_model.dart';
 
 part 'comentario_hive.g.dart';

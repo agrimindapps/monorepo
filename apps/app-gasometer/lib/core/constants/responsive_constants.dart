@@ -1,7 +1,7 @@
 /// Responsive design constants for adaptive layouts
 /// Defines breakpoints, constraints and responsive behaviors
 /// for mobile, tablet and desktop experiences
-library responsive_constants;
+library;
 
 import 'package:flutter/material.dart';
 

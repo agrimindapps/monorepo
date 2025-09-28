@@ -21,11 +21,11 @@ abstract class CacheManager<K, V> {
 
 /// Cache entry with TTL support
 class CacheEntry<V> {
+
+  CacheEntry(this.value, this.createdAt, this.ttl);
   final V value;
   final DateTime createdAt;
   final Duration? ttl;
-
-  CacheEntry(this.value, this.createdAt, this.ttl);
 
   bool get isExpired {
     if (ttl == null) return false;
@@ -35,14 +35,14 @@ class CacheEntry<V> {
 
 /// In-memory cache implementation with TTL support
 class MemoryCacheManager<K, V> implements CacheManager<K, V> {
-  final Map<K, CacheEntry<V>> _cache = {};
-  final int _maxSize;
-  final Duration _defaultTtl;
 
   MemoryCacheManager({
     int maxSize = 100,
     Duration defaultTtl = const Duration(minutes: 5),
   }) : _maxSize = maxSize, _defaultTtl = defaultTtl;
+  final Map<K, CacheEntry<V>> _cache = {};
+  final int _maxSize;
+  final Duration _defaultTtl;
 
   @override
   V? get(K key) {

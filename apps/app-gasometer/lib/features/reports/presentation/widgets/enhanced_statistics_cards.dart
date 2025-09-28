@@ -5,18 +5,6 @@ import '../../../../core/theme/design_tokens.dart';
 
 /// Enhanced statistics card with improved empty state handling
 class EnhancedStatisticsCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color iconColor;
-  final String primaryValue;
-  final String secondaryValue;
-  final String primaryLabel;
-  final String secondaryLabel;
-  final String? percentageChange;
-  final bool? isPositiveChange;
-  final StatisticsCardState state;
-  final VoidCallback? onRefresh;
-  final VoidCallback? onAddData;
 
   const EnhancedStatisticsCard({
     super.key,
@@ -33,6 +21,18 @@ class EnhancedStatisticsCard extends StatelessWidget {
     this.onRefresh,
     this.onAddData,
   });
+  final String title;
+  final IconData icon;
+  final Color iconColor;
+  final String primaryValue;
+  final String secondaryValue;
+  final String primaryLabel;
+  final String secondaryLabel;
+  final String? percentageChange;
+  final bool? isPositiveChange;
+  final StatisticsCardState state;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onAddData;
 
   @override
   Widget build(BuildContext context) {
@@ -326,8 +326,8 @@ class EnhancedStatisticsCard extends StatelessWidget {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: onAddData,
-            icon: Icon(Icons.add, size: 16),
-            label: Text(
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text(
               'Adicionar dados',
               style: TextStyle(fontSize: 12),
             ),
@@ -342,8 +342,8 @@ class EnhancedStatisticsCard extends StatelessWidget {
         if (onRefresh != null)
           OutlinedButton.icon(
             onPressed: onRefresh,
-            icon: Icon(Icons.refresh, size: 16),
-            label: Text('Atualizar', style: TextStyle(fontSize: 12)),
+            icon: const Icon(Icons.refresh, size: 16),
+            label: const Text('Atualizar', style: TextStyle(fontSize: 12)),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               side: BorderSide(
@@ -380,17 +380,6 @@ class EnhancedStatisticsCard extends StatelessWidget {
 
 /// Enhanced statistics section with better data handling
 class EnhancedStatisticsSection extends StatelessWidget {
-  final bool isLoading;
-  final bool hasError;
-  final String? errorMessage;
-  final bool hasData;
-  final Map<String, String> currentMonthStats;
-  final Map<String, String> currentYearStats;
-  final Map<String, String> monthlyComparisons;
-  final Map<String, String> yearlyComparisons;
-  final VoidCallback? onRefresh;
-  final VoidCallback? onAddFuel;
-  final VoidCallback? onAddExpense;
 
   const EnhancedStatisticsSection({
     super.key,
@@ -406,6 +395,17 @@ class EnhancedStatisticsSection extends StatelessWidget {
     this.onAddFuel,
     this.onAddExpense,
   });
+  final bool isLoading;
+  final bool hasError;
+  final String? errorMessage;
+  final bool hasData;
+  final Map<String, String> currentMonthStats;
+  final Map<String, String> currentYearStats;
+  final Map<String, String> monthlyComparisons;
+  final Map<String, String> yearlyComparisons;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onAddFuel;
+  final VoidCallback? onAddExpense;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +428,7 @@ class EnhancedStatisticsSection extends StatelessWidget {
   Widget _buildSectionHeader(BuildContext context) {
     return Row(
       children: [
-        Icon(
+        const Icon(
           Icons.analytics_outlined,
           color: GasometerDesignTokens.colorAnalyticsBlue,
           size: 28,
@@ -460,7 +460,7 @@ class EnhancedStatisticsSection extends StatelessWidget {
         if (hasData && onRefresh != null)
           IconButton(
             onPressed: onRefresh,
-            icon: Icon(Icons.refresh_outlined),
+            icon: const Icon(Icons.refresh_outlined),
             tooltip: 'Atualizar estatísticas',
             style: IconButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -512,7 +512,7 @@ class EnhancedStatisticsSection extends StatelessWidget {
           if (onRefresh != null)
             TextButton(
               onPressed: onRefresh,
-              child: Text('Tentar novamente'),
+              child: const Text('Tentar novamente'),
             ),
         ],
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
+import 'package:core/core.dart';
 
 import '../providers/favoritos_provider_simplified.dart';
 import 'favoritos_defensivos_tab_widget.dart';

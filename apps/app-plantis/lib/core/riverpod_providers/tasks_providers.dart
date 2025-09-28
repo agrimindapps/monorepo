@@ -39,8 +39,14 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
     _notificationService = ref.read(taskNotificationServiceProvider);
     _authStateNotifier = AuthStateNotifier.instance;
+    
+    // Initialize sync coordinator before using it
     _syncCoordinator = SyncCoordinatorService.instance;
+    _syncCoordinator.initialize();
+    
+    // Initialize offline queue service before using it
     _offlineQueue = offline_queue.OfflineSyncQueueService.instance;
+    await _offlineQueue.initialize();
 
     // Initialize notification service
     await _initializeNotificationService();
@@ -170,13 +176,13 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       state = AsyncData(currentState.copyWith(
         isLoading: true,
         clearError: true,
-        activeOperations: currentState.activeOperations..add(TaskLoadingOperation.loadingTasks),
+        activeOperations: {...currentState.activeOperations, TaskLoadingOperation.loadingTasks},
         currentOperationMessage: AppStrings.loadingTasks,
       ));
     } else {
       state = AsyncData(currentState.copyWith(
         clearError: true,
-        activeOperations: currentState.activeOperations..add(TaskLoadingOperation.syncing),
+        activeOperations: {...currentState.activeOperations, TaskLoadingOperation.syncing},
         currentOperationMessage: AppStrings.synchronizing,
       ));
     }
@@ -193,8 +199,8 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             isLoading: false,
             errorMessage: _mapFailureToMessage(failure),
             activeOperations: newState.activeOperations
-              ..remove(TaskLoadingOperation.loadingTasks)
-              ..remove(TaskLoadingOperation.syncing),
+                .where((op) => op != TaskLoadingOperation.loadingTasks && op != TaskLoadingOperation.syncing)
+                .toSet(),
             clearOperationMessage: true,
           ));
           throw Exception(_mapFailureToMessage(failure));
@@ -216,8 +222,8 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             isLoading: false,
             clearError: true,
             activeOperations: newState.activeOperations
-              ..remove(TaskLoadingOperation.loadingTasks)
-              ..remove(TaskLoadingOperation.syncing),
+                .where((op) => op != TaskLoadingOperation.loadingTasks && op != TaskLoadingOperation.syncing)
+                .toSet(),
             clearOperationMessage: true,
           ));
 
@@ -234,8 +240,8 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
         isLoading: false,
         errorMessage: 'Erro ao carregar tarefas: $e',
         activeOperations: newState.activeOperations
-          ..remove(TaskLoadingOperation.loadingTasks)
-          ..remove(TaskLoadingOperation.syncing),
+            .where((op) => op != TaskLoadingOperation.loadingTasks && op != TaskLoadingOperation.syncing)
+            .toSet(),
         clearOperationMessage: true,
       ));
       rethrow;
@@ -263,7 +269,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     final currentState = state.valueOrNull ?? TasksState.initial();
     state = AsyncData(currentState.copyWith(
       clearError: true,
-      activeOperations: currentState.activeOperations..add(TaskLoadingOperation.addingTask),
+      activeOperations: {...currentState.activeOperations, TaskLoadingOperation.addingTask},
       currentOperationMessage: AppStrings.addingTask,
     ));
 
@@ -274,7 +280,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
         final newState = state.valueOrNull ?? TasksState.initial();
         state = AsyncData(newState.copyWith(
           errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
-          activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+          activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
           clearOperationMessage: true,
         ));
         return false;
@@ -313,7 +319,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
               allTasks: updatedTasks,
               filteredTasks: filteredTasks,
               clearError: true,
-              activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+              activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
               clearOperationMessage: true,
             ));
 
@@ -334,7 +340,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             final newState = state.valueOrNull ?? TasksState.initial();
             state = AsyncData(newState.copyWith(
               errorMessage: _mapFailureToMessage(failure),
-              activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+              activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
               clearOperationMessage: true,
             ));
             throw Exception(_mapFailureToMessage(failure));
@@ -356,7 +362,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             allTasks: updatedTasks,
             filteredTasks: filteredTasks,
             clearError: true,
-            activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+            activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
             clearOperationMessage: true,
           ));
 
@@ -369,7 +375,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       final newState = state.valueOrNull ?? TasksState.initial();
       state = AsyncData(newState.copyWith(
         errorMessage: AppStrings.unexpectedErrorAddingTask,
-        activeOperations: newState.activeOperations..remove(TaskLoadingOperation.addingTask),
+        activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
         clearOperationMessage: true,
       ));
       rethrow;
@@ -619,7 +625,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   Future<void> refresh() async {
     final currentState = state.valueOrNull ?? TasksState.initial();
     state = AsyncData(currentState.copyWith(
-      activeOperations: currentState.activeOperations..add(TaskLoadingOperation.refreshing),
+      activeOperations: {...currentState.activeOperations, TaskLoadingOperation.refreshing},
       currentOperationMessage: AppStrings.refreshing,
     ));
 
@@ -628,7 +634,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     } finally {
       final newState = state.valueOrNull ?? TasksState.initial();
       state = AsyncData(newState.copyWith(
-        activeOperations: newState.activeOperations..remove(TaskLoadingOperation.refreshing),
+        activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.refreshing).toSet(),
         clearOperationMessage: true,
       ));
     }
@@ -1007,21 +1013,21 @@ final pendingOfflineOperationsCountProvider = Provider<int>((ref) {
   return offline_queue.OfflineSyncQueueService.instance.pendingOperationsCount;
 });
 
-// Dependency providers (these would need to be implemented based on your DI setup)
+// Dependency providers using GetIt DI
 final getTasksUseCaseProvider = Provider<GetTasksUseCase>((ref) {
-  throw UnimplementedError('GetTasksUseCase provider needs to be implemented');
+  return GetIt.instance<GetTasksUseCase>();
 });
 
 final addTaskUseCaseProvider = Provider<AddTaskUseCase>((ref) {
-  throw UnimplementedError('AddTaskUseCase provider needs to be implemented');
+  return GetIt.instance<AddTaskUseCase>();
 });
 
 final completeTaskUseCaseProvider = Provider<CompleteTaskUseCase>((ref) {
-  throw UnimplementedError('CompleteTaskUseCase provider needs to be implemented');
+  return GetIt.instance<CompleteTaskUseCase>();
 });
 
 final taskNotificationServiceProvider = Provider<TaskNotificationService>((ref) {
-  throw UnimplementedError('TaskNotificationService provider needs to be implemented');
+  return GetIt.instance<TaskNotificationService>();
 });
 
 /// Exception thrown when a user tries to access a task they don't own

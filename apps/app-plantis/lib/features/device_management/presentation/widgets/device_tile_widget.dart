@@ -106,7 +106,7 @@ class DeviceTileWidget extends StatelessWidget {
                           device.model,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -135,7 +135,7 @@ class DeviceTileWidget extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Color(
                         int.parse(device.statusColorHex.replaceFirst('#', '0xFF'))
-                      ).withOpacity(0.1),
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -230,7 +230,7 @@ class DeviceTileWidget extends StatelessWidget {
       },
       icon: Icon(
         Icons.more_vert,
-        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
       ),
       itemBuilder: (context) => [
         const PopupMenuItem(
@@ -249,14 +249,14 @@ class DeviceTileWidget extends StatelessWidget {
 
   Color _getIconBackgroundColor(BuildContext context) {
     if (!device.isActive) {
-      return Colors.grey.withOpacity(0.1);
+      return Colors.grey.withValues(alpha: 0.1);
     }
 
     if (isCurrentDevice) {
-      return Theme.of(context).primaryColor.withOpacity(0.1);
+      return Theme.of(context).primaryColor.withValues(alpha: 0.1);
     }
 
-    return Theme.of(context).cardColor.withOpacity(0.5);
+    return Theme.of(context).cardColor.withValues(alpha: 0.5);
   }
 
   String _formatLastActivity() {

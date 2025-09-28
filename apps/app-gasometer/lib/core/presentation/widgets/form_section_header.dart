@@ -23,6 +23,18 @@ import '../../theme/design_tokens.dart';
 /// )
 /// ```
 class FormSectionHeader extends StatelessWidget {
+
+  const FormSectionHeader({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.child,
+    this.contentPadding,
+    this.iconColor,
+    this.iconSize,
+    this.titleStyle,
+    this.applyVerticalPadding = true,
+  });
   /// Título da seção
   final String title;
 
@@ -47,18 +59,6 @@ class FormSectionHeader extends StatelessWidget {
   /// Se deve aplicar padding vertical no header
   final bool applyVerticalPadding;
 
-  const FormSectionHeader({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.child,
-    this.contentPadding,
-    this.iconColor,
-    this.iconSize,
-    this.titleStyle,
-    this.applyVerticalPadding = true,
-  });
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -78,10 +78,10 @@ class FormSectionHeader extends StatelessWidget {
                 size: iconSize ?? GasometerDesignTokens.iconSizeSm,
                 color: iconColor ?? Colors.grey.shade600,
               ),
-              SizedBox(width: GasometerDesignTokens.spacingSm),
+              const SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(
                 title,
-                style: titleStyle ?? TextStyle(
+                style: titleStyle ?? const TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeLg,
                   fontWeight: GasometerDesignTokens.fontWeightMedium,
                   color: GasometerDesignTokens.colorTextPrimary,
@@ -103,10 +103,6 @@ class FormSectionHeader extends StatelessWidget {
 
 /// Variação compacta do FormSectionHeader para casos específicos
 class CompactFormSectionHeader extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Widget child;
-  final Color? iconColor;
 
   const CompactFormSectionHeader({
     super.key,
@@ -115,21 +111,25 @@ class CompactFormSectionHeader extends StatelessWidget {
     required this.child,
     this.iconColor,
   });
+  final String title;
+  final IconData icon;
+  final Widget child;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
     return FormSectionHeader(
       title: title,
       icon: icon,
-      child: child,
       iconColor: iconColor,
       iconSize: GasometerDesignTokens.iconSizeXs,
       applyVerticalPadding: false,
-      titleStyle: TextStyle(
+      titleStyle: const TextStyle(
         fontSize: GasometerDesignTokens.fontSizeBody,
         fontWeight: GasometerDesignTokens.fontWeightMedium,
         color: GasometerDesignTokens.colorTextSecondary,
       ),
+      child: child,
     );
   }
 }
@@ -149,12 +149,12 @@ extension FormSectionHeaderExtensions on Widget {
     return FormSectionHeader(
       title: title,
       icon: icon,
-      child: this,
       contentPadding: contentPadding,
       iconColor: iconColor,
       iconSize: iconSize,
       titleStyle: titleStyle,
       applyVerticalPadding: applyVerticalPadding,
+      child: this,
     );
   }
 
@@ -167,8 +167,8 @@ extension FormSectionHeaderExtensions on Widget {
     return CompactFormSectionHeader(
       title: title,
       icon: icon,
-      child: this,
       iconColor: iconColor,
+      child: this,
     );
   }
 }

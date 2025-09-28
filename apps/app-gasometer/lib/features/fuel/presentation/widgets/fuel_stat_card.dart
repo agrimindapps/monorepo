@@ -36,7 +36,7 @@ class FuelStatCard extends StatelessWidget {
                   GasometerDesignTokens.spacingSm,
                 ),
                 decoration: BoxDecoration(
-                  color: GasometerDesignTokens.withOpacity(color, 0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: GasometerDesignTokens.borderRadius(
                     GasometerDesignTokens.radiusMd,
                   ),
@@ -47,7 +47,7 @@ class FuelStatCard extends StatelessWidget {
                   size: GasometerDesignTokens.iconSizeButton,
                 ),
               ),
-              SizedBox(width: GasometerDesignTokens.spacingMd),
+              const SizedBox(width: GasometerDesignTokens.spacingMd),
               SemanticText.label(
                 title,
                 style: TextStyle(
@@ -59,7 +59,7 @@ class FuelStatCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: GasometerDesignTokens.spacingMd),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
           SemanticText(
             value,
             style: TextStyle(

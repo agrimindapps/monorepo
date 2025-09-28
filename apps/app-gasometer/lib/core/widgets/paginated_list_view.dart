@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Configuração de paginação
-class PaginationConfig {
-  final int pageSize;
-  final int initialPageSize;
-  final bool enableInfiniteScroll;
-  final double scrollThreshold; // % de scroll para carregar próxima página
+class PaginationConfig { // % de scroll para carregar próxima página
 
   const PaginationConfig({
     this.pageSize = 20,
@@ -13,10 +9,30 @@ class PaginationConfig {
     this.enableInfiniteScroll = true,
     this.scrollThreshold = 0.8, // 80%
   });
+  final int pageSize;
+  final int initialPageSize;
+  final bool enableInfiniteScroll;
+  final double scrollThreshold;
 }
 
 /// Widget genérico para listas paginadas com lazy loading
 class PaginatedListView<T> extends StatefulWidget {
+
+  const PaginatedListView({
+    super.key,
+    required this.loadPage,
+    required this.itemBuilder,
+    this.separatorBuilder,
+    this.emptyWidget,
+    this.loadingWidget,
+    this.errorBuilder,
+    this.config = const PaginationConfig(),
+    this.cacheKey,
+    this.enableVirtualization = true,
+    this.scrollController,
+    this.physics,
+    this.padding,
+  });
   /// Função que carrega uma página de dados
   final Future<List<T>> Function(int page, int pageSize) loadPage;
   
@@ -52,22 +68,6 @@ class PaginatedListView<T> extends StatefulWidget {
   
   /// Padding da lista
   final EdgeInsetsGeometry? padding;
-
-  const PaginatedListView({
-    super.key,
-    required this.loadPage,
-    required this.itemBuilder,
-    this.separatorBuilder,
-    this.emptyWidget,
-    this.loadingWidget,
-    this.errorBuilder,
-    this.config = const PaginationConfig(),
-    this.cacheKey,
-    this.enableVirtualization = true,
-    this.scrollController,
-    this.physics,
-    this.padding,
-  });
 
   @override
   State<PaginatedListView<T>> createState() => _PaginatedListViewState<T>();

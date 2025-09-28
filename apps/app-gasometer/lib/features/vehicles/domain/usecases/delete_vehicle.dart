@@ -7,9 +7,9 @@ import '../repositories/vehicle_repository.dart';
 
 @lazySingleton
 class DeleteVehicle implements UseCase<Unit, DeleteVehicleParams> {
-  final VehicleRepository repository;
 
   DeleteVehicle(this.repository);
+  final VehicleRepository repository;
 
   @override
   Future<Either<Failure, Unit>> call(DeleteVehicleParams params) async {
@@ -18,9 +18,9 @@ class DeleteVehicle implements UseCase<Unit, DeleteVehicleParams> {
 }
 
 class DeleteVehicleParams extends UseCaseParams {
-  final String vehicleId;
 
   const DeleteVehicleParams({required this.vehicleId});
+  final String vehicleId;
 
   @override
   List<Object> get props => [vehicleId];

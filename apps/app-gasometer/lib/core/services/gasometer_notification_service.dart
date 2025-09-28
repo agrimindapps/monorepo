@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 /// Serviço de notificações específico do GasOMeter
 class GasOMeterNotificationService {
-  static final GasOMeterNotificationService _instance = GasOMeterNotificationService._internal();
   factory GasOMeterNotificationService() => _instance;
   GasOMeterNotificationService._internal();
+  static final GasOMeterNotificationService _instance = GasOMeterNotificationService._internal();
 
   static const String _appName = 'GasOMeter';
   static const int _primaryColor = 0xFF2196F3; // Azul combustível

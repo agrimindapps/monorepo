@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 import '../providers/home_pragas_provider.dart';
 
 /// Widget para exibir grid de estatísticas/categorias na home de pragas

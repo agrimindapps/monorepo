@@ -1,8 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/extensions/user_entity_gasometer_extension.dart';
@@ -10,30 +7,34 @@ import '../../../../core/extensions/user_entity_gasometer_extension.dart';
 abstract class AuthRemoteDataSource {
   Stream<UserEntity?> watchAuthState();
   Future<UserEntity?> getCurrentUser();
-  
+
   // Sign In
   Future<UserEntity> signInWithEmail(String email, String password);
   Future<UserEntity> signInAnonymously();
-  
+
   // Sign Up
-  Future<UserEntity> signUpWithEmail(String email, String password, String? displayName);
-  
+  Future<UserEntity> signUpWithEmail(
+    String email,
+    String password,
+    String? displayName,
+  );
+
   // Profile Management
   Future<UserEntity> updateProfile(String? displayName, String? photoUrl);
   Future<void> updateEmail(String newEmail);
   Future<void> updatePassword(String newPassword);
   Future<void> sendEmailVerification();
-  
+
   // Password Reset
   Future<void> sendPasswordResetEmail(String email);
-  
+
   // Account Conversion
   Future<UserEntity> linkAnonymousWithEmail(String email, String password);
-  
+
   // Sign Out
   Future<void> signOut();
   Future<void> deleteAccount();
-  
+
   // Firestore user data
   Future<void> saveUserToFirestore(UserEntity user);
   Future<UserEntity?> getUserFromFirestore(String userId);
@@ -41,13 +42,10 @@ abstract class AuthRemoteDataSource {
 
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+
+  AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore);
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
-
-  AuthRemoteDataSourceImpl(
-    this._firebaseAuth,
-    this._firestore,
-  );
 
   @override
   Stream<UserEntity?> watchAuthState() {
@@ -66,7 +64,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) return null;
-      
+
       return UserEntityGasometerExtension.fromFirebaseUser(user);
     } catch (e) {
       throw ServerException('Failed to get current user: $e');
@@ -85,34 +83,42 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthenticationException('No user returned from sign in');
       }
 
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(credential.user!);
-      
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
+        credential.user!,
+      );
+
       // Save/update user data in Firestore
       await saveUserToFirestore(userModel);
-      
+
       return userModel;
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('🔥 Firebase Auth Error - Code: ${e.code}, Message: ${e.message}');
+        debugPrint(
+          '🔥 Firebase Auth Error - Code: ${e.code}, Message: ${e.message}',
+        );
       }
-      
+
       // Handle specific Firebase Auth error codes
       switch (e.code) {
         case 'too-many-requests':
           if (kDebugMode) {
-            debugPrint('🔥 Firebase rate limiting detected - too-many-requests');
+            debugPrint(
+              '🔥 Firebase rate limiting detected - too-many-requests',
+            );
           }
-          throw AuthenticationException('FIREBASE BLOQUEIO: Muitas tentativas. Tente novamente mais tarde.');
+          throw const AuthenticationException(
+            'FIREBASE BLOQUEIO: Muitas tentativas. Tente novamente mais tarde.',
+          );
         case 'user-disabled':
-          throw AuthenticationException('Esta conta foi desabilitada.');
+          throw const AuthenticationException('Esta conta foi desabilitada.');
         case 'user-not-found':
-          throw AuthenticationException('Email não encontrado.');
+          throw const AuthenticationException('Email não encontrado.');
         case 'wrong-password':
-          throw AuthenticationException('Senha incorreta.');
+          throw const AuthenticationException('Senha incorreta.');
         case 'invalid-email':
-          throw AuthenticationException('Email inválido.');
+          throw const AuthenticationException('Email inválido.');
         case 'operation-not-allowed':
-          throw AuthenticationException('Operação não permitida.');
+          throw const AuthenticationException('Operação não permitida.');
         default:
           throw AuthenticationException('Erro de autenticação: ${e.message}');
       }
@@ -121,17 +127,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-
   @override
   Future<UserEntity> signInAnonymously() async {
     try {
       final userCredential = await _firebaseAuth.signInAnonymously();
-      
+
       if (userCredential.user == null) {
-        throw const AuthenticationException('No user returned from anonymous sign in');
+        throw const AuthenticationException(
+          'No user returned from anonymous sign in',
+        );
       }
 
-      return UserEntityGasometerExtension.fromFirebaseUser(userCredential.user!);
+      return UserEntityGasometerExtension.fromFirebaseUser(
+        userCredential.user!,
+      );
     } on FirebaseAuthException catch (e) {
       throw AuthenticationException('Anonymous sign in failed: ${e.message}');
     } catch (e) {
@@ -140,7 +149,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserEntity> signUpWithEmail(String email, String password, String? displayName) async {
+  Future<UserEntity> signUpWithEmail(
+    String email,
+    String password,
+    String? displayName,
+  ) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -157,11 +170,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         await credential.user!.reload();
       }
 
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(credential.user!);
-      
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
+        credential.user!,
+      );
+
       // Save user data in Firestore
       await saveUserToFirestore(userModel);
-      
+
       return userModel;
     } on FirebaseAuthException catch (e) {
       throw AuthenticationException('Sign up failed: ${e.message}');
@@ -171,7 +186,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserEntity> updateProfile(String? displayName, String? photoUrl) async {
+  Future<UserEntity> updateProfile(
+    String? displayName,
+    String? photoUrl,
+  ) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null) {
@@ -183,11 +201,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await user.reload();
 
       final updatedUser = _firebaseAuth.currentUser!;
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(updatedUser);
-      
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
+        updatedUser,
+      );
+
       // Update user data in Firestore
       await saveUserToFirestore(userModel);
-      
+
       return userModel;
     } on FirebaseAuthException catch (e) {
       throw AuthenticationException('Profile update failed: ${e.message}');
@@ -256,25 +276,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserEntity> linkAnonymousWithEmail(String email, String password) async {
+  Future<UserEntity> linkAnonymousWithEmail(
+    String email,
+    String password,
+  ) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user == null || !user.isAnonymous) {
         throw const AuthenticationException('No anonymous user to link');
       }
 
-      final credential = EmailAuthProvider.credential(email: email, password: password);
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
       final userCredential = await user.linkWithCredential(credential);
-      
+
       if (userCredential.user == null) {
         throw const AuthenticationException('No user returned from linking');
       }
 
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(userCredential.user!);
-      
+      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
+        userCredential.user!,
+      );
+
       // Save user data in Firestore
       await saveUserToFirestore(userModel);
-      
+
       return userModel;
     } on FirebaseAuthException catch (e) {
       throw AuthenticationException('Account linking failed: ${e.message}');
@@ -282,7 +310,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException('Unexpected account linking error: $e');
     }
   }
-
 
   @override
   Future<void> signOut() async {
@@ -303,7 +330,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Delete user data from Firestore first
       await _firestore.collection('users').doc(user.uid).delete();
-      
+
       // Delete the user account
       await user.delete();
     } on FirebaseAuthException catch (e) {
@@ -329,9 +356,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserEntity?> getUserFromFirestore(String userId) async {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
-      
+
       if (!doc.exists) return null;
-      
+
       return UserEntityGasometerExtension.fromFirestore(doc);
     } catch (e) {
       throw ServerException('Failed to get user from Firestore: $e');

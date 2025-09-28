@@ -177,9 +177,9 @@ class RenavamInputFormatter extends TextInputFormatter {
 
 /// Formatador para números decimais com vírgula brasileira
 class DecimalInputFormatter extends TextInputFormatter {
-  final int decimalPlaces;
   
   DecimalInputFormatter({this.decimalPlaces = 2});
+  final int decimalPlaces;
   
   @override
   TextEditingValue formatEditUpdate(

@@ -15,9 +15,9 @@ import 'expense_type_selector.dart';
 
 /// Widget principal do formulário de despesas
 class ExpenseFormView extends StatelessWidget {
-  final ExpenseFormProvider formProvider;
 
   const ExpenseFormView({super.key, required this.formProvider});
+  final ExpenseFormProvider formProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +236,7 @@ class ExpenseFormView extends StatelessWidget {
               children: [
                 // Status de validação
                 Container(
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: GasometerDesignTokens.spacingSm,
                     vertical: GasometerDesignTokens.spacingXs,
                   ),
@@ -271,7 +271,7 @@ class ExpenseFormView extends StatelessWidget {
                 // Indicador de valor alto
                 if (model.isHighValue)
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: GasometerDesignTokens.spacingSm,
                       vertical: GasometerDesignTokens.spacingXs,
                     ),
@@ -302,7 +302,7 @@ class ExpenseFormView extends StatelessWidget {
                 if (model.isRecurring) ...[
                   const SizedBox(width: GasometerDesignTokens.spacingSm),
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: GasometerDesignTokens.spacingSm,
                       vertical: GasometerDesignTokens.spacingXs,
                     ),
@@ -338,7 +338,7 @@ class ExpenseFormView extends StatelessWidget {
 
   Widget _buildSummaryRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: GasometerDesignTokens.spacingXs),
+      padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingXs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -346,7 +346,7 @@ class ExpenseFormView extends StatelessWidget {
             width: 80,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeCaption,
                 color: GasometerDesignTokens.colorTextSecondary,
               ),
@@ -355,7 +355,7 @@ class ExpenseFormView extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
                 color: GasometerDesignTokens.colorTextPrimary,
               ),

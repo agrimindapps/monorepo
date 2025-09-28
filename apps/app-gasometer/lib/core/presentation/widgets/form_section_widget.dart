@@ -8,23 +8,6 @@ import 'standard_card.dart';
 /// Encapsula campos relacionados em cards padronizados
 /// com título opcional e espaçamento semântico.
 class FormSectionWidget extends StatelessWidget {
-  /// Título da seção
-  final String? title;
-  
-  /// Ícone do título
-  final IconData? titleIcon;
-  
-  /// Cor do ícone
-  final Color? titleIconColor;
-  
-  /// Conteúdo da seção (campos do formulário)
-  final Widget content;
-  
-  /// Margin externa do card
-  final EdgeInsets? margin;
-  
-  /// Se deve mostrar border ao redor do card
-  final bool showBorder;
 
   const FormSectionWidget({
     super.key,
@@ -67,6 +50,23 @@ class FormSectionWidget extends StatelessWidget {
       showBorder: showBorder,
     );
   }
+  /// Título da seção
+  final String? title;
+  
+  /// Ícone do título
+  final IconData? titleIcon;
+  
+  /// Cor do ícone
+  final Color? titleIconColor;
+  
+  /// Conteúdo da seção (campos do formulário)
+  final Widget content;
+  
+  /// Margin externa do card
+  final EdgeInsets? margin;
+  
+  /// Se deve mostrar border ao redor do card
+  final bool showBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +91,6 @@ class FormSectionWidget extends StatelessWidget {
 
 /// Widget para agrupamento de campos em linha
 class FormFieldRow extends StatelessWidget {
-  /// Campos a serem organizados em linha
-  final List<Widget> children;
-  
-  /// Espaçamento entre os campos
-  final double spacing;
 
   const FormFieldRow({
     super.key,
@@ -108,10 +103,15 @@ class FormFieldRow extends StatelessWidget {
     required List<Widget> children,
   }) {
     return FormFieldRow(
-      children: children,
       spacing: GasometerDesignTokens.spacingLg,
+      children: children,
     );
   }
+  /// Campos a serem organizados em linha
+  final List<Widget> children;
+  
+  /// Espaçamento entre os campos
+  final double spacing;
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +133,6 @@ class FormFieldRow extends StatelessWidget {
 
 /// Widget para espaçamento vertical entre elementos de formulário
 class FormSpacing extends StatelessWidget {
-  /// Altura do espaçamento
-  final double height;
 
   const FormSpacing({
     super.key,
@@ -143,23 +141,25 @@ class FormSpacing extends StatelessWidget {
 
   /// Espaçamento pequeno
   factory FormSpacing.small() {
-    return FormSpacing(height: GasometerDesignTokens.spacingSm);
+    return const FormSpacing(height: GasometerDesignTokens.spacingSm);
   }
 
   /// Espaçamento médio
   factory FormSpacing.medium() {
-    return FormSpacing(height: GasometerDesignTokens.spacingMd);
+    return const FormSpacing(height: GasometerDesignTokens.spacingMd);
   }
 
   /// Espaçamento grande
   factory FormSpacing.large() {
-    return FormSpacing(height: GasometerDesignTokens.spacingLg);
+    return const FormSpacing(height: GasometerDesignTokens.spacingLg);
   }
 
   /// Espaçamento entre seções
   factory FormSpacing.section() {
-    return FormSpacing(height: GasometerDesignTokens.spacingSectionSpacing);
+    return const FormSpacing(height: GasometerDesignTokens.spacingSectionSpacing);
   }
+  /// Altura do espaçamento
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -169,17 +169,6 @@ class FormSpacing extends StatelessWidget {
 
 /// Widget para botões de ação em formulários
 class FormActionButtons extends StatelessWidget {
-  /// Botão primário (ex: Salvar)
-  final Widget primaryButton;
-  
-  /// Botão secundário opcional (ex: Cancelar)
-  final Widget? secondaryButton;
-  
-  /// Alinhamento dos botões
-  final MainAxisAlignment alignment;
-  
-  /// Espaçamento entre os botões
-  final double spacing;
 
   const FormActionButtons({
     super.key,
@@ -200,6 +189,17 @@ class FormActionButtons extends StatelessWidget {
       spacing: GasometerDesignTokens.spacingLg,
     );
   }
+  /// Botão primário (ex: Salvar)
+  final Widget primaryButton;
+  
+  /// Botão secundário opcional (ex: Cancelar)
+  final Widget? secondaryButton;
+  
+  /// Alinhamento dos botões
+  final MainAxisAlignment alignment;
+  
+  /// Espaçamento entre os botões
+  final double spacing;
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/errors/failures.dart';
+import 'package:core/core.dart';
+import '../../../../core/errors/failures.dart' as app_failures;
 import '../../../../core/repositories/favoritos_hive_repository.dart';
 import '../../../../core/utils/typedef.dart';
 import '../../domain/entities/favorito_entity.dart';
@@ -34,10 +34,10 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       if (success) {
         return Right(favorito.id);
       } else {
-        return const Left(CacheFailure('Falha ao adicionar favorito'));
+        return const Left(app_failures.CacheFailure('Falha ao adicionar favorito'));
       }
     } catch (e) {
-      return Left(CacheFailure('Erro ao adicionar favorito: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao adicionar favorito: ${e.toString()}'));
     }
   }
 
@@ -49,48 +49,76 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       if (success) {
         return const Right(null);
       } else {
-        return const Left(CacheFailure('Falha ao remover favorito'));
+        return const Left(app_failures.CacheFailure('Falha ao remover favorito'));
       }
     } catch (e) {
-      return Left(CacheFailure('Erro ao remover favorito: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao remover favorito: ${e.toString()}'));
     }
   }
 
   @override
   ResultFuture<bool> isFavorito(String itemId, String tipo) async {
     try {
-      final isFavorited = _hiveRepository.isFavorito(tipo, itemId);
+      final isFavorited = await _hiveRepository.isFavorito(tipo, itemId);
       return Right(isFavorited);
     } catch (e) {
-      return Left(CacheFailure('Erro ao verificar favorito: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao verificar favorito: ${e.toString()}'));
     }
   }
 
   @override
   ResultFuture<List<FavoritoEntity>> getFavoritosByTipo(String tipo) async {
     try {
-      // O FavoritosHiveRepository não tem método específico por tipo,
-      // então vamos implementar uma versão simplificada
+      final hiveFavoritos = await _hiveRepository.getFavoritosByTipoAsync(tipo);
       final favoritos = <FavoritoEntity>[];
       
-      // Por simplicidade, retornamos uma lista vazia por enquanto
-      // Em uma implementação real, precisaríamos iterar pelos dados do Hive
+      for (final hiveFavorito in hiveFavoritos) {
+        final data = await _hiveRepository.getFavoritoDataAsync(tipo, hiveFavorito.itemId);
+        if (data != null) {
+          favoritos.add(FavoritoEntity(
+            id: hiveFavorito.objectId,
+            itemId: hiveFavorito.itemId,
+            tipo: hiveFavorito.tipo,
+            nome: data['nome']?.toString() ?? '',
+            fabricante: data['fabricante']?.toString(),
+            cultura: data['cultura']?.toString(),
+            metadata: data,
+            createdAt: DateTime.fromMillisecondsSinceEpoch(hiveFavorito.createdAt),
+          ));
+        }
+      }
+      
       return Right(favoritos);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar favoritos por tipo: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao buscar favoritos por tipo: ${e.toString()}'));
     }
   }
 
   @override
   ResultFuture<List<FavoritoEntity>> getAllFavoritos() async {
     try {
+      final hiveFavoritos = await _hiveRepository.getAllAsync();
       final favoritos = <FavoritoEntity>[];
       
-      // Por simplicidade, retornamos uma lista vazia por enquanto
-      // Em uma implementação real, precisaríamos iterar pelos dados do Hive
+      for (final hiveFavorito in hiveFavoritos) {
+        final data = await _hiveRepository.getFavoritoDataAsync(hiveFavorito.tipo, hiveFavorito.itemId);
+        if (data != null) {
+          favoritos.add(FavoritoEntity(
+            id: hiveFavorito.objectId,
+            itemId: hiveFavorito.itemId,
+            tipo: hiveFavorito.tipo,
+            nome: data['nome']?.toString() ?? '',
+            fabricante: data['fabricante']?.toString(),
+            cultura: data['cultura']?.toString(),
+            metadata: data,
+            createdAt: DateTime.fromMillisecondsSinceEpoch(hiveFavorito.createdAt),
+          ));
+        }
+      }
+      
       return Right(favoritos);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar todos os favoritos: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao buscar todos os favoritos: ${e.toString()}'));
     }
   }
 
@@ -101,11 +129,21 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
         return const Right([]);
       }
 
-      // Por simplicidade, retornamos uma lista vazia por enquanto
-      final favoritos = <FavoritoEntity>[];
-      return Right(favoritos);
+      final allFavoritosResult = await getAllFavoritos();
+      return allFavoritosResult.fold(
+        (failure) => Left(failure),
+        (favoritos) {
+          final filteredFavoritos = favoritos.where((favorito) {
+            final lowerQuery = query.toLowerCase();
+            return favorito.nome.toLowerCase().contains(lowerQuery) ||
+                   (favorito.fabricante?.toLowerCase().contains(lowerQuery) ?? false) ||
+                   (favorito.cultura?.toLowerCase().contains(lowerQuery) ?? false);
+          }).toList();
+          return Right(filteredFavoritos);
+        },
+      );
     } catch (e) {
-      return Left(CacheFailure('Erro ao pesquisar favoritos: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao pesquisar favoritos: ${e.toString()}'));
     }
   }
 
@@ -114,8 +152,11 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
     try {
       // Como não temos stream nativo, simulamos com refresh periódico
       while (true) {
-        final favoritos = <FavoritoEntity>[];
-        yield favoritos;
+        final favoritosResult = await getAllFavoritos();
+        yield favoritosResult.fold(
+          (failure) => <FavoritoEntity>[],
+          (favoritos) => favoritos,
+        );
         
         // Aguarda 5 segundos antes do próximo refresh
         await Future<void>.delayed(const Duration(seconds: 5));
@@ -128,21 +169,23 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
   @override
   ResultFuture<int> countFavoritosByTipo(String tipo) async {
     try {
-      // Por simplicidade, retornamos 0 por enquanto
-      return const Right(0);
+      final hiveFavoritos = await _hiveRepository.getFavoritosByTipoAsync(tipo);
+      return Right(hiveFavoritos.length);
     } catch (e) {
-      return Left(CacheFailure('Erro ao contar favoritos: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao contar favoritos: ${e.toString()}'));
     }
   }
 
   @override
   ResultFuture<void> clearAllFavoritos() async {
     try {
-      // O FavoritosHiveRepository não tem método específico para limpar todos,
-      // então por enquanto retornamos sucesso
+      final stats = await _hiveRepository.getFavoritosStats();
+      for (final tipo in stats.keys) {
+        await _hiveRepository.clearFavoritosByTipo(tipo);
+      }
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao limpar favoritos: ${e.toString()}'));
+      return Left(app_failures.CacheFailure('Erro ao limpar favoritos: ${e.toString()}'));
     }
   }
 }

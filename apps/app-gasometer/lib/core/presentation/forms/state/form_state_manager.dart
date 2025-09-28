@@ -11,6 +11,22 @@ import 'form_state.dart';
 /// Single Responsibility Principle by focusing solely on state management.
 /// It provides reactive state updates and validation integration.
 class FormStateManager<T> implements IFormStateManager<T> {
+  
+  FormStateManager({
+    T? initialData,
+    this.validationDebounce = const Duration(milliseconds: 300),
+    this.autoSaveEnabled = false,
+    this.autoSaveInterval = const Duration(seconds: 30),
+    this.onAutoSave,
+  }) : _currentState = FormState<T>.initial(initialData: initialData),
+       _stateController = StreamController<FormState<T>>.broadcast(),
+       _tracker = FormStateTracker<T>() {
+    
+    // Start auto-save if enabled
+    if (autoSaveEnabled && onAutoSave != null) {
+      _startAutoSave();
+    }
+  }
   FormState<T> _currentState;
   final StreamController<FormState<T>> _stateController;
   final Map<String, FormState<T>> _snapshots = {};
@@ -29,22 +45,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
   final bool autoSaveEnabled;
   final Duration autoSaveInterval;
   final Future<void> Function(T data)? onAutoSave;
-  
-  FormStateManager({
-    T? initialData,
-    this.validationDebounce = const Duration(milliseconds: 300),
-    this.autoSaveEnabled = false,
-    this.autoSaveInterval = const Duration(seconds: 30),
-    this.onAutoSave,
-  }) : _currentState = FormState<T>.initial(initialData: initialData),
-       _stateController = StreamController<FormState<T>>.broadcast(),
-       _tracker = FormStateTracker<T>() {
-    
-    // Start auto-save if enabled
-    if (autoSaveEnabled && onAutoSave != null) {
-      _startAutoSave();
-    }
-  }
   
   @override
   FormState<T> get currentState => _currentState;
@@ -301,7 +301,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
 /// This class wraps FormStateManager to provide ChangeNotifier compatibility
 /// for use with Flutter Provider package.
 class ProviderFormStateManager<T> extends ChangeNotifier {
-  late final FormStateManager<T> _manager;
   
   ProviderFormStateManager({
     T? initialData,
@@ -320,31 +319,6 @@ class ProviderFormStateManager<T> extends ChangeNotifier {
     
     // Listen to state changes and notify ChangeNotifier
     _manager.addListener((state) => notifyListeners());
-  }
-  
-  // Expose manager interface
-  FormState<T> get currentState => _manager.currentState;
-  Stream<FormState<T>> get stateStream => _manager.stateStream;
-  bool get canSubmit => _manager.canSubmit;
-  bool get hasUnsavedChanges => _manager.hasUnsavedChanges;
-  
-  // Delegate methods
-  Future<void> updateField(String fieldName, dynamic value) => _manager.updateField(fieldName, value);
-  Future<void> updateFields(Map<String, dynamic> fieldUpdates) => _manager.updateFields(fieldUpdates);
-  Future<void> setFormData(T data) => _manager.setFormData(data);
-  Future<void> reset() => _manager.reset();
-  Future<void> markDirty() => _manager.markDirty();
-  Future<void> markClean() => _manager.markClean();
-  Future<void> setLoading(bool isLoading) => _manager.setLoading(isLoading);
-  Future<void> setError(String? error) => _manager.setError(error);
-  Future<void> setValidationResult(FormValidationResult result) => _manager.setValidationResult(result);
-  void saveSnapshot(String key) => _manager.saveSnapshot(key);
-  Future<void> restoreSnapshot(String key) => _manager.restoreSnapshot(key);
-  
-  @override
-  void dispose() {
-    _manager.dispose();
-    super.dispose();
   }
   
   /// Create a provider-compatible state manager with validation
@@ -376,6 +350,32 @@ class ProviderFormStateManager<T> extends ChangeNotifier {
     }
     
     return manager;
+  }
+  late final FormStateManager<T> _manager;
+  
+  // Expose manager interface
+  FormState<T> get currentState => _manager.currentState;
+  Stream<FormState<T>> get stateStream => _manager.stateStream;
+  bool get canSubmit => _manager.canSubmit;
+  bool get hasUnsavedChanges => _manager.hasUnsavedChanges;
+  
+  // Delegate methods
+  Future<void> updateField(String fieldName, dynamic value) => _manager.updateField(fieldName, value);
+  Future<void> updateFields(Map<String, dynamic> fieldUpdates) => _manager.updateFields(fieldUpdates);
+  Future<void> setFormData(T data) => _manager.setFormData(data);
+  Future<void> reset() => _manager.reset();
+  Future<void> markDirty() => _manager.markDirty();
+  Future<void> markClean() => _manager.markClean();
+  Future<void> setLoading(bool isLoading) => _manager.setLoading(isLoading);
+  Future<void> setError(String? error) => _manager.setError(error);
+  Future<void> setValidationResult(FormValidationResult result) => _manager.setValidationResult(result);
+  void saveSnapshot(String key) => _manager.saveSnapshot(key);
+  Future<void> restoreSnapshot(String key) => _manager.restoreSnapshot(key);
+  
+  @override
+  void dispose() {
+    _manager.dispose();
+    super.dispose();
   }
 }
 

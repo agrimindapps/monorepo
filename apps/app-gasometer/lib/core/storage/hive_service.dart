@@ -2,19 +2,19 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Generated Adapters - Using existing gasometer models
 import '../../core/data/models/category_model.dart';
-import '../../features/vehicles/data/models/vehicle_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
-import '../../features/odometer/data/models/odometer_model.dart';
-import '../../features/expenses/data/models/expense_model.dart';
-import '../../features/maintenance/data/models/maintenance_model.dart';
 import '../../core/logging/entities/log_entry.dart';
+import '../../features/expenses/data/models/expense_model.dart';
+import '../../features/fuel/data/models/fuel_supply_model.dart';
+import '../../features/maintenance/data/models/maintenance_model.dart';
+import '../../features/odometer/data/models/odometer_model.dart';
+import '../../features/vehicles/data/models/vehicle_model.dart';
 
 /// Serviço centralizado para inicialização e gerenciamento do Hive
 class HiveService {
-  static HiveService? _instance;
-  static HiveService get instance => _instance ??= HiveService._();
 
   HiveService._();
+  static HiveService? _instance;
+  static HiveService get instance => _instance ??= HiveService._();
 
   /// Inicializa o Hive e registra todos os adapters
   Future<void> init() async {

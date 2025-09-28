@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/services/app_data_manager.dart';
@@ -14,15 +14,19 @@ import '../providers/pragas_provider.dart';
 /// - Controle de carrossel de sugestões
 /// - Estados de loading e erro específicos da home
 class HomePragasProvider extends ChangeNotifier {
-  final PragasProvider _pragasProvider;
-  final CulturaHiveRepository _culturaRepository;
-  final IAppDataManager _appDataManager;
+  late final PragasProvider _pragasProvider;
+  late final CulturaHiveRepository _culturaRepository;
+  late final IAppDataManager _appDataManager;
 
-  HomePragasProvider()
-      : _pragasProvider = GetIt.instance<PragasProvider>(),
-        _culturaRepository = GetIt.instance<CulturaHiveRepository>(),
-        _appDataManager = GetIt.instance<IAppDataManager>() {
+  HomePragasProvider() {
+    _initializeDependencies();
     _initialize();
+  }
+
+  void _initializeDependencies() {
+    _pragasProvider = GetIt.instance<PragasProvider>();
+    _culturaRepository = GetIt.instance<CulturaHiveRepository>();
+    _appDataManager = GetIt.instance<IAppDataManager>();
   }
 
   // Estados de inicialização
@@ -81,8 +85,11 @@ class HomePragasProvider extends ChangeNotifier {
   /// Carrega dados de culturas do repositório
   Future<void> _loadCulturaData() async {
     try {
-      final culturas = _culturaRepository.getAll();
-      _totalCulturas = culturas.length;
+      final culturasResult = await _culturaRepository.getAll();
+      culturasResult.fold(
+        (failure) => _totalCulturas = 0,
+        (culturas) => _totalCulturas = culturas.length,
+      );
     } catch (e) {
       _totalCulturas = 0;
     }

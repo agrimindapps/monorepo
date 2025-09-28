@@ -1,9 +1,6 @@
 /// Resultado de validação com suporte para mensagens de erro e aviso
 /// Usado em todo o sistema de validação do app
 class ValidationResult {
-  final bool isValid;
-  final String message;
-  final ValidationSeverity severity;
 
   const ValidationResult._({
     required this.isValid,
@@ -46,6 +43,9 @@ class ValidationResult {
       severity: ValidationSeverity.info,
     );
   }
+  final bool isValid;
+  final String message;
+  final ValidationSeverity severity;
 
   /// Check if result has a warning
   bool get isWarning => severity == ValidationSeverity.warning;

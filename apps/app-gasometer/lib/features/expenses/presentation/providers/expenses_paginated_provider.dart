@@ -10,6 +10,8 @@ import '../../domain/services/expense_statistics_service.dart';
 /// Provider especializado em paginação eficiente de despesas
 /// Implementa real pagination sem carregar todos os dados em memória
 class ExpensesPaginatedProvider extends BaseProvider with PaginatedProviderMixin<ExpenseEntity> {
+
+  ExpensesPaginatedProvider(this._repository);
   final IExpensesRepository _repository;
   final ExpenseStatisticsService _statisticsService = ExpenseStatisticsService();
 
@@ -22,8 +24,6 @@ class ExpensesPaginatedProvider extends BaseProvider with PaginatedProviderMixin
   
   // Statistics cache for current filter set
   Map<String, dynamic>? _cachedStats;
-
-  ExpensesPaginatedProvider(this._repository);
 
   // Getters públicos
   ExpenseFiltersConfig get filtersConfig => _filtersConfig;

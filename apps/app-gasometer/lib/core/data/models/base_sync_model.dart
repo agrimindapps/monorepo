@@ -1,14 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 // ignore: must_be_immutable
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
-  void removeFromHive() {
-    // Stub implementation to satisfy HiveObjectMixin
-  }
   BaseSyncModel({
     required super.id,
     super.createdAt,
@@ -20,6 +15,9 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
     super.userId,
     super.moduleName = 'gasometer',
   });
+  void removeFromHive() {
+    // Stub implementation to satisfy HiveObjectMixin
+  }
 
   /// Convert to Hive-compatible map (using millisecond timestamps)
   Map<String, dynamic> toHiveMap() {

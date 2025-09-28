@@ -7,9 +7,9 @@ import '../repositories/auth_repository.dart';
 
 @lazySingleton
 class SignOut implements NoParamsUseCase<Unit> {
-  final AuthRepository repository;
 
   SignOut(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, Unit>> call() async {

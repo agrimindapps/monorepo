@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
+import 'package:core/core.dart';
+
 import '../providers/tab_controller_provider.dart';
 
 /// Widget otimizado para TabBar sem AnimatedBuilder desnecessário

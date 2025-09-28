@@ -1,21 +1,30 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/app_error.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
-import '../../core/constants/expense_constants.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_statistics_service.dart';
 import '../../domain/services/expense_validation_service.dart';
 import '../models/expense_form_model.dart';
 
 /// Provider principal para gerenciar estado e operações de despesas
+@injectable
 class ExpensesProvider extends BaseProvider {
+  ExpensesProvider(
+    this._repository,
+    this._vehiclesProvider,
+  ) {
+    _initialize();
+  }
+  
   final IExpensesRepository _repository;
   final VehiclesProvider _vehiclesProvider;
   final ExpenseValidationService _validator = const ExpenseValidationService();
@@ -33,13 +42,6 @@ class ExpensesProvider extends BaseProvider {
   // Estado de estatísticas
   Map<String, dynamic> _stats = {};
   ExpensePatternAnalysis? _patternAnalysis;
-
-  ExpensesProvider(
-    this._repository,
-    this._vehiclesProvider,
-  ) {
-    _initialize();
-  }
 
   // Getters públicos
   List<ExpenseEntity> get expenses => _filteredExpenses;

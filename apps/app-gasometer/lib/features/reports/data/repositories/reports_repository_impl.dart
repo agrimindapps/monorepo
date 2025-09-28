@@ -10,9 +10,9 @@ import '../datasources/reports_data_source.dart';
 
 @LazySingleton(as: ReportsRepository)
 class ReportsRepositoryImpl implements ReportsRepository {
-  final ReportsDataSource _dataSource;
 
   ReportsRepositoryImpl(this._dataSource);
+  final ReportsDataSource _dataSource;
 
   @override
   Future<Either<Failure, ReportSummaryEntity>> generateMonthlyReport(String vehicleId, DateTime month) async {

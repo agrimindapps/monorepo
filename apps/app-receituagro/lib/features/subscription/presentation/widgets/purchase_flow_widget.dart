@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../providers/subscription_provider.dart';
@@ -305,7 +305,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      feature as String,
+                      feature,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -457,7 +457,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
     final theme = Theme.of(context);
     
     return GestureDetector(
-      onTap: () => _selectPlan((plan as Map<String, dynamic>)['id'] as String),
+      onTap: () => _selectPlan(plan['id'] as String),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -493,14 +493,14 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        (plan as Map<String, dynamic>)['title'] as String,
+                        plan['title'] as String,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        (plan as Map<String, dynamic>)['description'] as String,
+                        plan['description'] as String,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -514,14 +514,14 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      (plan as Map<String, dynamic>)['priceString'] as String,
+                      plan['priceString'] as String,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.primary,
                       ),
                     ),
                     Text(
-                      '/ ${(plan as Map<String, dynamic>)['period'] as String}',
+                      '/ ${plan['period'] as String}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -532,7 +532,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
             ),
             
             // Promotional Badge
-            if ((plan as Map<String, dynamic>)['isPromotional'] as bool) ...[
+            if (plan['isPromotional'] as bool) ...[
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/praga_entity.dart';

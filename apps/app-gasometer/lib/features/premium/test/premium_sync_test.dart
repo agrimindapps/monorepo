@@ -9,12 +9,12 @@ import '../domain/entities/premium_status.dart';
 ///
 /// Para ser executado durante desenvolvimento para validar o sistema de sync
 class PremiumSyncTest {
+
+  PremiumSyncTest(this._syncService);
   final PremiumSyncService _syncService;
 
   StreamSubscription<PremiumStatus>? _statusSubscription;
   StreamSubscription<PremiumSyncEvent>? _eventsSubscription;
-
-  PremiumSyncTest(this._syncService);
 
   /// Executa teste completo de sincronização
   Future<void> runCompleteTest() async {

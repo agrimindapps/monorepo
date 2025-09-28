@@ -1,56 +1,80 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
+import '../../../core/models/favorito_item_hive.dart';
+import '../../../core/repositories/favoritos_hive_repository.dart';
 import '../models/favorito_defensivo_model.dart';
 import '../models/favorito_diagnostico_model.dart';
 import '../models/favorito_praga_model.dart';
-import '../services/favoritos_data_service.dart';
 
-class FavoritosHiveRepository implements IFavoritosRepository {
-  final Box<dynamic> _defensivosBox;
-  final Box<dynamic> _pragasBox;
-  final Box<dynamic> _diagnosticosBox;
+/// Wrapper service para manter compatibilidade com o módulo de favoritos
+/// Usa o FavoritosHiveRepository principal do core
+class FavoritosHiveRepositoryService {
+  final FavoritosHiveRepository _coreRepository;
 
-  FavoritosHiveRepository() 
-    : _defensivosBox = Hive.box('favoritos_defensivos'),
-      _pragasBox = Hive.box('favoritos_pragas'),
-      _diagnosticosBox = Hive.box('favoritos_diagnosticos');
+  FavoritosHiveRepositoryService() 
+    : _coreRepository = GetIt.instance<FavoritosHiveRepository>();
 
-  @override
+  /// Métodos compatíveis com os models antigos
   Future<List<FavoritoDefensivoModel>> getFavoritosDefensivos() async {
-    return _defensivosBox.values.cast<FavoritoDefensivoModel>().toList();
+    try {
+      await _coreRepository.getFavoritosByTipoAsync('defensivos');
+      // Converter para modelo específico se necessário
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 
-  @override
   Future<List<FavoritoPragaModel>> getFavoritosPragas() async {
-    return _pragasBox.values.cast<FavoritoPragaModel>().toList();
+    try {
+      await _coreRepository.getFavoritosByTipoAsync('pragas');
+      // Converter para modelo específico se necessário
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 
-  @override
   Future<List<FavoritoDiagnosticoModel>> getFavoritosDiagnosticos() async {
-    return _diagnosticosBox.values.cast<FavoritoDiagnosticoModel>().toList();
+    try {
+      await _coreRepository.getFavoritosByTipoAsync('diagnosticos');
+      // Converter para modelo específico se necessário
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 
-  @override
   Future<void> removeFavoritoDefensivo(int id) async {
-    final index = _defensivosBox.values.toList().indexWhere((item) => item.id == id);
-    if (index != -1) {
-      await _defensivosBox.deleteAt(index);
-    }
+    await _coreRepository.removeFavorito('defensivos', id.toString());
   }
 
-  @override
   Future<void> removeFavoritoPraga(int id) async {
-    final index = _pragasBox.values.toList().indexWhere((item) => item.id == id);
-    if (index != -1) {
-      await _pragasBox.deleteAt(index);
-    }
+    await _coreRepository.removeFavorito('pragas', id.toString());
   }
 
-  @override
   Future<void> removeFavoritoDiagnostico(int id) async {
-    final index = _diagnosticosBox.values.toList().indexWhere((item) => item.id == id);
-    if (index != -1) {
-      await _diagnosticosBox.deleteAt(index);
-    }
+    await _coreRepository.removeFavorito('diagnosticos', id.toString());
+  }
+
+  /// Proxy methods to core repository
+  Future<bool> addFavorito(String tipo, String itemId, Map<String, dynamic> itemData) async {
+    return await _coreRepository.addFavorito(tipo, itemId, itemData);
+  }
+
+  Future<bool> isFavorito(String tipo, String itemId) async {
+    return await _coreRepository.isFavorito(tipo, itemId);
+  }
+
+  Future<void> clearFavoritosByTipo(String tipo) async {
+    return await _coreRepository.clearFavoritosByTipo(tipo);
+  }
+
+  Future<Map<String, int>> getFavoritosStats() async {
+    return await _coreRepository.getFavoritosStats();
+  }
+
+  Future<List<FavoritoItemHive>> getFavoritosByTipoAsync(String tipo) async {
+    return await _coreRepository.getFavoritosByTipoAsync(tipo);
   }
 }

@@ -55,7 +55,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
       ),
       
       // Cor do veículo
-      TextFieldConfig(
+      const TextFieldConfig(
         key: 'cor',
         label: 'Cor',
         isRequired: true,
@@ -63,7 +63,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
       ),
       
       // Placa do veículo
-      TextFieldConfig(
+      const TextFieldConfig(
         key: 'placa',
         label: 'Placa',
         isRequired: true,
@@ -73,7 +73,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
       ),
       
       // Chassi do veículo
-      TextFieldConfig(
+      const TextFieldConfig(
         key: 'chassi',
         label: 'Chassi',
         isRequired: false,
@@ -83,7 +83,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
       ),
       
       // RENAVAM
-      TextFieldConfig(
+      const TextFieldConfig(
         key: 'renavam',
         label: 'RENAVAM',
         isRequired: false,
@@ -94,7 +94,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
       ),
       
       // Tipo de combustível
-      DropdownFieldConfig(
+      const DropdownFieldConfig(
         key: 'combustivel',
         label: 'Tipo de Combustível',
         isRequired: true,
@@ -111,7 +111,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
       ),
       
       // Odômetro inicial
-      NumberFieldConfig(
+      const NumberFieldConfig(
         key: 'odometro',
         label: 'Quilometragem Atual (km)',
         isRequired: true,

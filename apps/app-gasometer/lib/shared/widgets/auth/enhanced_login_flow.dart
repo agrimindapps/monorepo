@@ -9,13 +9,6 @@ import '../transitions/smooth_page_transition.dart';
 /// Widget que gerencia o fluxo completo de login melhorado
 /// Combina IntelligentLoading, SkeletonLoading e navegação suave
 class EnhancedLoginFlow extends StatefulWidget {
-  final VoidCallback? onLoginStart;
-  final VoidCallback? onLoginComplete;
-  final String destinationRoute;
-  final bool showSkeletonPreview;
-  final Duration skeletonDuration;
-  final List<LoadingStepConfig>? customSteps;
-  final Color? primaryColor;
 
   const EnhancedLoginFlow({
     super.key,
@@ -27,6 +20,13 @@ class EnhancedLoginFlow extends StatefulWidget {
     this.customSteps,
     this.primaryColor,
   });
+  final VoidCallback? onLoginStart;
+  final VoidCallback? onLoginComplete;
+  final String destinationRoute;
+  final bool showSkeletonPreview;
+  final Duration skeletonDuration;
+  final List<LoadingStepConfig>? customSteps;
+  final Color? primaryColor;
 
   /// Factory para fluxo de login padrão para veículos
   static EnhancedLoginFlow vehicles({
@@ -209,7 +209,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: LoadingDesignTokens.successColor.withOpacity(0.1),
+                  color: LoadingDesignTokens.successColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: LoadingDesignTokens.successColor,
@@ -223,7 +223,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
                 ),
               ),
               
-              SizedBox(height: LoadingDesignTokens.spacingLg),
+              const SizedBox(height: LoadingDesignTokens.spacingLg),
               
               // Texto de conclusão
               Text(
@@ -233,12 +233,12 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
                 ),
               ),
               
-              SizedBox(height: LoadingDesignTokens.spacingSm),
+              const SizedBox(height: LoadingDesignTokens.spacingSm),
               
               Text(
                 'Redirecionando...',
                 style: LoadingDesignTokens.bodyTextStyle.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -257,7 +257,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
         color: colors.surface,
         boxShadow: [
           BoxShadow(
-            color: colors.onSurface.withOpacity(0.1),
+            color: colors.onSurface.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -277,7 +277,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
             ),
           ),
           
-          SizedBox(width: LoadingDesignTokens.spacingMd),
+          const SizedBox(width: LoadingDesignTokens.spacingMd),
           
           // Texto de carregamento
           Expanded(
@@ -355,10 +355,6 @@ class EnhancedLoginFlowOverlay {
 
 /// Widget para substituir a tela de login existente
 class EnhancedLoginPage extends StatelessWidget {
-  final String destinationRoute;
-  final List<LoadingStepConfig>? customSteps;
-  final bool showSkeletonPreview;
-  final Color? primaryColor;
 
   const EnhancedLoginPage({
     super.key,
@@ -367,6 +363,10 @@ class EnhancedLoginPage extends StatelessWidget {
     this.showSkeletonPreview = true,
     this.primaryColor,
   });
+  final String destinationRoute;
+  final List<LoadingStepConfig>? customSteps;
+  final bool showSkeletonPreview;
+  final Color? primaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -381,14 +381,14 @@ class EnhancedLoginPage extends StatelessWidget {
 
 /// Controller para gerenciar o fluxo de login melhorado
 class EnhancedLoginFlowController {
-  static EnhancedLoginFlowController? _instance;
-  
-  EnhancedLoginFlowController._internal();
   
   factory EnhancedLoginFlowController() {
     _instance ??= EnhancedLoginFlowController._internal();
     return _instance!;
   }
+  
+  EnhancedLoginFlowController._internal();
+  static EnhancedLoginFlowController? _instance;
 
   /// Inicia fluxo de login melhorado após autenticação
   static Future<void> startAfterAuth(

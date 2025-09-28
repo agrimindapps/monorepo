@@ -8,11 +8,6 @@ import '../architecture/i_form_validator.dart';
 /// subclasses to implement specific field types. Follows Template Method
 /// pattern and Single Responsibility Principle.
 abstract class BaseFormField extends StatefulWidget {
-  final FieldConfig config;
-  final IFieldValidator? validator;
-  final void Function(String key, dynamic value)? onChanged;
-  final FocusNode? focusNode;
-  final bool autovalidate;
   
   const BaseFormField({
     super.key,
@@ -22,6 +17,11 @@ abstract class BaseFormField extends StatefulWidget {
     this.focusNode,
     this.autovalidate = false,
   });
+  final FieldConfig config;
+  final IFieldValidator? validator;
+  final void Function(String key, dynamic value)? onChanged;
+  final FocusNode? focusNode;
+  final bool autovalidate;
   
   @override
   BaseFormFieldState createState();
@@ -132,7 +132,7 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
     
     return RichText(
       text: TextSpan(
-        text: widget.config.label!,
+        text: widget.config.label,
         style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w500,
           color: theme.colorScheme.onSurface,
@@ -185,7 +185,7 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
     return Text(
       widget.config.hint!,
       style: theme.textTheme.bodySmall?.copyWith(
-        color: theme.colorScheme.onSurface.withOpacity(0.6),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
       ),
     );
   }

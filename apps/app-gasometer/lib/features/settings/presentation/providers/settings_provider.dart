@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Settings provider following SOLID principles
 /// 
@@ -164,8 +163,4 @@ class SettingsProvider extends ChangeNotifier {
   // CLEANUP
   // =========================================================================
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

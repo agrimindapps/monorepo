@@ -29,7 +29,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   void _onTabTapped(int index) {
     // Verificar se o contexto tem acesso ao GoRouter antes de navegar
     if (!mounted) return;
-    
+
     try {
       switch (index) {
         case 0:

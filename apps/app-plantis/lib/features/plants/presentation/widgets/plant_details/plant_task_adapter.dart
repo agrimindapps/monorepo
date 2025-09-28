@@ -2,18 +2,18 @@ import '../../../../tasks/domain/entities/task.dart' as task_entity;
 import '../../../domain/entities/plant_task.dart' as plant_task;
 
 /// Adaptador para converter entre PlantTask e Task entities
-/// 
+///
 /// Este adaptador permite reutilizar o TaskCompletionDialog (que espera Task)
 /// com PlantTasks da plant details section, mantendo compatibilidade.
-/// 
+///
 /// Implementação como mixin para evitar warning de classe sem instância.
 mixin PlantTaskAdapter {
   /// Converte PlantTask para Task entity
-  /// 
+  ///
   /// Necessário para usar TaskCompletionDialog que espera Task.
   /// Mapeia campos compatíveis e define valores padrão para campos específicos da Task.
   static task_entity.Task plantTaskToTask(
-    plant_task.PlantTask plantTask, 
+    plant_task.PlantTask plantTask,
     String plantName,
   ) {
     return task_entity.Task(
@@ -34,7 +34,7 @@ mixin PlantTaskAdapter {
       nextDueDate: plantTask.nextScheduledDate,
     );
   }
-  
+
   /// Mapeia TaskType de PlantTask para Task
   static task_entity.TaskType _mapTaskType(plant_task.TaskType plantTaskType) {
     switch (plantTaskType) {
@@ -52,9 +52,11 @@ mixin PlantTaskAdapter {
         return task_entity.TaskType.repotting;
     }
   }
-  
+
   /// Mapeia TaskStatus de PlantTask para Task
-  static task_entity.TaskStatus _mapTaskStatus(plant_task.TaskStatus plantTaskStatus) {
+  static task_entity.TaskStatus _mapTaskStatus(
+    plant_task.TaskStatus plantTaskStatus,
+  ) {
     switch (plantTaskStatus) {
       case plant_task.TaskStatus.pending:
         return task_entity.TaskStatus.pending;
@@ -64,12 +66,14 @@ mixin PlantTaskAdapter {
         return task_entity.TaskStatus.overdue;
     }
   }
-  
+
   /// Define prioridade baseada no tipo da tarefa
-  /// 
+  ///
   /// Rega e inspeção de pragas são alta prioridade,
   /// outros tipos são média prioridade.
-  static task_entity.TaskPriority _mapTaskPriority(plant_task.TaskType plantTaskType) {
+  static task_entity.TaskPriority _mapTaskPriority(
+    plant_task.TaskType plantTaskType,
+  ) {
     switch (plantTaskType) {
       case plant_task.TaskType.watering:
       case plant_task.TaskType.pestInspection:

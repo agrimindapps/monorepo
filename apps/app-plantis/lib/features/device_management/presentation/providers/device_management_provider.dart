@@ -1,6 +1,16 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide GetUserDevicesUseCase, ValidateDeviceUseCase, RevokeDeviceUseCase, RevokeAllOtherDevicesUseCase, DeviceValidationResult, ValidateDeviceParams, GetUserDevicesParams, RevokeDeviceParams, RevokeAllOtherDevicesParams;
+import 'package:core/core.dart'
+    hide
+        GetUserDevicesUseCase,
+        ValidateDeviceUseCase,
+        RevokeDeviceUseCase,
+        RevokeAllOtherDevicesUseCase,
+        DeviceValidationResult,
+        ValidateDeviceParams,
+        GetUserDevicesParams,
+        RevokeDeviceParams,
+        RevokeAllOtherDevicesParams;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -45,12 +55,12 @@ class DeviceManagementProvider extends ChangeNotifier {
     required RevokeAllOtherDevicesUseCase revokeAllOtherDevicesUseCase,
     required GetDeviceStatisticsUseCase getDeviceStatisticsUseCase,
     required AuthStateNotifier authStateNotifier,
-  })  : _getUserDevicesUseCase = getUserDevicesUseCase,
-        _validateDeviceUseCase = validateDeviceUseCase,
-        _revokeDeviceUseCase = revokeDeviceUseCase,
-        _revokeAllOtherDevicesUseCase = revokeAllOtherDevicesUseCase,
-        _getDeviceStatisticsUseCase = getDeviceStatisticsUseCase,
-        _authStateNotifier = authStateNotifier {
+  }) : _getUserDevicesUseCase = getUserDevicesUseCase,
+       _validateDeviceUseCase = validateDeviceUseCase,
+       _revokeDeviceUseCase = revokeDeviceUseCase,
+       _revokeAllOtherDevicesUseCase = revokeAllOtherDevicesUseCase,
+       _getDeviceStatisticsUseCase = getDeviceStatisticsUseCase,
+       _authStateNotifier = authStateNotifier {
     _initializeProvider();
   }
 
@@ -69,8 +79,10 @@ class DeviceManagementProvider extends ChangeNotifier {
   String? get revokingDeviceUuid => _revokingDeviceUuid;
 
   // Getters derivados
-  List<DeviceModel> get activeDevices => _devices.where((d) => d.isActive).toList();
-  List<DeviceModel> get inactiveDevices => _devices.where((d) => !d.isActive).toList();
+  List<DeviceModel> get activeDevices =>
+      _devices.where((d) => d.isActive).toList();
+  List<DeviceModel> get inactiveDevices =>
+      _devices.where((d) => !d.isActive).toList();
   int get activeDeviceCount => activeDevices.length;
   int get totalDeviceCount => _devices.length;
   bool get hasDevices => _devices.isNotEmpty;
@@ -146,7 +158,9 @@ class DeviceManagementProvider extends ChangeNotifier {
       _currentDevice = await DeviceModel.fromCurrentDevice();
 
       if (kDebugMode) {
-        debugPrint('📱 DeviceProvider: Current device identified: ${_currentDevice!.name}');
+        debugPrint(
+          '📱 DeviceProvider: Current device identified: ${_currentDevice!.name}',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -161,7 +175,10 @@ class DeviceManagementProvider extends ChangeNotifier {
     await _loadDevices(showLoading: true, refresh: refresh);
   }
 
-  Future<void> _loadDevices({bool showLoading = true, bool refresh = false}) async {
+  Future<void> _loadDevices({
+    bool showLoading = true,
+    bool refresh = false,
+  }) async {
     if (showLoading) _setLoading(true);
     _clearMessages();
 
@@ -176,9 +193,7 @@ class DeviceManagementProvider extends ChangeNotifier {
         return;
       }
 
-      const params = GetUserDevicesParams(
-        activeOnly: false,
-      );
+      const params = GetUserDevicesParams(activeOnly: false);
 
       final result = await _getUserDevicesUseCase(params);
 
@@ -188,7 +203,8 @@ class DeviceManagementProvider extends ChangeNotifier {
         },
         (devices) {
           // Converte DeviceEntity para DeviceModel
-          _devices = devices.map((entity) => DeviceModel.fromEntity(entity)).toList();
+          _devices =
+              devices.map((entity) => DeviceModel.fromEntity(entity)).toList();
           _clearError();
 
           if (kDebugMode) {
@@ -202,7 +218,6 @@ class DeviceManagementProvider extends ChangeNotifier {
       if (showLoading) _setLoading(false);
     }
   }
-
 
   /// Valida dispositivo atual
   Future<DeviceValidationResult?> validateCurrentDevice() async {
@@ -228,9 +243,7 @@ class DeviceManagementProvider extends ChangeNotifier {
         return null;
       }
 
-      final params = ValidateDeviceParams(
-        device: _currentDevice,
-      );
+      final params = ValidateDeviceParams(device: _currentDevice);
 
       final result = await _validateDeviceUseCase(params);
 
@@ -246,7 +259,9 @@ class DeviceManagementProvider extends ChangeNotifier {
             // Recarrega lista de dispositivos
             _loadDevices(showLoading: false);
           } else {
-            _setError(validationResult.message ?? 'Falha na validação do dispositivo');
+            _setError(
+              validationResult.message ?? 'Falha na validação do dispositivo',
+            );
           }
 
           return validationResult;
@@ -287,9 +302,7 @@ class DeviceManagementProvider extends ChangeNotifier {
         return false;
       }
 
-      final params = RevokeDeviceParams(
-        deviceUuid: deviceUuid,
-      );
+      final params = RevokeDeviceParams(deviceUuid: deviceUuid);
 
       final result = await _revokeDeviceUseCase(params);
 
@@ -400,7 +413,6 @@ class DeviceManagementProvider extends ChangeNotifier {
     return _isRevoking && _revokingDeviceUuid == uuid;
   }
 
-
   /// Limpa mensagens de erro/sucesso
   void clearMessages() {
     _clearMessages();
@@ -428,7 +440,9 @@ class DeviceManagementProvider extends ChangeNotifier {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            debugPrint('❌ DeviceProvider: Failed to load statistics - ${failure.message}');
+            debugPrint(
+              '❌ DeviceProvider: Failed to load statistics - ${failure.message}',
+            );
           }
           _setError('Erro ao carregar estatísticas: ${failure.message}');
         },
@@ -442,7 +456,9 @@ class DeviceManagementProvider extends ChangeNotifier {
       );
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ DeviceProvider: Unexpected error loading statistics - $e');
+        debugPrint(
+          '❌ DeviceProvider: Unexpected error loading statistics - $e',
+        );
       }
       _setError('Erro inesperado ao carregar estatísticas');
     } finally {
@@ -525,7 +541,9 @@ extension DeviceManagementProviderExtensions on DeviceManagementProvider {
     final total = totalDeviceCount;
 
     if (active == total) {
-      return active == 1 ? '1 dispositivo ativo' : '$active dispositivos ativos';
+      return active == 1
+          ? '1 dispositivo ativo'
+          : '$active dispositivos ativos';
     } else {
       return '$active de $total dispositivos ativos';
     }

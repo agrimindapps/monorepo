@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 
 import 'secure_storage_service.dart';
 
@@ -290,29 +288,30 @@ class EncryptedHiveService implements IEncryptedStorageRepository {
   }) async {
     try {
       final boxResult = await getEncryptedBox(boxName);
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (box) async {
-          try {
-            String jsonString;
-            if (toJson != null) {
-              jsonString = jsonEncode(toJson(data));
-            } else if (data is Map<String, dynamic>) {
-              jsonString = jsonEncode(data);
-            } else {
-              // Assume T has toJson method
-              jsonString = jsonEncode((data as dynamic).toJson());
-            }
-            
-            await box.put(key, jsonString);
-            debugPrint('🔐 Data stored encrypted with key: $key in box: $boxName');
-            return const Right(null);
-          } catch (e) {
-            debugPrint('❌ Error storing encrypted data: $e');
-            return Left(CacheFailure('Erro ao armazenar dados criptografados: $e'));
+      return boxResult.fold((failure) => Left(failure), (box) async {
+        try {
+          String jsonString;
+          if (toJson != null) {
+            jsonString = jsonEncode(toJson(data));
+          } else if (data is Map<String, dynamic>) {
+            jsonString = jsonEncode(data);
+          } else {
+            // Assume T has toJson method
+            jsonString = jsonEncode((data as dynamic).toJson());
           }
-        },
-      );
+
+          await box.put(key, jsonString);
+          debugPrint(
+            '🔐 Data stored encrypted with key: $key in box: $boxName',
+          );
+          return const Right(null);
+        } catch (e) {
+          debugPrint('❌ Error storing encrypted data: $e');
+          return Left(
+            CacheFailure('Erro ao armazenar dados criptografados: $e'),
+          );
+        }
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao armazenar dados criptografados: $e'));
     }
@@ -326,49 +325,50 @@ class EncryptedHiveService implements IEncryptedStorageRepository {
   }) async {
     try {
       final boxResult = await getEncryptedBox(boxName);
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (box) async {
-          try {
-            final jsonString = box.get(key);
-            if (jsonString == null) return const Right(null);
+      return boxResult.fold((failure) => Left(failure), (box) async {
+        try {
+          final jsonString = box.get(key);
+          if (jsonString == null) return const Right(null);
 
-            final json = jsonDecode(jsonString) as Map<String, dynamic>;
-            
-            if (fromJson != null) {
-              final data = fromJson(json);
-              return Right(data);
-            }
-            
-            return Right(json as T);
-          } catch (e) {
-            debugPrint('❌ Error retrieving encrypted data: $e');
-            return Left(CacheFailure('Erro ao recuperar dados criptografados: $e'));
+          final json = jsonDecode(jsonString) as Map<String, dynamic>;
+
+          if (fromJson != null) {
+            final data = fromJson(json);
+            return Right(data);
           }
-        },
-      );
+
+          return Right(json as T);
+        } catch (e) {
+          debugPrint('❌ Error retrieving encrypted data: $e');
+          return Left(
+            CacheFailure('Erro ao recuperar dados criptografados: $e'),
+          );
+        }
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao recuperar dados criptografados: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> deleteEncrypted(String key, String boxName) async {
+  Future<Either<Failure, void>> deleteEncrypted(
+    String key,
+    String boxName,
+  ) async {
     try {
       final boxResult = await getEncryptedBox(boxName);
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (box) async {
-          try {
-            await box.delete(key);
-            debugPrint('🗑️ Encrypted data deleted for key: $key in box: $boxName');
-            return const Right(null);
-          } catch (e) {
-            debugPrint('❌ Error deleting encrypted data: $e');
-            return Left(CacheFailure('Erro ao deletar dados criptografados: $e'));
-          }
-        },
-      );
+      return boxResult.fold((failure) => Left(failure), (box) async {
+        try {
+          await box.delete(key);
+          debugPrint(
+            '🗑️ Encrypted data deleted for key: $key in box: $boxName',
+          );
+          return const Right(null);
+        } catch (e) {
+          debugPrint('❌ Error deleting encrypted data: $e');
+          return Left(CacheFailure('Erro ao deletar dados criptografados: $e'));
+        }
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao deletar dados criptografados: $e'));
     }
@@ -396,12 +396,14 @@ class EncryptedHiveService implements IEncryptedStorageRepository {
       await clearEncryptedBox(_sensitiveDataBoxName);
       await clearEncryptedBox(_piiDataBoxName);
       await clearEncryptedBox(_locationDataBoxName);
-      
+
       debugPrint('🗑️ All encrypted data cleared');
       return const Right(null);
     } catch (e) {
       debugPrint('❌ Error clearing all encrypted data: $e');
-      return Left(CacheFailure('Erro ao limpar todos os dados criptografados: $e'));
+      return Left(
+        CacheFailure('Erro ao limpar todos os dados criptografados: $e'),
+      );
     }
   }
 
@@ -414,13 +416,10 @@ class EncryptedHiveService implements IEncryptedStorageRepository {
   Future<Either<Failure, List<String>>> getKeysFromBox(String boxName) async {
     try {
       final boxResult = await getEncryptedBox(boxName);
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (box) {
-          final keys = box.keys.cast<String>().toList();
-          return Right(keys);
-        },
-      );
+      return boxResult.fold((failure) => Left(failure), (box) {
+        final keys = box.keys.cast<String>().toList();
+        return Right(keys);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao obter chaves da box: $e'));
     }

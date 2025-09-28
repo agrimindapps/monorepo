@@ -7,7 +7,10 @@ import '../entities/plant_task.dart';
 /// Garante integridade e consistência dos dados
 class PlantTaskValidationService {
   /// Valida uma PlantTask individual
-  static PlantTaskValidationResult validatePlantTask(PlantTask task, Plant? plant) {
+  static PlantTaskValidationResult validatePlantTask(
+    PlantTask task,
+    Plant? plant,
+  ) {
     final errors = <String>[];
     final warnings = <String>[];
 
@@ -41,7 +44,8 @@ class PlantTaskValidationService {
       warnings.add('Tarefa marcada como completada mas sem data de conclusão');
     }
 
-    if (task.nextScheduledDate != null && task.nextScheduledDate!.isBefore(task.scheduledDate)) {
+    if (task.nextScheduledDate != null &&
+        task.nextScheduledDate!.isBefore(task.scheduledDate)) {
       warnings.add('Próxima data agendada é anterior à data atual');
     }
 
@@ -51,16 +55,19 @@ class PlantTaskValidationService {
     } else {
       // Verificar se a configuração da planta suporta este tipo de tarefa
       if (!_plantSupportsTaskType(plant, task.type)) {
-        warnings.add('Planta não tem configuração para tipo de tarefa ${task.type.displayName}');
+        warnings.add(
+          'Planta não tem configuração para tipo de tarefa ${task.type.displayName}',
+        );
       }
     }
 
     // Validações de consistência temporal
-    if (task.completedDate != null && task.completedDate!.isAfter(DateTime.now())) {
+    if (task.completedDate != null &&
+        task.completedDate!.isAfter(DateTime.now())) {
       errors.add('Data de conclusão não pode ser no futuro');
     }
 
-    if (task.createdAt.isAfter(DateTime.now().add(Duration(minutes: 5)))) {
+    if (task.createdAt.isAfter(DateTime.now().add(const Duration(minutes: 5)))) {
       warnings.add('Data de criação parece estar no futuro');
     }
 
@@ -76,7 +83,9 @@ class PlantTaskValidationService {
     );
 
     if (kDebugMode && (!result.isValid || result.warnings.isNotEmpty)) {
-      print('⚠️ PlantTaskValidation: Problemas encontrados na tarefa ${task.id}:');
+      print(
+        '⚠️ PlantTaskValidation: Problemas encontrados na tarefa ${task.id}:',
+      );
       for (final error in errors) {
         print('   ERROR: $error');
       }
@@ -138,7 +147,8 @@ class PlantTaskValidationService {
 
     final validTasks = results.where((r) => r.isValid).length;
     final invalidTasks = results.where((r) => !r.isValid).length;
-    final tasksWithWarnings = results.where((r) => r.warnings.isNotEmpty).length;
+    final tasksWithWarnings =
+        results.where((r) => r.warnings.isNotEmpty).length;
 
     final batchResult = PlantTaskBatchValidationResult(
       totalTasks: tasks.length,
@@ -159,7 +169,9 @@ class PlantTaskValidationService {
       print('   - Com avisos: ${batchResult.tasksWithWarnings}');
       print('   - IDs duplicados: ${batchResult.duplicateIds.length}');
       print('   - Tarefas órfãs: ${batchResult.orphanTasks.length}');
-      print('   - Intervalos inconsistentes: ${batchResult.inconsistentIntervals.length}');
+      print(
+        '   - Intervalos inconsistentes: ${batchResult.inconsistentIntervals.length}',
+      );
     }
 
     return batchResult;
@@ -195,7 +207,9 @@ class PlantTaskValidationService {
     switch (task.type) {
       case TaskType.watering:
         if (task.intervalDays > 30) {
-          warnings.add('Intervalo de rega muito longo (${task.intervalDays} dias)');
+          warnings.add(
+            'Intervalo de rega muito longo (${task.intervalDays} dias)',
+          );
         }
         if (task.intervalDays < 1) {
           errors.add('Intervalo de rega deve ser pelo menos 1 dia');
@@ -204,16 +218,22 @@ class PlantTaskValidationService {
 
       case TaskType.fertilizing:
         if (task.intervalDays < 7) {
-          warnings.add('Intervalo de fertilização muito curto (${task.intervalDays} dias)');
+          warnings.add(
+            'Intervalo de fertilização muito curto (${task.intervalDays} dias)',
+          );
         }
         if (task.intervalDays > 365) {
-          warnings.add('Intervalo de fertilização muito longo (${task.intervalDays} dias)');
+          warnings.add(
+            'Intervalo de fertilização muito longo (${task.intervalDays} dias)',
+          );
         }
         break;
 
       case TaskType.pruning:
         if (task.intervalDays < 30) {
-          warnings.add('Intervalo de poda muito curto (${task.intervalDays} dias)');
+          warnings.add(
+            'Intervalo de poda muito curto (${task.intervalDays} dias)',
+          );
         }
         break;
 
@@ -231,7 +251,9 @@ class PlantTaskValidationService {
 
       case TaskType.replanting:
         if (task.intervalDays < 365) {
-          warnings.add('Intervalo de replantio muito curto (${task.intervalDays} dias)');
+          warnings.add(
+            'Intervalo de replantio muito curto (${task.intervalDays} dias)',
+          );
         }
         break;
     }
@@ -246,16 +268,21 @@ class PlantTaskValidationService {
     final now = DateTime.now();
 
     // Estatísticas de status
-    final pendingTasks = tasks.where((t) => t.status == TaskStatus.pending).length;
-    final completedTasks = tasks.where((t) => t.status == TaskStatus.completed).length;
-    final overdueTasks = tasks.where((t) => t.status == TaskStatus.overdue).length;
+    final pendingTasks =
+        tasks.where((t) => t.status == TaskStatus.pending).length;
+    final completedTasks =
+        tasks.where((t) => t.status == TaskStatus.completed).length;
+    final overdueTasks =
+        tasks.where((t) => t.status == TaskStatus.overdue).length;
 
     // Estatísticas temporais
     final todayTasks = tasks.where((t) => t.isDueToday).length;
-    final upcomingTasks = tasks.where((t) => t.isDueSoon && !t.isDueToday).length;
-    final oldestTask = tasks.isEmpty
-        ? null
-        : tasks.reduce((a, b) => a.createdAt.isBefore(b.createdAt) ? a : b);
+    final upcomingTasks =
+        tasks.where((t) => t.isDueSoon && !t.isDueToday).length;
+    final oldestTask =
+        tasks.isEmpty
+            ? null
+            : tasks.reduce((a, b) => a.createdAt.isBefore(b.createdAt) ? a : b);
 
     // Estatísticas por tipo
     final tasksByType = <TaskType, int>{};
@@ -264,9 +291,10 @@ class PlantTaskValidationService {
     }
 
     // Plantas com problemas
-    final plantsWithoutTasks = plantsById.values
-        .where((plant) => !tasks.any((task) => task.plantId == plant.id))
-        .length;
+    final plantsWithoutTasks =
+        plantsById.values
+            .where((plant) => !tasks.any((task) => task.plantId == plant.id))
+            .length;
 
     final healthScore = _calculateHealthScore(validation, tasks, plantsById);
 
@@ -284,19 +312,26 @@ class PlantTaskValidationService {
       temporalStatistics: {
         'today': todayTasks,
         'upcoming': upcomingTasks,
-        'oldest_task_age_days': oldestTask != null
-            ? now.difference(oldestTask.createdAt).inDays
-            : 0,
+        'oldest_task_age_days':
+            oldestTask != null
+                ? now.difference(oldestTask.createdAt).inDays
+                : 0,
       },
       typeStatistics: tasksByType,
       plantsWithoutTasks: plantsWithoutTasks,
     );
 
     if (kDebugMode) {
-      print('🏥 PlantTaskHealthReport: Health score: ${report.healthScore}/100');
+      print(
+        '🏥 PlantTaskHealthReport: Health score: ${report.healthScore}/100',
+      );
       print('   - ${report.totalTasks} tasks, ${report.totalPlants} plantas');
-      print('   - Válidas: ${report.validationResult.validTasks}/${report.totalTasks}');
-      print('   - Hoje: ${report.temporalStatistics['today']}, Próximas: ${report.temporalStatistics['upcoming']}');
+      print(
+        '   - Válidas: ${report.validationResult.validTasks}/${report.totalTasks}',
+      );
+      print(
+        '   - Hoje: ${report.temporalStatistics['today']}, Próximas: ${report.temporalStatistics['upcoming']}',
+      );
     }
 
     return report;
@@ -326,11 +361,13 @@ class PlantTaskValidationService {
     score -= orphanRatio * 20;
 
     // Penalizar intervalos inconsistentes
-    final inconsistentRatio = validation.inconsistentIntervals.length / validation.totalTasks;
+    final inconsistentRatio =
+        validation.inconsistentIntervals.length / validation.totalTasks;
     score -= inconsistentRatio * 15;
 
     // Penalizar muitas tasks atrasadas
-    final overdueTasks = tasks.where((t) => t.status == TaskStatus.overdue).length;
+    final overdueTasks =
+        tasks.where((t) => t.status == TaskStatus.overdue).length;
     final overdueRatio = overdueTasks / tasks.length;
     score -= overdueRatio * 25;
 
@@ -386,7 +423,8 @@ class PlantTaskBatchValidationResult {
     required this.inconsistentIntervals,
   });
 
-  bool get isHealthy => invalidTasks == 0 && duplicateIds.isEmpty && orphanTasks.isEmpty;
+  bool get isHealthy =>
+      invalidTasks == 0 && duplicateIds.isEmpty && orphanTasks.isEmpty;
   double get validRatio => totalTasks > 0 ? validTasks / totalTasks : 0.0;
 }
 

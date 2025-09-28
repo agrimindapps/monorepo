@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../../core/theme/plantis_colors.dart';
 import '../../../../domain/entities/plant.dart';
 import '../../../../domain/entities/plant_task.dart';
 import 'plant_task_history_overview_tab.dart';
-import 'plant_task_history_timeline_tab.dart';
 import 'plant_task_history_stats_tab.dart';
+import 'plant_task_history_timeline_tab.dart';
 
 /// Modal bottom sheet expandido com sistema de 3 abas especializado
 /// para exibir histórico completo de tarefas de plantas
@@ -29,10 +30,11 @@ class PlantTaskHistoryModal extends StatefulWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => PlantTaskHistoryModal(
-        plant: plant,
-        completedTasks: completedTasks,
-      ),
+      builder:
+          (context) => PlantTaskHistoryModal(
+            plant: plant,
+            completedTasks: completedTasks,
+          ),
     );
   }
 
@@ -60,10 +62,9 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+    );
 
     // Iniciar animação
     _slideController.forward();
@@ -199,11 +200,7 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.eco,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: const Icon(Icons.eco, color: Colors.white, size: 24),
           ),
 
           const SizedBox(width: 16),
@@ -276,12 +273,10 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
           // Botão fechar
           IconButton(
             onPressed: _closeModal,
-            icon: Icon(
-              Icons.close,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),
             style: IconButton.styleFrom(
-              backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

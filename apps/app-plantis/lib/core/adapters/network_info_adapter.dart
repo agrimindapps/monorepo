@@ -42,7 +42,10 @@ class NetworkInfoAdapter implements NetworkInfo {
       final initialState = await _connectivityService.isOnline();
       initialState.fold(
         (failure) {
-          developer.log('NetworkInfoAdapter: Failed to get initial state: ${failure.message}', name: 'NetworkAdapter');
+          developer.log(
+            'NetworkInfoAdapter: Failed to get initial state: ${failure.message}',
+            name: 'NetworkAdapter',
+          );
           _lastKnownConnectionState = false;
         },
         (isOnline) {
@@ -51,9 +54,15 @@ class NetworkInfoAdapter implements NetworkInfo {
         },
       );
 
-      developer.log('NetworkInfoAdapter initialized successfully', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter initialized successfully',
+        name: 'NetworkAdapter',
+      );
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Initialization error: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Initialization error: $e',
+        name: 'NetworkAdapter',
+      );
       // Graceful degradation - continua funcionando com fallback
       _isInitialized = false;
     }
@@ -69,7 +78,10 @@ class NetworkInfoAdapter implements NetworkInfo {
         final result = await _connectivityService.isOnline();
         return result.fold(
           (failure) {
-            developer.log('NetworkInfoAdapter: ConnectivityService failed, using fallback: ${failure.message}', name: 'NetworkAdapter');
+            developer.log(
+              'NetworkInfoAdapter: ConnectivityService failed, using fallback: ${failure.message}',
+              name: 'NetworkAdapter',
+            );
             return _fallbackConnectionCheck();
           },
           (isOnline) {
@@ -82,7 +94,10 @@ class NetworkInfoAdapter implements NetworkInfo {
         return _fallbackConnectionCheck();
       }
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Unexpected error in isConnected: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Unexpected error in isConnected: $e',
+        name: 'NetworkAdapter',
+      );
       return _fallbackConnectionCheck();
     }
   }
@@ -97,7 +112,10 @@ class NetworkInfoAdapter implements NetworkInfo {
       try {
         return _connectivityService.connectivityStream;
       } catch (e) {
-        developer.log('NetworkInfoAdapter: Error accessing connectivityStream: $e', name: 'NetworkAdapter');
+        developer.log(
+          'NetworkInfoAdapter: Error accessing connectivityStream: $e',
+          name: 'NetworkAdapter',
+        );
         return _fallbackController.stream;
       }
     } else {
@@ -119,17 +137,20 @@ class NetworkInfoAdapter implements NetworkInfo {
     try {
       if (_isInitialized) {
         final result = await _connectivityService.getConnectivityType();
-        return result.fold(
-          (failure) {
-            developer.log('NetworkInfoAdapter: Failed to get connection type: ${failure.message}', name: 'NetworkAdapter');
-            return null;
-          },
-          (type) => type,
-        );
+        return result.fold((failure) {
+          developer.log(
+            'NetworkInfoAdapter: Failed to get connection type: ${failure.message}',
+            name: 'NetworkAdapter',
+          );
+          return null;
+        }, (type) => type);
       }
       return null;
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Error getting connection type: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Error getting connection type: $e',
+        name: 'NetworkAdapter',
+      );
       return null;
     }
   }
@@ -157,7 +178,10 @@ class NetworkInfoAdapter implements NetworkInfo {
         };
       }
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Error getting detailed status: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Error getting detailed status: $e',
+        name: 'NetworkAdapter',
+      );
       return {
         'error': e.toString(),
         'is_online': _lastKnownConnectionState,
@@ -177,7 +201,10 @@ class NetworkInfoAdapter implements NetworkInfo {
       // Durante inicialização, considera estável se temos conexão conhecida
       return _lastKnownConnectionState;
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Error checking stability: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Error checking stability: $e',
+        name: 'NetworkAdapter',
+      );
       return _lastKnownConnectionState;
     }
   }
@@ -191,7 +218,10 @@ class NetworkInfoAdapter implements NetworkInfo {
         await _connectivityService.forceConnectivityCheck();
       }
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Error forcing connectivity check: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Error forcing connectivity check: $e',
+        name: 'NetworkAdapter',
+      );
     }
   }
 
@@ -208,17 +238,20 @@ class NetworkInfoAdapter implements NetworkInfo {
           testUrl: testUrl,
           timeout: timeout,
         );
-        return result.fold(
-          (failure) {
-            developer.log('NetworkInfoAdapter: Real connectivity test failed: ${failure.message}', name: 'NetworkAdapter');
-            return false;
-          },
-          (isConnected) => isConnected,
-        );
+        return result.fold((failure) {
+          developer.log(
+            'NetworkInfoAdapter: Real connectivity test failed: ${failure.message}',
+            name: 'NetworkAdapter',
+          );
+          return false;
+        }, (isConnected) => isConnected);
       }
       return _lastKnownConnectionState;
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Error testing real connectivity: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Error testing real connectivity: $e',
+        name: 'NetworkAdapter',
+      );
       return false;
     }
   }
@@ -228,7 +261,8 @@ class NetworkInfoAdapter implements NetworkInfo {
     try {
       final connectivity = Connectivity();
       final result = await connectivity.checkConnectivity();
-      final isConnected = result.contains(ConnectivityResult.mobile) ||
+      final isConnected =
+          result.contains(ConnectivityResult.mobile) ||
           result.contains(ConnectivityResult.wifi) ||
           result.contains(ConnectivityResult.ethernet);
 
@@ -237,7 +271,10 @@ class NetworkInfoAdapter implements NetworkInfo {
 
       return isConnected;
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Fallback connection check failed: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Fallback connection check failed: $e',
+        name: 'NetworkAdapter',
+      );
       // Último recurso: retorna o último estado conhecido
       return _lastKnownConnectionState;
     }
@@ -257,7 +294,10 @@ class NetworkInfoAdapter implements NetworkInfo {
         await _connectivityService.dispose();
       }
     } catch (e) {
-      developer.log('NetworkInfoAdapter: Error during dispose: $e', name: 'NetworkAdapter');
+      developer.log(
+        'NetworkInfoAdapter: Error during dispose: $e',
+        name: 'NetworkAdapter',
+      );
     }
   }
 
@@ -278,14 +318,18 @@ extension NetworkInfoEnhanced on NetworkInfo {
   bool get isEnhanced => this is NetworkInfoAdapter;
 
   /// Cast seguro para o adapter avançado
-  NetworkInfoAdapter? get asEnhanced => this is NetworkInfoAdapter ? this as NetworkInfoAdapter : null;
+  NetworkInfoAdapter? get asEnhanced =>
+      this is NetworkInfoAdapter ? this as NetworkInfoAdapter : null;
 
   /// Stream de conectividade (se disponível)
-  Stream<bool>? get connectivityStreamIfAvailable => asEnhanced?.connectivityStream;
+  Stream<bool>? get connectivityStreamIfAvailable =>
+      asEnhanced?.connectivityStream;
 
   /// Tipo de conexão (se disponível)
-  Future<ConnectivityType?> get connectionTypeIfAvailable async => await asEnhanced?.connectionType;
+  Future<ConnectivityType?> get connectionTypeIfAvailable async =>
+      await asEnhanced?.connectionType;
 
   /// Status detalhado (se disponível)
-  Future<Map<String, dynamic>?> get detailedStatusIfAvailable async => await asEnhanced?.detailedStatus;
+  Future<Map<String, dynamic>?> get detailedStatusIfAvailable async =>
+      await asEnhanced?.detailedStatus;
 }

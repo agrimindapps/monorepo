@@ -17,9 +17,6 @@ class EmptyTasksWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmptyStateWidget.tasks(
-      filterType: filterType,
-      onAddTask: onAddTask,
-    );
+    return EmptyStateWidget.tasks(filterType: filterType, onAddTask: onAddTask);
   }
 }

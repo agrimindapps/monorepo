@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
@@ -11,20 +10,17 @@ class GetUserDevicesUseCase {
   final DeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
-  GetUserDevicesUseCase(
-    this._deviceRepository,
-    this._authStateNotifier,
-  );
+  GetUserDevicesUseCase(this._deviceRepository, this._authStateNotifier);
 
   /// Executa o use case obtendo dispositivos do usuário atual
-  Future<Either<Failure, List<DeviceModel>>> call([GetUserDevicesParams? params]) async {
+  Future<Either<Failure, List<DeviceModel>>> call([
+    GetUserDevicesParams? params,
+  ]) async {
     try {
       // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
-        return const Left(
-          AuthFailure('Usuário não autenticado'),
-        );
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
@@ -33,22 +29,20 @@ class GetUserDevicesUseCase {
       // Busca dispositivos do repository
       final result = await _deviceRepository.getUserDevices(userId);
 
-      return result.fold(
-        (failure) => Left(failure),
-        (devices) {
-          // Filtra apenas ativos se solicitado
-          if (activeOnly) {
-            final activeDevices = devices.where((device) => device.isActive).toList();
-            return Right(activeDevices);
-          }
+      return result.fold((failure) => Left(failure), (devices) {
+        // Filtra apenas ativos se solicitado
+        if (activeOnly) {
+          final activeDevices =
+              devices.where((device) => device.isActive).toList();
+          return Right(activeDevices);
+        }
 
-          // Ordena por última atividade (mais recente primeiro)
-          final sortedDevices = List<DeviceModel>.from(devices)
-            ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
+        // Ordena por última atividade (mais recente primeiro)
+        final sortedDevices = List<DeviceModel>.from(devices)
+          ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
 
-          return Right(sortedDevices);
-        },
-      );
+        return Right(sortedDevices);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -83,5 +77,6 @@ class GetUserDevicesParams {
   int get hashCode => activeOnly.hashCode ^ refreshCache.hashCode;
 
   @override
-  String toString() => 'GetUserDevicesParams(activeOnly: $activeOnly, refreshCache: $refreshCache)';
+  String toString() =>
+      'GetUserDevicesParams(activeOnly: $activeOnly, refreshCache: $refreshCache)';
 }

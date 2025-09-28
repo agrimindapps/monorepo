@@ -1,24 +1,36 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
+import '../../features/auth/presentation/providers/auth_provider.dart'
+    as providers;
 import '../../features/auth/presentation/providers/register_provider.dart';
+import '../../features/data_export/data/datasources/local/export_file_generator.dart';
+import '../../features/data_export/data/datasources/local/plants_export_datasource.dart';
+import '../../features/data_export/data/datasources/local/settings_export_datasource.dart';
+import '../../features/data_export/data/repositories/data_export_repository_impl.dart';
+import '../../features/data_export/domain/repositories/data_export_repository.dart';
+import '../../features/data_export/domain/usecases/check_export_availability_usecase.dart';
+import '../../features/data_export/domain/usecases/get_export_history_usecase.dart';
+import '../../features/data_export/domain/usecases/request_export_usecase.dart';
+import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../features/device_management/data/datasources/device_local_datasource.dart';
 import '../../features/device_management/data/datasources/device_remote_datasource.dart';
 import '../../features/device_management/data/repositories/device_repository_impl.dart';
 import '../../features/device_management/domain/repositories/device_repository.dart';
 import '../../features/device_management/domain/usecases/get_device_statistics_usecase.dart';
-import '../../features/device_management/domain/usecases/get_user_devices_usecase.dart' as local;
-import '../../features/device_management/domain/usecases/revoke_device_usecase.dart' as local;
+import '../../features/device_management/domain/usecases/get_user_devices_usecase.dart'
+    as local;
+import '../../features/device_management/domain/usecases/revoke_device_usecase.dart'
+    as local;
 import '../../features/device_management/domain/usecases/update_device_activity_usecase.dart';
-import '../../features/device_management/domain/usecases/validate_device_usecase.dart' as local;
+import '../../features/device_management/domain/usecases/validate_device_usecase.dart'
+    as local;
 import '../../features/device_management/presentation/providers/device_management_provider.dart';
+import '../../features/plants/domain/repositories/plant_comments_repository.dart';
+import '../../features/plants/domain/repositories/plants_repository.dart';
+import '../../features/plants/domain/repositories/spaces_repository.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../../features/settings/data/datasources/settings_local_datasource.dart';
 import '../../features/settings/data/repositories/settings_repository.dart';
@@ -26,15 +38,18 @@ import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../features/settings/presentation/providers/backup_settings_provider.dart';
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../../features/tasks/domain/repositories/tasks_repository.dart';
+import '../adapters/network_info_adapter.dart';
+import '../adapters/plantis_image_service_adapter.dart';
+import '../adapters/plantis_storage_adapter.dart';
 import '../auth/auth_state_notifier.dart';
+import '../config/security_config.dart';
 import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
-import '../adapters/network_info_adapter.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/background_sync_provider.dart';
 import '../providers/sync_status_provider.dart';
 import '../services/background_sync_service.dart';
-import '../config/security_config.dart';
 import '../services/backup_audit_service.dart';
 import '../services/backup_data_transformer_service.dart';
 import '../services/backup_restore_service.dart';
@@ -49,23 +64,8 @@ import '../services/interfaces/i_task_notification_manager.dart';
 import '../services/notification_manager.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
-import '../adapters/plantis_storage_adapter.dart';
-import '../adapters/plantis_image_service_adapter.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
-import '../../features/data_export/data/datasources/local/export_file_generator.dart';
-import '../../features/data_export/data/datasources/local/plants_export_datasource.dart';
-import '../../features/data_export/data/datasources/local/settings_export_datasource.dart';
-import '../../features/data_export/data/repositories/data_export_repository_impl.dart';
-import '../../features/data_export/domain/repositories/data_export_repository.dart';
-import '../../features/data_export/domain/usecases/check_export_availability_usecase.dart';
-import '../../features/data_export/domain/usecases/get_export_history_usecase.dart';
-import '../../features/data_export/domain/usecases/request_export_usecase.dart';
-import '../../features/data_export/presentation/providers/data_export_provider.dart';
-import '../../features/plants/domain/repositories/plants_repository.dart';
-import '../../features/plants/domain/repositories/plant_comments_repository.dart';
-import '../../features/tasks/domain/repositories/tasks_repository.dart';
-import '../../features/plants/domain/repositories/spaces_repository.dart';
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
@@ -116,10 +116,14 @@ void _initCoreServices() {
 
   // Network Info - Migrated to Adapter Pattern for enhanced features
   // BACKWARD COMPATIBILITY: Interface NetworkInfo preservada, zero breaking changes
-  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoAdapter(sl<ConnectivityService>()));
+  sl.registerLazySingleton<NetworkInfo>(
+    () => NetworkInfoAdapter(sl<ConnectivityService>()),
+  );
 
   // Auth Repository - Enhanced with security features
-  sl.registerLazySingleton<IAuthRepository>(() => PlantisSecurityConfig.createEnhancedAuthService());
+  sl.registerLazySingleton<IAuthRepository>(
+    () => PlantisSecurityConfig.createEnhancedAuthService(),
+  );
 
   // Analytics Repository
   sl.registerLazySingleton<IAnalyticsRepository>(
@@ -133,10 +137,12 @@ void _initCoreServices() {
 
   // Box Registry Service (required by HiveStorageService)
   sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
-  
+
   // Storage repositories
-  sl.registerLazySingleton<ILocalStorageRepository>(() => HiveStorageService(sl<IBoxRegistryService>()));
-  
+  sl.registerLazySingleton<ILocalStorageRepository>(
+    () => HiveStorageService(sl<IBoxRegistryService>()),
+  );
+
   // Enhanced Secure Storage Service with Plantis configuration
   sl.registerLazySingleton<EnhancedSecureStorageService>(
     () => EnhancedSecureStorageService(
@@ -185,57 +191,74 @@ void _initCoreServices() {
 
   // Notification Manager - registrado com interfaces segregadas
   sl.registerLazySingleton(() => NotificationManager());
-  
+
   // Interfaces segregadas para diferentes responsabilidades (ISP)
-  sl.registerLazySingleton<ITaskNotificationManager>(() => sl<NotificationManager>());
-  sl.registerLazySingleton<IPlantNotificationManager>(() => sl<NotificationManager>());
-  sl.registerLazySingleton<INotificationPermissionManager>(() => sl<NotificationManager>());
-  sl.registerLazySingleton<INotificationScheduleManager>(() => sl<NotificationManager>());
+  sl.registerLazySingleton<ITaskNotificationManager>(
+    () => sl<NotificationManager>(),
+  );
+  sl.registerLazySingleton<IPlantNotificationManager>(
+    () => sl<NotificationManager>(),
+  );
+  sl.registerLazySingleton<INotificationPermissionManager>(
+    () => sl<NotificationManager>(),
+  );
+  sl.registerLazySingleton<INotificationScheduleManager>(
+    () => sl<NotificationManager>(),
+  );
 
   // Enhanced Image Service (using adapter pattern)
   // Consolidates Core ImageService + ImagePreloaderService functionality
-  sl.registerLazySingleton(() => PlantisImageServiceAdapterFactory.createForPlantis());
+  sl.registerLazySingleton(
+    () => PlantisImageServiceAdapterFactory.createForPlantis(),
+  );
 
   // Backward compatibility: Register core ImageService separately if needed
-  sl.registerLazySingleton(() => ImageService(
-    config: const ImageServiceConfig(
-      maxWidth: 1200,
-      maxHeight: 1200,
-      imageQuality: 80,
-      maxFileSizeInMB: 5,
-      allowedFormats: ['.jpg', '.jpeg', '.png', '.webp'],
-      folders: {
-        'plants': 'plants',
-        'spaces': 'spaces',
-        'tasks': 'tasks',
-        'profiles': 'profiles',
-      },
+  sl.registerLazySingleton(
+    () => ImageService(
+      config: const ImageServiceConfig(
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 80,
+        maxFileSizeInMB: 5,
+        allowedFormats: ['.jpg', '.jpeg', '.png', '.webp'],
+        folders: {
+          'plants': 'plants',
+          'spaces': 'spaces',
+          'tasks': 'tasks',
+          'profiles': 'profiles',
+        },
+      ),
     ),
-  ));
+  );
 
   // File Manager Service (Core Package) - Replaces custom platform handlers
   sl.registerLazySingleton<IFileRepository>(() => FileManagerService());
 
   // URL Launcher Service
   sl.registerLazySingleton(() => UrlLauncherService());
-  
 
   // License System (from core package)
   sl.registerLazySingleton<LicenseRepository>(() => LicenseLocalStorage());
-  sl.registerLazySingleton<LicenseService>(() => LicenseService(sl<LicenseRepository>()));
+  sl.registerLazySingleton<LicenseService>(
+    () => LicenseService(sl<LicenseRepository>()),
+  );
 
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
-  sl.registerLazySingleton(() => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()));
+  sl.registerLazySingleton(
+    () => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()),
+  );
   sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
 }
 
 void _initAuth() {
   // Auth State Notifier (Singleton)
   sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
-  
+
   // Background Sync Service
-  sl.registerLazySingleton<BackgroundSyncService>(() => BackgroundSyncService());
+  sl.registerLazySingleton<BackgroundSyncService>(
+    () => BackgroundSyncService(),
+  );
 
   // Background Sync Provider
   sl.registerLazySingleton<BackgroundSyncProvider>(
@@ -256,8 +279,8 @@ void _initAuth() {
       revokeAllOtherDevicesUseCase: sl<local.RevokeAllOtherDevicesUseCase>(),
     ),
   );
-  
-  // Register Provider  
+
+  // Register Provider
   sl.registerFactory(() => RegisterProvider());
 }
 
@@ -349,7 +372,6 @@ void _initDeviceManagement() {
   );
 }
 
-
 void _initPlants() {
   PlantsDIModule.init(sl);
 }
@@ -431,15 +453,15 @@ void _initBackup() {
   sl.registerLazySingleton<BackupValidationService>(
     () => const BackupValidationService(),
   );
-  
+
   sl.registerLazySingleton<BackupDataTransformerService>(
     () => const BackupDataTransformerService(),
   );
-  
+
   sl.registerLazySingleton<BackupAuditService>(
     () => BackupAuditService(storageService: sl<SecureStorageService>()),
   );
-  
+
   sl.registerLazySingleton<BackupRestoreService>(
     () => BackupRestoreService(
       plantsRepository: sl(),
@@ -510,7 +532,6 @@ void _initAppServices() {
     () => SyncStatusProvider(sl(), sl()),
   );
 
-
   // Data Cleaner Service
   sl.registerLazySingleton<DataCleanerService>(
     () => DataCleanerService(
@@ -524,23 +545,31 @@ void _initAppServices() {
 
 void _initDataExport() {
   // Data Sources - using concrete implementations
-  sl.registerLazySingleton<PlantsExportDataSource>(() => PlantsExportLocalDataSource(
-    plantsRepository: sl<PlantsRepository>(),
-    commentsRepository: sl<PlantCommentsRepository>(),
-    tasksRepository: sl<TasksRepository>(),
-    spacesRepository: sl<SpacesRepository>(),
-  ));
+  sl.registerLazySingleton<PlantsExportDataSource>(
+    () => PlantsExportLocalDataSource(
+      plantsRepository: sl<PlantsRepository>(),
+      commentsRepository: sl<PlantCommentsRepository>(),
+      tasksRepository: sl<TasksRepository>(),
+      spacesRepository: sl<SpacesRepository>(),
+    ),
+  );
 
-  sl.registerLazySingleton<SettingsExportDataSource>(() => SettingsExportLocalDataSource());
+  sl.registerLazySingleton<SettingsExportDataSource>(
+    () => SettingsExportLocalDataSource(),
+  );
 
-  sl.registerLazySingleton<ExportFileGenerator>(() => ExportFileGenerator(fileRepository: sl<IFileRepository>()));
+  sl.registerLazySingleton<ExportFileGenerator>(
+    () => ExportFileGenerator(fileRepository: sl<IFileRepository>()),
+  );
 
   // Repository
-  sl.registerLazySingleton<DataExportRepository>(() => DataExportRepositoryImpl(
-    plantsDataSource: sl<PlantsExportDataSource>(),
-    settingsDataSource: sl<SettingsExportDataSource>(),
-    fileGenerator: sl<ExportFileGenerator>(),
-  ));
+  sl.registerLazySingleton<DataExportRepository>(
+    () => DataExportRepositoryImpl(
+      plantsDataSource: sl<PlantsExportDataSource>(),
+      settingsDataSource: sl<SettingsExportDataSource>(),
+      fileGenerator: sl<ExportFileGenerator>(),
+    ),
+  );
 
   // Use Cases
   sl.registerLazySingleton<CheckExportAvailabilityUseCase>(
@@ -556,10 +585,12 @@ void _initDataExport() {
   );
 
   // Provider
-  sl.registerFactory<DataExportProvider>(() => DataExportProvider(
-    checkAvailabilityUseCase: sl<CheckExportAvailabilityUseCase>(),
-    requestExportUseCase: sl<RequestExportUseCase>(),
-    getHistoryUseCase: sl<GetExportHistoryUseCase>(),
-    repository: sl<DataExportRepository>(),
-  ));
+  sl.registerFactory<DataExportProvider>(
+    () => DataExportProvider(
+      checkAvailabilityUseCase: sl<CheckExportAvailabilityUseCase>(),
+      requestExportUseCase: sl<RequestExportUseCase>(),
+      getHistoryUseCase: sl<GetExportHistoryUseCase>(),
+      repository: sl<DataExportRepository>(),
+    ),
+  );
 }

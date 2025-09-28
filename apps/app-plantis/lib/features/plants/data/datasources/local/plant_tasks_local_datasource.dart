@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 
 import '../../../domain/entities/plant_task.dart';
 import '../../models/plant_task_model.dart';
@@ -45,7 +44,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         final now = DateTime.now();
         if (now.difference(_cacheTimestamp!).compareTo(_cacheValidity) < 0) {
           if (kDebugMode) {
-            print('🔄 PlantTasksLocalDatasource: Retornando ${_cachedTasks!.length} tasks do cache');
+            print(
+              '🔄 PlantTasksLocalDatasource: Retornando ${_cachedTasks!.length} tasks do cache',
+            );
           }
           return _cachedTasks!;
         }
@@ -55,7 +56,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final tasks = <PlantTask>[];
 
       if (kDebugMode) {
-        print('📥 PlantTasksLocalDatasource: Carregando ${hiveBox.length} tasks do Hive');
+        print(
+          '📥 PlantTasksLocalDatasource: Carregando ${hiveBox.length} tasks do Hive',
+        );
       }
 
       for (final key in hiveBox.keys) {
@@ -71,16 +74,22 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         } catch (e) {
           // Log corrupted data and remove from Hive
           if (kDebugMode) {
-            print('❌ PlantTasksLocalDatasource: Dados corrompidos para key $key: $e');
+            print(
+              '❌ PlantTasksLocalDatasource: Dados corrompidos para key $key: $e',
+            );
           }
           try {
             await hiveBox.delete(key);
             if (kDebugMode) {
-              print('🗑️ PlantTasksLocalDatasource: Dados corrompidos removidos para key: $key');
+              print(
+                '🗑️ PlantTasksLocalDatasource: Dados corrompidos removidos para key: $key',
+              );
             }
           } catch (deleteError) {
             if (kDebugMode) {
-              print('❌ PlantTasksLocalDatasource: Falha ao remover dados corrompidos para key $key: $deleteError');
+              print(
+                '❌ PlantTasksLocalDatasource: Falha ao remover dados corrompidos para key $key: $deleteError',
+              );
             }
           }
           continue;
@@ -95,7 +104,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _cacheTimestamp = DateTime.now();
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: ${tasks.length} tasks carregadas com sucesso');
+        print(
+          '✅ PlantTasksLocalDatasource: ${tasks.length} tasks carregadas com sucesso',
+        );
       }
 
       return tasks;
@@ -113,16 +124,21 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<List<PlantTask>> getPlantTasksByPlantId(String plantId) async {
     try {
       final allTasks = await getPlantTasks();
-      final plantTasks = allTasks.where((task) => task.plantId == plantId).toList();
+      final plantTasks =
+          allTasks.where((task) => task.plantId == plantId).toList();
 
       if (kDebugMode) {
-        print('📥 PlantTasksLocalDatasource: ${plantTasks.length} tasks encontradas para planta $plantId');
+        print(
+          '📥 PlantTasksLocalDatasource: ${plantTasks.length} tasks encontradas para planta $plantId',
+        );
       }
 
       return plantTasks;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao buscar tasks por plantId: $e');
+        print(
+          '❌ PlantTasksLocalDatasource: Erro ao buscar tasks por plantId: $e',
+        );
       }
       throw CacheFailure(
         'Erro ao buscar tarefas por planta do cache local: ${e.toString()}',
@@ -148,16 +164,22 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       } catch (corruptionError) {
         // Handle corrupted individual task data
         if (kDebugMode) {
-          print('❌ PlantTasksLocalDatasource: Dados corrompidos para ID $id: $corruptionError');
+          print(
+            '❌ PlantTasksLocalDatasource: Dados corrompidos para ID $id: $corruptionError',
+          );
         }
         try {
           await hiveBox.delete(id);
           if (kDebugMode) {
-            print('🗑️ PlantTasksLocalDatasource: Dados corrompidos removidos para ID: $id');
+            print(
+              '🗑️ PlantTasksLocalDatasource: Dados corrompidos removidos para ID: $id',
+            );
           }
         } catch (deleteError) {
           if (kDebugMode) {
-            print('❌ PlantTasksLocalDatasource: Falha ao remover dados corrompidos para ID $id: $deleteError');
+            print(
+              '❌ PlantTasksLocalDatasource: Falha ao remover dados corrompidos para ID $id: $deleteError',
+            );
           }
         }
         return null;
@@ -176,7 +198,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> addPlantTask(PlantTask task) async {
     try {
       if (kDebugMode) {
-        print('💾 PlantTasksLocalDatasource: Salvando task ${task.id} - ${task.title}');
+        print(
+          '💾 PlantTasksLocalDatasource: Salvando task ${task.id} - ${task.title}',
+        );
       }
 
       final hiveBox = await box;
@@ -205,7 +229,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> addPlantTasks(List<PlantTask> tasks) async {
     try {
       if (kDebugMode) {
-        print('💾 PlantTasksLocalDatasource: Salvando ${tasks.length} tasks em lote');
+        print(
+          '💾 PlantTasksLocalDatasource: Salvando ${tasks.length} tasks em lote',
+        );
       }
 
       final hiveBox = await box;
@@ -220,7 +246,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: ${tasks.length} tasks salvas em lote com sucesso');
+        print(
+          '✅ PlantTasksLocalDatasource: ${tasks.length} tasks salvas em lote com sucesso',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -244,7 +272,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: Task ${task.id} atualizada com sucesso');
+        print(
+          '✅ PlantTasksLocalDatasource: Task ${task.id} atualizada com sucesso',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -294,7 +324,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> deletePlantTasksByPlantId(String plantId) async {
     try {
       if (kDebugMode) {
-        print('🗑️ PlantTasksLocalDatasource: Deletando todas as tasks da planta $plantId');
+        print(
+          '🗑️ PlantTasksLocalDatasource: Deletando todas as tasks da planta $plantId',
+        );
       }
 
       final tasks = await getPlantTasksByPlantId(plantId);
@@ -304,11 +336,15 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       }
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: ${tasks.length} tasks da planta $plantId deletadas');
+        print(
+          '✅ PlantTasksLocalDatasource: ${tasks.length} tasks da planta $plantId deletadas',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao deletar tasks por plantId: $e');
+        print(
+          '❌ PlantTasksLocalDatasource: Erro ao deletar tasks por plantId: $e',
+        );
       }
       throw CacheFailure(
         'Erro ao deletar tarefas por planta do cache local: ${e.toString()}',
@@ -320,7 +356,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<List<PlantTask>> getPendingPlantTasks() async {
     try {
       final allTasks = await getPlantTasks();
-      return allTasks.where((task) => task.status == TaskStatus.pending).toList();
+      return allTasks
+          .where((task) => task.status == TaskStatus.pending)
+          .toList();
     } catch (e) {
       throw CacheFailure(
         'Erro ao buscar tarefas pendentes do cache local: ${e.toString()}',
@@ -332,7 +370,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<List<PlantTask>> getOverduePlantTasks() async {
     try {
       final allTasks = await getPlantTasks();
-      return allTasks.where((task) => task.status == TaskStatus.overdue).toList();
+      return allTasks
+          .where((task) => task.status == TaskStatus.overdue)
+          .toList();
     } catch (e) {
       throw CacheFailure(
         'Erro ao buscar tarefas atrasadas do cache local: ${e.toString()}',

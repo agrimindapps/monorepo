@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/device_management_provider.dart';
+import '../widgets/device_actions_widget.dart';
 import '../widgets/device_list_widget.dart';
 import '../widgets/device_statistics_widget.dart';
-import '../widgets/device_actions_widget.dart';
 
 /// Página principal de gerenciamento de dispositivos
 /// Interface principal para visualizar e gerenciar dispositivos no app-plantis
 class DeviceManagementPage extends StatefulWidget {
-  const DeviceManagementPage({Key? key}) : super(key: key);
+  const DeviceManagementPage({super.key});
 
   @override
   State<DeviceManagementPage> createState() => _DeviceManagementPageState();
@@ -41,34 +41,36 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
           Consumer<DeviceManagementProvider>(
             builder: (context, provider, child) {
               return PopupMenuButton<String>(
-                onSelected: (value) => _handleMenuAction(context, value, provider),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'refresh',
-                    child: ListTile(
-                      leading: Icon(Icons.refresh),
-                      title: Text('Atualizar'),
-                      dense: true,
-                    ),
-                  ),
-                  if (provider.hasDevices && provider.activeDeviceCount > 1)
-                    const PopupMenuItem(
-                      value: 'revoke_all',
-                      child: ListTile(
-                        leading: Icon(Icons.logout, color: Colors.red),
-                        title: Text('Revogar Outros Dispositivos'),
-                        dense: true,
+                onSelected:
+                    (value) => _handleMenuAction(context, value, provider),
+                itemBuilder:
+                    (context) => [
+                      const PopupMenuItem(
+                        value: 'refresh',
+                        child: ListTile(
+                          leading: Icon(Icons.refresh),
+                          title: Text('Atualizar'),
+                          dense: true,
+                        ),
                       ),
-                    ),
-                  const PopupMenuItem(
-                    value: 'help',
-                    child: ListTile(
-                      leading: Icon(Icons.help_outline),
-                      title: Text('Ajuda'),
-                      dense: true,
-                    ),
-                  ),
-                ],
+                      if (provider.hasDevices && provider.activeDeviceCount > 1)
+                        const PopupMenuItem(
+                          value: 'revoke_all',
+                          child: ListTile(
+                            leading: Icon(Icons.logout, color: Colors.red),
+                            title: Text('Revogar Outros Dispositivos'),
+                            dense: true,
+                          ),
+                        ),
+                      const PopupMenuItem(
+                        value: 'help',
+                        child: ListTile(
+                          leading: Icon(Icons.help_outline),
+                          title: Text('Ajuda'),
+                          dense: true,
+                        ),
+                      ),
+                    ],
               );
             },
           ),
@@ -76,14 +78,8 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(
-              icon: Icon(Icons.devices),
-              text: 'Dispositivos',
-            ),
-            Tab(
-              icon: Icon(Icons.analytics_outlined),
-              text: 'Estatísticas',
-            ),
+            Tab(icon: Icon(Icons.devices), text: 'Dispositivos'),
+            Tab(icon: Icon(Icons.analytics_outlined), text: 'Estatísticas'),
           ],
         ),
       ),
@@ -162,7 +158,11 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle_outline, color: Colors.green.shade600, size: 20),
+            Icon(
+              Icons.check_circle_outline,
+              color: Colors.green.shade600,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -226,7 +226,9 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
                   provider.deviceLimitText,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -287,17 +289,15 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
       return _buildEmptyDevicesState();
     }
 
-    return Column(
+    return const Column(
       children: [
         // Ações rápidas
         DeviceActionsWidget(),
 
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
 
         // Lista de dispositivos
-        Expanded(
-          child: DeviceListWidget(),
-        ),
+        Expanded(child: DeviceListWidget()),
       ],
     );
   }
@@ -316,7 +316,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
       );
     }
 
-    return DeviceStatisticsWidget();
+    return const DeviceStatisticsWidget();
   }
 
   Widget _buildEmptyDevicesState() {
@@ -341,7 +341,9 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
             Text(
               'Este é seu primeiro dispositivo.\nVocê pode adicionar até 3 dispositivos.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -363,15 +365,21 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
         if (!provider.canAddMoreDevices) return const SizedBox.shrink();
 
         return FloatingActionButton.extended(
-          onPressed: provider.isValidating ? null : () => _validateCurrentDevice(context),
-          icon: provider.isValidating
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.add),
-          label: Text(provider.isValidating ? 'Validando...' : 'Validar Dispositivo'),
+          onPressed:
+              provider.isValidating
+                  ? null
+                  : () => _validateCurrentDevice(context),
+          icon:
+              provider.isValidating
+                  ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : const Icon(Icons.add),
+          label: Text(
+            provider.isValidating ? 'Validando...' : 'Validar Dispositivo',
+          ),
         );
       },
     );
@@ -420,28 +428,29 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Revogar Outros Dispositivos'),
-        content: Text(
-          'Isso irá desconectar todos os outros dispositivos (${provider.activeDeviceCount - 1}), '
-          'mantendo apenas este dispositivo ativo.\n\n'
-          'Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Revogar Outros Dispositivos'),
+            content: Text(
+              'Isso irá desconectar todos os outros dispositivos (${provider.activeDeviceCount - 1}), '
+              'mantendo apenas este dispositivo ativo.\n\n'
+              'Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Revogar Todos'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Revogar Todos'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -454,54 +463,55 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
   void _showHelpDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajuda - Gerenciamento de Dispositivos'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'O que são dispositivos registrados?',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Ajuda - Gerenciamento de Dispositivos'),
+            content: const SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'O que são dispositivos registrados?',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'São os aparelhos (celular, tablet, computador) onde você fez login no Plantis. '
+                    'Você pode ter até 3 dispositivos ativos simultaneamente.',
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Por que revogar um dispositivo?',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '• Quando perder ou trocar de aparelho\n'
+                    '• Para liberar espaço para um novo dispositivo\n'
+                    '• Por questões de segurança\n'
+                    '• Quando não usar mais um aparelho',
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'O que acontece ao revogar?',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'O dispositivo revogado será desconectado automaticamente e precisará '
+                    'fazer login novamente para usar o Plantis.',
+                  ),
+                ],
               ),
-              SizedBox(height: 8),
-              Text(
-                'São os aparelhos (celular, tablet, computador) onde você fez login no Plantis. '
-                'Você pode ter até 3 dispositivos ativos simultaneamente.',
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Por que revogar um dispositivo?',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '• Quando perder ou trocar de aparelho\n'
-                '• Para liberar espaço para um novo dispositivo\n'
-                '• Por questões de segurança\n'
-                '• Quando não usar mais um aparelho',
-              ),
-              SizedBox(height: 16),
-              Text(
-                'O que acontece ao revogar?',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'O dispositivo revogado será desconectado automaticamente e precisará '
-                'fazer login novamente para usar o Plantis.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendi'),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendi'),
-          ),
-        ],
-      ),
     );
   }
 }

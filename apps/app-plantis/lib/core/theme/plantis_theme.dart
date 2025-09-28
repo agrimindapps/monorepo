@@ -118,7 +118,7 @@ class PlantisTheme {
       shadowColor: Colors.transparent, // Sem sombra padrão
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
-    
+
     // Scaffold theme baseado no mockup
     scaffoldBackgroundColor: const Color(0xFFF8F9FA),
   );
@@ -222,7 +222,7 @@ class PlantisTheme {
       shadowColor: Colors.transparent, // Sem sombra padrão
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
-    
+
     // Scaffold theme para modo escuro
     scaffoldBackgroundColor: const Color(0xFF1C1C1E),
   );

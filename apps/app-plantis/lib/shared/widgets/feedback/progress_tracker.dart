@@ -11,7 +11,7 @@ import 'toast_service.dart';
 class ProgressTracker {
   static final Map<String, ProgressOperation> _activeOperations = {};
   static final List<VoidCallback> _listeners = [];
-  
+
   /// Inicia uma nova operação de progresso
   static ProgressOperation startOperation({
     required String key,
@@ -24,7 +24,7 @@ class ProgressTracker {
     if (includeHaptic) {
       HapticContexts.uploadStart();
     }
-    
+
     final operation = ProgressOperation(
       key: key,
       title: title,
@@ -32,15 +32,16 @@ class ProgressTracker {
       type: type,
       showToast: showToast,
     );
-    
+
     _activeOperations[key] = operation;
     _notifyListeners();
-    
+
     return operation;
   }
-  
+
   /// Atualiza progresso de uma operação
-  static void updateProgress(String key, {
+  static void updateProgress(
+    String key, {
     required double progress,
     String? message,
     String? description,
@@ -53,17 +54,18 @@ class ProgressTracker {
         message: message,
         description: description,
       );
-      
+
       if (includeHaptic) {
         HapticContexts.uploadProgress();
       }
-      
+
       _notifyListeners();
     }
   }
-  
+
   /// Completa operação com sucesso
-  static void completeOperation(String key, {
+  static void completeOperation(
+    String key, {
     String? successMessage,
     bool showToast = true,
     bool includeHaptic = true,
@@ -71,11 +73,11 @@ class ProgressTracker {
     final operation = _activeOperations[key];
     if (operation != null) {
       operation._complete(successMessage);
-      
+
       if (includeHaptic) {
         HapticContexts.uploadComplete();
       }
-      
+
       if (showToast && operation.context != null) {
         ToastService.showSuccess(
           context: operation.context!,
@@ -83,7 +85,7 @@ class ProgressTracker {
           icon: Icons.check_circle,
         );
       }
-      
+
       // Remove operação após delay
       Future.delayed(const Duration(seconds: 2), () {
         _activeOperations.remove(key);
@@ -91,9 +93,10 @@ class ProgressTracker {
       });
     }
   }
-  
+
   /// Falha operação com erro
-  static void failOperation(String key, {
+  static void failOperation(
+    String key, {
     required String errorMessage,
     bool showToast = true,
     bool includeHaptic = true,
@@ -102,11 +105,11 @@ class ProgressTracker {
     final operation = _activeOperations[key];
     if (operation != null) {
       operation._fail(errorMessage);
-      
+
       if (includeHaptic) {
         HapticContexts.uploadError();
       }
-      
+
       if (showToast && operation.context != null) {
         ToastService.showError(
           context: operation.context!,
@@ -115,11 +118,11 @@ class ProgressTracker {
           onAction: onRetry,
         );
       }
-      
+
       _notifyListeners();
     }
   }
-  
+
   /// Pausa operação
   static void pauseOperation(String key) {
     final operation = _activeOperations[key];
@@ -128,7 +131,7 @@ class ProgressTracker {
       _notifyListeners();
     }
   }
-  
+
   /// Retoma operação
   static void resumeOperation(String key) {
     final operation = _activeOperations[key];
@@ -137,20 +140,21 @@ class ProgressTracker {
       _notifyListeners();
     }
   }
-  
+
   /// Cancela operação
-  static void cancelOperation(String key, {
+  static void cancelOperation(
+    String key, {
     bool showToast = true,
     bool includeHaptic = true,
   }) {
     final operation = _activeOperations[key];
     if (operation != null) {
       operation._cancel();
-      
+
       if (includeHaptic) {
         HapticService.selection();
       }
-      
+
       if (showToast && operation.context != null) {
         ToastService.showInfo(
           context: operation.context!,
@@ -158,37 +162,37 @@ class ProgressTracker {
           icon: Icons.cancel,
         );
       }
-      
+
       _activeOperations.remove(key);
       _notifyListeners();
     }
   }
-  
+
   /// Obtém operação específica
   static ProgressOperation? getOperation(String key) {
     return _activeOperations[key];
   }
-  
+
   /// Obtém todas as operações ativas
-  static Map<String, ProgressOperation> get activeOperations => 
+  static Map<String, ProgressOperation> get activeOperations =>
       Map.unmodifiable(_activeOperations);
-  
+
   /// Adiciona listener para mudanças
   static void addListener(VoidCallback listener) {
     _listeners.add(listener);
   }
-  
+
   /// Remove listener
   static void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
   }
-  
+
   static void _notifyListeners() {
     for (final listener in _listeners) {
       listener();
     }
   }
-  
+
   /// Limpa todas as operações
   static void clearAll() {
     _activeOperations.clear();
@@ -202,7 +206,7 @@ class ProgressOperation extends ChangeNotifier {
   final String title;
   final ProgressType type;
   final bool showToast;
-  
+
   String? _description;
   String? _currentMessage;
   double _progress;
@@ -210,7 +214,7 @@ class ProgressOperation extends ChangeNotifier {
   final DateTime _startTime;
   Duration? _estimatedTime;
   BuildContext? context;
-  
+
   ProgressOperation({
     required this.key,
     required this.title,
@@ -222,7 +226,7 @@ class ProgressOperation extends ChangeNotifier {
        _progress = 0.0,
        _state = OperationState.running,
        _startTime = DateTime.now();
-  
+
   // Getters
   String? get description => _description;
   String? get currentMessage => _currentMessage;
@@ -231,27 +235,27 @@ class ProgressOperation extends ChangeNotifier {
   DateTime get startTime => _startTime;
   Duration? get estimatedTime => _estimatedTime;
   Duration get elapsedTime => DateTime.now().difference(_startTime);
-  
+
   /// Define contexto para toasts
   void setContext(BuildContext context) {
     this.context = context;
   }
-  
+
   void _updateProgress({
     required double progress,
     String? message,
     String? description,
   }) {
     _progress = progress.clamp(0.0, 1.0);
-    
+
     if (message != null) {
       _currentMessage = message;
     }
-    
+
     if (description != null) {
       _description = description;
     }
-    
+
     // Calcular tempo estimado
     if (_progress > 0.1) {
       final elapsed = elapsedTime;
@@ -260,10 +264,10 @@ class ProgressOperation extends ChangeNotifier {
         milliseconds: (estimatedTotal - elapsed.inMilliseconds).round(),
       );
     }
-    
+
     notifyListeners();
   }
-  
+
   void _complete(String? successMessage) {
     _state = OperationState.completed;
     _progress = 1.0;
@@ -272,51 +276,51 @@ class ProgressOperation extends ChangeNotifier {
     }
     notifyListeners();
   }
-  
+
   void _fail(String errorMessage) {
     _state = OperationState.failed;
     _currentMessage = errorMessage;
     notifyListeners();
   }
-  
+
   void _pause() {
     if (_state == OperationState.running) {
       _state = OperationState.paused;
       notifyListeners();
     }
   }
-  
+
   void _resume() {
     if (_state == OperationState.paused) {
       _state = OperationState.running;
       notifyListeners();
     }
   }
-  
+
   void _cancel() {
     _state = OperationState.cancelled;
     notifyListeners();
   }
-  
+
   /// Formata tempo estimado
   String get formattedEstimatedTime {
     if (_estimatedTime == null) return '--';
-    
+
     final minutes = _estimatedTime!.inMinutes;
     final seconds = _estimatedTime!.inSeconds % 60;
-    
+
     if (minutes > 0) {
       return '${minutes}m ${seconds}s';
     } else {
       return '${seconds}s';
     }
   }
-  
+
   /// Formata tempo decorrido
   String get formattedElapsedTime {
     final minutes = elapsedTime.inMinutes;
     final seconds = elapsedTime.inSeconds % 60;
-    
+
     if (minutes > 0) {
       return '${minutes}m ${seconds}s';
     } else {
@@ -326,13 +330,7 @@ class ProgressOperation extends ChangeNotifier {
 }
 
 /// Estados de uma operação
-enum OperationState {
-  running,
-  paused,
-  completed,
-  failed,
-  cancelled,
-}
+enum OperationState { running, paused, completed, failed, cancelled }
 
 /// Widget que exibe o progresso de uma operação
 class ProgressTrackerWidget extends StatefulWidget {
@@ -341,7 +339,7 @@ class ProgressTrackerWidget extends StatefulWidget {
   final bool showActions;
   final VoidCallback? onCancel;
   final VoidCallback? onRetry;
-  
+
   const ProgressTrackerWidget({
     super.key,
     required this.operationKey,
@@ -350,27 +348,27 @@ class ProgressTrackerWidget extends StatefulWidget {
     this.onCancel,
     this.onRetry,
   });
-  
+
   @override
   State<ProgressTrackerWidget> createState() => _ProgressTrackerWidgetState();
 }
 
 class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
   ProgressOperation? _operation;
-  
+
   @override
   void initState() {
     super.initState();
     _operation = ProgressTracker.getOperation(widget.operationKey);
     ProgressTracker.addListener(_onProgressChanged);
   }
-  
+
   @override
   void dispose() {
     ProgressTracker.removeListener(_onProgressChanged);
     super.dispose();
   }
-  
+
   void _onProgressChanged() {
     if (mounted) {
       setState(() {
@@ -378,15 +376,15 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (_operation == null) {
       return const SizedBox.shrink();
     }
-    
+
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -415,10 +413,10 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
             const SizedBox(height: 8),
             _buildDetails(theme),
           ],
-          if (widget.showActions && 
+          if (widget.showActions &&
               (_operation!.state == OperationState.running ||
-               _operation!.state == OperationState.paused ||
-               _operation!.state == OperationState.failed)) ...[
+                  _operation!.state == OperationState.paused ||
+                  _operation!.state == OperationState.failed)) ...[
             const SizedBox(height: 16),
             _buildActions(theme),
           ],
@@ -426,7 +424,7 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
       ),
     );
   }
-  
+
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
@@ -464,7 +462,7 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
       ],
     );
   }
-  
+
   Widget _buildStateIcon(ThemeData theme) {
     switch (_operation!.state) {
       case OperationState.running:
@@ -472,9 +470,10 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
           width: 24,
           height: 24,
           child: CircularProgressIndicator(
-            value: _operation!.type == ProgressType.determinate 
-                ? _operation!.progress 
-                : null,
+            value:
+                _operation!.type == ProgressType.determinate
+                    ? _operation!.progress
+                    : null,
             strokeWidth: 3,
             valueColor: AlwaysStoppedAnimation<Color>(
               theme.colorScheme.primary,
@@ -488,42 +487,29 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
           size: 24,
         );
       case OperationState.completed:
-        return const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 24,
-        );
+        return const Icon(Icons.check_circle, color: Colors.green, size: 24);
       case OperationState.failed:
-        return const Icon(
-          Icons.error,
-          color: Colors.red,
-          size: 24,
-        );
+        return const Icon(Icons.error, color: Colors.red, size: 24);
       case OperationState.cancelled:
-        return Icon(
-          Icons.cancel,
-          color: theme.colorScheme.outline,
-          size: 24,
-        );
+        return Icon(Icons.cancel, color: theme.colorScheme.outline, size: 24);
     }
   }
-  
+
   Widget _buildProgressBar(ThemeData theme) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
       child: LinearProgressIndicator(
-        value: _operation!.type == ProgressType.determinate 
-            ? _operation!.progress 
-            : null,
+        value:
+            _operation!.type == ProgressType.determinate
+                ? _operation!.progress
+                : null,
         backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
-        valueColor: AlwaysStoppedAnimation<Color>(
-          _getProgressColor(theme),
-        ),
+        valueColor: AlwaysStoppedAnimation<Color>(_getProgressColor(theme)),
         minHeight: 6,
       ),
     );
   }
-  
+
   Color _getProgressColor(ThemeData theme) {
     switch (_operation!.state) {
       case OperationState.running:
@@ -538,7 +524,7 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
         return theme.colorScheme.outline;
     }
   }
-  
+
   Widget _buildDetails(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -560,12 +546,12 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
       ],
     );
   }
-  
+
   Widget _buildActions(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (_operation!.state == OperationState.failed && 
+        if (_operation!.state == OperationState.failed &&
             widget.onRetry != null) ...[
           TextButton.icon(
             onPressed: widget.onRetry,
@@ -608,9 +594,7 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
             },
             icon: const Icon(Icons.close, size: 16),
             label: const Text('Cancelar'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
           ),
       ],
     );
@@ -620,12 +604,9 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
 /// Widget que mostra todas as operações ativas
 class ProgressTrackerPanel extends StatefulWidget {
   final bool showOnlyActive;
-  
-  const ProgressTrackerPanel({
-    super.key,
-    this.showOnlyActive = true,
-  });
-  
+
+  const ProgressTrackerPanel({super.key, this.showOnlyActive = true});
+
   @override
   State<ProgressTrackerPanel> createState() => _ProgressTrackerPanelState();
 }
@@ -636,41 +617,45 @@ class _ProgressTrackerPanelState extends State<ProgressTrackerPanel> {
     super.initState();
     ProgressTracker.addListener(_onProgressChanged);
   }
-  
+
   @override
   void dispose() {
     ProgressTracker.removeListener(_onProgressChanged);
     super.dispose();
   }
-  
+
   void _onProgressChanged() {
     if (mounted) {
       setState(() {});
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    final operations = ProgressTracker.activeOperations.values.where((op) {
-      if (widget.showOnlyActive) {
-        return op.state == OperationState.running || 
-               op.state == OperationState.paused;
-      }
-      return true;
-    }).toList();
-    
+    final operations =
+        ProgressTracker.activeOperations.values.where((op) {
+          if (widget.showOnlyActive) {
+            return op.state == OperationState.running ||
+                op.state == OperationState.paused;
+          }
+          return true;
+        }).toList();
+
     if (operations.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Column(
-      children: operations.map((operation) => 
-        ProgressTrackerWidget(
-          operationKey: operation.key,
-          showDetails: true,
-          showActions: true,
-        ),
-      ).toList(),
+      children:
+          operations
+              .map(
+                (operation) => ProgressTrackerWidget(
+                  operationKey: operation.key,
+                  showDetails: true,
+                  showActions: true,
+                ),
+              )
+              .toList(),
     );
   }
 }
@@ -686,7 +671,7 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
-  
+
   // Backup de dados
   static String backupData() {
     return ProgressTracker.startOperation(
@@ -696,7 +681,7 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
-  
+
   // Restore de dados
   static String restoreData() {
     return ProgressTracker.startOperation(
@@ -706,7 +691,7 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
-  
+
   // Sincronização
   static String syncData() {
     return ProgressTracker.startOperation(
@@ -716,7 +701,7 @@ class ProgressContexts {
       type: ProgressType.indeterminate,
     ).key;
   }
-  
+
   // Processamento de dados
   static String processData(String operation) {
     return ProgressTracker.startOperation(

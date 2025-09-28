@@ -69,21 +69,13 @@ class _SettingsCardState extends State<SettingsCard>
       curve: Curves.easeInOut,
     );
 
-    _iconRotation = Tween<double>(
-      begin: 0.0,
-      end: 0.5,
-    ).animate(CurvedAnimation(
-      parent: _expandController,
-      curve: Curves.easeInOut,
-    ));
+    _iconRotation = Tween<double>(begin: 0.0, end: 0.5).animate(
+      CurvedAnimation(parent: _expandController, curve: Curves.easeInOut),
+    );
 
-    _hoverAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.02,
-    ).animate(CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeInOut,
-    ));
+    _hoverAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
+    );
 
     if (_isExpanded) {
       _expandController.value = 1.0;
@@ -152,7 +144,9 @@ class _SettingsCardState extends State<SettingsCard>
 
   Color _getBorderColor() {
     final color = _getHeaderColor();
-    return _isHovered ? color.withValues(alpha: 0.3) : color.withValues(alpha: 0.1);
+    return _isHovered
+        ? color.withValues(alpha: 0.3)
+        : color.withValues(alpha: 0.1);
   }
 
   Widget _buildLeading() {
@@ -175,11 +169,7 @@ class _SettingsCardState extends State<SettingsCard>
             ),
           ],
         ),
-        child: Icon(
-          widget.icon!,
-          color: Colors.white,
-          size: 20,
-        ),
+        child: Icon(widget.icon, color: Colors.white, size: 20),
       );
     }
 
@@ -216,10 +206,7 @@ class _SettingsCardState extends State<SettingsCard>
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         badgeText,
@@ -256,25 +243,23 @@ class _SettingsCardState extends State<SettingsCard>
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _getBorderColor(),
-                  width: 2,
-                ),
-                boxShadow: _isHovered
-                    ? [
-                        BoxShadow(
-                          color: _getHeaderColor().withValues(alpha: 0.1),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                border: Border.all(color: _getBorderColor(), width: 2),
+                boxShadow:
+                    _isHovered
+                        ? [
+                          BoxShadow(
+                            color: _getHeaderColor().withValues(alpha: 0.1),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                        : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
               ),
               child: Column(
                 children: [
@@ -318,10 +303,12 @@ class _SettingsCardState extends State<SettingsCard>
                                     Expanded(
                                       child: Text(
                                         widget.title,
-                                        style: theme.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: theme.colorScheme.onSurface,
-                                        ),
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                            ),
                                       ),
                                     ),
                                     _buildCategoryBadge(),
@@ -378,9 +365,7 @@ class _SettingsCardState extends State<SettingsCard>
                             const Divider(height: 1),
                             Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Column(
-                                children: widget.children,
-                              ),
+                              child: Column(children: widget.children),
                             ),
                           ],
                         ),
@@ -401,9 +386,7 @@ class _SettingsCardState extends State<SettingsCard>
                           const Divider(height: 1),
                           Padding(
                             padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: widget.children,
-                            ),
+                            child: Column(children: widget.children),
                           ),
                         ],
                       ),
@@ -420,10 +403,10 @@ class _SettingsCardState extends State<SettingsCard>
 
 /// Settings card categories with specific theming
 enum SettingsCardCategory {
-  general,     // Default green theme
-  account,     // Leaf green theme
-  premium,     // Gold theme for premium features
-  privacy,     // Blue theme for privacy settings
+  general, // Default green theme
+  account, // Leaf green theme
+  premium, // Gold theme for premium features
+  privacy, // Blue theme for privacy settings
   development, // Brown theme for dev settings
 }
 
@@ -458,10 +441,7 @@ class QuickSettingsCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              cardColor,
-              cardColor.withValues(alpha: 0.8),
-            ],
+            colors: [cardColor, cardColor.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -479,11 +459,7 @@ class QuickSettingsCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 32,
-                ),
+                Icon(icon, color: Colors.white, size: 32),
                 if (badge != null)
                   Positioned(
                     right: -4,

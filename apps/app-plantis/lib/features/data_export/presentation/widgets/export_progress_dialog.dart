@@ -9,10 +9,7 @@ import '../providers/data_export_provider.dart';
 class ExportProgressDialog extends StatefulWidget {
   final ExportRequest request;
 
-  const ExportProgressDialog({
-    super.key,
-    required this.request,
-  });
+  const ExportProgressDialog({super.key, required this.request});
 
   @override
   State<ExportProgressDialog> createState() => _ExportProgressDialogState();
@@ -30,13 +27,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
     _animationController.forward();
   }
 
@@ -51,9 +44,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         contentPadding: EdgeInsets.zero,
         content: Container(
           width: MediaQuery.of(context).size.width * 0.85,
@@ -71,12 +62,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
                       Container(
                         width: 48,
                         height: 48,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              PlantisColors.primary,
-                              PlantisColors.leaf,
-                            ],
+                            colors: [PlantisColors.primary, PlantisColors.leaf],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -97,23 +85,31 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
                               progress.isCompleted
                                   ? 'Exportação Concluída!'
                                   : progress.errorMessage != null
-                                      ? 'Erro na Exportação'
-                                      : 'Exportando Dados',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  ? 'Erro na Exportação'
+                                  : 'Exportando Dados',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: progress.errorMessage != null
-                                    ? Colors.red
-                                    : PlantisColors.primary,
+                                color:
+                                    progress.errorMessage != null
+                                        ? Colors.red
+                                        : PlantisColors.primary,
                               ),
                             ),
                             Text(
                               progress.isCompleted
                                   ? 'Seus dados estão prontos!'
                                   : progress.errorMessage != null
-                                      ? 'Ocorreu um problema'
-                                      : 'Aguarde enquanto processamos...',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ? 'Ocorreu um problema'
+                                  : 'Aguarde enquanto processamos...',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -126,7 +122,11 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
 
                   // Progress content
                   if (progress.errorMessage != null)
-                    _buildErrorContent(context, progress.errorMessage!, provider)
+                    _buildErrorContent(
+                      context,
+                      progress.errorMessage!,
+                      provider,
+                    )
                   else if (progress.isCompleted)
                     _buildCompletedContent(context, widget.request, provider)
                   else
@@ -159,7 +159,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
                 value: progress.percentage / 100,
                 strokeWidth: 6,
                 backgroundColor: PlantisColors.primary.withAlpha(50),
-                valueColor: AlwaysStoppedAnimation<Color>(PlantisColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  PlantisColors.primary,
+                ),
               ),
             ),
             Text(
@@ -181,25 +183,19 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           decoration: BoxDecoration(
             color: PlantisColors.primary.withAlpha(20),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: PlantisColors.primary.withAlpha(60),
-            ),
+            border: Border.all(color: PlantisColors.primary.withAlpha(60)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.task_alt,
-                    color: PlantisColors.primary,
-                    size: 20,
-                  ),
+                  const Icon(Icons.task_alt, color: PlantisColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       progress.currentTask,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         color: PlantisColors.primary,
                       ),
@@ -255,13 +251,11 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           decoration: BoxDecoration(
             color: PlantisColors.leaf.withAlpha(20),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: PlantisColors.leaf.withAlpha(60),
-            ),
+            border: Border.all(color: PlantisColors.leaf.withAlpha(60)),
           ),
           child: Column(
             children: [
-              Text(
+              const Text(
                 'Exportação realizada com sucesso!',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -327,11 +321,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 4),
           Text(
             label,
@@ -369,11 +359,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
             color: Colors.red.withAlpha(30),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: 48,
-          ),
+          child: const Icon(Icons.error_outline, color: Colors.red, size: 48),
         ),
 
         const SizedBox(height: 20),
@@ -385,15 +371,13 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           decoration: BoxDecoration(
             color: Colors.red.withAlpha(20),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.red.withAlpha(60),
-            ),
+            border: Border.all(color: Colors.red.withAlpha(60)),
           ),
           child: Column(
             children: [
-              Text(
+              const Text(
                 'Erro durante a exportação',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.red,
                 ),
@@ -460,7 +444,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           Expanded(
             child: ElevatedButton(
               onPressed: () async {
-                final success = await provider.downloadExport(widget.request.id);
+                final success = await provider.downloadExport(
+                  widget.request.id,
+                );
                 if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

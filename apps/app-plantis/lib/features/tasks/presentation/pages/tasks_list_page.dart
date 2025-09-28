@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/riverpod_providers/tasks_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
@@ -158,7 +158,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     // Load tasks on initialization with delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       ref.read(tasksProvider.notifier).loadTasks();
       // Set default filter to "Today"
       ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.today);
@@ -216,19 +216,15 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       title: 'Minhas Tarefas',
       subtitle: '$tasksCount tarefas cadastradas',
       leading: Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.task_alt,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-        );
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(Icons.task_alt, color: Colors.white, size: 24),
+      ),
+    );
   }
 
   Widget _buildTasksAsyncContent() {
@@ -246,7 +242,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         return _buildTasksContent(state);
       },
       loading: () {
-        final state = TasksListState(
+        const state = TasksListState(
           isLoading: true,
           hasError: false,
           errorMessage: null,
@@ -288,7 +284,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             label: const Text('Hoje'),
             selected: tasksState.currentFilter == TasksFilterType.today,
             onSelected: (selected) {
-              ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.today);
+              ref
+                  .read(tasksProvider.notifier)
+                  .filterTasks(TasksFilterType.today);
             },
             selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
             checkmarkColor: PlantisColors.primary,
@@ -296,13 +294,15 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             side: BorderSide.none,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             labelStyle: TextStyle(
-              color: tasksState.currentFilter == TasksFilterType.today
-                  ? PlantisColors.primary
-                  : Colors.grey[700],
+              color:
+                  tasksState.currentFilter == TasksFilterType.today
+                      ? PlantisColors.primary
+                      : Colors.grey[700],
               fontSize: 16,
-              fontWeight: tasksState.currentFilter == TasksFilterType.today
-                  ? FontWeight.w600
-                  : FontWeight.w500,
+              fontWeight:
+                  tasksState.currentFilter == TasksFilterType.today
+                      ? FontWeight.w600
+                      : FontWeight.w500,
             ),
           ),
           const SizedBox(width: 12),
@@ -310,7 +310,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             label: const Text('Próxima'),
             selected: tasksState.currentFilter == TasksFilterType.upcoming,
             onSelected: (selected) {
-              ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.upcoming);
+              ref
+                  .read(tasksProvider.notifier)
+                  .filterTasks(TasksFilterType.upcoming);
             },
             selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
             checkmarkColor: PlantisColors.primary,
@@ -318,13 +320,15 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             side: BorderSide.none,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             labelStyle: TextStyle(
-              color: tasksState.currentFilter == TasksFilterType.upcoming
-                  ? PlantisColors.primary
-                  : Colors.grey[700],
+              color:
+                  tasksState.currentFilter == TasksFilterType.upcoming
+                      ? PlantisColors.primary
+                      : Colors.grey[700],
               fontSize: 16,
-              fontWeight: tasksState.currentFilter == TasksFilterType.upcoming
-                  ? FontWeight.w600
-                  : FontWeight.w500,
+              fontWeight:
+                  tasksState.currentFilter == TasksFilterType.upcoming
+                      ? FontWeight.w600
+                      : FontWeight.w500,
             ),
           ),
           const SizedBox(width: 12),
@@ -332,7 +336,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             label: const Text('Futuras'),
             selected: tasksState.currentFilter == TasksFilterType.allFuture,
             onSelected: (selected) {
-              ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.allFuture);
+              ref
+                  .read(tasksProvider.notifier)
+                  .filterTasks(TasksFilterType.allFuture);
             },
             selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
             checkmarkColor: PlantisColors.primary,
@@ -340,13 +346,15 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             side: BorderSide.none,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             labelStyle: TextStyle(
-              color: tasksState.currentFilter == TasksFilterType.allFuture
-                  ? PlantisColors.primary
-                  : Colors.grey[700],
+              color:
+                  tasksState.currentFilter == TasksFilterType.allFuture
+                      ? PlantisColors.primary
+                      : Colors.grey[700],
               fontSize: 16,
-              fontWeight: tasksState.currentFilter == TasksFilterType.allFuture
-                  ? FontWeight.w600
-                  : FontWeight.w500,
+              fontWeight:
+                  tasksState.currentFilter == TasksFilterType.allFuture
+                      ? FontWeight.w600
+                      : FontWeight.w500,
             ),
           ),
         ],
@@ -369,7 +377,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             return _buildTasksListContent(data);
           },
           loading: () {
-            final data = TasksListData(
+            const data = TasksListData(
               filteredTasks: [],
               isLoading: true,
               currentFilter: TasksFilterType.today,
@@ -378,9 +386,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             return _buildTasksListContent(data);
           },
           error: (Object error, StackTrace stack) {
-            return Center(
-              child: Text('Error loading tasks: $error'),
-            );
+            return Center(child: Text('Error loading tasks: $error'));
           },
         );
       },
@@ -399,8 +405,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final groupedTasks = _groupTasksByDate(data.filteredTasks);
 
     // Verificar se deve mostrar botão "Ver todas futuras"
-    final shouldShowViewAllButton = data.currentFilter == TasksFilterType.upcoming &&
-                                   data.totalTasks > data.filteredTasks.length;
+    final shouldShowViewAllButton =
+        data.currentFilter == TasksFilterType.upcoming &&
+        data.totalTasks > data.filteredTasks.length;
 
     return CustomScrollView(
       slivers: [
@@ -456,9 +463,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               Container(
                 width: 3,
                 height: 20,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: PlantisColors.primary,
-                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                  borderRadius: BorderRadius.all(Radius.circular(2)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -484,51 +491,71 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final theme = Theme.of(context);
     final tasksAsync = ref.watch(tasksProvider);
     final isLoading = tasksAsync.maybeWhen(
-      data: (TasksState state) => state.individualTaskOperations.containsKey(task.id),
+      data:
+          (TasksState state) =>
+              state.individualTaskOperations.containsKey(task.id),
       orElse: () => false,
     );
     return _buildTaskCardContent(task, isLoading, theme, ref);
   }
 
-  Widget _buildTaskCardContent(task_entity.Task task, bool isLoading, ThemeData theme, WidgetRef ref) {
+  Widget _buildTaskCardContent(
+    task_entity.Task task,
+    bool isLoading,
+    ThemeData theme,
+    WidgetRef ref,
+  ) {
     return Semantics(
       label: 'Tarefa: ${task.title} para ${task.plantName}',
-      hint: isLoading ? 'Tarefa sendo processada' : 'Toque duas vezes para marcar como concluída',
+      hint:
+          isLoading
+              ? 'Tarefa sendo processada'
+              : 'Toque duas vezes para marcar como concluída',
       button: true,
       enabled: !isLoading,
-      onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task, ref),
+      onTap:
+          isLoading
+              ? null
+              : () => _showTaskCompletionDialog(context, task, ref),
       child: PlantisCard(
         key: ValueKey(task.id),
         margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
         padding: const EdgeInsets.all(12),
-        onTap: isLoading ? null : () {
-          AccessibilityTokens.performHapticFeedback('light');
-          _showTaskCompletionDialog(context, task, ref);
-        },
+        onTap:
+            isLoading
+                ? null
+                : () {
+                  AccessibilityTokens.performHapticFeedback('light');
+                  _showTaskCompletionDialog(context, task, ref);
+                },
         child: Row(
           children: [
             // Check button (moved to left)
             GestureDetector(
-              onTap: isLoading ? null : () => _showTaskCompletionDialog(context, task, ref),
+              onTap:
+                  isLoading
+                      ? null
+                      : () => _showTaskCompletionDialog(context, task, ref),
               child: SizedBox(
                 width: 32,
                 height: 32,
-                child: isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            PlantisColors.primary,
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              PlantisColors.primary,
+                            ),
                           ),
+                        )
+                        : const Icon(
+                          Icons.check_circle,
+                          color: PlantisColors.primary,
+                          size: 32,
                         ),
-                      )
-                    : Icon(
-                        Icons.check_circle,
-                        color: PlantisColors.primary,
-                        size: 32,
-                      ),
               ),
             ),
             const SizedBox(width: 16),
@@ -579,7 +606,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 color: PlantisColors.primary.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(_getTaskIcon(task.type), color: PlantisColors.primary, size: 18),
+              child: Icon(
+                _getTaskIcon(task.type),
+                color: PlantisColors.primary,
+                size: 18,
+              ),
             ),
           ],
         ),
@@ -587,7 +618,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     );
   }
 
-  Future<void> _showTaskCompletionDialog(BuildContext context, task_entity.Task task, WidgetRef ref) async {
+  Future<void> _showTaskCompletionDialog(
+    BuildContext context,
+    task_entity.Task task,
+    WidgetRef ref,
+  ) async {
     final result = await TaskCompletionDialog.show(
       context: context,
       task: task,
@@ -612,10 +647,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         if (context.mounted) {
           // Show error feedback
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Erro ao concluir tarefa. Tente novamente.'),
+            const SnackBar(
+              content: Text('Erro ao concluir tarefa. Tente novamente.'),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
+              duration: Duration(seconds: 3),
             ),
           );
         }
@@ -654,7 +689,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     } else {
       // Use cache to avoid recreating the same date string
       final cacheKey = '${date.year}-${date.month}-${date.day}-${date.weekday}';
-      
+
       if (_dateFormattingCache.containsKey(cacheKey)) {
         return _dateFormattingCache[cacheKey]!;
       }
@@ -665,7 +700,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
       final formatted = '$weekday, $day de $month';
       _dateFormattingCache[cacheKey] = formatted;
-      
+
       return formatted;
     }
   }
@@ -677,19 +712,27 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final theme = Theme.of(context);
     final tasksAsync = ref.watch(tasksProvider);
     final remainingTasks = tasksAsync.maybeWhen(
-      data: (TasksState state) => state.allTasks.length - state.filteredTasks.length,
+      data:
+          (TasksState state) =>
+              state.allTasks.length - state.filteredTasks.length,
       orElse: () => 0,
     );
     return _buildViewAllButtonContent(remainingTasks, theme, ref);
   }
 
-  Widget _buildViewAllButtonContent(int remainingTasks, ThemeData theme, WidgetRef ref) {
+  Widget _buildViewAllButtonContent(
+    int remainingTasks,
+    ThemeData theme,
+    WidgetRef ref,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
       child: Center(
         child: ElevatedButton.icon(
           onPressed: () {
-            ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.allFuture);
+            ref
+                .read(tasksProvider.notifier)
+                .filterTasks(TasksFilterType.allFuture);
           },
           icon: const Icon(Icons.calendar_month),
           label: Text('Ver todas as tarefas futuras (+$remainingTasks)'),
@@ -712,54 +755,59 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         final theme = Theme.of(context);
         final tasksAsync = ref.watch(tasksProvider);
         return tasksAsync.when(
-          data: (TasksState tasksState) => Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.colorScheme.onPrimary,
+          data:
+              (TasksState tasksState) => Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          tasksState.currentOperationMessage?.toString() ??
+                              'Processando...',
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                tasksState.currentOperationMessage?.toString() ?? 'Processando...',
-                style: TextStyle(
-                  color: theme.colorScheme.onPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-          ),
           loading: () => const SizedBox.shrink(),
           error: (error, stack) => const SizedBox.shrink(),
         );
@@ -803,11 +851,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               state.errorMessage ?? 'Erro desconhecido',
@@ -836,7 +880,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         children: [
           _buildTasksListAsync(),
           // Operation feedback overlay
-          if (state.hasActiveOperations || state.currentOperationMessage != null)
+          if (state.hasActiveOperations ||
+              state.currentOperationMessage != null)
             _buildOperationOverlay(),
         ],
       ),
@@ -856,7 +901,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         return _buildTasksListContent(data);
       },
       loading: () {
-        final data = TasksListData(
+        const data = TasksListData(
           filteredTasks: [],
           isLoading: true,
           currentFilter: TasksFilterType.today,
@@ -865,9 +910,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         return _buildTasksListContent(data);
       },
       error: (Object error, StackTrace stack) {
-        return Center(
-          child: Text('Error loading tasks: $error'),
-        );
+        return Center(child: Text('Error loading tasks: $error'));
       },
     );
   }

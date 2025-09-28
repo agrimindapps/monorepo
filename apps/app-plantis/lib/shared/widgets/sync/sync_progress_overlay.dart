@@ -5,13 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/plantis_colors.dart';
 
 /// Estados do overlay de progresso de sincronização
-enum SyncProgressState {
-  preparing,
-  syncing,
-  completing,
-  completed,
-  error,
-}
+enum SyncProgressState { preparing, syncing, completing, completed, error }
 
 /// Etapa individual de sincronização
 class SyncStep {
@@ -56,7 +50,7 @@ class SyncProgressController {
   final _stepsController = StreamController<List<SyncStep>>.broadcast();
   final _progressController = StreamController<double>.broadcast();
   final _messageController = StreamController<String?>.broadcast();
-  
+
   SyncProgressState _currentState = SyncProgressState.preparing;
   List<SyncStep> _steps = [];
   double _overallProgress = 0.0;
@@ -68,7 +62,7 @@ class SyncProgressController {
   Stream<List<SyncStep>> get stepsStream => _stepsController.stream;
   Stream<double> get progressStream => _progressController.stream;
   Stream<String?> get messageStream => _messageController.stream;
-  
+
   SyncProgressState get currentState => _currentState;
   List<SyncStep> get steps => List.unmodifiable(_steps);
   double get overallProgress => _overallProgress;
@@ -85,7 +79,7 @@ class SyncProgressController {
   void updateState(SyncProgressState newState, {String? message}) {
     _currentState = newState;
     _stateController.add(newState);
-    
+
     if (message != null) {
       updateMessage(message);
     }
@@ -97,7 +91,8 @@ class SyncProgressController {
   }
 
   /// Atualiza uma etapa específica
-  void updateStep(String stepId, {
+  void updateStep(
+    String stepId, {
     String? title,
     String? description,
     bool? isCompleted,
@@ -133,17 +128,23 @@ class SyncProgressController {
     if (message != null) {
       updateMessage(message);
     }
-    
+
     // Verificar se todas as etapas foram completadas
     if (_steps.every((step) => step.isCompleted)) {
-      updateState(SyncProgressState.completed, message: 'Sincronização concluída!');
+      updateState(
+        SyncProgressState.completed,
+        message: 'Sincronização concluída!',
+      );
     }
   }
 
   /// Marca etapa com erro
   void errorStep(String stepId, {String? message}) {
     updateStep(stepId, hasError: true);
-    updateState(SyncProgressState.error, message: message ?? 'Erro na sincronização');
+    updateState(
+      SyncProgressState.error,
+      message: message ?? 'Erro na sincronização',
+    );
   }
 
   /// Atualiza progresso de uma etapa
@@ -166,12 +167,12 @@ class SyncProgressController {
       _overallProgress = 0.0;
     } else {
       final totalProgress = _steps.fold<double>(
-        0.0, 
+        0.0,
         (sum, step) => sum + step.progress,
       );
       _overallProgress = totalProgress / _steps.length;
     }
-    
+
     _progressController.add(_overallProgress);
   }
 
@@ -222,12 +223,11 @@ class SyncProgressOverlay extends StatefulWidget {
 
 class _SyncProgressOverlayState extends State<SyncProgressOverlay>
     with TickerProviderStateMixin {
-  
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   Timer? _autoHideTimer;
   bool _isVisible = true;
 
@@ -244,7 +244,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -253,18 +253,14 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    ));
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
     _fadeController.forward();
   }
@@ -280,12 +276,12 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
 
   void _hideOverlay() async {
     if (!_isVisible) return;
-    
+
     setState(() => _isVisible = false);
-    
+
     await _slideController.reverse();
     await _fadeController.reverse();
-    
+
     if (mounted && widget.onClose != null) {
       widget.onClose!();
     }
@@ -315,11 +311,9 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
           // Background semi-transparente
           FadeTransition(
             opacity: _fadeAnimation,
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.3),
-            ),
+            child: Container(color: Colors.black.withValues(alpha: 0.3)),
           ),
-          
+
           // Overlay content
           Positioned(
             bottom: 0,
@@ -368,14 +362,12 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       initialData: widget.controller.currentState,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: _getStateColor(state).withValues(alpha: 0.1),
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(16),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: Row(
             children: [
@@ -398,12 +390,11 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
                       builder: (context, messageSnapshot) {
                         final message = messageSnapshot.data;
                         if (message == null) return const SizedBox.shrink();
-                        
+
                         return Text(
                           message,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey.shade600),
                         );
                       },
                     ),
@@ -433,7 +424,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
             initialData: widget.controller.overallProgress,
             builder: (context, snapshot) {
               final progress = snapshot.data!;
-              
+
               return Column(
                 children: [
                   Row(
@@ -482,7 +473,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       builder: (context, snapshot) {
         final steps = snapshot.data!;
         if (steps.isEmpty) return const SizedBox.shrink();
-        
+
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -531,7 +522,9 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
                     ),
                   ),
                 ],
-                if (!step.isCompleted && !step.hasError && step.progress > 0) ...[
+                if (!step.isCompleted &&
+                    !step.hasError &&
+                    step.progress > 0) ...[
                   const SizedBox(height: 6),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
@@ -555,13 +548,9 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
 
   Widget _buildStepIndicator(SyncStep step) {
     if (step.hasError) {
-      return const Icon(
-        Icons.error,
-        color: Colors.red,
-        size: 20,
-      );
+      return const Icon(Icons.error, color: Colors.red, size: 20);
     }
-    
+
     if (step.isCompleted) {
       return const Icon(
         Icons.check_circle,
@@ -569,7 +558,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
         size: 20,
       );
     }
-    
+
     if (step.progress > 0) {
       return const SizedBox(
         width: 20,
@@ -580,7 +569,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
         ),
       );
     }
-    
+
     return Container(
       width: 20,
       height: 20,
@@ -597,13 +586,14 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       initialData: widget.controller.currentState,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return Container(
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              if (widget.showContinueOption && 
-                  (state == SyncProgressState.syncing || state == SyncProgressState.preparing)) ...[
+              if (widget.showContinueOption &&
+                  (state == SyncProgressState.syncing ||
+                      state == SyncProgressState.preparing)) ...[
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: _continueInBackground,
@@ -617,8 +607,9 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
                 ),
                 const SizedBox(width: 12),
               ],
-              
-              if (state == SyncProgressState.error && widget.onRetry != null) ...[
+
+              if (state == SyncProgressState.error &&
+                  widget.onRetry != null) ...[
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: widget.onRetry,
@@ -632,7 +623,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
                 ),
                 const SizedBox(width: 12),
               ],
-              
+
               if (state == SyncProgressState.completed) ...[
                 Expanded(
                   child: ElevatedButton.icon(
@@ -646,8 +637,9 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
                   ),
                 ),
               ],
-              
-              if (state != SyncProgressState.completed && widget.onCancel != null)
+
+              if (state != SyncProgressState.completed &&
+                  widget.onCancel != null)
                 TextButton(
                   onPressed: widget.onCancel,
                   child: Text(
@@ -678,7 +670,11 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       case SyncProgressState.completing:
         return const Icon(Icons.sync, color: PlantisColors.primary, size: 24);
       case SyncProgressState.completed:
-        return const Icon(Icons.check_circle, color: PlantisColors.success, size: 24);
+        return const Icon(
+          Icons.check_circle,
+          color: PlantisColors.success,
+          size: 24,
+        );
       case SyncProgressState.error:
         return const Icon(Icons.error, color: Colors.red, size: 24);
     }

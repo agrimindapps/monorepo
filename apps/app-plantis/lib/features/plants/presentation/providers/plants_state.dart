@@ -53,7 +53,8 @@ class PlantsState extends Equatable {
   }) {
     return PlantsState(
       plants: plants ?? this.plants,
-      selectedPlant: clearSelectedPlant ? null : selectedPlant ?? this.selectedPlant,
+      selectedPlant:
+          clearSelectedPlant ? null : selectedPlant ?? this.selectedPlant,
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
       error: clearError ? null : error ?? this.error,
@@ -78,10 +79,7 @@ class PlantsState extends Equatable {
   /// Factory constructor for error state
   factory PlantsState.error(String message, {PlantsState? previousState}) {
     if (previousState != null) {
-      return previousState.copyWith(
-        isLoading: false,
-        error: message,
-      );
+      return previousState.copyWith(isLoading: false, error: message);
     }
     return PlantsState(error: message);
   }
@@ -108,9 +106,8 @@ class PlantsState extends Equatable {
       if (plant.config?.enableWateringCare != true) return false;
       if (plant.config?.lastWateringDate == null) return true;
 
-      final daysSinceLastWatering = DateTime.now()
-          .difference(plant.config!.lastWateringDate!)
-          .inDays;
+      final daysSinceLastWatering =
+          DateTime.now().difference(plant.config!.lastWateringDate!).inDays;
 
       return daysSinceLastWatering >= (plant.config?.wateringIntervalDays ?? 7);
     }).toList();
@@ -121,27 +118,27 @@ class PlantsState extends Equatable {
       if (plant.config?.enableFertilizerCare != true) return false;
       if (plant.config?.lastFertilizerDate == null) return true;
 
-      final daysSinceLastFertilizer = DateTime.now()
-          .difference(plant.config!.lastFertilizerDate!)
-          .inDays;
+      final daysSinceLastFertilizer =
+          DateTime.now().difference(plant.config!.lastFertilizerDate!).inDays;
 
-      return daysSinceLastFertilizer >= (plant.config?.fertilizingIntervalDays ?? 30);
+      return daysSinceLastFertilizer >=
+          (plant.config?.fertilizingIntervalDays ?? 30);
     }).toList();
   }
 
   @override
   List<Object?> get props => [
-        plants,
-        selectedPlant,
-        isLoading,
-        isSearching,
-        error,
-        searchQuery,
-        searchResults,
-        viewMode,
-        sortBy,
-        filterBySpace,
-      ];
+    plants,
+    selectedPlant,
+    isLoading,
+    isSearching,
+    error,
+    searchQuery,
+    searchResults,
+    viewMode,
+    sortBy,
+    filterBySpace,
+  ];
 
   @override
   String toString() {

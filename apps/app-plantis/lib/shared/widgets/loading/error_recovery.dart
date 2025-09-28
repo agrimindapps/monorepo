@@ -44,39 +44,32 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
   late AnimationController _shakeController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _shakeAnimation;
-  
+
   int _retryCount = 0;
   bool _isRetrying = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _shakeController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOut,
-    ));
-    
-    _shakeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(
-      parent: _shakeController,
-      curve: Curves.elasticIn,
-    ));
+    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
+
+    _shakeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
+    );
 
     if (widget.error != null || widget.errorMessage != null) {
       _slideController.forward();
@@ -87,10 +80,10 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
   @override
   void didUpdateWidget(ErrorRecovery oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     final hadError = oldWidget.error != null || oldWidget.errorMessage != null;
     final hasError = widget.error != null || widget.errorMessage != null;
-    
+
     if (!hadError && hasError) {
       _slideController.forward();
       _scheduleAutoRetry();
@@ -135,7 +128,7 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
     } finally {
       if (mounted) {
         setState(() => _isRetrying = false);
-        
+
         if (isAutoRetry) {
           _retryCount++;
           _scheduleAutoRetry();
@@ -153,16 +146,13 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
   @override
   Widget build(BuildContext context) {
     final hasError = widget.error != null || widget.errorMessage != null;
-    
+
     if (!hasError) {
       return widget.child ?? const SizedBox.shrink();
     }
 
     return Stack(
-      children: [
-        if (widget.child != null) widget.child!,
-        _buildErrorOverlay(),
-      ],
+      children: [if (widget.child != null) widget.child!, _buildErrorOverlay()],
     );
   }
 
@@ -260,7 +250,7 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
 
   Widget _buildErrorContent({bool compact = false}) {
     final theme = Theme.of(context);
-    
+
     if (widget.customErrorWidget != null) {
       return widget.customErrorWidget!;
     }
@@ -322,7 +312,9 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
           Text(
             'Tentativa ${_retryCount + 1}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onErrorContainer.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onErrorContainer.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(width: 16),
@@ -336,21 +328,22 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
           const SizedBox(width: 8),
           ElevatedButton.icon(
             onPressed: _isRetrying ? null : () => _handleRetry(),
-            icon: _isRetrying
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.onPrimary,
+            icon:
+                _isRetrying
+                    ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
-                    ),
-                  )
-                : const Icon(Icons.refresh, size: 18),
+                    )
+                    : const Icon(Icons.refresh, size: 18),
             label: Text(
-              _isRetrying 
-                  ? 'Tentando...' 
+              _isRetrying
+                  ? 'Tentando...'
                   : (widget.retryText ?? 'Tentar Novamente'),
             ),
             style: ElevatedButton.styleFrom(
@@ -371,19 +364,22 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
           Text(
             'Tentativa ${_retryCount + 1}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onErrorContainer.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onErrorContainer.withValues(alpha: 0.7),
               fontSize: 10,
             ),
           ),
         TextButton.icon(
           onPressed: _isRetrying ? null : () => _handleRetry(),
-          icon: _isRetrying
-              ? const SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(strokeWidth: 1.5),
-                )
-              : const Icon(Icons.refresh, size: 14),
+          icon:
+              _isRetrying
+                  ? const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 1.5),
+                  )
+                  : const Icon(Icons.refresh, size: 14),
           label: Text(
             _isRetrying ? 'Tentando...' : 'Tentar',
             style: const TextStyle(fontSize: 12),
@@ -397,49 +393,43 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
     if (widget.errorMessage != null) {
       return widget.errorMessage!;
     }
-    
+
     if (widget.error != null) {
       return _parseErrorMessage(widget.error!);
     }
-    
+
     return 'Ocorreu um erro inesperado. Por favor, tente novamente.';
   }
 
   String _parseErrorMessage(Exception error) {
     final message = error.toString().toLowerCase();
-    
+
     if (message.contains('network') || message.contains('connection')) {
       return 'Problema de conexão com a internet. Verifique sua conexão e tente novamente.';
     }
-    
+
     if (message.contains('timeout')) {
       return 'A operação demorou mais que o esperado. Tente novamente.';
     }
-    
+
     if (message.contains('permission') || message.contains('unauthorized')) {
       return 'Você não tem permissão para realizar esta operação.';
     }
-    
+
     if (message.contains('not found') || message.contains('404')) {
       return 'Recurso não encontrado. Pode ter sido removido ou movido.';
     }
-    
+
     if (message.contains('server') || message.contains('500')) {
       return 'Erro interno do servidor. Nossa equipe foi notificada.';
     }
-    
+
     return 'Ocorreu um erro inesperado. Por favor, tente novamente.';
   }
 }
 
 /// Estilos disponíveis para o ErrorRecovery
-enum ErrorRecoveryStyle {
-  card,
-  banner,
-  modal,
-  snackbar,
-  inline,
-}
+enum ErrorRecoveryStyle { card, banner, modal, snackbar, inline }
 
 /// Widget específico para erros de rede
 class NetworkErrorRecovery extends StatelessWidget {
@@ -457,9 +447,10 @@ class NetworkErrorRecovery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ErrorRecovery(
-      errorMessage: isOffline
-          ? 'Você está offline. Algumas funcionalidades podem estar limitadas.'
-          : 'Problema de conexão com a internet.',
+      errorMessage:
+          isOffline
+              ? 'Você está offline. Algumas funcionalidades podem estar limitadas.'
+              : 'Problema de conexão com a internet.',
       onRetry: onRetry,
       style: ErrorRecoveryStyle.banner,
       customErrorWidget: _buildNetworkErrorWidget(context),
@@ -468,19 +459,22 @@ class NetworkErrorRecovery extends StatelessWidget {
 
   Widget _buildNetworkErrorWidget(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isOffline 
-            ? Colors.orange.withValues(alpha: 0.1) 
-            : theme.colorScheme.errorContainer,
+        color:
+            isOffline
+                ? Colors.orange.withValues(alpha: 0.1)
+                : theme.colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
           Icon(
-            isOffline ? Icons.wifi_off : Icons.signal_wifi_connected_no_internet_4,
+            isOffline
+                ? Icons.wifi_off
+                : Icons.signal_wifi_connected_no_internet_4,
             color: isOffline ? Colors.orange : theme.colorScheme.error,
           ),
           const SizedBox(width: 12),
@@ -492,9 +486,10 @@ class NetworkErrorRecovery extends StatelessWidget {
                   isOffline ? 'Modo Offline' : 'Sem Conexão',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isOffline 
-                        ? Colors.orange 
-                        : theme.colorScheme.onErrorContainer,
+                    color:
+                        isOffline
+                            ? Colors.orange
+                            : theme.colorScheme.onErrorContainer,
                   ),
                 ),
                 Text(
@@ -502,19 +497,17 @@ class NetworkErrorRecovery extends StatelessWidget {
                       ? 'Trabalhando com dados locais'
                       : 'Verifique sua conexão com a internet',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isOffline 
-                        ? Colors.orange 
-                        : theme.colorScheme.onErrorContainer,
+                    color:
+                        isOffline
+                            ? Colors.orange
+                            : theme.colorScheme.onErrorContainer,
                   ),
                 ),
               ],
             ),
           ),
           if (!isOffline && onRetry != null)
-            IconButton(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-            ),
+            IconButton(onPressed: onRetry, icon: const Icon(Icons.refresh)),
           if (isOffline && onOfflineMode != null)
             TextButton(
               onPressed: onOfflineMode,
@@ -552,16 +545,13 @@ class FormErrorRecovery extends StatelessWidget {
 
   Widget _buildFormErrorWidget(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, color: theme.colorScheme.error),
             const SizedBox(width: 8),
             Text(
               'Corrija os erros abaixo:',
@@ -573,36 +563,38 @@ class FormErrorRecovery extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...fieldErrors.entries.map((entry) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.arrow_right,
-                size: 16,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onErrorContainer,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: '${entry.key}: ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+        ...fieldErrors.entries.map(
+          (entry) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.arrow_right,
+                  size: 16,
+                  color: theme.colorScheme.error,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onErrorContainer,
                       ),
-                      TextSpan(text: entry.value),
-                    ],
+                      children: [
+                        TextSpan(
+                          text: '${entry.key}: ',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(text: entry.value),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )),
+        ),
         if (onFixErrors != null) ...[
           const SizedBox(height: 12),
           ElevatedButton.icon(

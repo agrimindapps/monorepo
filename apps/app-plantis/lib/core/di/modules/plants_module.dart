@@ -13,9 +13,7 @@ import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../../../features/plants/presentation/providers/plant_comments_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
-import '../../../features/plants/presentation/providers/plant_form_provider.dart';
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';
-import '../../../features/plants/presentation/providers/plants_provider.dart';
 
 abstract class PlantsDIModule {
   static void init(GetIt sl) {
@@ -55,7 +53,6 @@ abstract class PlantsDIModule {
 
     // Legacy PlantsProvider removed - now using Riverpod PlantsNotifier
 
-
     sl.registerFactory(
       () => PlantDetailsProvider(
         getPlantByIdUseCase: sl(),
@@ -64,14 +61,7 @@ abstract class PlantsDIModule {
       ),
     );
 
-    sl.registerFactory(
-      () => PlantFormProvider(
-        getPlantByIdUseCase: sl(),
-        addPlantUseCase: sl(),
-        updatePlantUseCase: sl(),
-        imageService: sl(),
-      ),
-    );
+    // PlantFormProvider removido - agora usa sistema SOLID com PlantFormStateManager
 
     // Plant task generator
     sl.registerLazySingleton(() => PlantTaskGenerator());
@@ -79,7 +69,7 @@ abstract class PlantsDIModule {
     // Plant task provider
     sl.registerFactory(() => PlantTaskProvider(taskGenerationService: sl()));
 
-    // Plant comments provider  
+    // Plant comments provider
     sl.registerFactory(() => PlantCommentsProvider(repository: sl()));
   }
 }

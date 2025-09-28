@@ -84,13 +84,17 @@ class PlantsProvider extends ChangeNotifier {
   /// automatically reloads plants to ensure data consistency.
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      debugPrint('🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      debugPrint(
+        '🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
+      );
       // CRITICAL FIX: Only load plants if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         debugPrint('✅ PlantsProvider: Auth is stable, loading plants...');
         loadInitialData();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        debugPrint('🔄 PlantsProvider: No user but auth initialized - clearing plants');
+        debugPrint(
+          '🔄 PlantsProvider: No user but auth initialized - clearing plants',
+        );
         // Clear plants when user logs out
         _plants = [];
         _selectedPlant = null;
@@ -111,30 +115,41 @@ class PlantsProvider extends ChangeNotifier {
       if (dataStream != null) {
         _realtimeDataSubscription = dataStream.listen(
           (List<dynamic> plants) {
-            debugPrint('🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas');
+            debugPrint(
+              '🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas',
+            );
 
             // Converter de entidades sync para entidades de domínio
-            final domainPlants = plants
-                .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
-                .where((plant) => plant != null)
-                .cast<Plant>()
-                .toList();
+            final domainPlants =
+                plants
+                    .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
+                    .where((plant) => plant != null)
+                    .cast<Plant>()
+                    .toList();
 
             // Atualizar apenas se houve mudanças reais
             if (_hasDataChanged(domainPlants)) {
               _plants = _sortPlants(domainPlants);
               _applyFilters();
-              debugPrint('✅ PlantsProvider: UI atualizada com ${_plants.length} plantas');
+              debugPrint(
+                '✅ PlantsProvider: UI atualizada com ${_plants.length} plantas',
+              );
             }
           },
           onError: (dynamic error) {
-            debugPrint('❌ PlantsProvider: Erro no stream de dados em tempo real: $error');
+            debugPrint(
+              '❌ PlantsProvider: Erro no stream de dados em tempo real: $error',
+            );
           },
         );
 
-        debugPrint('✅ PlantsProvider: Stream de dados em tempo real configurado');
+        debugPrint(
+          '✅ PlantsProvider: Stream de dados em tempo real configurado',
+        );
       } else {
-        debugPrint('⚠️ PlantsProvider: Stream de dados não disponível - usando polling');
+        debugPrint(
+          '⚠️ PlantsProvider: Stream de dados não disponível - usando polling',
+        );
       }
     } catch (e) {
       debugPrint('❌ PlantsProvider: Erro ao configurar stream de dados: $e');
@@ -162,7 +177,9 @@ class PlantsProvider extends ChangeNotifier {
 
       return null;
     } catch (e) {
-      debugPrint('❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e');
+      debugPrint(
+        '❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e',
+      );
       return null;
     }
   }
@@ -196,7 +213,7 @@ class PlantsProvider extends ChangeNotifier {
   }
 
   /// CRITICAL FIX: Wait for authentication initialization with timeout
-  /// 
+  ///
   /// This method ensures that we don't attempt to load plants before the
   /// authentication system is fully initialized. This prevents race conditions
   /// that cause data not to load properly.
@@ -212,18 +229,20 @@ class PlantsProvider extends ChangeNotifier {
     }
 
     debugPrint('⏳ PlantsProvider: Waiting for auth initialization...');
-    
+
     // Wait for initialization with timeout
     try {
       await _authStateNotifier.initializedStream
           .where((isInitialized) => isInitialized)
           .timeout(timeout)
           .first;
-      
+
       debugPrint('✅ PlantsProvider: Auth initialization complete');
       return true;
     } on TimeoutException {
-      debugPrint('⚠️ PlantsProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      debugPrint(
+        '⚠️ PlantsProvider: Auth initialization timeout after ${timeout.inSeconds}s',
+      );
       return false;
     } catch (e) {
       debugPrint('❌ PlantsProvider: Auth initialization error: $e');
@@ -234,7 +253,9 @@ class PlantsProvider extends ChangeNotifier {
   // Load all plants
   Future<void> loadPlants() async {
     if (kDebugMode) {
-      print('📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first');
+      print(
+        '📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first',
+      );
     }
 
     // CRITICAL FIX: Wait for authentication before loading plants
@@ -270,13 +291,17 @@ class PlantsProvider extends ChangeNotifier {
       localResult.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}');
+            print(
+              '⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}',
+            );
           }
           // Don't set error yet - try remote sync
         },
         (plants) {
           if (kDebugMode) {
-            print('✅ PlantsProvider: Dados locais carregados: ${plants.length} plantas');
+            print(
+              '✅ PlantsProvider: Dados locais carregados: ${plants.length} plantas',
+            );
           }
           _updatePlantsData(plants);
           _setLoading(false);
@@ -302,7 +327,9 @@ class PlantsProvider extends ChangeNotifier {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}');
+            print(
+              '❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}',
+            );
           }
           // Only set error if no local data was loaded
           if (_plants.isEmpty) {
@@ -311,7 +338,9 @@ class PlantsProvider extends ChangeNotifier {
         },
         (plants) {
           if (kDebugMode) {
-            print('✅ PlantsProvider: Background sync bem-sucedido: ${plants.length} plantas');
+            print(
+              '✅ PlantsProvider: Background sync bem-sucedido: ${plants.length} plantas',
+            );
           }
           _updatePlantsData(plants);
         },
@@ -503,7 +532,7 @@ class PlantsProvider extends ChangeNotifier {
   Map<String?, List<Plant>> get plantsGroupedBySpaces {
     final plantsToGroup = _searchQuery.isNotEmpty ? _searchResults : _plants;
     final Map<String?, List<Plant>> groupedPlants = {};
-    
+
     for (final plant in plantsToGroup) {
       final spaceId = plant.spaceId;
       if (!groupedPlants.containsKey(spaceId)) {
@@ -511,16 +540,16 @@ class PlantsProvider extends ChangeNotifier {
       }
       groupedPlants[spaceId]!.add(plant);
     }
-    
+
     return groupedPlants;
   }
-  
+
   /// Gets the count of plants in each space
   Map<String?, int> get plantCountsBySpace {
     final grouped = plantsGroupedBySpaces;
     return grouped.map((spaceId, plants) => MapEntry(spaceId, plants.length));
   }
-  
+
   /// Toggle between normal view and grouped by spaces view
   void toggleGroupedView() {
     if (_viewMode == ViewMode.groupedBySpaces) {
@@ -530,7 +559,7 @@ class PlantsProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-  
+
   /// Check if current view is grouped by spaces
   bool get isGroupedBySpaces => _viewMode == ViewMode.groupedBySpaces;
 
@@ -563,15 +592,19 @@ class PlantsProvider extends ChangeNotifier {
   Future<void> refreshPlants() async {
     if (kDebugMode) {
       print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
-      print('🔄 PlantsProvider.refreshPlants() - Plantas antes: ${_plants.length}');
+      print(
+        '🔄 PlantsProvider.refreshPlants() - Plantas antes: ${_plants.length}',
+      );
     }
-    
+
     clearError();
     await loadInitialData();
-    
+
     if (kDebugMode) {
       print('✅ PlantsProvider.refreshPlants() - Refresh completo');
-      print('🔄 PlantsProvider.refreshPlants() - Plantas depois: ${_plants.length}');
+      print(
+        '🔄 PlantsProvider.refreshPlants() - Plantas depois: ${_plants.length}',
+      );
     }
   }
 
@@ -588,7 +621,8 @@ class PlantsProvider extends ChangeNotifier {
       if (config == null) return false;
 
       // Check if watering care is enabled and has valid interval
-      if (config.enableWateringCare == true && config.wateringIntervalDays != null) {
+      if (config.enableWateringCare == true &&
+          config.wateringIntervalDays != null) {
         final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
         final nextWatering = lastWatering.add(
           Duration(days: config.wateringIntervalDays!),
@@ -623,8 +657,10 @@ class PlantsProvider extends ChangeNotifier {
       if (config == null) return false;
 
       // Check if fertilizer care is enabled and has valid interval
-      if (config.enableFertilizerCare == true && config.fertilizingIntervalDays != null) {
-        final lastFertilizer = config.lastFertilizerDate ?? plant.createdAt ?? now;
+      if (config.enableFertilizerCare == true &&
+          config.fertilizingIntervalDays != null) {
+        final lastFertilizer =
+            config.lastFertilizerDate ?? plant.createdAt ?? now;
         final nextFertilizer = lastFertilizer.add(
           Duration(days: config.fertilizingIntervalDays!),
         );
@@ -670,8 +706,8 @@ class PlantsProvider extends ChangeNotifier {
         case CareStatus.good:
           return _isPlantInGoodCondition(plant, now);
         case CareStatus.unknown:
-          return config.wateringIntervalDays == null && 
-                 config.fertilizingIntervalDays == null;
+          return config.wateringIntervalDays == null &&
+              config.fertilizingIntervalDays == null;
       }
     }).toList();
   }
@@ -682,14 +718,15 @@ class PlantsProvider extends ChangeNotifier {
     if (config == null) return false;
 
     // Use new care system if enabled
-    if (config.enableWateringCare == true && config.wateringIntervalDays != null) {
+    if (config.enableWateringCare == true &&
+        config.wateringIntervalDays != null) {
       final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
       final nextWatering = lastWatering.add(
         Duration(days: config.wateringIntervalDays!),
       );
       final daysDifference = nextWatering.difference(now).inDays;
-      
-      return dayThreshold == 0 
+
+      return dayThreshold == 0
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
@@ -701,8 +738,8 @@ class PlantsProvider extends ChangeNotifier {
         Duration(days: config.wateringIntervalDays!),
       );
       final daysDifference = nextWatering.difference(now).inDays;
-      
-      return dayThreshold == 0 
+
+      return dayThreshold == 0
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
@@ -716,14 +753,16 @@ class PlantsProvider extends ChangeNotifier {
     if (config == null) return false;
 
     // Use new care system if enabled
-    if (config.enableFertilizerCare == true && config.fertilizingIntervalDays != null) {
-      final lastFertilizer = config.lastFertilizerDate ?? plant.createdAt ?? now;
+    if (config.enableFertilizerCare == true &&
+        config.fertilizingIntervalDays != null) {
+      final lastFertilizer =
+          config.lastFertilizerDate ?? plant.createdAt ?? now;
       final nextFertilizer = lastFertilizer.add(
         Duration(days: config.fertilizingIntervalDays!),
       );
       final daysDifference = nextFertilizer.difference(now).inDays;
-      
-      return dayThreshold == 0 
+
+      return dayThreshold == 0
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
@@ -735,8 +774,8 @@ class PlantsProvider extends ChangeNotifier {
         Duration(days: config.fertilizingIntervalDays!),
       );
       final daysDifference = nextFertilizer.difference(now).inDays;
-      
-      return dayThreshold == 0 
+
+      return dayThreshold == 0
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
@@ -746,15 +785,23 @@ class PlantsProvider extends ChangeNotifier {
 
   // Helper method to check if plant is in good condition
   bool _isPlantInGoodCondition(Plant plant, DateTime now) {
-    final waterGood = !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
-    final fertilizerGood = !_checkFertilizerStatus(plant, now, 0) && !_checkFertilizerStatus(plant, now, 2);
-    
+    final waterGood =
+        !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
+    final fertilizerGood =
+        !_checkFertilizerStatus(plant, now, 0) &&
+        !_checkFertilizerStatus(plant, now, 2);
+
     final config = plant.config;
-    final hasWaterCare = config?.enableWateringCare == true || config?.wateringIntervalDays != null;
-    final hasFertilizerCare = config?.enableFertilizerCare == true || config?.fertilizingIntervalDays != null;
-    
+    final hasWaterCare =
+        config?.enableWateringCare == true ||
+        config?.wateringIntervalDays != null;
+    final hasFertilizerCare =
+        config?.enableFertilizerCare == true ||
+        config?.fertilizingIntervalDays != null;
+
     // Plant is good if it doesn't need water or fertilizer within 2 days
-    return (hasWaterCare ? waterGood : true) && (hasFertilizerCare ? fertilizerGood : true);
+    return (hasWaterCare ? waterGood : true) &&
+        (hasFertilizerCare ? fertilizerGood : true);
   }
 
   // Private methods
@@ -858,10 +905,12 @@ class PlantsProvider extends ChangeNotifier {
             failure.message.contains('Usuário não autenticado')) {
           return 'Sessão expirada. Tente fazer login novamente.';
         }
-        if (failure.message.contains('403') || failure.message.contains('Forbidden')) {
+        if (failure.message.contains('403') ||
+            failure.message.contains('Forbidden')) {
           return 'Acesso negado. Verifique suas permissões.';
         }
-        if (failure.message.contains('500') || failure.message.contains('Internal')) {
+        if (failure.message.contains('500') ||
+            failure.message.contains('Internal')) {
           return 'Erro no servidor. Tente novamente em alguns instantes.';
         }
         return failure.message.isNotEmpty
@@ -872,9 +921,8 @@ class PlantsProvider extends ChangeNotifier {
             ? failure.message
             : 'Dados não encontrados';
       default:
-        final errorContext = kDebugMode 
-            ? ' (${failure.runtimeType}: ${failure.message})' 
-            : '';
+        final errorContext =
+            kDebugMode ? ' (${failure.runtimeType}: ${failure.message})' : '';
         return 'Ops! Algo deu errado$errorContext';
     }
   }
@@ -891,15 +939,21 @@ class PlantsProvider extends ChangeNotifier {
   }
 }
 
-enum ViewMode { grid, list, groupedBySpaces, groupedBySpacesGrid, groupedBySpacesList }
+enum ViewMode {
+  grid,
+  list,
+  groupedBySpaces,
+  groupedBySpacesGrid,
+  groupedBySpacesList,
+}
 
 enum SortBy { newest, oldest, name, species }
 
-enum CareStatus { 
-  needsWater, 
-  soonWater, 
+enum CareStatus {
+  needsWater,
+  soonWater,
   needsFertilizer,
   soonFertilizer,
-  good, 
-  unknown 
+  good,
+  unknown,
 }

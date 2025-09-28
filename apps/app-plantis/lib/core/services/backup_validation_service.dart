@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../data/models/backup_model.dart';
@@ -15,73 +14,76 @@ class BackupValidationService {
   ) async {
     try {
       debugPrint('🔍 Validando integridade do backup...');
-      
+
       final validationErrors = <String>[];
       final validationWarnings = <String>[];
-      
+
       // 1. Validação básica da estrutura
       final structureValidation = _validateBackupStructure(backup);
       structureValidation.fold(
         (error) => validationErrors.add(error),
         (_) => {},
       );
-      
+
       // 2. Validação de compatibilidade
       final compatibilityValidation = _validateCompatibility(backup);
       compatibilityValidation.fold(
         (error) => validationErrors.add(error),
         (_) => {},
       );
-      
+
       // 3. Validação de metadados
       final metadataValidation = _validateMetadata(backup);
       metadataValidation.fold(
         (error) => validationErrors.add(error),
         (_) => {},
       );
-      
+
       // 4. Validação dos dados de plantas
       final plantsValidation = await _validatePlantsData(backup.data.plants);
       plantsValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-      
+
       // 5. Validação dos dados de tarefas
       final tasksValidation = await _validateTasksData(backup.data.tasks);
       tasksValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-      
+
       // 6. Validação dos dados de espaços
       final spacesValidation = await _validateSpacesData(backup.data.spaces);
       spacesValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-      
+
       // 7. Validação de configurações
       final settingsValidation = _validateSettingsData(backup.data.settings);
       settingsValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-      
+
       // Determinar resultado final
       if (validationErrors.isNotEmpty) {
-        return Left(ValidationFailure(
-          'Backup possui erros críticos: ${validationErrors.join('; ')}',
-        ));
+        return Left(
+          ValidationFailure(
+            'Backup possui erros críticos: ${validationErrors.join('; ')}',
+          ),
+        );
       }
-      
-      return Right(ValidationResult(
-        isValid: true,
-        errors: validationErrors,
-        warnings: validationWarnings,
-        validatedItemsCount: _countValidatedItems(backup),
-      ));
-      
+
+      return Right(
+        ValidationResult(
+          isValid: true,
+          errors: validationErrors,
+          warnings: validationWarnings,
+          validatedItemsCount: _countValidatedItems(backup),
+        ),
+      );
     } catch (e) {
       debugPrint('❌ Erro durante validação: $e');
       return Left(ValidationFailure('Erro na validação: ${e.toString()}'));
@@ -105,17 +107,17 @@ class BackupValidationService {
     if (backup.version.isEmpty) {
       return const Left('Backup não possui versão definida');
     }
-    
+
     if (backup.userId.isEmpty) {
       return const Left('Backup não possui ID de usuário');
     }
-    
-    if (backup.data.plants.isEmpty && 
-        backup.data.tasks.isEmpty && 
+
+    if (backup.data.plants.isEmpty &&
+        backup.data.tasks.isEmpty &&
         backup.data.spaces.isEmpty) {
       return const Left('Backup não contém dados');
     }
-    
+
     return const Right(null);
   }
 
@@ -130,11 +132,13 @@ class BackupValidationService {
   /// Valida metadados do backup
   Either<String, void> _validateMetadata(BackupModel backup) {
     final metadata = backup.metadata;
-    
-    if (metadata.plantsCount < 0 || metadata.tasksCount < 0 || metadata.spacesCount < 0) {
+
+    if (metadata.plantsCount < 0 ||
+        metadata.tasksCount < 0 ||
+        metadata.spacesCount < 0) {
       return const Left('Metadados possuem valores inválidos');
     }
-    
+
     // Validar consistência entre metadados e dados reais
     if (metadata.plantsCount != backup.data.plants.length) {
       return Left(
@@ -142,21 +146,21 @@ class BackupValidationService {
         'encontrado ${backup.data.plants.length}',
       );
     }
-    
+
     if (metadata.tasksCount != backup.data.tasks.length) {
       return Left(
         'Inconsistência nos metadados: esperado ${metadata.tasksCount} tarefas, '
         'encontrado ${backup.data.tasks.length}',
       );
     }
-    
+
     if (metadata.spacesCount != backup.data.spaces.length) {
       return Left(
         'Inconsistência nos metadados: esperado ${metadata.spacesCount} espaços, '
         'encontrado ${backup.data.spaces.length}',
       );
     }
-    
+
     return const Right(null);
   }
 
@@ -165,33 +169,36 @@ class BackupValidationService {
     List<Map<String, dynamic>> plantsData,
   ) async {
     final warnings = <String>[];
-    
+
     for (int i = 0; i < plantsData.length; i++) {
       final plant = plantsData[i];
-      
+
       // Validação de campos obrigatórios
       if (!plant.containsKey('id') || plant['id'].toString().isEmpty) {
         return Left('Planta ${i + 1} não possui ID');
       }
-      
+
       if (!plant.containsKey('name') || plant['name'].toString().isEmpty) {
         return Left('Planta ${i + 1} não possui nome');
       }
-      
+
       if (!plant.containsKey('userId') || plant['userId'].toString().isEmpty) {
         return Left('Planta ${i + 1} não possui ID de usuário');
       }
-      
+
       // Validações que geram warnings (não impedem restore)
-      if ((!plant.containsKey('imageUrls') || (plant['imageUrls'] as List?)?.isEmpty == true) &&
-          (!plant.containsKey('imageBase64') || plant['imageBase64'].toString().isEmpty)) {
+      if ((!plant.containsKey('imageUrls') ||
+              (plant['imageUrls'] as List?)?.isEmpty == true) &&
+          (!plant.containsKey('imageBase64') ||
+              plant['imageBase64'].toString().isEmpty)) {
         warnings.add('Planta "${plant['name']}" não possui imagem');
       }
-      
-      if (!plant.containsKey('species') || plant['species'].toString().isEmpty) {
+
+      if (!plant.containsKey('species') ||
+          plant['species'].toString().isEmpty) {
         warnings.add('Planta "${plant['name']}" não possui espécie informada');
       }
-      
+
       // Validação de datas
       if (plant.containsKey('plantingDate')) {
         if (!_isValidDate(plant['plantingDate'])) {
@@ -199,7 +206,7 @@ class BackupValidationService {
         }
       }
     }
-    
+
     return Right(warnings);
   }
 
@@ -208,46 +215,47 @@ class BackupValidationService {
     List<Map<String, dynamic>> tasksData,
   ) async {
     final warnings = <String>[];
-    
+
     for (int i = 0; i < tasksData.length; i++) {
       final task = tasksData[i];
-      
+
       // Validação de campos obrigatórios
       if (!task.containsKey('id') || task['id'].toString().isEmpty) {
         return Left('Tarefa ${i + 1} não possui ID');
       }
-      
+
       if (!task.containsKey('name') || task['name'].toString().isEmpty) {
         return Left('Tarefa ${i + 1} não possui nome');
       }
-      
+
       if (!task.containsKey('plantId') || task['plantId'].toString().isEmpty) {
         return Left('Tarefa ${i + 1} não está associada a uma planta');
       }
-      
+
       if (!task.containsKey('userId') || task['userId'].toString().isEmpty) {
         return Left('Tarefa ${i + 1} não possui ID de usuário');
       }
-      
+
       // Validações que geram warnings
-      if (!task.containsKey('description') || task['description'].toString().isEmpty) {
+      if (!task.containsKey('description') ||
+          task['description'].toString().isEmpty) {
         warnings.add('Tarefa "${task['name']}" não possui descrição');
       }
-      
+
       // Validação de datas
       if (task.containsKey('dueDate')) {
         if (!_isValidDate(task['dueDate'])) {
           return Left('Tarefa ${i + 1} possui data de vencimento inválida');
         }
       }
-      
+
       if (task.containsKey('completedAt')) {
         if (!_isValidDate(task['completedAt'])) {
           return Left('Tarefa ${i + 1} possui data de conclusão inválida');
         }
       }
     }
-    
+
     return Right(warnings);
   }
 
@@ -256,41 +264,44 @@ class BackupValidationService {
     List<Map<String, dynamic>> spacesData,
   ) async {
     final warnings = <String>[];
-    
+
     for (int i = 0; i < spacesData.length; i++) {
       final space = spacesData[i];
-      
+
       // Validação de campos obrigatórios
       if (!space.containsKey('id') || space['id'].toString().isEmpty) {
         return Left('Espaço ${i + 1} não possui ID');
       }
-      
+
       if (!space.containsKey('name') || space['name'].toString().isEmpty) {
         return Left('Espaço ${i + 1} não possui nome');
       }
-      
+
       if (!space.containsKey('userId') || space['userId'].toString().isEmpty) {
         return Left('Espaço ${i + 1} não possui ID de usuário');
       }
-      
+
       // Validações que geram warnings
-      if (!space.containsKey('description') || space['description'].toString().isEmpty) {
+      if (!space.containsKey('description') ||
+          space['description'].toString().isEmpty) {
         warnings.add('Espaço "${space['name']}" não possui descrição');
       }
     }
-    
+
     return Right(warnings);
   }
 
   /// Valida dados de configurações
-  Either<String, List<String>> _validateSettingsData(Map<String, dynamic> settings) {
+  Either<String, List<String>> _validateSettingsData(
+    Map<String, dynamic> settings,
+  ) {
     final warnings = <String>[];
-    
+
     // Validações básicas de configurações
     if (settings.isEmpty) {
       warnings.add('Backup não contém configurações do usuário');
     }
-    
+
     // Validar estrutura esperada
     final expectedKeys = [
       'notifications_enabled',
@@ -298,13 +309,13 @@ class BackupValidationService {
       'theme_mode',
       'language',
     ];
-    
+
     for (final key in expectedKeys) {
       if (!settings.containsKey(key)) {
         warnings.add('Configuração "$key" não encontrada');
       }
     }
-    
+
     return Right(warnings);
   }
 
@@ -313,7 +324,7 @@ class BackupValidationService {
   /// Valida se uma string é uma data válida
   bool _isValidDate(dynamic dateValue) {
     if (dateValue == null) return false;
-    
+
     try {
       if (dateValue is String) {
         DateTime.parse(dateValue);
@@ -327,9 +338,9 @@ class BackupValidationService {
 
   /// Conta total de itens validados
   int _countValidatedItems(BackupModel backup) {
-    return backup.data.plants.length + 
-           backup.data.tasks.length + 
-           backup.data.spaces.length;
+    return backup.data.plants.length +
+        backup.data.tasks.length +
+        backup.data.spaces.length;
   }
 }
 
@@ -349,10 +360,10 @@ class ValidationResult {
 
   bool get hasWarnings => warnings.isNotEmpty;
   bool get hasErrors => errors.isNotEmpty;
-  
+
   @override
   String toString() {
     return 'ValidationResult(isValid: $isValid, errors: ${errors.length}, '
-           'warnings: ${warnings.length}, items: $validatedItemsCount)';
+        'warnings: ${warnings.length}, items: $validatedItemsCount)';
   }
 }

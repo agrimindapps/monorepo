@@ -5,7 +5,6 @@ abstract class SettingsExportDataSource {
 }
 
 class SettingsExportLocalDataSource implements SettingsExportDataSource {
-
   SettingsExportLocalDataSource();
 
   @override
@@ -13,17 +12,17 @@ class SettingsExportLocalDataSource implements SettingsExportDataSource {
     try {
       // Mock data for demonstration
       return UserSettingsExportData(
-        notificationSettings: {
+        notificationSettings: const {
           'plantsReminder': true,
           'wateringReminder': true,
           'fertilizerReminder': false,
         },
-        backupSettings: {
+        backupSettings: const {
           'autoBackupEnabled': true,
           'wifiOnly': true,
           'backupFrequency': 'daily',
         },
-        appPreferences: {
+        appPreferences: const {
           'theme': 'system',
           'language': 'pt-BR',
           'autoBackup': true,
@@ -34,7 +33,9 @@ class SettingsExportLocalDataSource implements SettingsExportDataSource {
         lastSyncDate: DateTime.now(),
       );
     } catch (e) {
-      throw Exception('Erro ao buscar configurações do usuário: ${e.toString()}');
+      throw Exception(
+        'Erro ao buscar configurações do usuário: ${e.toString()}',
+      );
     }
   }
 }

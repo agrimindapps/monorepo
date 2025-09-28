@@ -227,7 +227,10 @@ class MemoryMonitoringService {
     }
 
     final totalImageCacheMB =
-        double.tryParse((current.imageCacheStats['totalSizeMB'] as String?) ?? '0') ?? 0;
+        double.tryParse(
+          (current.imageCacheStats['totalSizeMB'] as String?) ?? '0',
+        ) ??
+        0;
     if (totalImageCacheMB > 20) {
       recommendations.add(
         'Image cache is large (${totalImageCacheMB}MB) - consider clearing',

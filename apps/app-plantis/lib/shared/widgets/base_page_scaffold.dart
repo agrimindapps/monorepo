@@ -85,8 +85,7 @@ class BasePageScaffold extends StatelessWidget {
 
     if (applyDefaultPadding || padding != null) {
       final effectivePadding =
-          padding ??
-          const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
+          padding ?? const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
 
       bodyWidget = Padding(padding: effectivePadding, child: bodyWidget);
     }

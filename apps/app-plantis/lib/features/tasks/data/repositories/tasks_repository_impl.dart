@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/interfaces/network_info.dart';
 import '../../../../core/adapters/network_info_adapter.dart';
+import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/repositories/tasks_repository.dart';
 import '../datasources/local/tasks_local_datasource.dart';
@@ -36,35 +36,34 @@ class TasksRepositoryImpl implements TasksRepository {
       try {
         // Wait for user with increasing timeout per attempt
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user = await authService.currentUser
-            .timeout(timeoutDuration)
-            .first;
-        
+        final user =
+            await authService.currentUser.timeout(timeoutDuration).first;
+
         if (user != null && user.id.isNotEmpty) {
           return user.id;
         }
-        
+
         // If user is null or has empty ID, wait and retry (except on last attempt)
         if (attempt < maxRetries) {
           await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
           continue;
         }
-        
+
         return null;
       } catch (e) {
         // Log error for debugging with attempt number
         print('Auth attempt $attempt/$maxRetries failed: $e');
-        
+
         // If it's the last attempt, return null
         if (attempt >= maxRetries) {
           return null;
         }
-        
+
         // Wait before retrying, with exponential backoff
         await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
       }
     }
-    
+
     return null;
   }
 
@@ -74,7 +73,11 @@ class TasksRepositoryImpl implements TasksRepository {
       final userId = await _currentUserId;
       if (userId == null) {
         // CRITICAL FIX: Return proper error instead of empty list for unauthenticated users
-        return const Left(ServerFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
+        return const Left(
+          ServerFailure(
+            'Usuário não autenticado. Aguarde a inicialização ou faça login.',
+          ),
+        );
       }
 
       // Always get from local first for instant UI response
@@ -100,7 +103,9 @@ class TasksRepositoryImpl implements TasksRepository {
           if (kDebugMode) {
             print('❌ TasksRepository: Remote fetch failed: $e');
           }
-          return Left(ServerFailure('Falha ao sincronizar tarefas: ${e.toString()}'));
+          return Left(
+            ServerFailure('Falha ao sincronizar tarefas: ${e.toString()}'),
+          );
         }
       } else {
         return Right(
@@ -196,7 +201,9 @@ class TasksRepositoryImpl implements TasksRepository {
       stopwatch.stop();
 
       if (kDebugMode) {
-        print('✅ TasksRepository: Aggressive sync completed in ${stopwatch.elapsedMilliseconds}ms');
+        print(
+          '✅ TasksRepository: Aggressive sync completed in ${stopwatch.elapsedMilliseconds}ms',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -210,7 +217,8 @@ class TasksRepositoryImpl implements TasksRepository {
     try {
       // TODO: Implement batched sync for mobile connections
       // For now, use basic sync with timeout
-      final remoteTasks = await remoteDataSource.getTasks(userId)
+      final remoteTasks = await remoteDataSource
+          .getTasks(userId)
           .timeout(const Duration(seconds: 10));
       await localDataSource.cacheTasks(remoteTasks);
 
@@ -279,7 +287,10 @@ class TasksRepositoryImpl implements TasksRepository {
       // If no local data, try remote as fallback
       if (await networkInfo.isConnected) {
         try {
-          final remoteTasks = await remoteDataSource.getTasksByPlantId(plantId, userId);
+          final remoteTasks = await remoteDataSource.getTasksByPlantId(
+            plantId,
+            userId,
+          );
           for (final task in remoteTasks) {
             await localDataSource.cacheTask(task);
           }

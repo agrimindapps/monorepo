@@ -1,8 +1,7 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 /// Use case para solicitar reset de senha via email
-/// 
+///
 /// Implementa a lógica de negócio para:
 /// - Validação de email
 /// - Envio de email de reset
@@ -13,9 +12,9 @@ class ResetPasswordUseCase {
   ResetPasswordUseCase(this._authRepository);
 
   /// Executa o reset de senha
-  /// 
+  ///
   /// [email] - Email do usuário para receber o link de reset
-  /// 
+  ///
   /// Returns:
   /// - Right(void) - Sucesso no envio do email
   /// - Left(Failure) - Erro na operação
@@ -42,9 +41,9 @@ class ResetPasswordUseCase {
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$',
     );
-    
-    return emailRegex.hasMatch(email) && 
-           email.length <= 320 && 
-           !email.contains('..');
+
+    return emailRegex.hasMatch(email) &&
+        email.length <= 320 &&
+        !email.contains('..');
   }
 }

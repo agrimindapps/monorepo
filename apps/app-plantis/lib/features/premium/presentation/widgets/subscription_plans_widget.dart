@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 
 /// Widget responsável pela exibição e seleção de planos de subscription para Plantis
-/// 
+///
 /// Funcionalidades:
 /// - Exibir opções de planos baseadas nos produtos disponíveis
 /// - Seleção visual com estado
 /// - Badges para destacar melhor valor
 /// - Design visual consistente com tema do Plantis
-/// 
+///
 /// Design:
 /// - Cards com seleção por radio button
 /// - Destaque visual para plano selecionado
@@ -29,23 +29,26 @@ class PlantisSubscriptionPlansWidget extends StatefulWidget {
   });
 
   @override
-  State<PlantisSubscriptionPlansWidget> createState() => _PlantisSubscriptionPlansWidgetState();
+  State<PlantisSubscriptionPlansWidget> createState() =>
+      _PlantisSubscriptionPlansWidgetState();
 }
 
-class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlansWidget> {
+class _PlantisSubscriptionPlansWidgetState
+    extends State<PlantisSubscriptionPlansWidget> {
   String? _selectedPlanId;
 
   @override
   void initState() {
     super.initState();
     _selectedPlanId = widget.selectedPlanId;
-    
+
     // Se não há plano selecionado e existem produtos, seleciona o primeiro (geralmente anual)
     if (_selectedPlanId == null && widget.availableProducts.isNotEmpty) {
       // Prioriza plano anual se disponível
       final yearlyPlan = widget.availableProducts.firstWhere(
-        (product) => product.productId.toLowerCase().contains('year') || 
-                    product.productId.toLowerCase().contains('annual'),
+        (product) =>
+            product.productId.toLowerCase().contains('year') ||
+            product.productId.toLowerCase().contains('annual'),
         orElse: () => widget.availableProducts.first,
       );
       _selectedPlanId = yearlyPlan.productId;
@@ -66,25 +69,27 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
   @override
   Widget build(BuildContext context) {
     // Se não há produtos disponíveis, usar dados mock
-    final products = widget.availableProducts.isEmpty
-        ? _getMockProducts()
-        : widget.availableProducts;
+    final products =
+        widget.availableProducts.isEmpty
+            ? _getMockProducts()
+            : widget.availableProducts;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        children: products.asMap().entries.map((entry) {
-          final index = entry.key;
-          final product = entry.value;
-          return Expanded(
-            child: Container(
-              margin: EdgeInsets.only(
-                right: index < products.length - 1 ? 8 : 0,
-              ),
-              child: _buildPlanOption(product),
-            ),
-          );
-        }).toList(),
+        children:
+            products.asMap().entries.map((entry) {
+              final index = entry.key;
+              final product = entry.value;
+              return Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    right: index < products.length - 1 ? 8 : 0,
+                  ),
+                  child: _buildPlanOption(product),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -125,8 +130,9 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
   /// Constrói um card de opção de plano
   Widget _buildPlanOption(ProductInfo product) {
     final isSelected = _selectedPlanId == product.productId;
-    final isYearly = product.productId.toLowerCase().contains('year') ||
-                    product.productId.toLowerCase().contains('annual');
+    final isYearly =
+        product.productId.toLowerCase().contains('year') ||
+        product.productId.toLowerCase().contains('annual');
     final isMonthly = product.productId.toLowerCase().contains('month');
     final isSemester = product.productId.toLowerCase().contains('semester');
     final isWeekly = product.productId.toLowerCase().contains('week');
@@ -170,13 +176,21 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
   }) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isSelected 
-            ? PlantisColors.primary.withValues(alpha: 0.15)
-            : Colors.white.withValues(alpha: 0.08),
+        color:
+            isSelected
+                ? PlantisColors.primary.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: isSelected 
-            ? Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2)
-            : Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        border:
+            isSelected
+                ? Border.all(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  width: 2,
+                )
+                : Border.all(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  width: 1,
+                ),
       ),
       child: Stack(
         children: [
@@ -190,9 +204,9 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
                   horizontal: 12,
                   vertical: 6,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: PlantisColors.primary,
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(8),
                     bottomRight: Radius.circular(8),
                   ),
@@ -207,7 +221,7 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
                 ),
               ),
             ),
-          
+
           // Conteúdo principal do card
           Material(
             color: Colors.transparent,
@@ -252,23 +266,27 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? PlantisColors.primary : Colors.white.withValues(alpha: 0.4),
+          color:
+              isSelected
+                  ? PlantisColors.primary
+                  : Colors.white.withValues(alpha: 0.4),
           width: 2,
         ),
         color: Colors.transparent,
       ),
-      child: isSelected
-          ? Center(
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: PlantisColors.primary,
+      child:
+          isSelected
+              ? Center(
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: PlantisColors.primary,
+                  ),
                 ),
-              ),
-            )
-          : null,
+              )
+              : null,
     );
   }
 
@@ -303,8 +321,9 @@ class _PlantisSubscriptionPlansWidgetState extends State<PlantisSubscriptionPlan
 
   /// Constrói o preço do plano
   Widget _buildPlanPrice(ProductInfo product) {
-    final isYearly = product.productId.toLowerCase().contains('year') ||
-                    product.productId.toLowerCase().contains('annual');
+    final isYearly =
+        product.productId.toLowerCase().contains('year') ||
+        product.productId.toLowerCase().contains('annual');
     final isMonthly = product.productId.toLowerCase().contains('month');
     final isSemester = product.productId.toLowerCase().contains('semester');
     final isWeekly = product.productId.toLowerCase().contains('week');

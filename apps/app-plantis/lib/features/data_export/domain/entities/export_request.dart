@@ -48,27 +48,27 @@ class ExportProgress extends Equatable {
 
   /// Creates a progress instance for initialization
   const ExportProgress.initial()
-      : percentage = 0.0,
-        currentTask = 'Iniciando exportação...',
-        estimatedTimeRemaining = null,
-        isCompleted = false,
-        errorMessage = null;
+    : percentage = 0.0,
+      currentTask = 'Iniciando exportação...',
+      estimatedTimeRemaining = null,
+      isCompleted = false,
+      errorMessage = null;
 
   /// Creates a progress instance for completion
   const ExportProgress.completed()
-      : percentage = 100.0,
-        currentTask = 'Exportação concluída',
-        estimatedTimeRemaining = null,
-        isCompleted = true,
-        errorMessage = null;
+    : percentage = 100.0,
+      currentTask = 'Exportação concluída',
+      estimatedTimeRemaining = null,
+      isCompleted = true,
+      errorMessage = null;
 
   /// Creates a progress instance for errors
   const ExportProgress.error(String error)
-      : percentage = 0.0,
-        currentTask = 'Erro na exportação',
-        estimatedTimeRemaining = null,
-        isCompleted = false,
-        errorMessage = error;
+    : percentage = 0.0,
+      currentTask = 'Erro na exportação',
+      estimatedTimeRemaining = null,
+      isCompleted = false,
+      errorMessage = error;
 
   ExportProgress copyWith({
     double? percentage,
@@ -80,7 +80,8 @@ class ExportProgress extends Equatable {
     return ExportProgress(
       percentage: percentage ?? this.percentage,
       currentTask: currentTask ?? this.currentTask,
-      estimatedTimeRemaining: estimatedTimeRemaining ?? this.estimatedTimeRemaining,
+      estimatedTimeRemaining:
+          estimatedTimeRemaining ?? this.estimatedTimeRemaining,
       isCompleted: isCompleted ?? this.isCompleted,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -88,12 +89,12 @@ class ExportProgress extends Equatable {
 
   @override
   List<Object?> get props => [
-        percentage,
-        currentTask,
-        estimatedTimeRemaining,
-        isCompleted,
-        errorMessage,
-      ];
+    percentage,
+    currentTask,
+    estimatedTimeRemaining,
+    isCompleted,
+    errorMessage,
+  ];
 }
 
 /// Represents the availability result of data export
@@ -117,29 +118,29 @@ class ExportAvailabilityResult extends Equatable {
     required Map<DataType, bool> availableDataTypes,
     int? estimatedSizeInBytes,
   }) : isAvailable = true,
-        reason = null,
-        availableDataTypes = availableDataTypes,
-        earliestAvailableDate = null,
-        estimatedSizeInBytes = estimatedSizeInBytes;
+       reason = null,
+       availableDataTypes = availableDataTypes,
+       earliestAvailableDate = null,
+       estimatedSizeInBytes = estimatedSizeInBytes;
 
   /// Creates an unavailable result
   const ExportAvailabilityResult.unavailable({
     required String reason,
     DateTime? earliestAvailableDate,
   }) : isAvailable = false,
-        reason = reason,
-        availableDataTypes = const {},
-        earliestAvailableDate = earliestAvailableDate,
-        estimatedSizeInBytes = null;
+       reason = reason,
+       availableDataTypes = const {},
+       earliestAvailableDate = earliestAvailableDate,
+       estimatedSizeInBytes = null;
 
   @override
   List<Object?> get props => [
-        isAvailable,
-        reason,
-        availableDataTypes,
-        earliestAvailableDate,
-        estimatedSizeInBytes,
-      ];
+    isAvailable,
+    reason,
+    availableDataTypes,
+    earliestAvailableDate,
+    estimatedSizeInBytes,
+  ];
 }
 
 /// Represents a data export request according to LGPD requirements
@@ -208,17 +209,17 @@ class ExportRequest extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        dataTypes,
-        format,
-        requestDate,
-        completionDate,
-        status,
-        downloadUrl,
-        errorMessage,
-        metadata,
-      ];
+    id,
+    userId,
+    dataTypes,
+    format,
+    requestDate,
+    completionDate,
+    status,
+    downloadUrl,
+    errorMessage,
+    metadata,
+  ];
 }
 
 /// Status of an export request
@@ -264,18 +265,18 @@ class PlantExportData extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        species,
-        spaceId,
-        imageUrls,
-        plantingDate,
-        notes,
-        config,
-        isFavorited,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    name,
+    species,
+    spaceId,
+    imageUrls,
+    plantingDate,
+    notes,
+    config,
+    isFavorited,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 class PlantConfigExportData extends Equatable {
@@ -305,17 +306,17 @@ class PlantConfigExportData extends Equatable {
 
   @override
   List<Object?> get props => [
-        wateringIntervalDays,
-        fertilizingIntervalDays,
-        pruningIntervalDays,
-        lightRequirement,
-        waterAmount,
-        soilType,
-        enableWateringCare,
-        lastWateringDate,
-        enableFertilizerCare,
-        lastFertilizerDate,
-      ];
+    wateringIntervalDays,
+    fertilizingIntervalDays,
+    pruningIntervalDays,
+    lightRequirement,
+    waterAmount,
+    soilType,
+    enableWateringCare,
+    lastWateringDate,
+    enableFertilizerCare,
+    lastFertilizerDate,
+  ];
 }
 
 class TaskExportData extends Equatable {
@@ -355,22 +356,22 @@ class TaskExportData extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        plantId,
-        plantName,
-        type,
-        status,
-        priority,
-        dueDate,
-        completedAt,
-        completionNotes,
-        isRecurring,
-        recurringIntervalDays,
-        nextDueDate,
-        createdAt,
-      ];
+    id,
+    title,
+    description,
+    plantId,
+    plantName,
+    type,
+    status,
+    priority,
+    dueDate,
+    completedAt,
+    completionNotes,
+    isRecurring,
+    recurringIntervalDays,
+    nextDueDate,
+    createdAt,
+  ];
 }
 
 class SpaceExportData extends Equatable {
@@ -389,13 +390,7 @@ class SpaceExportData extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        id,
-        name,
-        description,
-        createdAt,
-        updatedAt,
-      ];
+  List<Object?> get props => [id, name, description, createdAt, updatedAt];
 }
 
 class UserSettingsExportData extends Equatable {
@@ -415,12 +410,12 @@ class UserSettingsExportData extends Equatable {
 
   @override
   List<Object?> get props => [
-        notificationSettings,
-        backupSettings,
-        appPreferences,
-        lastBackupDate,
-        lastSyncDate,
-      ];
+    notificationSettings,
+    backupSettings,
+    appPreferences,
+    lastBackupDate,
+    lastSyncDate,
+  ];
 }
 
 class PlantPhotoExportData extends Equatable {
@@ -439,13 +434,7 @@ class PlantPhotoExportData extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        plantId,
-        plantName,
-        photoUrls,
-        takenAt,
-        caption,
-      ];
+  List<Object?> get props => [plantId, plantName, photoUrls, takenAt, caption];
 }
 
 class PlantCommentExportData extends Equatable {
@@ -467,11 +456,11 @@ class PlantCommentExportData extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        plantId,
-        plantName,
-        content,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    plantId,
+    plantName,
+    content,
+    createdAt,
+    updatedAt,
+  ];
 }

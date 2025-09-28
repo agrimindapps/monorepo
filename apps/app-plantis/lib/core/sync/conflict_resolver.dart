@@ -86,24 +86,36 @@ class ConflictResolver {
     final localTask = local as Task;
     final remoteTask = remote as Task;
 
-    return local.copyWith(
-      updatedAt: DateTime.now(),
-      isDirty: true,
-      isDeleted: localTask.isDeleted || remoteTask.isDeleted,
-      version: localTask.version + 1,
-      userId: localTask.userId ?? remoteTask.userId,
-      moduleName: localTask.moduleName ?? remoteTask.moduleName,
-      lastSyncAt: DateTime.now(),
-    ).copyWithTaskData(
-      title: localTask.title.isNotEmpty ? localTask.title : remoteTask.title,
-      description: localTask.description ?? remoteTask.description,
-      plantName: localTask.plantName.isNotEmpty ? localTask.plantName : remoteTask.plantName,
-      status: localTask.status.index > remoteTask.status.index ? localTask.status : remoteTask.status,
-      completedAt: localTask.completedAt ?? remoteTask.completedAt,
-      completionNotes: localTask.completionNotes ?? remoteTask.completionNotes,
-      isRecurring: localTask.isRecurring || remoteTask.isRecurring,
-      recurringIntervalDays: localTask.recurringIntervalDays ?? remoteTask.recurringIntervalDays,
-      nextDueDate: localTask.nextDueDate ?? remoteTask.nextDueDate,
-    );
+    return local
+        .copyWith(
+          updatedAt: DateTime.now(),
+          isDirty: true,
+          isDeleted: localTask.isDeleted || remoteTask.isDeleted,
+          version: localTask.version + 1,
+          userId: localTask.userId ?? remoteTask.userId,
+          moduleName: localTask.moduleName ?? remoteTask.moduleName,
+          lastSyncAt: DateTime.now(),
+        )
+        .copyWithTaskData(
+          title:
+              localTask.title.isNotEmpty ? localTask.title : remoteTask.title,
+          description: localTask.description ?? remoteTask.description,
+          plantName:
+              localTask.plantName.isNotEmpty
+                  ? localTask.plantName
+                  : remoteTask.plantName,
+          status:
+              localTask.status.index > remoteTask.status.index
+                  ? localTask.status
+                  : remoteTask.status,
+          completedAt: localTask.completedAt ?? remoteTask.completedAt,
+          completionNotes:
+              localTask.completionNotes ?? remoteTask.completionNotes,
+          isRecurring: localTask.isRecurring || remoteTask.isRecurring,
+          recurringIntervalDays:
+              localTask.recurringIntervalDays ??
+              remoteTask.recurringIntervalDays,
+          nextDueDate: localTask.nextDueDate ?? remoteTask.nextDueDate,
+        );
   }
 }

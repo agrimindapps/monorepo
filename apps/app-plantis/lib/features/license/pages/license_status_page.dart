@@ -216,18 +216,11 @@ class _LicenseStatusCard extends StatelessWidget {
   ) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Colors.white70,
-          size: 16,
-        ),
+        Icon(icon, color: Colors.white70, size: 16),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
-          ),
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
         ),
         Expanded(
           child: Text(
@@ -268,11 +261,7 @@ class _FeaturesOverviewCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.star,
-                  color: PlantisColors.primary,
-                  size: 24,
-                ),
+                const Icon(Icons.star, color: PlantisColors.primary, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   'Recursos Disponíveis',
@@ -328,9 +317,10 @@ class _FeaturesOverviewCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: available
-                  ? PlantisColors.primary.withValues(alpha: 0.1)
-                  : Colors.grey.withValues(alpha: 0.1),
+              color:
+                  available
+                      ? PlantisColors.primary.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
@@ -379,9 +369,9 @@ class _ActionsSection extends StatelessWidget {
           children: [
             Text(
               'Ações',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
@@ -410,9 +400,10 @@ class _ActionsSection extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: licenseProvider.isLoading
-                    ? null
-                    : () => licenseProvider.refreshLicenseInfo(),
+                onPressed:
+                    licenseProvider.isLoading
+                        ? null
+                        : () => licenseProvider.refreshLicenseInfo(),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Atualizar Status'),
                 style: OutlinedButton.styleFrom(
@@ -461,18 +452,14 @@ class _DevelopmentTools extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.developer_mode,
-                  color: Colors.orange,
-                  size: 24,
-                ),
+                const Icon(Icons.developer_mode, color: Colors.orange, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   'Ferramentas de Desenvolvimento',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
                 ),
               ],
             ),
@@ -515,56 +502,58 @@ class _DevelopmentTools extends StatelessWidget {
   void _showExtendTrialDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Estender Trial'),
-        content: const Text('Quantos dias adicionar ao trial?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Estender Trial'),
+            content: const Text('Quantos dias adicionar ao trial?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  licenseProvider.extendTrial(30);
+                },
+                child: const Text('30 dias'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  licenseProvider.extendTrial(7);
+                },
+                child: const Text('7 dias'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              licenseProvider.extendTrial(30);
-            },
-            child: const Text('30 dias'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              licenseProvider.extendTrial(7);
-            },
-            child: const Text('7 dias'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showResetLicenseDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resetar Licença'),
-        content: const Text(
-          'Isso irá remover a licença atual. Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Resetar Licença'),
+            content: const Text(
+              'Isso irá remover a licença atual. Esta ação não pode ser desfeita.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  licenseProvider.resetLicense();
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Resetar'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              licenseProvider.resetLicense();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Resetar'),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -593,10 +582,7 @@ class _ErrorView extends StatelessWidget {
   final String error;
   final VoidCallback onRetry;
 
-  const _ErrorView({
-    required this.error,
-    required this.onRetry,
-  });
+  const _ErrorView({required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -606,11 +592,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar licença',

@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/offline_sync_queue_service.dart';
-import '../../../../core/services/sync_coordinator_service.dart' hide SyncPriority;
+import '../../../../core/services/sync_coordinator_service.dart'
+    hide SyncPriority;
 import '../../../../core/services/task_notification_service.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -41,7 +42,7 @@ class TasksProvider extends ChangeNotifier {
   final AuthStateNotifier _authStateNotifier;
   final SyncCoordinatorService _syncCoordinator;
   final OfflineSyncQueueService _offlineQueue;
-  
+
   // Stream subscription for auth state changes
   StreamSubscription<UserEntity?>? _authSubscription;
 
@@ -82,17 +83,21 @@ class TasksProvider extends ChangeNotifier {
   String? get selectedPlantId => _state.selectedPlantId;
   String get searchQuery => _state.searchQuery;
   List<task_entity.TaskType> get selectedTaskTypes => _state.selectedTaskTypes;
-  List<task_entity.TaskPriority> get selectedPriorities => _state.selectedPriorities;
+  List<task_entity.TaskPriority> get selectedPriorities =>
+      _state.selectedPriorities;
   bool get hasError => _state.hasError;
   bool get isEmpty => _state.isEmpty;
-  
+
   // Granular loading states
-  Map<String, bool> get individualTaskOperations => _state.individualTaskOperations;
+  Map<String, bool> get individualTaskOperations =>
+      _state.individualTaskOperations;
   Set<TaskLoadingOperation> get activeOperations => _state.activeOperations;
   String? get currentOperationMessage => _state.currentOperationMessage;
-  bool isTaskOperationLoading(String taskId) => _state.isTaskOperationLoading(taskId);
+  bool isTaskOperationLoading(String taskId) =>
+      _state.isTaskOperationLoading(taskId);
   bool get hasActiveOperations => _state.hasActiveOperations;
-  bool isOperationActive(TaskLoadingOperation operation) => _state.isOperationActive(operation);
+  bool isOperationActive(TaskLoadingOperation operation) =>
+      _state.isOperationActive(operation);
   bool get isRefreshing => _state.isRefreshing;
   bool get isAddingTask => _state.isAddingTask;
   bool get isSyncing => _state.isSyncing;
@@ -104,7 +109,7 @@ class TasksProvider extends ChangeNotifier {
   int get overdueTasks => _state.overdueTasks;
   int get todayTasks => _state.todayTasks;
   int get upcomingTasksCount => _state.upcomingTasksCount;
-  
+
   // Offline sync status
   bool get hasPendingOfflineOperations => _offlineQueue.hasPendingOperations;
   int get pendingOfflineOperationsCount => _offlineQueue.pendingOperationsCount;
@@ -152,13 +157,17 @@ class TasksProvider extends ChangeNotifier {
   /// _startTaskOperation('task_123', message: 'Completing task...');
   /// ```
   void _startTaskOperation(String taskId, {String? message}) {
-    final updatedOperations = Map<String, bool>.from(_state.individualTaskOperations);
+    final updatedOperations = Map<String, bool>.from(
+      _state.individualTaskOperations,
+    );
     updatedOperations[taskId] = true;
-    
-    _updateState(_state.copyWith(
-      individualTaskOperations: updatedOperations,
-      currentOperationMessage: message,
-    ));
+
+    _updateState(
+      _state.copyWith(
+        individualTaskOperations: updatedOperations,
+        currentOperationMessage: message,
+      ),
+    );
   }
 
   /// Completes a task-specific loading operation and cleans up state
@@ -175,13 +184,17 @@ class TasksProvider extends ChangeNotifier {
   /// _completeTaskLoadingOperation('task_123');
   /// ```
   void _completeTaskLoadingOperation(String taskId) {
-    final updatedOperations = Map<String, bool>.from(_state.individualTaskOperations);
+    final updatedOperations = Map<String, bool>.from(
+      _state.individualTaskOperations,
+    );
     updatedOperations.remove(taskId);
-    
-    _updateState(_state.copyWith(
-      individualTaskOperations: updatedOperations,
-      clearOperationMessage: true,
-    ));
+
+    _updateState(
+      _state.copyWith(
+        individualTaskOperations: updatedOperations,
+        clearOperationMessage: true,
+      ),
+    );
   }
 
   /// Starts a global loading operation that affects the entire tasks system
@@ -201,14 +214,21 @@ class TasksProvider extends ChangeNotifier {
   ///   message: 'Loading your tasks...',
   /// );
   /// ```
-  void _startGlobalOperation(TaskLoadingOperation operation, {String? message}) {
-    final updatedOperations = Set<TaskLoadingOperation>.from(_state.activeOperations);
+  void _startGlobalOperation(
+    TaskLoadingOperation operation, {
+    String? message,
+  }) {
+    final updatedOperations = Set<TaskLoadingOperation>.from(
+      _state.activeOperations,
+    );
     updatedOperations.add(operation);
-    
-    _updateState(_state.copyWith(
-      activeOperations: updatedOperations,
-      currentOperationMessage: message,
-    ));
+
+    _updateState(
+      _state.copyWith(
+        activeOperations: updatedOperations,
+        currentOperationMessage: message,
+      ),
+    );
   }
 
   /// Completes a global loading operation and updates the UI state
@@ -224,13 +244,17 @@ class TasksProvider extends ChangeNotifier {
   /// _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
   /// ```
   void _completeGlobalOperation(TaskLoadingOperation operation) {
-    final updatedOperations = Set<TaskLoadingOperation>.from(_state.activeOperations);
+    final updatedOperations = Set<TaskLoadingOperation>.from(
+      _state.activeOperations,
+    );
     updatedOperations.remove(operation);
-    
-    _updateState(_state.copyWith(
-      activeOperations: updatedOperations,
-      clearOperationMessage: updatedOperations.isEmpty,
-    ));
+
+    _updateState(
+      _state.copyWith(
+        activeOperations: updatedOperations,
+        clearOperationMessage: updatedOperations.isEmpty,
+      ),
+    );
   }
 
   /// Initializes the authentication state listener
@@ -243,19 +267,25 @@ class TasksProvider extends ChangeNotifier {
   /// directly depended on AuthProvider, while maintaining the same functionality.
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      debugPrint('🔐 TasksProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      debugPrint(
+        '🔐 TasksProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
+      );
       // CRITICAL FIX: Only load tasks if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         debugPrint('✅ TasksProvider: Auth is stable, loading tasks...');
         loadTasks();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        debugPrint('🔄 TasksProvider: No user but auth initialized - clearing tasks');
+        debugPrint(
+          '🔄 TasksProvider: No user but auth initialized - clearing tasks',
+        );
         // Clear tasks when user logs out
-        _updateState(_state.copyWith(
-          allTasks: <task_entity.Task>[],
-          filteredTasks: <task_entity.Task>[],
-          clearError: true,
-        ));
+        _updateState(
+          _state.copyWith(
+            allTasks: <task_entity.Task>[],
+            filteredTasks: <task_entity.Task>[],
+            clearError: true,
+          ),
+        );
       }
     });
   }
@@ -272,7 +302,7 @@ class TasksProvider extends ChangeNotifier {
   /// Returns:
   /// - `true` if the current user owns the task (exact userId match)
   /// - `false` if no user is authenticated, task has null userId, or belongs to different user
-  /// 
+  ///
   /// SECURITY: Tasks with null userId are DENIED access to prevent data exposure
   ///
   /// Example:
@@ -284,27 +314,31 @@ class TasksProvider extends ChangeNotifier {
   /// ```
   bool _validateTaskOwnership(task_entity.Task task) {
     final currentUser = _authStateNotifier.currentUser;
-    
+
     // If no user is authenticated, deny access
     if (currentUser == null) {
       debugPrint('🚫 Access denied: No authenticated user');
       return false;
     }
-    
+
     // SECURITY FIX: Deny access for tasks with null userId
     // This prevents potential exposure of orphaned or incorrectly stored tasks
     if (task.userId == null) {
-      debugPrint('🚫 Access denied: Task has null userId (potential security risk)');
+      debugPrint(
+        '🚫 Access denied: Task has null userId (potential security risk)',
+      );
       return false;
     }
-    
+
     // SECURITY: Only allow access if task explicitly belongs to current user
     if (task.userId == currentUser.id) {
       return true;
     }
-    
+
     // If task belongs to different user, deny access
-    debugPrint('🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}');
+    debugPrint(
+      '🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}',
+    );
     return false;
   }
 
@@ -340,7 +374,9 @@ class TasksProvider extends ChangeNotifier {
     );
 
     if (!_validateTaskOwnership(task)) {
-      throw const UnauthorizedAccessException('You are not authorized to modify this task');
+      throw const UnauthorizedAccessException(
+        'You are not authorized to modify this task',
+      );
     }
 
     return task;
@@ -404,7 +440,8 @@ class TasksProvider extends ChangeNotifier {
       await _syncCoordinator.executeSyncOperation(
         operationType: TaskSyncOperations.loadTasks,
         priority: SyncPriority.high.index,
-        minimumInterval: TasksConstants.syncMinimumInterval, // Throttle rapid calls
+        minimumInterval:
+            TasksConstants.syncMinimumInterval, // Throttle rapid calls
         operation: () => _loadTasksOperation(),
       );
     } on SyncThrottledException catch (e) {
@@ -412,15 +449,17 @@ class TasksProvider extends ChangeNotifier {
       // Don't show error to user for throttling
     } catch (e) {
       debugPrint('❌ TasksProvider: Load tasks failed: $e');
-      _updateState(_state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao sincronizar tarefas: $e',
-      ));
+      _updateState(
+        _state.copyWith(
+          isLoading: false,
+          errorMessage: 'Erro ao sincronizar tarefas: $e',
+        ),
+      );
     }
   }
 
   /// CRITICAL FIX: Wait for authentication initialization with timeout
-  /// 
+  ///
   /// This method ensures that we don't attempt to load tasks before the
   /// authentication system is fully initialized. This prevents race conditions
   /// that cause data not to load properly.
@@ -436,18 +475,20 @@ class TasksProvider extends ChangeNotifier {
     }
 
     debugPrint('⏳ TasksProvider: Waiting for auth initialization...');
-    
+
     // Wait for initialization with timeout
     try {
       await _authStateNotifier.initializedStream
           .where((isInitialized) => isInitialized)
           .timeout(timeout)
           .first;
-      
+
       debugPrint('✅ TasksProvider: Auth initialization complete');
       return true;
     } on TimeoutException {
-      debugPrint('⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      debugPrint(
+        '⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s',
+      );
       return false;
     } catch (e) {
       debugPrint('❌ TasksProvider: Auth initialization error: $e');
@@ -463,10 +504,16 @@ class TasksProvider extends ChangeNotifier {
     final shouldShowLoading = _state.allTasks.isEmpty;
 
     if (shouldShowLoading) {
-      _startGlobalOperation(TaskLoadingOperation.loadingTasks, message: AppStrings.loadingTasks);
+      _startGlobalOperation(
+        TaskLoadingOperation.loadingTasks,
+        message: AppStrings.loadingTasks,
+      );
       _updateState(_state.copyWith(isLoading: true, clearError: true));
     } else {
-      _startGlobalOperation(TaskLoadingOperation.syncing, message: AppStrings.synchronizing);
+      _startGlobalOperation(
+        TaskLoadingOperation.syncing,
+        message: AppStrings.synchronizing,
+      );
       _updateState(_state.copyWith(clearError: true));
     }
 
@@ -483,10 +530,12 @@ class TasksProvider extends ChangeNotifier {
           if (_disposed) return;
           _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
           _completeGlobalOperation(TaskLoadingOperation.syncing);
-          _updateState(_state.copyWith(
-            isLoading: false,
-            errorMessage: _mapFailureToMessage(failure),
-          ));
+          _updateState(
+            _state.copyWith(
+              isLoading: false,
+              errorMessage: _mapFailureToMessage(failure),
+            ),
+          );
           throw Exception(_mapFailureToMessage(failure));
         },
         (tasks) {
@@ -502,13 +551,15 @@ class TasksProvider extends ChangeNotifier {
 
           _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
           _completeGlobalOperation(TaskLoadingOperation.syncing);
-          _updateState(_state.copyWith(
-            allTasks: tasks,
-            filteredTasks: filteredTasks,
-            isLoading: false,
-            clearError: true,
-          ));
-          
+          _updateState(
+            _state.copyWith(
+              allTasks: tasks,
+              filteredTasks: filteredTasks,
+              isLoading: false,
+              clearError: true,
+            ),
+          );
+
           // Check overdue tasks and send notifications
           _notificationService.checkOverdueTasks(tasks);
           // Reschedule all notifications
@@ -521,10 +572,12 @@ class TasksProvider extends ChangeNotifier {
       debugPrint('❌ TasksProvider: Stack trace: ${StackTrace.current}');
       _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
       _completeGlobalOperation(TaskLoadingOperation.syncing);
-      _updateState(_state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao carregar tarefas: $e',
-      ));
+      _updateState(
+        _state.copyWith(
+          isLoading: false,
+          errorMessage: 'Erro ao carregar tarefas: $e',
+        ),
+      );
       rethrow;
     }
   }
@@ -565,15 +618,18 @@ class TasksProvider extends ChangeNotifier {
         operation: () => _addTaskOperation(task),
       );
     } catch (e) {
-      _updateState(_state.copyWith(
-        errorMessage: AppStrings.errorSyncingNewTask,
-      ));
+      _updateState(
+        _state.copyWith(errorMessage: AppStrings.errorSyncingNewTask),
+      );
       return false;
     }
   }
 
   Future<bool> _addTaskOperation(task_entity.Task task) async {
-    _startGlobalOperation(TaskLoadingOperation.addingTask, message: AppStrings.addingTask);
+    _startGlobalOperation(
+      TaskLoadingOperation.addingTask,
+      message: AppStrings.addingTask,
+    );
     _updateState(_state.copyWith(clearError: true));
 
     try {
@@ -581,46 +637,53 @@ class TasksProvider extends ChangeNotifier {
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         _completeGlobalOperation(TaskLoadingOperation.addingTask);
-        _updateState(_state.copyWith(
-          errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
-        ));
+        _updateState(
+          _state.copyWith(
+            errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
+          ),
+        );
         return false;
       }
 
       // Assign current user to the task
       final taskWithUser = task.withUserId(currentUser.id);
-      
+
       final result = await _addTaskUseCase(AddTaskParams(task: taskWithUser));
 
       return result.fold(
         (failure) {
           // If it's a network failure, queue for offline sync
           if (_isNetworkFailure(failure)) {
-            debugPrint('🌐 Network failure detected, queuing task for offline sync');
-            
+            debugPrint(
+              '🌐 Network failure detected, queuing task for offline sync',
+            );
+
             // Create optimistic local task
             final optimisticTask = taskWithUser.copyWith(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               isDirty: true,
             );
-            
+
             // Add to local state immediately
-            final updatedTasks = List<task_entity.Task>.from(_state.allTasks)..add(optimisticTask);
+            final updatedTasks = List<task_entity.Task>.from(_state.allTasks)
+              ..add(optimisticTask);
             final filteredTasks = _applyFiltersToTasks(
-              updatedTasks, 
-              _state.currentFilter, 
-              _state.searchQuery, 
+              updatedTasks,
+              _state.currentFilter,
+              _state.searchQuery,
               _state.selectedPlantId,
               _state.selectedTaskTypes,
               _state.selectedPriorities,
             );
-            
-            _updateState(_state.copyWith(
-              allTasks: updatedTasks,
-              filteredTasks: filteredTasks,
-              clearError: true,
-            ));
-            
+
+            _updateState(
+              _state.copyWith(
+                allTasks: updatedTasks,
+                filteredTasks: filteredTasks,
+                clearError: true,
+              ),
+            );
+
             // Queue for offline sync
             final queuedOperation = QueuedOperation(
               id: optimisticTask.id,
@@ -628,37 +691,40 @@ class TasksProvider extends ChangeNotifier {
               data: optimisticTask.toFirebaseMap(),
               createdAt: DateTime.now(),
             );
-            
+
             _offlineQueue.queueOperation(queuedOperation);
-            
+
             _completeGlobalOperation(TaskLoadingOperation.addingTask);
             return true; // Return success for optimistic update
           } else {
             _completeGlobalOperation(TaskLoadingOperation.addingTask);
-            _updateState(_state.copyWith(
-              errorMessage: _mapFailureToMessage(failure),
-            ));
+            _updateState(
+              _state.copyWith(errorMessage: _mapFailureToMessage(failure)),
+            );
             throw Exception(_mapFailureToMessage(failure));
           }
         },
         (addedTask) {
-          final updatedTasks = List<task_entity.Task>.from(_state.allTasks)..add(addedTask);
+          final updatedTasks = List<task_entity.Task>.from(_state.allTasks)
+            ..add(addedTask);
           final filteredTasks = _applyFiltersToTasks(
-            updatedTasks, 
-            _state.currentFilter, 
-            _state.searchQuery, 
+            updatedTasks,
+            _state.currentFilter,
+            _state.searchQuery,
             _state.selectedPlantId,
             _state.selectedTaskTypes,
             _state.selectedPriorities,
           );
-          
+
           _completeGlobalOperation(TaskLoadingOperation.addingTask);
-          _updateState(_state.copyWith(
-            allTasks: updatedTasks,
-            filteredTasks: filteredTasks,
-            clearError: true,
-          ));
-          
+          _updateState(
+            _state.copyWith(
+              allTasks: updatedTasks,
+              filteredTasks: filteredTasks,
+              clearError: true,
+            ),
+          );
+
           // Schedule notification for the new task
           _notificationService.scheduleTaskNotification(addedTask);
           return true;
@@ -666,9 +732,9 @@ class TasksProvider extends ChangeNotifier {
       );
     } catch (e) {
       _completeGlobalOperation(TaskLoadingOperation.addingTask);
-      _updateState(_state.copyWith(
-        errorMessage: AppStrings.unexpectedErrorAddingTask,
-      ));
+      _updateState(
+        _state.copyWith(errorMessage: AppStrings.unexpectedErrorAddingTask),
+      );
       rethrow;
     }
   }
@@ -715,9 +781,9 @@ class TasksProvider extends ChangeNotifier {
         operation: () => _completeTaskOperation(taskId, notes),
       );
     } catch (e) {
-      _updateState(_state.copyWith(
-        errorMessage: AppStrings.errorSyncingTaskCompletion,
-      ));
+      _updateState(
+        _state.copyWith(errorMessage: AppStrings.errorSyncingTaskCompletion),
+      );
       return false;
     }
   }
@@ -729,7 +795,7 @@ class TasksProvider extends ChangeNotifier {
     try {
       // Validate ownership before completing task
       final task = _getTaskWithOwnershipValidation(taskId);
-      
+
       final result = await _completeTaskUseCase(
         CompleteTaskParams(taskId: taskId, notes: notes),
       );
@@ -738,35 +804,40 @@ class TasksProvider extends ChangeNotifier {
         (failure) {
           // If it's a network failure, queue for offline sync
           if (_isNetworkFailure(failure)) {
-            debugPrint('🌐 Network failure detected, queuing task completion for offline sync');
-            
+            debugPrint(
+              '🌐 Network failure detected, queuing task completion for offline sync',
+            );
+
             // Create optimistic local completion
             final completedTask = task.copyWithTaskData(
               status: task_entity.TaskStatus.completed,
               completedAt: DateTime.now(),
               completionNotes: notes,
             );
-            
+
             // Update local state immediately
-            final updatedTasks = _state.allTasks.map((t) {
-              return t.id == taskId ? completedTask : t;
-            }).toList();
-            
+            final updatedTasks =
+                _state.allTasks.map((t) {
+                  return t.id == taskId ? completedTask : t;
+                }).toList();
+
             final filteredTasks = _applyFiltersToTasks(
-              updatedTasks, 
-              _state.currentFilter, 
-              _state.searchQuery, 
+              updatedTasks,
+              _state.currentFilter,
+              _state.searchQuery,
               _state.selectedPlantId,
               _state.selectedTaskTypes,
               _state.selectedPriorities,
             );
-            
-            _updateState(_state.copyWith(
-              allTasks: updatedTasks,
-              filteredTasks: filteredTasks,
-              clearError: true,
-            ));
-            
+
+            _updateState(
+              _state.copyWith(
+                allTasks: updatedTasks,
+                filteredTasks: filteredTasks,
+                clearError: true,
+              ),
+            );
+
             // Queue for offline sync
             final queuedOperation = QueuedOperation(
               id: taskId,
@@ -778,63 +849,64 @@ class TasksProvider extends ChangeNotifier {
               },
               createdAt: DateTime.now(),
             );
-            
+
             _offlineQueue.queueOperation(queuedOperation);
-            
+
             // Cancel notifications optimistically
             _notificationService.cancelTaskNotifications(taskId);
             _notificationService.rescheduleTaskNotifications(updatedTasks);
-            
+
             _completeTaskLoadingOperation(taskId);
             return true; // Return success for optimistic update
           } else {
             _completeTaskLoadingOperation(taskId);
-            _updateState(_state.copyWith(
-              errorMessage: _mapFailureToMessage(failure),
-            ));
+            _updateState(
+              _state.copyWith(errorMessage: _mapFailureToMessage(failure)),
+            );
             throw Exception(_mapFailureToMessage(failure));
           }
         },
         (completedTask) {
-          final updatedTasks = _state.allTasks.map((t) {
-            return t.id == taskId ? completedTask : t;
-          }).toList();
-          
+          final updatedTasks =
+              _state.allTasks.map((t) {
+                return t.id == taskId ? completedTask : t;
+              }).toList();
+
           final filteredTasks = _applyFiltersToTasks(
-            updatedTasks, 
-            _state.currentFilter, 
-            _state.searchQuery, 
+            updatedTasks,
+            _state.currentFilter,
+            _state.searchQuery,
             _state.selectedPlantId,
             _state.selectedTaskTypes,
             _state.selectedPriorities,
           );
-          
+
           _completeTaskLoadingOperation(taskId);
-          _updateState(_state.copyWith(
-            allTasks: updatedTasks,
-            filteredTasks: filteredTasks,
-            clearError: true,
-          ));
-          
+          _updateState(
+            _state.copyWith(
+              allTasks: updatedTasks,
+              filteredTasks: filteredTasks,
+              clearError: true,
+            ),
+          );
+
           // Cancel notifications for the completed task
           _notificationService.cancelTaskNotifications(taskId);
           // Reschedule notifications for remaining tasks
           _notificationService.rescheduleTaskNotifications(updatedTasks);
-          
+
           return true;
         },
       );
     } on UnauthorizedAccessException catch (e) {
       _completeTaskLoadingOperation(taskId);
-      _updateState(_state.copyWith(
-        errorMessage: e.message,
-      ));
+      _updateState(_state.copyWith(errorMessage: e.message));
       rethrow;
     } catch (e) {
       _completeTaskLoadingOperation(taskId);
-      _updateState(_state.copyWith(
-        errorMessage: AppStrings.unexpectedErrorCompletingTask,
-      ));
+      _updateState(
+        _state.copyWith(errorMessage: AppStrings.unexpectedErrorCompletingTask),
+      );
       rethrow;
     }
   }
@@ -857,18 +929,20 @@ class TasksProvider extends ChangeNotifier {
     final normalizedQuery = query.toLowerCase();
     if (_state.searchQuery != normalizedQuery) {
       final filteredTasks = _applyFiltersToTasks(
-        _state.allTasks, 
-        _state.currentFilter, 
-        normalizedQuery, 
+        _state.allTasks,
+        _state.currentFilter,
+        normalizedQuery,
         _state.selectedPlantId,
         _state.selectedTaskTypes,
         _state.selectedPriorities,
       );
-      
-      _updateState(_state.copyWith(
-        searchQuery: normalizedQuery,
-        filteredTasks: filteredTasks,
-      ));
+
+      _updateState(
+        _state.copyWith(
+          searchQuery: normalizedQuery,
+          filteredTasks: filteredTasks,
+        ),
+      );
     }
   }
 
@@ -890,19 +964,21 @@ class TasksProvider extends ChangeNotifier {
   void setFilter(TasksFilterType filter, {String? plantId}) {
     if (_state.currentFilter != filter || _state.selectedPlantId != plantId) {
       final filteredTasks = _applyFiltersToTasks(
-        _state.allTasks, 
-        filter, 
-        _state.searchQuery, 
+        _state.allTasks,
+        filter,
+        _state.searchQuery,
         plantId,
         _state.selectedTaskTypes,
         _state.selectedPriorities,
       );
-      
-      _updateState(_state.copyWith(
-        currentFilter: filter,
-        selectedPlantId: plantId,
-        filteredTasks: filteredTasks,
-      ));
+
+      _updateState(
+        _state.copyWith(
+          currentFilter: filter,
+          selectedPlantId: plantId,
+          filteredTasks: filteredTasks,
+        ),
+      );
     }
   }
 
@@ -941,13 +1017,15 @@ class TasksProvider extends ChangeNotifier {
       priorities ?? _state.selectedPriorities,
     );
 
-    _updateState(_state.copyWith(
-      currentFilter: filter ?? _state.currentFilter,
-      selectedPlantId: plantId ?? _state.selectedPlantId,
-      selectedTaskTypes: taskTypes ?? _state.selectedTaskTypes,
-      selectedPriorities: priorities ?? _state.selectedPriorities,
-      filteredTasks: filteredTasks,
-    ));
+    _updateState(
+      _state.copyWith(
+        currentFilter: filter ?? _state.currentFilter,
+        selectedPlantId: plantId ?? _state.selectedPlantId,
+        selectedTaskTypes: taskTypes ?? _state.selectedTaskTypes,
+        selectedPriorities: priorities ?? _state.selectedPriorities,
+        filteredTasks: filteredTasks,
+      ),
+    );
   }
 
   /// Refreshes tasks from the remote data source with visual feedback
@@ -964,7 +1042,10 @@ class TasksProvider extends ChangeNotifier {
   /// await refresh(); // User will see "Refreshing..." message
   /// ```
   Future<void> refresh() async {
-    _startGlobalOperation(TaskLoadingOperation.refreshing, message: AppStrings.refreshing);
+    _startGlobalOperation(
+      TaskLoadingOperation.refreshing,
+      message: AppStrings.refreshing,
+    );
     try {
       await loadTasks();
     } finally {
@@ -1023,13 +1104,14 @@ class TasksProvider extends ChangeNotifier {
       case TasksFilterType.all:
         break;
       case TasksFilterType.today:
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.isDueToday &&
-                  t.status == task_entity.TaskStatus.pending,
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.isDueToday &&
+                      t.status == task_entity.TaskStatus.pending,
+                )
+                .toList();
         break;
       case TasksFilterType.overdue:
         tasks = tasks.where((t) => t.isOverdue).toList();
@@ -1037,29 +1119,32 @@ class TasksProvider extends ChangeNotifier {
       case TasksFilterType.upcoming:
         final now = DateTime.now();
         final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.status == task_entity.TaskStatus.pending &&
-                  t.dueDate.isAfter(now) &&
-                  t.dueDate.isBefore(nextWeek),
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now) &&
+                      t.dueDate.isBefore(nextWeek),
+                )
+                .toList();
         break;
       case TasksFilterType.allFuture:
         final now = DateTime.now();
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.status == task_entity.TaskStatus.pending &&
-                  t.dueDate.isAfter(now),
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now),
+                )
+                .toList();
         break;
       case TasksFilterType.completed:
-        tasks = tasks
-            .where((t) => t.status == task_entity.TaskStatus.completed)
-            .toList();
+        tasks =
+            tasks
+                .where((t) => t.status == task_entity.TaskStatus.completed)
+                .toList();
         break;
       case TasksFilterType.byPlant:
         if (selectedPlantId != null) {
@@ -1070,22 +1155,27 @@ class TasksProvider extends ChangeNotifier {
 
     // Aplicar filtro por tipo de tarefa
     if (selectedTaskTypes.isNotEmpty) {
-      tasks = tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
+      tasks =
+          tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
     }
 
     // Aplicar filtro por prioridade
     if (selectedPriorities.isNotEmpty) {
-      tasks = tasks.where((task) => selectedPriorities.contains(task.priority)).toList();
+      tasks =
+          tasks
+              .where((task) => selectedPriorities.contains(task.priority))
+              .toList();
     }
 
     // Aplicar busca
     if (searchQuery.isNotEmpty) {
-      tasks = tasks.where((task) {
-        return task.title.toLowerCase().contains(searchQuery) ||
-            task.plantName.toLowerCase().contains(searchQuery) ||
-            (task.description?.toLowerCase().contains(searchQuery) ??
-                false);
-      }).toList();
+      tasks =
+          tasks.where((task) {
+            return task.title.toLowerCase().contains(searchQuery) ||
+                task.plantName.toLowerCase().contains(searchQuery) ||
+                (task.description?.toLowerCase().contains(searchQuery) ??
+                    false);
+          }).toList();
     }
 
     // Ordenar por prioridade e data
@@ -1175,10 +1265,10 @@ class TasksProvider extends ChangeNotifier {
   /// - `true` if the failure is network-related
   /// - `false` if it's a validation or other type of failure
   bool _isNetworkFailure(Failure failure) {
-    return failure is NetworkFailure || 
-           failure.message.toLowerCase().contains('network') ||
-           failure.message.toLowerCase().contains('connection') ||
-           failure.message.toLowerCase().contains('timeout');
+    return failure is NetworkFailure ||
+        failure.message.toLowerCase().contains('network') ||
+        failure.message.toLowerCase().contains('connection') ||
+        failure.message.toLowerCase().contains('timeout');
   }
 
   /// Initializes the notification service with comprehensive setup
@@ -1201,12 +1291,18 @@ class TasksProvider extends ChangeNotifier {
       final initResult = await _notificationService.initialize();
       if (initResult) {
         await _notificationService.initializeNotificationHandlers();
-        debugPrint('✅ TasksProvider: Notification service initialized successfully');
+        debugPrint(
+          '✅ TasksProvider: Notification service initialized successfully',
+        );
       } else {
-        debugPrint('⚠️ TasksProvider: Failed to initialize notification service');
+        debugPrint(
+          '⚠️ TasksProvider: Failed to initialize notification service',
+        );
       }
     } catch (e) {
-      debugPrint('❌ TasksProvider: Error initializing notification service: $e');
+      debugPrint(
+        '❌ TasksProvider: Error initializing notification service: $e',
+      );
     }
   }
 
@@ -1297,9 +1393,9 @@ class TasksProvider extends ChangeNotifier {
 /// Exception thrown when a user tries to access a task they don't own
 class UnauthorizedAccessException implements Exception {
   final String message;
-  
+
   const UnauthorizedAccessException(this.message);
-  
+
   @override
   String toString() => 'UnauthorizedAccessException: $message';
 }

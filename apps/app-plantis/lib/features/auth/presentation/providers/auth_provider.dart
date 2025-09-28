@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
@@ -11,8 +10,10 @@ import '../../../../core/providers/background_sync_provider.dart';
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../../device_management/data/models/device_model.dart';
-import '../../../device_management/domain/usecases/revoke_device_usecase.dart' as device_revocation;
-import '../../../device_management/domain/usecases/validate_device_usecase.dart' as device_validation;
+import '../../../device_management/domain/usecases/revoke_device_usecase.dart'
+    as device_revocation;
+import '../../../device_management/domain/usecases/validate_device_usecase.dart'
+    as device_validation;
 import '../../domain/usecases/reset_password_usecase.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -25,7 +26,8 @@ class AuthProvider extends ChangeNotifier {
   final BackgroundSyncProvider? _backgroundSyncProvider;
   final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
   final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
-  final device_revocation.RevokeAllOtherDevicesUseCase? _revokeAllOtherDevicesUseCase;
+  final device_revocation.RevokeAllOtherDevicesUseCase?
+  _revokeAllOtherDevicesUseCase;
 
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -40,7 +42,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isValidatingDevice = false;
   String? _deviceValidationError;
   bool _deviceLimitExceeded = false;
-  
+
   // Legacy sync properties - will be removed
   // Sync is now handled by BackgroundSyncProvider
 
@@ -70,7 +72,8 @@ class AuthProvider extends ChangeNotifier {
     BackgroundSyncProvider? backgroundSyncProvider,
     device_validation.ValidateDeviceUseCase? validateDeviceUseCase,
     device_revocation.RevokeDeviceUseCase? revokeDeviceUseCase,
-    device_revocation.RevokeAllOtherDevicesUseCase? revokeAllOtherDevicesUseCase,
+    device_revocation.RevokeAllOtherDevicesUseCase?
+    revokeAllOtherDevicesUseCase,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _authRepository = authRepository,
@@ -96,11 +99,13 @@ class AuthProvider extends ChangeNotifier {
   bool get isValidatingDevice => _isValidatingDevice;
   String? get deviceValidationError => _deviceValidationError;
   bool get deviceLimitExceeded => _deviceLimitExceeded;
-  
+
   // Sync related getters - delegated to BackgroundSyncProvider
   bool get isSyncInProgress => _syncProvider?.isSyncInProgress ?? false;
-  bool get hasPerformedInitialSync => _syncProvider?.hasPerformedInitialSync ?? false;
-  String get syncMessage => _syncProvider?.currentSyncMessage ?? 'Sincronizando dados...';
+  bool get hasPerformedInitialSync =>
+      _syncProvider?.hasPerformedInitialSync ?? false;
+  String get syncMessage =>
+      _syncProvider?.currentSyncMessage ?? 'Sincronizando dados...';
 
   void _initializeAuthState() {
     _userSubscription = _authRepository.currentUser.listen(
@@ -111,7 +116,9 @@ class AuthProvider extends ChangeNotifier {
         if (user == null && await shouldUseAnonymousMode()) {
           // NÃO marcar como inicializado ainda - esperar o signInAnonymously completar
           if (kDebugMode) {
-            debugPrint('🔄 AuthProvider: Iniciando modo anônimo, aguardando login...');
+            debugPrint(
+              '🔄 AuthProvider: Iniciando modo anônimo, aguardando login...',
+            );
           }
           await signInAnonymously();
           return; // O signInAnonymously vai disparar este listener novamente
@@ -125,7 +132,9 @@ class AuthProvider extends ChangeNotifier {
         _isInitialized = true;
         _authStateNotifier.updateInitializationStatus(true);
         if (kDebugMode) {
-          debugPrint('Auth error: ${DataSanitizationService.sanitizeForLogging(error.toString())}');
+          debugPrint(
+            'Auth error: ${DataSanitizationService.sanitizeForLogging(error.toString())}',
+          );
         }
         notifyListeners();
       },
@@ -153,7 +162,7 @@ class AuthProvider extends ChangeNotifier {
       if (user != null && !isAnonymous && _subscriptionRepository != null) {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
-        
+
         // Triggar sincronização inicial em background sem bloquear
         _triggerBackgroundSyncIfNeeded(user.id);
       } else {
@@ -163,13 +172,14 @@ class AuthProvider extends ChangeNotifier {
 
       // CRITICAL: Only mark as initialized AFTER everything is stable
       if (kDebugMode) {
-        debugPrint('✅ AuthProvider: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: $_isPremium');
+        debugPrint(
+          '✅ AuthProvider: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: $_isPremium',
+        );
       }
-      
+
       _isInitialized = true;
       _authStateNotifier.updateInitializationStatus(true);
       notifyListeners();
-      
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ AuthProvider: Error during initialization: $e');
@@ -197,7 +207,9 @@ class AuthProvider extends ChangeNotifier {
     result.fold(
       (failure) {
         if (kDebugMode) {
-          debugPrint('Erro verificar premium: ${DataSanitizationService.sanitizeForLogging(failure.message)}');
+          debugPrint(
+            'Erro verificar premium: ${DataSanitizationService.sanitizeForLogging(failure.message)}',
+          );
         }
         _isPremium = false;
         _authStateNotifier.updatePremiumStatus(false);
@@ -238,7 +250,7 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
         _isLoading = false;
         _currentOperation = null;
-        
+
         // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
 
@@ -315,7 +327,9 @@ class AuthProvider extends ChangeNotifier {
             }
           } else {
             if (kDebugMode) {
-              debugPrint('⚠️ Device validation falhou: ${validationResult.message}');
+              debugPrint(
+                '⚠️ Device validation falhou: ${validationResult.message}',
+              );
             }
             _deviceValidationError = validationResult.message;
 
@@ -341,7 +355,9 @@ class AuthProvider extends ChangeNotifier {
   /// Handle device limit exceeded - force logout
   Future<void> _handleDeviceLimitExceeded() async {
     if (kDebugMode) {
-      debugPrint('🚫 Limite de dispositivos excedido - fazendo logout automático');
+      debugPrint(
+        '🚫 Limite de dispositivos excedido - fazendo logout automático',
+      );
     }
 
     // Log analytics event
@@ -370,10 +386,7 @@ class AuthProvider extends ChangeNotifier {
     // Execute in background without blocking
     Future.delayed(const Duration(milliseconds: 100), () {
       if (isAuthenticated && !isAnonymous) {
-        _syncProvider!.startBackgroundSync(
-          userId: userId,
-          isInitialSync: true,
-        );
+        _syncProvider!.startBackgroundSync(userId: userId, isInitialSync: true);
       }
     });
   }
@@ -454,10 +467,10 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
         _isLoading = false;
         _currentOperation = null;
-        
+
         // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
-        
+
         notifyListeners();
       },
     );
@@ -482,7 +495,7 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
         _isLoading = false;
         _currentOperation = null;
-        
+
         // Update AuthStateNotifier with anonymous user
         _authStateNotifier.updateUser(user);
 
@@ -500,7 +513,9 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setBool('use_anonymous_mode', true);
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('Erro salvar preferência anônima: ${DataSanitizationService.sanitizeForLogging(e.toString())}');
+        debugPrint(
+          'Erro salvar preferência anônima: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+        );
       }
     }
   }
@@ -533,7 +548,9 @@ class AuthProvider extends ChangeNotifier {
 
     if (_syncProvider?.shouldStartInitialSync(_currentUser!.id) == true) {
       if (kDebugMode) {
-        debugPrint('🔄 Iniciando auto-sync em background para usuário não anônimo');
+        debugPrint(
+          '🔄 Iniciando auto-sync em background para usuário não anônimo',
+        );
       }
 
       await _syncProvider?.startBackgroundSync(
@@ -546,7 +563,6 @@ class AuthProvider extends ChangeNotifier {
       }
     }
   }
-
 
   void clearError() {
     _errorMessage = null;
@@ -566,9 +582,9 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Solicita reset de senha via email
-  /// 
+  ///
   /// [email] - Email do usuário para receber o link de reset
-  /// 
+  ///
   /// Returns:
   /// - true: Email enviado com sucesso
   /// - false: Erro no envio (verificar errorMessage)
@@ -586,10 +602,8 @@ class AuthProvider extends ChangeNotifier {
       },
       (_) {
         // Log evento de reset de senha
-        _analytics?.logEvent('password_reset_requested', {
-          'method': 'email',
-        });
-        
+        _analytics?.logEvent('password_reset_requested', {'method': 'email'});
+
         return true;
       },
     );
@@ -606,7 +620,9 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _performDeviceCleanupOnLogout() async {
     if (_revokeDeviceUseCase == null || _currentUser == null || isAnonymous) {
       if (kDebugMode) {
-        debugPrint('⚠️ Device cleanup: Skipped (missing dependencies or anonymous user)');
+        debugPrint(
+          '⚠️ Device cleanup: Skipped (missing dependencies or anonymous user)',
+        );
       }
       return;
     }
@@ -631,7 +647,9 @@ class AuthProvider extends ChangeNotifier {
       revokeResult.fold(
         (failure) {
           if (kDebugMode) {
-            debugPrint('❌ Device cleanup: Failed to revoke current device - ${failure.message}');
+            debugPrint(
+              '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
+            );
           }
 
           // Log erro para analytics/monitoring
@@ -655,10 +673,11 @@ class AuthProvider extends ChangeNotifier {
           });
         },
       );
-
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Device cleanup: Unexpected error during logout cleanup - $e');
+        debugPrint(
+          '❌ Device cleanup: Unexpected error during logout cleanup - $e',
+        );
       }
 
       // Log erro crítico
@@ -671,21 +690,21 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Exclui permanentemente a conta do usuário
-  /// 
+  ///
   /// Este método realiza:
   /// 1. Re-autenticação do usuário para confirmar identidade
   /// 2. Exclusão de todos os dados pessoais do Firestore
   /// 3. Cancelamento de assinaturas ativas (RevenueCat)
   /// 4. Limpeza de dados locais (SharedPreferences, cache)
   /// 5. Exclusão da conta do Firebase Auth
-  /// 
+  ///
   /// [password] - Senha atual para re-autenticação (obrigatório)
   /// [downloadData] - Se deve fazer backup dos dados antes da exclusão
-  /// 
+  ///
   /// Returns:
   /// - true: Conta excluída com sucesso
   /// - false: Erro na exclusão (verificar errorMessage)
-  /// 
+  ///
   /// Throws:
   /// - Exception se não há usuário autenticado
   /// - Exception se a re-autenticação falhar
@@ -720,20 +739,17 @@ class AuthProvider extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('🔐 Iniciando re-autenticação para exclusão de conta');
       }
-      
+
       final reauthResult = await _authRepository.signInWithEmailAndPassword(
         email: userEmail,
         password: password,
       );
-      
-      final reauthSuccess = reauthResult.fold(
-        (failure) {
-          _errorMessage = 'Falha na re-autenticação: ${failure.message}';
-          return false;
-        },
-        (user) => true,
-      );
-      
+
+      final reauthSuccess = reauthResult.fold((failure) {
+        _errorMessage = 'Falha na re-autenticação: ${failure.message}';
+        return false;
+      }, (user) => true);
+
       if (!reauthSuccess) {
         _isLoading = false;
         _currentOperation = null;
@@ -780,15 +796,12 @@ class AuthProvider extends ChangeNotifier {
         debugPrint('🔥 Excluindo conta do Firebase Auth');
       }
       final deleteResult = await _authRepository.deleteAccount();
-      
-      final deleteSuccess = deleteResult.fold(
-        (failure) {
-          _errorMessage = 'Falha na exclusão da conta: ${failure.message}';
-          return false;
-        },
-        (_) => true,
-      );
-      
+
+      final deleteSuccess = deleteResult.fold((failure) {
+        _errorMessage = 'Falha na exclusão da conta: ${failure.message}';
+        return false;
+      }, (_) => true);
+
       if (!deleteSuccess) {
         _isLoading = false;
         _currentOperation = null;
@@ -809,36 +822,37 @@ class AuthProvider extends ChangeNotifier {
 
       // Resetar estado de sincronização para próxima sessão
       _syncProvider?.resetSyncState();
-      
+
       // Update AuthStateNotifier
       _authStateNotifier.updateUser(null);
       _authStateNotifier.updatePremiumStatus(false);
-      
+
       _isLoading = false;
       _currentOperation = null;
-      
+
       if (kDebugMode) {
         debugPrint('✅ Conta excluída com sucesso');
       }
-      
+
       notifyListeners();
       return true;
-
     } catch (e) {
       _errorMessage = 'Erro na exclusão da conta: $e';
       _isLoading = false;
       _currentOperation = null;
-      
+
       if (kDebugMode) {
-        debugPrint('❌ Erro na exclusão da conta: ${DataSanitizationService.sanitizeForLogging(e.toString())}');
+        debugPrint(
+          '❌ Erro na exclusão da conta: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+        );
       }
-      
+
       // Log do erro
       await _analytics?.logEvent('account_deletion_failed', {
         'error': e.toString(),
         'user_id': _currentUser?.id ?? 'unknown',
       });
-      
+
       notifyListeners();
       return false;
     }
@@ -853,7 +867,9 @@ class AuthProvider extends ChangeNotifier {
   /// IMPORTANTE: Falhas neste processo devem ser logadas mas NÃO devem
   /// bloquear a exclusão da conta, pois é um processo crítico de privacidade.
   Future<void> _performCompleteDeviceCleanupOnAccountDeletion() async {
-    if (_revokeAllOtherDevicesUseCase == null || _revokeDeviceUseCase == null || _currentUser == null) {
+    if (_revokeAllOtherDevicesUseCase == null ||
+        _revokeDeviceUseCase == null ||
+        _currentUser == null) {
       if (kDebugMode) {
         debugPrint('⚠️ Device cleanup: Skipped (missing dependencies)');
       }
@@ -862,7 +878,9 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       if (kDebugMode) {
-        debugPrint('🧹 Device cleanup: Starting complete device cleanup for account deletion');
+        debugPrint(
+          '🧹 Device cleanup: Starting complete device cleanup for account deletion',
+        );
       }
 
       final userId = _currentUser!.id;
@@ -874,7 +892,9 @@ class AuthProvider extends ChangeNotifier {
       await revokeOthersResult.fold(
         (failure) async {
           if (kDebugMode) {
-            debugPrint('❌ Device cleanup: Failed to revoke other devices - ${failure.message}');
+            debugPrint(
+              '❌ Device cleanup: Failed to revoke other devices - ${failure.message}',
+            );
           }
 
           // Log erro mas continuar com device atual
@@ -888,7 +908,9 @@ class AuthProvider extends ChangeNotifier {
         (result) async {
           totalDevicesRemoved += result.revokedCount;
           if (kDebugMode) {
-            debugPrint('✅ Device cleanup: ${result.revokedCount} other devices revoked');
+            debugPrint(
+              '✅ Device cleanup: ${result.revokedCount} other devices revoked',
+            );
           }
         },
       );
@@ -906,7 +928,9 @@ class AuthProvider extends ChangeNotifier {
       revokeCurrentResult.fold(
         (failure) {
           if (kDebugMode) {
-            debugPrint('❌ Device cleanup: Failed to revoke current device - ${failure.message}');
+            debugPrint(
+              '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
+            );
           }
 
           // Log erro para auditoria
@@ -933,12 +957,15 @@ class AuthProvider extends ChangeNotifier {
       });
 
       if (kDebugMode) {
-        debugPrint('✅ Device cleanup: Complete cleanup finished - $totalDevicesRemoved devices removed');
+        debugPrint(
+          '✅ Device cleanup: Complete cleanup finished - $totalDevicesRemoved devices removed',
+        );
       }
-
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Device cleanup: Unexpected error during account deletion cleanup - $e');
+        debugPrint(
+          '❌ Device cleanup: Unexpected error during account deletion cleanup - $e',
+        );
       }
 
       // Log erro crítico mas não bloquear exclusão da conta
@@ -960,7 +987,7 @@ class AuthProvider extends ChangeNotifier {
       // - Tarefas e histórico
       // - Configurações
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      
+
       if (kDebugMode) {
         debugPrint('✅ Dados exportados com sucesso');
       }
@@ -976,16 +1003,17 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _cancelActiveSubscriptions() async {
     try {
       if (_subscriptionRepository == null) return;
-      
+
       // Verificar se há assinaturas ativas
-      final subscriptionResult = await _subscriptionRepository.subscriptionStatus.first;
-      
+      final subscriptionResult =
+          await _subscriptionRepository.subscriptionStatus.first;
+
       if (subscriptionResult != null && subscriptionResult.isActive) {
         // Em uma implementação real, aqui faria:
         // - Cancelamento via RevenueCat API
         // - Notificação ao usuário sobre cancelamento
         // - Reembolso se aplicável
-        
+
         if (kDebugMode) {
           debugPrint('✅ Assinaturas canceladas');
         }
@@ -1007,9 +1035,9 @@ class AuthProvider extends ChangeNotifier {
       // - Tarefas (/users/{userId}/tasks/*)
       // - Configurações (/users/{userId}/settings)
       // - Imagens do Firebase Storage
-      
+
       await Future<void>.delayed(const Duration(milliseconds: 1000));
-      
+
       if (kDebugMode) {
         debugPrint('✅ Dados do Firestore excluídos');
       }
@@ -1025,7 +1053,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _clearLocalUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Limpar preferências relacionadas ao usuário
       final keysToRemove = [
         'use_anonymous_mode',
@@ -1035,17 +1063,17 @@ class AuthProvider extends ChangeNotifier {
         'last_sync_timestamp',
         'user_settings',
       ];
-      
+
       for (final key in keysToRemove) {
         await prefs.remove(key);
       }
-      
+
       // Limpar cache de imagens e outros dados locais
       // Em uma implementação real, isso incluiria:
       // - Cache de imagens
       // - Banco de dados local (SQLite, Hive)
       // - Arquivos temporários
-      
+
       if (kDebugMode) {
         debugPrint('✅ Dados locais limpos');
       }

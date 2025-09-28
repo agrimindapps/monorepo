@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// State class for sync status
 class SyncState {
@@ -102,16 +101,15 @@ class SyncNotifier extends StateNotifier<SyncState> {
   }
 
   /// Updates sync status from external sources
-  void updateSyncStatus({
-    bool? isSyncing,
-    String? message,
-    String? error,
-  }) {
+  void updateSyncStatus({bool? isSyncing, String? message, String? error}) {
     state = state.copyWith(
       isSyncing: isSyncing ?? state.isSyncing,
       lastSyncMessage: message ?? state.lastSyncMessage,
       error: error,
-      lastSyncTime: (isSyncing == false && error == null) ? DateTime.now() : state.lastSyncTime,
+      lastSyncTime:
+          (isSyncing == false && error == null)
+              ? DateTime.now()
+              : state.lastSyncTime,
     );
   }
 

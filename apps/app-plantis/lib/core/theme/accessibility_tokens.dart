@@ -43,7 +43,7 @@ class AccessibilityTokens {
     'close_button': 'Fechar',
     'next_button': 'Próximo',
     'previous_button': 'Anterior',
-    
+
     // Actions
     'save_button': 'Salvar alterações',
     'delete_button': 'Excluir item',
@@ -51,7 +51,7 @@ class AccessibilityTokens {
     'complete_button': 'Marcar como concluído',
     'add_button': 'Adicionar novo item',
     'refresh_button': 'Atualizar conteúdo',
-    
+
     // Forms
     'required_field': 'Campo obrigatório',
     'optional_field': 'Campo opcional',
@@ -60,18 +60,18 @@ class AccessibilityTokens {
     'search_field': 'Campo de pesquisa',
     'show_password': 'Mostrar senha',
     'hide_password': 'Ocultar senha',
-    
+
     // Loading states
     'loading': 'Carregando conteúdo',
     'refreshing': 'Atualizando conteúdo',
     'processing': 'Processando solicitação',
-    
+
     // Content
     'image': 'Imagem',
     'plant_image': 'Foto da planta',
     'profile_image': 'Foto do perfil',
     'empty_list': 'Lista vazia',
-    
+
     // Plants specific
     'plant_card': 'Cartão da planta',
     'task_card': 'Cartão de tarefa',
@@ -102,9 +102,14 @@ class AccessibilityTokens {
   };
 
   /// Calcula se um contraste é adequado para WCAG
-  static bool isContrastCompliant(Color foreground, Color background, {bool isLargeText = false}) {
+  static bool isContrastCompliant(
+    Color foreground,
+    Color background, {
+    bool isLargeText = false,
+  }) {
     final contrast = _calculateContrast(foreground, background);
-    final requiredContrast = isLargeText ? _largeTextContrast : _normalTextContrast;
+    final requiredContrast =
+        isLargeText ? _largeTextContrast : _normalTextContrast;
     return contrast >= requiredContrast;
   }
 
@@ -118,7 +123,11 @@ class AccessibilityTokens {
   }
 
   /// Retorna uma cor com contraste adequado para o background
-  static Color getAccessibleColor(Color color, Color background, {bool isLargeText = false}) {
+  static Color getAccessibleColor(
+    Color color,
+    Color background, {
+    bool isLargeText = false,
+  }) {
     if (isContrastCompliant(color, background, isLargeText: isLargeText)) {
       return color;
     }
@@ -129,23 +138,29 @@ class AccessibilityTokens {
   }
 
   /// Retorna o tamanho de fonte baseado nas configurações de acessibilidade
-  static double getAccessibleFontSize(BuildContext context, double baseFontSize) {
+  static double getAccessibleFontSize(
+    BuildContext context,
+    double baseFontSize,
+  ) {
     final mediaQuery = MediaQuery.of(context);
     final textScaleFactor = mediaQuery.textScaler.scale(1.0);
     final scaledSize = baseFontSize * textScaleFactor;
-    
+
     // Garante um tamanho mínimo legível
     const minSize = minReadableTextSize;
     final maxSize = baseFontSize * maxScaleFactor;
-    
+
     return scaledSize.clamp(minSize, maxSize);
   }
 
   /// Retorna duração de animação baseada nas preferências do usuário
-  static Duration getAccessibleAnimationDuration(BuildContext context, Duration baseDuration) {
+  static Duration getAccessibleAnimationDuration(
+    BuildContext context,
+    Duration baseDuration,
+  ) {
     final mediaQuery = MediaQuery.of(context);
     final reduceMotion = mediaQuery.disableAnimations;
-    
+
     return reduceMotion ? noAnimation : baseDuration;
   }
 
@@ -213,9 +228,12 @@ extension AccessibilityExtension on Widget {
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
-      onFocusChange: onFocusChange != null ? (hasFocus) {
-        if (hasFocus) onFocusChange();
-      } : null,
+      onFocusChange:
+          onFocusChange != null
+              ? (hasFocus) {
+                if (hasFocus) onFocusChange();
+              }
+              : null,
       child: this,
     );
   }
@@ -235,7 +253,7 @@ extension AccessibilityExtension on Widget {
 /// Mixin para gerenciar focus nodes em StatefulWidgets com estabilidade de layout
 mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
   final Map<String, FocusNode> _focusNodes = {};
-  
+
   // Layout stability tracking
   bool _layoutStable = false;
   int _layoutStabilityChecks = 0;
@@ -243,30 +261,35 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
   static const Duration _stabilityCheckDelay = Duration(milliseconds: 16);
 
   FocusNode getFocusNode(String key) {
-    return _focusNodes.putIfAbsent(key, () => FocusNode(
-      debugLabel: key,
-      canRequestFocus: true,
-      descendantsAreFocusable: true,
-      descendantsAreTraversable: true,
-    ));
+    return _focusNodes.putIfAbsent(
+      key,
+      () => FocusNode(
+        debugLabel: key,
+        canRequestFocus: true,
+        descendantsAreFocusable: true,
+        descendantsAreTraversable: true,
+      ),
+    );
   }
 
   /// Enhanced layout stability check before focus operations
   Future<bool> _waitForLayoutStability() async {
     if (_layoutStable) return true;
-    
+
     _layoutStabilityChecks = 0;
-    
+
     while (_layoutStabilityChecks < _maxStabilityChecks) {
       await Future<void>.delayed(_stabilityCheckDelay);
-      
+
       if (!mounted) return false;
-      
+
       // Check if layout is complete by verifying RenderObject tree
       final renderObject = context.findRenderObject();
-      if (renderObject != null && renderObject.attached && !renderObject.debugNeedsLayout) {
+      if (renderObject != null &&
+          renderObject.attached &&
+          !renderObject.debugNeedsLayout) {
         // Check if it's a RenderBox with size
-        if (renderObject is RenderBox && 
+        if (renderObject is RenderBox &&
             renderObject.hasSize &&
             renderObject.size != Size.zero) {
           _layoutStable = true;
@@ -278,10 +301,10 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
           return true;
         }
       }
-      
+
       _layoutStabilityChecks++;
     }
-    
+
     // Fallback: assume stable after max checks
     _layoutStable = true;
     return true;
@@ -302,8 +325,8 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
           try {
             // Additional check: ensure widget is still laid out
             final renderObject = context.findRenderObject();
-            if (renderObject != null && 
-                renderObject.attached && 
+            if (renderObject != null &&
+                renderObject.attached &&
                 !renderObject.debugNeedsLayout) {
               node.requestFocus();
             }
@@ -344,14 +367,16 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
           try {
             // Verify layout state before focus traversal
             final renderObject = context.findRenderObject();
-            if (renderObject != null && 
-                renderObject.attached && 
+            if (renderObject != null &&
+                renderObject.attached &&
                 !renderObject.debugNeedsLayout) {
               nextNode.requestFocus();
             }
           } catch (e) {
             // Silently handle focus traversal errors in web environment
-            debugPrint('Focus traversal failed from $currentKey to $nextKey: $e');
+            debugPrint(
+              'Focus traversal failed from $currentKey to $nextKey: $e',
+            );
           }
         }
       }
@@ -363,14 +388,14 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
     void attemptFocus(int attempt) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        
+
         if (await _waitForLayoutStability()) {
           final node = _focusNodes[key];
           if (node != null && mounted && node.canRequestFocus) {
             try {
               final renderObject = context.findRenderObject();
-              if (renderObject != null && 
-                  renderObject.attached && 
+              if (renderObject != null &&
+                  renderObject.attached &&
                   !renderObject.debugNeedsLayout) {
                 node.requestFocus();
                 return; // Success
@@ -380,7 +405,7 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
             }
           }
         }
-        
+
         // Retry if we haven't exceeded max attempts
         if (attempt < maxRetries && mounted) {
           _resetLayoutStability();
@@ -390,7 +415,7 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
         }
       });
     }
-    
+
     attemptFocus(0);
   }
 
@@ -447,16 +472,23 @@ class AccessibleButton extends StatelessWidget {
     return Tooltip(
       message: tooltip ?? semanticLabel ?? '',
       child: ElevatedButton(
-        onPressed: onPressed == null ? null : () {
-          AccessibilityTokens.performHapticFeedback(hapticPattern);
-          onPressed!();
-        },
+        onPressed:
+            onPressed == null
+                ? null
+                : () {
+                  AccessibilityTokens.performHapticFeedback(hapticPattern);
+                  onPressed!();
+                },
         focusNode: focusNode,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
-          minimumSize: minimumSize ?? 
-              const Size(AccessibilityTokens.minTouchTargetSize, AccessibilityTokens.minTouchTargetSize),
+          minimumSize:
+              minimumSize ??
+              const Size(
+                AccessibilityTokens.minTouchTargetSize,
+                AccessibilityTokens.minTouchTargetSize,
+              ),
           padding: padding,
           shape: shape,
         ),
@@ -512,7 +544,8 @@ class AccessibleTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveLabel = semanticLabel ?? 
+    final effectiveLabel =
+        semanticLabel ??
         '$labelText${isRequired ? ', campo obrigatório' : ', campo opcional'}';
 
     return LayoutBuilder(
@@ -525,8 +558,11 @@ class AccessibleTextField extends StatelessWidget {
             focusNode: focusNode,
             obscureText: obscureText,
             keyboardType: keyboardType,
-            textInputAction: textInputAction ??
-                (nextFocusNode != null ? TextInputAction.next : TextInputAction.done),
+            textInputAction:
+                textInputAction ??
+                (nextFocusNode != null
+                    ? TextInputAction.next
+                    : TextInputAction.done),
             autofillHints: autocomplete != null ? [autocomplete!] : null,
             validator: validator,
             onChanged: onChanged,

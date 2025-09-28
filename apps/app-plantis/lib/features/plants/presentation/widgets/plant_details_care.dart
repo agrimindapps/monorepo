@@ -26,9 +26,10 @@ class PlantDetailsCare extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: theme.brightness == Brightness.dark 
-                ? const Color(0xFF2D2D2D) 
-                : const Color(0xFFFFFFFF), // Branco puro
+            color:
+                theme.brightness == Brightness.dark
+                    ? const Color(0xFF2D2D2D)
+                    : const Color(0xFFFFFFFF), // Branco puro
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(

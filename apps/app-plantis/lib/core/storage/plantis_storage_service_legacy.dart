@@ -1,11 +1,11 @@
 import 'package:core/core.dart';
-import 'package:get_it/get_it.dart';
 import '../constants/plantis_environment_config.dart';
 
 /// Plantis-specific storage service that manages app-specific boxes
 /// This prevents contamination with other apps while using the core infrastructure
 class PlantisStorageService {
-  static final PlantisStorageService _instance = PlantisStorageService._internal();
+  static final PlantisStorageService _instance =
+      PlantisStorageService._internal();
   factory PlantisStorageService() => _instance;
   PlantisStorageService._internal();
 
@@ -28,50 +28,33 @@ class PlantisStorageService {
       _isInitialized = true;
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageError(
-        message: 'Failed to initialize plantis storage: $e',
-        code: 'PLANTIS_STORAGE_INIT_ERROR',
-      ));
+      return Result.error(
+        StorageError(
+          message: 'Failed to initialize plantis storage: $e',
+          code: 'PLANTIS_STORAGE_INIT_ERROR',
+        ),
+      );
     }
   }
 
   /// Register plantis-specific boxes
   Future<void> _registerPlantisBoxes() async {
     final plantisBoxes = [
-      BoxConfiguration.basic(
-        name: PlantisBoxes.main,
-        appId: 'plantis',
-      ),
-      BoxConfiguration.basic(
-        name: PlantisBoxes.plants,
-        appId: 'plantis',
-      ),
-      BoxConfiguration.basic(
-        name: PlantisBoxes.spaces,
-        appId: 'plantis',
-      ),
-      BoxConfiguration.basic(
-        name: PlantisBoxes.tasks,
-        appId: 'plantis',
-      ),
-      BoxConfiguration.basic(
-        name: PlantisBoxes.reminders,
-        appId: 'plantis',
-      ),
-      BoxConfiguration.basic(
-        name: PlantisBoxes.care_logs,
-        appId: 'plantis',
-      ),
-      BoxConfiguration.basic(
-        name: PlantisBoxes.backups,
-        appId: 'plantis',
-      ),
+      BoxConfiguration.basic(name: PlantisBoxes.main, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.plants, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.spaces, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.tasks, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.reminders, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.care_logs, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.backups, appId: 'plantis'),
     ];
 
     for (final config in plantisBoxes) {
       final result = await _boxRegistry.registerBox(config);
       if (result.isLeft()) {
-        print('Warning: Failed to register plantis box "${config.name}": ${result.fold((f) => f.message, (_) => '')}');
+        print(
+          'Warning: Failed to register plantis box "${config.name}": ${result.fold((f) => f.message, (_) => '')}',
+        );
       }
     }
   }
@@ -91,9 +74,7 @@ class PlantisStorageService {
   }
 
   /// Get plant data
-  Future<Result<T?>> getPlant<T>({
-    required String plantId,
-  }) async {
+  Future<Result<T?>> getPlant<T>({required String plantId}) async {
     await _ensureInitialized();
     final result = await _storage.get<T>(
       key: plantId,
@@ -124,9 +105,7 @@ class PlantisStorageService {
   }
 
   /// Get space data
-  Future<Result<T?>> getSpace<T>({
-    required String spaceId,
-  }) async {
+  Future<Result<T?>> getSpace<T>({required String spaceId}) async {
     await _ensureInitialized();
     final result = await _storage.get<T>(
       key: spaceId,
@@ -246,7 +225,7 @@ class PlantisStorageService {
       key: 'plantis_$key', // Prefix to avoid conflicts
       box: PlantisBoxes.main,
     );
-    
+
     return result.fold(
       (failure) => Result.error(AppErrorFactory.fromFailure(failure)),
       (value) => Result.success(value ?? defaultValue),
@@ -256,7 +235,7 @@ class PlantisStorageService {
   /// Clear all plantis data (for reset/uninstall)
   Future<Result<void>> clearAllPlantisData() async {
     await _ensureInitialized();
-    
+
     final boxes = [
       PlantisBoxes.main,
       PlantisBoxes.plants,
@@ -280,9 +259,9 @@ class PlantisStorageService {
   /// Get storage statistics for debugging
   Future<Map<String, int>> getStorageStatistics() async {
     await _ensureInitialized();
-    
+
     final statistics = <String, int>{};
-    
+
     final boxes = [
       PlantisBoxes.main,
       PlantisBoxes.plants,

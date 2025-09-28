@@ -1,15 +1,14 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/interfaces/network_info.dart';
 import '../../../../core/adapters/network_info_adapter.dart';
+import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';
 import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
-import 'dart:async';
-
 import '../models/plant_model.dart';
 
 class PlantsRepositoryImpl implements PlantsRepository {
@@ -42,35 +41,34 @@ class PlantsRepositoryImpl implements PlantsRepository {
       try {
         // Wait for user with increasing timeout per attempt
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user = await authService.currentUser
-            .timeout(timeoutDuration)
-            .first;
-        
+        final user =
+            await authService.currentUser.timeout(timeoutDuration).first;
+
         if (user != null && user.id.isNotEmpty) {
           return user.id;
         }
-        
+
         // If user is null or has empty ID, wait and retry (except on last attempt)
         if (attempt < maxRetries) {
           await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
           continue;
         }
-        
+
         return null;
       } catch (e) {
         // Log error for debugging with attempt number
         print('Auth attempt $attempt/$maxRetries failed: $e');
-        
+
         // If it's the last attempt, return null
         if (attempt >= maxRetries) {
           return null;
         }
-        
+
         // Wait before retrying, with exponential backoff
         await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
       }
     }
-    
+
     return null;
   }
 
@@ -81,7 +79,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
       final enhanced = networkInfo.asEnhanced;
       if (enhanced == null) {
         if (kDebugMode) {
-          print('ℹ️ PlantsRepository: Basic NetworkInfo - real-time monitoring unavailable');
+          print(
+            'ℹ️ PlantsRepository: Basic NetworkInfo - real-time monitoring unavailable',
+          );
         }
         return;
       }
@@ -103,7 +103,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepository: Failed to start connectivity monitoring: $e');
+        print(
+          '❌ PlantsRepository: Failed to start connectivity monitoring: $e',
+        );
       }
     }
   }
@@ -112,7 +114,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
   void _onConnectivityChanged(bool isConnected) async {
     try {
       if (kDebugMode) {
-        print('🔄 PlantsRepository: Connectivity changed - ${isConnected ? 'Online' : 'Offline'}');
+        print(
+          '🔄 PlantsRepository: Connectivity changed - ${isConnected ? 'Online' : 'Offline'}',
+        );
       }
 
       if (isConnected) {
@@ -120,14 +124,18 @@ class PlantsRepositoryImpl implements PlantsRepository {
         final userId = await _currentUserId;
         if (userId != null) {
           if (kDebugMode) {
-            print('🚀 PlantsRepository: Connection restored - starting auto-sync');
+            print(
+              '🚀 PlantsRepository: Connection restored - starting auto-sync',
+            );
           }
           _syncPlantsInBackground(userId, connectionRestored: true);
         }
       } else {
         // When connection is lost, log for monitoring
         if (kDebugMode) {
-          print('📱 PlantsRepository: Connection lost - switching to offline mode');
+          print(
+            '📱 PlantsRepository: Connection lost - switching to offline mode',
+          );
         }
       }
     } catch (e) {
@@ -143,7 +151,11 @@ class PlantsRepositoryImpl implements PlantsRepository {
       final userId = await _currentUserId;
       if (userId == null) {
         // CRITICAL FIX: Return proper error instead of empty list for unauthenticated users
-        return Left(AuthFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
+        return const Left(
+          AuthFailure(
+            'Usuário não autenticado. Aguarde a inicialização ou faça login.',
+          ),
+        );
       }
 
       // ALWAYS return local data first for instant UI response
@@ -173,13 +185,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
   }
 
   // Background sync method (fire and forget) - ENHANCED with connectivity awareness
-  void _syncPlantsInBackground(String userId, {bool connectionRestored = false}) {
+  void _syncPlantsInBackground(
+    String userId, {
+    bool connectionRestored = false,
+  }) {
     remoteDatasource
         .getPlants(userId)
         .then((remotePlants) {
-          final syncType = connectionRestored ? 'Connection restored sync' : 'Background sync';
+          final syncType =
+              connectionRestored
+                  ? 'Connection restored sync'
+                  : 'Background sync';
           if (kDebugMode) {
-            print('✅ PlantsRepository: $syncType completed - ${remotePlants.length} plants');
+            print(
+              '✅ PlantsRepository: $syncType completed - ${remotePlants.length} plants',
+            );
           }
           // Update local cache with remote data
           for (final plant in remotePlants) {
@@ -267,19 +287,25 @@ class PlantsRepositoryImpl implements PlantsRepository {
       final plantModel = PlantModel.fromEntity(plant);
 
       if (kDebugMode) {
-        print('🌱 PlantsRepositoryImpl.addPlant() - Salvando localmente primeiro');
+        print(
+          '🌱 PlantsRepositoryImpl.addPlant() - Salvando localmente primeiro',
+        );
       }
 
       // Always save locally first
       await localDatasource.addPlant(plantModel);
 
       if (kDebugMode) {
-        print('✅ PlantsRepositoryImpl.addPlant() - Salvo localmente com sucesso');
+        print(
+          '✅ PlantsRepositoryImpl.addPlant() - Salvo localmente com sucesso',
+        );
       }
 
       if (await networkInfo.isConnected) {
         if (kDebugMode) {
-          print('🌱 PlantsRepositoryImpl.addPlant() - Conectado, tentando salvar remotamente');
+          print(
+            '🌱 PlantsRepositoryImpl.addPlant() - Conectado, tentando salvar remotamente',
+          );
         }
         try {
           // Try to save remotely
@@ -289,21 +315,29 @@ class PlantsRepositoryImpl implements PlantsRepository {
           );
 
           if (kDebugMode) {
-            print('✅ PlantsRepositoryImpl.addPlant() - Salvo remotamente com sucesso');
-            print('🌱 PlantsRepositoryImpl.addPlant() - remotePlant.id: ${remotePlant.id}');
+            print(
+              '✅ PlantsRepositoryImpl.addPlant() - Salvo remotamente com sucesso',
+            );
+            print(
+              '🌱 PlantsRepositoryImpl.addPlant() - remotePlant.id: ${remotePlant.id}',
+            );
           }
 
           // Se o ID mudou (local vs remoto), remover o registro local antigo para evitar duplicação
           if (plantModel.id != remotePlant.id) {
             if (kDebugMode) {
-              print('🌱 PlantsRepositoryImpl.addPlant() - IDs diferentes, removendo registro local antigo');
+              print(
+                '🌱 PlantsRepositoryImpl.addPlant() - IDs diferentes, removendo registro local antigo',
+              );
               print('   - ID local: ${plantModel.id}');
               print('   - ID remoto: ${remotePlant.id}');
             }
             await localDatasource.hardDeletePlant(plantModel.id);
-            
+
             if (kDebugMode) {
-              print('✅ PlantsRepositoryImpl.addPlant() - Registro local antigo removido');
+              print(
+                '✅ PlantsRepositoryImpl.addPlant() - Registro local antigo removido',
+              );
             }
           }
 
@@ -311,21 +345,29 @@ class PlantsRepositoryImpl implements PlantsRepository {
           await localDatasource.updatePlant(remotePlant);
 
           if (kDebugMode) {
-            print('✅ PlantsRepositoryImpl.addPlant() - Local atualizado com dados remotos');
+            print(
+              '✅ PlantsRepositoryImpl.addPlant() - Local atualizado com dados remotos',
+            );
           }
 
           return Right(remotePlant);
         } catch (e) {
           if (kDebugMode) {
-            print('⚠️ PlantsRepositoryImpl.addPlant() - Falha ao salvar remotamente: $e');
-            print('🌱 PlantsRepositoryImpl.addPlant() - Retornando versão local');
+            print(
+              '⚠️ PlantsRepositoryImpl.addPlant() - Falha ao salvar remotamente: $e',
+            );
+            print(
+              '🌱 PlantsRepositoryImpl.addPlant() - Retornando versão local',
+            );
           }
           // If remote fails, return local version (will sync later)
           return Right(plantModel);
         }
       } else {
         if (kDebugMode) {
-          print('🌱 PlantsRepositoryImpl.addPlant() - Offline, retornando versão local');
+          print(
+            '🌱 PlantsRepositoryImpl.addPlant() - Offline, retornando versão local',
+          );
         }
         // Offline - return local version
         return Right(plantModel);
@@ -548,8 +590,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (plantsToSync.isNotEmpty) {
         try {
           await remoteDatasource.syncPlants(
-            plantsToSync.map((plant) => PlantModel.fromEntity(plant)).toList(), 
-            userId
+            plantsToSync.map((plant) => PlantModel.fromEntity(plant)).toList(),
+            userId,
           );
 
           // Update local plants to mark as synced
@@ -641,7 +683,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepository: Error disposing connectivity monitoring: $e');
+        print(
+          '❌ PlantsRepository: Error disposing connectivity monitoring: $e',
+        );
       }
     }
   }

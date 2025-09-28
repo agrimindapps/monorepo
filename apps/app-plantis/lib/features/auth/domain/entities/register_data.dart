@@ -45,7 +45,9 @@ class RegisterData {
     if (trimmedEmail.isEmpty) {
       return 'Por favor, insira seu email';
     }
-    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(trimmedEmail)) {
+    if (!RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(trimmedEmail)) {
       return 'Por favor, insira um email válido';
     }
     return null;
@@ -91,20 +93,20 @@ class RegisterData {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is RegisterData &&
-      other.name == name &&
-      other.email == email &&
-      other.password == password &&
-      other.confirmPassword == confirmPassword &&
-      other.currentStep == currentStep;
+        other.name == name &&
+        other.email == email &&
+        other.password == password &&
+        other.confirmPassword == confirmPassword &&
+        other.currentStep == currentStep;
   }
 
   @override
   int get hashCode {
     return name.hashCode ^
-      email.hashCode ^
-      password.hashCode ^
-      confirmPassword.hashCode ^
-      currentStep.hashCode;
+        email.hashCode ^
+        password.hashCode ^
+        confirmPassword.hashCode ^
+        currentStep.hashCode;
   }
 
   @override

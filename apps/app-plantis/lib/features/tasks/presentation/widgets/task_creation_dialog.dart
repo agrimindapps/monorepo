@@ -40,11 +40,7 @@ class TaskCreationDialog extends StatefulWidget {
   final VoidCallback? onCancel;
   final Function(TaskCreationData)? onConfirm;
 
-  const TaskCreationDialog({
-    super.key,
-    this.onCancel,
-    this.onConfirm,
-  });
+  const TaskCreationDialog({super.key, this.onCancel, this.onConfirm});
 
   /// Shows the task creation dialog and returns task data or null if cancelled
   ///
@@ -71,9 +67,7 @@ class TaskCreationDialog extends StatefulWidget {
   ///   );
   /// }
   /// ```
-  static Future<TaskCreationData?> show({
-    required BuildContext context,
-  }) async {
+  static Future<TaskCreationData?> show({required BuildContext context}) async {
     return showDialog<TaskCreationData>(
       context: context,
       barrierDismissible: false,
@@ -91,12 +85,12 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   TaskType _selectedType = TaskType.watering;
   String? _selectedPlantId;
   DateTime _dueDate = DateTime.now().add(const Duration(days: 1));
   TaskPriority _selectedPriority = TaskPriority.medium;
-  
+
   List<Plant> _plants = [];
   bool _isLoadingPlants = false;
 
@@ -126,14 +120,14 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
   /// - Error handling if plant loading fails
   Future<void> _loadPlants() async {
     setState(() => _isLoadingPlants = true);
-    
+
     final plantsProvider = context.read<PlantsProvider>();
     await plantsProvider.loadPlants();
-    
+
     setState(() {
       _plants = plantsProvider.plants;
       _isLoadingPlants = false;
-      
+
       // Auto-select first plant if available
       if (_plants.isNotEmpty && _selectedPlantId == null) {
         _selectedPlantId = _plants.first.id;
@@ -218,7 +212,9 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
         child: Form(
           key: _formKey,
           child: SizedBox(
-            width: MediaQuery.of(context).size.width * TasksConstants.taskDialogWidthPercentage,
+            width:
+                MediaQuery.of(context).size.width *
+                TasksConstants.taskDialogWidthPercentage,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,7 +247,10 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: _handleCancel, child: const Text(AppStrings.cancel)),
+        TextButton(
+          onPressed: _handleCancel,
+          child: const Text(AppStrings.cancel),
+        ),
         ElevatedButton(
           onPressed: _handleConfirm,
           child: const Text(AppStrings.createTaskButton),
@@ -292,22 +291,25 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
               value: _selectedType,
               isExpanded: true,
               onChanged: _onTaskTypeChanged,
-              items: TaskType.values.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Row(
-                    children: [
-                      Icon(
-                        _getTaskTypeIcon(type),
-                        size: TasksConstants.taskTypeIconSize,
-                        color: theme.colorScheme.primary,
+              items:
+                  TaskType.values.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Row(
+                        children: [
+                          Icon(
+                            _getTaskTypeIcon(type),
+                            size: TasksConstants.taskTypeIconSize,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(
+                            width: TasksConstants.taskDialogIconSpacing,
+                          ),
+                          Text(type.displayName),
+                        ],
                       ),
-                      const SizedBox(width: TasksConstants.taskDialogIconSpacing),
-                      Text(type.displayName),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ),
         ),
@@ -354,9 +356,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
               children: [
                 Icon(Icons.warning, color: theme.colorScheme.error),
                 const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(AppStrings.noPlantFoundAddFirst),
-                ),
+                const Expanded(child: Text(AppStrings.noPlantFoundAddFirst)),
               ],
             ),
           )
@@ -375,41 +375,46 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
                 onChanged: (plantId) {
                   setState(() => _selectedPlantId = plantId);
                 },
-                items: _plants.map((plant) {
-                  return DropdownMenuItem(
-                    value: plant.id,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.local_florist,
-                          size: TasksConstants.taskTypeIconSize,
-                          color: theme.colorScheme.secondary,
-                        ),
-                        const SizedBox(width: TasksConstants.taskDialogIconSpacing),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                plant.displayName,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if (plant.species != null)
-                                Text(
-                                  plant.displaySpecies,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                items:
+                    _plants.map((plant) {
+                      return DropdownMenuItem(
+                        value: plant.id,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.local_florist,
+                              size: TasksConstants.taskTypeIconSize,
+                              color: theme.colorScheme.secondary,
+                            ),
+                            const SizedBox(
+                              width: TasksConstants.taskDialogIconSpacing,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    plant.displayName,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
+                                  if (plant.species != null)
+                                    Text(
+                                      plant.displaySpecies,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
           ),
@@ -432,9 +437,9 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
       children: [
         Text(
           AppStrings.taskTitleLabel,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -469,9 +474,9 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
       children: [
         Text(
           AppStrings.taskDescriptionLabel,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -524,10 +529,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  _formatDate(_dueDate),
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text(_formatDate(_dueDate), style: theme.textTheme.bodyMedium),
                 const Spacer(),
                 Icon(
                   Icons.edit,
@@ -579,22 +581,25 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
                   setState(() => _selectedPriority = priority);
                 }
               },
-              items: TaskPriority.values.map((priority) {
-                return DropdownMenuItem(
-                  value: priority,
-                  child: Row(
-                    children: [
-                      Icon(
-                        _getPriorityIcon(priority),
-                        size: TasksConstants.priorityIconSize,
-                        color: _getPriorityColor(priority, theme),
+              items:
+                  TaskPriority.values.map((priority) {
+                    return DropdownMenuItem(
+                      value: priority,
+                      child: Row(
+                        children: [
+                          Icon(
+                            _getPriorityIcon(priority),
+                            size: TasksConstants.priorityIconSize,
+                            color: _getPriorityColor(priority, theme),
+                          ),
+                          const SizedBox(
+                            width: TasksConstants.taskDialogIconSpacing,
+                          ),
+                          Text(priority.displayName),
+                        ],
                       ),
-                      const SizedBox(width: TasksConstants.taskDialogIconSpacing),
-                      Text(priority.displayName),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ),
         ),
@@ -616,7 +621,9 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
       context: context,
       initialDate: _dueDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: TasksConstants.datePickerMaxDays)),
+      lastDate: DateTime.now().add(
+        const Duration(days: TasksConstants.datePickerMaxDays),
+      ),
       helpText: AppStrings.dueDatePickerHelp,
       confirmText: AppStrings.confirmButton,
       cancelText: AppStrings.cancelButton,
@@ -667,9 +674,11 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
       return;
     }
 
-    final selectedPlant = _plants.firstWhere((plant) => plant.id == _selectedPlantId);
+    final selectedPlant = _plants.firstWhere(
+      (plant) => plant.id == _selectedPlantId,
+    );
     final description = _descriptionController.text.trim();
-    
+
     final taskData = TaskCreationData(
       title: _titleController.text.trim(),
       description: description.isEmpty ? null : description,
@@ -691,7 +700,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
   ///
   /// This method maps task types to intuitive Material Design icons:
   /// - Watering: Water drop icon
-  /// - Fertilizing: Eco/leaf icon  
+  /// - Fertilizing: Eco/leaf icon
   /// - Pruning: Scissors icon
   /// - Repotting: Grass icon
   /// - And more...

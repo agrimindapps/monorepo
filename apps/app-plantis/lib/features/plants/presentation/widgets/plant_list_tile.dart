@@ -1,6 +1,8 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../domain/entities/plant.dart';
 import 'plant_tasks_helper.dart';
 
@@ -142,7 +144,11 @@ class PlantListTile extends StatelessWidget {
                       const SizedBox(height: 12),
 
                       // Badge de cuidados pendentes
-                      PlantTasksHelper.buildTaskBadge(context, plant.id, hideWhenEmpty: true),
+                      PlantTasksHelper.buildTaskBadge(
+                        context,
+                        plant.id,
+                        hideWhenEmpty: true,
+                      ),
                     ],
                   ),
                 ),
@@ -205,7 +211,6 @@ class PlantListTile extends StatelessWidget {
       },
     );
   }
-
 
   void _showPlantMenu(BuildContext context) {
     showModalBottomSheet<void>(

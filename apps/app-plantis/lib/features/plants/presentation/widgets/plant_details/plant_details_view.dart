@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
-import '../../../../../shared/widgets/base_page_scaffold.dart';
-import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../../../core/localization/app_strings.dart';
 import '../../../../../core/theme/plantis_colors.dart';
+import '../../../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
@@ -86,14 +85,19 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
             },
             onNavigateToEdit: (plantId) async {
               if (mounted) {
-                final result = await PlantFormDialog.show(context, plantId: plantId);
+                final result = await PlantFormDialog.show(
+                  context,
+                  plantId: plantId,
+                );
                 if (result == true && mounted) {
                   // Planta foi editada com sucesso, recarregar dados
                   final provider = context.read<PlantDetailsProvider>();
                   await provider.reloadPlant(plantId);
-                  
+
                   if (kDebugMode) {
-                    print('✅ PlantDetailsView - Planta recarregada após edição: ${provider.plant?.name}');
+                    print(
+                      '✅ PlantDetailsView - Planta recarregada após edição: ${provider.plant?.name}',
+                    );
                   }
                 }
               }
@@ -110,11 +114,12 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               if (mounted) _showSnackBar(message, type);
             },
             onShowSnackBarWithColor: (message, type, {Color? backgroundColor}) {
-              if (mounted)
+              if (mounted) {
                 _showSnackBarWithColor(
                   message,
                   backgroundColor: backgroundColor,
                 );
+              }
             },
             onShowDialog: (dialog) {
               if (mounted) showDialog(context: context, builder: (_) => dialog);
@@ -820,26 +825,35 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       final plantsProvider = context.read<PlantsProvider>();
       // Forçar recarregamento completo da lista para refletir as mudanças
       plantsProvider.refreshPlants();
-      
+
       if (kDebugMode) {
-        print('✅ _syncPlantDeletion: Refresh solicitado para plantId: $plantId');
+        print(
+          '✅ _syncPlantDeletion: Refresh solicitado para plantId: $plantId',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ _syncPlantDeletion: Provider não encontrado, tentando Provider.of: $e');
+        print(
+          '⚠️ _syncPlantDeletion: Provider não encontrado, tentando Provider.of: $e',
+        );
       }
-      
+
       // Tentar método alternativo se o read() falhar
       try {
-        final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+        final plantsProvider = Provider.of<PlantsProvider>(
+          context,
+          listen: false,
+        );
         plantsProvider.refreshPlants();
-        
+
         if (kDebugMode) {
           print('✅ _syncPlantDeletion: Refresh com Provider.of bem sucedido');
         }
       } catch (fallbackError) {
         if (kDebugMode) {
-          print('❌ _syncPlantDeletion: Falha total na sincronização: $fallbackError');
+          print(
+            '❌ _syncPlantDeletion: Falha total na sincronização: $fallbackError',
+          );
         }
         // Como último recurso, usar um delay e tentar novamente
         Future.delayed(const Duration(milliseconds: 500), () {
@@ -847,13 +861,15 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
             try {
               final plantsProvider = context.read<PlantsProvider>();
               plantsProvider.refreshPlants();
-              
+
               if (kDebugMode) {
                 print('✅ _syncPlantDeletion: Refresh com delay bem sucedido');
               }
             } catch (delayedError) {
               if (kDebugMode) {
-                print('❌ _syncPlantDeletion: Falha mesmo com delay: $delayedError');
+                print(
+                  '❌ _syncPlantDeletion: Falha mesmo com delay: $delayedError',
+                );
               }
             }
           }
@@ -871,9 +887,11 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           try {
             final plantsProvider = context.read<PlantsProvider>();
             plantsProvider.refreshPlants();
-            
+
             if (kDebugMode) {
-              print('✅ _notifyListScreenUpdate: Atualização da lista solicitada');
+              print(
+                '✅ _notifyListScreenUpdate: Atualização da lista solicitada',
+              );
             }
           } catch (e) {
             if (kDebugMode) {
@@ -1023,9 +1041,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
               color:
                   Colors
                       .transparent, // Transparente para usar o fundo do BasePageScaffold
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Column(
               children: [
@@ -1065,7 +1081,10 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
           plant.species?.isNotEmpty == true
               ? plant.species!
               : 'Detalhes da planta',
-      margin: const EdgeInsets.only(bottom: 8, top: 4), // Usar mesmo margin das outras páginas
+      margin: const EdgeInsets.only(
+        bottom: 8,
+        top: 4,
+      ), // Usar mesmo margin das outras páginas
       onBackPressed: () => _controller?.goBack(),
       actions: [
         PopupMenuButton<String>(

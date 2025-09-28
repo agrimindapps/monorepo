@@ -180,7 +180,8 @@ class NotificationSettingsEntity {
       overdueNotificationsEnabled:
           overdueNotificationsEnabled ?? this.overdueNotificationsEnabled,
       dailySummaryEnabled: dailySummaryEnabled ?? this.dailySummaryEnabled,
-      reminderMinutesBefore: reminderMinutesBefore ?? this.reminderMinutesBefore,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
       dailySummaryTime: dailySummaryTime ?? this.dailySummaryTime,
       taskTypeSettings: taskTypeSettings ?? Map.from(this.taskTypeSettings),
     );

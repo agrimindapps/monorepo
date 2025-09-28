@@ -7,26 +7,26 @@ class ValidationHelpers {
     if (value == null || value.trim().isEmpty) {
       return 'Por favor, insira seu nome completo';
     }
-    
+
     final trimmedName = value.trim();
-    
+
     if (trimmedName.length < 2) {
       return 'Nome deve ter pelo menos 2 caracteres';
     }
     if (trimmedName.length > 100) {
       return 'Nome não pode ter mais de 100 caracteres';
     }
-    
+
     // Enhanced security: check for malicious characters that could be used for injection
     if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedName)) {
       return 'Nome contém caracteres não permitidos';
     }
-    
+
     // Allow only letters, spaces, hyphens, apostrophes, and accented characters
     if (!RegExp(r"^[a-zA-ZÀ-ÿ\s\-']+$").hasMatch(trimmedName)) {
       return 'Nome deve conter apenas letras';
     }
-    
+
     return null;
   }
 
@@ -36,33 +36,35 @@ class ValidationHelpers {
     if (value == null || value.trim().isEmpty) {
       return 'Por favor, insira seu email';
     }
-    
+
     final email = value.trim().toLowerCase();
-    
+
     // Enhanced email validation with security checks
-    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
+    if (!RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(email)) {
       return 'Por favor, insira um email válido';
     }
-    
+
     // Prevent multiple @ symbols
     if (email.split('@').length != 2) {
       return 'Email contém formato inválido';
     }
-    
+
     // Check for suspicious patterns that could indicate injection attempts
-    if (email.contains('..') || 
-        email.startsWith('.') || 
+    if (email.contains('..') ||
+        email.startsWith('.') ||
         email.endsWith('.') ||
         email.contains('@.') ||
         email.contains('.@')) {
       return 'Email contém caracteres não permitidos';
     }
-    
+
     // Maximum email length for security
     if (email.length > 320) {
       return 'Email muito longo';
     }
-    
+
     return null;
   }
 
@@ -72,21 +74,21 @@ class ValidationHelpers {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira sua senha';
     }
-    
+
     // Consistent minimum length requirement (8 characters)
     if (value.length < 8) {
       return 'A senha deve ter pelo menos 8 caracteres';
     }
-    
+
     if (value.length > 128) {
       return 'Senha muito longa';
     }
-    
+
     // Enhanced security: require letters and numbers
     if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
       return 'A senha deve conter letras e números';
     }
-    
+
     // Check for common weak patterns
     final commonWeakPatterns = [
       r'12345',
@@ -95,26 +97,29 @@ class ValidationHelpers {
       r'password',
       r'senha',
     ];
-    
+
     for (final pattern in commonWeakPatterns) {
       if (value.toLowerCase().contains(pattern)) {
         return 'Senha muito simples. Evite sequências comuns';
       }
     }
-    
+
     return null;
   }
 
   /// Validates password confirmation field in real-time
-  static String? validatePasswordConfirmation(String? value, String? originalPassword) {
+  static String? validatePasswordConfirmation(
+    String? value,
+    String? originalPassword,
+  ) {
     if (value == null || value.isEmpty) {
       return 'Por favor, confirme sua senha';
     }
-    
+
     if (value != originalPassword) {
       return 'As senhas não coincidem';
     }
-    
+
     return null;
   }
 
@@ -123,15 +128,15 @@ class ValidationHelpers {
     if (value == null || value.trim().isEmpty) {
       return null; // Phone is optional in most cases
     }
-    
+
     // Remove all non-digit characters
     final digits = value.replaceAll(RegExp(r'\D'), '');
-    
+
     // Brazilian phone numbers: 10-11 digits (with area code)
     if (digits.length < 10 || digits.length > 11) {
       return 'Número de telefone inválido';
     }
-    
+
     // Check area code (first two digits should be valid Brazilian area codes)
     final areaCode = digits.substring(0, 2);
     final validAreaCodes = [
@@ -163,20 +168,23 @@ class ValidationHelpers {
       '96', // Amapá
       '98', '99', // Maranhão
     ];
-    
+
     if (!validAreaCodes.contains(areaCode)) {
       return 'Código de área inválido';
     }
-    
+
     return null;
   }
 
   /// Gets validation status icon for form fields
-  static Widget? getValidationIcon(String? value, String? Function(String?) validator) {
+  static Widget? getValidationIcon(
+    String? value,
+    String? Function(String?) validator,
+  ) {
     if (value == null || value.isEmpty) {
       return null;
     }
-    
+
     final error = validator(value);
     if (error == null) {
       return const Icon(Icons.check_circle, color: Colors.green, size: 20);
@@ -188,7 +196,7 @@ class ValidationHelpers {
   /// Formats phone number as user types (Brazilian format)
   static String formatPhone(String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
-    
+
     if (digits.length <= 2) {
       return digits;
     } else if (digits.length <= 6) {
@@ -206,11 +214,14 @@ class ValidationHelpers {
   }
 
   /// Gets color for form field border based on validation state
-  static Color getBorderColor(String? value, String? Function(String?) validator) {
+  static Color getBorderColor(
+    String? value,
+    String? Function(String?) validator,
+  ) {
     if (value == null || value.isEmpty) {
       return Colors.grey.shade400;
     }
-    
+
     final error = validator(value);
     if (error == null) {
       return Colors.green;
@@ -223,64 +234,73 @@ class ValidationHelpers {
   static bool shouldShowValidation(String? value, bool hasBeenFocused) {
     return hasBeenFocused && hasMinimumInput(value);
   }
-  
+
   /// Sanitizes text input to prevent injection attacks
   /// Removes or escapes potentially dangerous characters while preserving spaces
   static String sanitizeTextInput(String input) {
     if (input.isEmpty) return input;
-    
+
     // Remove dangerous characters that could be used for injection
     String sanitized = input
-        .replaceAll(RegExp(r'[<>"\\]'), '') // Remove HTML/script injection chars
+        .replaceAll(
+          RegExp(r'[<>"\\]'),
+          '',
+        ) // Remove HTML/script injection chars
         .replaceAll(RegExp(r'[\n\r\t]'), ' ') // Replace line breaks with spaces
         .replaceAll(RegExp(r' +'), ' '); // Clean up multiple spaces
-    
+
     // Limit length to prevent buffer overflow attacks
     if (sanitized.length > 500) {
       sanitized = sanitized.substring(0, 500);
     }
-    
+
     return sanitized.trim();
   }
-  
+
   /// Sanitizes plant name input with specific rules
   static String sanitizePlantName(String input) {
     if (input.isEmpty) return input;
-    
+
     // First, remove only dangerous injection characters while preserving spaces
     String sanitized = input
-        .replaceAll(RegExp(r'[<>"\\]'), '') // Remove dangerous HTML/script chars
+        .replaceAll(
+          RegExp(r'[<>"\\]'),
+          '',
+        ) // Remove dangerous HTML/script chars
         .replaceAll(RegExp(r'[\r\t]'), ' '); // Replace tabs/returns with spaces
-    
+
     // Allow letters, numbers, spaces, accents, and safe punctuation for plant names
     // Explicitly preserve spaces by using explicit space character in regex
-    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z\u00C0-\u00FF0-9 \-.,()]'), '');
-    
+    sanitized = sanitized.replaceAll(
+      RegExp(r'[^a-zA-Z\u00C0-\u00FF0-9 \-.,()]'),
+      '',
+    );
+
     // Clean up multiple consecutive spaces
     sanitized = sanitized.replaceAll(RegExp(r' +'), ' ');
-    
+
     // Limit to reasonable plant name length
     if (sanitized.length > 100) {
       sanitized = sanitized.substring(0, 100);
     }
-    
+
     return sanitized.trim();
   }
-  
+
   /// Sanitizes notes/description input
   static String sanitizeNotes(String input) {
     if (input.isEmpty) return input;
-    
+
     String sanitized = input
         .replaceAll(RegExp(r'[<>"\\]'), '') // Remove dangerous chars
         .replaceAll(RegExp(r'[\r\t]'), ' ') // Replace tabs with spaces
         .replaceAll(RegExp(r'\n{3,}'), '\n\n'); // Limit consecutive newlines
-    
+
     // Limit notes to reasonable length
     if (sanitized.length > 1000) {
       sanitized = sanitized.substring(0, 1000);
     }
-    
+
     return sanitized.trim();
   }
 }

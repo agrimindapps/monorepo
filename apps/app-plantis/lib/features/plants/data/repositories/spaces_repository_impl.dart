@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/space.dart';

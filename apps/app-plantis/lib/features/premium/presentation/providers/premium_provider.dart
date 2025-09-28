@@ -59,16 +59,18 @@ class PremiumProvider extends ChangeNotifier {
   void _initialize() {
     // Escuta mudanças na assinatura via SimpleSubscriptionSyncService (NOVO)
     if (_simpleSubscriptionSyncService != null) {
-      _syncSubscriptionStream = _simpleSubscriptionSyncService!.subscriptionStatus.listen(
-        (subscription) {
-          _currentSubscription = subscription;
-          notifyListeners();
-        },
-        onError: (Object error) {
-          _errorMessage = error.toString();
-          notifyListeners();
-        },
-      );
+      _syncSubscriptionStream = _simpleSubscriptionSyncService
+          .subscriptionStatus
+          .listen(
+            (subscription) {
+              _currentSubscription = subscription;
+              notifyListeners();
+            },
+            onError: (Object error) {
+              _errorMessage = error.toString();
+              notifyListeners();
+            },
+          );
     } else {
       // Fallback para versão original (compatibilidade)
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
@@ -116,7 +118,8 @@ class PremiumProvider extends ChangeNotifier {
 
     // Usa SimpleSubscriptionSyncService se disponível (NOVO)
     if (_simpleSubscriptionSyncService != null) {
-      final result = await _simpleSubscriptionSyncService!.hasActiveSubscriptionForApp('plantis');
+      final result = await _simpleSubscriptionSyncService
+          .hasActiveSubscriptionForApp('plantis');
 
       result.fold(
         (failure) {

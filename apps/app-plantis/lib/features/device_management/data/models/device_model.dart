@@ -1,7 +1,7 @@
+import 'dart:io';
+
 import 'package:core/core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'dart:io';
 
 /// Model específico do app-plantis para dispositivos
 /// Extende a entidade do core com funcionalidades específicas do app
@@ -246,10 +246,7 @@ class DeviceModel extends DeviceEntity {
   }
 
   @override
-  List<Object?> get props => [
-    ...super.props,
-    plantisSpecificData,
-  ];
+  List<Object?> get props => [...super.props, plantisSpecificData];
 }
 
 /// Model para estatísticas de dispositivos específicas do plantis

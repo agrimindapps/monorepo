@@ -36,8 +36,10 @@ class LoadingButton extends StatefulWidget {
     this.onSuccess,
     this.onError,
     this.semanticLabel,
-  }) : assert(onPressed != null || onPressedAsync != null,
-              'Either onPressed or onPressedAsync must be provided');
+  }) : assert(
+         onPressed != null || onPressedAsync != null,
+         'Either onPressed or onPressedAsync must be provided',
+       );
 
   @override
   State<LoadingButton> createState() => _LoadingButtonState();
@@ -48,7 +50,7 @@ class _LoadingButtonState extends State<LoadingButton>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
-  
+
   bool _isInternalLoading = false;
   bool _showSuccess = false;
   bool _showError = false;
@@ -60,22 +62,16 @@ class _LoadingButtonState extends State<LoadingButton>
       duration: widget.animationDuration,
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-    
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
     _opacityAnimation = Tween<double>(
       begin: 1.0,
       end: 0.7,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -102,13 +98,13 @@ class _LoadingButtonState extends State<LoadingButton>
         });
 
         await widget.onPressedAsync!();
-        
+
         if (widget.showSuccessIndicator) {
           setState(() => _showSuccess = true);
           widget.onSuccess?.call();
-          
+
           await Future<void>.delayed(widget.successDuration);
-          
+
           if (mounted) {
             setState(() => _showSuccess = false);
           }
@@ -122,7 +118,7 @@ class _LoadingButtonState extends State<LoadingButton>
           _showError = true;
         });
         widget.onError?.call();
-        
+
         // Auto-hide error after 2 seconds
         await Future<void>.delayed(const Duration(seconds: 2));
         if (mounted) {
@@ -278,13 +274,7 @@ class _LoadingButtonState extends State<LoadingButton>
 }
 
 /// Tipos de botão disponíveis
-enum LoadingButtonType {
-  elevated,
-  outlined,
-  text,
-  filled,
-  icon,
-}
+enum LoadingButtonType { elevated, outlined, text, filled, icon }
 
 /// Botão específico para operações de salvamento
 class SaveButton extends StatelessWidget {
@@ -376,10 +366,7 @@ class PurchaseButton extends StatelessWidget {
                 'Comprar $productName',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(
-                price,
-                style: const TextStyle(fontSize: 12),
-              ),
+              Text(price, style: const TextStyle(fontSize: 12)),
             ],
           ),
         ],

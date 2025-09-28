@@ -1,8 +1,8 @@
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
+import '../datasources/local/export_file_generator.dart';
 import '../datasources/local/plants_export_datasource.dart';
 import '../datasources/local/settings_export_datasource.dart';
-import '../datasources/local/export_file_generator.dart';
 
 class DataExportRepositoryImpl implements DataExportRepository {
   final PlantsExportDataSource _plantsDataSource;
@@ -20,9 +20,9 @@ class DataExportRepositoryImpl implements DataExportRepository {
     required PlantsExportDataSource plantsDataSource,
     required SettingsExportDataSource settingsDataSource,
     required ExportFileGenerator fileGenerator,
-  })  : _plantsDataSource = plantsDataSource,
-        _settingsDataSource = settingsDataSource,
-        _fileGenerator = fileGenerator;
+  }) : _plantsDataSource = plantsDataSource,
+       _settingsDataSource = settingsDataSource,
+       _fileGenerator = fileGenerator;
 
   @override
   Future<ExportAvailabilityResult> checkExportAvailability({
@@ -36,7 +36,8 @@ class DataExportRepositoryImpl implements DataExportRepository {
         if (timeSinceLastExport < _exportCooldown) {
           final remainingTime = _exportCooldown - timeSinceLastExport;
           return ExportAvailabilityResult.unavailable(
-            reason: 'Para proteger seus dados, aguarde ${remainingTime.inMinutes} minutos para solicitar outro export.',
+            reason:
+                'Para proteger seus dados, aguarde ${remainingTime.inMinutes} minutos para solicitar outro export.',
             earliestAvailableDate: _lastExportTime!.add(_exportCooldown),
           );
         }
@@ -66,19 +67,26 @@ class DataExportRepositoryImpl implements DataExportRepository {
             break;
 
           case DataType.plantPhotos:
-            final photos = await _plantsDataSource.getUserPlantPhotosData(userId);
+            final photos = await _plantsDataSource.getUserPlantPhotosData(
+              userId,
+            );
             availableTypes[dataType] = photos.isNotEmpty;
             totalSize += photos.length * 2048; // Rough estimate for metadata
             break;
 
           case DataType.plantComments:
-            final comments = await _plantsDataSource.getUserPlantCommentsData(userId);
+            final comments = await _plantsDataSource.getUserPlantCommentsData(
+              userId,
+            );
             availableTypes[dataType] = comments.isNotEmpty;
-            totalSize += comments.length * 512; // Rough estimate for comment text
+            totalSize +=
+                comments.length * 512; // Rough estimate for comment text
             break;
 
           case DataType.settings:
-            final settings = await _settingsDataSource.getUserSettingsData(userId);
+            final settings = await _settingsDataSource.getUserSettingsData(
+              userId,
+            );
             availableTypes[dataType] = settings.appPreferences.isNotEmpty;
             totalSize += 1024; // Settings are usually small
             break;
@@ -136,7 +144,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
         format: format,
         requestDate: DateTime.now(),
         status: ExportRequestStatus.pending,
-        metadata: {
+        metadata: const {
           'app_version': '1.0.0',
           'platform': 'Flutter',
           'compliance': 'LGPD',
@@ -158,9 +166,10 @@ class DataExportRepositoryImpl implements DataExportRepository {
   @override
   Future<List<ExportRequest>> getExportHistory(String userId) async {
     try {
-      final requests = _exportRequests.values
-          .where((request) => request.userId == userId)
-          .toList();
+      final requests =
+          _exportRequests.values
+              .where((request) => request.userId == userId)
+              .toList();
 
       // Sort by date (newest first)
       requests.sort((a, b) => b.requestDate.compareTo(a.requestDate));
@@ -230,26 +239,26 @@ class DataExportRepositoryImpl implements DataExportRepository {
       _plantsDataSource.getUserPlantPhotosData(userId);
 
   @override
-  Future<List<PlantCommentExportData>> getUserPlantCommentsData(String userId) =>
-      _plantsDataSource.getUserPlantCommentsData(userId);
+  Future<List<PlantCommentExportData>> getUserPlantCommentsData(
+    String userId,
+  ) => _plantsDataSource.getUserPlantCommentsData(userId);
 
   @override
   Future<String> generateExportFile({
     required ExportRequest request,
     required Map<DataType, dynamic> exportData,
-  }) =>
-      _fileGenerator.generateExportFile(
-        request: request,
-        exportData: exportData,
-      );
+  }) => _fileGenerator.generateExportFile(
+    request: request,
+    exportData: exportData,
+  );
 
   /// Process export request in background
   Future<void> _processExportRequest(ExportRequest request) async {
     try {
       // Update status to processing
-      await _updateExportRequest(request.copyWith(
-        status: ExportRequestStatus.processing,
-      ));
+      await _updateExportRequest(
+        request.copyWith(status: ExportRequestStatus.processing),
+      );
 
       // Collect all requested data
       final exportData = <DataType, dynamic>{};
@@ -269,22 +278,39 @@ class DataExportRepositoryImpl implements DataExportRepository {
             exportData[dataType] = await getUserPlantPhotosData(request.userId);
             break;
           case DataType.plantComments:
-            exportData[dataType] = await getUserPlantCommentsData(request.userId);
+            exportData[dataType] = await getUserPlantCommentsData(
+              request.userId,
+            );
             break;
           case DataType.settings:
             exportData[dataType] = await getUserSettingsData(request.userId);
             break;
           case DataType.userProfile:
-            exportData[dataType] = {'userId': request.userId, 'exportDate': DateTime.now()};
+            exportData[dataType] = {
+              'userId': request.userId,
+              'exportDate': DateTime.now(),
+            };
             break;
           case DataType.all:
             // Include all available data types
-            exportData[DataType.plants] = await getUserPlantsData(request.userId);
-            exportData[DataType.plantTasks] = await getUserTasksData(request.userId);
-            exportData[DataType.spaces] = await getUserSpacesData(request.userId);
-            exportData[DataType.plantPhotos] = await getUserPlantPhotosData(request.userId);
-            exportData[DataType.plantComments] = await getUserPlantCommentsData(request.userId);
-            exportData[DataType.settings] = await getUserSettingsData(request.userId);
+            exportData[DataType.plants] = await getUserPlantsData(
+              request.userId,
+            );
+            exportData[DataType.plantTasks] = await getUserTasksData(
+              request.userId,
+            );
+            exportData[DataType.spaces] = await getUserSpacesData(
+              request.userId,
+            );
+            exportData[DataType.plantPhotos] = await getUserPlantPhotosData(
+              request.userId,
+            );
+            exportData[DataType.plantComments] = await getUserPlantCommentsData(
+              request.userId,
+            );
+            exportData[DataType.settings] = await getUserSettingsData(
+              request.userId,
+            );
             break;
           default:
             exportData[dataType] = 'Data not available';
@@ -298,17 +324,21 @@ class DataExportRepositoryImpl implements DataExportRepository {
       );
 
       // Update request with completion
-      await _updateExportRequest(request.copyWith(
-        status: ExportRequestStatus.completed,
-        completionDate: DateTime.now(),
-        downloadUrl: filePath,
-      ));
+      await _updateExportRequest(
+        request.copyWith(
+          status: ExportRequestStatus.completed,
+          completionDate: DateTime.now(),
+          downloadUrl: filePath,
+        ),
+      );
     } catch (e) {
       // Update request with error
-      await _updateExportRequest(request.copyWith(
-        status: ExportRequestStatus.failed,
-        errorMessage: e.toString(),
-      ));
+      await _updateExportRequest(
+        request.copyWith(
+          status: ExportRequestStatus.failed,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 

@@ -64,7 +64,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     );
   }
 
-  Widget _buildAddCommentSection(BuildContext context, PlantCommentsProvider provider) {
+  Widget _buildAddCommentSection(
+    BuildContext context,
+    PlantCommentsProvider provider,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -75,7 +78,9 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
                 ? const Color(0xFF2C2C2E)
                 : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withValues(alpha: 0.05),
@@ -116,7 +121,9 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
               hintText:
                   'Escreva uma observação sobre ${widget.plant.displayName}...',
               hintStyle: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.6,
+                ),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -159,7 +166,8 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
-                onPressed: provider.isLoading ? null : () => _addComment(provider),
+                onPressed:
+                    provider.isLoading ? null : () => _addComment(provider),
                 icon: const Icon(Icons.send, size: 18),
                 label: const Text('Adicionar'),
                 style: ElevatedButton.styleFrom(
@@ -176,8 +184,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     );
   }
 
-
-  Widget _buildCommentsList(BuildContext context, PlantCommentsProvider provider) {
+  Widget _buildCommentsList(
+    BuildContext context,
+    PlantCommentsProvider provider,
+  ) {
     final theme = Theme.of(context);
     final comments = provider.comments;
 
@@ -238,7 +248,9 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
                 ? const Color(0xFF2C2C2E)
                 : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withValues(alpha: 0.05),
@@ -276,7 +288,8 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
                   color: theme.colorScheme.onSurfaceVariant,
                   size: 18,
                 ),
-                onSelected: (action) => _handleCommentAction(action, comment, provider),
+                onSelected:
+                    (action) => _handleCommentAction(action, comment, provider),
                 itemBuilder:
                     (context) => [
                       const PopupMenuItem(
@@ -318,7 +331,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
           ),
 
           // Mostrar data de atualização se foi editado
-          if (comment.dataAtualizacao != null && 
+          if (comment.dataAtualizacao != null &&
               comment.dataAtualizacao != comment.dataCriacao) ...[
             const SizedBox(height: 8),
             Text(
@@ -339,10 +352,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     if (text.isEmpty) return;
 
     final success = await provider.addComment(widget.plant.id, text);
-    
+
     if (success) {
       _commentController.clear();
-      
+
       // Mostrar confirmação
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -356,7 +369,11 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     }
   }
 
-  void _handleCommentAction(String action, ComentarioModel comment, PlantCommentsProvider provider) {
+  void _handleCommentAction(
+    String action,
+    ComentarioModel comment,
+    PlantCommentsProvider provider,
+  ) {
     switch (action) {
       case 'edit':
         _editComment(comment, provider);
@@ -372,93 +389,101 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar observação'),
-        content: TextField(
-          controller: editController,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Edite sua observação...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              editController.dispose();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newText = editController.text.trim();
-              if (newText.isNotEmpty && newText != comment.conteudo) {
-                final success = await provider.updateComment(comment.id, newText);
-                
-                if (success) {
-                  if (mounted) Navigator.of(context).pop();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Observação atualizada'),
-                        backgroundColor: Colors.green,
-                      ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Editar observação'),
+            content: TextField(
+              controller: editController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText: 'Edite sua observação...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  editController.dispose();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final newText = editController.text.trim();
+                  if (newText.isNotEmpty && newText != comment.conteudo) {
+                    final success = await provider.updateComment(
+                      comment.id,
+                      newText,
                     );
+
+                    if (success) {
+                      if (mounted) Navigator.of(context).pop();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Observação atualizada'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    }
+                  } else {
+                    Navigator.of(context).pop();
                   }
-                }
-              } else {
-                Navigator.of(context).pop();
-              }
-              editController.dispose();
-            },
-            child: const Text('Salvar'),
+                  editController.dispose();
+                },
+                child: const Text('Salvar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
-  void _confirmDeleteComment(ComentarioModel comment, PlantCommentsProvider provider) {
+  void _confirmDeleteComment(
+    ComentarioModel comment,
+    PlantCommentsProvider provider,
+  ) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir observação'),
-        content: const Text(
-          'Tem certeza que deseja excluir esta observação?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Excluir observação'),
+            content: const Text(
+              'Tem certeza que deseja excluir esta observação?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final success = await provider.deleteComment(comment.id);
+
+                  if (success) {
+                    if (mounted) Navigator.of(context).pop();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Observação excluída'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              final success = await provider.deleteComment(comment.id);
-              
-              if (success) {
-                if (mounted) Navigator.of(context).pop();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Observação excluída'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildLoadingState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -484,7 +509,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -519,9 +544,12 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     );
   }
 
-  Widget _buildErrorMessage(BuildContext context, PlantCommentsProvider provider) {
+  Widget _buildErrorMessage(
+    BuildContext context,
+    PlantCommentsProvider provider,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
@@ -534,11 +562,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: theme.colorScheme.error,
-            size: 20,
-          ),
+          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

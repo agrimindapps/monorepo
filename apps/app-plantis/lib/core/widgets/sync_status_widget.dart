@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../providers/realtime_sync_provider.dart';
 
@@ -28,10 +27,14 @@ class SyncStatusWidget extends StatelessWidget {
               vertical: compact ? 4 : 6,
             ),
             decoration: BoxDecoration(
-              color: _getStatusColor(syncProvider.statusColor).withValues(alpha: 0.1),
+              color: _getStatusColor(
+                syncProvider.statusColor,
+              ).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(compact ? 12 : 16),
               border: Border.all(
-                color: _getStatusColor(syncProvider.statusColor).withValues(alpha: 0.3),
+                color: _getStatusColor(
+                  syncProvider.statusColor,
+                ).withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -53,7 +56,10 @@ class SyncStatusWidget extends StatelessWidget {
                 if (syncProvider.pendingChanges > 0) ...[
                   const SizedBox(width: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(8),
@@ -109,11 +115,7 @@ class SyncStatusWidget extends StatelessWidget {
         break;
     }
 
-    return Icon(
-      iconData,
-      size: compact ? 12 : 16,
-      color: color,
-    );
+    return Icon(iconData, size: compact ? 12 : 16, color: color);
   }
 
   Color _getStatusColor(SyncIndicatorColor indicatorColor) {
@@ -143,7 +145,10 @@ class SyncStatusWidget extends StatelessWidget {
     return syncProvider.isRealtimeActive ? 'Real-time' : 'Intervalos';
   }
 
-  void _showSyncDetailsDialog(BuildContext context, RealtimeSyncProvider syncProvider) {
+  void _showSyncDetailsDialog(
+    BuildContext context,
+    RealtimeSyncProvider syncProvider,
+  ) {
     showDialog<void>(
       context: context,
       builder: (context) => SyncDetailsDialog(syncProvider: syncProvider),
@@ -153,10 +158,7 @@ class SyncStatusWidget extends StatelessWidget {
 
 /// Dialog com detalhes completos do status de sincronização
 class SyncDetailsDialog extends StatelessWidget {
-  const SyncDetailsDialog({
-    super.key,
-    required this.syncProvider,
-  });
+  const SyncDetailsDialog({super.key, required this.syncProvider});
 
   final RealtimeSyncProvider syncProvider;
 
@@ -229,9 +231,11 @@ class SyncDetailsDialog extends StatelessWidget {
               size: 20,
             ),
             const SizedBox(width: 8),
-            Text(syncProvider.isRealtimeActive
-                ? 'Sincronização em tempo real'
-                : 'Sincronização por intervalos'),
+            Text(
+              syncProvider.isRealtimeActive
+                  ? 'Sincronização em tempo real'
+                  : 'Sincronização por intervalos',
+            ),
           ],
         ),
         const SizedBox(height: 4),
@@ -254,16 +258,16 @@ class SyncDetailsDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Controles',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        const Text('Controles', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         SwitchListTile(
           title: const Text('Sincronização em tempo real'),
           subtitle: const Text('Receber mudanças instantaneamente'),
           value: syncProvider.isRealtimeActive,
-          onChanged: syncProvider.isOnline ? (value) => syncProvider.toggleRealtimeSync() : null,
+          onChanged:
+              syncProvider.isOnline
+                  ? (value) => syncProvider.toggleRealtimeSync()
+                  : null,
           secondary: const Icon(Icons.speed),
           dense: true,
         ),
@@ -311,13 +315,14 @@ class SyncDetailsDialog extends StatelessWidget {
             style: TextStyle(color: Colors.grey),
           )
         else
-          ...syncProvider.recentEvents.take(5).map((event) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  event,
-                  style: const TextStyle(fontSize: 12),
+          ...syncProvider.recentEvents
+              .take(5)
+              .map(
+                (event) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(event, style: const TextStyle(fontSize: 12)),
                 ),
-              )),
+              ),
       ],
     );
   }
@@ -344,10 +349,7 @@ class SyncStatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SyncStatusWidget(
-      showText: false,
-      compact: true,
-    );
+    return const SyncStatusWidget(showText: false, compact: true);
   }
 }
 
@@ -357,9 +359,6 @@ class AppBarSyncStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SyncStatusWidget(
-      showText: true,
-      compact: false,
-    );
+    return const SyncStatusWidget(showText: true, compact: false);
   }
 }

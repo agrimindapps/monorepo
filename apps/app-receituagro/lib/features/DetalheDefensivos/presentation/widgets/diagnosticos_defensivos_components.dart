@@ -10,8 +10,8 @@ import '../../../../core/models/pragas_hive.dart';
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/widgets/praga_image_widget.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
-import '../../detalhe_defensivo_page.dart' as defensivo_page;
 import '../providers/diagnosticos_provider.dart';
 
 /// Componentes modulares para exibição de diagnósticos em páginas de defensivos
@@ -895,7 +895,7 @@ class _DiagnosticoDefensivoListItemWidgetState
 /// - Informações detalhadas do diagnóstico
 /// - Ações para navegar para defensivo ou diagnóstico detalhado
 /// - Premium badges para features pagas
-class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
+class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
   final dynamic diagnostico;
   final String defensivoName;
   final ReceitaAgroNavigationService navigationService;
@@ -906,6 +906,10 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
     required this.defensivoName,
     required this.navigationService,
   });
+
+  @override
+  State<DiagnosticoDefensivoDialogWidget> createState() =>
+      _DiagnosticoDefensivoDialogWidgetState();
 
   /// Mostra o modal de detalhes
   static Future<void> show(
@@ -922,6 +926,121 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
         navigationService: navigationService,
       ),
     );
+  }
+}
+
+class _DiagnosticoDefensivoDialogWidgetState
+    extends State<DiagnosticoDefensivoDialogWidget> {
+  PragasHive? _pragaData;
+  bool _isLoadingPraga = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPragaData();
+  }
+
+  /// Carrega dados da praga relacionada ao diagnóstico
+  Future<void> _loadPragaData() async {
+    try {
+      final nomePraga = _getProperty('nomePraga', 'grupo');
+      if (nomePraga != null && nomePraga.isNotEmpty) {
+        final pragaRepository = sl<PragasHiveRepository>();
+        final praga = await pragaRepository.findByNomeComum(nomePraga);
+        if (mounted) {
+          setState(() {
+            _pragaData = praga;
+            _isLoadingPraga = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoadingPraga = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingPraga = false;
+        });
+      }
+    }
+  }
+
+  /// Helper para extrair propriedades do diagnóstico
+  String? _getProperty(String primaryKey, [String? secondaryKey]) {
+    try {
+      if (widget.diagnostico is Map<String, dynamic>) {
+        final map = widget.diagnostico as Map<String, dynamic>;
+        return map[primaryKey]?.toString() ?? 
+               (secondaryKey != null ? map[secondaryKey]?.toString() : null);
+      } else {
+        // Tenta acessar como propriedade do objeto
+        switch (primaryKey) {
+          case 'nomeDefensivo':
+            return widget.diagnostico.nomeDefensivo?.toString();
+          case 'nome':
+            return widget.diagnostico.nome?.toString();
+          case 'ingredienteAtivo':
+            return widget.diagnostico.ingredienteAtivo?.toString();
+          case 'nomePraga':
+            return widget.diagnostico.nomePraga?.toString();
+          case 'grupo':
+            return widget.diagnostico.grupo?.toString();
+          case 'dosagem':
+            return widget.diagnostico.dosagem?.toString();
+          case 'cultura':
+            return widget.diagnostico.cultura?.toString();
+          case 'carencia':
+            return widget.diagnostico.carencia?.toString();
+          case 'periodoAplicacao':
+            return widget.diagnostico.periodoAplicacao?.toString();
+          case 'id':
+            return widget.diagnostico.id?.toString();
+          default:
+            return null;
+        }
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Navega para a página de detalhes da praga
+  void _navigateToPraga(BuildContext context) {
+    final nomePraga = _getProperty('nomePraga', 'grupo');
+    final nomeComumPraga = _getProperty('nomeComumPraga', 'nomeComum');
+    final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
+
+    if (nomePraga != null) {
+      widget.navigationService.navigateToDetalhePraga(
+        pragaName: nomePraga,
+        pragaId: idPraga,
+        pragaScientificName: nomeComumPraga,
+      );
+    }
+  }
+
+  /// Navega para a página de detalhes do diagnóstico
+  void _navigateToDetailedDiagnostic(BuildContext context) {
+    final diagnosticoId = _getProperty('id');
+    final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Não especificado';
+    final cultura = _getProperty('cultura') ?? 'Não especificada';
+
+    if (diagnosticoId != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => DetalheDiagnosticoPage(
+            diagnosticoId: diagnosticoId,
+            nomeDefensivo: widget.defensivoName,
+            nomePraga: nomePraga,
+            cultura: cultura,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -1006,6 +1125,150 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
               fontStyle: FontStyle.italic,
               color: theme.colorScheme.onSurfaceVariant,
             ),
+          ),
+          
+          // Imagem da praga (se disponível)
+          if (_pragaData?.nomeCientifico != null) ...[
+            const SizedBox(height: 16),
+            _buildPragaImageSection(context),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Seção da imagem da praga
+  Widget _buildPragaImageSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Praga não identificada';
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cabeçalho da seção
+          Row(
+            children: [
+              Icon(
+                Icons.bug_report_outlined,
+                size: 16,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Praga Relacionada',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          
+          // Imagem da praga ocupando toda largura
+          Container(
+            width: double.infinity,
+            height: 200,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: PragaImageWidget(
+                nomeCientifico: _pragaData!.nomeCientifico,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                placeholder: Container(
+                  color: theme.colorScheme.surface,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.bug_report_outlined,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Carregando imagem...',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                errorWidget: Container(
+                  color: theme.colorScheme.surface,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.bug_report_outlined,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Imagem não disponível',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          // Informações da praga abaixo da imagem
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                nomePraga,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _pragaData!.nomeCientifico,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ],
       ),
@@ -1242,140 +1505,5 @@ class DiagnosticoDefensivoDialogWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  /// Ações do modal
-  Widget _buildActions(BuildContext context) {
-    return _buildModernActions(context);
-  }
-
-  /// Navega para a página de detalhes do diagnóstico
-  void _navigateToDetailedDiagnostic(BuildContext context) {
-    final diagnosticoId = _getProperty('id');
-    // Usar extensão para resolver nomes dinamicamente se disponível
-    String nomeCultura = 'Não especificado';
-    String nomeDefensivo = 'Não especificado';
-    
-    if (diagnostico is DiagnosticoHive) {
-      final diagnosticoHive = diagnostico as DiagnosticoHive;
-      nomeCultura = diagnosticoHive.nomeCultura ?? 'Cultura não identificada';
-      nomeDefensivo = diagnosticoHive.nomeDefensivo ?? 'Defensivo não identificado';
-    } else {
-      nomeCultura = _getProperty('nomeCultura', 'cultura') ?? 'Não especificado';
-      nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? 'Não especificado';
-    }
-    final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Não especificado';
-
-    if (diagnosticoId != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) => DetalheDiagnosticoPage(
-            diagnosticoId: diagnosticoId,
-            cultura: nomeCultura,
-            nomeDefensivo: nomeDefensivo,
-            nomePraga: nomePraga,
-          ),
-        ),
-      );
-    }
-  }
-
-  /// Navega para a página de detalhes da praga
-  void _navigateToPraga(BuildContext context) {
-    final nomePraga = _getProperty('nomePraga', 'grupo');
-    final nomeComumPraga = _getProperty('nomeComumPraga', 'nomeComum');
-    final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga'); // Try to get praga ID
-
-    if (nomePraga != null) {
-      navigationService.navigateToDetalhePraga(
-        pragaName: nomePraga,
-        pragaId: idPraga, // Include ID if available
-        pragaScientificName: nomeComumPraga,
-      );
-    }
-  }
-
-  /// Navega para a página de detalhes do defensivo
-  void _navigateToDefensivo(BuildContext context) {
-    final nomeDefensivo = _getProperty('nomeDefensivo', 'nome');
-
-    if (nomeDefensivo != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) => defensivo_page.DetalheDefensivoPage(
-            defensivoName: nomeDefensivo,
-            fabricante:
-                'Não especificado', // Fabricante não disponível no contexto
-          ),
-        ),
-      );
-    }
-  }
-
-  /// Helper para extrair propriedades com fallbacks
-  String? _getProperty(String primaryKey, [String? fallbackKey]) {
-    try {
-      if (diagnostico is Map<String, dynamic>) {
-        final map = diagnostico as Map<String, dynamic>;
-        return map[primaryKey]?.toString() ??
-            (fallbackKey != null ? map[fallbackKey]?.toString() : null);
-      } else {
-        // Tenta acessar como propriedade do objeto
-        final primary = _getObjectProperty(diagnostico, primaryKey);
-        if (primary != null) return primary.toString();
-
-        if (fallbackKey != null) {
-          final fallback = _getObjectProperty(diagnostico, fallbackKey);
-          if (fallback != null) return fallback.toString();
-        }
-      }
-    } catch (e) {
-      // Ignora erros de acesso a propriedades
-    }
-    return null;
-  }
-
-  /// Helper para acessar propriedades de objeto dinamicamente
-  dynamic _getObjectProperty(dynamic obj, String property) {
-    try {
-      switch (property) {
-        case 'id':
-          return obj.id;
-        case 'fkIdPraga':
-          return obj.fkIdPraga;
-        case 'fkIdDefensivo':
-          return obj.fkIdDefensivo;
-        case 'idDefensivo':
-          return obj.idDefensivo;
-        case 'nomeDefensivo':
-          return obj.nomeDefensivo;
-        case 'ingredienteAtivo':
-          return obj.ingredienteAtivo;
-        case 'nomeCultura':
-          return obj.nomeCultura;
-        case 'cultura':
-          return obj.cultura;
-        case 'nomePraga':
-          return obj.nomePraga;
-        case 'grupo':
-          return obj.grupo;
-        case 'dosagem':
-          return obj.dosagem;
-        case 'unidadeDosagem':
-          return obj.unidadeDosagem;
-        case 'modoAplicacao':
-          return obj.modoAplicacao;
-        case 'intervaloDias':
-          return obj.intervaloDias;
-        case 'observacoes':
-          return obj.observacoes;
-        case 'nome':
-          return obj.nome;
-        default:
-          return null;
-      }
-    } catch (e) {
-      return null;
-    }
   }
 }

@@ -1,10 +1,11 @@
 import 'dart:async';
+
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget, WidgetRef;
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod show Consumer;
-import 'package:get_it/get_it.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    as riverpod
+    show Consumer;
 
 import '../../core/riverpod_providers/auth_providers.dart';
 import '../../core/riverpod_providers/sync_providers.dart';
@@ -48,125 +49,214 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: ref.watch(authProvider).when(
-                  data: (authState) {
-                    final user = authState.currentUser;
-                    final isAnonymous = authState.isAnonymous;
+                child: ref
+                    .watch(authProvider)
+                    .when(
+                      data: (authState) {
+                        final user = authState.currentUser;
+                        final isAnonymous = authState.isAnonymous;
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header com informações do usuário
-                        PlantisCard(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(
-                            children: [
-                              // Avatar with edit functionality
-                              Stack(
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Header com informações do usuário
+                            PlantisCard(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Row(
                                 children: [
-                                  CircleAvatar(
-                                    radius: 30,
-                                    backgroundColor: PlantisColors.primary,
-                                    child:
-                                        DataSanitizationService.shouldShowProfilePhoto(
-                                              user,
-                                              isAnonymous,
-                                            )
-                                            ? ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
-                                              child: Image.network(
-                                                user!.photoUrl!,
-                                                width: 60,
-                                                height: 60,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (
+                                  // Avatar with edit functionality
+                                  Stack(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 30,
+                                        backgroundColor: PlantisColors.primary,
+                                        child:
+                                            DataSanitizationService.shouldShowProfilePhoto(
+                                                  user,
+                                                  isAnonymous,
+                                                )
+                                                ? ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                  child: Image.network(
+                                                    user!.photoUrl!,
+                                                    width: 60,
+                                                    height: 60,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Text(
+                                                        DataSanitizationService.sanitizeInitials(
+                                                          user,
+                                                          isAnonymous,
+                                                        ),
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 20,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                                : Text(
+                                                  DataSanitizationService.sanitizeInitials(
+                                                    user,
+                                                    isAnonymous,
+                                                  ),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                      ),
+                                      if (!isAnonymous)
+                                        Positioned(
+                                          bottom: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap:
+                                                () => _showImagePickerOptions(
                                                   context,
-                                                  error,
-                                                  stackTrace,
-                                                ) {
-                                                  return Text(
-                                                    DataSanitizationService.sanitizeInitials(
-                                                      user,
-                                                      isAnonymous,
-                                                    ),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  );
-                                                },
+                                                ),
+                                            child: Container(
+                                              width: 24,
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: PlantisColors.primary,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color:
+                                                      theme.colorScheme.surface,
+                                                  width: 2,
+                                                ),
                                               ),
-                                            )
-                                            : Text(
-                                              DataSanitizationService.sanitizeInitials(
-                                                user,
-                                                isAnonymous,
-                                              ),
-                                              style: const TextStyle(
+                                              child: const Icon(
+                                                Icons.edit,
                                                 color: Colors.white,
-                                                fontSize: 20,
+                                                size: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 16),
+
+                                  // User Info
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          DataSanitizationService.sanitizeDisplayName(
+                                            user,
+                                            isAnonymous,
+                                          ),
+                                          style: theme.textTheme.titleLarge
+                                              ?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                               ),
-                                            ),
-                                  ),
-                                  if (!isAnonymous)
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: GestureDetector(
-                                        onTap:
-                                            () => _showImagePickerOptions(
-                                              context,
-                                            ),
-                                        child: Container(
-                                          width: 24,
-                                          height: 24,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          DataSanitizationService.sanitizeEmail(
+                                            user,
+                                            isAnonymous,
+                                          ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color:
+                                                    theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: PlantisColors.primary,
+                                            color:
+                                                isAnonymous
+                                                    ? Colors.orange.withValues(
+                                                      alpha: 0.2,
+                                                    )
+                                                    : PlantisColors.primary
+                                                        .withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
-                                            border: Border.all(
-                                              color: theme.colorScheme.surface,
-                                              width: 2,
-                                            ),
                                           ),
-                                          child: const Icon(
-                                            Icons.edit,
-                                            color: Colors.white,
-                                            size: 12,
+                                          child: Text(
+                                            isAnonymous
+                                                ? 'Conta Anônima'
+                                                : 'Conta Autenticada',
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color:
+                                                      isAnonymous
+                                                          ? Colors.orange
+                                                          : PlantisColors
+                                                              .primary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
+                                  ),
                                 ],
                               ),
-                              const SizedBox(width: 16),
+                            ),
 
-                              // User Info
-                              Expanded(
+                            const SizedBox(height: 24),
+
+                            // Card especial para usuário anônimo
+                            if (isAnonymous) ...[
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.orange.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      DataSanitizationService.sanitizeDisplayName(
-                                        user,
-                                        isAnonymous,
-                                      ),
-                                      style: theme.textTheme.titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.info_outline,
+                                          color: Colors.orange,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Conta Anônima',
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                color: Colors.orange,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 12),
                                     Text(
-                                      DataSanitizationService.sanitizeEmail(
-                                        user,
-                                        isAnonymous,
-                                      ),
+                                      'Seus dados estão armazenados apenas neste dispositivo. Para maior segurança e sincronização entre dispositivos, recomendamos criar uma conta.',
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
                                             color:
@@ -175,206 +265,136 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                                                     .onSurfaceVariant,
                                           ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            isAnonymous
-                                                ? Colors.orange.withValues(
-                                                  alpha: 0.2,
-                                                )
-                                                : PlantisColors.primary
-                                                    .withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        isAnonymous
-                                            ? 'Conta Anônima'
-                                            : 'Conta Autenticada',
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                              color:
-                                                  isAnonymous
-                                                      ? Colors.orange
-                                                      : PlantisColors.primary,
-                                              fontWeight: FontWeight.w600,
+                                    const SizedBox(height: 16),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          context.push('/login');
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.orange,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
                                             ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Card especial para usuário anônimo
-                        if (isAnonymous) ...[
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.orange.withValues(alpha: 0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.info_outline,
-                                      color: Colors.orange,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Conta Anônima',
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            color: Colors.orange,
-                                            fontWeight: FontWeight.bold,
                                           ),
+                                        ),
+                                        icon: const Icon(
+                                          Icons.person_add,
+                                          size: 18,
+                                        ),
+                                        label: const Text('Criar Conta'),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Seus dados estão armazenados apenas neste dispositivo. Para maior segurança e sincronização entre dispositivos, recomendamos criar uma conta.',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      context.push('/login');
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                    icon: const Icon(
-                                      Icons.person_add,
-                                      size: 18,
-                                    ),
-                                    label: const Text('Criar Conta'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-
-                        // Informações detalhadas da conta (apenas para usuários registrados)
-                        if (!isAnonymous) ...[
-                          _buildAccountInfoSection(context, user, authState),
-                          const SizedBox(height: 24),
-                        ],
-
-                        // Controle de Dispositivos (apenas para usuários registrados)
-                        if (!isAnonymous) ...[
-                          _buildDeviceManagementSectionSimple(context),
-                          const SizedBox(height: 24),
-                        ],
-
-                        // Dados e Sincronização (apenas para usuários registrados)
-                        if (!isAnonymous) ...[
-                          _buildDataSyncSection(context, authState),
-                          const SizedBox(height: 24),
-                        ],
-
-                        // Ações de Conta - Subgrupo separado
-                        PlantisCard(
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: Icon(
-                                  Icons.delete_sweep,
-                                  color: theme.colorScheme.error,
-                                ),
-                                title: Text(
-                                  'Limpar Dados',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.error,
-                                  ),
-                                ),
-                                subtitle: const Text(
-                                  'Limpar plantas e tarefas mantendo conta',
-                                ),
-                                onTap: () {
-                                  _showClearDataDialog(context, authState);
-                                },
                               ),
-                              ListTile(
-                                leading: Icon(
-                                  Icons.logout_outlined,
-                                  color: theme.colorScheme.error,
-                                ),
-                                title: Text(
-                                  'Sair da Conta',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.error,
-                                  ),
-                                ),
-                                subtitle: const Text(
-                                  'Fazer logout da aplicação',
-                                ),
-                                onTap: () {
-                                  _showLogoutDialog(context, authState);
-                                },
+                              const SizedBox(height: 24),
+                            ],
+
+                            // Informações detalhadas da conta (apenas para usuários registrados)
+                            if (!isAnonymous) ...[
+                              _buildAccountInfoSection(
+                                context,
+                                user,
+                                authState,
                               ),
-                              if (!isAnonymous) ...[
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.delete_outline,
-                                    color: theme.colorScheme.error,
-                                  ),
-                                  title: Text(
-                                    'Excluir Conta',
-                                    style: TextStyle(
+                              const SizedBox(height: 24),
+                            ],
+
+                            // Controle de Dispositivos (apenas para usuários registrados)
+                            if (!isAnonymous) ...[
+                              _buildDeviceManagementSectionSimple(context),
+                              const SizedBox(height: 24),
+                            ],
+
+                            // Dados e Sincronização (apenas para usuários registrados)
+                            if (!isAnonymous) ...[
+                              _buildDataSyncSection(context, authState),
+                              const SizedBox(height: 24),
+                            ],
+
+                            // Ações de Conta - Subgrupo separado
+                            PlantisCard(
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.delete_sweep,
                                       color: theme.colorScheme.error,
                                     ),
+                                    title: Text(
+                                      'Limpar Dados',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.error,
+                                      ),
+                                    ),
+                                    subtitle: const Text(
+                                      'Limpar plantas e tarefas mantendo conta',
+                                    ),
+                                    onTap: () {
+                                      _showClearDataDialog(context, authState);
+                                    },
                                   ),
-                                  subtitle: const Text(
-                                    'Remover conta permanentemente',
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.logout_outlined,
+                                      color: theme.colorScheme.error,
+                                    ),
+                                    title: Text(
+                                      'Sair da Conta',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.error,
+                                      ),
+                                    ),
+                                    subtitle: const Text(
+                                      'Fazer logout da aplicação',
+                                    ),
+                                    onTap: () {
+                                      _showLogoutDialog(context, authState);
+                                    },
                                   ),
-                                  onTap: () {
-                                    _showDeleteAccountDialog(
-                                      context,
-                                      authState,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
+                                  if (!isAnonymous) ...[
+                                    ListTile(
+                                      leading: Icon(
+                                        Icons.delete_outline,
+                                        color: theme.colorScheme.error,
+                                      ),
+                                      title: Text(
+                                        'Excluir Conta',
+                                        style: TextStyle(
+                                          color: theme.colorScheme.error,
+                                        ),
+                                      ),
+                                      subtitle: const Text(
+                                        'Remover conta permanentemente',
+                                      ),
+                                      onTap: () {
+                                        _showDeleteAccountDialog(
+                                          context,
+                                          authState,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
 
-                        const SizedBox(height: 40),
-                      ],
-                    );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, stack) => Center(
-                    child: Text('Erro ao carregar perfil: $error'),
-                  ),
-                ),
+                            const SizedBox(height: 40),
+                          ],
+                        );
+                      },
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (error, stack) => Center(
+                            child: Text('Erro ao carregar perfil: $error'),
+                          ),
+                    ),
               ), // SingleChildScrollView
             ), // Expanded
           ],
@@ -452,114 +472,113 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
-  Widget _buildDataSyncSection(
-    BuildContext context,
-    AuthState authState,
-  ) {
+  Widget _buildDataSyncSection(BuildContext context, AuthState authState) {
     final theme = Theme.of(context);
-    
+
     return riverpod.Consumer(
       builder: (context, ref, _) {
         final syncState = ref.watch(syncProvider);
         final isSyncing = syncState.isSyncing;
         final lastSyncMessage = syncState.statusMessage;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(context, 'Dados e Sincronização'),
-        const SizedBox(height: 16),
-        PlantisCard(
-          child: Column(
-            children: [
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(context, 'Dados e Sincronização'),
+            const SizedBox(height: 16),
+            PlantisCard(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        isSyncing ? Icons.sync : Icons.cloud_done,
+                        color: PlantisColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      isSyncing
+                          ? lastSyncMessage
+                          : 'Todos os dados estão atualizados',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    trailing:
+                        isSyncing
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : IconButton(
+                              onPressed: () {
+                                ref
+                                    .read(syncProvider.notifier)
+                                    .triggerManualSync();
+                              },
+                              icon: const Icon(Icons.refresh),
+                              tooltip: 'Sincronizar agora',
+                            ),
                   ),
-                  child: Icon(
-                    isSyncing ? Icons.sync : Icons.cloud_done,
-                    color: PlantisColors.primary,
-                    size: 20,
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.download,
+                        color: PlantisColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    title: const Text('Exportar JSON'),
+                    subtitle: const Text(
+                      'Baixar dados em formato JSON para backup',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/data-export'),
                   ),
-                ),
-                title: Text(
-                  isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.table_view,
+                        color: PlantisColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    title: const Text('Exportar CSV'),
+                    subtitle: const Text(
+                      'Baixar dados em planilha para análise',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/data-export'),
                   ),
-                ),
-                subtitle: Text(
-                  isSyncing
-                      ? lastSyncMessage
-                      : 'Todos os dados estão atualizados',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                trailing:
-                    isSyncing
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : IconButton(
-                          onPressed: () {
-                            ref.read(syncProvider.notifier).triggerManualSync();
-                          },
-                          icon: const Icon(Icons.refresh),
-                          tooltip: 'Sincronizar agora',
-                        ),
+                ],
               ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.download,
-                    color: PlantisColors.primary,
-                    size: 20,
-                  ),
-                ),
-                title: const Text('Exportar JSON'),
-                subtitle: const Text(
-                  'Baixar dados em formato JSON para backup',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/data-export'),
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.table_view,
-                    color: PlantisColors.primary,
-                    size: 20,
-                  ),
-                ),
-                title: const Text('Exportar CSV'),
-                subtitle: const Text(
-                  'Baixar dados em planilha para análise',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/data-export'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-      }
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -761,10 +780,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showLogoutDialog(
-    BuildContext context,
-    AuthState authState,
-  ) {
+  void _showLogoutDialog(BuildContext context, AuthState authState) {
     final theme = Theme.of(context);
     showDialog<void>(
       context: context,
@@ -896,10 +912,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showClearDataDialog(
-    BuildContext context,
-    AuthState authState,
-  ) {
+  void _showClearDataDialog(BuildContext context, AuthState authState) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -909,10 +922,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showDeleteAccountDialog(
-    BuildContext context,
-    AuthState authState,
-  ) {
+  void _showDeleteAccountDialog(BuildContext context, AuthState authState) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -927,23 +937,25 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     AuthState authState,
   ) async {
     // Show progress dialog
-    unawaited(showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => _LogoutProgressDialog(),
-    ));
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => _LogoutProgressDialog(),
+      ),
+    );
 
     try {
       // Simulate some processing time for better UX
       await Future<void>.delayed(const Duration(milliseconds: 800));
-      
+
       // Perform actual logout
       await ref.read(authProvider.notifier).logout();
 
       // Close progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-        
+
         // Show success message and navigate
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -953,14 +965,14 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
             duration: Duration(seconds: 2),
           ),
         );
-        
+
         context.go('/welcome');
       }
     } catch (e) {
       // Close progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-        
+
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -983,7 +995,8 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: PlantisColors.primary,
-          fontSize: (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) + 2,
+          fontSize:
+              (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) + 2,
         ),
       ),
     );
@@ -1000,32 +1013,28 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   final List<String> _progressSteps = [
     'Limpando dados locais...',
     'Removendo configurações...',
     'Finalizando logout...',
   ];
-  
+
   int _currentStepIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     _animationController.forward();
     _startProgressSteps();
   }
@@ -1052,7 +1061,7 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Dialog(
@@ -1090,9 +1099,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Title
               Text(
                 'Saindo da Conta',
@@ -1102,9 +1111,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Progress indicator
               SizedBox(
                 width: 40,
@@ -1116,9 +1125,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Dynamic progress text
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
@@ -1132,14 +1141,16 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
                   textAlign: TextAlign.center,
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Info message
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -1225,17 +1236,13 @@ class __DataClearDialogState extends State<_DataClearDialog> {
               color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(32),
             ),
-            child: const Icon(
-              Icons.delete_sweep,
-              size: 32,
-              color: Colors.red,
-            ),
+            child: const Icon(Icons.delete_sweep, size: 32, color: Colors.red),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Título
-          Text(
+          const Text(
             'Limpar Dados do App',
             style: TextStyle(
               fontSize: 20,
@@ -1244,9 +1251,9 @@ class __DataClearDialogState extends State<_DataClearDialog> {
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Conteúdo alinhado à esquerda
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1259,72 +1266,72 @@ class __DataClearDialogState extends State<_DataClearDialog> {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-          const SizedBox(height: 16),
-          _buildClearItem(
-            context,
-            Icons.local_florist,
-            'Todas as suas plantas',
-          ),
-          _buildClearItem(
-            context,
-            Icons.task_alt,
-            'Todas as tarefas e lembretes',
-          ),
-          _buildClearItem(
-            context,
-            Icons.space_dashboard,
-            'Todos os espaços criados',
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(Icons.shield, color: Colors.green, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Serão mantidos: perfil, configurações, tema e assinatura',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.green.shade700,
+              const SizedBox(height: 16),
+              _buildClearItem(
+                context,
+                Icons.local_florist,
+                'Todas as suas plantas',
+              ),
+              _buildClearItem(
+                context,
+                Icons.task_alt,
+                'Todas as tarefas e lembretes',
+              ),
+              _buildClearItem(
+                context,
+                Icons.space_dashboard,
+                'Todos os espaços criados',
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.shield, color: Colors.green, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Serão mantidos: perfil, configurações, tema e assinatura',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Para confirmar, digite LIMPAR abaixo:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _confirmationController,
+                enabled: !_isLoading,
+                decoration: InputDecoration(
+                  hintText: 'Digite LIMPAR para confirmar',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.orange, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Para confirmar, digite LIMPAR abaixo:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _confirmationController,
-            enabled: !_isLoading,
-            decoration: InputDecoration(
-              hintText: 'Digite LIMPAR para confirmar',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Colors.orange,
-                  width: 2,
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [_UpperCaseTextFormatter()],
+                style: TextStyle(
+                  fontSize: 16,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
-            ),
-            textCapitalization: TextCapitalization.characters,
-            inputFormatters: [_UpperCaseTextFormatter()],
-            style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
-          ),
             ],
           ),
         ],
@@ -1348,8 +1355,10 @@ class __DataClearDialogState extends State<_DataClearDialog> {
                     });
 
                     try {
-                      final dataCleanerService = GetIt.instance<DataCleanerService>();
-                      final result = await dataCleanerService.clearUserContentOnly();
+                      final dataCleanerService =
+                          GetIt.instance<DataCleanerService>();
+                      final result =
+                          await dataCleanerService.clearUserContentOnly();
 
                       if (context.mounted) {
                         Navigator.of(context).pop();
@@ -1416,16 +1425,17 @@ class __DataClearDialogState extends State<_DataClearDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text('Limpar Dados'),
+          child:
+              _isLoading
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                  : const Text('Limpar Dados'),
         ),
       ],
     );
@@ -1452,7 +1462,6 @@ class __DataClearDialogState extends State<_DataClearDialog> {
       ),
     );
   }
-
 }
 
 /// Dialog stateful para confirmação de exclusão de conta
@@ -1462,10 +1471,12 @@ class _AccountDeletionDialog extends ConsumerStatefulWidget {
   const _AccountDeletionDialog({required this.authState});
 
   @override
-  ConsumerState<_AccountDeletionDialog> createState() => __AccountDeletionDialogState();
+  ConsumerState<_AccountDeletionDialog> createState() =>
+      __AccountDeletionDialogState();
 }
 
-class __AccountDeletionDialogState extends ConsumerState<_AccountDeletionDialog> {
+class __AccountDeletionDialogState
+    extends ConsumerState<_AccountDeletionDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
 
@@ -1723,7 +1734,6 @@ class __AccountDeletionDialogState extends ConsumerState<_AccountDeletionDialog>
           ),
     );
   }
-
 }
 
 /// Formatter que converte automaticamente o texto para uppercase

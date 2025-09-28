@@ -47,4 +47,3 @@ class OptimizedImageWidget extends StatelessWidget {
     );
   }
 }
-

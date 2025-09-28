@@ -42,7 +42,7 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
     debugPrint('🚨 Tasks Error Boundary caught error:');
     debugPrint('Error: ${details.exception}');
     debugPrint('Stack trace: ${details.stack}');
-    
+
     // In production, you might want to report to crash analytics
     // Example: FirebaseCrashlytics.instance.recordFlutterError(details);
   }
@@ -70,7 +70,9 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
                 _errorDetails = FlutterErrorDetails(
                   exception: error,
                   stack: stackTrace,
-                  context: ErrorDescription('Error caught by TasksErrorBoundary'),
+                  context: ErrorDescription(
+                    'Error caught by TasksErrorBoundary',
+                  ),
                 );
                 _hasError = true;
               });
@@ -83,13 +85,13 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
     );
   }
 
-
   Widget _buildErrorUI(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+      backgroundColor:
+          isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -101,7 +103,9 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
+                  color: theme.colorScheme.errorContainer.withValues(
+                    alpha: 0.1,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -127,8 +131,8 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
 
               // Error message
               Text(
-                widget.customErrorMessage ?? 
-                'Ocorreu um erro inesperado. Não se preocupe, seus dados estão seguros.',
+                widget.customErrorMessage ??
+                    'Ocorreu um erro inesperado. Não se preocupe, seus dados estão seguros.',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
@@ -182,7 +186,9 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
                 icon: const Icon(Icons.bug_report, size: 18),
                 label: const Text('Relatar Problema'),
                 style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  foregroundColor: theme.colorScheme.onSurface.withValues(
+                    alpha: 0.6,
+                  ),
                 ),
               ),
             ],
@@ -229,7 +235,11 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _errorDetails!.stack.toString().split('\n').take(5).join('\n'),
+                  _errorDetails!.stack
+                      .toString()
+                      .split('\n')
+                      .take(5)
+                      .join('\n'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontFamily: 'monospace',
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -287,7 +297,7 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
     try {
       final tasksProvider = context.read<TasksProvider>();
       tasksProvider.clearError();
-      
+
       // Reload tasks from scratch
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -300,7 +310,9 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Erro ao reiniciar. Tente fechar e reabrir o app.'),
+            content: const Text(
+              'Erro ao reiniciar. Tente fechar e reabrir o app.',
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -309,9 +321,10 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
   }
 
   void _handleReportIssue(BuildContext context) {
-    final errorInfo = _errorDetails != null
-        ? 'Erro: ${_errorDetails!.exception}\n\nStack Trace:\n${_errorDetails!.stack}'
-        : 'Erro não identificado';
+    final errorInfo =
+        _errorDetails != null
+            ? 'Erro: ${_errorDetails!.exception}\n\nStack Trace:\n${_errorDetails!.stack}'
+            : 'Erro não identificado';
 
     // Copy error details to clipboard
     Clipboard.setData(ClipboardData(text: errorInfo));
@@ -319,7 +332,9 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
     // Show feedback to user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Detalhes do erro copiados para a área de transferência'),
+        content: const Text(
+          'Detalhes do erro copiados para a área de transferência',
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         behavior: SnackBarBehavior.floating,
         action: SnackBarAction(

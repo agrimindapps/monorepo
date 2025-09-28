@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
@@ -12,13 +11,12 @@ class GetDeviceStatisticsUseCase {
   final DeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
-  GetDeviceStatisticsUseCase(
-    this._deviceRepository,
-    this._authStateNotifier,
-  );
+  GetDeviceStatisticsUseCase(this._deviceRepository, this._authStateNotifier);
 
   /// Obtém estatísticas detalhadas dos dispositivos do usuário
-  Future<Either<Failure, DeviceStatisticsModel>> call([GetDeviceStatisticsParams? params]) async {
+  Future<Either<Failure, DeviceStatisticsModel>> call([
+    GetDeviceStatisticsParams? params,
+  ]) async {
     try {
       if (kDebugMode) {
         debugPrint('📊 DeviceStats: Getting device statistics');
@@ -27,9 +25,7 @@ class GetDeviceStatisticsUseCase {
       // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
-        return const Left(
-          AuthFailure('Usuário não autenticado'),
-        );
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
@@ -51,7 +47,9 @@ class GetDeviceStatisticsUseCase {
 
             if (kDebugMode) {
               debugPrint('✅ DeviceStats: Statistics retrieved successfully');
-              debugPrint('   Total: ${statistics.totalDevices}, Active: ${statistics.activeDevices}');
+              debugPrint(
+                '   Total: ${statistics.totalDevices}, Active: ${statistics.activeDevices}',
+              );
             }
 
             // Adiciona informações específicas do plantis se solicitado
@@ -94,16 +92,21 @@ class GetDeviceStatisticsUseCase {
     return DeviceStatisticsModel(
       totalDevices: map['totalDevices'] as int? ?? 0,
       activeDevices: map['activeDevices'] as int? ?? 0,
-      devicesByPlatform: Map<String, int>.from(map['devicesByPlatform'] as Map? ?? {}),
-      lastActiveDevice: map['lastActiveDevice'] != null
-          ? DeviceModel.fromEntity(map['lastActiveDevice'] as DeviceEntity)
-          : null,
-      oldestDevice: map['oldestDevice'] != null
-          ? DeviceModel.fromEntity(map['oldestDevice'] as DeviceEntity)
-          : null,
-      newestDevice: map['newestDevice'] != null
-          ? DeviceModel.fromEntity(map['newestDevice'] as DeviceEntity)
-          : null,
+      devicesByPlatform: Map<String, int>.from(
+        map['devicesByPlatform'] as Map? ?? {},
+      ),
+      lastActiveDevice:
+          map['lastActiveDevice'] != null
+              ? DeviceModel.fromEntity(map['lastActiveDevice'] as DeviceEntity)
+              : null,
+      oldestDevice:
+          map['oldestDevice'] != null
+              ? DeviceModel.fromEntity(map['oldestDevice'] as DeviceEntity)
+              : null,
+      newestDevice:
+          map['newestDevice'] != null
+              ? DeviceModel.fromEntity(map['newestDevice'] as DeviceEntity)
+              : null,
     );
   }
 
@@ -115,9 +118,10 @@ class GetDeviceStatisticsUseCase {
 
       // Análise de atividade
       if (stats.lastActiveDevice != null) {
-        final hoursSinceLastActivity = DateTime.now()
-            .difference(stats.lastActiveDevice!.lastActiveAt)
-            .inHours;
+        final hoursSinceLastActivity =
+            DateTime.now()
+                .difference(stats.lastActiveDevice!.lastActiveAt)
+                .inHours;
 
         plantisMetrics['hoursSinceLastActivity'] = hoursSinceLastActivity;
         plantisMetrics['isActiveToday'] = hoursSinceLastActivity < 24;
@@ -125,41 +129,48 @@ class GetDeviceStatisticsUseCase {
 
       // Análise de plataformas
       if (stats.devicesByPlatform.isNotEmpty) {
-        final mostUsedPlatform = stats.devicesByPlatform.entries
-            .reduce((a, b) => a.value > b.value ? a : b);
+        final mostUsedPlatform = stats.devicesByPlatform.entries.reduce(
+          (a, b) => a.value > b.value ? a : b,
+        );
 
         plantisMetrics['mostUsedPlatform'] = mostUsedPlatform.key;
         plantisMetrics['platformDiversity'] = stats.devicesByPlatform.length;
         plantisMetrics['isMobilePrimary'] =
             (stats.devicesByPlatform['iOS'] ?? 0) +
-            (stats.devicesByPlatform['Android'] ?? 0) >
+                (stats.devicesByPlatform['Android'] ?? 0) >
             stats.totalDevices / 2;
       }
 
       // Análise de segurança
-      plantisMetrics['deviceUtilization'] = stats.totalDevices > 0
-          ? (stats.activeDevices / stats.totalDevices * 100).round()
-          : 0;
+      plantisMetrics['deviceUtilization'] =
+          stats.totalDevices > 0
+              ? (stats.activeDevices / stats.totalDevices * 100).round()
+              : 0;
 
-      plantisMetrics['hasInactiveDevices'] = stats.activeDevices < stats.totalDevices;
+      plantisMetrics['hasInactiveDevices'] =
+          stats.activeDevices < stats.totalDevices;
 
       // Recomendações baseadas nos dados
       final recommendations = <String>[];
 
       if (stats.totalDevices >= 3) {
-        recommendations.add('Limite de dispositivos atingido. Considere revogar dispositivos inativos.');
+        recommendations.add(
+          'Limite de dispositivos atingido. Considere revogar dispositivos inativos.',
+        );
       }
 
       if (stats.activeDevices < stats.totalDevices) {
         final inactiveCount = stats.totalDevices - stats.activeDevices;
         recommendations.add(
           'Você tem $inactiveCount dispositivo${inactiveCount > 1 ? 's' : ''} inativo${inactiveCount > 1 ? 's' : ''}. '
-          'Revogue-${inactiveCount > 1 ? 'os' : 'o'} para liberar espaço.'
+          'Revogue-${inactiveCount > 1 ? 'os' : 'o'} para liberar espaço.',
         );
       }
 
       if (stats.devicesByPlatform.length > 2) {
-        recommendations.add('Você usa múltiplas plataformas. Mantenha apenas os dispositivos que usa regularmente.');
+        recommendations.add(
+          'Você usa múltiplas plataformas. Mantenha apenas os dispositivos que usa regularmente.',
+        );
       }
 
       plantisMetrics['recommendations'] = recommendations;
@@ -205,5 +216,6 @@ class GetDeviceStatisticsParams {
   int get hashCode => includeExtendedInfo.hashCode ^ refreshCache.hashCode;
 
   @override
-  String toString() => 'GetDeviceStatisticsParams(includeExtendedInfo: $includeExtendedInfo)';
+  String toString() =>
+      'GetDeviceStatisticsParams(includeExtendedInfo: $includeExtendedInfo)';
 }

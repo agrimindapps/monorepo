@@ -1,7 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-import 'package:core/core.dart';
 
 import 'core/di/injection_container.dart' as di;
 import 'core/riverpod_providers/theme_providers.dart';
@@ -25,7 +24,9 @@ class PlantisApp extends ConsumerWidget {
     return MultiProvider(
       providers: [
         // Auth migrated to Riverpod - using authProvider directly
-        ChangeNotifierProvider(create: (_) => di.sl<DeviceManagementProvider>()),
+        ChangeNotifierProvider(
+          create: (_) => di.sl<DeviceManagementProvider>(),
+        ),
         ChangeNotifierProvider(create: (_) => di.sl<PlantsProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<PlantTaskProvider>()),
         ChangeNotifierProvider(create: (_) => di.sl<TasksProvider>()),
@@ -39,9 +40,7 @@ class PlantisApp extends ConsumerWidget {
         ChangeNotifierProvider<ChangeNotifier>(
           create: (_) => di.sl<ChangeNotifier>(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => di.sl<ThemeProvider>(),
-        ),
+        ChangeNotifierProvider(create: (_) => di.sl<ThemeProvider>()),
       ],
       builder: (context, child) {
         final router = AppRouter.router(ref);
@@ -55,9 +54,10 @@ class PlantisApp extends ConsumerWidget {
 
             // During migration, we can use either provider
             // For now, keeping legacy for stability, but Riverpod is ready
-            final currentThemeMode = legacyThemeProvider.isInitialized
-                ? legacyThemeProvider.themeMode
-                : riverpodThemeMode;
+            final currentThemeMode =
+                legacyThemeProvider.isInitialized
+                    ? legacyThemeProvider.themeMode
+                    : riverpodThemeMode;
 
             return DesktopKeyboardShortcuts(
               child: MaterialApp.router(

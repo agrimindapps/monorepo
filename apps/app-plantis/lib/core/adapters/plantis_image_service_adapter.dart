@@ -26,8 +26,8 @@ class PlantisImageServiceAdapter {
   PlantisImageServiceAdapter({
     required ImageService coreImageService,
     ImagePreloaderService? preloaderService,
-  })  : _coreImageService = coreImageService,
-        _preloaderService = preloaderService ?? ImagePreloaderService.instance;
+  }) : _coreImageService = coreImageService,
+       _preloaderService = preloaderService ?? ImagePreloaderService.instance;
 
   // ==========================================================================
   // CORE IMAGE SERVICE METHODS (Direct delegation)
@@ -76,9 +76,10 @@ class PlantisImageServiceAdapter {
       imageFiles,
       folder: folder,
       uploadType: uploadType,
-      onProgress: onProgress != null
-        ? (int index, double progress) => onProgress(progress)
-        : null,
+      onProgress:
+          onProgress != null
+              ? (int index, double progress) => onProgress(progress)
+              : null,
     );
   }
 
@@ -88,7 +89,9 @@ class PlantisImageServiceAdapter {
   }
 
   /// Delete multiple images (backward compatible)
-  Future<Result<List<AppError>>> deleteMultipleImages(List<String> downloadUrls) {
+  Future<Result<List<AppError>>> deleteMultipleImages(
+    List<String> downloadUrls,
+  ) {
     return _coreImageService.deleteMultipleImages(downloadUrls);
   }
 
@@ -124,7 +127,9 @@ class PlantisImageServiceAdapter {
     if (imageUrls.isEmpty) return;
 
     _preloaderService.preloadImages(imageUrls, priority: priority);
-    debugPrint('📥 Preloading ${imageUrls.length} images (priority: $priority)');
+    debugPrint(
+      '📥 Preloading ${imageUrls.length} images (priority: $priority)',
+    );
   }
 
   /// Preload plant images (convenience method)

@@ -31,11 +31,10 @@ class LoadingOverlay extends StatelessWidget {
           Positioned.fill(
             child: ColoredBox(
               color: (overlayColor ?? Colors.black).withValues(alpha: opacity),
-              child: preventInteraction
-                  ? AbsorbPointer(
-                      child: _buildLoadingContent(context),
-                    )
-                  : _buildLoadingContent(context),
+              child:
+                  preventInteraction
+                      ? AbsorbPointer(child: _buildLoadingContent(context))
+                      : _buildLoadingContent(context),
             ),
           ),
       ],
@@ -117,7 +116,7 @@ class AuthLoadingOverlay extends StatelessWidget {
 
   String _getLoadingMessage(AuthOperation? operation) {
     if (operation == null) return 'Processando...';
-    
+
     switch (operation) {
       case AuthOperation.signIn:
         return 'Fazendo login...';
@@ -138,7 +137,7 @@ class AuthLoadingOverlay extends StatelessWidget {
 
   String _getSemanticLabel(AuthOperation? operation) {
     if (operation == null) return 'Processando operação de autenticação';
-    
+
     switch (operation) {
       case AuthOperation.signIn:
         return 'Fazendo login na sua conta';
@@ -183,7 +182,7 @@ class PurchaseLoadingOverlay extends StatelessWidget {
 
   String _getLoadingMessage(PurchaseOperation? operation) {
     if (operation == null) return 'Processando...';
-    
+
     switch (operation) {
       case PurchaseOperation.purchase:
         return 'Processando compra...';
@@ -198,7 +197,7 @@ class PurchaseLoadingOverlay extends StatelessWidget {
 
   String _getSemanticLabel(PurchaseOperation? operation) {
     if (operation == null) return 'Processando operação de compra';
-    
+
     switch (operation) {
       case PurchaseOperation.purchase:
         return 'Processando sua compra premium';
@@ -223,8 +222,4 @@ enum AuthOperation {
 }
 
 /// Purchase operations enum
-enum PurchaseOperation {
-  purchase,
-  restore,
-  loadProducts,
-}
+enum PurchaseOperation { purchase, restore, loadProducts }

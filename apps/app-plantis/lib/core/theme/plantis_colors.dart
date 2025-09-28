@@ -45,7 +45,7 @@ class PlantisColors {
   static const Color errorLight = Color(0xFFFDEDEA); // Light error
   static const Color warning = Color(0xFFF39C12); // Warning orange
   static const Color warningLight = Color(0xFFFEF5E7); // Light warning
-  
+
   // Text colors
   static const Color textPrimary = Color(0xFF2C3E50); // Dark text
   static const Color textSecondary = Color(0xFF7F8C8D); // Light text
@@ -89,7 +89,7 @@ class PlantisColors {
   );
 
   // Helper methods
-  
+
   /// Cor de fundo padrão que suporta tema claro e escuro
   static Color getPageBackgroundColor(BuildContext context) {
     final theme = Theme.of(context);
@@ -97,7 +97,7 @@ class PlantisColors {
         ? const Color(0xFF1C1C1E) // Cor escura personalizada
         : theme.colorScheme.surface; // Cor clara do tema
   }
-  
+
   static Color getPrimaryShade(int shade) {
     switch (shade) {
       case 50:

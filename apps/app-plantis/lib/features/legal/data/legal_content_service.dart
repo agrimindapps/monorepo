@@ -14,7 +14,8 @@ class LegalContentService {
     'sections': [
       {
         'title': 'Nossa Política de Privacidade',
-        'content': '''O Plantis está comprometido em proteger e respeitar sua privacidade. Esta política explica como coletamos, usamos, armazenamos e protegemos suas informações pessoais.
+        'content':
+            '''O Plantis está comprometido em proteger e respeitar sua privacidade. Esta política explica como coletamos, usamos, armazenamos e protegemos suas informações pessoais.
 
 Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de acordo com esta política.''',
       },
@@ -149,7 +150,8 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
       },
       {
         'title': 'Transferências Internacionais',
-        'content': '''Seus dados podem ser processados em diferentes localidades:
+        'content':
+            '''Seus dados podem ser processados em diferentes localidades:
 
 **Armazenamento Principal:**
 • Servidores localizados no Brasil quando possível
@@ -214,13 +216,15 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
     'sections': [
       {
         'title': 'Introdução',
-        'content': '''Bem-vindo ao Plantis! Estes Termos de Uso governam seu relacionamento com o aplicativo Plantis, operado pela nossa equipe.
+        'content':
+            '''Bem-vindo ao Plantis! Estes Termos de Uso governam seu relacionamento com o aplicativo Plantis, operado pela nossa equipe.
 
 Ao acessar ou usar nosso serviço, você concorda em estar vinculado por estes termos. Se você discordar de qualquer parte destes termos, não deverá usar nosso aplicativo.''',
       },
       {
         'title': 'Definições',
-        'content': '''• **Aplicativo**: refere-se ao Plantis, aplicativo de gerenciamento de plantas
+        'content':
+            '''• **Aplicativo**: refere-se ao Plantis, aplicativo de gerenciamento de plantas
 • **Serviço**: refere-se ao aplicativo e todos os recursos relacionados
 • **Usuário**: refere-se a qualquer indivíduo que acessa ou usa o aplicativo
 • **Conteúdo**: inclui todas as informações sobre plantas, fotos, notas e dados inseridos''',
@@ -245,7 +249,8 @@ Você se compromete a usar o aplicativo apenas para fins pessoais e não comerci
       },
       {
         'title': 'Conta do Usuário',
-        'content': '''Para acessar certas funcionalidades, você pode precisar criar uma conta. Você é responsável por:
+        'content':
+            '''Para acessar certas funcionalidades, você pode precisar criar uma conta. Você é responsável por:
 • Manter a confidencialidade de suas credenciais
 • Todas as atividades que ocorrem em sua conta
 • Notificar-nos imediatamente sobre uso não autorizado
@@ -253,7 +258,8 @@ Você se compromete a usar o aplicativo apenas para fins pessoais e não comerci
       },
       {
         'title': 'Privacidade e Dados',
-        'content': '''Respeitamos sua privacidade e estamos comprometidos em proteger seus dados pessoais:
+        'content':
+            '''Respeitamos sua privacidade e estamos comprometidos em proteger seus dados pessoais:
 • Coletamos apenas dados necessários para fornecer o serviço
 • Suas informações de plantas são armazenadas localmente por padrão
 • Dados sincronizados na nuvem são criptografados
@@ -297,14 +303,16 @@ Nossa responsabilidade é limitada ao valor pago pelos serviços premium, se apl
       },
       {
         'title': 'Propriedade Intelectual',
-        'content': '''• O aplicativo e seu conteúdo são protegidos por direitos autorais
+        'content':
+            '''• O aplicativo e seu conteúdo são protegidos por direitos autorais
 • Você mantém a propriedade dos dados que insere no aplicativo
 • Concede-nos licença para processar seus dados conforme necessário para fornecer o serviço
 • Não é permitido reproduzir, distribuir ou criar obras derivadas sem autorização''',
       },
       {
         'title': 'Cancelamento',
-        'content': '''Você pode cancelar sua conta a qualquer momento. Nós podemos cancelar contas que:
+        'content':
+            '''Você pode cancelar sua conta a qualquer momento. Nós podemos cancelar contas que:
 • Violem estes termos de uso
 • Sejam usadas para atividades ilegais
 • Permaneçam inativas por período prolongado
@@ -314,13 +322,15 @@ Após o cancelamento, seus dados podem ser mantidos conforme nossa política de 
       },
       {
         'title': 'Modificações dos Termos',
-        'content': '''Reservamo-nos o direito de modificar estes termos a qualquer momento. Mudanças significativas serão comunicadas através do aplicativo ou por email.
+        'content':
+            '''Reservamo-nos o direito de modificar estes termos a qualquer momento. Mudanças significativas serão comunicadas através do aplicativo ou por email.
 
 O uso continuado do aplicativo após as modificações constitui aceitação dos novos termos.''',
       },
       {
         'title': 'Lei Aplicável',
-        'content': '''Estes termos são governados pelas leis brasileiras. Disputas serão resolvidas nos tribunais competentes do Brasil.
+        'content':
+            '''Estes termos são governados pelas leis brasileiras. Disputas serão resolvidas nos tribunais competentes do Brasil.
 
 Para questões relacionadas a direitos do consumidor, aplicam-se as disposições do Código de Defesa do Consumidor.''',
       },
@@ -375,8 +385,18 @@ Responderemos suas questões em até 48 horas úteis.''',
   static String getFormattedLastUpdatedDate() {
     final date = DateTime.parse('$_lastUpdatedDate 00:00:00');
     final months = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
     return '${date.day} de ${months[date.month - 1]} de ${date.year}';
   }
@@ -394,7 +414,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     final privacySections = _privacyPolicyContent['sections'] as List;
     final termsSections = _termsOfServiceContent['sections'] as List;
     final totalSections = privacySections.length + termsSections.length;
-    
+
     // Simple version based on date and content count
     return '${_lastUpdatedDate}_v$totalSections';
   }
@@ -444,11 +464,11 @@ Responderemos suas questões em até 48 horas úteis.''',
   static Map<String, bool> validateUrls() {
     final contactInfo = getContactInfo();
     final validationResults = <String, bool>{};
-    
+
     for (final entry in contactInfo.entries) {
       validationResults[entry.key] = AppConfig.isValidUrl(entry.value);
     }
-    
+
     return validationResults;
   }
 
@@ -460,8 +480,10 @@ Responderemos suas questões em até 48 horas úteis.''',
       'has_recent_updates': hasRecentUpdates(),
       'content_version': getContentVersion(),
       'environment': AppConfig.isProduction ? 'production' : 'development',
-      'privacy_sections_count': (_privacyPolicyContent['sections'] as List).length,
-      'terms_sections_count': (_termsOfServiceContent['sections'] as List).length,
+      'privacy_sections_count':
+          (_privacyPolicyContent['sections'] as List).length,
+      'terms_sections_count':
+          (_termsOfServiceContent['sections'] as List).length,
       'contact_info': getContactInfo(),
       'url_validations': validateUrls(),
     };
@@ -471,7 +493,7 @@ Responderemos suas questões em até 48 horas úteis.''',
   /// Conforme requisitos das lojas de aplicativos e legislações de privacidade
   static List<LegalSection> getAccountDeletionSections() {
     return [
-      LegalSection(
+      const LegalSection(
         title: 'Como Excluir Sua Conta',
         content: '''**Exclusão via Aplicativo:**
 1. Abra o aplicativo Plantis
@@ -496,7 +518,7 @@ Responderemos suas questões em até 48 horas úteis.''',
 • Cancelamento de assinaturas ativas''',
         titleColor: PlantisColors.error,
       ),
-      LegalSection(
+      const LegalSection(
         title: 'Dados Que Serão Excluídos',
         content: '''**Dados Pessoais:**
 • Informações de perfil (nome, email, foto)
@@ -522,7 +544,7 @@ Responderemos suas questões em até 48 horas úteis.''',
 • Preferências de cobrança''',
         titleColor: PlantisColors.error,
       ),
-      LegalSection(
+      const LegalSection(
         title: 'Dados Retidos por Motivos Legais',
         content: '''**Obrigações Fiscais (5 anos):**
 • Registros de transações para declaração de renda
@@ -548,7 +570,7 @@ Responderemos suas questões em até 48 horas úteis.''',
 • Legislação de defesa do consumidor''',
         titleColor: PlantisColors.error,
       ),
-      LegalSection(
+      const LegalSection(
         title: 'Consequências da Exclusão',
         content: '''**Irreversibilidade:**
 • A exclusão é PERMANENTE e IRREVERSÍVEL
@@ -574,7 +596,7 @@ Responderemos suas questões em até 48 horas úteis.''',
 • Dados em serviços externos mantidos conforme suas políticas''',
         titleColor: PlantisColors.error,
       ),
-      LegalSection(
+      const LegalSection(
         title: 'Alternativas à Exclusão',
         content: '''**Desativação Temporária:**
 • Pause sua conta sem perder dados
@@ -601,7 +623,7 @@ Responderemos suas questões em até 48 horas úteis.''',
 • Tire dúvidas sobre políticas''',
         titleColor: PlantisColors.primary,
       ),
-      LegalSection(
+      const LegalSection(
         title: 'Suporte e Contato',
         content: '''**Central de Ajuda:**
 • Email: privacy@plantis.app

@@ -33,7 +33,9 @@ class PlantDetailsProvider extends ChangeNotifier {
   /// Force reload the plant data, bypassing cache
   Future<void> reloadPlant(String plantId) async {
     if (kDebugMode) {
-      print('🔄 PlantDetailsProvider.reloadPlant() - Forçando reload para plantId: $plantId');
+      print(
+        '🔄 PlantDetailsProvider.reloadPlant() - Forçando reload para plantId: $plantId',
+      );
     }
     await _loadPlant(plantId, forceReload: true);
   }
@@ -101,7 +103,7 @@ class PlantDetailsProvider extends ChangeNotifier {
   }
 
   /// Clears the loading state
-  /// 
+  ///
   /// This method ensures that any pending loading state is cleared,
   /// particularly useful when operations are cancelled or interrupted.
   void clearLoadingState() {
@@ -118,9 +120,7 @@ class PlantDetailsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final updatedPlant = _plant!.copyWith(
-        isFavorited: !_plant!.isFavorited,
-      );
+      final updatedPlant = _plant!.copyWith(isFavorited: !_plant!.isFavorited);
 
       final params = UpdatePlantParams(
         id: plantId,

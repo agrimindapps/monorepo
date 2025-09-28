@@ -50,7 +50,7 @@ class TasksConstants {
   static const int progressFairThreshold = 25;
 
   // ============================================================================
-  // UI SPACING CONSTANTS  
+  // UI SPACING CONSTANTS
   // ============================================================================
 
   /// Empty state illustration size
@@ -140,7 +140,7 @@ class TasksConstants {
   /// Surface alpha for secondary text
   static const double secondaryTextAlpha = 0.7;
 
-  /// Surface alpha for muted text  
+  /// Surface alpha for muted text
   static const double mutedTextAlpha = 0.6;
 
   /// Surface alpha for disabled text

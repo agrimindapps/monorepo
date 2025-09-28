@@ -1,6 +1,5 @@
-import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/device_model.dart';
 
@@ -43,7 +42,9 @@ abstract class DeviceRemoteDataSource {
   Future<Either<Failure, int>> getActiveDeviceCount(String userId);
 
   /// Obtém estatísticas de dispositivos do usuário
-  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(String userId);
+  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(
+    String userId,
+  );
 
   /// Sincroniza dispositivos com o servidor
   Future<Either<Failure, List<DeviceModel>>> syncDevices(String userId);
@@ -59,27 +60,33 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   }) : _firebaseDeviceService = firebaseDeviceService;
 
   @override
-  Future<Either<Failure, List<DeviceModel>>> getUserDevices(String userId) async {
+  Future<Either<Failure, List<DeviceModel>>> getUserDevices(
+    String userId,
+  ) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Getting devices from Firestore for user $userId');
+      debugPrint(
+        '🌐 DeviceRemote: Getting devices from Firestore for user $userId',
+      );
     }
 
     final result = await _firebaseDeviceService.getDevicesFromFirestore(userId);
 
-    return result.fold(
-      (failure) => Left(failure),
-      (entities) {
-        final models = entities.map((entity) => DeviceModel.fromEntity(entity)).toList();
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: Found ${models.length} devices from Firestore');
-        }
-        return Right(models);
-      },
-    );
+    return result.fold((failure) => Left(failure), (entities) {
+      final models =
+          entities.map((entity) => DeviceModel.fromEntity(entity)).toList();
+      if (kDebugMode) {
+        debugPrint(
+          '✅ DeviceRemote: Found ${models.length} devices from Firestore',
+        );
+      }
+      return Right(models);
+    });
   }
 
   @override
-  Future<Either<Failure, DeviceModel?>> getDeviceByUuid(String deviceUuid) async {
+  Future<Either<Failure, DeviceModel?>> getDeviceByUuid(
+    String deviceUuid,
+  ) async {
     if (kDebugMode) {
       debugPrint('🌐 DeviceRemote: Getting device $deviceUuid from Firestore');
     }
@@ -96,7 +103,9 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     required DeviceModel device,
   }) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Validating device ${device.uuid} via Firebase');
+      debugPrint(
+        '🌐 DeviceRemote: Validating device ${device.uuid} via Firebase',
+      );
     }
 
     final result = await _firebaseDeviceService.validateDevice(
@@ -104,16 +113,13 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
       device: device.toEntity(),
     );
 
-    return result.fold(
-      (failure) => Left(failure),
-      (entity) {
-        final model = DeviceModel.fromEntity(entity);
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: Device validation successful');
-        }
-        return Right(model);
-      },
-    );
+    return result.fold((failure) => Left(failure), (entity) {
+      final model = DeviceModel.fromEntity(entity);
+      if (kDebugMode) {
+        debugPrint('✅ DeviceRemote: Device validation successful');
+      }
+      return Right(model);
+    });
   }
 
   @override
@@ -130,15 +136,12 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
       deviceUuid: deviceUuid,
     );
 
-    return result.fold(
-      (failure) => Left(failure),
-      (_) {
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: Device revocation successful');
-        }
-        return const Right(null);
-      },
-    );
+    return result.fold((failure) => Left(failure), (_) {
+      if (kDebugMode) {
+        debugPrint('✅ DeviceRemote: Device revocation successful');
+      }
+      return const Right(null);
+    });
   }
 
   @override
@@ -152,44 +155,43 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
     // O FirebaseDeviceService não tem método para revogar todos exceto o atual
     // Vamos implementar obtendo todos os dispositivos e revogando individualmente
-    final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(userId);
+    final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(
+      userId,
+    );
 
-    return devicesResult.fold(
-      (failure) => Left(failure),
-      (devices) async {
-        try {
-          for (final device in devices) {
-            if (device.uuid != currentDeviceUuid) {
-              final revokeResult = await _firebaseDeviceService.revokeDevice(
-                userId: userId,
-                deviceUuid: device.uuid,
+    return devicesResult.fold((failure) => Left(failure), (devices) async {
+      try {
+        for (final device in devices) {
+          if (device.uuid != currentDeviceUuid) {
+            final revokeResult = await _firebaseDeviceService.revokeDevice(
+              userId: userId,
+              deviceUuid: device.uuid,
+            );
+
+            // Se alguma revogação falhar, retornamos o erro
+            if (revokeResult.isLeft()) {
+              return revokeResult.fold(
+                (failure) => Left(failure),
+                (_) => const Right(null),
               );
-              
-              // Se alguma revogação falhar, retornamos o erro
-              if (revokeResult.isLeft()) {
-                return revokeResult.fold(
-                  (failure) => Left(failure),
-                  (_) => const Right(null),
-                );
-              }
             }
           }
-          
-          if (kDebugMode) {
-            debugPrint('✅ DeviceRemote: All other devices revoked successfully');
-          }
-          return const Right(null);
-        } catch (e) {
-          return Left(
-            ServerFailure(
-              'Erro ao revogar outros dispositivos',
-              code: 'REVOKE_ALL_ERROR',
-              details: e,
-            ),
-          );
         }
-      },
-    );
+
+        if (kDebugMode) {
+          debugPrint('✅ DeviceRemote: All other devices revoked successfully');
+        }
+        return const Right(null);
+      } catch (e) {
+        return Left(
+          ServerFailure(
+            'Erro ao revogar outros dispositivos',
+            code: 'REVOKE_ALL_ERROR',
+            details: e,
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -198,7 +200,9 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     required String deviceUuid,
   }) async {
     if (kDebugMode) {
-      debugPrint('🌐 DeviceRemote: Updating last activity for $deviceUuid via Firebase');
+      debugPrint(
+        '🌐 DeviceRemote: Updating last activity for $deviceUuid via Firebase',
+      );
     }
 
     final result = await _firebaseDeviceService.updateDeviceLastActivity(
@@ -206,16 +210,13 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
       deviceUuid: deviceUuid,
     );
 
-    return result.fold(
-      (failure) => Left(failure),
-      (entity) {
-        final model = DeviceModel.fromEntity(entity);
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: Device activity updated successfully');
-        }
-        return Right(model);
-      },
-    );
+    return result.fold((failure) => Left(failure), (entity) {
+      final model = DeviceModel.fromEntity(entity);
+      if (kDebugMode) {
+        debugPrint('✅ DeviceRemote: Device activity updated successfully');
+      }
+      return Right(model);
+    });
   }
 
   @override
@@ -226,17 +227,16 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
     final result = await _firebaseDeviceService.getActiveDeviceCount(userId);
 
-    return result.fold(
-      (failure) => Left(failure),
-      (count) {
-        const deviceLimit = 3; // Limite padrão
-        final canAdd = count < deviceLimit;
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: User has $count/$deviceLimit devices, can add: $canAdd');
-        }
-        return Right(canAdd);
-      },
-    );
+    return result.fold((failure) => Left(failure), (count) {
+      const deviceLimit = 3; // Limite padrão
+      final canAdd = count < deviceLimit;
+      if (kDebugMode) {
+        debugPrint(
+          '✅ DeviceRemote: User has $count/$deviceLimit devices, can add: $canAdd',
+        );
+      }
+      return Right(canAdd);
+    });
   }
 
   @override
@@ -247,48 +247,46 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
 
     final result = await _firebaseDeviceService.getActiveDeviceCount(userId);
 
-    return result.fold(
-      (failure) => Left(failure),
-      (count) {
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: Found $count active devices');
-        }
-        return Right(count);
-      },
-    );
+    return result.fold((failure) => Left(failure), (count) {
+      if (kDebugMode) {
+        debugPrint('✅ DeviceRemote: Found $count active devices');
+      }
+      return Right(count);
+    });
   }
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(String userId) async {
+  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(
+    String userId,
+  ) async {
     if (kDebugMode) {
       debugPrint('🌐 DeviceRemote: Getting device statistics for $userId');
     }
 
     // O FirebaseDeviceService não tem método de estatísticas específico
     // Vamos obter os dispositivos e calcular as estatísticas localmente
-    final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(userId);
-
-    return devicesResult.fold(
-      (failure) => Left(failure),
-      (devices) {
-        final totalDevices = devices.length;
-        final activeDevices = devices.where((d) => d.isActive).length;
-        final inactiveDevices = totalDevices - activeDevices;
-
-        final statistics = {
-          'total_devices': totalDevices,
-          'active_devices': activeDevices,
-          'inactive_devices': inactiveDevices,
-          'platforms': _groupDevicesByPlatform(devices),
-        };
-
-        if (kDebugMode) {
-          debugPrint('✅ DeviceRemote: Generated statistics: $statistics');
-        }
-
-        return Right(statistics);
-      },
+    final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(
+      userId,
     );
+
+    return devicesResult.fold((failure) => Left(failure), (devices) {
+      final totalDevices = devices.length;
+      final activeDevices = devices.where((d) => d.isActive).length;
+      final inactiveDevices = totalDevices - activeDevices;
+
+      final statistics = {
+        'total_devices': totalDevices,
+        'active_devices': activeDevices,
+        'inactive_devices': inactiveDevices,
+        'platforms': _groupDevicesByPlatform(devices),
+      };
+
+      if (kDebugMode) {
+        debugPrint('✅ DeviceRemote: Generated statistics: $statistics');
+      }
+
+      return Right(statistics);
+    });
   }
 
   @override
@@ -304,12 +302,12 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   /// Helper para agrupar dispositivos por plataforma
   Map<String, int> _groupDevicesByPlatform(List<DeviceEntity> devices) {
     final platformCounts = <String, int>{};
-    
+
     for (final device in devices) {
       final platform = device.platform;
       platformCounts[platform] = (platformCounts[platform] ?? 0) + 1;
     }
-    
+
     return platformCounts;
   }
 }

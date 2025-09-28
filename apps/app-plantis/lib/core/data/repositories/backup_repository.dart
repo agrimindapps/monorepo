@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../models/backup_model.dart';
 
@@ -22,7 +20,7 @@ abstract class IBackupRepository {
 class BackupRepository implements IBackupRepository {
   final FirebaseStorage _storage;
   final IAuthRepository _authRepository;
-  
+
   static const String _backupsPath = 'user_backups';
   static const int _maxRetries = 3;
   static const int _timeoutSeconds = 60;
@@ -67,18 +65,20 @@ class BackupRepository implements IBackupRepository {
       for (int attempt = 0; attempt < _maxRetries; attempt++) {
         try {
           uploadTask = ref.putData(bytes, metadata);
-          
+
           // Timeout para o upload
           final result = await uploadTask.timeout(
             const Duration(seconds: _timeoutSeconds),
           );
 
           if (result.state == TaskState.success) {
-            return Right(BackupResult.success(
-              backupId: ref.name,
-              fileName: backup.fileName,
-              sizeInBytes: backup.sizeInBytes,
-            ));
+            return Right(
+              BackupResult.success(
+                backupId: ref.name,
+                fileName: backup.fileName,
+                sizeInBytes: backup.sizeInBytes,
+              ),
+            );
           }
         } catch (e) {
           if (attempt == _maxRetries - 1) rethrow;
@@ -86,7 +86,9 @@ class BackupRepository implements IBackupRepository {
         }
       }
 
-      return const Left(NetworkFailure('Falha no upload após $_maxRetries tentativas'));
+      return const Left(
+        NetworkFailure('Falha no upload após $_maxRetries tentativas'),
+      );
     } catch (e) {
       return Left(_handleError(e));
     }
@@ -115,13 +117,15 @@ class BackupRepository implements IBackupRepository {
           // Extrai informações dos metadados
           final customMeta = metadata.customMetadata ?? {};
           final timestampStr = customMeta['timestamp'];
-          final plantsCount = int.tryParse(customMeta['plantsCount'] ?? '0') ?? 0;
+          final plantsCount =
+              int.tryParse(customMeta['plantsCount'] ?? '0') ?? 0;
           final tasksCount = int.tryParse(customMeta['tasksCount'] ?? '0') ?? 0;
-          final spacesCount = int.tryParse(customMeta['spacesCount'] ?? '0') ?? 0;
+          final spacesCount =
+              int.tryParse(customMeta['spacesCount'] ?? '0') ?? 0;
 
           if (timestampStr != null) {
             final timestamp = DateTime.parse(timestampStr);
-            
+
             final backupInfo = BackupInfo(
               id: item.name,
               fileName: item.name,
@@ -183,7 +187,9 @@ class BackupRepository implements IBackupRepository {
         }
       }
 
-      return const Left(NetworkFailure('Falha no download após $_maxRetries tentativas'));
+      return const Left(
+        NetworkFailure('Falha no download após $_maxRetries tentativas'),
+      );
     } catch (e) {
       return Left(_handleError(e));
     }
@@ -208,27 +214,29 @@ class BackupRepository implements IBackupRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteOldBackups(String userId, int maxBackups) async {
+  Future<Either<Failure, void>> deleteOldBackups(
+    String userId,
+    int maxBackups,
+  ) async {
     try {
       final backupsResult = await listBackups(userId);
-      
-      return await backupsResult.fold(
-        (failure) async => Left(failure),
-        (backups) async {
-          if (backups.length <= maxBackups) {
-            return const Right(null);
-          }
 
-          // Remove backups mais antigos
-          final backupsToDelete = backups.skip(maxBackups);
-          
-          for (final backup in backupsToDelete) {
-            await deleteBackup(backup.id);
-          }
-
+      return await backupsResult.fold((failure) async => Left(failure), (
+        backups,
+      ) async {
+        if (backups.length <= maxBackups) {
           return const Right(null);
-        },
-      );
+        }
+
+        // Remove backups mais antigos
+        final backupsToDelete = backups.skip(maxBackups);
+
+        for (final backup in backupsToDelete) {
+          await deleteBackup(backup.id);
+        }
+
+        return const Right(null);
+      });
     } catch (e) {
       return Left(_handleError(e));
     }
@@ -262,7 +270,7 @@ class BackupRepository implements IBackupRepository {
       }
     }
 
-    if (error.toString().contains('TimeoutException') || 
+    if (error.toString().contains('TimeoutException') ||
         error.toString().contains('timeout')) {
       return const NetworkFailure('Timeout na operação de backup');
     }
@@ -274,7 +282,7 @@ class BackupRepository implements IBackupRepository {
 /// Failure específico para operações de storage
 class StorageFailure extends Failure {
   const StorageFailure(String message) : super(message: message);
-  
+
   @override
   List<Object?> get props => [message];
 }

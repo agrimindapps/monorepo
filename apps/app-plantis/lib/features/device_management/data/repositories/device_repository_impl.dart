@@ -1,6 +1,5 @@
-import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/repositories/device_repository.dart';
 import '../datasources/device_local_datasource.dart';
@@ -16,11 +15,13 @@ class DeviceRepositoryImpl implements DeviceRepository {
   DeviceRepositoryImpl({
     required DeviceRemoteDataSource remoteDataSource,
     required DeviceLocalDataSource localDataSource,
-  })  : _remoteDataSource = remoteDataSource,
-        _localDataSource = localDataSource;
+  }) : _remoteDataSource = remoteDataSource,
+       _localDataSource = localDataSource;
 
   @override
-  Future<Either<Failure, List<DeviceModel>>> getUserDevices(String userId) async {
+  Future<Either<Failure, List<DeviceModel>>> getUserDevices(
+    String userId,
+  ) async {
     try {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Getting devices for user $userId');
@@ -32,21 +33,25 @@ class DeviceRepositoryImpl implements DeviceRepository {
       return remoteResult.fold(
         (failure) async {
           if (kDebugMode) {
-            debugPrint('⚠️ DeviceRepository: Remote failed, falling back to local cache');
+            debugPrint(
+              '⚠️ DeviceRepository: Remote failed, falling back to local cache',
+            );
           }
           // Se falhar, usa o cache local como fallback
           return await _localDataSource.getUserDevices(userId);
         },
         (devices) async {
           if (kDebugMode) {
-            debugPrint('✅ DeviceRepository: Found ${devices.length} devices from remote');
+            debugPrint(
+              '✅ DeviceRepository: Found ${devices.length} devices from remote',
+            );
           }
-          
+
           // Salva os dispositivos no cache local para uso offline
           for (final device in devices) {
             await _localDataSource.saveDevice(device);
           }
-          
+
           return Right(devices);
         },
       );
@@ -62,7 +67,9 @@ class DeviceRepositoryImpl implements DeviceRepository {
   }
 
   @override
-  Future<Either<Failure, DeviceModel?>> getDeviceByUuid(String deviceUuid) async {
+  Future<Either<Failure, DeviceModel?>> getDeviceByUuid(
+    String deviceUuid,
+  ) async {
     try {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Getting device $deviceUuid (stub)');
@@ -96,19 +103,18 @@ class DeviceRepositoryImpl implements DeviceRepository {
         device: device,
       );
 
-      return result.fold(
-        (failure) => Left(failure),
-        (validatedDevice) async {
-          // Salva o dispositivo validado no cache local
-          await _localDataSource.saveDevice(validatedDevice);
-          
-          if (kDebugMode) {
-            debugPrint('✅ DeviceRepository: Device validation and caching successful');
-          }
-          
-          return Right(validatedDevice);
-        },
-      );
+      return result.fold((failure) => Left(failure), (validatedDevice) async {
+        // Salva o dispositivo validado no cache local
+        await _localDataSource.saveDevice(validatedDevice);
+
+        if (kDebugMode) {
+          debugPrint(
+            '✅ DeviceRepository: Device validation and caching successful',
+          );
+        }
+
+        return Right(validatedDevice);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -136,19 +142,18 @@ class DeviceRepositoryImpl implements DeviceRepository {
         deviceUuid: deviceUuid,
       );
 
-      return result.fold(
-        (failure) => Left(failure),
-        (_) async {
-          // Remove do cache local também
-          await _localDataSource.removeDevice(deviceUuid);
-          
-          if (kDebugMode) {
-            debugPrint('✅ DeviceRepository: Device revocation and local removal successful');
-          }
-          
-          return const Right(null);
-        },
-      );
+      return result.fold((failure) => Left(failure), (_) async {
+        // Remove do cache local também
+        await _localDataSource.removeDevice(deviceUuid);
+
+        if (kDebugMode) {
+          debugPrint(
+            '✅ DeviceRepository: Device revocation and local removal successful',
+          );
+        }
+
+        return const Right(null);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -173,18 +178,15 @@ class DeviceRepositoryImpl implements DeviceRepository {
       // Obtém todos os dispositivos
       final devicesResult = await _localDataSource.getUserDevices(userId);
 
-      return devicesResult.fold(
-        (failure) => Left(failure),
-        (devices) async {
-          // Remove todos exceto o atual
-          for (final device in devices) {
-            if (device.uuid != currentDeviceUuid) {
-              await _localDataSource.removeDevice(device.uuid);
-            }
+      return devicesResult.fold((failure) => Left(failure), (devices) async {
+        // Remove todos exceto o atual
+        for (final device in devices) {
+          if (device.uuid != currentDeviceUuid) {
+            await _localDataSource.removeDevice(device.uuid);
           }
-          return const Right(null);
-        },
-      );
+        }
+        return const Right(null);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -203,47 +205,46 @@ class DeviceRepositoryImpl implements DeviceRepository {
   }) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Updating last activity for $deviceUuid (stub)');
+        debugPrint(
+          '🔄 DeviceRepository: Updating last activity for $deviceUuid (stub)',
+        );
       }
 
       // Busca o dispositivo atual
       final deviceResult = await _localDataSource.getDeviceByUuid(deviceUuid);
 
-      return deviceResult.fold(
-        (failure) => Left(failure),
-        (device) async {
-          if (device == null) {
-            return Left(
-              NotFoundFailure('Dispositivo não encontrado: $deviceUuid'),
-            );
-          }
-
-          // Cria uma nova instância com timestamp atualizado
-          final updatedDevice = DeviceModel(
-            id: device.id,
-            uuid: device.uuid,
-            name: device.name,
-            model: device.model,
-            platform: device.platform,
-            systemVersion: device.systemVersion,
-            appVersion: device.appVersion,
-            buildNumber: device.buildNumber,
-            isPhysicalDevice: device.isPhysicalDevice,
-            manufacturer: device.manufacturer,
-            firstLoginAt: device.firstLoginAt,
-            lastActiveAt: DateTime.now(), // Atualiza timestamp
-            isActive: device.isActive,
-            createdAt: device.createdAt,
-            updatedAt: DateTime.now(),
-            plantisSpecificData: device.plantisSpecificData,
+      return deviceResult.fold((failure) => Left(failure), (device) async {
+        if (device == null) {
+          return Left(
+            NotFoundFailure('Dispositivo não encontrado: $deviceUuid'),
           );
+        }
 
-          // Salva no cache
-          await _localDataSource.saveDevice(updatedDevice);
+        // Cria uma nova instância com timestamp atualizado
+        final updatedDevice = DeviceModel(
+          id: device.id,
+          uuid: device.uuid,
+          name: device.name,
+          model: device.model,
+          platform: device.platform,
+          systemVersion: device.systemVersion,
+          appVersion: device.appVersion,
+          buildNumber: device.buildNumber,
+          isPhysicalDevice: device.isPhysicalDevice,
+          manufacturer: device.manufacturer,
+          firstLoginAt: device.firstLoginAt,
+          lastActiveAt: DateTime.now(), // Atualiza timestamp
+          isActive: device.isActive,
+          createdAt: device.createdAt,
+          updatedAt: DateTime.now(),
+          plantisSpecificData: device.plantisSpecificData,
+        );
 
-          return Right(updatedDevice);
-        },
-      );
+        // Salva no cache
+        await _localDataSource.saveDevice(updatedDevice);
+
+        return Right(updatedDevice);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -259,19 +260,18 @@ class DeviceRepositoryImpl implements DeviceRepository {
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Checking if user $userId can add more devices (stub)');
+        debugPrint(
+          '🔄 DeviceRepository: Checking if user $userId can add more devices (stub)',
+        );
       }
 
       final devicesResult = await _localDataSource.getUserDevices(userId);
 
-      return devicesResult.fold(
-        (failure) => Left(failure),
-        (devices) {
-          final activeDevices = devices.where((d) => d.isActive).length;
-          final canAdd = activeDevices < 3; // Limite padrão
-          return Right(canAdd);
-        },
-      );
+      return devicesResult.fold((failure) => Left(failure), (devices) {
+        final activeDevices = devices.where((d) => d.isActive).length;
+        final canAdd = activeDevices < 3; // Limite padrão
+        return Right(canAdd);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -287,18 +287,17 @@ class DeviceRepositoryImpl implements DeviceRepository {
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Getting active device count for $userId (stub)');
+        debugPrint(
+          '🔄 DeviceRepository: Getting active device count for $userId (stub)',
+        );
       }
 
       final devicesResult = await _localDataSource.getUserDevices(userId);
 
-      return devicesResult.fold(
-        (failure) => Left(failure),
-        (devices) {
-          final activeCount = devices.where((d) => d.isActive).length;
-          return Right(activeCount);
-        },
-      );
+      return devicesResult.fold((failure) => Left(failure), (devices) {
+        final activeCount = devices.where((d) => d.isActive).length;
+        return Right(activeCount);
+      });
     } catch (e) {
       return Left(
         ServerFailure(
@@ -311,10 +310,14 @@ class DeviceRepositoryImpl implements DeviceRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(String userId) async {
+  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(
+    String userId,
+  ) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔄 DeviceRepository: Getting device statistics for $userId (stub)');
+        debugPrint(
+          '🔄 DeviceRepository: Getting device statistics for $userId (stub)',
+        );
       }
 
       return await _localDataSource.getDeviceStatistics(userId);

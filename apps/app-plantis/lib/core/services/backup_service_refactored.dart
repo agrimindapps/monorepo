@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
@@ -103,9 +101,16 @@ class BackupServiceRefactored {
 
       // Usa transformer service para converter dados
       final backupData = BackupData(
-        plants: plants.map((plant) => _transformerService.plantToJson(plant)).toList(),
-        tasks: tasks.map((task) => _transformerService.taskToJson(task)).toList(),
-        spaces: spaces.map((space) => _transformerService.spaceToJson(space)).toList(),
+        plants:
+            plants
+                .map((plant) => _transformerService.plantToJson(plant))
+                .toList(),
+        tasks:
+            tasks.map((task) => _transformerService.taskToJson(task)).toList(),
+        spaces:
+            spaces
+                .map((space) => _transformerService.spaceToJson(space))
+                .toList(),
         settings: await _loadUserSettings(),
         userPreferences: await _loadUserPreferences(),
       );
@@ -141,7 +146,7 @@ class BackupServiceRefactored {
           );
 
           final totalItems = plants.length + spaces.length + tasks.length;
-          
+
           // Log de sucesso
           await _auditService.logBackupCreation(
             userId: user.id,
@@ -200,16 +205,18 @@ class BackupServiceRefactored {
 
       // Baixa o backup
       final backupResult = await _backupRepository.downloadBackup(backupId);
-      
+
       if (backupResult.isLeft()) {
         return backupResult.fold(
           (failure) => Left(failure),
           (_) => throw StateError('Unexpected success'),
         );
       }
-      
-      final backup = backupResult.getOrElse(() => throw StateError('No backup data'));
-      
+
+      final backup = backupResult.getOrElse(
+        () => throw StateError('No backup data'),
+      );
+
       // Delega para o service especializado de restore
       return await _restoreService.restoreBackup(backup, user.id, options);
     } catch (e) {
@@ -226,13 +233,14 @@ class BackupServiceRefactored {
       }
 
       final result = await _backupRepository.deleteBackup(backupId);
-      
+
       // Log da operação
       await _auditService.logBackupDeletion(
         userId: user.id,
         backupId: backupId,
         isSuccess: result.isRight(),
-        errorMessage: result.isLeft() ? result.fold((f) => f.message, (_) => null) : null,
+        errorMessage:
+            result.isLeft() ? result.fold((f) => f.message, (_) => null) : null,
       );
 
       return result;
@@ -247,7 +255,8 @@ class BackupServiceRefactored {
       final settingsJson = await _storageService.getString(_backupSettingsKey);
       if (settingsJson != null) {
         final dynamic decodedJson = jsonDecode(settingsJson);
-        final Map<String, dynamic> settingsMap = decodedJson as Map<String, dynamic>;
+        final Map<String, dynamic> settingsMap =
+            decodedJson as Map<String, dynamic>;
         return BackupSettings.fromJson(settingsMap);
       }
       return const BackupSettings(); // Configurações padrão
@@ -342,7 +351,7 @@ class BackupServiceRefactored {
   Future<void> _cleanupOldBackups(String userId, int maxBackupsToKeep) async {
     try {
       await _backupRepository.deleteOldBackups(userId, maxBackupsToKeep);
-      
+
       await _auditService.logBackupCleanup(
         userId: userId,
         deletedCount: 0, // Seria calculado pela implementação real

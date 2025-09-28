@@ -194,9 +194,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 task.dueDate.isAfter(
                   startOfDay.subtract(const Duration(seconds: 1)),
                 ) &&
-                task.dueDate.isBefore(
-                  endOfDay.add(const Duration(seconds: 1)),
-                );
+                task.dueDate.isBefore(endOfDay.add(const Duration(seconds: 1)));
           }).toList();
 
       filteredTasks.sort((a, b) {
@@ -236,9 +234,7 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
           tasks.where((task) {
             return task.status == TaskStatus.pending &&
                 task.dueDate.isAfter(now) &&
-                task.dueDate.isBefore(
-                  nextWeek.add(const Duration(seconds: 1)),
-                );
+                task.dueDate.isBefore(nextWeek.add(const Duration(seconds: 1)));
           }).toList();
 
       filteredTasks.sort((a, b) {

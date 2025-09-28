@@ -14,13 +14,14 @@ class TasksDashboard extends StatelessWidget {
 
     // Optimized with Selector - only rebuilds when task statistics change
     return Selector<TasksProvider, Map<String, int>>(
-      selector: (context, provider) => {
-        'totalTasks': provider.totalTasks,
-        'pendingTasks': provider.pendingTasks,
-        'todayTasks': provider.todayTasks,
-        'overdueTasks': provider.overdueTasks,
-        'completedTasks': provider.completedTasks,
-      },
+      selector:
+          (context, provider) => {
+            'totalTasks': provider.totalTasks,
+            'pendingTasks': provider.pendingTasks,
+            'todayTasks': provider.todayTasks,
+            'overdueTasks': provider.overdueTasks,
+            'completedTasks': provider.completedTasks,
+          },
       builder: (context, taskStats, child) {
         return Container(
           padding: const EdgeInsets.all(TasksConstants.dashboardPadding),
@@ -185,7 +186,9 @@ class _ProgressBar extends StatelessWidget {
             _getProgressColor(percentage, theme),
           ),
           minHeight: TasksConstants.progressBarHeight,
-          borderRadius: BorderRadius.circular(TasksConstants.progressBarBorderRadius),
+          borderRadius: BorderRadius.circular(
+            TasksConstants.progressBarBorderRadius,
+          ),
         ),
       ],
     );

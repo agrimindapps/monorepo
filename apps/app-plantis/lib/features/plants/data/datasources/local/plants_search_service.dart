@@ -106,10 +106,11 @@ class PlantsSearchService {
 
   /// Search for plants containing all words in the query
   Future<List<Plant>> _searchMultiWord(String query) async {
-    final queryWords = query
-        .split(' ')
-        .where((word) => word.isNotEmpty && word.length > 2)
-        .toList();
+    final queryWords =
+        query
+            .split(' ')
+            .where((word) => word.isNotEmpty && word.length > 2)
+            .toList();
 
     if (queryWords.isEmpty) return [];
 
@@ -227,10 +228,7 @@ class PlantsSearchService {
   }
 
   /// Debounced search to reduce unnecessary calls
-  Future<List<Plant>> searchWithDebounce(
-    String query,
-    Duration delay,
-  ) async {
+  Future<List<Plant>> searchWithDebounce(String query, Duration delay) async {
     final completer = Completer<List<Plant>>();
 
     _debounceTimer?.cancel();

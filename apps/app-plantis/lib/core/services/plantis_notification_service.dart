@@ -6,14 +6,14 @@ import 'plantis_notification_config.dart';
 
 /// Serviço de notificações do Plantis usando o core LocalNotificationService
 class PlantisNotificationService {
-  static final PlantisNotificationService _instance = PlantisNotificationService._internal();
+  static final PlantisNotificationService _instance =
+      PlantisNotificationService._internal();
   factory PlantisNotificationService() => _instance;
   PlantisNotificationService._internal();
 
   // Usar o serviço do core
-  final INotificationRepository _notificationService = kIsWeb 
-      ? WebNotificationService()
-      : LocalNotificationService();
+  final INotificationRepository _notificationService =
+      kIsWeb ? WebNotificationService() : LocalNotificationService();
 
   bool _isInitialized = false;
 
@@ -30,7 +30,9 @@ class PlantisNotificationService {
       if (_isInitialized) {
         // Configurar callbacks
         _notificationService.setNotificationTapCallback(_onNotificationTapped);
-        _notificationService.setNotificationActionCallback(_onNotificationAction);
+        _notificationService.setNotificationActionCallback(
+          _onNotificationAction,
+        );
       }
 
       return _isInitialized;
@@ -74,7 +76,9 @@ class PlantisNotificationService {
     // Este método era usado para agendar notificações iniciais
     // Na nova implementação, isso é feito sob demanda
     if (kDebugMode) {
-      print('PlantisNotificationService: initializeAllNotifications - usando agendamento sob demanda');
+      print(
+        'PlantisNotificationService: initializeAllNotifications - usando agendamento sob demanda',
+      );
     }
   }
 
@@ -83,7 +87,9 @@ class PlantisNotificationService {
     // Este método era usado para verificar tarefas atrasadas
     // Na nova implementação, isso deve ser feito pelo TaskNotificationService
     if (kDebugMode) {
-      print('PlantisNotificationService: checkAndNotifyOverdueTasks - delegado para TaskNotificationService');
+      print(
+        'PlantisNotificationService: checkAndNotifyOverdueTasks - delegado para TaskNotificationService',
+      );
     }
   }
 
@@ -128,10 +134,7 @@ class PlantisNotificationService {
       title: '🌱 Nova planta adicionada!',
       body: message ?? 'Você adicionou $plantName ao seu jardim',
       type: 'new_plant',
-      extraData: {
-        'plantName': plantName,
-        'plantType': plantType,
-      },
+      extraData: {'plantName': plantName, 'plantType': plantType},
     );
   }
 
@@ -158,7 +161,9 @@ class PlantisNotificationService {
     // Este método era usado para agendar notificações diárias
     // Na nova implementação, isso deve ser feito sob demanda por planta
     if (kDebugMode) {
-      print('PlantisNotificationService: scheduleDailyCareForAllPlants - usando agendamento individual por planta');
+      print(
+        'PlantisNotificationService: scheduleDailyCareForAllPlants - usando agendamento individual por planta',
+      );
     }
   }
 
@@ -197,7 +202,9 @@ class PlantisNotificationService {
         priority: notification.priority,
       );
 
-      return await _notificationService.scheduleNotification(scheduledNotification);
+      return await _notificationService.scheduleNotification(
+        scheduledNotification,
+      );
     } catch (e) {
       if (kDebugMode) {
         print('Erro ao agendar notificação direta: $e');
@@ -249,20 +256,23 @@ class PlantisNotificationService {
     }
 
     try {
-      final id = _notificationService.generateNotificationId('${plantId}_$careType');
-      
+      final id = _notificationService.generateNotificationId(
+        '${plantId}_$careType',
+      );
+
       final title = _getCareTypeTitle(careType);
       final body = customMessage ?? 'É hora de cuidar da sua $plantName';
 
-      final notification = PlantisNotificationConfig.createPlantCareNotification(
-        id: id,
-        title: title,
-        body: body,
-        careType: careType,
-        plantId: plantId,
-        plantName: plantName,
-        scheduledDate: scheduledDate,
-      );
+      final notification =
+          PlantisNotificationConfig.createPlantCareNotification(
+            id: id,
+            title: title,
+            body: body,
+            careType: careType,
+            plantId: plantId,
+            plantName: plantName,
+            scheduledDate: scheduledDate,
+          );
 
       return await _notificationService.scheduleNotification(notification);
     } catch (e) {
@@ -286,7 +296,7 @@ class PlantisNotificationService {
 
     try {
       final id = DateTime.now().millisecondsSinceEpoch;
-      
+
       final notification = PlantisNotificationConfig.createGeneralNotification(
         id: id,
         title: title,
@@ -306,7 +316,9 @@ class PlantisNotificationService {
   /// Cancela notificação específica de planta
   Future<bool> cancelPlantNotification(String plantId, String careType) async {
     try {
-      final id = _notificationService.generateNotificationId('${plantId}_$careType');
+      final id = _notificationService.generateNotificationId(
+        '${plantId}_$careType',
+      );
       return await _notificationService.cancelNotification(id);
     } catch (e) {
       if (kDebugMode) {
@@ -319,7 +331,8 @@ class PlantisNotificationService {
   /// Cancela todas as notificações de uma planta
   Future<bool> cancelAllPlantNotifications(String plantId) async {
     try {
-      final pendingNotifications = await _notificationService.getPendingNotifications();
+      final pendingNotifications =
+          await _notificationService.getPendingNotifications();
       bool allCancelled = true;
 
       for (final notification in pendingNotifications) {
@@ -329,7 +342,9 @@ class PlantisNotificationService {
             if (payloadData is Map<String, dynamic> &&
                 payloadData.containsKey('plantId') &&
                 payloadData['plantId'] == plantId) {
-              final cancelled = await _notificationService.cancelNotification(notification.id);
+              final cancelled = await _notificationService.cancelNotification(
+                notification.id,
+              );
               if (!cancelled) allCancelled = false;
             }
           } catch (e) {
@@ -358,17 +373,20 @@ class PlantisNotificationService {
   }
 
   /// Lista notificações de uma planta específica
-  Future<List<PendingNotificationEntity>> getPlantNotifications(String plantId) async {
+  Future<List<PendingNotificationEntity>> getPlantNotifications(
+    String plantId,
+  ) async {
     try {
-      final allNotifications = await _notificationService.getPendingNotifications();
-      
+      final allNotifications =
+          await _notificationService.getPendingNotifications();
+
       return allNotifications.where((notification) {
         if (notification.payload != null) {
           try {
             final payloadData = jsonDecode(notification.payload!);
             return payloadData is Map<String, dynamic> &&
-                   payloadData.containsKey('plantId') &&
-                   payloadData['plantId'] == plantId;
+                payloadData.containsKey('plantId') &&
+                payloadData['plantId'] == plantId;
           } catch (e) {
             return false;
           }
@@ -384,9 +402,14 @@ class PlantisNotificationService {
   }
 
   /// Verifica se uma notificação específica está agendada
-  Future<bool> isPlantNotificationScheduled(String plantId, String careType) async {
+  Future<bool> isPlantNotificationScheduled(
+    String plantId,
+    String careType,
+  ) async {
     try {
-      final id = _notificationService.generateNotificationId('${plantId}_$careType');
+      final id = _notificationService.generateNotificationId(
+        '${plantId}_$careType',
+      );
       return await _notificationService.isNotificationScheduled(id);
     } catch (e) {
       if (kDebugMode) {
@@ -401,7 +424,7 @@ class PlantisNotificationService {
     if (payload != null && kDebugMode) {
       print('Notificação tocada: $payload');
     }
-    
+
     // TODO: Implementar navegação baseada no payload
     // Por exemplo: navegar para detalhes da planta se for notificação de cuidado
   }

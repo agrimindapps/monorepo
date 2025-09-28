@@ -29,7 +29,7 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
   void initState() {
     super.initState();
     _selectedSpaceId = widget.selectedSpaceId;
-    
+
     // Carregar espaços quando o widget for inicializado
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final spacesProvider = context.read<SpacesProvider>();
@@ -62,7 +62,7 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            
+
             const SizedBox(height: 8),
 
             // Loading state
@@ -70,11 +70,16 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
               Container(
                 height: 56,
                 decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                  ),
                   borderRadius: BorderRadius.circular(12),
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(
+                            0xFFFFFFFF,
+                          ), // Branco puro para modo claro
                 ),
                 child: const Center(
                   child: SizedBox(
@@ -85,21 +90,29 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                 ),
               )
             // Error state
-            else if (spacesProvider.error != null && spacesProvider.spaces.isEmpty)
+            else if (spacesProvider.error != null &&
+                spacesProvider.spaces.isEmpty)
               Container(
                 height: 56,
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.error),
                   borderRadius: BorderRadius.circular(12),
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(
+                            0xFFFFFFFF,
+                          ), // Branco puro para modo claro
                 ),
                 child: Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error, color: theme.colorScheme.error, size: 20),
+                      Icon(
+                        Icons.error,
+                        color: theme.colorScheme.error,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Erro ao carregar espaços',
@@ -135,9 +148,13 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
     );
   }
 
-  Widget _buildSpaceDropdown(BuildContext context, SpacesProvider spacesProvider, ThemeData theme) {
+  Widget _buildSpaceDropdown(
+    BuildContext context,
+    SpacesProvider spacesProvider,
+    ThemeData theme,
+  ) {
     final spaces = spacesProvider.spaces;
-    
+
     // Adiciona opções especiais
     final List<DropdownMenuItem<String?>> items = [
       DropdownMenuItem<String?>(
@@ -213,23 +230,21 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: theme.colorScheme.error,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
         ),
         filled: true,
-        fillColor: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFFFFFFF), // Branco puro para modo claro
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        fillColor:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
       ),
       items: items,
       isExpanded: true,
@@ -275,9 +290,12 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                     ),
                   ),
                   filled: true,
-                  fillColor: theme.brightness == Brightness.dark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
+                  fillColor:
+                      theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(
+                            0xFFFFFFFF,
+                          ), // Branco puro para modo claro
                   contentPadding: const EdgeInsets.all(12),
                 ),
                 onChanged: (value) {
@@ -298,7 +316,10 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                 });
                 widget.onSpaceChanged(null);
               },
-              icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),
+              icon: Icon(
+                Icons.close,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
               tooltip: 'Cancelar',
             ),
           ],

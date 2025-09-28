@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../services/image_preloader_service.dart';
 import '../adapters/plantis_image_service_adapter.dart';
 import '../di/injection_container.dart';
+import '../services/image_preloader_service.dart';
 
 /// Unified image widget that consolidates all image display functionality
 /// Combines features from OptimizedImageWidget and OptimizedPlantImageWidget
@@ -131,7 +131,6 @@ class UnifiedImageWidget extends StatefulWidget {
 
 class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-
   // LRU cache for base64 images
   static final _LRUImageCache _base64Cache = _LRUImageCache(maxSize: 30);
 
@@ -200,7 +199,10 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         adapter.preloadImages(widget.imageUrls, priority: true);
       } catch (e) {
         // Fallback to original preloader service
-        ImagePreloaderService.instance.preloadImages(widget.imageUrls, priority: true);
+        ImagePreloaderService.instance.preloadImages(
+          widget.imageUrls,
+          priority: true,
+        );
       }
     }
   }
@@ -306,10 +308,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
     }
 
     // Apply border radius clipping
-    child = ClipRRect(
-      borderRadius: _getBorderRadius(),
-      child: child,
-    );
+    child = ClipRRect(borderRadius: _getBorderRadius(), child: child);
 
     // Wrap with RepaintBoundary for performance
     return RepaintBoundary(
@@ -397,8 +396,9 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
 
   Widget _buildDefaultPlaceholder() {
     final theme = Theme.of(context);
-    final iconData = widget.placeholderIcon ?? 
-                    (widget.isPlantImage ? Icons.eco : Icons.image);
+    final iconData =
+        widget.placeholderIcon ??
+        (widget.isPlantImage ? Icons.eco : Icons.image);
 
     if (widget.isPlantImage) {
       // Plant-specific placeholder with border
@@ -406,9 +406,10 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         width: widget.width,
         height: widget.height,
         decoration: BoxDecoration(
-          shape: widget.useCircularBorder ? BoxShape.circle : BoxShape.rectangle,
-          color: widget.placeholderColor ?? 
-                 theme.colorScheme.surfaceContainerHigh,
+          shape:
+              widget.useCircularBorder ? BoxShape.circle : BoxShape.rectangle,
+          color:
+              widget.placeholderColor ?? theme.colorScheme.surfaceContainerHigh,
           border: Border.all(
             color: widget.borderColor ?? theme.colorScheme.primary,
             width: widget.borderWidth ?? 2,
@@ -428,8 +429,9 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
-        color: widget.placeholderColor ??
-               theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color:
+            widget.placeholderColor ??
+            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: _getBorderRadius(),
       ),
       child: Icon(
@@ -494,7 +496,7 @@ class _LRUImageCache {
   /// Put an image in cache
   void put(String key, Uint8List value) {
     final existingNode = _cache[key];
-    
+
     if (existingNode != null) {
       // Update existing node and move to front
       existingNode.value = value;

@@ -19,12 +19,12 @@ class EnhancedImageCacheManager {
   // Memory cache for decoded base64 images (LRU)
   final Map<String, Uint8List> _memoryCache = {};
   final Map<String, DateTime> _cacheAccess = {};
-  
+
   // Cache configuration
   static const int maxMemoryCacheSize = 20; // Max items in memory
   static const int maxMemoryBytes = 50 * 1024 * 1024; // 50MB max memory usage
   static const Duration cacheExpiration = Duration(hours: 24);
-  
+
   int _currentMemoryBytes = 0;
 
   // Simplified cache manager using default CachedNetworkImage behavior
@@ -43,10 +43,10 @@ class EnhancedImageCacheManager {
     try {
       // Decode the image
       final imageBytes = await _decodeBase64Optimized(base64String);
-      
+
       // Cache it if there's space
       await _cacheImageBytes(key, imageBytes);
-      
+
       return imageBytes;
     } catch (e) {
       debugPrint('Error decoding base64 image: $e');
@@ -56,7 +56,8 @@ class EnhancedImageCacheManager {
 
   /// Optimized base64 decoding using compute for large images
   static Future<Uint8List> _decodeBase64Optimized(String base64String) async {
-    if (base64String.length > 1000000) { // > 1MB base64, use compute
+    if (base64String.length > 1000000) {
+      // > 1MB base64, use compute
       return compute(_decodeBase64Worker, base64String);
     } else {
       return base64Decode(base64String);
@@ -71,9 +72,10 @@ class EnhancedImageCacheManager {
   /// Cache image bytes with memory management
   Future<void> _cacheImageBytes(String key, Uint8List imageBytes) async {
     final imageSize = imageBytes.lengthInBytes;
-    
+
     // Check if image is too large for memory cache
-    if (imageSize > 10 * 1024 * 1024) { // 10MB limit per image
+    if (imageSize > 10 * 1024 * 1024) {
+      // 10MB limit per image
       return;
     }
 
@@ -90,10 +92,11 @@ class EnhancedImageCacheManager {
   Future<void> _cleanupMemoryCache(int newImageSize) async {
     // Remove expired entries first
     final now = DateTime.now();
-    final expiredKeys = _cacheAccess.entries
-        .where((entry) => now.difference(entry.value) > cacheExpiration)
-        .map((entry) => entry.key)
-        .toList();
+    final expiredKeys =
+        _cacheAccess.entries
+            .where((entry) => now.difference(entry.value) > cacheExpiration)
+            .map((entry) => entry.key)
+            .toList();
 
     for (final key in expiredKeys) {
       _removeFromCache(key);
@@ -101,13 +104,14 @@ class EnhancedImageCacheManager {
 
     // If still over limit, remove oldest entries
     while ((_currentMemoryBytes + newImageSize > maxMemoryBytes) ||
-           (_memoryCache.length >= maxMemoryCacheSize)) {
+        (_memoryCache.length >= maxMemoryCacheSize)) {
       if (_cacheAccess.isEmpty) break;
 
       // Find oldest entry
-      final oldestKey = _cacheAccess.entries
-          .reduce((a, b) => a.value.isBefore(b.value) ? a : b)
-          .key;
+      final oldestKey =
+          _cacheAccess.entries
+              .reduce((a, b) => a.value.isBefore(b.value) ? a : b)
+              .key;
 
       _removeFromCache(oldestKey);
     }
@@ -117,7 +121,7 @@ class EnhancedImageCacheManager {
   void _removeFromCache(String key) {
     final imageBytes = _memoryCache.remove(key);
     _cacheAccess.remove(key);
-    
+
     if (imageBytes != null) {
       _currentMemoryBytes -= imageBytes.lengthInBytes;
     }
@@ -130,7 +134,7 @@ class EnhancedImageCacheManager {
 
   /// Generate cache key from base64 string
   String _generateCacheKey(String base64String) {
-    return base64String.length > 50 
+    return base64String.length > 50
         ? base64String.substring(0, 50) + base64String.length.toString()
         : base64String;
   }
@@ -141,9 +145,9 @@ class EnhancedImageCacheManager {
     for (int i = 0; i < base64Images.length; i += 3) {
       final batch = base64Images.skip(i).take(3);
       final batchFutures = batch.map((image) => getBase64Image(image));
-      
+
       await Future.wait(batchFutures);
-      
+
       // Small delay between batches to prevent memory pressure
       if (i + 3 < base64Images.length) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -156,10 +160,12 @@ class EnhancedImageCacheManager {
     _memoryCache.clear();
     _cacheAccess.clear();
     _currentMemoryBytes = 0;
-    
+
     // Request garbage collection
     if (!kIsWeb) {
-      SystemChannels.platform.invokeMethod<void>('SystemChrome.restoreSystemUIOverlays');
+      SystemChannels.platform.invokeMethod<void>(
+        'SystemChrome.restoreSystemUIOverlays',
+      );
     }
   }
 
@@ -207,16 +213,16 @@ class EnhancedImageCacheManager {
     try {
       final cacheDir = await getTemporaryDirectory();
       final plantisCache = Directory('${cacheDir.path}/plantis_images');
-      
+
       if (!plantisCache.existsSync()) return 0;
-      
+
       int totalSize = 0;
       await for (final entity in plantisCache.list(recursive: true)) {
         if (entity is File) {
           totalSize += await entity.length();
         }
       }
-      
+
       return totalSize;
     } catch (e) {
       debugPrint('Error calculating cache size: $e');
@@ -242,7 +248,8 @@ extension OptimizedCachedNetworkImage on CachedNetworkImage {
       height: height,
       fit: fit,
       placeholder: (context, url) => placeholder ?? const SizedBox(),
-      errorWidget: (context, url, error) => errorWidget ?? const Icon(Icons.error),
+      errorWidget:
+          (context, url, error) => errorWidget ?? const Icon(Icons.error),
       fadeInDuration: fadeInDuration,
       // Using default cache manager
       // Memory optimization

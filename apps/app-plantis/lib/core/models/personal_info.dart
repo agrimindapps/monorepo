@@ -25,13 +25,15 @@ class PersonalInfo {
   factory PersonalInfo.fromJson(Map<String, dynamic> json) => PersonalInfo(
     fullName: json['fullName'] as String?,
     phoneNumber: json['phoneNumber'] as String?,
-    dateOfBirth: json['dateOfBirth'] != null
-        ? DateTime.parse(json['dateOfBirth'] as String)
-        : null,
+    dateOfBirth:
+        json['dateOfBirth'] != null
+            ? DateTime.parse(json['dateOfBirth'] as String)
+            : null,
     address: json['address'] as String?,
-    customFields: json['customFields'] != null
-        ? Map<String, String>.from(json['customFields'] as Map)
-        : null,
+    customFields:
+        json['customFields'] != null
+            ? Map<String, String>.from(json['customFields'] as Map)
+            : null,
   );
 
   @override

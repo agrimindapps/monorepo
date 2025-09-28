@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/settings/domain/entities/settings_entity.dart';
 
@@ -20,9 +19,7 @@ class ThemeState {
 
   /// Configuração inicial padrão
   factory ThemeState.initial() {
-    return ThemeState(
-      settings: ThemeSettingsEntity.defaults(),
-    );
+    return ThemeState(settings: ThemeSettingsEntity.defaults());
   }
 
   /// Cria uma cópia com alterações
@@ -54,10 +51,12 @@ class ThemeState {
   }
 
   @override
-  int get hashCode => settings.hashCode ^ isLoading.hashCode ^ errorMessage.hashCode;
+  int get hashCode =>
+      settings.hashCode ^ isLoading.hashCode ^ errorMessage.hashCode;
 
   @override
-  String toString() => 'ThemeState(settings: $settings, isLoading: $isLoading, errorMessage: $errorMessage)';
+  String toString() =>
+      'ThemeState(settings: $settings, isLoading: $isLoading, errorMessage: $errorMessage)';
 }
 
 /// StateNotifier para gerenciar o tema usando SharedPreferences
@@ -95,10 +94,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
         followSystemTheme: followSystemTheme,
       );
 
-      state = state.copyWith(
-        settings: newSettings,
-        isLoading: false,
-      );
+      state = state.copyWith(settings: newSettings, isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -127,9 +123,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
         prefs.setBool(_followSystemKey, newSettings.followSystemTheme),
       ]);
     } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Erro ao salvar tema: $e',
-      );
+      state = state.copyWith(errorMessage: 'Erro ao salvar tema: $e');
     }
   }
 
@@ -182,7 +176,8 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       final prefs = await SharedPreferences.getInstance();
       await Future.wait<void>([
         prefs.setBool(_followSystemKey, followSystem),
-        if (followSystem) prefs.setString(_themeKey, ThemeMode.system.toString()),
+        if (followSystem)
+          prefs.setString(_themeKey, ThemeMode.system.toString()),
       ]);
     } catch (e) {
       state = state.copyWith(
@@ -209,7 +204,9 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 // =============================================================================
 
 /// Provider principal do ThemeNotifier
-final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
+final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((
+  ref,
+) {
   return ThemeNotifier();
 });
 
@@ -249,7 +246,10 @@ final plantisFollowSystemThemeProvider = Provider<bool>((ref) {
 });
 
 /// Provider auxiliar para verificar se está no modo escuro considerando o contexto
-final contextAwareDarkModeProvider = Provider.family<bool, BuildContext>((ref, context) {
+final contextAwareDarkModeProvider = Provider.family<bool, BuildContext>((
+  ref,
+  context,
+) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.themeMode == ThemeMode.system) {

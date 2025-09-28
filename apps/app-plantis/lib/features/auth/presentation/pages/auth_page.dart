@@ -2,22 +2,21 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:core/core.dart' hide Consumer;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart' hide Consumer;
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 
+import '../../../../core/riverpod_providers/auth_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
-import '../../../../core/riverpod_providers/auth_providers.dart';
-import '../widgets/forgot_password_dialog.dart';
 import '../widgets/device_validation_overlay.dart';
+import '../widgets/forgot_password_dialog.dart';
 
 // Constantes para SharedPreferences
 const String _kRememberedEmailKey = 'remembered_email';
@@ -28,10 +27,7 @@ class AuthLoadingState {
   final bool isLoading;
   final String? currentOperation;
 
-  const AuthLoadingState({
-    required this.isLoading,
-    this.currentOperation,
-  });
+  const AuthLoadingState({required this.isLoading, this.currentOperation});
 
   @override
   bool operator ==(Object other) =>
@@ -50,11 +46,7 @@ class AuthPage extends ConsumerStatefulWidget {
   final int initialTab; // 0 = login, 1 = register
   final bool? showBackButton;
 
-  const AuthPage({
-    super.key, 
-    this.initialTab = 0,
-    this.showBackButton,
-  });
+  const AuthPage({super.key, this.initialTab = 0, this.showBackButton});
 
   @override
   ConsumerState<AuthPage> createState() => _AuthPageState();
@@ -63,7 +55,7 @@ class AuthPage extends ConsumerStatefulWidget {
 class _AuthPageState extends ConsumerState<AuthPage>
     with TickerProviderStateMixin, LoadingStateMixin, AccessibilityFocusMixin {
   late TabController _tabController;
-  
+
   // Enhanced animations inspired by gasometer
   late AnimationController _animationController;
   late AnimationController _backgroundController;
@@ -87,7 +79,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
   final _registerConfirmPasswordController = TextEditingController();
   bool _obscureRegisterPassword = true;
   bool _obscureRegisterConfirmPassword = true;
-  
+
   // Focus nodes para navegação por teclado - inicialização segura
   FocusNode? _emailFocusNode;
   FocusNode? _passwordFocusNode;
@@ -101,14 +93,14 @@ class _AuthPageState extends ConsumerState<AuthPage>
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize TabController
     _tabController = TabController(
       length: 2,
       vsync: this,
       initialIndex: widget.initialTab,
     );
-    
+
     // Inicializar focus nodes de forma imediata mas segura
     _emailFocusNode = getFocusNode('email');
     _passwordFocusNode = getFocusNode('password');
@@ -116,15 +108,17 @@ class _AuthPageState extends ConsumerState<AuthPage>
     _registerNameFocusNode = getFocusNode('register_name');
     _registerEmailFocusNode = getFocusNode('register_email');
     _registerPasswordFocusNode = getFocusNode('register_password');
-    _registerConfirmPasswordFocusNode = getFocusNode('register_confirm_password');
+    _registerConfirmPasswordFocusNode = getFocusNode(
+      'register_confirm_password',
+    );
     _registerButtonFocusNode = getFocusNode('register_button');
-    
+
     // Enhanced animation setup inspired by gasometer
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
+
     _backgroundController = AnimationController(
       duration: const Duration(seconds: 15),
       vsync: this,
@@ -143,12 +137,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
         curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
       ),
     );
-    
+
     _backgroundAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _backgroundController,
-        curve: Curves.linear,
-      ),
+      CurvedAnimation(parent: _backgroundController, curve: Curves.linear),
     );
 
     // Logo animation for modern branding
@@ -186,7 +177,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
   /// Salva ou remove as credenciais lembradas baseado no estado do checkbox
   Future<void> _saveRememberedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     if (_rememberMe) {
       // Salvar email e estado do "Lembrar-me"
       await prefs.setString(_kRememberedEmailKey, _loginEmailController.text);
@@ -201,10 +192,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
   /// Carrega email salvo e estado do "Lembrar-me" na inicialização
   Future<void> _loadRememberedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     final rememberedEmail = prefs.getString(_kRememberedEmailKey);
     final rememberMe = prefs.getBool(_kRememberMeKey) ?? false;
-    
+
     if (rememberedEmail != null && rememberMe) {
       setState(() {
         _loginEmailController.text = rememberedEmail;
@@ -248,7 +239,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
     }
   }
 
-
   Future<void> _handleRegister() async {
     if (_registerFormKey.currentState!.validate()) {
       showLoading(message: 'Criando conta...');
@@ -283,94 +273,95 @@ class _AuthPageState extends ConsumerState<AuthPage>
   void _showSocialLoginDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Em Desenvolvimento'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.construction,
-              size: 48,
-              color: Colors.orange,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Em Desenvolvimento'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.construction, size: 48, color: Colors.orange),
+                SizedBox(height: 16),
+                Text(
+                  'O login social está em desenvolvimento e estará disponível em breve!',
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            Text(
-              'O login social está em desenvolvimento e estará disponível em breve!',
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showAnonymousLoginDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Anônimo'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Como funciona o login anônimo:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Login Anônimo'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Como funciona o login anônimo:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text('• Você pode usar o app sem criar conta'),
+                Text('• Seus dados ficam apenas no dispositivo'),
+                Text(
+                  '• Limitação: dados podem ser perdidos se o app for desinstalado',
+                ),
+                Text('• Sem backup na nuvem'),
+                Text('• Sem sincronização entre dispositivos'),
+                SizedBox(height: 16),
+                Text(
+                  'Deseja prosseguir?',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text('• Você pode usar o app sem criar conta'),
-            Text('• Seus dados ficam apenas no dispositivo'),
-            Text('• Limitação: dados podem ser perdidos se o app for desinstalado'),
-            Text('• Sem backup na nuvem'),
-            Text('• Sem sincronização entre dispositivos'),
-            SizedBox(height: 16),
-            Text(
-              'Deseja prosseguir?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  showLoading(message: 'Entrando anonimamente...');
+
+                  final router = GoRouter.of(context);
+                  final authNotifier = ref.read(authProvider.notifier);
+
+                  try {
+                    await authNotifier.signInAnonymously();
+
+                    if (!mounted) return;
+
+                    hideLoading();
+
+                    // Verificar se login anônimo foi bem-sucedido
+                    final authState = ref.read(authProvider);
+                    if (authState.hasValue &&
+                        authState.value!.isAuthenticated) {
+                      router.go('/plants');
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      hideLoading();
+                    }
+                  }
+                },
+                child: const Text('Prosseguir'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              showLoading(message: 'Entrando anonimamente...');
-
-              final router = GoRouter.of(context);
-              final authNotifier = ref.read(authProvider.notifier);
-
-              try {
-                await authNotifier.signInAnonymously();
-
-                if (!mounted) return;
-
-                hideLoading();
-
-                // Verificar se login anônimo foi bem-sucedido
-                final authState = ref.read(authProvider);
-                if (authState.hasValue && authState.value!.isAuthenticated) {
-                  router.go('/plants');
-                }
-              } catch (e) {
-                if (mounted) {
-                  hideLoading();
-                }
-              }
-            },
-            child: const Text('Prosseguir'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -380,7 +371,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
     final isDesktop = size.width > 900;
     final isTablet = size.width > 600 && size.width <= 900;
     final isMobile = size.width <= 600;
-    
+
     return buildWithLoading(
       child: Scaffold(
         body: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -390,7 +381,13 @@ class _AuthPageState extends ConsumerState<AuthPage>
               GestureDetector(
                 onTap: () => FocusScope.of(context).unfocus(),
                 child: _buildModernBackground(
-                  child: _buildResponsiveLayout(context, size, isDesktop, isTablet, isMobile),
+                  child: _buildResponsiveLayout(
+                    context,
+                    size,
+                    isDesktop,
+                    isTablet,
+                    isMobile,
+                  ),
                 ),
               ),
               // Device validation overlay
@@ -430,24 +427,28 @@ class _AuthPageState extends ConsumerState<AuthPage>
   }
 
   /// Responsive layout inspired by gasometer design
-  Widget _buildResponsiveLayout(BuildContext context, Size size, bool isDesktop, bool isTablet, bool isMobile) {
+  Widget _buildResponsiveLayout(
+    BuildContext context,
+    Size size,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+  ) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    
+
     return Center(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(
-          vertical: MediaQuery.of(context).padding.top + (keyboardHeight > 0 ? 8 : 16),
+          vertical:
+              MediaQuery.of(context).padding.top +
+              (keyboardHeight > 0 ? 8 : 16),
           horizontal: 16,
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: isMobile
-                ? size.width * 0.9
-                : (isTablet ? 500 : 1000),
-            maxHeight: isMobile
-                ? size.height * 0.9
-                : (isTablet ? 700 : 650),
+            maxWidth: isMobile ? size.width * 0.9 : (isTablet ? 500 : 1000),
+            maxHeight: isMobile ? size.height * 0.9 : (isTablet ? 700 : 650),
           ),
           child: RepaintBoundary(
             child: Card(
@@ -460,9 +461,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: isDesktop
-                  ? _buildDesktopLayout()
-                  : _buildMobileLayout(),
+              child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
             ),
           ),
         ),
@@ -475,10 +474,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
     return Row(
       children: [
         // Left side with Inside Garden branding
-        Expanded(
-          flex: 5,
-          child: _buildPlantBrandingSide(),
-        ),
+        Expanded(flex: 5, child: _buildPlantBrandingSide()),
         // Right side with form
         Expanded(
           flex: 4,
@@ -506,7 +502,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
   Widget _buildMobileLayout() {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardVisible = keyboardHeight > 0;
-    
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: 20.0,
@@ -531,9 +527,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     _buildCompactBranding(),
                     const SizedBox(height: 12),
                   ],
-                  Flexible(
-                    child: _buildAuthContent(),
-                  ),
+                  Flexible(child: _buildAuthContent()),
                 ],
               ),
             );
@@ -610,7 +604,12 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     animation: _backgroundAnimation,
                     builder: (context, child) {
                       return Transform.scale(
-                        scale: 1.0 + (0.1 * math.sin(_backgroundAnimation.value * 2 * math.pi)),
+                        scale:
+                            1.0 +
+                            (0.1 *
+                                math.sin(
+                                  _backgroundAnimation.value * 2 * math.pi,
+                                )),
                         child: Container(
                           padding: const EdgeInsets.all(30),
                           decoration: BoxDecoration(
@@ -683,11 +682,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
               width: 1.5,
             ),
           ),
-          child: const Icon(
-            Icons.eco,
-            color: PlantisColors.primary,
-            size: 20,
-          ),
+          child: const Icon(Icons.eco, color: PlantisColors.primary, size: 20),
         ),
         const SizedBox(width: 12),
         const Text(
@@ -710,7 +705,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
     Color? color,
   }) {
     final logoColor = isWhite ? Colors.white : (color ?? PlantisColors.primary);
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
@@ -725,11 +720,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
               width: 2,
             ),
           ),
-          child: Icon(
-            Icons.eco,
-            color: logoColor,
-            size: size,
-          ),
+          child: Icon(Icons.eco, color: logoColor, size: size),
         ),
         const SizedBox(width: 12),
         Text(
@@ -767,23 +758,26 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     position: Tween<Offset>(
                       begin: const Offset(0.0, 0.1),
                       end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      ),
+                    ),
                     child: child,
                   ),
                 );
               },
-              child: _tabController.index == 0
-                  ? Container(
-                      key: const ValueKey('login'),
-                      child: _buildLoginTab(),
-                    )
-                  : Container(
-                      key: const ValueKey('register'),
-                      child: _buildRegisterTab(),
-                    ),
+              child:
+                  _tabController.index == 0
+                      ? Container(
+                        key: const ValueKey('login'),
+                        child: _buildLoginTab(),
+                      )
+                      : Container(
+                        key: const ValueKey('register'),
+                        child: _buildRegisterTab(),
+                      ),
             );
           },
         ),
@@ -809,7 +803,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 },
               ),
               const SizedBox(width: 40),
-              // Register Tab  
+              // Register Tab
               _buildTab(
                 title: 'Cadastrar',
                 isActive: _tabController.index == 1,
@@ -840,9 +834,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: isActive
-                  ? PlantisColors.primary
-                  : Colors.grey.shade500,
+              color: isActive ? PlantisColors.primary : Colors.grey.shade500,
             ),
             child: Text(title),
           ),
@@ -906,13 +898,23 @@ class _AuthPageState extends ConsumerState<AuthPage>
             autocomplete: AutofillHints.password,
             isRequired: true,
             validator: (value) {
-              return AuthValidators.validatePassword(value ?? '', isRegistration: false);
+              return AuthValidators.validatePassword(
+                value ?? '',
+                isRegistration: false,
+              );
             },
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: Semantics(
-              label: _obscureLoginPassword 
-                  ? AccessibilityTokens.getSemanticLabel('show_password', 'Mostrar senha')
-                  : AccessibilityTokens.getSemanticLabel('hide_password', 'Ocultar senha'),
+              label:
+                  _obscureLoginPassword
+                      ? AccessibilityTokens.getSemanticLabel(
+                        'show_password',
+                        'Mostrar senha',
+                      )
+                      : AccessibilityTokens.getSemanticLabel(
+                        'hide_password',
+                        'Ocultar senha',
+                      ),
               button: true,
               child: IconButton(
                 icon: Icon(
@@ -928,7 +930,8 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     _obscureLoginPassword = !_obscureLoginPassword;
                   });
                   // Anunciar mudança para screen readers
-                  final message = _obscureLoginPassword ? 'Senha oculta' : 'Senha visível';
+                  final message =
+                      _obscureLoginPassword ? 'Senha oculta' : 'Senha visível';
                   SemanticsService.announce(message, ui.TextDirection.ltr);
                 },
               ),
@@ -952,9 +955,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
 
           // Enhanced divider with social login
           _buildSocialLoginSection(),
-          
+
           const SizedBox(height: 16),
-          
+
           // Enhanced anonymous login
           _buildAnonymousLoginSection(),
         ],
@@ -994,24 +997,27 @@ class _AuthPageState extends ConsumerState<AuthPage>
                             width: 20,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: _rememberMe 
-                                  ? PlantisColors.primary 
-                                  : Colors.transparent,
+                              color:
+                                  _rememberMe
+                                      ? PlantisColors.primary
+                                      : Colors.transparent,
                               border: Border.all(
-                                color: _rememberMe 
-                                    ? PlantisColors.primary 
-                                    : Colors.grey.shade400,
+                                color:
+                                    _rememberMe
+                                        ? PlantisColors.primary
+                                        : Colors.grey.shade400,
                                 width: 2,
                               ),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: _rememberMe
-                                ? const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 14,
-                                  )
-                                : null,
+                            child:
+                                _rememberMe
+                                    ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 14,
+                                    )
+                                    : null,
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -1030,7 +1036,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 TextButton(
                   onPressed: _showForgotPasswordDialog,
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -1050,7 +1059,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
       },
     );
   }
-  
+
   Widget _buildErrorMessage() {
     return riverpod.Consumer(
       builder: (context, ref, child) {
@@ -1098,7 +1107,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
       },
     );
   }
-  
+
   Widget _buildAccessibleLoginButton() {
     return riverpod.Consumer(
       builder: (context, ref, child) {
@@ -1106,45 +1115,58 @@ class _AuthPageState extends ConsumerState<AuthPage>
 
         return authState.when(
           data: (state) {
-            final isAnonymousLoading = state.currentOperation == AuthOperation.anonymous;
+            final isAnonymousLoading =
+                state.currentOperation == AuthOperation.anonymous;
             return AccessibleButton(
               focusNode: _loginButtonFocusNode,
-              onPressed: (state.isLoading || isAnonymousLoading)
-                  ? null
-                  : _handleLogin,
-              semanticLabel: AccessibilityTokens.getSemanticLabel('login_button', 'Fazer login'),
+              onPressed:
+                  (state.isLoading || isAnonymousLoading) ? null : _handleLogin,
+              semanticLabel: AccessibilityTokens.getSemanticLabel(
+                'login_button',
+                'Fazer login',
+              ),
               tooltip: 'Entrar com suas credenciais',
-              backgroundColor: (state.isLoading || isAnonymousLoading)
-                  ? Colors.grey.shade400
-                  : PlantisColors.primary,
+              backgroundColor:
+                  (state.isLoading || isAnonymousLoading)
+                      ? Colors.grey.shade400
+                      : PlantisColors.primary,
               foregroundColor: Colors.white,
               minimumSize: const Size(
                 double.infinity,
                 AccessibilityTokens.largeTouchTargetSize,
               ),
               hapticPattern: 'medium',
-              child: state.isLoading
-                  ? Semantics(
-                      label: AccessibilityTokens.getSemanticLabel('loading', 'Fazendo login'),
-                      liveRegion: true,
-                      child: const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              child:
+                  state.isLoading
+                      ? Semantics(
+                        label: AccessibilityTokens.getSemanticLabel(
+                          'loading',
+                          'Fazendo login',
+                        ),
+                        liveRegion: true,
+                        child: const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                      : Text(
+                        'Entrar',
+                        style: TextStyle(
+                          fontSize: AccessibilityTokens.getAccessibleFontSize(
+                            context,
+                            18,
+                          ),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                    )
-                  : Text(
-                      'Entrar',
-                      style: TextStyle(
-                        fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
             );
           },
           loading: () => const CircularProgressIndicator(),
@@ -1153,18 +1175,13 @@ class _AuthPageState extends ConsumerState<AuthPage>
       },
     );
   }
-  
+
   Widget _buildSocialLoginSection() {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(
-              child: Container(
-                height: 1,
-                color: Colors.grey.shade300,
-              ),
-            ),
+            Expanded(child: Container(height: 1, color: Colors.grey.shade300)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
@@ -1176,16 +1193,11 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 ),
               ),
             ),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: Colors.grey.shade300,
-              ),
-            ),
+            Expanded(child: Container(height: 1, color: Colors.grey.shade300)),
           ],
         ),
         const SizedBox(height: 20),
-        
+
         // Social buttons row similar to GasOMeter
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1210,7 +1222,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
           ],
         ),
         const SizedBox(height: 12),
-        
+
         // Disclaimer text with asterisk
         Text(
           '* Opções de login social estarão disponíveis em breve',
@@ -1224,7 +1236,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
       ],
     );
   }
-  
+
   Widget _buildAnonymousLoginSection() {
     return riverpod.Consumer(
       builder: (context, ref, child) {
@@ -1236,15 +1248,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
               height: 48,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                  width: 1,
-                ),
+                border: Border.all(color: Colors.grey.shade300, width: 1),
               ),
               child: OutlinedButton(
-                onPressed: state.isLoading
-                    ? null
-                    : _showAnonymousLoginDialog,
+                onPressed: state.isLoading ? null : _showAnonymousLoginDialog,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: PlantisColors.primary,
                   side: BorderSide.none,
@@ -1252,36 +1259,37 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: state.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            PlantisColors.primary,
-                          ),
-                        ),
-                      )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.person_outline_rounded,
-                            size: 18,
-                            color: PlantisColors.primary,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Continuar sem conta',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: PlantisColors.primary,
+                child:
+                    state.isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              PlantisColors.primary,
                             ),
                           ),
-                        ],
-                      ),
+                        )
+                        : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_outline_rounded,
+                              size: 18,
+                              color: PlantisColors.primary,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Continuar sem conta',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: PlantisColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
               ),
             );
           },
@@ -1291,7 +1299,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
       },
     );
   }
-  
+
   Widget _buildGasOMeterStyleSocialButton(
     String? text,
     Color color,
@@ -1305,10 +1313,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
         decoration: BoxDecoration(
           color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
         ),
         child: Material(
           color: Colors.transparent,
@@ -1316,23 +1321,23 @@ class _AuthPageState extends ConsumerState<AuthPage>
             onTap: onPressed,
             borderRadius: BorderRadius.circular(8),
             child: Center(
-              child: icon != null
-                  ? Icon(icon, color: color, size: 20)
-                  : Text(
-                      text!,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+              child:
+                  icon != null
+                      ? Icon(icon, color: color, size: 20)
+                      : Text(
+                        text!,
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
             ),
           ),
         ),
       ),
     );
   }
-
 
   /// Register form with enhanced fields
   Widget _buildRegisterTab() {
@@ -1396,13 +1401,23 @@ class _AuthPageState extends ConsumerState<AuthPage>
             autocomplete: AutofillHints.newPassword,
             isRequired: true,
             validator: (value) {
-              return AuthValidators.validatePassword(value ?? '', isRegistration: true);
+              return AuthValidators.validatePassword(
+                value ?? '',
+                isRegistration: true,
+              );
             },
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: Semantics(
-              label: _obscureRegisterPassword 
-                  ? AccessibilityTokens.getSemanticLabel('show_password', 'Mostrar senha')
-                  : AccessibilityTokens.getSemanticLabel('hide_password', 'Ocultar senha'),
+              label:
+                  _obscureRegisterPassword
+                      ? AccessibilityTokens.getSemanticLabel(
+                        'show_password',
+                        'Mostrar senha',
+                      )
+                      : AccessibilityTokens.getSemanticLabel(
+                        'hide_password',
+                        'Ocultar senha',
+                      ),
               button: true,
               child: IconButton(
                 icon: Icon(
@@ -1418,7 +1433,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     _obscureRegisterPassword = !_obscureRegisterPassword;
                   });
                   // Anunciar mudança para screen readers
-                  final message = _obscureRegisterPassword ? 'Senha oculta' : 'Senha visível';
+                  final message =
+                      _obscureRegisterPassword
+                          ? 'Senha oculta'
+                          : 'Senha visível';
                   SemanticsService.announce(message, ui.TextDirection.ltr);
                 },
               ),
@@ -1444,9 +1462,16 @@ class _AuthPageState extends ConsumerState<AuthPage>
             },
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: Semantics(
-              label: _obscureRegisterConfirmPassword 
-                  ? AccessibilityTokens.getSemanticLabel('show_password', 'Mostrar confirmação de senha')
-                  : AccessibilityTokens.getSemanticLabel('hide_password', 'Ocultar confirmação de senha'),
+              label:
+                  _obscureRegisterConfirmPassword
+                      ? AccessibilityTokens.getSemanticLabel(
+                        'show_password',
+                        'Mostrar confirmação de senha',
+                      )
+                      : AccessibilityTokens.getSemanticLabel(
+                        'hide_password',
+                        'Ocultar confirmação de senha',
+                      ),
               button: true,
               child: IconButton(
                 icon: Icon(
@@ -1459,10 +1484,14 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 onPressed: () {
                   AccessibilityTokens.performHapticFeedback('light');
                   setState(() {
-                    _obscureRegisterConfirmPassword = !_obscureRegisterConfirmPassword;
+                    _obscureRegisterConfirmPassword =
+                        !_obscureRegisterConfirmPassword;
                   });
                   // Anunciar mudança para screen readers
-                  final message = _obscureRegisterConfirmPassword ? 'Confirmação de senha oculta' : 'Confirmação de senha visível';
+                  final message =
+                      _obscureRegisterConfirmPassword
+                          ? 'Confirmação de senha oculta'
+                          : 'Confirmação de senha visível';
                   SemanticsService.announce(message, ui.TextDirection.ltr);
                 },
               ),
@@ -1490,7 +1519,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 height: 1.4,
               ),
               children: [
-                const TextSpan(text: 'Ao criar uma conta, você concorda com nossos\n'),
+                const TextSpan(
+                  text: 'Ao criar uma conta, você concorda com nossos\n',
+                ),
                 TextSpan(
                   text: 'Termos de Serviço',
                   style: TextStyle(
@@ -1498,8 +1529,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     decoration: TextDecoration.underline,
                     fontWeight: FontWeight.w500,
                   ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => _showTermsOfService(),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () => _showTermsOfService(),
                 ),
                 const TextSpan(text: ' e '),
                 TextSpan(
@@ -1509,8 +1541,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     decoration: TextDecoration.underline,
                     fontWeight: FontWeight.w500,
                   ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => _showPrivacyPolicy(),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () => _showPrivacyPolicy(),
                 ),
               ],
             ),
@@ -1529,42 +1562,53 @@ class _AuthPageState extends ConsumerState<AuthPage>
           data: (state) {
             return AccessibleButton(
               focusNode: _registerButtonFocusNode,
-              onPressed: state.isLoading
-                  ? null
-                  : _handleRegister,
-              semanticLabel: AccessibilityTokens.getSemanticLabel('register_button', 'Criar conta'),
+              onPressed: state.isLoading ? null : _handleRegister,
+              semanticLabel: AccessibilityTokens.getSemanticLabel(
+                'register_button',
+                'Criar conta',
+              ),
               tooltip: 'Criar nova conta',
-              backgroundColor: state.isLoading
-                  ? Colors.grey.shade400
-                  : PlantisColors.primary,
+              backgroundColor:
+                  state.isLoading
+                      ? Colors.grey.shade400
+                      : PlantisColors.primary,
               foregroundColor: Colors.white,
               minimumSize: const Size(
                 double.infinity,
                 AccessibilityTokens.largeTouchTargetSize,
               ),
               hapticPattern: 'medium',
-              child: state.isLoading
-                  ? Semantics(
-                      label: AccessibilityTokens.getSemanticLabel('loading', 'Criando conta'),
-                      liveRegion: true,
-                      child: const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              child:
+                  state.isLoading
+                      ? Semantics(
+                        label: AccessibilityTokens.getSemanticLabel(
+                          'loading',
+                          'Criando conta',
+                        ),
+                        liveRegion: true,
+                        child: const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                      : Text(
+                        'Criar Conta',
+                        style: TextStyle(
+                          fontSize: AccessibilityTokens.getAccessibleFontSize(
+                            context,
+                            18,
+                          ),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                    )
-                  : Text(
-                      'Criar Conta',
-                      style: TextStyle(
-                        fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
             );
           },
           loading: () => const CircularProgressIndicator(),
@@ -1587,39 +1631,40 @@ class _AuthPageState extends ConsumerState<AuthPage>
   void _showTermsOfService() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Termos de Serviço'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Última atualização: Janeiro 2025\n\n'
-                '1. ACEITAÇÃO DOS TERMOS\n'
-                'Ao usar o Inside Garden, você concorda com estes termos.\n\n'
-                '2. DESCRIÇÃO DO SERVIÇO\n'
-                'O Inside Garden é um aplicativo para cuidado e gerenciamento de plantas.\n\n'
-                '3. RESPONSABILIDADES DO USUÁRIO\n'
-                '• Fornecer informações precisas\n'
-                '• Usar o serviço de forma apropriada\n'
-                '• Manter a segurança da sua conta\n\n'
-                '4. PRIVACIDADE\n'
-                'Seus dados são protegidos conforme nossa Política de Privacidade.\n\n'
-                '5. MODIFICAÇÕES\n'
-                'Podemos atualizar estes termos. Você será notificado sobre mudanças importantes.',
-                style: TextStyle(fontSize: 14),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Termos de Serviço'),
+            content: const SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Última atualização: Janeiro 2025\n\n'
+                    '1. ACEITAÇÃO DOS TERMOS\n'
+                    'Ao usar o Inside Garden, você concorda com estes termos.\n\n'
+                    '2. DESCRIÇÃO DO SERVIÇO\n'
+                    'O Inside Garden é um aplicativo para cuidado e gerenciamento de plantas.\n\n'
+                    '3. RESPONSABILIDADES DO USUÁRIO\n'
+                    '• Fornecer informações precisas\n'
+                    '• Usar o serviço de forma apropriada\n'
+                    '• Manter a segurança da sua conta\n\n'
+                    '4. PRIVACIDADE\n'
+                    'Seus dados são protegidos conforme nossa Política de Privacidade.\n\n'
+                    '5. MODIFICAÇÕES\n'
+                    'Podemos atualizar estes termos. Você será notificado sobre mudanças importantes.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1627,44 +1672,44 @@ class _AuthPageState extends ConsumerState<AuthPage>
   void _showPrivacyPolicy() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Política de Privacidade'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Última atualização: Janeiro 2025\n\n'
-                '1. INFORMAÇÕES QUE COLETAMOS\n'
-                '• Dados de conta (email, nome)\n'
-                '• Informações sobre suas plantas\n'
-                '• Dados de uso do aplicativo\n\n'
-                '2. COMO USAMOS SUAS INFORMAÇÕES\n'
-                '• Para fornecer e melhorar nossos serviços\n'
-                '• Para personalizar sua experiência\n'
-                '• Para enviar notificações de cuidados\n\n'
-                '3. COMPARTILHAMENTO DE DADOS\n'
-                'Não vendemos ou compartilhamos seus dados pessoais com terceiros.\n\n'
-                '4. SEGURANÇA\n'
-                'Utilizamos medidas de segurança para proteger suas informações.\n\n'
-                '5. SEUS DIREITOS\n'
-                'Você pode acessar, corrigir ou excluir seus dados a qualquer momento.',
-                style: TextStyle(fontSize: 14),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Política de Privacidade'),
+            content: const SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Última atualização: Janeiro 2025\n\n'
+                    '1. INFORMAÇÕES QUE COLETAMOS\n'
+                    '• Dados de conta (email, nome)\n'
+                    '• Informações sobre suas plantas\n'
+                    '• Dados de uso do aplicativo\n\n'
+                    '2. COMO USAMOS SUAS INFORMAÇÕES\n'
+                    '• Para fornecer e melhorar nossos serviços\n'
+                    '• Para personalizar sua experiência\n'
+                    '• Para enviar notificações de cuidados\n\n'
+                    '3. COMPARTILHAMENTO DE DADOS\n'
+                    'Não vendemos ou compartilhamos seus dados pessoais com terceiros.\n\n'
+                    '4. SEGURANÇA\n'
+                    'Utilizamos medidas de segurança para proteger suas informações.\n\n'
+                    '5. SEUS DIREITOS\n'
+                    'Você pode acessar, corrigir ou excluir seus dados a qualquer momento.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
     );
   }
-
 
   /// Enhanced background pattern with plant motifs
   Widget _buildPlantBackgroundPattern() {
@@ -1682,7 +1727,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
       },
     );
   }
-  
+
   /// Floating plant elements with enhanced animations
   Widget _buildFloatingPlantElements() {
     return Stack(
@@ -1721,7 +1766,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
               return Transform.rotate(
                 angle: -_backgroundAnimation.value * 1.3 * math.pi,
                 child: Transform.scale(
-                  scale: 1.0 + (0.1 * math.sin(_backgroundAnimation.value * 3 * math.pi)),
+                  scale:
+                      1.0 +
+                      (0.1 *
+                          math.sin(_backgroundAnimation.value * 3 * math.pi)),
                   child: Icon(
                     Icons.local_florist,
                     color: Colors.white.withValues(alpha: 0.1),
@@ -1762,40 +1810,44 @@ class _AuthPageState extends ConsumerState<AuthPage>
 class PlantBackgroundPatternPainter extends CustomPainter {
   final double animation;
   final Color primaryColor;
-  
+
   PlantBackgroundPatternPainter({
     required this.animation,
     required this.primaryColor,
   });
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     // Base organic shapes
-    final basePaint = Paint()
-      ..color = primaryColor.withValues(alpha: 0.03)
-      ..style = PaintingStyle.fill;
-    
+    final basePaint =
+        Paint()
+          ..color = primaryColor.withValues(alpha: 0.03)
+          ..style = PaintingStyle.fill;
+
     // Floating organic circles (like seeds)
     for (int i = 0; i < 6; i++) {
-      final x = (size.width * (i + 1) / 7) + (40 * math.sin(animation * 1.5 + i));
-      final y = (size.height * (i + 1) / 8) + (25 * math.cos(animation * 1.2 + i));
+      final x =
+          (size.width * (i + 1) / 7) + (40 * math.sin(animation * 1.5 + i));
+      final y =
+          (size.height * (i + 1) / 8) + (25 * math.cos(animation * 1.2 + i));
       final radius = 15 + (8 * math.sin(animation * 2.5 + i));
-      
+
       canvas.drawCircle(Offset(x, y), radius, basePaint);
     }
-    
+
     // Leaf-like curved lines
-    final linePaint = Paint()
-      ..color = primaryColor.withValues(alpha: 0.04)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    
+    final linePaint =
+        Paint()
+          ..color = primaryColor.withValues(alpha: 0.04)
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
     for (int i = 0; i < 4; i++) {
       final path = Path();
       final startX = size.width * (i + 1) / 5;
       final startY = size.height * 0.2 + (100 * math.sin(animation + i));
-      
+
       path.moveTo(startX, startY);
       path.quadraticBezierTo(
         startX + 30 + (20 * math.cos(animation * 0.8 + i)),
@@ -1803,28 +1855,29 @@ class PlantBackgroundPatternPainter extends CustomPainter {
         startX + 10 + (25 * math.sin(animation * 0.5 + i)),
         startY + 80 + (20 * math.cos(animation * 0.7 + i)),
       );
-      
+
       canvas.drawPath(path, linePaint);
     }
-    
+
     // Subtle dots pattern (like pollen or small seeds)
-    final dotPaint = Paint()
-      ..color = primaryColor.withValues(alpha: 0.02)
-      ..style = PaintingStyle.fill;
-    
+    final dotPaint =
+        Paint()
+          ..color = primaryColor.withValues(alpha: 0.02)
+          ..style = PaintingStyle.fill;
+
     for (int i = 0; i < size.width; i += 60) {
       for (int j = 0; j < size.height; j += 60) {
         final offsetX = 10 * math.sin(animation * 0.3 + i * 0.01);
         final offsetY = 8 * math.cos(animation * 0.4 + j * 0.01);
         canvas.drawCircle(
-          Offset(i.toDouble() + offsetX, j.toDouble() + offsetY), 
-          2.5, 
+          Offset(i.toDouble() + offsetX, j.toDouble() + offsetY),
+          2.5,
           dotPaint,
         );
       }
     }
   }
-  
+
   @override
   bool shouldRepaint(PlantBackgroundPatternPainter oldDelegate) {
     return oldDelegate.animation != animation;

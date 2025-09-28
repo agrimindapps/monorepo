@@ -1,19 +1,21 @@
 import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../auth/auth_state_notifier.dart';
-import '../localization/app_strings.dart';
-import '../services/offline_sync_queue_service.dart' as offline_queue;
-import '../services/sync_coordinator_service.dart' hide SyncPriority;
-import '../services/task_notification_service.dart' hide NotificationPermissionStatus;
-import '../services/task_notification_service.dart' as notification_service;
 import '../../features/tasks/core/constants/tasks_constants.dart';
 import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import '../../features/tasks/domain/usecases/add_task_usecase.dart';
 import '../../features/tasks/domain/usecases/complete_task_usecase.dart';
 import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../features/tasks/presentation/providers/tasks_state.dart';
+import '../auth/auth_state_notifier.dart';
+import '../localization/app_strings.dart';
+import '../services/offline_sync_queue_service.dart' as offline_queue;
+import '../services/sync_coordinator_service.dart' hide SyncPriority;
+import '../services/task_notification_service.dart'
+    hide NotificationPermissionStatus;
+import '../services/task_notification_service.dart' as notification_service;
 
 // part 'tasks_providers.g.dart';
 
@@ -39,11 +41,11 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
     _notificationService = ref.read(taskNotificationServiceProvider);
     _authStateNotifier = AuthStateNotifier.instance;
-    
+
     // Initialize sync coordinator before using it
     _syncCoordinator = SyncCoordinatorService.instance;
     _syncCoordinator.initialize();
-    
+
     // Initialize offline queue service before using it
     _offlineQueue = offline_queue.OfflineSyncQueueService.instance;
     await _offlineQueue.initialize();
@@ -61,13 +63,17 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   /// Initializes the authentication state listener
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      debugPrint('🔐 TasksProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      debugPrint(
+        '🔐 TasksProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
+      );
       // Only load tasks if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         debugPrint('✅ TasksProvider: Auth is stable, loading tasks...');
         loadTasks();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        debugPrint('🔄 TasksProvider: No user but auth initialized - clearing tasks');
+        debugPrint(
+          '🔄 TasksProvider: No user but auth initialized - clearing tasks',
+        );
         // Clear tasks when user logs out
         state = AsyncData(TasksState.initial());
       }
@@ -86,7 +92,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 
     // SECURITY FIX: Deny access for tasks with null userId
     if (task.userId == null) {
-      debugPrint('🚫 Access denied: Task has null userId (potential security risk)');
+      debugPrint(
+        '🚫 Access denied: Task has null userId (potential security risk)',
+      );
       return false;
     }
 
@@ -96,7 +104,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     }
 
     // If task belongs to different user, deny access
-    debugPrint('🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}');
+    debugPrint(
+      '🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}',
+    );
     return false;
   }
 
@@ -109,7 +119,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     );
 
     if (!_validateTaskOwnership(task)) {
-      throw const UnauthorizedAccessException('You are not authorized to modify this task');
+      throw const UnauthorizedAccessException(
+        'You are not authorized to modify this task',
+      );
     }
 
     return task;
@@ -134,7 +146,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       debugPrint('✅ TasksProvider: Auth initialization complete');
       return true;
     } on TimeoutException {
-      debugPrint('⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      debugPrint(
+        '⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s',
+      );
       return false;
     } catch (e) {
       debugPrint('❌ TasksProvider: Auth initialization error: $e');
@@ -159,10 +173,12 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     } catch (e) {
       debugPrint('❌ TasksProvider: Load tasks failed: $e');
       final currentState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(currentState.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao sincronizar tarefas: $e',
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          isLoading: false,
+          errorMessage: 'Erro ao sincronizar tarefas: $e',
+        ),
+      );
     }
   }
 
@@ -173,18 +189,28 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     final shouldShowLoading = currentState.allTasks.isEmpty;
 
     if (shouldShowLoading) {
-      state = AsyncData(currentState.copyWith(
-        isLoading: true,
-        clearError: true,
-        activeOperations: {...currentState.activeOperations, TaskLoadingOperation.loadingTasks},
-        currentOperationMessage: AppStrings.loadingTasks,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          isLoading: true,
+          clearError: true,
+          activeOperations: {
+            ...currentState.activeOperations,
+            TaskLoadingOperation.loadingTasks,
+          },
+          currentOperationMessage: AppStrings.loadingTasks,
+        ),
+      );
     } else {
-      state = AsyncData(currentState.copyWith(
-        clearError: true,
-        activeOperations: {...currentState.activeOperations, TaskLoadingOperation.syncing},
-        currentOperationMessage: AppStrings.synchronizing,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          clearError: true,
+          activeOperations: {
+            ...currentState.activeOperations,
+            TaskLoadingOperation.syncing,
+          },
+          currentOperationMessage: AppStrings.synchronizing,
+        ),
+      );
     }
 
     try {
@@ -195,14 +221,21 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       result.fold(
         (failure) {
           final newState = state.valueOrNull ?? TasksState.initial();
-          state = AsyncData(newState.copyWith(
-            isLoading: false,
-            errorMessage: _mapFailureToMessage(failure),
-            activeOperations: newState.activeOperations
-                .where((op) => op != TaskLoadingOperation.loadingTasks && op != TaskLoadingOperation.syncing)
-                .toSet(),
-            clearOperationMessage: true,
-          ));
+          state = AsyncData(
+            newState.copyWith(
+              isLoading: false,
+              errorMessage: _mapFailureToMessage(failure),
+              activeOperations:
+                  newState.activeOperations
+                      .where(
+                        (op) =>
+                            op != TaskLoadingOperation.loadingTasks &&
+                            op != TaskLoadingOperation.syncing,
+                      )
+                      .toSet(),
+              clearOperationMessage: true,
+            ),
+          );
           throw Exception(_mapFailureToMessage(failure));
         },
         (tasks) {
@@ -216,16 +249,23 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             newState.selectedPriorities,
           );
 
-          state = AsyncData(newState.copyWith(
-            allTasks: tasks,
-            filteredTasks: filteredTasks,
-            isLoading: false,
-            clearError: true,
-            activeOperations: newState.activeOperations
-                .where((op) => op != TaskLoadingOperation.loadingTasks && op != TaskLoadingOperation.syncing)
-                .toSet(),
-            clearOperationMessage: true,
-          ));
+          state = AsyncData(
+            newState.copyWith(
+              allTasks: tasks,
+              filteredTasks: filteredTasks,
+              isLoading: false,
+              clearError: true,
+              activeOperations:
+                  newState.activeOperations
+                      .where(
+                        (op) =>
+                            op != TaskLoadingOperation.loadingTasks &&
+                            op != TaskLoadingOperation.syncing,
+                      )
+                      .toSet(),
+              clearOperationMessage: true,
+            ),
+          );
 
           // Check overdue tasks and send notifications
           _notificationService.checkOverdueTasks(tasks);
@@ -236,14 +276,21 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     } catch (e) {
       debugPrint('❌ TasksProvider: Load tasks operation failed: $e');
       final newState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(newState.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao carregar tarefas: $e',
-        activeOperations: newState.activeOperations
-            .where((op) => op != TaskLoadingOperation.loadingTasks && op != TaskLoadingOperation.syncing)
-            .toSet(),
-        clearOperationMessage: true,
-      ));
+      state = AsyncData(
+        newState.copyWith(
+          isLoading: false,
+          errorMessage: 'Erro ao carregar tarefas: $e',
+          activeOperations:
+              newState.activeOperations
+                  .where(
+                    (op) =>
+                        op != TaskLoadingOperation.loadingTasks &&
+                        op != TaskLoadingOperation.syncing,
+                  )
+                  .toSet(),
+          clearOperationMessage: true,
+        ),
+      );
       rethrow;
     }
   }
@@ -258,31 +305,41 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       );
     } catch (e) {
       final currentState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(currentState.copyWith(
-        errorMessage: AppStrings.errorSyncingNewTask,
-      ));
+      state = AsyncData(
+        currentState.copyWith(errorMessage: AppStrings.errorSyncingNewTask),
+      );
       return false;
     }
   }
 
   Future<bool> _addTaskOperation(task_entity.Task task) async {
     final currentState = state.valueOrNull ?? TasksState.initial();
-    state = AsyncData(currentState.copyWith(
-      clearError: true,
-      activeOperations: {...currentState.activeOperations, TaskLoadingOperation.addingTask},
-      currentOperationMessage: AppStrings.addingTask,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        clearError: true,
+        activeOperations: {
+          ...currentState.activeOperations,
+          TaskLoadingOperation.addingTask,
+        },
+        currentOperationMessage: AppStrings.addingTask,
+      ),
+    );
 
     try {
       // Ensure task is associated with current user
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         final newState = state.valueOrNull ?? TasksState.initial();
-        state = AsyncData(newState.copyWith(
-          errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
-          activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
-          clearOperationMessage: true,
-        ));
+        state = AsyncData(
+          newState.copyWith(
+            errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
+            activeOperations:
+                newState.activeOperations
+                    .where((op) => op != TaskLoadingOperation.addingTask)
+                    .toSet(),
+            clearOperationMessage: true,
+          ),
+        );
         return false;
       }
 
@@ -295,7 +352,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
         (failure) {
           // If it's a network failure, queue for offline sync
           if (_isNetworkFailure(failure)) {
-            debugPrint('🌐 Network failure detected, queuing task for offline sync');
+            debugPrint(
+              '🌐 Network failure detected, queuing task for offline sync',
+            );
 
             // Create optimistic local task
             final optimisticTask = taskWithUser.copyWith(
@@ -315,13 +374,18 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
               newState.selectedPriorities,
             );
 
-            state = AsyncData(newState.copyWith(
-              allTasks: updatedTasks,
-              filteredTasks: filteredTasks,
-              clearError: true,
-              activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
-              clearOperationMessage: true,
-            ));
+            state = AsyncData(
+              newState.copyWith(
+                allTasks: updatedTasks,
+                filteredTasks: filteredTasks,
+                clearError: true,
+                activeOperations:
+                    newState.activeOperations
+                        .where((op) => op != TaskLoadingOperation.addingTask)
+                        .toSet(),
+                clearOperationMessage: true,
+              ),
+            );
 
             // Queue for offline sync
             final queuedOperation = offline_queue.QueuedOperation(
@@ -338,11 +402,16 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             return true; // Return success for optimistic update
           } else {
             final newState = state.valueOrNull ?? TasksState.initial();
-            state = AsyncData(newState.copyWith(
-              errorMessage: _mapFailureToMessage(failure),
-              activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
-              clearOperationMessage: true,
-            ));
+            state = AsyncData(
+              newState.copyWith(
+                errorMessage: _mapFailureToMessage(failure),
+                activeOperations:
+                    newState.activeOperations
+                        .where((op) => op != TaskLoadingOperation.addingTask)
+                        .toSet(),
+                clearOperationMessage: true,
+              ),
+            );
             throw Exception(_mapFailureToMessage(failure));
           }
         },
@@ -358,13 +427,18 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             newState.selectedPriorities,
           );
 
-          state = AsyncData(newState.copyWith(
-            allTasks: updatedTasks,
-            filteredTasks: filteredTasks,
-            clearError: true,
-            activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
-            clearOperationMessage: true,
-          ));
+          state = AsyncData(
+            newState.copyWith(
+              allTasks: updatedTasks,
+              filteredTasks: filteredTasks,
+              clearError: true,
+              activeOperations:
+                  newState.activeOperations
+                      .where((op) => op != TaskLoadingOperation.addingTask)
+                      .toSet(),
+              clearOperationMessage: true,
+            ),
+          );
 
           // Schedule notification for the new task
           _notificationService.scheduleTaskNotification(addedTask);
@@ -373,11 +447,16 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       );
     } catch (e) {
       final newState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(newState.copyWith(
-        errorMessage: AppStrings.unexpectedErrorAddingTask,
-        activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.addingTask).toSet(),
-        clearOperationMessage: true,
-      ));
+      state = AsyncData(
+        newState.copyWith(
+          errorMessage: AppStrings.unexpectedErrorAddingTask,
+          activeOperations:
+              newState.activeOperations
+                  .where((op) => op != TaskLoadingOperation.addingTask)
+                  .toSet(),
+          clearOperationMessage: true,
+        ),
+      );
       rethrow;
     }
   }
@@ -392,23 +471,29 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       );
     } catch (e) {
       final currentState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(currentState.copyWith(
-        errorMessage: AppStrings.errorSyncingTaskCompletion,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          errorMessage: AppStrings.errorSyncingTaskCompletion,
+        ),
+      );
       return false;
     }
   }
 
   Future<bool> _completeTaskOperation(String taskId, String? notes) async {
     final currentState = state.valueOrNull ?? TasksState.initial();
-    final updatedOperations = Map<String, bool>.from(currentState.individualTaskOperations);
+    final updatedOperations = Map<String, bool>.from(
+      currentState.individualTaskOperations,
+    );
     updatedOperations[taskId] = true;
 
-    state = AsyncData(currentState.copyWith(
-      clearError: true,
-      individualTaskOperations: updatedOperations,
-      currentOperationMessage: AppStrings.completingTask,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        clearError: true,
+        individualTaskOperations: updatedOperations,
+        currentOperationMessage: AppStrings.completingTask,
+      ),
+    );
 
     try {
       // Validate ownership before completing task
@@ -422,7 +507,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
         (failure) {
           // If it's a network failure, queue for offline sync
           if (_isNetworkFailure(failure)) {
-            debugPrint('🌐 Network failure detected, queuing task completion for offline sync');
+            debugPrint(
+              '🌐 Network failure detected, queuing task completion for offline sync',
+            );
 
             // Create optimistic local completion
             final completedTask = task.copyWithTaskData(
@@ -433,9 +520,10 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 
             // Update local state immediately
             final newState = state.valueOrNull ?? TasksState.initial();
-            final updatedTasks = newState.allTasks.map((t) {
-              return t.id == taskId ? completedTask : t;
-            }).toList();
+            final updatedTasks =
+                newState.allTasks.map((t) {
+                  return t.id == taskId ? completedTask : t;
+                }).toList();
 
             final filteredTasks = _applyFiltersToTasks(
               updatedTasks,
@@ -446,16 +534,20 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
               newState.selectedPriorities,
             );
 
-            final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+            final newOperations = Map<String, bool>.from(
+              newState.individualTaskOperations,
+            );
             newOperations.remove(taskId);
 
-            state = AsyncData(newState.copyWith(
-              allTasks: updatedTasks,
-              filteredTasks: filteredTasks,
-              clearError: true,
-              individualTaskOperations: newOperations,
-              clearOperationMessage: true,
-            ));
+            state = AsyncData(
+              newState.copyWith(
+                allTasks: updatedTasks,
+                filteredTasks: filteredTasks,
+                clearError: true,
+                individualTaskOperations: newOperations,
+                clearOperationMessage: true,
+              ),
+            );
 
             // Queue for offline sync
             final queuedOperation = offline_queue.QueuedOperation(
@@ -480,22 +572,27 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             return true; // Return success for optimistic update
           } else {
             final newState = state.valueOrNull ?? TasksState.initial();
-            final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+            final newOperations = Map<String, bool>.from(
+              newState.individualTaskOperations,
+            );
             newOperations.remove(taskId);
 
-            state = AsyncData(newState.copyWith(
-              errorMessage: _mapFailureToMessage(failure),
-              individualTaskOperations: newOperations,
-              clearOperationMessage: true,
-            ));
+            state = AsyncData(
+              newState.copyWith(
+                errorMessage: _mapFailureToMessage(failure),
+                individualTaskOperations: newOperations,
+                clearOperationMessage: true,
+              ),
+            );
             throw Exception(_mapFailureToMessage(failure));
           }
         },
         (completedTask) {
           final newState = state.valueOrNull ?? TasksState.initial();
-          final updatedTasks = newState.allTasks.map((t) {
-            return t.id == taskId ? completedTask : t;
-          }).toList();
+          final updatedTasks =
+              newState.allTasks.map((t) {
+                return t.id == taskId ? completedTask : t;
+              }).toList();
 
           final filteredTasks = _applyFiltersToTasks(
             updatedTasks,
@@ -506,16 +603,20 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
             newState.selectedPriorities,
           );
 
-          final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+          final newOperations = Map<String, bool>.from(
+            newState.individualTaskOperations,
+          );
           newOperations.remove(taskId);
 
-          state = AsyncData(newState.copyWith(
-            allTasks: updatedTasks,
-            filteredTasks: filteredTasks,
-            clearError: true,
-            individualTaskOperations: newOperations,
-            clearOperationMessage: true,
-          ));
+          state = AsyncData(
+            newState.copyWith(
+              allTasks: updatedTasks,
+              filteredTasks: filteredTasks,
+              clearError: true,
+              individualTaskOperations: newOperations,
+              clearOperationMessage: true,
+            ),
+          );
 
           // Cancel notifications for the completed task
           _notificationService.cancelTaskNotifications(taskId);
@@ -527,25 +628,33 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       );
     } on UnauthorizedAccessException catch (e) {
       final newState = state.valueOrNull ?? TasksState.initial();
-      final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+      final newOperations = Map<String, bool>.from(
+        newState.individualTaskOperations,
+      );
       newOperations.remove(taskId);
 
-      state = AsyncData(newState.copyWith(
-        errorMessage: e.message,
-        individualTaskOperations: newOperations,
-        clearOperationMessage: true,
-      ));
+      state = AsyncData(
+        newState.copyWith(
+          errorMessage: e.message,
+          individualTaskOperations: newOperations,
+          clearOperationMessage: true,
+        ),
+      );
       rethrow;
     } catch (e) {
       final newState = state.valueOrNull ?? TasksState.initial();
-      final newOperations = Map<String, bool>.from(newState.individualTaskOperations);
+      final newOperations = Map<String, bool>.from(
+        newState.individualTaskOperations,
+      );
       newOperations.remove(taskId);
 
-      state = AsyncData(newState.copyWith(
-        errorMessage: AppStrings.unexpectedErrorCompletingTask,
-        individualTaskOperations: newOperations,
-        clearOperationMessage: true,
-      ));
+      state = AsyncData(
+        newState.copyWith(
+          errorMessage: AppStrings.unexpectedErrorCompletingTask,
+          individualTaskOperations: newOperations,
+          clearOperationMessage: true,
+        ),
+      );
       rethrow;
     }
   }
@@ -565,10 +674,12 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
         currentState.selectedPriorities,
       );
 
-      state = AsyncData(currentState.copyWith(
-        searchQuery: normalizedQuery,
-        filteredTasks: filteredTasks,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          searchQuery: normalizedQuery,
+          filteredTasks: filteredTasks,
+        ),
+      );
     }
   }
 
@@ -576,7 +687,8 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   void setFilter(TasksFilterType filter, {String? plantId}) {
     final currentState = state.valueOrNull ?? TasksState.initial();
 
-    if (currentState.currentFilter != filter || currentState.selectedPlantId != plantId) {
+    if (currentState.currentFilter != filter ||
+        currentState.selectedPlantId != plantId) {
       final filteredTasks = _applyFiltersToTasks(
         currentState.allTasks,
         filter,
@@ -586,11 +698,13 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
         currentState.selectedPriorities,
       );
 
-      state = AsyncData(currentState.copyWith(
-        currentFilter: filter,
-        selectedPlantId: plantId,
-        filteredTasks: filteredTasks,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          currentFilter: filter,
+          selectedPlantId: plantId,
+          filteredTasks: filteredTasks,
+        ),
+      );
     }
   }
 
@@ -612,31 +726,43 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       priorities ?? currentState.selectedPriorities,
     );
 
-    state = AsyncData(currentState.copyWith(
-      currentFilter: filter ?? currentState.currentFilter,
-      selectedPlantId: plantId ?? currentState.selectedPlantId,
-      selectedTaskTypes: taskTypes ?? currentState.selectedTaskTypes,
-      selectedPriorities: priorities ?? currentState.selectedPriorities,
-      filteredTasks: filteredTasks,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        currentFilter: filter ?? currentState.currentFilter,
+        selectedPlantId: plantId ?? currentState.selectedPlantId,
+        selectedTaskTypes: taskTypes ?? currentState.selectedTaskTypes,
+        selectedPriorities: priorities ?? currentState.selectedPriorities,
+        filteredTasks: filteredTasks,
+      ),
+    );
   }
 
   /// Refreshes tasks from the remote data source with visual feedback
   Future<void> refresh() async {
     final currentState = state.valueOrNull ?? TasksState.initial();
-    state = AsyncData(currentState.copyWith(
-      activeOperations: {...currentState.activeOperations, TaskLoadingOperation.refreshing},
-      currentOperationMessage: AppStrings.refreshing,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        activeOperations: {
+          ...currentState.activeOperations,
+          TaskLoadingOperation.refreshing,
+        },
+        currentOperationMessage: AppStrings.refreshing,
+      ),
+    );
 
     try {
       await loadTasks();
     } finally {
       final newState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(newState.copyWith(
-        activeOperations: newState.activeOperations.where((op) => op != TaskLoadingOperation.refreshing).toSet(),
-        clearOperationMessage: true,
-      ));
+      state = AsyncData(
+        newState.copyWith(
+          activeOperations:
+              newState.activeOperations
+                  .where((op) => op != TaskLoadingOperation.refreshing)
+                  .toSet(),
+          clearOperationMessage: true,
+        ),
+      );
     }
   }
 
@@ -656,13 +782,14 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       case TasksFilterType.all:
         break;
       case TasksFilterType.today:
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.isDueToday &&
-                  t.status == task_entity.TaskStatus.pending,
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.isDueToday &&
+                      t.status == task_entity.TaskStatus.pending,
+                )
+                .toList();
         break;
       case TasksFilterType.overdue:
         tasks = tasks.where((t) => t.isOverdue).toList();
@@ -670,29 +797,32 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       case TasksFilterType.upcoming:
         final now = DateTime.now();
         final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.status == task_entity.TaskStatus.pending &&
-                  t.dueDate.isAfter(now) &&
-                  t.dueDate.isBefore(nextWeek),
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now) &&
+                      t.dueDate.isBefore(nextWeek),
+                )
+                .toList();
         break;
       case TasksFilterType.allFuture:
         final now = DateTime.now();
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.status == task_entity.TaskStatus.pending &&
-                  t.dueDate.isAfter(now),
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now),
+                )
+                .toList();
         break;
       case TasksFilterType.completed:
-        tasks = tasks
-            .where((t) => t.status == task_entity.TaskStatus.completed)
-            .toList();
+        tasks =
+            tasks
+                .where((t) => t.status == task_entity.TaskStatus.completed)
+                .toList();
         break;
       case TasksFilterType.byPlant:
         if (selectedPlantId != null) {
@@ -703,22 +833,27 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 
     // Apply task type filter
     if (selectedTaskTypes.isNotEmpty) {
-      tasks = tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
+      tasks =
+          tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
     }
 
     // Apply priority filter
     if (selectedPriorities.isNotEmpty) {
-      tasks = tasks.where((task) => selectedPriorities.contains(task.priority)).toList();
+      tasks =
+          tasks
+              .where((task) => selectedPriorities.contains(task.priority))
+              .toList();
     }
 
     // Apply search
     if (searchQuery.isNotEmpty) {
-      tasks = tasks.where((task) {
-        return task.title.toLowerCase().contains(searchQuery) ||
-            task.plantName.toLowerCase().contains(searchQuery) ||
-            (task.description?.toLowerCase().contains(searchQuery) ??
-                false);
-      }).toList();
+      tasks =
+          tasks.where((task) {
+            return task.title.toLowerCase().contains(searchQuery) ||
+                task.plantName.toLowerCase().contains(searchQuery) ||
+                (task.description?.toLowerCase().contains(searchQuery) ??
+                    false);
+          }).toList();
     }
 
     // Sort by priority and date
@@ -768,9 +903,9 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   /// Determines if a failure is network-related for offline queue handling
   bool _isNetworkFailure(Failure failure) {
     return failure is NetworkFailure ||
-           failure.message.toLowerCase().contains('network') ||
-           failure.message.toLowerCase().contains('connection') ||
-           failure.message.toLowerCase().contains('timeout');
+        failure.message.toLowerCase().contains('network') ||
+        failure.message.toLowerCase().contains('connection') ||
+        failure.message.toLowerCase().contains('timeout');
   }
 
   /// Initializes the notification service with comprehensive setup
@@ -779,12 +914,18 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       final initResult = await _notificationService.initialize();
       if (initResult) {
         await _notificationService.initializeNotificationHandlers();
-        debugPrint('✅ TasksProvider: Notification service initialized successfully');
+        debugPrint(
+          '✅ TasksProvider: Notification service initialized successfully',
+        );
       } else {
-        debugPrint('⚠️ TasksProvider: Failed to initialize notification service');
+        debugPrint(
+          '⚠️ TasksProvider: Failed to initialize notification service',
+        );
       }
     } catch (e) {
-      debugPrint('❌ TasksProvider: Error initializing notification service: $e');
+      debugPrint(
+        '❌ TasksProvider: Error initializing notification service: $e',
+      );
     }
   }
 
@@ -832,10 +973,12 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       );
     } catch (e) {
       final currentState = state.valueOrNull ?? TasksState.initial();
-      state = AsyncData(currentState.copyWith(
-        errorMessage: 'Failed to undo task completion',
-        clearError: false,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          errorMessage: 'Failed to undo task completion',
+          clearError: false,
+        ),
+      );
       return false;
     }
   }
@@ -844,15 +987,16 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     final currentState = state.valueOrNull ?? TasksState.initial();
 
     // Find the task and mark it as incomplete
-    final updatedTasks = currentState.allTasks.map((task) {
-      if (task.id == taskId) {
-        return task.copyWithTaskData(
-          status: task_entity.TaskStatus.pending,
-          completedAt: null,
-        );
-      }
-      return task;
-    }).toList();
+    final updatedTasks =
+        currentState.allTasks.map((task) {
+          if (task.id == taskId) {
+            return task.copyWithTaskData(
+              status: task_entity.TaskStatus.pending,
+              completedAt: null,
+            );
+          }
+          return task;
+        }).toList();
 
     // Filter tasks with updated data
     final filteredTasks = _applyFiltersToTasks(
@@ -864,11 +1008,13 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       currentState.selectedPriorities,
     );
 
-    state = AsyncData(currentState.copyWith(
-      allTasks: updatedTasks,
-      filteredTasks: filteredTasks,
-      clearError: true,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        allTasks: updatedTasks,
+        filteredTasks: filteredTasks,
+        clearError: true,
+      ),
+    );
 
     return true;
   }
@@ -886,11 +1032,13 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       currentState.selectedPriorities,
     );
 
-    state = AsyncData(currentState.copyWith(
-      currentFilter: filter,
-      filteredTasks: filteredTasks,
-      clearError: true,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        currentFilter: filter,
+        filteredTasks: filteredTasks,
+        clearError: true,
+      ),
+    );
   }
 }
 
@@ -898,7 +1046,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 final tasksProvider = AsyncNotifierProvider<TasksNotifier, TasksState>(() {
   return TasksNotifier();
 });
-
 
 // Compatibility providers for legacy code
 final allTasksProvider = Provider<List<task_entity.Task>>((ref) {
@@ -939,13 +1086,15 @@ final tasksErrorProvider = Provider<String?>((ref) {
 final highPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (TasksState state) => state.filteredTasks
-        .where(
-          (task_entity.Task t) =>
-              t.priority == task_entity.TaskPriority.high ||
-              t.priority == task_entity.TaskPriority.urgent,
-        )
-        .toList(),
+    data:
+        (TasksState state) =>
+            state.filteredTasks
+                .where(
+                  (task_entity.Task t) =>
+                      t.priority == task_entity.TaskPriority.high ||
+                      t.priority == task_entity.TaskPriority.urgent,
+                )
+                .toList(),
     orElse: () => <task_entity.Task>[],
   );
 });
@@ -953,9 +1102,14 @@ final highPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
 final mediumPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (TasksState state) => state.filteredTasks
-        .where((task_entity.Task t) => t.priority == task_entity.TaskPriority.medium)
-        .toList(),
+    data:
+        (TasksState state) =>
+            state.filteredTasks
+                .where(
+                  (task_entity.Task t) =>
+                      t.priority == task_entity.TaskPriority.medium,
+                )
+                .toList(),
     orElse: () => <task_entity.Task>[],
   );
 });
@@ -963,9 +1117,14 @@ final mediumPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
 final lowPriorityTasksProvider = Provider<List<task_entity.Task>>((ref) {
   final tasksState = ref.watch(tasksProvider);
   return tasksState.maybeWhen(
-    data: (TasksState state) => state.filteredTasks
-        .where((task_entity.Task t) => t.priority == task_entity.TaskPriority.low)
-        .toList(),
+    data:
+        (TasksState state) =>
+            state.filteredTasks
+                .where(
+                  (task_entity.Task t) =>
+                      t.priority == task_entity.TaskPriority.low,
+                )
+                .toList(),
     orElse: () => <task_entity.Task>[],
   );
 });
@@ -1026,7 +1185,9 @@ final completeTaskUseCaseProvider = Provider<CompleteTaskUseCase>((ref) {
   return GetIt.instance<CompleteTaskUseCase>();
 });
 
-final taskNotificationServiceProvider = Provider<TaskNotificationService>((ref) {
+final taskNotificationServiceProvider = Provider<TaskNotificationService>((
+  ref,
+) {
   return GetIt.instance<TaskNotificationService>();
 });
 
@@ -1043,13 +1204,14 @@ class UnauthorizedAccessException implements Exception {
 // Additional enums and types that may be needed
 // TaskLoadingOperation and TasksFilterType imported from tasks_state.dart
 enum TaskSyncOperations { loadTasks, addTask, completeTask }
+
 enum OfflineTaskOperations { addTask, completeTask }
+
 enum SyncPriority { low, medium, high, critical }
 
 class SyncThrottledException implements Exception {
   final String message;
   SyncThrottledException(this.message);
 }
-
 
 enum NotificationPermissionStatus { granted, denied, notDetermined }

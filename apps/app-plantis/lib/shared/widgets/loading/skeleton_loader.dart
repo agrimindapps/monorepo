@@ -41,10 +41,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
     _animation = Tween<double>(
       begin: -1.0,
       end: 2.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.isLoading) {
       _controller.repeat();
@@ -77,10 +74,11 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
-    final baseColor = widget.baseColor ?? 
-        (isDark ? Colors.grey[800]! : Colors.grey[300]!);
-    final highlightColor = widget.highlightColor ?? 
+
+    final baseColor =
+        widget.baseColor ?? (isDark ? Colors.grey[800]! : Colors.grey[300]!);
+    final highlightColor =
+        widget.highlightColor ??
         (isDark ? Colors.grey[700]! : Colors.grey[100]!);
 
     return AnimatedBuilder(
@@ -115,11 +113,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
         return LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            baseColor,
-            highlightColor,
-            baseColor,
-          ],
+          colors: [baseColor, highlightColor, baseColor],
           stops: [
             math.max(0.0, (position - width) / width),
             position / width,
@@ -130,11 +124,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
         return LinearGradient(
           begin: Alignment.centerRight,
           end: Alignment.centerLeft,
-          colors: [
-            baseColor,
-            highlightColor,
-            baseColor,
-          ],
+          colors: [baseColor, highlightColor, baseColor],
           stops: [
             math.max(0.0, (position - width) / width),
             position / width,
@@ -145,11 +135,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
         return LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            baseColor,
-            highlightColor,
-            baseColor,
-          ],
+          colors: [baseColor, highlightColor, baseColor],
           stops: [
             math.max(0.0, (position - width) / width),
             position / width,
@@ -161,11 +147,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
 }
 
 /// Direções de animação do shimmer
-enum ShimmerDirection {
-  leftToRight,
-  rightToLeft,
-  topToBottom,
-}
+enum ShimmerDirection { leftToRight, rightToLeft, topToBottom }
 
 /// Skeleton pré-definidos para diferentes tipos de conteúdo
 class SkeletonShapes {
@@ -244,9 +226,7 @@ class SkeletonShapes {
   }
 
   /// Skeleton para item de tarefa
-  static Widget taskItem({
-    bool isLoading = true,
-  }) {
+  static Widget taskItem({bool isLoading = true}) {
     return SkeletonLoader(
       isLoading: isLoading,
       child: Padding(
@@ -385,10 +365,7 @@ class SkeletonShapes {
   }
 
   /// Skeleton para imagem circular
-  static Widget circularImage({
-    double size = 48,
-    bool isLoading = true,
-  }) {
+  static Widget circularImage({double size = 48, bool isLoading = true}) {
     return SkeletonLoader(
       isLoading: isLoading,
       child: Container(

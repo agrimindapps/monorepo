@@ -28,14 +28,13 @@ class LayoutStabilityWidget extends StatefulWidget {
   State<LayoutStabilityWidget> createState() => _LayoutStabilityWidgetState();
 }
 
-class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget> 
+class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
     with WidgetsBindingObserver {
-  
   Timer? _stabilityTimer;
   Size? _lastSize;
   bool _isLayoutStable = false;
   bool _isResizing = false;
-  
+
   // Throttling for resize events
   Timer? _resizeThrottleTimer;
   static const Duration _resizeThrottleDuration = Duration(milliseconds: 16);
@@ -44,7 +43,7 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Initial stability check after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLayoutStability();
@@ -87,7 +86,7 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
     });
 
     widget.onLayoutChanged?.call();
-    
+
     // Reset stability after resize
     _stabilityTimer?.cancel();
     _stabilityTimer = Timer(widget.stabilityDelay, () {
@@ -108,17 +107,18 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
       if (renderObject == null) return;
 
       final currentSize = renderObject.hasSize ? renderObject.size : Size.zero;
-      
+
       // Check if size has stabilized
-      if (_lastSize != null && _lastSize == currentSize && 
-          renderObject.attached && !renderObject.debugNeedsLayout) {
-        
+      if (_lastSize != null &&
+          _lastSize == currentSize &&
+          renderObject.attached &&
+          !renderObject.debugNeedsLayout) {
         if (!_isLayoutStable) {
           setState(() {
             _isLayoutStable = true;
           });
           widget.onLayoutStable?.call();
-          
+
           if (widget.debugLabel != null) {
             debugPrint('Layout stable for ${widget.debugLabel}: $currentSize');
           }
@@ -129,9 +129,9 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
             _isLayoutStable = false;
           });
         }
-        
+
         _lastSize = currentSize;
-        
+
         // Recheck after next frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -162,9 +162,7 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
 
     // Add RepaintBoundary for isolation during resize
     if (widget.enableRepaintBoundary) {
-      child = RepaintBoundary(
-        child: child,
-      );
+      child = RepaintBoundary(child: child);
     }
 
     // Add resize indicator for debugging
@@ -218,9 +216,7 @@ class IsolatedRepaintBoundary extends StatelessWidget {
       return child;
     }
 
-    return RepaintBoundary(
-      child: child,
-    );
+    return RepaintBoundary(child: child);
   }
 }
 
@@ -242,7 +238,7 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
 
     int checks = 0;
     final completer = Completer<bool>();
-    
+
     void checkStability() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
@@ -261,10 +257,9 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
           return;
         }
 
-        if (renderObject.hasSize && 
-            renderObject.attached && 
+        if (renderObject.hasSize &&
+            renderObject.attached &&
             !renderObject.debugNeedsLayout) {
-          
           final currentSize = renderObject.size;
           if (_lastKnownSize == null || _lastKnownSize == currentSize) {
             _layoutStable = true;
@@ -272,7 +267,7 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
             if (!completer.isCompleted) completer.complete(true);
             return;
           }
-          
+
           _lastKnownSize = currentSize;
         }
 
@@ -288,7 +283,7 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
     }
 
     checkStability();
-    
+
     // Timeout fallback
     Timer(timeout, () {
       if (!completer.isCompleted) {
@@ -304,7 +299,7 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
   void markLayoutUnstable() {
     _layoutStable = false;
     _stabilityCheckTimer?.cancel();
-    
+
     _stabilityCheckTimer = Timer(const Duration(milliseconds: 100), () {
       if (mounted) {
         waitForLayoutStability();
@@ -346,7 +341,7 @@ class _SizeChangeNotifierState extends State<SizeChangeNotifier> {
     if (_lastSize == newSize) return;
 
     _lastSize = newSize;
-    
+
     widget.onSizeChange(newSize);
     widget.onStabilityChange?.call(false);
 

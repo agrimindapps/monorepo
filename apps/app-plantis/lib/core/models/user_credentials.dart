@@ -28,9 +28,10 @@ class UserCredentials {
         email: json['email'] as String,
         accessToken: json['accessToken'] as String?,
         refreshToken: json['refreshToken'] as String?,
-        tokenExpiry: json['tokenExpiry'] != null
-            ? DateTime.parse(json['tokenExpiry'] as String)
-            : null,
+        tokenExpiry:
+            json['tokenExpiry'] != null
+                ? DateTime.parse(json['tokenExpiry'] as String)
+                : null,
       );
 
   @override

@@ -1,7 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:core/core.dart';
 
 import '../../core/theme/plantis_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart' as local;
@@ -14,10 +13,7 @@ import 'main_scaffold.dart';
 class WebOptimizedNavigationShell extends StatelessWidget {
   final Widget child;
 
-  const WebOptimizedNavigationShell({
-    super.key,
-    required this.child,
-  });
+  const WebOptimizedNavigationShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +21,7 @@ class WebOptimizedNavigationShell extends StatelessWidget {
       builder: (context, constraints) {
         // Mostrar sidebar apenas em desktop (>1200px)
         final shouldShowSidebar = constraints.maxWidth >= 1200;
-        
+
         if (shouldShowSidebar) {
           return _DesktopLayout(child: child);
         } else {
@@ -84,14 +80,13 @@ class ModernSidebar extends StatefulWidget {
   State<ModernSidebar> createState() => _ModernSidebarState();
 }
 
-class _ModernSidebarState extends State<ModernSidebar> 
+class _ModernSidebarState extends State<ModernSidebar>
     with TickerProviderStateMixin {
-  
   late AnimationController _fadeAnimationController;
   late AnimationController _widthAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _widthAnimation;
-  
+
   bool _isExpanded = true;
   static const double _expandedWidth = 280.0;
   static const double _collapsedWidth = 80.0;
@@ -99,20 +94,19 @@ class _ModernSidebarState extends State<ModernSidebar>
   @override
   void initState() {
     super.initState();
-    
+
     // Animation controller para fade in inicial
     _fadeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     // Animation controller para expansão/colapso
     _widthAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -121,11 +115,13 @@ class _ModernSidebarState extends State<ModernSidebar>
     _widthAnimation = Tween<double>(
       begin: _expandedWidth,
       end: _expandedWidth,
-    ).animate(CurvedAnimation(
-      parent: _widthAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    ).animate(
+      CurvedAnimation(
+        parent: _widthAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _fadeAnimationController.forward();
     _widthAnimationController.forward();
   }
@@ -136,20 +132,22 @@ class _ModernSidebarState extends State<ModernSidebar>
     _widthAnimationController.dispose();
     super.dispose();
   }
-  
+
   void _toggleSidebar() {
     setState(() {
       _isExpanded = !_isExpanded;
     });
-    
+
     _widthAnimation = Tween<double>(
       begin: _isExpanded ? _collapsedWidth : _expandedWidth,
       end: _isExpanded ? _expandedWidth : _collapsedWidth,
-    ).animate(CurvedAnimation(
-      parent: _widthAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    ).animate(
+      CurvedAnimation(
+        parent: _widthAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _widthAnimationController.reset();
     _widthAnimationController.forward();
   }
@@ -157,7 +155,7 @@ class _ModernSidebarState extends State<ModernSidebar>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: AnimatedBuilder(
@@ -167,9 +165,10 @@ class _ModernSidebarState extends State<ModernSidebar>
             width: _widthAnimation.value,
             decoration: BoxDecoration(
               // Fundo cinza claro mais sutil
-              color: theme.brightness == Brightness.dark
-                  ? Colors.grey.shade900.withValues(alpha: 0.95)
-                  : Colors.grey.shade50,
+              color:
+                  theme.brightness == Brightness.dark
+                      ? Colors.grey.shade900.withValues(alpha: 0.95)
+                      : Colors.grey.shade50,
               border: Border(
                 right: BorderSide(
                   color: theme.dividerColor.withValues(alpha: 0.15),
@@ -188,15 +187,13 @@ class _ModernSidebarState extends State<ModernSidebar>
               children: [
                 // Header com logo e nome do app
                 _SidebarHeader(isExpanded: _isExpanded),
-                
+
                 // Lista de navegação principal
-                Expanded(
-                  child: _NavigationList(isExpanded: _isExpanded),
-                ),
-                
+                Expanded(child: _NavigationList(isExpanded: _isExpanded)),
+
                 // Configurações movidas para bottom
                 _BottomNavigationSection(isExpanded: _isExpanded),
-                
+
                 // Footer com informações do usuário, versão e toggle
                 _SidebarFooter(
                   isExpanded: _isExpanded,
@@ -214,15 +211,13 @@ class _ModernSidebarState extends State<ModernSidebar>
 /// Header da sidebar com branding e toggle
 class _SidebarHeader extends StatelessWidget {
   final bool isExpanded;
-  
-  const _SidebarHeader({
-    required this.isExpanded,
-  });
+
+  const _SidebarHeader({required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 16, 24),
       child: Row(
@@ -235,10 +230,7 @@ class _SidebarHeader extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  PlantisColors.primary,
-                  PlantisColors.primaryLight,
-                ],
+                colors: [PlantisColors.primary, PlantisColors.primaryLight],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
@@ -249,16 +241,12 @@ class _SidebarHeader extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.eco,
-              color: Colors.white,
-              size: 22,
-            ),
+            child: const Icon(Icons.eco, color: Colors.white, size: 22),
           ),
-          
+
           if (isExpanded) ...[
             const SizedBox(width: 16),
-            
+
             // Nome do app e subtítulo (apenas quando expandido)
             Expanded(
               child: Column(
@@ -283,7 +271,6 @@ class _SidebarHeader extends StatelessWidget {
               ),
             ),
           ],
-          
         ],
       ),
     );
@@ -293,7 +280,7 @@ class _SidebarHeader extends StatelessWidget {
 /// Lista de navegação principal
 class _NavigationList extends StatelessWidget {
   final bool isExpanded;
-  
+
   const _NavigationList({required this.isExpanded});
 
   @override
@@ -317,14 +304,15 @@ class _NavigationList extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // Itens de navegação (sem Configurações)
           Consumer<TasksProvider>(
             builder: (context, tasksProvider, child) {
-              final pendingTasksCount = tasksProvider.allTasks
-                  .where((task) => task.status == TaskStatus.pending)
-                  .length;
-              
+              final pendingTasksCount =
+                  tasksProvider.allTasks
+                      .where((task) => task.status == TaskStatus.pending)
+                      .length;
+
               return Column(
                 children: [
                   _NavigationItem(
@@ -362,13 +350,13 @@ class _NavigationList extends StatelessWidget {
 /// Seção de navegação bottom (Configurações)
 class _BottomNavigationSection extends StatelessWidget {
   final bool isExpanded;
-  
+
   const _BottomNavigationSection({required this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 0),
       decoration: BoxDecoration(
@@ -383,7 +371,7 @@ class _BottomNavigationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          
+
           // Configurações na parte inferior
           _NavigationItem(
             icon: Icons.settings_outlined,
@@ -392,7 +380,7 @@ class _BottomNavigationSection extends StatelessWidget {
             shortcut: '4',
             isExpanded: isExpanded,
           ),
-          
+
           const SizedBox(height: 8),
         ],
       ),
@@ -424,7 +412,6 @@ class _NavigationItem extends StatefulWidget {
 
 class _NavigationItemState extends State<_NavigationItem>
     with SingleTickerProviderStateMixin {
-  
   bool _isHovering = false;
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -436,13 +423,9 @@ class _NavigationItemState extends State<_NavigationItem>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -452,26 +435,28 @@ class _NavigationItemState extends State<_NavigationItem>
   }
 
   bool get _isActive {
-    final currentRoute = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
-    
+    final currentRoute =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+
     // Exact match for root route
     if (widget.route == '/') {
       return currentRoute == '/';
     }
-    
+
     // For other routes, check if current route starts with the widget route
     // and ensure it's either an exact match or followed by a '/' or query parameter
     if (currentRoute == widget.route) {
       return true;
     }
-    
+
     if (currentRoute.startsWith(widget.route)) {
-      final nextChar = currentRoute.length > widget.route.length 
-          ? currentRoute[widget.route.length] 
-          : '';
+      final nextChar =
+          currentRoute.length > widget.route.length
+              ? currentRoute[widget.route.length]
+              : '';
       return nextChar == '/' || nextChar == '?' || nextChar == '#';
     }
-    
+
     return false;
   }
 
@@ -479,7 +464,7 @@ class _NavigationItemState extends State<_NavigationItem>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isActive = _isActive;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: AnimatedBuilder(
@@ -511,26 +496,35 @@ class _NavigationItemState extends State<_NavigationItem>
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     padding: EdgeInsets.symmetric(
-                      horizontal: widget.isExpanded ? 16 : 0, // Sem padding horizontal quando colapsado
+                      horizontal:
+                          widget.isExpanded
+                              ? 16
+                              : 0, // Sem padding horizontal quando colapsado
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? PlantisColors.primary.withValues(alpha: 0.1)
-                          : _isHovering
-                              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+                      color:
+                          isActive
+                              ? PlantisColors.primary.withValues(alpha: 0.1)
+                              : _isHovering
+                              ? theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.5)
                               : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
-                      border: isActive
-                          ? Border.all(
-                              color: PlantisColors.primary.withValues(alpha: 0.3),
-                              width: 1,
-                            )
-                          : null,
+                      border:
+                          isActive
+                              ? Border.all(
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
+                                width: 1,
+                              )
+                              : null,
                     ),
-                    child: widget.isExpanded 
-                        ? _buildExpandedContent(theme, isActive)
-                        : _buildCollapsedContent(theme, isActive),
+                    child:
+                        widget.isExpanded
+                            ? _buildExpandedContent(theme, isActive)
+                            : _buildCollapsedContent(theme, isActive),
                   ),
                 ),
               ),
@@ -540,7 +534,7 @@ class _NavigationItemState extends State<_NavigationItem>
       ),
     );
   }
-  
+
   /// Conteúdo quando sidebar está expandida
   Widget _buildExpandedContent(ThemeData theme, bool isActive) {
     return Row(
@@ -549,34 +543,33 @@ class _NavigationItemState extends State<_NavigationItem>
         Icon(
           widget.icon,
           size: 20,
-          color: isActive
-              ? PlantisColors.primary
-              : theme.colorScheme.onSurfaceVariant,
+          color:
+              isActive
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurfaceVariant,
         ),
-        
+
         const SizedBox(width: 16),
-        
+
         // Label
         Expanded(
           child: Text(
             widget.label,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color: isActive
-                  ? PlantisColors.primary
-                  : theme.colorScheme.onSurface,
+              color:
+                  isActive
+                      ? PlantisColors.primary
+                      : theme.colorScheme.onSurface,
             ),
           ),
         ),
-        
+
         // Badge para contadores
         if (widget.badge != null) ...[
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: PlantisColors.primary,
               borderRadius: BorderRadius.circular(12),
@@ -591,22 +584,16 @@ class _NavigationItemState extends State<_NavigationItem>
             ),
           ),
         ],
-        
+
         // Atalho de teclado
         if (widget.shortcut != null && _isHovering) ...[
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 6,
-              vertical: 2,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: theme.dividerColor,
-                width: 0.5,
-              ),
+              border: Border.all(color: theme.dividerColor, width: 0.5),
             ),
             child: Text(
               widget.shortcut!,
@@ -620,7 +607,7 @@ class _NavigationItemState extends State<_NavigationItem>
       ],
     );
   }
-  
+
   /// Conteúdo quando sidebar está colapsada
   Widget _buildCollapsedContent(ThemeData theme, bool isActive) {
     return Stack(
@@ -630,22 +617,20 @@ class _NavigationItemState extends State<_NavigationItem>
           child: Icon(
             widget.icon,
             size: 22,
-            color: isActive
-                ? PlantisColors.primary
-                : theme.colorScheme.onSurfaceVariant,
+            color:
+                isActive
+                    ? PlantisColors.primary
+                    : theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        
+
         // Badge no canto superior direito (se houver)
         if (widget.badge != null)
           Positioned(
             top: -2,
             right: 8, // Ajustado para melhor alinhamento quando centralizado
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: PlantisColors.primary,
                 borderRadius: BorderRadius.circular(10),
@@ -673,16 +658,13 @@ class _NavigationItemState extends State<_NavigationItem>
 class _SidebarFooter extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
-  
-  const _SidebarFooter({
-    required this.isExpanded,
-    required this.onToggle,
-  });
+
+  const _SidebarFooter({required this.isExpanded, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -698,249 +680,249 @@ class _SidebarFooter extends StatelessWidget {
             ),
           ),
           child: Consumer<local.AuthProvider>(
-        builder: (context, authProvider, child) {
-          final user = authProvider.currentUser;
-          final isAnonymous = authProvider.isAnonymous;
-          
-          if (!isExpanded) {
-            // Versão colapsada - apenas avatar com tooltip
-            return Tooltip(
-              message: isAnonymous
-                  ? 'Usuário Anônimo'
-                  : (user?.displayName.isNotEmpty == true)
-                      ? user!.displayName
-                      : user?.email.split('@').first ?? 'Usuário',
-              waitDuration: const Duration(milliseconds: 500),
-              child: Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            PlantisColors.primary,
-                            PlantisColors.primaryLight,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(22),
-                        boxShadow: [
-                          BoxShadow(
-                            color: PlantisColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: isAnonymous
-                            ? const Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 22,
-                              )
-                            : Text(
-                                (user?.displayName.isNotEmpty == true)
-                                    ? user!.displayName[0].toUpperCase()
-                                    : (user?.email.isNotEmpty == true)
-                                        ? user!.email[0].toUpperCase()
-                                        : '?',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                      ),
-                    ),
-                    
-                    // Indicador de status no canto
-                    Positioned(
-                      bottom: 2,
-                      right: 2,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: isAnonymous 
-                              ? Colors.orange 
-                              : PlantisColors.success,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: theme.colorScheme.surface,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          
-          // Versão expandida - layout completo
-          return Row(
-            children: [
-              // Avatar
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      PlantisColors.primary,
-                      PlantisColors.primaryLight,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: PlantisColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: isAnonymous
-                      ? const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 20,
-                        )
-                      : Text(
-                          (user?.displayName.isNotEmpty == true)
-                              ? user!.displayName[0].toUpperCase()
-                              : (user?.email.isNotEmpty == true)
-                                  ? user!.email[0].toUpperCase()
-                                  : '?',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                ),
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // Nome e tipo de usuário
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+            builder: (context, authProvider, child) {
+              final user = authProvider.currentUser;
+              final isAnonymous = authProvider.isAnonymous;
+
+              if (!isExpanded) {
+                // Versão colapsada - apenas avatar com tooltip
+                return Tooltip(
+                  message:
                       isAnonymous
                           ? 'Usuário Anônimo'
                           : (user?.displayName.isNotEmpty == true)
-                              ? user!.displayName
-                              : user?.email.split('@').first ?? 'Usuário',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      isAnonymous ? 'Modo Offline' : 'Jardineiro',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(width: 8),
-              
-              // Indicador de status (online/offline)
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: isAnonymous 
-                      ? Colors.orange 
-                      : PlantisColors.success,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    ),
-    
-    // Divider horizontal
-    Divider(
-      height: 1,
-      thickness: 1,
-      color: theme.dividerColor.withValues(alpha: 0.15),
-    ),
-    
-    // Seção com versão e botão toggle
-    Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          // Versão do app (apenas quando expandido)
-          if (isExpanded) ...[
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Inside Garden',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10,
+                          ? user!.displayName
+                          : user?.email.split('@').first ?? 'Usuário',
+                  waitDuration: const Duration(milliseconds: 500),
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                PlantisColors.primary,
+                                PlantisColors.primaryLight,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [
+                              BoxShadow(
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child:
+                                isAnonymous
+                                    ? const Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                      size: 22,
+                                    )
+                                    : Text(
+                                      (user?.displayName.isNotEmpty == true)
+                                          ? user!.displayName[0].toUpperCase()
+                                          : (user?.email.isNotEmpty == true)
+                                          ? user!.email[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                          ),
+                        ),
+
+                        // Indicador de status no canto
+                        Positioned(
+                          bottom: 2,
+                          right: 2,
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color:
+                                  isAnonymous
+                                      ? Colors.orange
+                                      : PlantisColors.success,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: theme.colorScheme.surface,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'v1.0.0',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                      fontSize: 9,
+                );
+              }
+
+              // Versão expandida - layout completo
+              return Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          PlantisColors.primary,
+                          PlantisColors.primaryLight,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: PlantisColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child:
+                          isAnonymous
+                              ? const Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 20,
+                              )
+                              : Text(
+                                (user?.displayName.isNotEmpty == true)
+                                    ? user!.displayName[0].toUpperCase()
+                                    : (user?.email.isNotEmpty == true)
+                                    ? user!.email[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Nome e tipo de usuário
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isAnonymous
+                              ? 'Usuário Anônimo'
+                              : (user?.displayName.isNotEmpty == true)
+                              ? user!.displayName
+                              : user?.email.split('@').first ?? 'Usuário',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          isAnonymous ? 'Modo Offline' : 'Jardineiro',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  // Indicador de status (online/offline)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color:
+                          isAnonymous ? Colors.orange : PlantisColors.success,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-          
-          // Botão de toggle (sempre à direita)
-          _ToggleButton(
-            isExpanded: isExpanded,
-            onToggle: onToggle,
+              );
+            },
           ),
-        ],
-      ),
-    ),
-  ],
-);
+        ),
+
+        // Divider horizontal
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: theme.dividerColor.withValues(alpha: 0.15),
+        ),
+
+        // Seção com versão e botão toggle
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              // Versão do app (apenas quando expandido)
+              if (isExpanded) ...[
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Inside Garden',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'v1.0.0',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.7,
+                          ),
+                          fontSize: 9,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+
+              // Botão de toggle (sempre à direita)
+              _ToggleButton(isExpanded: isExpanded, onToggle: onToggle),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
-
 
 /// Botão de toggle com estados hover mais visíveis
 class _ToggleButton extends StatefulWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
-  
-  const _ToggleButton({
-    required this.isExpanded,
-    required this.onToggle,
-  });
+
+  const _ToggleButton({required this.isExpanded, required this.onToggle});
 
   @override
   State<_ToggleButton> createState() => _ToggleButtonState();
@@ -962,23 +944,28 @@ class _ToggleButtonState extends State<_ToggleButton> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: _isHovered 
-                ? PlantisColors.primary.withValues(alpha: 0.2)
-                : PlantisColors.primary.withValues(alpha: 0.1),
+            color:
+                _isHovered
+                    ? PlantisColors.primary.withValues(alpha: 0.2)
+                    : PlantisColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _isHovered 
-                  ? PlantisColors.primary.withValues(alpha: 0.5)
-                  : PlantisColors.primary.withValues(alpha: 0.3),
+              color:
+                  _isHovered
+                      ? PlantisColors.primary.withValues(alpha: 0.5)
+                      : PlantisColors.primary.withValues(alpha: 0.3),
               width: _isHovered ? 1.5 : 1,
             ),
-            boxShadow: _isHovered ? [
-              BoxShadow(
-                color: PlantisColors.primary.withValues(alpha: 0.2),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ] : null,
+            boxShadow:
+                _isHovered
+                    ? [
+                      BoxShadow(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                    : null,
           ),
           child: AnimatedRotation(
             turns: widget.isExpanded ? 0.0 : 0.5,
@@ -986,9 +973,10 @@ class _ToggleButtonState extends State<_ToggleButton> {
             child: Icon(
               Icons.chevron_left,
               size: 18,
-              color: _isHovered 
-                  ? PlantisColors.primary
-                  : PlantisColors.primary.withValues(alpha: 0.8),
+              color:
+                  _isHovered
+                      ? PlantisColors.primary
+                      : PlantisColors.primary.withValues(alpha: 0.8),
             ),
           ),
         ),

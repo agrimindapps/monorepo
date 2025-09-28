@@ -10,7 +10,8 @@ import 'plant_task_validation_service.dart';
 /// Coleta métricas, detecta problemas e gera alertas
 class PlantTaskMonitoringService {
   static PlantTaskMonitoringService? _instance;
-  static PlantTaskMonitoringService get instance => _instance ??= PlantTaskMonitoringService._();
+  static PlantTaskMonitoringService get instance =>
+      _instance ??= PlantTaskMonitoringService._();
 
   PlantTaskMonitoringService._();
 
@@ -39,7 +40,9 @@ class PlantTaskMonitoringService {
     _recordEvent(PlantTaskEvent.monitoringStarted());
 
     if (kDebugMode) {
-      print('🔍 PlantTaskMonitoring: Monitoramento iniciado com intervalo de ${interval.inMinutes} minutos');
+      print(
+        '🔍 PlantTaskMonitoring: Monitoramento iniciado com intervalo de ${interval.inMinutes} minutos',
+      );
     }
   }
 
@@ -64,7 +67,9 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print('🔍 PlantTaskMonitoring: Monitoramento ${enabled ? 'habilitado' : 'desabilitado'}');
+      print(
+        '🔍 PlantTaskMonitoring: Monitoramento ${enabled ? 'habilitado' : 'desabilitado'}',
+      );
     }
   }
 
@@ -74,16 +79,25 @@ class PlantTaskMonitoringService {
 
     _recordEvent(PlantTaskEvent.taskCreated(task, plant));
     _updateMetric('tasks_created_total', 1, increment: true);
-    _updateMetric('tasks_created_by_type_${task.type.name}', 1, increment: true);
+    _updateMetric(
+      'tasks_created_by_type_${task.type.name}',
+      1,
+      increment: true,
+    );
 
     // Validar task criada
-    final validation = PlantTaskValidationService.validatePlantTask(task, plant);
+    final validation = PlantTaskValidationService.validatePlantTask(
+      task,
+      plant,
+    );
     if (!validation.isValid) {
       _recordAlert(PlantTaskAlert.invalidTaskCreated(task, validation.errors));
     }
 
     if (kDebugMode) {
-      print('📝 PlantTaskMonitoring: Task criada - ${task.title} (${task.type.displayName})');
+      print(
+        '📝 PlantTaskMonitoring: Task criada - ${task.title} (${task.type.displayName})',
+      );
     }
   }
 
@@ -93,11 +107,16 @@ class PlantTaskMonitoringService {
 
     _recordEvent(PlantTaskEvent.taskCompleted(task, plant));
     _updateMetric('tasks_completed_total', 1, increment: true);
-    _updateMetric('tasks_completed_by_type_${task.type.name}', 1, increment: true);
+    _updateMetric(
+      'tasks_completed_by_type_${task.type.name}',
+      1,
+      increment: true,
+    );
 
     // Calcular tempo até conclusão
     if (task.completedDate != null) {
-      final daysToComplete = task.completedDate!.difference(task.scheduledDate).inDays;
+      final daysToComplete =
+          task.completedDate!.difference(task.scheduledDate).inDays;
       _updateMetric('avg_days_to_complete', daysToComplete);
 
       if (daysToComplete > 0) {
@@ -111,7 +130,11 @@ class PlantTaskMonitoringService {
   }
 
   /// Registra evento de falha/erro
-  void recordError(String operation, String error, {Map<String, dynamic>? context}) {
+  void recordError(
+    String operation,
+    String error, {
+    Map<String, dynamic>? context,
+  }) {
     if (!_isMonitoringEnabled) return;
 
     _recordEvent(PlantTaskEvent.error(operation, error, context));
@@ -126,7 +149,12 @@ class PlantTaskMonitoringService {
   }
 
   /// Registra evento de sincronização
-  void recordSyncEvent(String syncType, int itemCount, bool success, {Duration? duration}) {
+  void recordSyncEvent(
+    String syncType,
+    int itemCount,
+    bool success, {
+    Duration? duration,
+  }) {
     if (!_isMonitoringEnabled) return;
 
     _recordEvent(PlantTaskEvent.sync(syncType, itemCount, success, duration));
@@ -144,7 +172,9 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print('🔄 PlantTaskMonitoring: Sync $syncType - ${success ? 'sucesso' : 'falha'} ($itemCount items)');
+      print(
+        '🔄 PlantTaskMonitoring: Sync $syncType - ${success ? 'sucesso' : 'falha'} ($itemCount items)',
+      );
     }
   }
 
@@ -173,7 +203,9 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print('✅ PlantTaskMonitoring: Validação em lote - ${validation.validTasks}/${validation.totalTasks} válidas');
+      print(
+        '✅ PlantTaskMonitoring: Validação em lote - ${validation.validTasks}/${validation.totalTasks} válidas',
+      );
     }
   }
 
@@ -192,7 +224,9 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print('🏥 PlantTaskMonitoring: Health score - ${report.healthScore.toStringAsFixed(1)}/100');
+      print(
+        '🏥 PlantTaskMonitoring: Health score - ${report.healthScore.toStringAsFixed(1)}/100',
+      );
     }
   }
 
@@ -205,8 +239,14 @@ class PlantTaskMonitoringService {
       print('🔍 PlantTaskMonitoring: Executando diagnóstico completo');
     }
 
-    final validation = PlantTaskValidationService.validatePlantTasks(tasks, plantsById);
-    final healthReport = PlantTaskValidationService.generateHealthReport(tasks, plantsById);
+    final validation = PlantTaskValidationService.validatePlantTasks(
+      tasks,
+      plantsById,
+    );
+    final healthReport = PlantTaskValidationService.generateHealthReport(
+      tasks,
+      plantsById,
+    );
 
     recordBatchValidation(validation);
     recordHealthReport(healthReport);
@@ -228,7 +268,9 @@ class PlantTaskMonitoringService {
     _recordEvent(PlantTaskEvent.diagnosticCompleted(diagnostic));
 
     if (kDebugMode) {
-      print('🔍 PlantTaskMonitoring: Diagnóstico concluído - Sistema ${diagnostic.isHealthy ? 'saudável' : 'com problemas'}');
+      print(
+        '🔍 PlantTaskMonitoring: Diagnóstico concluído - Sistema ${diagnostic.isHealthy ? 'saudável' : 'com problemas'}',
+      );
     }
 
     return diagnostic;
@@ -246,7 +288,8 @@ class PlantTaskMonitoringService {
 
   /// Obtém métricas atuais
   Map<String, dynamic> getCurrentMetrics() {
-    return Map.from(_metrics)..['last_updated'] = DateTime.now().toIso8601String();
+    return Map.from(_metrics)
+      ..['last_updated'] = DateTime.now().toIso8601String();
   }
 
   /// Limpa eventos antigos
@@ -260,7 +303,9 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print('🧹 PlantTaskMonitoring: Eventos antigos limpos (${_events.length} eventos, ${_alerts.length} alertas)');
+      print(
+        '🧹 PlantTaskMonitoring: Eventos antigos limpos (${_events.length} eventos, ${_alerts.length} alertas)',
+      );
     }
   }
 
@@ -325,33 +370,49 @@ class PlantTaskEvent {
   final String description;
   final Map<String, dynamic>? data;
 
-  PlantTaskEvent({
-    required this.type,
-    required this.description,
-    this.data,
-  }) : timestamp = DateTime.now();
+  PlantTaskEvent({required this.type, required this.description, this.data})
+    : timestamp = DateTime.now();
 
-  factory PlantTaskEvent.taskCreated(PlantTask task, Plant? plant) => PlantTaskEvent(
+  factory PlantTaskEvent.taskCreated(
+    PlantTask task,
+    Plant? plant,
+  ) => PlantTaskEvent(
     type: 'task_created',
-    description: 'Task "${task.title}" criada para planta ${plant?.name ?? 'unknown'}',
-    data: {'task_id': task.id, 'plant_id': task.plantId, 'task_type': task.type.name},
+    description:
+        'Task "${task.title}" criada para planta ${plant?.name ?? 'unknown'}',
+    data: {
+      'task_id': task.id,
+      'plant_id': task.plantId,
+      'task_type': task.type.name,
+    },
   );
 
-  factory PlantTaskEvent.taskCompleted(PlantTask task, Plant? plant) => PlantTaskEvent(
-    type: 'task_completed',
-    description: 'Task "${task.title}" completada',
-    data: {'task_id': task.id, 'plant_id': task.plantId},
-  );
+  factory PlantTaskEvent.taskCompleted(PlantTask task, Plant? plant) =>
+      PlantTaskEvent(
+        type: 'task_completed',
+        description: 'Task "${task.title}" completada',
+        data: {'task_id': task.id, 'plant_id': task.plantId},
+      );
 
-  factory PlantTaskEvent.error(String operation, String error, Map<String, dynamic>? context) => PlantTaskEvent(
+  factory PlantTaskEvent.error(
+    String operation,
+    String error,
+    Map<String, dynamic>? context,
+  ) => PlantTaskEvent(
     type: 'error',
     description: 'Erro em $operation: $error',
     data: {'operation': operation, 'error': error, ...?context},
   );
 
-  factory PlantTaskEvent.sync(String syncType, int itemCount, bool success, Duration? duration) => PlantTaskEvent(
+  factory PlantTaskEvent.sync(
+    String syncType,
+    int itemCount,
+    bool success,
+    Duration? duration,
+  ) => PlantTaskEvent(
     type: 'sync',
-    description: 'Sync $syncType ${success ? 'bem-sucedido' : 'falhou'} ($itemCount items)',
+    description:
+        'Sync $syncType ${success ? 'bem-sucedido' : 'falhou'} ($itemCount items)',
     data: {
       'sync_type': syncType,
       'item_count': itemCount,
@@ -360,9 +421,12 @@ class PlantTaskEvent {
     },
   );
 
-  factory PlantTaskEvent.batchValidation(PlantTaskBatchValidationResult validation) => PlantTaskEvent(
+  factory PlantTaskEvent.batchValidation(
+    PlantTaskBatchValidationResult validation,
+  ) => PlantTaskEvent(
     type: 'batch_validation',
-    description: 'Validação em lote: ${validation.validTasks}/${validation.totalTasks} válidas',
+    description:
+        'Validação em lote: ${validation.validTasks}/${validation.totalTasks} válidas',
     data: {
       'total_tasks': validation.totalTasks,
       'valid_tasks': validation.validTasks,
@@ -370,15 +434,23 @@ class PlantTaskEvent {
     },
   );
 
-  factory PlantTaskEvent.healthReport(PlantTaskHealthReport report) => PlantTaskEvent(
-    type: 'health_report',
-    description: 'Relatório de saúde: ${report.healthScore.toStringAsFixed(1)}/100',
-    data: {'health_score': report.healthScore, 'total_tasks': report.totalTasks},
-  );
+  factory PlantTaskEvent.healthReport(PlantTaskHealthReport report) =>
+      PlantTaskEvent(
+        type: 'health_report',
+        description:
+            'Relatório de saúde: ${report.healthScore.toStringAsFixed(1)}/100',
+        data: {
+          'health_score': report.healthScore,
+          'total_tasks': report.totalTasks,
+        },
+      );
 
-  factory PlantTaskEvent.diagnosticCompleted(PlantTaskSystemDiagnostic diagnostic) => PlantTaskEvent(
+  factory PlantTaskEvent.diagnosticCompleted(
+    PlantTaskSystemDiagnostic diagnostic,
+  ) => PlantTaskEvent(
     type: 'diagnostic_completed',
-    description: 'Diagnóstico concluído - Sistema ${diagnostic.isHealthy ? 'saudável' : 'com problemas'}',
+    description:
+        'Diagnóstico concluído - Sistema ${diagnostic.isHealthy ? 'saudável' : 'com problemas'}',
     data: {'is_healthy': diagnostic.isHealthy},
   );
 
@@ -397,10 +469,8 @@ class PlantTaskEvent {
     description: 'Monitoramento parado',
   );
 
-  factory PlantTaskEvent.metricsReset() => PlantTaskEvent(
-    type: 'metrics_reset',
-    description: 'Métricas resetadas',
-  );
+  factory PlantTaskEvent.metricsReset() =>
+      PlantTaskEvent(type: 'metrics_reset', description: 'Métricas resetadas');
 
   factory PlantTaskEvent.serviceDisposed() => PlantTaskEvent(
     type: 'service_disposed',
@@ -423,47 +493,59 @@ class PlantTaskAlert {
     this.data,
   }) : timestamp = DateTime.now();
 
-  factory PlantTaskAlert.invalidTaskCreated(PlantTask task, List<String> errors) => PlantTaskAlert(
+  factory PlantTaskAlert.invalidTaskCreated(
+    PlantTask task,
+    List<String> errors,
+  ) => PlantTaskAlert(
     type: 'invalid_task_created',
     severity: 'high',
     message: 'Task inválida criada: ${task.title}',
     data: {'task_id': task.id, 'errors': errors},
   );
 
-  factory PlantTaskAlert.operationError(String operation, String error) => PlantTaskAlert(
-    type: 'operation_error',
-    severity: 'high',
-    message: 'Erro em $operation: $error',
-    data: {'operation': operation, 'error': error},
-  );
+  factory PlantTaskAlert.operationError(String operation, String error) =>
+      PlantTaskAlert(
+        type: 'operation_error',
+        severity: 'high',
+        message: 'Erro em $operation: $error',
+        data: {'operation': operation, 'error': error},
+      );
 
-  factory PlantTaskAlert.syncFailure(String syncType, int itemCount) => PlantTaskAlert(
-    type: 'sync_failure',
-    severity: 'medium',
-    message: 'Falha na sincronização $syncType ($itemCount items)',
-    data: {'sync_type': syncType, 'item_count': itemCount},
-  );
+  factory PlantTaskAlert.syncFailure(String syncType, int itemCount) =>
+      PlantTaskAlert(
+        type: 'sync_failure',
+        severity: 'medium',
+        message: 'Falha na sincronização $syncType ($itemCount items)',
+        data: {'sync_type': syncType, 'item_count': itemCount},
+      );
 
-  factory PlantTaskAlert.validationIssues(PlantTaskBatchValidationResult validation) => PlantTaskAlert(
+  factory PlantTaskAlert.validationIssues(
+    PlantTaskBatchValidationResult validation,
+  ) => PlantTaskAlert(
     type: 'validation_issues',
     severity: 'medium',
     message: '${validation.invalidTasks} tasks inválidas encontradas',
-    data: {'invalid_count': validation.invalidTasks, 'total_count': validation.totalTasks},
+    data: {
+      'invalid_count': validation.invalidTasks,
+      'total_count': validation.totalTasks,
+    },
   );
 
-  factory PlantTaskAlert.duplicateIds(List<String> duplicateIds) => PlantTaskAlert(
-    type: 'duplicate_ids',
-    severity: 'high',
-    message: 'IDs duplicados encontrados: ${duplicateIds.length}',
-    data: {'duplicate_ids': duplicateIds},
-  );
+  factory PlantTaskAlert.duplicateIds(List<String> duplicateIds) =>
+      PlantTaskAlert(
+        type: 'duplicate_ids',
+        severity: 'high',
+        message: 'IDs duplicados encontrados: ${duplicateIds.length}',
+        data: {'duplicate_ids': duplicateIds},
+      );
 
-  factory PlantTaskAlert.orphanTasks(List<PlantTask> orphanTasks) => PlantTaskAlert(
-    type: 'orphan_tasks',
-    severity: 'medium',
-    message: '${orphanTasks.length} tasks órfãs (sem planta)',
-    data: {'orphan_count': orphanTasks.length},
-  );
+  factory PlantTaskAlert.orphanTasks(List<PlantTask> orphanTasks) =>
+      PlantTaskAlert(
+        type: 'orphan_tasks',
+        severity: 'medium',
+        message: '${orphanTasks.length} tasks órfãs (sem planta)',
+        data: {'orphan_count': orphanTasks.length},
+      );
 
   factory PlantTaskAlert.lowHealthScore(double healthScore) => PlantTaskAlert(
     type: 'low_health_score',
@@ -494,7 +576,8 @@ class PlantTaskSystemDiagnostic {
   });
 
   String generateReport() {
-    final criticalAlerts = recentAlerts.where((a) => a.severity == 'critical').length;
+    final criticalAlerts =
+        recentAlerts.where((a) => a.severity == 'critical').length;
     final highAlerts = recentAlerts.where((a) => a.severity == 'high').length;
 
     return '''

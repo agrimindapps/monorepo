@@ -248,14 +248,16 @@ class AuthSecurityService {
   String sanitizeInput(String input) {
     // Remove dangerous characters and patterns
     String sanitized = input;
-    
+
     // Escape and remove dangerous characters
-    sanitized = sanitized.replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#x27;')
-        .replaceAll('\\', '')
-        .trim();
+    sanitized =
+        sanitized
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#x27;')
+            .replaceAll('\\', '')
+            .trim();
 
     // Limit length to prevent buffer overflow attempts
     if (sanitized.length > 1000) {

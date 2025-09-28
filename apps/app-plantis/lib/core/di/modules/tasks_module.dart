@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../../features/tasks/data/datasources/local/tasks_local_datasource.dart';
 import '../../../features/tasks/data/datasources/remote/tasks_remote_datasource.dart';

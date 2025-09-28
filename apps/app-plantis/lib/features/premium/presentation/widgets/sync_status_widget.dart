@@ -26,11 +26,12 @@ class SyncStatusWidget extends StatelessWidget {
                       premiumProvider.isSyncing
                           ? Icons.sync
                           : premiumProvider.hasSyncErrors
-                              ? Icons.sync_problem
-                              : Icons.check_circle,
-                      color: premiumProvider.isSyncing
-                          ? Colors.orange
-                          : premiumProvider.hasSyncErrors
+                          ? Icons.sync_problem
+                          : Icons.check_circle,
+                      color:
+                          premiumProvider.isSyncing
+                              ? Colors.orange
+                              : premiumProvider.hasSyncErrors
                               ? Colors.red
                               : Colors.green,
                     ),
@@ -88,7 +89,11 @@ class SyncStatusWidget extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.error, color: Colors.red.shade600, size: 16),
+                            Icon(
+                              Icons.error,
+                              color: Colors.red.shade600,
+                              size: 16,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               'Erro de Sincronização',
@@ -102,7 +107,8 @@ class SyncStatusWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          premiumProvider.syncErrorMessage ?? 'Erro desconhecido',
+                          premiumProvider.syncErrorMessage ??
+                              'Erro desconhecido',
                           style: TextStyle(
                             color: Colors.red.shade700,
                             fontSize: 11,
@@ -125,9 +131,10 @@ class SyncStatusWidget extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: premiumProvider.isSyncing
-                            ? null
-                            : premiumProvider.forceSyncSubscription,
+                        onPressed:
+                            premiumProvider.isSyncing
+                                ? null
+                                : premiumProvider.forceSyncSubscription,
                         icon: const Icon(Icons.refresh, size: 16),
                         label: const Text('Sincronizar'),
                       ),
@@ -160,18 +167,12 @@ class SyncStatusWidget extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
           Text(
             '$label: ',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           ),
           Text(
             value,
@@ -243,10 +244,7 @@ class SyncDebugWidget extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         const SizedBox(height: 8),
         Container(
@@ -258,10 +256,7 @@ class SyncDebugWidget extends StatelessWidget {
           ),
           child: Text(
             data.toString(),
-            style: const TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 11,
-            ),
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
           ),
         ),
       ],
@@ -278,15 +273,51 @@ class PremiumFeaturesWidget extends StatelessWidget {
     return Consumer<PremiumProviderImproved>(
       builder: (context, premiumProvider, child) {
         final features = [
-          _FeatureItem('Plantas Ilimitadas', 'unlimited_plants', premiumProvider.canCreateUnlimitedPlants()),
-          _FeatureItem('Lembretes Avançados', 'advanced_reminders', premiumProvider.canUseCustomReminders()),
-          _FeatureItem('Exportar Dados', 'export_data', premiumProvider.canExportData()),
-          _FeatureItem('Temas Personalizados', 'custom_themes', premiumProvider.canAccessPremiumThemes()),
-          _FeatureItem('Backup na Nuvem', 'cloud_backup', premiumProvider.canBackupToCloud()),
-          _FeatureItem('Identificação de Plantas', 'plant_identification', premiumProvider.canIdentifyPlants()),
-          _FeatureItem('Diagnóstico de Doenças', 'disease_diagnosis', premiumProvider.canDiagnoseDiseases()),
-          _FeatureItem('Notificações Meteorológicas', 'weather_based_notifications', premiumProvider.canUseWeatherNotifications()),
-          _FeatureItem('Calendário de Cuidados', 'care_calendar', premiumProvider.canUseCareCalendar()),
+          _FeatureItem(
+            'Plantas Ilimitadas',
+            'unlimited_plants',
+            premiumProvider.canCreateUnlimitedPlants(),
+          ),
+          _FeatureItem(
+            'Lembretes Avançados',
+            'advanced_reminders',
+            premiumProvider.canUseCustomReminders(),
+          ),
+          _FeatureItem(
+            'Exportar Dados',
+            'export_data',
+            premiumProvider.canExportData(),
+          ),
+          _FeatureItem(
+            'Temas Personalizados',
+            'custom_themes',
+            premiumProvider.canAccessPremiumThemes(),
+          ),
+          _FeatureItem(
+            'Backup na Nuvem',
+            'cloud_backup',
+            premiumProvider.canBackupToCloud(),
+          ),
+          _FeatureItem(
+            'Identificação de Plantas',
+            'plant_identification',
+            premiumProvider.canIdentifyPlants(),
+          ),
+          _FeatureItem(
+            'Diagnóstico de Doenças',
+            'disease_diagnosis',
+            premiumProvider.canDiagnoseDiseases(),
+          ),
+          _FeatureItem(
+            'Notificações Meteorológicas',
+            'weather_based_notifications',
+            premiumProvider.canUseWeatherNotifications(),
+          ),
+          _FeatureItem(
+            'Calendário de Cuidados',
+            'care_calendar',
+            premiumProvider.canUseCareCalendar(),
+          ),
         ];
 
         return Card(
@@ -325,7 +356,8 @@ class PremiumFeaturesWidget extends StatelessWidget {
               feature.name,
               style: TextStyle(
                 color: feature.isEnabled ? Colors.black : Colors.grey,
-                fontWeight: feature.isEnabled ? FontWeight.w500 : FontWeight.normal,
+                fontWeight:
+                    feature.isEnabled ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
           ),

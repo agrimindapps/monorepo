@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 /// Adaptador para converter entre o sistema antigo (`Either<Failure, T>`) e o novo (`Result<T>`)

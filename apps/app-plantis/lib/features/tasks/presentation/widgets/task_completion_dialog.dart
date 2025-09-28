@@ -76,16 +76,17 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       contentPadding: const EdgeInsets.all(24),
       content: SingleChildScrollView(
         child: SizedBox(
-          width: MediaQuery.of(context).size.width > 400 
-              ? 400 
-              : MediaQuery.of(context).size.width * 0.85,
+          width:
+              MediaQuery.of(context).size.width > 400
+                  ? 400
+                  : MediaQuery.of(context).size.width * 0.85,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header com ícone e título da tarefa
               _buildHeader(theme),
-              
+
               const SizedBox(height: 24),
 
               // Data de vencimento atual
@@ -207,14 +208,22 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     );
   }
 
-  Widget _buildInfoCard(ThemeData theme, IconData icon, String title, String description, Color iconColor) {
+  Widget _buildInfoCard(
+    ThemeData theme,
+    IconData icon,
+    String title,
+    String description,
+    Color iconColor,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
@@ -260,7 +269,9 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,7 +285,11 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
                   color: Colors.green.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.calendar_today, color: Colors.green, size: 18),
+                child: const Icon(
+                  Icons.calendar_today,
+                  color: Colors.green,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -381,7 +396,6 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     }
   }
 
-
   Future<void> _selectCompletionDate() async {
     final selectedDate = await showDatePicker(
       context: context,
@@ -394,12 +408,10 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            dialogTheme: const DialogThemeData(
-              backgroundColor: Colors.white,
-            ),
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              surface: Colors.white,
-            ),
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(surface: Colors.white),
           ),
           child: child!,
         );
@@ -472,7 +484,6 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       return '${date.day}/${date.month}/${date.year}';
     }
   }
-
 }
 
 /// Resultado da conclusão de uma tarefa

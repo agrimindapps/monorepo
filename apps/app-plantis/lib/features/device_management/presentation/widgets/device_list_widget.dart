@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/models/device_model.dart';
 import '../providers/device_management_provider.dart';
@@ -9,7 +9,7 @@ import 'device_tile_widget.dart';
 /// Widget que exibe a lista de dispositivos do usuário
 /// Organizada em seções de dispositivos ativos e inativos
 class DeviceListWidget extends StatelessWidget {
-  const DeviceListWidget({Key? key}) : super(key: key);
+  const DeviceListWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +20,7 @@ class DeviceListWidget extends StatelessWidget {
         }
 
         if (!provider.hasDevices) {
-          return const Center(
-            child: Text('Nenhum dispositivo encontrado'),
-          );
+          return const Center(child: Text('Nenhum dispositivo encontrado'));
         }
 
         return RefreshIndicator(
@@ -132,9 +130,10 @@ class DeviceListWidget extends StatelessWidget {
         device: device,
         isCurrentDevice: provider.currentDevice?.uuid == device.uuid,
         isBeingRevoked: provider.isDeviceBeingRevoked(device.uuid),
-        onRevoke: device.isActive
-          ? () => _showRevokeDialog(context, device, provider)
-          : null,
+        onRevoke:
+            device.isActive
+                ? () => _showRevokeDialog(context, device, provider)
+                : null,
         onTap: () => _showDeviceDetails(context, device),
       ),
     );
@@ -158,76 +157,78 @@ class DeviceListWidget extends StatelessWidget {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Revogar Dispositivo'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Deseja revogar o acesso do dispositivo:'),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Revogar Dispositivo'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Deseja revogar o acesso do dispositivo:'),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        device.platformIcon,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              device.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              device.model,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Este dispositivo será desconectado imediatamente e '
+                  'precisará fazer login novamente.',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
               ),
-              child: Row(
-                children: [
-                  Text(
-                    device.platformIcon,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          device.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          device.model,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Revogar'),
               ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Este dispositivo será desconectado imediatamente e '
-              'precisará fazer login novamente.',
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Revogar'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -297,7 +298,9 @@ class _DeviceDetailsSheet extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -324,7 +327,11 @@ class _DeviceDetailsSheet extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Color(int.parse(device.statusColorHex.replaceFirst('#', '0xFF'))).withValues(alpha: 0.1),
+                            color: Color(
+                              int.parse(
+                                device.statusColorHex.replaceFirst('#', '0xFF'),
+                              ),
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -332,7 +339,14 @@ class _DeviceDetailsSheet extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Color(int.parse(device.statusColorHex.replaceFirst('#', '0xFF'))),
+                              color: Color(
+                                int.parse(
+                                  device.statusColorHex.replaceFirst(
+                                    '#',
+                                    '0xFF',
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -352,14 +366,23 @@ class _DeviceDetailsSheet extends StatelessWidget {
                     _buildDetailSection('Informações do Dispositivo', [
                       _buildDetailItem('Modelo', device.model),
                       _buildDetailItem('Fabricante', device.manufacturer),
-                      _buildDetailItem('Plataforma', '${device.platform} ${device.systemVersion}'),
-                      _buildDetailItem('Tipo', device.isPhysicalDevice ? 'Físico' : 'Emulador'),
+                      _buildDetailItem(
+                        'Plataforma',
+                        '${device.platform} ${device.systemVersion}',
+                      ),
+                      _buildDetailItem(
+                        'Tipo',
+                        device.isPhysicalDevice ? 'Físico' : 'Emulador',
+                      ),
                     ]),
 
                     const SizedBox(height: 16),
 
                     _buildDetailSection('Informações do App', [
-                      _buildDetailItem('Versão', '${device.appVersion} (${device.buildNumber})'),
+                      _buildDetailItem(
+                        'Versão',
+                        '${device.appVersion} (${device.buildNumber})',
+                      ),
                       _buildDetailItem('UUID', device.uuid, isMonospace: true),
                     ]),
 
@@ -368,11 +391,15 @@ class _DeviceDetailsSheet extends StatelessWidget {
                     _buildDetailSection('Atividade', [
                       _buildDetailItem(
                         'Primeiro Login',
-                        DateFormat('dd/MM/yyyy HH:mm').format(device.firstLoginAt),
+                        DateFormat(
+                          'dd/MM/yyyy HH:mm',
+                        ).format(device.firstLoginAt),
                       ),
                       _buildDetailItem(
                         'Última Atividade',
-                        DateFormat('dd/MM/yyyy HH:mm').format(device.lastActiveAt),
+                        DateFormat(
+                          'dd/MM/yyyy HH:mm',
+                        ).format(device.lastActiveAt),
                       ),
                       _buildDetailItem(
                         'Status',
@@ -395,11 +422,15 @@ class _DeviceDetailsSheet extends StatelessWidget {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.smartphone, color: Colors.blue.shade600),
+                                Icon(
+                                  Icons.smartphone,
+                                  color: Colors.blue.shade600,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Dispositivo Atual',
@@ -442,10 +473,7 @@ class _DeviceDetailsSheet extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Container(
@@ -469,10 +497,7 @@ class _DeviceDetailsSheet extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 0.5,
-          ),
+          bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
         ),
       ),
       child: Row(

@@ -69,7 +69,9 @@ class PlantTaskTaskAdapter {
   }
 
   /// Mapeia tipo de PlantTask para tipo de Task
-  static task_entity.TaskType _mapPlantTaskTypeToTaskType(TaskType plantTaskType) {
+  static task_entity.TaskType _mapPlantTaskTypeToTaskType(
+    TaskType plantTaskType,
+  ) {
     switch (plantTaskType) {
       case TaskType.watering:
         return task_entity.TaskType.watering;
@@ -87,7 +89,9 @@ class PlantTaskTaskAdapter {
   }
 
   /// Mapeia status de PlantTask para status de Task
-  static task_entity.TaskStatus _mapPlantTaskStatusToTaskStatus(TaskStatus plantTaskStatus) {
+  static task_entity.TaskStatus _mapPlantTaskStatusToTaskStatus(
+    TaskStatus plantTaskStatus,
+  ) {
     switch (plantTaskStatus) {
       case TaskStatus.pending:
         return task_entity.TaskStatus.pending;
@@ -99,7 +103,9 @@ class PlantTaskTaskAdapter {
   }
 
   /// Mapeia status de Task para status de PlantTask
-  static TaskStatus _mapTaskStatusToPlantTaskStatus(task_entity.TaskStatus taskStatus) {
+  static TaskStatus _mapTaskStatusToPlantTaskStatus(
+    task_entity.TaskStatus taskStatus,
+  ) {
     switch (taskStatus) {
       case task_entity.TaskStatus.pending:
         return TaskStatus.pending;
@@ -113,7 +119,9 @@ class PlantTaskTaskAdapter {
   }
 
   /// Mapeia tipo de PlantTask para prioridade de Task
-  static task_entity.TaskPriority _mapPlantTaskTypeToPriority(TaskType plantTaskType) {
+  static task_entity.TaskPriority _mapPlantTaskTypeToPriority(
+    TaskType plantTaskType,
+  ) {
     switch (plantTaskType) {
       case TaskType.watering:
         return task_entity.TaskPriority.high; // Rega é crítica
@@ -173,7 +181,9 @@ class PlantTaskTaskAdapter {
       mergedTasks[task.id] = task;
 
       if (kDebugMode && plant == null) {
-        print('⚠️ PlantTaskTaskAdapter: Planta ${plantTask.plantId} não encontrada para PlantTask ${plantTask.id}');
+        print(
+          '⚠️ PlantTaskTaskAdapter: Planta ${plantTask.plantId} não encontrada para PlantTask ${plantTask.id}',
+        );
       }
     }
 
@@ -182,7 +192,9 @@ class PlantTaskTaskAdapter {
     if (kDebugMode) {
       print('🔄 PlantTaskTaskAdapter: Merge completed');
       print('   - ${plantTasks.length} PlantTasks convertidas');
-      print('   - ${existingTasks.where((t) => !isTaskFromPlantTask(t)).length} Tasks não-PlantTask mantidas');
+      print(
+        '   - ${existingTasks.where((t) => !isTaskFromPlantTask(t)).length} Tasks não-PlantTask mantidas',
+      );
       print('   - ${result.length} Tasks totais no resultado');
     }
 
@@ -214,11 +226,14 @@ class PlantTaskTaskAdapter {
   }
 
   /// Verifica se há diferenças significativas entre duas tasks
-  static bool _hasSignificantDifferences(task_entity.Task task1, task_entity.Task task2) {
+  static bool _hasSignificantDifferences(
+    task_entity.Task task1,
+    task_entity.Task task2,
+  ) {
     return task1.title != task2.title ||
-           task1.status != task2.status ||
-           task1.dueDate != task2.dueDate ||
-           task1.completedAt != task2.completedAt;
+        task1.status != task2.status ||
+        task1.dueDate != task2.dueDate ||
+        task1.completedAt != task2.completedAt;
   }
 
   /// Gera relatório de migração/unificação
@@ -228,9 +243,14 @@ class PlantTaskTaskAdapter {
     required Map<String, Plant> plantsById,
   }) {
     final convertedTasks = plantTasks.length;
-    final existingNonPlantTasks = existingTasks.where((t) => !isTaskFromPlantTask(t)).length;
-    final existingPlantTasks = existingTasks.where((t) => isTaskFromPlantTask(t)).length;
-    final conflicts = findConflictingTaskIds(plantTasks: plantTasks, existingTasks: existingTasks);
+    final existingNonPlantTasks =
+        existingTasks.where((t) => !isTaskFromPlantTask(t)).length;
+    final existingPlantTasks =
+        existingTasks.where((t) => isTaskFromPlantTask(t)).length;
+    final conflicts = findConflictingTaskIds(
+      plantTasks: plantTasks,
+      existingTasks: existingTasks,
+    );
     final plantsWithTasks = plantTasks.map((pt) => pt.plantId).toSet().length;
     final plantsFound = plantsById.length;
 
@@ -262,15 +282,19 @@ class PlantTaskTaskAdapter {
     final recommendations = <String>[];
 
     if (conflicts > 0) {
-      recommendations.add('Resolver ${conflicts} conflitos antes da migração completa');
+      recommendations.add(
+        'Resolver $conflicts conflitos antes da migração completa',
+      );
     }
 
     if (convertedTasks == 0) {
-      recommendations.add('Nenhuma PlantTask encontrada - verificar implementação da geração automática');
+      recommendations.add(
+        'Nenhuma PlantTask encontrada - verificar implementação da geração automática',
+      );
     }
 
     if (existingTasks > 0) {
-      recommendations.add('${existingTasks} tasks existentes serão mantidas');
+      recommendations.add('$existingTasks tasks existentes serão mantidas');
     }
 
     if (convertedTasks > 0 && conflicts == 0) {

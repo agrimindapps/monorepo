@@ -45,15 +45,13 @@ class AsyncStateBuilder<T> extends StatelessWidget {
     if (loadingBuilder != null) {
       return loadingBuilder!(context);
     }
-    
+
     if (showDefaultLoading) {
       return Center(
-        child: EnhancedLoadingStates.adaptiveLoading(
-          message: loadingMessage,
-        ),
+        child: EnhancedLoadingStates.adaptiveLoading(message: loadingMessage),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 
@@ -61,7 +59,7 @@ class AsyncStateBuilder<T> extends StatelessWidget {
     if (errorBuilder != null) {
       return errorBuilder!(context, error);
     }
-    
+
     if (showDefaultError) {
       return EnhancedErrorStates.adaptiveError(
         title: 'Ops, algo deu errado',
@@ -69,7 +67,7 @@ class AsyncStateBuilder<T> extends StatelessWidget {
         onRetry: onRetry,
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 
@@ -81,7 +79,7 @@ class AsyncStateBuilder<T> extends StatelessWidget {
     if (emptyBuilder != null) {
       return emptyBuilder!(context);
     }
-    
+
     return EnhancedErrorStates.emptyState(
       title: 'Nenhum item encontrado',
       message: emptyMessage,
@@ -156,16 +154,16 @@ abstract class AsyncState<T> {
 
 class AsyncLoadingState<T> extends AsyncState<T> {
   const AsyncLoadingState();
-  
+
   @override
   String toString() => 'AsyncLoadingState<$T>()';
 }
 
 class AsyncErrorState<T> extends AsyncState<T> {
   final String message;
-  
+
   const AsyncErrorState(this.message);
-  
+
   @override
   String toString() => 'AsyncErrorState<$T>(message: $message)';
 }
@@ -173,16 +171,16 @@ class AsyncErrorState<T> extends AsyncState<T> {
 class AsyncSuccessState<T> extends AsyncState<T> {
   @override
   final T data;
-  
+
   const AsyncSuccessState(this.data);
-  
+
   @override
   String toString() => 'AsyncSuccessState<$T>(data: $data)';
 }
 
 class AsyncEmptyState<T> extends AsyncState<T> {
   const AsyncEmptyState();
-  
+
   @override
   String toString() => 'AsyncEmptyState<$T>()';
 }
@@ -295,9 +293,11 @@ extension AsyncStateExtensions<T> on AsyncState<T> {
     return when(
       loading: () => const AsyncState.loading(),
       error: (error) => AsyncState.error(error),
-      success: (data) => predicate(data) 
-          ? AsyncState.success(data)
-          : const AsyncState.empty(),
+      success:
+          (data) =>
+              predicate(data)
+                  ? AsyncState.success(data)
+                  : const AsyncState.empty(),
       empty: () => const AsyncState.empty(),
     );
   }

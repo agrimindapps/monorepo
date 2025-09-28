@@ -1,22 +1,18 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget, WidgetRef;
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod show Consumer;
 import 'package:provider/provider.dart' as provider;
 
 import '../../core/di/injection_container.dart' as di;
-import 'package:core/core.dart';
-
-import '../../shared/widgets/responsive_layout.dart';
-import '../../shared/widgets/base_page_scaffold.dart';
-import '../../core/theme/plantis_colors.dart';
-import '../../core/theme/plantis_design_tokens.dart';
 import '../../core/riverpod_providers/auth_providers.dart';
 import '../../core/riverpod_providers/settings_providers.dart';
-import '../../core/riverpod_providers/sync_providers.dart';
+import '../../core/theme/plantis_colors.dart';
+import '../../core/theme/plantis_design_tokens.dart';
 import '../../features/development/presentation/pages/database_inspector_page.dart';
 import '../../features/settings/presentation/widgets/premium_components.dart';
+import '../../shared/widgets/base_page_scaffold.dart';
 import '../../shared/widgets/loading/loading_components.dart';
+import '../../shared/widgets/responsive_layout.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -25,7 +21,8 @@ class SettingsPage extends ConsumerStatefulWidget {
   ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMixin {
+class _SettingsPageState extends ConsumerState<SettingsPage>
+    with LoadingPageMixin {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -69,14 +66,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
                                 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
                             button: true,
                             onTap:
-                                () =>
-                                    _showThemeDialog(context, themeProvider),
+                                () => _showThemeDialog(context, themeProvider),
                             child: GestureDetector(
                               onTap:
-                                  () => _showThemeDialog(
-                                    context,
-                                    themeProvider,
-                                  ),
+                                  () =>
+                                      _showThemeDialog(context, themeProvider),
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
@@ -118,12 +112,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
                         _buildConfigSection(context, theme, settingsState),
                         const SizedBox(height: 8),
 
-                        // Seção de Sincronização
-                        if (!authData.isAnonymous) ...[
-                          _buildSyncStatusSection(context, theme, authData),
-                          const SizedBox(height: 8),
-                        ],
-
                         // Seção de Suporte
                         _buildSupportSection(context, theme),
                         const SizedBox(height: 8),
@@ -131,7 +119,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
                         // Seção Sobre (com privacidade e termos)
                         _buildAboutSection(context, theme),
                         const SizedBox(height: 8),
-
 
                         // Seção de Desenvolvimento (debug only)
                         if (kDebugMode) ...[
@@ -147,9 +134,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(
-              child: Text('Erro ao carregar configurações: $error'),
-            ),
+            error:
+                (error, stack) => Center(
+                  child: Text('Erro ao carregar configurações: $error'),
+                ),
           ),
         ),
       ),
@@ -556,7 +544,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
             color:
                 isCurrentDevice
                     ? PlantisColors.primary.withValues(alpha: 0.2)
-                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    : theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -620,93 +610,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
             size: 18,
           ),
       ],
-    );
-  }
-
-  Widget _buildSyncStatusSection(
-    BuildContext context,
-    ThemeData theme,
-    AuthState authState,
-  ) {
-    return riverpod.Consumer(
-      builder: (context, ref, _) {
-        final syncState = ref.watch(syncProvider);
-        final isSyncing = syncState.isSyncing;
-        final syncMessage = syncState.statusMessage;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color:
-              isSyncing
-                  ? Colors.orange.withValues(alpha: 0.3)
-                  : PlantisColors.primary.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color:
-                    isSyncing
-                        ? Colors.orange.withValues(alpha: 0.2)
-                        : PlantisColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                isSyncing ? Icons.sync : Icons.cloud_done,
-                color: isSyncing ? Colors.orange : PlantisColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isSyncing ? 'Sincronizando...' : 'Dados Sincronizados',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isSyncing
-                        ? syncMessage
-                        : 'Todos os dados estão atualizados na nuvem',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSyncing)
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            else
-              IconButton(
-                onPressed: () {
-                  ref.read(syncProvider.notifier).triggerManualSync();
-                },
-                icon: const Icon(Icons.refresh),
-                tooltip: 'Sincronizar agora',
-                color: PlantisColors.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-      }
     );
   }
 
@@ -801,7 +704,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.verified,
                           color: PlantisColors.primary,
                           size: 16,
@@ -924,13 +827,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
             subtitle: 'Gerencie aparelhos com acesso à conta',
             onTap: () => context.push('/device-management'),
           ),
-          _buildSettingsItem(
-            context,
-            icon: Icons.workspace_premium,
-            title: 'Status da Licença',
-            subtitle: 'Visualizar informações da licença trial',
-            onTap: () => context.push('/license-status'),
-          ),
         ]),
       ],
     );
@@ -1018,7 +914,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
     );
   }
 
-
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -1027,7 +922,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: PlantisColors.primary,
-          fontSize: (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) + 2,
+          fontSize:
+              (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) + 2,
         ),
       ),
     );
@@ -1160,7 +1056,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
   ) {
     final theme = Theme.of(context);
     final isEnabled = settingsState.settings.notifications.taskRemindersEnabled;
-    final isWebPlatform = kIsWeb;
+    const isWebPlatform = kIsWeb;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -1169,17 +1065,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isWebPlatform 
-                  ? Colors.grey.withValues(alpha: 0.1)
-                  : PlantisColors.primary.withValues(alpha: 0.1),
+              color:
+                  isWebPlatform
+                      ? Colors.grey.withValues(alpha: 0.1)
+                      : PlantisColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               isWebPlatform
                   ? Icons.web
                   : isEnabled
-                      ? Icons.notifications_active
-                      : Icons.notifications_off,
+                  ? Icons.notifications_active
+                  : Icons.notifications_off,
               color: isWebPlatform ? Colors.grey : PlantisColors.primary,
               size: 20,
             ),
@@ -1201,8 +1098,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
                   isWebPlatform
                       ? 'Não disponível na versão web'
                       : isEnabled
-                          ? 'Receba lembretes sobre suas plantas'
-                          : 'Notificações desabilitadas',
+                      ? 'Receba lembretes sobre suas plantas'
+                      : 'Notificações desabilitadas',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -1212,23 +1109,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
           ),
           Switch.adaptive(
             value: isWebPlatform ? false : isEnabled,
-            onChanged: isWebPlatform ? null : (value) {
-              ref.read(settingsNotifierProvider.notifier).toggleTaskReminders(value);
+            onChanged:
+                isWebPlatform
+                    ? null
+                    : (value) {
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleTaskReminders(value);
 
-              // Mostrar feedback ao usuário
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    value
-                        ? 'Notificações ativadas'
-                        : 'Notificações desativadas',
-                  ),
-                  backgroundColor: PlantisColors.primary,
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
+                      // Mostrar feedback ao usuário
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            value
+                                ? 'Notificações ativadas'
+                                : 'Notificações desativadas',
+                          ),
+                          backgroundColor: PlantisColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
             activeColor: PlantisColors.primary,
           ),
         ],
@@ -1539,7 +1441,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
     );
   }
 
-
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -1681,7 +1582,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with LoadingPageMix
               ),
             ),
             if (isSelected)
-              Icon(Icons.check, color: PlantisColors.primary, size: 20),
+              const Icon(Icons.check, color: PlantisColors.primary, size: 20),
           ],
         ),
       ),

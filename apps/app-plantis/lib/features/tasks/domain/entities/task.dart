@@ -323,7 +323,10 @@ class Task extends BaseSyncEntity {
       plantId: tarefaModel.plantaId as String,
       plantName: plantName ?? 'Planta',
       type: taskType,
-      status: ((tarefaModel.concluida as bool?) ?? false) ? TaskStatus.completed : TaskStatus.pending,
+      status:
+          ((tarefaModel.concluida as bool?) ?? false)
+              ? TaskStatus.completed
+              : TaskStatus.pending,
       priority: mapPriority(tarefaModel.tipoCuidado as String),
       dueDate: tarefaModel.dataExecucao as DateTime,
       completedAt: tarefaModel.dataConclusao as DateTime?,
@@ -401,23 +404,26 @@ class Task extends BaseSyncEntity {
         orElse: () => TaskPriority.medium,
       ),
       dueDate: DateTime.fromMillisecondsSinceEpoch(json['dueDate'] as int),
-      completedAt: json['completedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['completedAt'] as int)
-          : null,
+      completedAt:
+          json['completedAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['completedAt'] as int)
+              : null,
       completionNotes: json['completionNotes'] as String?,
       isRecurring: json['isRecurring'] as bool? ?? false,
       recurringIntervalDays: json['recurringIntervalDays'] as int?,
-      nextDueDate: json['nextDueDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['nextDueDate'] as int)
-          : null,
+      nextDueDate:
+          json['nextDueDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['nextDueDate'] as int)
+              : null,
       isDirty: json['isDirty'] as bool? ?? false,
       isDeleted: json['isDeleted'] as bool? ?? false,
       version: json['version'] as int? ?? 1,
       userId: json['userId'] as String?,
       moduleName: json['moduleName'] as String?,
-      lastSyncAt: json['lastSyncAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
-          : null,
+      lastSyncAt:
+          json['lastSyncAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
+              : null,
     );
   }
 

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
@@ -32,9 +31,8 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       try {
         // Wait for user with increasing timeout per attempt
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user = await authService.currentUser
-            .timeout(timeoutDuration)
-            .first;
+        final user =
+            await authService.currentUser.timeout(timeoutDuration).first;
 
         if (user != null && user.id.isNotEmpty) {
           return user.id;
@@ -50,7 +48,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       } catch (e) {
         // Log error for debugging with attempt number
         if (kDebugMode) {
-          print('PlantTasksRepository: Auth attempt $attempt/$maxRetries failed: $e');
+          print(
+            'PlantTasksRepository: Auth attempt $attempt/$maxRetries failed: $e',
+          );
         }
 
         // If it's the last attempt, return null
@@ -71,7 +71,11 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(AuthFailure('Usuário não autenticado. Aguarde a inicialização ou faça login.'));
+        return const Left(
+          AuthFailure(
+            'Usuário não autenticado. Aguarde a inicialização ou faça login.',
+          ),
+        );
       }
 
       // ALWAYS return local data first for instant UI response
@@ -83,7 +87,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print('✅ PlantTasksRepository: Retornando ${localTasks.length} plant tasks do cache local');
+        print(
+          '✅ PlantTasksRepository: Retornando ${localTasks.length} plant tasks do cache local',
+        );
       }
 
       return Right(localTasks);
@@ -97,17 +103,21 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         print('❌ PlantTasksRepository: Unexpected error: $e');
       }
       return Left(
-        UnknownFailure('Erro inesperado ao buscar tarefas de plantas: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao buscar tarefas de plantas: ${e.toString()}',
+        ),
       );
     }
   }
 
   @override
-  Future<Either<Failure, List<PlantTask>>> getPlantTasksByPlantId(String plantId) async {
+  Future<Either<Failure, List<PlantTask>>> getPlantTasksByPlantId(
+    String plantId,
+  ) async {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        return Left(AuthFailure('Usuário não autenticado'));
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       // ALWAYS get from local first for instant response
@@ -119,7 +129,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print('✅ PlantTasksRepository: Retornando ${localTasks.length} tasks para planta $plantId');
+        print(
+          '✅ PlantTasksRepository: Retornando ${localTasks.length} tasks para planta $plantId',
+        );
       }
 
       return Right(localTasks);
@@ -127,7 +139,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Left(e);
     } catch (e) {
       return Left(
-        UnknownFailure('Erro inesperado ao buscar tarefas da planta: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao buscar tarefas da planta: ${e.toString()}',
+        ),
       );
     }
   }
@@ -166,7 +180,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print('💾 PlantTasksRepository: Adicionando task ${task.id} - ${task.title}');
+        print(
+          '💾 PlantTasksRepository: Adicionando task ${task.id} - ${task.title}',
+        );
       }
 
       final taskModel = PlantTaskModel.fromEntity(task);
@@ -177,19 +193,26 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (await networkInfo.isConnected) {
         try {
           // Try to save remotely
-          final remoteTask = await remoteDatasource.addPlantTask(taskModel, userId);
+          final remoteTask = await remoteDatasource.addPlantTask(
+            taskModel,
+            userId,
+          );
 
           // Update local with remote data (with Firebase ID)
           await localDatasource.updatePlantTask(remoteTask.toEntity());
 
           if (kDebugMode) {
-            print('✅ PlantTasksRepository: Task ${task.id} salva remotamente com ID ${remoteTask.id}');
+            print(
+              '✅ PlantTasksRepository: Task ${task.id} salva remotamente com ID ${remoteTask.id}',
+            );
           }
 
           return Right(remoteTask.toEntity());
         } catch (e) {
           if (kDebugMode) {
-            print('⚠️ PlantTasksRepository: Falha ao salvar remotamente, será sincronizada depois: $e');
+            print(
+              '⚠️ PlantTasksRepository: Falha ao salvar remotamente, será sincronizada depois: $e',
+            );
           }
           // If remote fails, return local version (will sync later)
           return Right(task);
@@ -197,7 +220,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       } else {
         // Offline - return local version
         if (kDebugMode) {
-          print('📴 PlantTasksRepository: Offline, task salva apenas localmente');
+          print(
+            '📴 PlantTasksRepository: Offline, task salva apenas localmente',
+          );
         }
         return Right(task);
       }
@@ -217,7 +242,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
   }
 
   @override
-  Future<Either<Failure, List<PlantTask>>> addPlantTasks(List<PlantTask> tasks) async {
+  Future<Either<Failure, List<PlantTask>>> addPlantTasks(
+    List<PlantTask> tasks,
+  ) async {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
@@ -225,7 +252,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print('💾 PlantTasksRepository: Adicionando ${tasks.length} tasks em lote');
+        print(
+          '💾 PlantTasksRepository: Adicionando ${tasks.length} tasks em lote',
+        );
       }
 
       // Always save locally first
@@ -234,7 +263,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       // TODO: Implementar sync com remote quando disponível
 
       if (kDebugMode) {
-        print('✅ PlantTasksRepository: ${tasks.length} tasks adicionadas em lote com sucesso');
+        print(
+          '✅ PlantTasksRepository: ${tasks.length} tasks adicionadas em lote com sucesso',
+        );
       }
 
       return Right(tasks);
@@ -300,7 +331,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deletePlantTasksByPlantId(String plantId) async {
+  Future<Either<Failure, void>> deletePlantTasksByPlantId(
+    String plantId,
+  ) async {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
@@ -308,7 +341,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print('🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId');
+        print(
+          '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId',
+        );
       }
 
       // Always delete locally first
@@ -317,7 +352,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       // TODO: Implementar sync com remote quando disponível
 
       if (kDebugMode) {
-        print('✅ PlantTasksRepository: Tasks da planta $plantId deletadas com sucesso');
+        print(
+          '✅ PlantTasksRepository: Tasks da planta $plantId deletadas com sucesso',
+        );
       }
 
       return const Right(null);
@@ -325,7 +362,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Left(e);
     } catch (e) {
       return Left(
-        UnknownFailure('Erro inesperado ao deletar tarefas da planta: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao deletar tarefas da planta: ${e.toString()}',
+        ),
       );
     }
   }
@@ -342,7 +381,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Right(pendingTasks);
     } catch (e) {
       return Left(
-        UnknownFailure('Erro inesperado ao buscar tarefas pendentes: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao buscar tarefas pendentes: ${e.toString()}',
+        ),
       );
     }
   }
@@ -359,7 +400,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Right(overdueTasks);
     } catch (e) {
       return Left(
-        UnknownFailure('Erro inesperado ao buscar tarefas atrasadas: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao buscar tarefas atrasadas: ${e.toString()}',
+        ),
       );
     }
   }
@@ -376,7 +419,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Right(todayTasks);
     } catch (e) {
       return Left(
-        UnknownFailure('Erro inesperado ao buscar tarefas de hoje: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao buscar tarefas de hoje: ${e.toString()}',
+        ),
       );
     }
   }
@@ -393,13 +438,18 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Right(upcomingTasks);
     } catch (e) {
       return Left(
-        UnknownFailure('Erro inesperado ao buscar tarefas próximas: ${e.toString()}'),
+        UnknownFailure(
+          'Erro inesperado ao buscar tarefas próximas: ${e.toString()}',
+        ),
       );
     }
   }
 
   @override
-  Future<Either<Failure, PlantTask>> completeTask(String id, {String? notes}) async {
+  Future<Either<Failure, PlantTask>> completeTask(
+    String id, {
+    String? notes,
+  }) async {
     try {
       final taskResult = await getPlantTaskById(id);
 
@@ -429,14 +479,17 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
       // Get all local tasks that need sync
       final localTasks = await localDatasource.getPlantTasks();
-      final tasksToSync = localTasks
-          .map((task) => PlantTaskModel.fromEntity(task))
-          .where((task) => task.isDirty)
-          .toList();
+      final tasksToSync =
+          localTasks
+              .map((task) => PlantTaskModel.fromEntity(task))
+              .where((task) => task.isDirty)
+              .toList();
 
       if (tasksToSync.isNotEmpty) {
         if (kDebugMode) {
-          print('🔄 PlantTasksRepository: Sincronizando ${tasksToSync.length} plant tasks');
+          print(
+            '🔄 PlantTasksRepository: Sincronizando ${tasksToSync.length} plant tasks',
+          );
         }
 
         try {
@@ -449,11 +502,15 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           }
 
           if (kDebugMode) {
-            print('✅ PlantTasksRepository: ${tasksToSync.length} plant tasks sincronizadas');
+            print(
+              '✅ PlantTasksRepository: ${tasksToSync.length} plant tasks sincronizadas',
+            );
           }
         } catch (e) {
           if (kDebugMode) {
-            print('❌ PlantTasksRepository: Erro ao sincronizar plant tasks: $e');
+            print(
+              '❌ PlantTasksRepository: Erro ao sincronizar plant tasks: $e',
+            );
           }
           return Left(
             ServerFailure('Erro ao sincronizar mudanças: ${e.toString()}'),
@@ -477,7 +534,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         .getPlantTasks(userId)
         .then((remoteTasks) {
           if (kDebugMode) {
-            print('✅ PlantTasksRepository: Background sync completed - ${remoteTasks.length} plant tasks');
+            print(
+              '✅ PlantTasksRepository: Background sync completed - ${remoteTasks.length} plant tasks',
+            );
           }
           // Update local cache with remote data
           for (final task in remoteTasks) {
@@ -497,7 +556,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         .getPlantTasksByPlantId(plantId, userId)
         .then((remoteTasks) {
           if (kDebugMode) {
-            print('✅ PlantTasksRepository: Background sync for plant $plantId completed - ${remoteTasks.length} tasks');
+            print(
+              '✅ PlantTasksRepository: Background sync for plant $plantId completed - ${remoteTasks.length} tasks',
+            );
           }
           // Update local cache with remote data
           for (final task in remoteTasks) {
@@ -507,7 +568,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         .catchError((e) {
           // Log background sync errors for debugging
           if (kDebugMode) {
-            print('⚠️ PlantTasksRepository: Background sync for plant $plantId failed: $e');
+            print(
+              '⚠️ PlantTasksRepository: Background sync for plant $plantId failed: $e',
+            );
           }
         });
   }

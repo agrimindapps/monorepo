@@ -11,7 +11,8 @@ class UrlLauncherService {
   UrlLauncherService._internal();
 
   /// Launch URL with comprehensive error handling and validation
-  Future<UrlLaunchResult> launchUrl(String url, {
+  Future<UrlLaunchResult> launchUrl(
+    String url, {
     String? source,
     Map<String, dynamic>? analyticsParameters,
     url_launcher.LaunchMode mode = url_launcher.LaunchMode.externalApplication,
@@ -40,11 +41,11 @@ class UrlLauncherService {
 
       // Attempt to launch URL
       final launched = await _launchUrlSafely(uri, mode);
-      
+
       if (launched) {
         // Track successful launch for analytics
         _trackUrlLaunch(url, source, analyticsParameters, success: true);
-        
+
         return UrlLaunchResult.success(
           url: url,
           message: 'Link aberto com sucesso',
@@ -52,7 +53,7 @@ class UrlLauncherService {
       } else {
         // Track failed launch for analytics
         _trackUrlLaunch(url, source, analyticsParameters, success: false);
-        
+
         return UrlLaunchResult.failure(
           error: UrlLaunchError.launchFailed,
           message: 'Falha ao abrir o link',
@@ -61,8 +62,14 @@ class UrlLauncherService {
       }
     } catch (e) {
       // Track exception for analytics
-      _trackUrlLaunch(url, source, analyticsParameters, success: false, exception: e.toString());
-      
+      _trackUrlLaunch(
+        url,
+        source,
+        analyticsParameters,
+        success: false,
+        exception: e.toString(),
+      );
+
       return UrlLaunchResult.failure(
         error: UrlLaunchError.exception,
         message: 'Erro inesperado ao abrir o link: ${e.toString()}',
@@ -74,10 +81,7 @@ class UrlLauncherService {
   /// Safely launch URL with platform-specific handling
   Future<bool> _launchUrlSafely(Uri uri, url_launcher.LaunchMode mode) async {
     try {
-      return await url_launcher.launchUrl(
-        uri,
-        mode: mode,
-      );
+      return await url_launcher.launchUrl(uri, mode: mode);
     } catch (e) {
       // Fallback to external application mode if webview fails
       if (mode != url_launcher.LaunchMode.externalApplication) {
@@ -93,7 +97,7 @@ class UrlLauncherService {
           return false;
         }
       }
-      
+
       if (kDebugMode) {
         print('URL Launch failed: $e');
       }
@@ -129,15 +133,16 @@ class UrlLauncherService {
   }
 
   /// Launch phone dialer with number
-  Future<UrlLaunchResult> launchPhone(String phoneNumber, {String? source}) async {
+  Future<UrlLaunchResult> launchPhone(
+    String phoneNumber, {
+    String? source,
+  }) async {
     final phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-    
+
     return await launchUrl(
       phoneUri.toString(),
       source: source ?? 'phone_launcher',
-      analyticsParameters: {
-        'action': 'phone_call',
-      },
+      analyticsParameters: {'action': 'phone_call'},
     );
   }
 
@@ -167,9 +172,10 @@ class UrlLauncherService {
   Future<UrlLaunchResult> launchStoreReview({String? source}) async {
     // Platform-specific store URLs would be determined here
     // For now, using the configured URLs from AppConfig
-    final storeUrl = defaultTargetPlatform == TargetPlatform.iOS 
-        ? AppConfig.appStoreUrl 
-        : AppConfig.googlePlayUrl;
+    final storeUrl =
+        defaultTargetPlatform == TargetPlatform.iOS
+            ? AppConfig.appStoreUrl
+            : AppConfig.googlePlayUrl;
 
     return await launchUrl(
       storeUrl,
@@ -183,20 +189,22 @@ class UrlLauncherService {
 
   /// Track URL launch events (placeholder for analytics integration)
   void _trackUrlLaunch(
-    String url, 
-    String? source, 
+    String url,
+    String? source,
     Map<String, dynamic>? additionalParameters, {
     required bool success,
     String? exception,
   }) {
     if (kDebugMode) {
-      print('URL Launch Event: '
-          'url=$url, '
-          'source=$source, '
-          'success=$success'
-          '${exception != null ? ', exception=$exception' : ''}');
+      print(
+        'URL Launch Event: '
+        'url=$url, '
+        'source=$source, '
+        'success=$success'
+        '${exception != null ? ', exception=$exception' : ''}',
+      );
     }
-    
+
     // TODO: Integrate with actual analytics service
     // Analytics.track('url_launch', {
     //   'url': url,
@@ -226,11 +234,7 @@ class UrlLaunchResult {
   factory UrlLaunchResult.success({
     required String url,
     required String message,
-  }) => UrlLaunchResult._(
-    isSuccess: true,
-    url: url,
-    message: message,
-  );
+  }) => UrlLaunchResult._(isSuccess: true, url: url, message: message);
 
   factory UrlLaunchResult.failure({
     required UrlLaunchError error,
@@ -244,16 +248,12 @@ class UrlLaunchResult {
   );
 
   @override
-  String toString() => 'UrlLaunchResult(success: $isSuccess, url: $url, message: $message)';
+  String toString() =>
+      'UrlLaunchResult(success: $isSuccess, url: $url, message: $message)';
 }
 
 /// Types of URL launch errors
-enum UrlLaunchError {
-  invalidUrl,
-  cannotLaunch,
-  launchFailed,
-  exception,
-}
+enum UrlLaunchError { invalidUrl, cannotLaunch, launchFailed, exception }
 
 /// Extension to provide user-friendly error messages
 extension UrlLaunchErrorExtension on UrlLaunchError {

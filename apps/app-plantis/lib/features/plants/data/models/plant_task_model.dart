@@ -38,23 +38,26 @@ class PlantTaskModel extends PlantTask {
       title: json['title'] as String,
       description: json['description'] as String?,
       scheduledDate: DateTime.parse(json['scheduledDate'] as String),
-      completedDate: json['completedDate'] != null
-          ? DateTime.parse(json['completedDate'] as String)
-          : null,
+      completedDate:
+          json['completedDate'] != null
+              ? DateTime.parse(json['completedDate'] as String)
+              : null,
       status: TaskStatus.values.firstWhere(
         (e) => e.name == json['status'],
         orElse: () => TaskStatus.pending,
       ),
       intervalDays: json['intervalDays'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      nextScheduledDate: json['nextScheduledDate'] != null
-          ? DateTime.parse(json['nextScheduledDate'] as String)
-          : null,
+      nextScheduledDate:
+          json['nextScheduledDate'] != null
+              ? DateTime.parse(json['nextScheduledDate'] as String)
+              : null,
       isDirty: json['isDirty'] as bool? ?? false,
       isDeleted: json['isDeleted'] as bool? ?? false,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : null,
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'] as String)
+              : null,
     );
   }
 
@@ -115,6 +118,7 @@ class PlantTaskModel extends PlantTask {
   }
 
   /// Copy with modifications
+  @override
   PlantTaskModel copyWith({
     String? id,
     String? plantId,
@@ -151,27 +155,17 @@ class PlantTaskModel extends PlantTask {
 
   /// Mark as dirty for sync
   PlantTaskModel markAsDirty() {
-    return copyWith(
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
   }
 
   /// Mark as synced
   PlantTaskModel markAsSynced() {
-    return copyWith(
-      isDirty: false,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDirty: false, updatedAt: DateTime.now());
   }
 
   /// Mark as deleted (soft delete)
   PlantTaskModel markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override

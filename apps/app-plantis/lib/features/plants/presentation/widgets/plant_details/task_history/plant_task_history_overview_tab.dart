@@ -36,17 +36,16 @@ class _PlantTaskHistoryOverviewTabState
 
     // Criar animações escalonadas para os itens
     _itemAnimations = List.generate(8, (index) {
-      return Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: _fadeController,
-        curve: Interval(
-          index * 0.1,
-          0.8 + (index * 0.02),
-          curve: Curves.easeOutBack,
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _fadeController,
+          curve: Interval(
+            index * 0.1,
+            0.8 + (index * 0.02),
+            curve: Curves.easeOutBack,
+          ),
         ),
-      ));
+      );
     });
 
     _fadeController.forward();
@@ -93,13 +92,17 @@ class _PlantTaskHistoryOverviewTabState
     if (widget.completedTasks.isEmpty) return 0;
 
     final tasks = [...widget.completedTasks];
-    tasks.sort((a, b) => (b.completedDate ?? DateTime(1970))
-        .compareTo(a.completedDate ?? DateTime(1970)));
+    tasks.sort(
+      (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
+        a.completedDate ?? DateTime(1970),
+      ),
+    );
 
     final uniqueDates = <String>{};
     for (final task in tasks) {
       if (task.completedDate != null) {
-        final dateKey = '${task.completedDate!.year}-${task.completedDate!.month}-${task.completedDate!.day}';
+        final dateKey =
+            '${task.completedDate!.year}-${task.completedDate!.month}-${task.completedDate!.day}';
         uniqueDates.add(dateKey);
       }
     }
@@ -113,7 +116,11 @@ class _PlantTaskHistoryOverviewTabState
 
     for (int i = 0; i < sortedDates.length; i++) {
       final parts = sortedDates[i].split('-');
-      final date = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+      final date = DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
 
       if (lastDate == null) {
         lastDate = date;
@@ -134,8 +141,11 @@ class _PlantTaskHistoryOverviewTabState
   /// Obtém os últimos 5 cuidados realizados
   List<PlantTask> _getRecentTasks() {
     final tasks = [...widget.completedTasks];
-    tasks.sort((a, b) => (b.completedDate ?? DateTime(1970))
-        .compareTo(a.completedDate ?? DateTime(1970)));
+    tasks.sort(
+      (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
+        a.completedDate ?? DateTime(1970),
+      ),
+    );
     return tasks.take(5).toList();
   }
 
@@ -145,11 +155,12 @@ class _PlantTaskHistoryOverviewTabState
     final currentMonth = DateTime(now.year, now.month);
     final nextMonth = DateTime(now.year, now.month + 1);
 
-    final monthTasks = widget.completedTasks.where((task) {
-      if (task.completedDate == null) return false;
-      return task.completedDate!.isAfter(currentMonth) &&
-          task.completedDate!.isBefore(nextMonth);
-    }).toList();
+    final monthTasks =
+        widget.completedTasks.where((task) {
+          if (task.completedDate == null) return false;
+          return task.completedDate!.isAfter(currentMonth) &&
+              task.completedDate!.isBefore(nextMonth);
+        }).toList();
 
     final typeCount = <TaskType, int>{};
     for (final task in monthTasks) {
@@ -159,8 +170,14 @@ class _PlantTaskHistoryOverviewTabState
     return {
       'total': monthTasks.length,
       'byType': typeCount,
-      'daysWithCare': monthTasks.map((t) =>
-        '${t.completedDate!.year}-${t.completedDate!.month}-${t.completedDate!.day}').toSet().length,
+      'daysWithCare':
+          monthTasks
+              .map(
+                (t) =>
+                    '${t.completedDate!.year}-${t.completedDate!.month}-${t.completedDate!.day}',
+              )
+              .toSet()
+              .length,
     };
   }
 
@@ -188,7 +205,11 @@ class _PlantTaskHistoryOverviewTabState
                     begin: const Offset(0, 0.3),
                     end: Offset.zero,
                   ).animate(_itemAnimations[0]),
-                  child: _buildMainStatsCards(context, currentStreak, monthStats),
+                  child: _buildMainStatsCards(
+                    context,
+                    currentStreak,
+                    monthStats,
+                  ),
                 ),
               );
             },
@@ -317,24 +338,14 @@ class _PlantTaskHistoryOverviewTabState
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.1),
-            color.withValues(alpha: 0.05),
-          ],
+          colors: [color.withValues(alpha: 0.1), color.withValues(alpha: 0.05)],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 28,
-          ),
+          Icon(icon, color: color, size: 28),
           const SizedBox(height: 8),
           Text(
             value,
@@ -418,20 +429,14 @@ class _PlantTaskHistoryOverviewTabState
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                _getTaskTypeIcon(type),
-                color: color,
-                size: 20,
-              ),
+              Icon(_getTaskTypeIcon(type), color: color, size: 20),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -469,7 +474,9 @@ class _PlantTaskHistoryOverviewTabState
             Text(
               'Nunca realizado',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.6,
+                ),
               ),
             ),
         ],
@@ -494,9 +501,7 @@ class _PlantTaskHistoryOverviewTabState
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -568,7 +573,9 @@ class _PlantTaskHistoryOverviewTabState
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -577,7 +584,9 @@ class _PlantTaskHistoryOverviewTabState
                   Icon(
                     Icons.history,
                     size: 48,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -626,9 +635,7 @@ class _PlantTaskHistoryOverviewTabState
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withValues(alpha: 0.05),
@@ -645,11 +652,7 @@ class _PlantTaskHistoryOverviewTabState
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              _getTaskTypeIcon(task.type),
-              color: color,
-              size: 20,
-            ),
+            child: Icon(_getTaskTypeIcon(task.type), color: color, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -756,8 +759,18 @@ class _PlantTaskHistoryOverviewTabState
       return 'Ontem';
     } else {
       final months = [
-        'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
       ];
       return '${date.day} ${months[date.month - 1]}';
     }

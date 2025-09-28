@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/presentation/providers/plants_provider.dart';
@@ -26,7 +25,7 @@ class BackgroundSyncService extends ChangeNotifier {
   GetPlantsUseCase? _getPlantsUseCase;
   GetTasksUseCase? _getTasksUseCase;
   AuthStateNotifier? _authStateNotifier;
-  
+
   // Providers for notification
   PlantsProvider? _plantsProvider;
   TasksProvider? _tasksProvider;
@@ -45,26 +44,32 @@ class BackgroundSyncService extends ChangeNotifier {
       _getPlantsUseCase ??= di.sl<GetPlantsUseCase>();
       _getTasksUseCase ??= di.sl<GetTasksUseCase>();
       _authStateNotifier ??= di.sl<AuthStateNotifier>();
-      
+
       // Try to get providers if available (they might not be registered yet)
       try {
         _plantsProvider ??= di.sl<PlantsProvider>();
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('ℹ️ BackgroundSyncService: PlantsProvider não disponível ainda: $e');
+          debugPrint(
+            'ℹ️ BackgroundSyncService: PlantsProvider não disponível ainda: $e',
+          );
         }
       }
-      
+
       try {
         _tasksProvider ??= di.sl<TasksProvider>();
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('ℹ️ BackgroundSyncService: TasksProvider não disponível ainda: $e');
+          debugPrint(
+            'ℹ️ BackgroundSyncService: TasksProvider não disponível ainda: $e',
+          );
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('⚠️ BackgroundSyncService: Erro ao inicializar dependências: $e');
+        debugPrint(
+          '⚠️ BackgroundSyncService: Erro ao inicializar dependências: $e',
+        );
       }
     }
   }
@@ -78,7 +83,8 @@ class BackgroundSyncService extends ChangeNotifier {
   // Streams for reactive UI updates
   Stream<String> get syncMessageStream => _syncMessageController.stream;
   Stream<bool> get syncProgressStream => _syncProgressController.stream;
-  Stream<BackgroundSyncStatus> get syncStatusStream => _syncStatusController.stream;
+  Stream<BackgroundSyncStatus> get syncStatusStream =>
+      _syncStatusController.stream;
 
   /// Starts background synchronization for authenticated users
   Future<void> startBackgroundSync({
@@ -87,7 +93,9 @@ class BackgroundSyncService extends ChangeNotifier {
   }) async {
     if (_isSyncInProgress) {
       if (kDebugMode) {
-        debugPrint('🔄 BackgroundSync: Sync já em progresso, ignorando nova solicitação');
+        debugPrint(
+          '🔄 BackgroundSync: Sync já em progresso, ignorando nova solicitação',
+        );
       }
       return;
     }
@@ -107,7 +115,9 @@ class BackgroundSyncService extends ChangeNotifier {
 
     try {
       if (kDebugMode) {
-        debugPrint('🔄 BackgroundSync: Iniciando sincronização REAL para usuário $userId');
+        debugPrint(
+          '🔄 BackgroundSync: Iniciando sincronização REAL para usuário $userId',
+        );
       }
 
       // Perform REAL sync operations in sequence
@@ -119,14 +129,15 @@ class BackgroundSyncService extends ChangeNotifier {
       }
 
       _updateSyncStatus(BackgroundSyncStatus.completed);
-      
+
       // Notify providers that sync is complete
       _notifyProvidersAfterSync();
 
       if (kDebugMode) {
-        debugPrint('✅ BackgroundSync: Sincronização REAL completada com sucesso');
+        debugPrint(
+          '✅ BackgroundSync: Sincronização REAL completada com sucesso',
+        );
       }
-
     } catch (e) {
       _updateSyncStatus(BackgroundSyncStatus.error);
 
@@ -135,7 +146,6 @@ class BackgroundSyncService extends ChangeNotifier {
       }
 
       // Don't mark as completed if there was an error
-
     } finally {
       _setSyncInProgress(false);
     }
@@ -174,7 +184,9 @@ class BackgroundSyncService extends ChangeNotifier {
       _operationStatus['user_data'] = false;
 
       if (kDebugMode) {
-        debugPrint('❌ BackgroundSync: Erro ao sincronizar dados do usuário: $e');
+        debugPrint(
+          '❌ BackgroundSync: Erro ao sincronizar dados do usuário: $e',
+        );
       }
 
       // Don't rethrow - allow other operations to continue
@@ -202,14 +214,20 @@ class BackgroundSyncService extends ChangeNotifier {
         (failure) {
           _operationStatus['plants_data'] = false;
           if (kDebugMode) {
-            debugPrint('❌ BackgroundSync: Falha ao sincronizar plantas: ${failure.message}');
+            debugPrint(
+              '❌ BackgroundSync: Falha ao sincronizar plantas: ${failure.message}',
+            );
           }
-          throw Exception('Erro na sincronização de plantas: ${failure.message}');
+          throw Exception(
+            'Erro na sincronização de plantas: ${failure.message}',
+          );
         },
         (plants) {
           _operationStatus['plants_data'] = true;
           if (kDebugMode) {
-            debugPrint('✅ BackgroundSync: ${plants.length} plantas sincronizadas com sucesso');
+            debugPrint(
+              '✅ BackgroundSync: ${plants.length} plantas sincronizadas com sucesso',
+            );
           }
         },
       );
@@ -245,14 +263,20 @@ class BackgroundSyncService extends ChangeNotifier {
         (failure) {
           _operationStatus['tasks_data'] = false;
           if (kDebugMode) {
-            debugPrint('❌ BackgroundSync: Falha ao sincronizar tarefas: ${failure.message}');
+            debugPrint(
+              '❌ BackgroundSync: Falha ao sincronizar tarefas: ${failure.message}',
+            );
           }
-          throw Exception('Erro na sincronização de tarefas: ${failure.message}');
+          throw Exception(
+            'Erro na sincronização de tarefas: ${failure.message}',
+          );
         },
         (tasks) {
           _operationStatus['tasks_data'] = true;
           if (kDebugMode) {
-            debugPrint('✅ BackgroundSync: ${tasks.length} tarefas sincronizadas com sucesso');
+            debugPrint(
+              '✅ BackgroundSync: ${tasks.length} tarefas sincronizadas com sucesso',
+            );
           }
         },
       );
@@ -330,7 +354,9 @@ class BackgroundSyncService extends ChangeNotifier {
   Future<void> retrySync(String userId) async {
     if (_isSyncInProgress) {
       if (kDebugMode) {
-        debugPrint('🔄 BackgroundSync: Não é possível repetir - sync em progresso');
+        debugPrint(
+          '🔄 BackgroundSync: Não é possível repetir - sync em progresso',
+        );
       }
       return;
     }
@@ -373,7 +399,9 @@ class BackgroundSyncService extends ChangeNotifier {
   }) async {
     if (_isSyncInProgress) {
       if (kDebugMode) {
-        debugPrint('🔄 BackgroundSync: Sync específico ignorado - sync principal em progresso');
+        debugPrint(
+          '🔄 BackgroundSync: Sync específico ignorado - sync principal em progresso',
+        );
       }
       return;
     }
@@ -400,14 +428,12 @@ class BackgroundSyncService extends ChangeNotifier {
       }
 
       _updateSyncStatus(BackgroundSyncStatus.completed);
-
     } catch (e) {
       _updateSyncStatus(BackgroundSyncStatus.error);
 
       if (kDebugMode) {
         debugPrint('❌ BackgroundSync: Erro no sync específico ($dataType): $e');
       }
-
     } finally {
       _setSyncInProgress(false);
     }
@@ -416,15 +442,19 @@ class BackgroundSyncService extends ChangeNotifier {
   /// Notifies providers that sync is complete so they can refresh their data
   void _notifyProvidersAfterSync() {
     if (kDebugMode) {
-      debugPrint('📢 BackgroundSync: Notificando providers sobre conclusão da sync...');
+      debugPrint(
+        '📢 BackgroundSync: Notificando providers sobre conclusão da sync...',
+      );
     }
 
     // Notify plants provider to refresh data if available
     if (_plantsProvider != null) {
       if (kDebugMode) {
-        debugPrint('🌱 BackgroundSync: Notificando PlantsProvider para refresh...');
+        debugPrint(
+          '🌱 BackgroundSync: Notificando PlantsProvider para refresh...',
+        );
       }
-      
+
       // Execute refresh in next frame to avoid sync issues
       Future.delayed(const Duration(milliseconds: 100), () {
         try {
@@ -434,7 +464,9 @@ class BackgroundSyncService extends ChangeNotifier {
           }
         } catch (e) {
           if (kDebugMode) {
-            debugPrint('❌ BackgroundSync: Erro ao notificar PlantsProvider: $e');
+            debugPrint(
+              '❌ BackgroundSync: Erro ao notificar PlantsProvider: $e',
+            );
           }
         }
       });
@@ -443,9 +475,11 @@ class BackgroundSyncService extends ChangeNotifier {
     // Notify tasks provider to refresh data if available
     if (_tasksProvider != null) {
       if (kDebugMode) {
-        debugPrint('📅 BackgroundSync: Notificando TasksProvider para refresh...');
+        debugPrint(
+          '📅 BackgroundSync: Notificando TasksProvider para refresh...',
+        );
       }
-      
+
       // Execute refresh in next frame to avoid sync issues
       Future.delayed(const Duration(milliseconds: 150), () {
         try {

@@ -6,7 +6,7 @@ import '../../utils/auth_validators.dart';
 import '../providers/auth_provider.dart';
 
 /// Dialog modal para capturar email para reset de senha
-/// 
+///
 /// Features:
 /// - Validação de email em tempo real
 /// - Estados de loading durante envio
@@ -23,7 +23,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _emailFocusNode = FocusNode();
-  
+
   bool _isLoading = false;
   String? _successMessage;
   String? _errorMessage;
@@ -38,9 +38,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -116,9 +114,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.green.withValues(alpha: 0.3),
-            ),
+            border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -175,26 +171,22 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Colors.grey.shade300,
-                ),
+                borderSide: BorderSide(color: Colors.grey.shade300),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: PlantisColors.primary,
-                ),
+                borderSide: const BorderSide(color: PlantisColors.primary),
               ),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Email é obrigatório';
               }
-              
+
               if (!AuthValidators.isValidEmail(value)) {
                 return 'Email inválido';
               }
-              
+
               return null;
             },
             onFieldSubmitted: (_) => _handleSubmit(),
@@ -206,9 +198,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
               decoration: BoxDecoration(
                 color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.red.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -252,10 +242,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
           ),
           child: const Text(
             'Fechar',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),
       );
@@ -293,22 +280,23 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : const Text(
+                      'Enviar',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  )
-                : const Text(
-                    'Enviar',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
           ),
         ),
       ],
@@ -327,7 +315,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final result = await authProvider.resetPassword(_emailController.text.trim());
+      final result = await authProvider.resetPassword(
+        _emailController.text.trim(),
+      );
 
       if (mounted) {
         if (result) {

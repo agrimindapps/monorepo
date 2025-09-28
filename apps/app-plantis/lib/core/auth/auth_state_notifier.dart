@@ -169,6 +169,9 @@ class AuthStateNotifier {
   /// - `null` if user is not authenticated
   String? get userId => _currentUser?.id;
 
+  /// Alias for userId to maintain compatibility with IAuthStateProvider
+  String? get currentUserId => userId;
+
   /// Convenience method to get user email safely
   ///
   /// Returns:
@@ -202,6 +205,17 @@ class AuthStateNotifier {
     }
 
     debugPrint('🔄 AuthStateNotifier: State reset to initial values');
+  }
+
+  /// Ensures the auth system is initialized
+  /// This is a compatibility method for IAuthStateProvider interface
+  Future<void> ensureInitialized() async {
+    if (!_isInitialized) {
+      // Wait for initialization - in real implementation this would
+      // wait for Firebase Auth to initialize
+      await Future.delayed(Duration.zero);
+      updateInitializationStatus(true);
+    }
   }
 
   /// Disposes of all resources and closes streams

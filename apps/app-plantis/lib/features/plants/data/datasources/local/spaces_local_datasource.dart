@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../models/space_model.dart';
 

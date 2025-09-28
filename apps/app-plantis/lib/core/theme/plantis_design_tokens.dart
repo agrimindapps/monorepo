@@ -8,15 +8,15 @@ class PlantisDesignTokens {
   // MARK: - Spacing Tokens
 
   /// Spacing scale based on 4px baseline
-  static const double spacing1 = 4.0;   // 4px
-  static const double spacing2 = 8.0;   // 8px
-  static const double spacing3 = 12.0;  // 12px
-  static const double spacing4 = 16.0;  // 16px
-  static const double spacing5 = 20.0;  // 20px
-  static const double spacing6 = 24.0;  // 24px
-  static const double spacing7 = 28.0;  // 28px
-  static const double spacing8 = 32.0;  // 32px
-  static const double spacing9 = 36.0;  // 36px
+  static const double spacing1 = 4.0; // 4px
+  static const double spacing2 = 8.0; // 8px
+  static const double spacing3 = 12.0; // 12px
+  static const double spacing4 = 16.0; // 16px
+  static const double spacing5 = 20.0; // 20px
+  static const double spacing6 = 24.0; // 24px
+  static const double spacing7 = 28.0; // 28px
+  static const double spacing8 = 32.0; // 32px
+  static const double spacing9 = 36.0; // 36px
   static const double spacing10 = 40.0; // 40px
   static const double spacing12 = 48.0; // 48px
   static const double spacing16 = 64.0; // 64px
@@ -285,33 +285,10 @@ class PlantisDesignTokens {
 
 // MARK: - Enums
 
-enum SpacingContext {
-  tight,
-  normal,
-  comfortable,
-  spacious,
-}
+enum SpacingContext { tight, normal, comfortable, spacious }
 
-enum ComponentType {
-  button,
-  card,
-  dialog,
-  sheet,
-  input,
-}
+enum ComponentType { button, card, dialog, sheet, input }
 
-enum ElevationLevel {
-  flat,
-  raised,
-  floating,
-  modal,
-  dropdown,
-}
+enum ElevationLevel { flat, raised, floating, modal, dropdown }
 
-enum SemanticState {
-  success,
-  warning,
-  error,
-  info,
-  premium,
-}
+enum SemanticState { success, warning, error, info, premium }

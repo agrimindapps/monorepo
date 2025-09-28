@@ -12,14 +12,15 @@ import 'package:flutter/foundation.dart';
 /// - Supports different operation types with priority levels
 class SyncCoordinatorService {
   static SyncCoordinatorService? _instance;
-  static SyncCoordinatorService get instance => _instance ??= SyncCoordinatorService._();
-  
+  static SyncCoordinatorService get instance =>
+      _instance ??= SyncCoordinatorService._();
+
   SyncCoordinatorService._();
 
   final Map<String, SyncOperation> _activeOperations = {};
   final Queue<SyncOperation> _operationQueue = Queue<SyncOperation>();
   final Map<String, DateTime> _lastOperationTime = {};
-  
+
   Timer? _queueProcessor;
   bool _isProcessing = false;
 
@@ -30,7 +31,7 @@ class SyncCoordinatorService {
       const Duration(milliseconds: 100),
       (_) => _processQueue(),
     );
-    
+
     debugPrint('🔄 Sync coordinator initialized');
   }
 
@@ -44,16 +45,20 @@ class SyncCoordinatorService {
     Duration retryDelay = const Duration(seconds: 2),
   }) async {
     final completer = Completer<T>();
-    
+
     // Check if we should throttle this operation
     if (minimumInterval != null) {
       final lastTime = _lastOperationTime[operationType];
       if (lastTime != null) {
         final elapsed = DateTime.now().difference(lastTime);
         if (elapsed < minimumInterval) {
-          debugPrint('🚦 Throttling $operationType - too soon (${elapsed.inMilliseconds}ms < ${minimumInterval.inMilliseconds}ms)');
+          debugPrint(
+            '🚦 Throttling $operationType - too soon (${elapsed.inMilliseconds}ms < ${minimumInterval.inMilliseconds}ms)',
+          );
           completer.completeError(
-            SyncThrottledException('Operation $operationType is being throttled'),
+            SyncThrottledException(
+              'Operation $operationType is being throttled',
+            ),
           );
           return completer.future;
         }
@@ -110,7 +115,9 @@ class SyncCoordinatorService {
       final shouldRemove = op.type == operationType;
       if (shouldRemove) {
         op.completer.completeError(
-          SyncCancelledException('Queued operation $operationType was cancelled'),
+          SyncCancelledException(
+            'Queued operation $operationType was cancelled',
+          ),
         );
         debugPrint('❌ Cancelled queued operation: $operationType');
       }
@@ -142,8 +149,10 @@ class SyncCoordinatorService {
   void _executeOperation<T>(SyncOperation<T> operation) async {
     _activeOperations[operation.type] = operation;
     _lastOperationTime[operation.type] = DateTime.now();
-    
-    debugPrint('▶️ Executing ${operation.type} (attempt ${operation.currentRetry + 1}/${operation.maxRetries})');
+
+    debugPrint(
+      '▶️ Executing ${operation.type} (attempt ${operation.currentRetry + 1}/${operation.maxRetries})',
+    );
 
     try {
       final result = await operation.operation();
@@ -151,11 +160,13 @@ class SyncCoordinatorService {
       debugPrint('✅ ${operation.type} completed successfully');
     } catch (error) {
       debugPrint('❌ ${operation.type} failed: $error');
-      
+
       if (operation.currentRetry < operation.maxRetries - 1) {
         operation.currentRetry++;
-        debugPrint('🔄 Retrying ${operation.type} in ${operation.retryDelay.inSeconds}s');
-        
+        debugPrint(
+          '🔄 Retrying ${operation.type} in ${operation.retryDelay.inSeconds}s',
+        );
+
         // Schedule retry
         Timer(operation.retryDelay, () {
           if (_activeOperations.containsKey(operation.type)) {
@@ -165,11 +176,14 @@ class SyncCoordinatorService {
       } else {
         // Max retries reached
         operation.completer.completeError(error);
-        debugPrint('💥 ${operation.type} failed after ${operation.maxRetries} attempts');
+        debugPrint(
+          '💥 ${operation.type} failed after ${operation.maxRetries} attempts',
+        );
       }
     } finally {
       // Only remove from active if not retrying
-      if (operation.currentRetry >= operation.maxRetries - 1 || operation.completer.isCompleted) {
+      if (operation.currentRetry >= operation.maxRetries - 1 ||
+          operation.completer.isCompleted) {
         _activeOperations.remove(operation.type);
       }
     }
@@ -184,8 +198,9 @@ class SyncCoordinatorService {
 
     try {
       // Process operations by priority
-      final sortedOps = _operationQueue.toList()
-        ..sort((a, b) => b.priority.compareTo(a.priority));
+      final sortedOps =
+          _operationQueue.toList()
+            ..sort((a, b) => b.priority.compareTo(a.priority));
 
       for (final operation in sortedOps) {
         // Check if this operation type is still active
@@ -234,10 +249,10 @@ class SyncOperation<T> {
 
 /// Sync operation priorities
 class SyncPriority {
-  static const int critical = 1000;  // User-initiated operations
-  static const int high = 800;      // Real-time sync operations
-  static const int normal = 500;    // Background sync
-  static const int low = 200;       // Cleanup, analytics
+  static const int critical = 1000; // User-initiated operations
+  static const int high = 800; // Real-time sync operations
+  static const int normal = 500; // Background sync
+  static const int low = 200; // Cleanup, analytics
   static const int background = 100; // Non-critical background tasks
 }
 
@@ -245,7 +260,7 @@ class SyncPriority {
 class SyncThrottledException implements Exception {
   final String message;
   const SyncThrottledException(this.message);
-  
+
   @override
   String toString() => 'SyncThrottledException: $message';
 }
@@ -254,7 +269,7 @@ class SyncThrottledException implements Exception {
 class SyncCancelledException implements Exception {
   final String message;
   const SyncCancelledException(this.message);
-  
+
   @override
   String toString() => 'SyncCancelledException: $message';
 }

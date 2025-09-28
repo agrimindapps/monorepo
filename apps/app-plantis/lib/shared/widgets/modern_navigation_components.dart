@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../core/theme/plantis_colors.dart';
 
 /// Modern Navigation List Component
@@ -34,7 +35,10 @@ class ModernNavigationList extends StatelessWidget {
                 return Opacity(
                   opacity: expandAnimation.value,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     child: Text(
                       'PRINCIPAIS',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -49,7 +53,7 @@ class ModernNavigationList extends StatelessWidget {
             ),
             const SizedBox(height: 4),
           ],
-          
+
           // Main Navigation Items
           Expanded(
             child: ListView.builder(
@@ -198,22 +202,15 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.02,
-    ).animate(CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
+    );
+
     _tapAnimation = Tween<double>(
       begin: 1.0,
       end: 0.96,
-    ).animate(CurvedAnimation(
-      parent: _tapController,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _tapController, curve: Curves.easeInOut));
   }
 
   @override
@@ -266,18 +263,24 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                   curve: Curves.easeInOut,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: widget.isSelected
-                        ? PlantisColors.primary.withValues(alpha: 0.1)
-                        : _isHovered
-                            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)
+                    color:
+                        widget.isSelected
+                            ? PlantisColors.primary.withValues(alpha: 0.1)
+                            : _isHovered
+                            ? colorScheme.surfaceContainerHighest.withValues(
+                              alpha: 0.6,
+                            )
                             : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: widget.isSelected
-                        ? Border.all(
-                            color: PlantisColors.primary.withValues(alpha: 0.3),
-                            width: 1,
-                          )
-                        : null,
+                    border:
+                        widget.isSelected
+                            ? Border.all(
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.3,
+                              ),
+                              width: 1,
+                            )
+                            : null,
                   ),
                   child: Row(
                     children: [
@@ -294,28 +297,34 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: widget.isSelected
-                                    ? PlantisColors.primary
-                                    : _isHovered
-                                        ? PlantisColors.primary.withValues(alpha: 0.1)
+                                color:
+                                    widget.isSelected
+                                        ? PlantisColors.primary
+                                        : _isHovered
+                                        ? PlantisColors.primary.withValues(
+                                          alpha: 0.1,
+                                        )
                                         : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 200),
                                 child: Icon(
-                                  widget.isSelected ? widget.selectedIcon : widget.icon,
+                                  widget.isSelected
+                                      ? widget.selectedIcon
+                                      : widget.icon,
                                   key: ValueKey(widget.isSelected),
-                                  color: widget.isSelected
-                                      ? Colors.white
-                                      : _isHovered
+                                  color:
+                                      widget.isSelected
+                                          ? Colors.white
+                                          : _isHovered
                                           ? PlantisColors.primary
                                           : colorScheme.onSurfaceVariant,
                                   size: 20,
                                 ),
                               ),
                             ),
-                            
+
                             // Badge
                             if (widget.badge != null && widget.badge! > 0)
                               Positioned(
@@ -331,7 +340,9 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: PlantisColors.flower.withValues(alpha: 0.3),
+                                        color: PlantisColors.flower.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
@@ -347,7 +358,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                   ),
                                 ),
                               ),
-                            
+
                             // New Indicator
                             if (widget.isNew)
                               Positioned(
@@ -361,7 +372,9 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: PlantisColors.success.withValues(alpha: 0.4),
+                                        color: PlantisColors.success.withValues(
+                                          alpha: 0.4,
+                                        ),
                                         blurRadius: 3,
                                         offset: const Offset(0, 1),
                                       ),
@@ -372,7 +385,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                           ],
                         ),
                       ),
-                      
+
                       // Label and Description
                       AnimatedBuilder(
                         animation: widget.expandAnimation,
@@ -380,38 +393,48 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                           if (widget.expandAnimation.value < 0.1) {
                             return const SizedBox.shrink();
                           }
-                          
+
                           return Expanded(
                             child: Opacity(
                               opacity: widget.expandAnimation.value,
                               child: Padding(
-                                padding: const EdgeInsets.only(left: 4, right: 12),
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  right: 12,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
                                       widget.label,
-                                      style: theme.textTheme.titleSmall?.copyWith(
-                                        color: widget.isSelected
-                                            ? colorScheme.onSurface
-                                            : colorScheme.onSurface.withValues(alpha: 0.9),
-                                        fontWeight: widget.isSelected
-                                            ? FontWeight.w600
-                                            : FontWeight.w500,
-                                      ),
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            color:
+                                                widget.isSelected
+                                                    ? colorScheme.onSurface
+                                                    : colorScheme.onSurface
+                                                        .withValues(alpha: 0.9),
+                                            fontWeight:
+                                                widget.isSelected
+                                                    ? FontWeight.w600
+                                                    : FontWeight.w500,
+                                          ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 1),
                                     Text(
                                       widget.description,
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: widget.isSelected
-                                            ? PlantisColors.primary
-                                            : colorScheme.onSurfaceVariant,
-                                        fontSize: 11,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color:
+                                                widget.isSelected
+                                                    ? PlantisColors.primary
+                                                    : colorScheme
+                                                        .onSurfaceVariant,
+                                            fontSize: 11,
+                                          ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -422,7 +445,7 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                           );
                         },
                       ),
-                      
+
                       // Selection Indicator
                       if (widget.isSelected)
                         Container(
@@ -466,7 +489,7 @@ class ModernSidebarFooter extends StatelessWidget {
       animation: expandAnimation,
       builder: (context, child) {
         if (expandAnimation.value < 0.5) return const SizedBox.shrink();
-        
+
         return Opacity(
           opacity: expandAnimation.value,
           child: Container(
@@ -487,7 +510,10 @@ class ModernSidebarFooter extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [PlantisColors.primary, PlantisColors.primaryLight],
+                      colors: [
+                        PlantisColors.primary,
+                        PlantisColors.primaryLight,
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -506,9 +532,9 @@ class ModernSidebarFooter extends StatelessWidget {
                     size: 20,
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // User Info
                 Expanded(
                   child: Column(
@@ -537,7 +563,7 @@ class ModernSidebarFooter extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Settings Button
                 DecoratedBox(
                   decoration: BoxDecoration(

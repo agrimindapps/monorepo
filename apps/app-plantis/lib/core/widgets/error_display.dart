@@ -49,11 +49,7 @@ class ErrorDisplay extends StatelessWidget {
           Row(
             children: [
               if (showIcon) ...[
-                Icon(
-                  icon,
-                  color: iconColor,
-                  size: 24,
-                ),
+                Icon(icon, color: iconColor, size: 24),
                 const SizedBox(width: 12),
               ],
               Expanded(
@@ -144,7 +140,7 @@ class AuthErrorDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final errorInfo = _getAuthErrorInfo(errorMessage);
-    
+
     return ErrorDisplay(
       title: errorInfo['title'] as String?,
       message: errorInfo['message'] as String,
@@ -157,7 +153,8 @@ class AuthErrorDisplay extends StatelessWidget {
   Map<String, dynamic> _getAuthErrorInfo(String error) {
     final lowercaseError = error.toLowerCase();
 
-    if (lowercaseError.contains('network') || lowercaseError.contains('connection')) {
+    if (lowercaseError.contains('network') ||
+        lowercaseError.contains('connection')) {
       return {
         'title': 'Erro de Conexão',
         'message': 'Verifique sua conexão com a internet e tente novamente.',
@@ -177,15 +174,18 @@ class AuthErrorDisplay extends StatelessWidget {
     if (lowercaseError.contains('user-not-found')) {
       return {
         'title': 'Usuário Não Encontrado',
-        'message': 'Não existe uma conta com este email. Verifique o email ou crie uma nova conta.',
+        'message':
+            'Não existe uma conta com este email. Verifique o email ou crie uma nova conta.',
         'canRetry': false,
       };
     }
 
-    if (lowercaseError.contains('wrong-password') || lowercaseError.contains('invalid-credential')) {
+    if (lowercaseError.contains('wrong-password') ||
+        lowercaseError.contains('invalid-credential')) {
       return {
         'title': 'Senha Incorreta',
-        'message': 'A senha informada está incorreta. Tente novamente ou recupere sua senha.',
+        'message':
+            'A senha informada está incorreta. Tente novamente ou recupere sua senha.',
         'canRetry': true,
         'retryText': 'Tentar Novamente',
       };
@@ -194,7 +194,8 @@ class AuthErrorDisplay extends StatelessWidget {
     if (lowercaseError.contains('email-already-in-use')) {
       return {
         'title': 'Email já Cadastrado',
-        'message': 'Já existe uma conta com este email. Tente fazer login ou use outro email.',
+        'message':
+            'Já existe uma conta com este email. Tente fazer login ou use outro email.',
         'canRetry': false,
       };
     }
@@ -210,7 +211,8 @@ class AuthErrorDisplay extends StatelessWidget {
     if (lowercaseError.contains('too-many-requests')) {
       return {
         'title': 'Muitas Tentativas',
-        'message': 'Muitas tentativas de login. Tente novamente em alguns minutos.',
+        'message':
+            'Muitas tentativas de login. Tente novamente em alguns minutos.',
         'canRetry': true,
         'retryText': 'Tentar Novamente',
       };
@@ -219,7 +221,10 @@ class AuthErrorDisplay extends StatelessWidget {
     // Generic error
     return {
       'title': 'Erro de Autenticação',
-      'message': error.isNotEmpty ? error : 'Ocorreu um erro inesperado. Tente novamente.',
+      'message':
+          error.isNotEmpty
+              ? error
+              : 'Ocorreu um erro inesperado. Tente novamente.',
       'canRetry': true,
       'retryText': 'Tentar Novamente',
     };
@@ -244,7 +249,7 @@ class PurchaseErrorDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final errorInfo = _getPurchaseErrorInfo(errorMessage);
-    
+
     return ErrorDisplay(
       title: errorInfo['title'] as String?,
       message: errorInfo['message'] as String,
@@ -257,7 +262,8 @@ class PurchaseErrorDisplay extends StatelessWidget {
   Map<String, dynamic> _getPurchaseErrorInfo(String error) {
     final lowercaseError = error.toLowerCase();
 
-    if (lowercaseError.contains('user_cancelled') || lowercaseError.contains('cancelled')) {
+    if (lowercaseError.contains('user_cancelled') ||
+        lowercaseError.contains('cancelled')) {
       return {
         'title': null, // Don't show error for user cancellation
         'message': '',
@@ -265,19 +271,23 @@ class PurchaseErrorDisplay extends StatelessWidget {
       };
     }
 
-    if (lowercaseError.contains('network') || lowercaseError.contains('connection')) {
+    if (lowercaseError.contains('network') ||
+        lowercaseError.contains('connection')) {
       return {
         'title': 'Erro de Conexão',
-        'message': 'Problema de conexão durante a compra. Verifique sua internet e tente novamente.',
+        'message':
+            'Problema de conexão durante a compra. Verifique sua internet e tente novamente.',
         'canRetry': true,
         'retryText': 'Tentar Novamente',
       };
     }
 
-    if (lowercaseError.contains('payment_invalid') || lowercaseError.contains('payment')) {
+    if (lowercaseError.contains('payment_invalid') ||
+        lowercaseError.contains('payment')) {
       return {
         'title': 'Erro de Pagamento',
-        'message': 'Não foi possível processar o pagamento. Verifique seus dados de pagamento.',
+        'message':
+            'Não foi possível processar o pagamento. Verifique seus dados de pagamento.',
         'canRetry': true,
         'retryText': 'Tentar Novamente',
       };
@@ -286,16 +296,19 @@ class PurchaseErrorDisplay extends StatelessWidget {
     if (lowercaseError.contains('product_not_available')) {
       return {
         'title': 'Produto Indisponível',
-        'message': 'Este produto não está disponível no momento. Tente novamente mais tarde.',
+        'message':
+            'Este produto não está disponível no momento. Tente novamente mais tarde.',
         'canRetry': true,
         'retryText': 'Tentar Novamente',
       };
     }
 
-    if (lowercaseError.contains('store_problem') || lowercaseError.contains('billing_unavailable')) {
+    if (lowercaseError.contains('store_problem') ||
+        lowercaseError.contains('billing_unavailable')) {
       return {
         'title': 'Erro na Loja',
-        'message': 'Problema temporário na loja de aplicativos. Tente novamente em alguns minutos.',
+        'message':
+            'Problema temporário na loja de aplicativos. Tente novamente em alguns minutos.',
         'canRetry': true,
         'retryText': 'Tentar Novamente',
       };
@@ -312,7 +325,8 @@ class PurchaseErrorDisplay extends StatelessWidget {
     // Generic purchase error
     return {
       'title': 'Erro na Compra',
-      'message': 'Não foi possível completar a compra. Entre em contato com o suporte se o problema persistir.',
+      'message':
+          'Não foi possível completar a compra. Entre em contato com o suporte se o problema persistir.',
       'canRetry': true,
       'retryText': 'Tentar Novamente',
     };
@@ -363,11 +377,7 @@ class SuccessDisplay extends StatelessWidget {
           Row(
             children: [
               if (showIcon) ...[
-                Icon(
-                  icon,
-                  color: iconColor,
-                  size: 24,
-                ),
+                Icon(icon, color: iconColor, size: 24),
                 const SizedBox(width: 12),
               ],
               Expanded(

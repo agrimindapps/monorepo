@@ -22,7 +22,7 @@ import 'plantis_notification_service.dart';
 /// - **Priority Awareness**: Visual priority indicators in notification content
 /// - **Daily Summaries**: Morning overview of all scheduled tasks
 /// - **Overdue Detection**: Automatic alerts for missed tasks
-/// 
+///
 /// **Platform Integration:**
 /// - **Cross-Platform**: Works on both iOS and Android with platform-specific features
 /// - **Background Processing**: Uses WorkManager for reliable background operations
@@ -66,7 +66,7 @@ class TaskNotificationService {
       PlantisNotificationService();
 
   bool _isInitialized = false;
-  
+
   /// Initializes the notification service with comprehensive platform setup
   ///
   /// This method performs complete service initialization including:
@@ -93,7 +93,7 @@ class TaskNotificationService {
   /// ```
   Future<bool> initialize() async {
     if (_isInitialized) return true;
-    
+
     try {
       // Initialize the core notification service
       final initResult = await _notificationService.initialize();
@@ -101,16 +101,16 @@ class TaskNotificationService {
         debugPrint('❌ Failed to initialize core notification service');
         return false;
       }
-      
+
       // Request notification permissions
       final hasPermission = await _requestNotificationPermissions();
       if (!hasPermission) {
         debugPrint('⚠️ Notification permissions not granted');
       }
-      
+
       // Initialize WorkManager for background processing
       await _initializeWorkManager();
-      
+
       _isInitialized = true;
       debugPrint('✅ TaskNotificationService initialized successfully');
       return true;
@@ -119,30 +119,31 @@ class TaskNotificationService {
       return false;
     }
   }
-  
+
   /// Request notification permissions with user-friendly flow
   Future<bool> _requestNotificationPermissions() async {
     try {
       // Check current permission status
-      final currentPermission = await _notificationService.areNotificationsEnabled();
+      final currentPermission =
+          await _notificationService.areNotificationsEnabled();
       if (currentPermission) {
         return true;
       }
-      
+
       // Request permission
       final permissionGranted = await _notificationService.requestPermission();
-      
+
       if (!permissionGranted) {
         debugPrint('⚠️ User denied notification permissions');
       }
-      
+
       return permissionGranted;
     } catch (e) {
       debugPrint('❌ Error requesting notification permissions: $e');
       return false;
     }
   }
-  
+
   /// Initialize WorkManager for background task processing
   Future<void> _initializeWorkManager() async {
     try {
@@ -165,7 +166,7 @@ class TaskNotificationService {
   }) async {
     try {
       await _ensureInitialized();
-      
+
       // Create notification with actions
       final notification = NotificationHelper.createReminderNotification(
         appName: 'Plantis',
@@ -176,7 +177,7 @@ class TaskNotificationService {
         color: TasksConstants.notificationColor,
         scheduledDate: scheduledDate,
       );
-      
+
       // Schedule the notification
       await _notificationService.scheduleDirectNotification(
         notificationId: id,
@@ -185,13 +186,15 @@ class TaskNotificationService {
         scheduledTime: scheduledDate,
         payload: payload,
       );
-      
-      debugPrint('✅ Scheduled notification: $title at ${scheduledDate.toString()}');
+
+      debugPrint(
+        '✅ Scheduled notification: $title at ${scheduledDate.toString()}',
+      );
     } catch (e) {
       debugPrint('❌ Error scheduling notification: $e');
     }
   }
-  
+
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
       await initialize();
@@ -228,7 +231,7 @@ class TaskNotificationService {
   Future<void> scheduleTaskNotification(task_entity.Task task) async {
     try {
       await _ensureInitialized();
-      
+
       // Check if notifications are enabled
       final bool enabled = await _notificationService.areNotificationsEnabled();
       if (!enabled) {
@@ -267,15 +270,19 @@ class TaskNotificationService {
         payload: payload,
         actions: actions,
       );
-      
-      debugPrint('✅ Scheduled task notification: ${task.title} at ${notificationTime.toString()}');
+
+      debugPrint(
+        '✅ Scheduled task notification: ${task.title} at ${notificationTime.toString()}',
+      );
     } catch (e) {
       debugPrint('❌ Error scheduling task notification: $e');
     }
   }
-  
+
   /// Create notification actions for task notifications
-  List<Map<String, String>> _createTaskNotificationActions(task_entity.Task task) {
+  List<Map<String, String>> _createTaskNotificationActions(
+    task_entity.Task task,
+  ) {
     return [
       {
         'id': TasksConstants.completeTaskActionId,
@@ -326,10 +333,12 @@ class TaskNotificationService {
   Future<void> scheduleOverdueNotification(task_entity.Task task) async {
     try {
       await _ensureInitialized();
-      
+
       final bool enabled = await _notificationService.areNotificationsEnabled();
       if (!enabled) {
-        debugPrint('⚠️ Notifications not enabled, skipping overdue notification');
+        debugPrint(
+          '⚠️ Notifications not enabled, skipping overdue notification',
+        );
         return;
       }
 
@@ -341,7 +350,7 @@ class TaskNotificationService {
       );
 
       final int notificationId = _createNotificationId('${task.id}_overdue');
-      
+
       // Create actions for overdue notifications
       final actions = [
         {
@@ -369,7 +378,7 @@ class TaskNotificationService {
         payload: payload,
         actions: actions,
       );
-      
+
       debugPrint('✅ Created overdue task notification: ${task.title}');
     } catch (e) {
       debugPrint('❌ Error creating overdue notification: $e');
@@ -417,7 +426,9 @@ class TaskNotificationService {
       final String body = _getDailySummaryBody(todayTasks);
       final String payload = _createDailySummaryPayload(todayTasks);
 
-      const int notificationId = TasksConstants.dailySummaryNotificationId; // ID fixo para resumo diário
+      const int notificationId =
+          TasksConstants
+              .dailySummaryNotificationId; // ID fixo para resumo diário
 
       await _scheduleNotificationWithActions(
         id: notificationId,
@@ -473,7 +484,7 @@ class TaskNotificationService {
   ///
   /// **Complete Cleanup:**
   /// - Removes all task reminder notifications
-  /// - Cancels all overdue alert notifications  
+  /// - Cancels all overdue alert notifications
   /// - Clears daily summary notifications
   /// - Resets notification scheduling state
   ///
@@ -552,8 +563,10 @@ class TaskNotificationService {
           .replaceAll('%TOTAL%', '$totalTasks')
           .replaceAll('%URGENT%', '$urgentTasks');
     } else {
-      return AppStrings.multipleTasksScheduled
-          .replaceAll('%TOTAL%', '$totalTasks');
+      return AppStrings.multipleTasksScheduled.replaceAll(
+        '%TOTAL%',
+        '$totalTasks',
+      );
     }
   }
 
@@ -589,7 +602,8 @@ class TaskNotificationService {
   /// Handle notification tap and actions
   static void handleNotificationTap(String payload) {
     try {
-      final Map<String, dynamic> data = jsonDecode(payload) as Map<String, dynamic>;
+      final Map<String, dynamic> data =
+          jsonDecode(payload) as Map<String, dynamic>;
       final String type = (data['type'] as String?) ?? '';
 
       debugPrint('📱 Handling notification tap: $type');
@@ -610,13 +624,19 @@ class TaskNotificationService {
   }
 
   /// Handle notification actions (complete, snooze, etc.)
-  static Future<void> handleNotificationAction(String actionId, String payload) async {
+  static Future<void> handleNotificationAction(
+    String actionId,
+    String payload,
+  ) async {
     try {
-      final Map<String, dynamic> data = jsonDecode(payload) as Map<String, dynamic>;
+      final Map<String, dynamic> data =
+          jsonDecode(payload) as Map<String, dynamic>;
       // final String type = (data['type'] as String?) ?? '';
       final String taskId = (data['taskId'] as String?) ?? '';
 
-      debugPrint('🔔 Handling notification action: $actionId for task: $taskId');
+      debugPrint(
+        '🔔 Handling notification action: $actionId for task: $taskId',
+      );
 
       switch (actionId) {
         case 'complete_task':
@@ -666,19 +686,23 @@ class TaskNotificationService {
   }
 
   /// Handle snooze task action
-  static Future<void> _handleSnoozeTaskAction(String taskId, String payload) async {
+  static Future<void> _handleSnoozeTaskAction(
+    String taskId,
+    String payload,
+  ) async {
     try {
       debugPrint('⏰ Snoozing task: $taskId');
-      
+
       // Parse original payload
-      final Map<String, dynamic> data = jsonDecode(payload) as Map<String, dynamic>;
-      
+      final Map<String, dynamic> data =
+          jsonDecode(payload) as Map<String, dynamic>;
+
       // Create new notification for 1 hour later
       final instance = TaskNotificationService._instance;
       final snoozeTime = DateTime.now().add(TasksConstants.snoozeDuration);
-      
+
       final snoozedPayload = _updatePayloadForSnooze(data, snoozeTime);
-      
+
       // Schedule snoozed notification
       await instance._scheduleNotificationWithActions(
         id: instance._createNotificationId('${taskId}_snoozed'),
@@ -701,7 +725,7 @@ class TaskNotificationService {
           ),
         ),
       );
-      
+
       debugPrint('✅ Task snoozed for 1 hour: $taskId');
     } catch (e) {
       debugPrint('❌ Error snoozing task: $e');
@@ -720,7 +744,10 @@ class TaskNotificationService {
   }
 
   /// Update payload for snoozed notification
-  static Map<String, dynamic> _updatePayloadForSnooze(Map<String, dynamic> originalData, DateTime snoozeTime) {
+  static Map<String, dynamic> _updatePayloadForSnooze(
+    Map<String, dynamic> originalData,
+    DateTime snoozeTime,
+  ) {
     return {
       ...originalData,
       'snoozed': true,
@@ -814,9 +841,9 @@ class TaskNotificationService {
   ) async {
     try {
       await _ensureInitialized();
-      
+
       debugPrint('🔄 Rescheduling notifications for ${allTasks.length} tasks');
-      
+
       // Cancel all existing task notifications
       await cancelAllTaskNotifications();
 
@@ -828,30 +855,33 @@ class TaskNotificationService {
 
       // Batch schedule notifications
       final List<Future<void>> schedulingFutures = [];
-      
+
       for (final task in pendingTasks) {
         schedulingFutures.add(scheduleTaskNotification(task));
       }
-      
+
       // Wait for all scheduling operations to complete
       await Future.wait(schedulingFutures);
-      
-      debugPrint('✅ Rescheduled notifications for ${pendingTasks.length} pending tasks');
-      
+
+      debugPrint(
+        '✅ Rescheduled notifications for ${pendingTasks.length} pending tasks',
+      );
+
       // Schedule background check for overdue tasks
       await _scheduleBackgroundTaskCheck();
-      
     } catch (e) {
       debugPrint('❌ Error rescheduling notifications: $e');
     }
   }
-  
+
   /// Schedule background task to check for overdue tasks periodically
   Future<void> _scheduleBackgroundTaskCheck() async {
     try {
       // Schedule a daily check for overdue tasks
-      final dailyCheckTime = DateTime.now().add(TasksConstants.backgroundCheckInterval);
-      
+      final dailyCheckTime = DateTime.now().add(
+        TasksConstants.backgroundCheckInterval,
+      );
+
       await _scheduleNotificationWithActions(
         id: _createNotificationId('background_task_check'),
         title: AppStrings.notificationSystem,
@@ -863,13 +893,15 @@ class TaskNotificationService {
         }),
         actions: [],
       );
-      
-      debugPrint('✅ Scheduled background task check for ${dailyCheckTime.toString()}');
+
+      debugPrint(
+        '✅ Scheduled background task check for ${dailyCheckTime.toString()}',
+      );
     } catch (e) {
       debugPrint('❌ Error scheduling background task check: $e');
     }
   }
-  
+
   /// Initialize all notification handlers and callbacks
   Future<void> initializeNotificationHandlers() async {
     try {
@@ -883,22 +915,23 @@ class TaskNotificationService {
       debugPrint('❌ Error initializing notification handlers: $e');
     }
   }
-  
+
   /// Get notification permissions status
   Future<NotificationPermissionStatus> getPermissionStatus() async {
     try {
       await _ensureInitialized();
-      
-      final hasPermission = await _notificationService.areNotificationsEnabled();
-      return hasPermission 
-          ? NotificationPermissionStatus.granted 
+
+      final hasPermission =
+          await _notificationService.areNotificationsEnabled();
+      return hasPermission
+          ? NotificationPermissionStatus.granted
           : NotificationPermissionStatus.denied;
     } catch (e) {
       debugPrint('❌ Error getting permission status: $e');
       return NotificationPermissionStatus.denied;
     }
   }
-  
+
   /// Open system notification settings
   Future<bool> openNotificationSettings() async {
     try {
@@ -909,14 +942,15 @@ class TaskNotificationService {
       return false;
     }
   }
-  
+
   /// Get currently scheduled notifications count
   Future<int> getScheduledNotificationsCount() async {
     try {
       await _ensureInitialized();
-      
-      final pendingNotifications = await _notificationService.getPendingNotifications();
-      
+
+      final pendingNotifications =
+          await _notificationService.getPendingNotifications();
+
       return (pendingNotifications as List).length;
     } catch (e) {
       debugPrint('❌ Error getting scheduled notifications count: $e');
@@ -926,8 +960,4 @@ class TaskNotificationService {
 }
 
 /// Notification permission status
-enum NotificationPermissionStatus {
-  granted,
-  denied,
-  notDetermined,
-}
+enum NotificationPermissionStatus { granted, denied, notDetermined }

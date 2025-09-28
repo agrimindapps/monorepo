@@ -4,14 +4,14 @@ import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 
 /// Widget responsável pelas ações de pagamento para Plantis
-/// 
+///
 /// Funcionalidades:
 /// - Botão principal de compra
 /// - Botão de restaurar compras
 /// - Botão de gerenciar assinatura
 /// - Links de rodapé (Termos, Privacidade)
 /// - Loading states contextuais
-/// 
+///
 /// Estados:
 /// - Usuário sem subscription: Botões de compra e restaurar
 /// - Usuário com subscription: Botão de gerenciar
@@ -50,8 +50,7 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Botão principal de compra
-        if (showPurchaseButton && !isPremium)
-          _buildPurchaseButton(),
+        if (showPurchaseButton && !isPremium) _buildPurchaseButton(),
 
         // Botão de restaurar compras
         if (!isPremium && !showPurchaseButton && onRestore != null)
@@ -62,8 +61,7 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
           _buildManageSubscriptionButton(),
 
         // Links de rodapé
-        if (showFooterLinks)
-          _buildFooterLinks(),
+        if (showFooterLinks) _buildFooterLinks(),
       ],
     );
   }
@@ -96,13 +94,8 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
             const Icon(Icons.star, size: 20),
             const SizedBox(width: 8),
             Text(
-              selectedPlanId != null 
-                  ? 'Assinar Premium'
-                  : 'Selecione um Plano',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              selectedPlanId != null ? 'Assinar Premium' : 'Selecione um Plano',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -157,9 +150,7 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: Colors.white.withValues(alpha: 0.2),
-            ),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
           ),
           elevation: 0,
         ),
@@ -173,10 +164,7 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
             SizedBox(width: 8),
             Text(
               'Gerenciar Assinatura',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -215,19 +203,13 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildFooterLink(
-                'Política de Privacidade',
-                onPrivacyPolicy,
-              ),
+              _buildFooterLink('Política de Privacidade', onPrivacyPolicy),
               Container(
                 width: 1,
                 height: 16,
                 color: Colors.white.withValues(alpha: 0.3),
               ),
-              _buildFooterLink(
-                'Termos de Uso',
-                onTermsOfService,
-              ),
+              _buildFooterLink('Termos de Uso', onTermsOfService),
             ],
           ),
 

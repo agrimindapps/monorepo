@@ -12,7 +12,7 @@ import '../../domain/usecases/update_plant_usecase.dart';
 /// Default care interval constants in days
 class PlantCareIntervals {
   static const int defaultSunlightInterval = 7; // 1 week
-  static const int defaultPestInspectionInterval = 14; // 2 weeks  
+  static const int defaultPestInspectionInterval = 14; // 2 weeks
   static const int defaultPruningInterval = 90; // 3 months
   static const int defaultReplantingInterval = 365; // 1 year
 }
@@ -162,12 +162,19 @@ class PlantFormProvider extends ChangeNotifier {
     if (_waterAmount?.trim().isNotEmpty == true) return true;
 
     // Extended care configuration - toggles and intervals are meaningful
-    if (_enableWateringCare == true && (_wateringIntervalDays != null || _lastWateringDate != null)) return true;
-    if (_enableFertilizerCare == true && (_fertilizingIntervalDays != null || _lastFertilizerDate != null)) return true;
-    if (_enableSunlightCare == true && _sunlightIntervalDays != null) return true;
-    if (_enablePestInspection == true && _pestInspectionIntervalDays != null) return true;
+    if (_enableWateringCare == true &&
+        (_wateringIntervalDays != null || _lastWateringDate != null))
+      return true;
+    if (_enableFertilizerCare == true &&
+        (_fertilizingIntervalDays != null || _lastFertilizerDate != null))
+      return true;
+    if (_enableSunlightCare == true && _sunlightIntervalDays != null)
+      return true;
+    if (_enablePestInspection == true && _pestInspectionIntervalDays != null)
+      return true;
     if (_enablePruning == true && _pruningIntervalDays != null) return true;
-    if (_enableReplanting == true && _replantingIntervalDays != null) return true;
+    if (_enableReplanting == true && _replantingIntervalDays != null)
+      return true;
 
     return false;
   }
@@ -183,37 +190,47 @@ class PlantFormProvider extends ChangeNotifier {
     if (_spaceId != original.spaceId) return true;
     if (_notes.trim() != (original.notes ?? '')) return true;
     if (_plantingDate != original.plantingDate) return true;
-    
+
     // Compare images (order matters for user experience)
     if (_imageUrls.length != original.imageUrls.length) return true;
     for (int i = 0; i < _imageUrls.length; i++) {
-      if (i >= original.imageUrls.length || _imageUrls[i] != original.imageUrls[i]) {
+      if (i >= original.imageUrls.length ||
+          _imageUrls[i] != original.imageUrls[i]) {
         return true;
       }
     }
 
     // Compare care configuration
-    if (_wateringIntervalDays != originalConfig?.wateringIntervalDays) return true;
-    if (_fertilizingIntervalDays != originalConfig?.fertilizingIntervalDays) return true;
-    if (_pruningIntervalDays != originalConfig?.pruningIntervalDays) return true;
+    if (_wateringIntervalDays != originalConfig?.wateringIntervalDays)
+      return true;
+    if (_fertilizingIntervalDays != originalConfig?.fertilizingIntervalDays)
+      return true;
+    if (_pruningIntervalDays != originalConfig?.pruningIntervalDays)
+      return true;
     if (_waterAmount?.trim() != originalConfig?.waterAmount) return true;
 
     // Compare extended care fields
     if (_enableWateringCare != originalConfig?.enableWateringCare) return true;
     if (_lastWateringDate != originalConfig?.lastWateringDate) return true;
-    if (_enableFertilizerCare != originalConfig?.enableFertilizerCare) return true;
+    if (_enableFertilizerCare != originalConfig?.enableFertilizerCare)
+      return true;
     if (_lastFertilizerDate != originalConfig?.lastFertilizerDate) return true;
 
     // Compare sunlight care
-    final originalEnableSunlight = originalConfig?.sunlightCheckIntervalDays != null;
+    final originalEnableSunlight =
+        originalConfig?.sunlightCheckIntervalDays != null;
     if (_enableSunlightCare != originalEnableSunlight) return true;
-    if (_sunlightIntervalDays != originalConfig?.sunlightCheckIntervalDays) return true;
+    if (_sunlightIntervalDays != originalConfig?.sunlightCheckIntervalDays)
+      return true;
     // Note: lastSunlightDate is not stored in PlantConfig, it's a UI-only field
 
     // Compare pest inspection
-    final originalEnablePest = originalConfig?.pestInspectionIntervalDays != null;
+    final originalEnablePest =
+        originalConfig?.pestInspectionIntervalDays != null;
     if (_enablePestInspection != originalEnablePest) return true;
-    if (_pestInspectionIntervalDays != originalConfig?.pestInspectionIntervalDays) return true;
+    if (_pestInspectionIntervalDays !=
+        originalConfig?.pestInspectionIntervalDays)
+      return true;
     // Note: lastPestInspectionDate is not stored in PlantConfig, it's a UI-only field
 
     // Compare pruning
@@ -222,9 +239,11 @@ class PlantFormProvider extends ChangeNotifier {
     // Note: lastPruningDate is not stored in PlantConfig, it's a UI-only field
 
     // Compare replanting
-    final originalEnableReplanting = originalConfig?.replantingIntervalDays != null;
+    final originalEnableReplanting =
+        originalConfig?.replantingIntervalDays != null;
     if (_enableReplanting != originalEnableReplanting) return true;
-    if (_replantingIntervalDays != originalConfig?.replantingIntervalDays) return true;
+    if (_replantingIntervalDays != originalConfig?.replantingIntervalDays)
+      return true;
     // Note: lastReplantingDate is not stored in PlantConfig, it's a UI-only field
 
     return false;
@@ -257,16 +276,23 @@ class PlantFormProvider extends ChangeNotifier {
       errors['pruningInterval'] = 'Intervalo deve ser maior que 0';
     }
 
-    if (_enableSunlightCare == true && (_sunlightIntervalDays == null || _sunlightIntervalDays! <= 0)) {
-      errors['sunlightInterval'] = 'Intervalo deve ser maior que 0 quando ativado';
+    if (_enableSunlightCare == true &&
+        (_sunlightIntervalDays == null || _sunlightIntervalDays! <= 0)) {
+      errors['sunlightInterval'] =
+          'Intervalo deve ser maior que 0 quando ativado';
     }
 
-    if (_enablePestInspection == true && (_pestInspectionIntervalDays == null || _pestInspectionIntervalDays! <= 0)) {
-      errors['pestInspectionInterval'] = 'Intervalo deve ser maior que 0 quando ativado';
+    if (_enablePestInspection == true &&
+        (_pestInspectionIntervalDays == null ||
+            _pestInspectionIntervalDays! <= 0)) {
+      errors['pestInspectionInterval'] =
+          'Intervalo deve ser maior que 0 quando ativado';
     }
 
-    if (_enableReplanting == true && (_replantingIntervalDays == null || _replantingIntervalDays! <= 0)) {
-      errors['replantingInterval'] = 'Intervalo deve ser maior que 0 quando ativado';
+    if (_enableReplanting == true &&
+        (_replantingIntervalDays == null || _replantingIntervalDays! <= 0)) {
+      errors['replantingInterval'] =
+          'Intervalo deve ser maior que 0 quando ativado';
     }
 
     return errors;
@@ -275,9 +301,11 @@ class PlantFormProvider extends ChangeNotifier {
   // Initialize form for editing
   Future<void> initializeForEdit(String plantId) async {
     if (kDebugMode) {
-      print('🌱 PlantFormProvider.initializeForEdit() - Iniciando para plantId: $plantId');
+      print(
+        '🌱 PlantFormProvider.initializeForEdit() - Iniciando para plantId: $plantId',
+      );
     }
-    
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -287,14 +315,18 @@ class PlantFormProvider extends ChangeNotifier {
     result.fold(
       (failure) {
         if (kDebugMode) {
-          print('❌ PlantFormProvider.initializeForEdit() - Erro ao buscar planta: ${_getErrorMessage(failure)}');
+          print(
+            '❌ PlantFormProvider.initializeForEdit() - Erro ao buscar planta: ${_getErrorMessage(failure)}',
+          );
         }
         _errorMessage = _getErrorMessage(failure);
         _originalPlant = null;
       },
       (plant) {
         if (kDebugMode) {
-          print('✅ PlantFormProvider.initializeForEdit() - Planta carregada: ${plant.name} (ID: ${plant.id})');
+          print(
+            '✅ PlantFormProvider.initializeForEdit() - Planta carregada: ${plant.name} (ID: ${plant.id})',
+          );
           print('   - isDeleted: ${plant.isDeleted}');
           print('   - species: ${plant.species}');
           print('   - spaceId: ${plant.spaceId}');
@@ -307,9 +339,11 @@ class PlantFormProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
-    
+
     if (kDebugMode) {
-      print('🌱 PlantFormProvider.initializeForEdit() - Finalizado. originalPlant: ${_originalPlant?.name}');
+      print(
+        '🌱 PlantFormProvider.initializeForEdit() - Finalizado. originalPlant: ${_originalPlant?.name}',
+      );
     }
   }
 
@@ -456,7 +490,6 @@ class PlantFormProvider extends ChangeNotifier {
     }
   }
 
-
   // Config setters
   void setWateringInterval(int? value) {
     _wateringIntervalDays = value;
@@ -501,7 +534,8 @@ class PlantFormProvider extends ChangeNotifier {
       _pestInspectionIntervalDays = null;
       _lastPestInspectionDate = null;
     } else {
-      _pestInspectionIntervalDays ??= PlantCareIntervals.defaultPestInspectionInterval;
+      _pestInspectionIntervalDays ??=
+          PlantCareIntervals.defaultPestInspectionInterval;
     }
     notifyListeners();
   }
@@ -592,14 +626,16 @@ class PlantFormProvider extends ChangeNotifier {
       print('🌱 PlantFormProvider.savePlant() - isEditMode: $isEditMode');
       print('🌱 PlantFormProvider.savePlant() - isValid: $isValid');
     }
-    
+
     if (!isValid) return false;
-    
+
     // Validate plant config data
     final configValidationError = _validateConfigData();
     if (configValidationError != null) {
       if (kDebugMode) {
-        print('❌ PlantFormProvider.savePlant() - Config validation failed: $configValidationError');
+        print(
+          '❌ PlantFormProvider.savePlant() - Config validation failed: $configValidationError',
+        );
       }
       _errorMessage = configValidationError;
       notifyListeners();
@@ -655,7 +691,9 @@ class PlantFormProvider extends ChangeNotifier {
     notifyListeners();
 
     if (kDebugMode) {
-      print('🌱 PlantFormProvider.savePlant() - Finalizando salvamento, success: $success');
+      print(
+        '🌱 PlantFormProvider.savePlant() - Finalizando salvamento, success: $success',
+      );
     }
 
     return success;
@@ -762,19 +800,32 @@ class PlantFormProvider extends ChangeNotifier {
   AddPlantParams _buildAddParams() {
     // Sempre criar uma PlantConfig com valores padrão para garantir que todas as 6 tarefas sejam geradas
     final config = PlantConfig(
-      wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : (_wateringIntervalDays ?? 7),
-      fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : (_fertilizingIntervalDays ?? 30),
+      wateringIntervalDays:
+          (_enableWateringCare == true)
+              ? _wateringIntervalDays
+              : (_wateringIntervalDays ?? 7),
+      fertilizingIntervalDays:
+          (_enableFertilizerCare == true)
+              ? _fertilizingIntervalDays
+              : (_fertilizingIntervalDays ?? 30),
       pruningIntervalDays:
-          (_enablePruning == true) ? _pruningIntervalDays : (_pruningIntervalDays ?? 90),
+          (_enablePruning == true)
+              ? _pruningIntervalDays
+              : (_pruningIntervalDays ?? 90),
       sunlightCheckIntervalDays:
-          (_enableSunlightCare == true) ? _sunlightIntervalDays : (_sunlightIntervalDays ?? 14),
+          (_enableSunlightCare == true)
+              ? _sunlightIntervalDays
+              : (_sunlightIntervalDays ?? 14),
       pestInspectionIntervalDays:
           (_enablePestInspection == true)
               ? _pestInspectionIntervalDays
               : (_pestInspectionIntervalDays ?? 21),
       replantingIntervalDays:
-          (_enableReplanting == true) ? _replantingIntervalDays : (_replantingIntervalDays ?? 365),
-      waterAmount: _waterAmount?.trim().isNotEmpty == true ? _waterAmount : null,
+          (_enableReplanting == true)
+              ? _replantingIntervalDays
+              : (_replantingIntervalDays ?? 365),
+      waterAmount:
+          _waterAmount?.trim().isNotEmpty == true ? _waterAmount : null,
       // Add new care fields
       enableWateringCare: _enableWateringCare,
       lastWateringDate: _lastWateringDate,
@@ -784,9 +835,15 @@ class PlantFormProvider extends ChangeNotifier {
 
     return AddPlantParams(
       name: ValidationHelpers.sanitizePlantName(_name),
-      species: _species.trim().isEmpty ? null : ValidationHelpers.sanitizePlantName(_species),
+      species:
+          _species.trim().isEmpty
+              ? null
+              : ValidationHelpers.sanitizePlantName(_species),
       spaceId: _spaceId,
-      notes: _notes.trim().isEmpty ? null : ValidationHelpers.sanitizeNotes(_notes),
+      notes:
+          _notes.trim().isEmpty
+              ? null
+              : ValidationHelpers.sanitizeNotes(_notes),
       plantingDate: _plantingDate,
       imageBase64: _imageBase64,
       imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
@@ -797,19 +854,32 @@ class PlantFormProvider extends ChangeNotifier {
   UpdatePlantParams _buildUpdateParams() {
     // Sempre criar uma PlantConfig com valores padrão para garantir que todas as 6 tarefas sejam geradas
     final config = PlantConfig(
-      wateringIntervalDays: (_enableWateringCare == true) ? _wateringIntervalDays : (_wateringIntervalDays ?? 7),
-      fertilizingIntervalDays: (_enableFertilizerCare == true) ? _fertilizingIntervalDays : (_fertilizingIntervalDays ?? 30),
+      wateringIntervalDays:
+          (_enableWateringCare == true)
+              ? _wateringIntervalDays
+              : (_wateringIntervalDays ?? 7),
+      fertilizingIntervalDays:
+          (_enableFertilizerCare == true)
+              ? _fertilizingIntervalDays
+              : (_fertilizingIntervalDays ?? 30),
       pruningIntervalDays:
-          (_enablePruning == true) ? _pruningIntervalDays : (_pruningIntervalDays ?? 90),
+          (_enablePruning == true)
+              ? _pruningIntervalDays
+              : (_pruningIntervalDays ?? 90),
       sunlightCheckIntervalDays:
-          (_enableSunlightCare == true) ? _sunlightIntervalDays : (_sunlightIntervalDays ?? 14),
+          (_enableSunlightCare == true)
+              ? _sunlightIntervalDays
+              : (_sunlightIntervalDays ?? 14),
       pestInspectionIntervalDays:
           (_enablePestInspection == true)
               ? _pestInspectionIntervalDays
               : (_pestInspectionIntervalDays ?? 21),
       replantingIntervalDays:
-          (_enableReplanting == true) ? _replantingIntervalDays : (_replantingIntervalDays ?? 365),
-      waterAmount: _waterAmount?.trim().isNotEmpty == true ? _waterAmount : null,
+          (_enableReplanting == true)
+              ? _replantingIntervalDays
+              : (_replantingIntervalDays ?? 365),
+      waterAmount:
+          _waterAmount?.trim().isNotEmpty == true ? _waterAmount : null,
       // Add new care fields
       enableWateringCare: _enableWateringCare,
       lastWateringDate: _lastWateringDate,
@@ -820,9 +890,15 @@ class PlantFormProvider extends ChangeNotifier {
     return UpdatePlantParams(
       id: _originalPlant!.id,
       name: ValidationHelpers.sanitizePlantName(_name),
-      species: _species.trim().isEmpty ? null : ValidationHelpers.sanitizePlantName(_species),
+      species:
+          _species.trim().isEmpty
+              ? null
+              : ValidationHelpers.sanitizePlantName(_species),
       spaceId: _spaceId,
-      notes: _notes.trim().isEmpty ? null : ValidationHelpers.sanitizeNotes(_notes),
+      notes:
+          _notes.trim().isEmpty
+              ? null
+              : ValidationHelpers.sanitizeNotes(_notes),
       plantingDate: _plantingDate,
       imageBase64: _imageBase64,
       imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
@@ -835,48 +911,56 @@ class PlantFormProvider extends ChangeNotifier {
   bool _hasConfigData() {
     // Basic care intervals - valid if > 0
     bool hasBasicCare = false;
-    
+
     if (_wateringIntervalDays != null && _wateringIntervalDays! > 0) {
       hasBasicCare = true;
     }
-    
+
     if (_fertilizingIntervalDays != null && _fertilizingIntervalDays! > 0) {
       hasBasicCare = true;
     }
-    
+
     // Extended care - only valid if enabled AND has valid interval
     bool hasExtendedCare = false;
-    
-    if (_enablePruning == true && _pruningIntervalDays != null && _pruningIntervalDays! > 0) {
+
+    if (_enablePruning == true &&
+        _pruningIntervalDays != null &&
+        _pruningIntervalDays! > 0) {
       hasExtendedCare = true;
     }
-    
-    if (_enableSunlightCare == true && _sunlightIntervalDays != null && _sunlightIntervalDays! > 0) {
+
+    if (_enableSunlightCare == true &&
+        _sunlightIntervalDays != null &&
+        _sunlightIntervalDays! > 0) {
       hasExtendedCare = true;
     }
-    
-    if (_enablePestInspection == true && _pestInspectionIntervalDays != null && _pestInspectionIntervalDays! > 0) {
+
+    if (_enablePestInspection == true &&
+        _pestInspectionIntervalDays != null &&
+        _pestInspectionIntervalDays! > 0) {
       hasExtendedCare = true;
     }
-    
-    if (_enableReplanting == true && _replantingIntervalDays != null && _replantingIntervalDays! > 0) {
+
+    if (_enableReplanting == true &&
+        _replantingIntervalDays != null &&
+        _replantingIntervalDays! > 0) {
       hasExtendedCare = true;
     }
-    
+
     // Care flags - valid if enabled
     bool hasCareFlags = false;
-    
+
     if (_enableWateringCare == true) {
       hasCareFlags = true;
     }
-    
+
     if (_enableFertilizerCare == true) {
       hasCareFlags = true;
     }
-    
+
     // Water amount is meaningful config
     bool hasWaterAmount = _waterAmount?.trim().isNotEmpty == true;
-    
+
     return hasBasicCare || hasExtendedCare || hasCareFlags || hasWaterAmount;
   }
 
@@ -886,40 +970,49 @@ class PlantFormProvider extends ChangeNotifier {
     if (!_hasConfigData()) {
       return null; // No config is valid (optional)
     }
-    
+
     // If has config data, validate required fields
     List<String> errors = [];
-    
+
     // Validate watering interval if set
     if (_wateringIntervalDays != null && _wateringIntervalDays! <= 0) {
       errors.add('Intervalo de rega deve ser maior que 0');
     }
-    
-    // Validate fertilizing interval if set  
+
+    // Validate fertilizing interval if set
     if (_fertilizingIntervalDays != null && _fertilizingIntervalDays! <= 0) {
       errors.add('Intervalo de adubação deve ser maior que 0');
     }
-    
+
     // Validate pruning if enabled
-    if (_enablePruning == true && (_pruningIntervalDays == null || _pruningIntervalDays! <= 0)) {
+    if (_enablePruning == true &&
+        (_pruningIntervalDays == null || _pruningIntervalDays! <= 0)) {
       errors.add('Intervalo de poda deve ser maior que 0 quando ativado');
     }
-    
+
     // Validate sunlight if enabled
-    if (_enableSunlightCare == true && (_sunlightIntervalDays == null || _sunlightIntervalDays! <= 0)) {
-      errors.add('Intervalo de banho de sol deve ser maior que 0 quando ativado');
+    if (_enableSunlightCare == true &&
+        (_sunlightIntervalDays == null || _sunlightIntervalDays! <= 0)) {
+      errors.add(
+        'Intervalo de banho de sol deve ser maior que 0 quando ativado',
+      );
     }
-    
+
     // Validate pest inspection if enabled
-    if (_enablePestInspection == true && (_pestInspectionIntervalDays == null || _pestInspectionIntervalDays! <= 0)) {
-      errors.add('Intervalo de inspeção de pragas deve ser maior que 0 quando ativado');
+    if (_enablePestInspection == true &&
+        (_pestInspectionIntervalDays == null ||
+            _pestInspectionIntervalDays! <= 0)) {
+      errors.add(
+        'Intervalo de inspeção de pragas deve ser maior que 0 quando ativado',
+      );
     }
-    
+
     // Validate replanting if enabled
-    if (_enableReplanting == true && (_replantingIntervalDays == null || _replantingIntervalDays! <= 0)) {
+    if (_enableReplanting == true &&
+        (_replantingIntervalDays == null || _replantingIntervalDays! <= 0)) {
       errors.add('Intervalo de replantio deve ser maior que 0 quando ativado');
     }
-    
+
     return errors.isEmpty ? null : errors.first;
   }
 

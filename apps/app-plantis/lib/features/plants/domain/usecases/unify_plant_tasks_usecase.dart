@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../tasks/domain/entities/task.dart' as task_entity;
@@ -12,7 +11,8 @@ import '../services/plant_task_task_adapter.dart';
 
 /// Use case para unificar o sistema de PlantTasks com Tasks
 /// Elimina duplicação e sincroniza os dois sistemas
-class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTasksParams> {
+class UnifyPlantTasksUseCase
+    implements UseCase<UnificationResult, UnifyPlantTasksParams> {
   final PlantTasksRepository plantTasksRepository;
   final TasksRepository tasksRepository;
   final PlantsRepository plantsRepository;
@@ -24,19 +24,27 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
   });
 
   @override
-  Future<Either<Failure, UnificationResult>> call(UnifyPlantTasksParams params) async {
+  Future<Either<Failure, UnificationResult>> call(
+    UnifyPlantTasksParams params,
+  ) async {
     try {
       if (kDebugMode) {
-        print('🔄 UnifyPlantTasksUseCase: Iniciando unificação do sistema de tarefas');
+        print(
+          '🔄 UnifyPlantTasksUseCase: Iniciando unificação do sistema de tarefas',
+        );
       }
 
       // 1. Carregar dados necessários
       final loadResult = await _loadAllData();
       if (loadResult.isLeft()) {
-        return loadResult.map((r) => UnificationResult.failure('Erro ao carregar dados'));
+        return loadResult.map(
+          (r) => UnificationResult.failure('Erro ao carregar dados'),
+        );
       }
 
-      final data = loadResult.getOrElse(() => throw Exception('Dados não encontrados'));
+      final data = loadResult.getOrElse(
+        () => throw Exception('Dados não encontrados'),
+      );
 
       // 2. Analisar conflitos
       final conflicts = PlantTaskTaskAdapter.findConflictingTaskIds(
@@ -46,7 +54,9 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
 
       if (conflicts.isNotEmpty && !params.forceResolveConflicts) {
         if (kDebugMode) {
-          print('⚠️ UnifyPlantTasksUseCase: ${conflicts.length} conflitos encontrados');
+          print(
+            '⚠️ UnifyPlantTasksUseCase: ${conflicts.length} conflitos encontrados',
+          );
         }
         return Right(UnificationResult.conflict(conflicts, data));
       }
@@ -60,7 +70,9 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
         print('❌ UnifyPlantTasksUseCase: Erro inesperado: $e');
         print('Stack trace: $stackTrace');
       }
-      return Right(UnificationResult.failure('Erro inesperado: ${e.toString()}'));
+      return Right(
+        UnificationResult.failure('Erro inesperado: ${e.toString()}'),
+      );
     }
   }
 
@@ -83,26 +95,25 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
         (failure) => Left(failure),
         (plantTasks) => tasksResult.fold(
           (failure) => Left(failure),
-          (tasks) => plantsResult.fold(
-            (failure) => Left(failure),
-            (plants) {
-              final plantsById = {for (final plant in plants) plant.id: plant};
+          (tasks) => plantsResult.fold((failure) => Left(failure), (plants) {
+            final plantsById = {for (final plant in plants) plant.id: plant};
 
-              if (kDebugMode) {
-                print('📊 UnifyPlantTasksUseCase: Dados carregados:');
-                print('   - ${plantTasks.length} PlantTasks');
-                print('   - ${tasks.length} Tasks existentes');
-                print('   - ${plants.length} Plantas');
-              }
+            if (kDebugMode) {
+              print('📊 UnifyPlantTasksUseCase: Dados carregados:');
+              print('   - ${plantTasks.length} PlantTasks');
+              print('   - ${tasks.length} Tasks existentes');
+              print('   - ${plants.length} Plantas');
+            }
 
-              return Right(UnificationData(
+            return Right(
+              UnificationData(
                 plantTasks: plantTasks,
                 existingTasks: tasks,
                 plants: plants,
                 plantsById: plantsById,
-              ));
-            },
-          ),
+              ),
+            );
+          }),
         ),
       );
     } catch (e) {
@@ -128,7 +139,9 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
       );
 
       if (kDebugMode) {
-        print('✅ UnifyPlantTasksUseCase: ${unifiedTasks.length} tasks unificadas');
+        print(
+          '✅ UnifyPlantTasksUseCase: ${unifiedTasks.length} tasks unificadas',
+        );
       }
 
       // 2. Sincronizar com repositório de Tasks (se solicitado)
@@ -148,11 +161,13 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
         print(report);
       }
 
-      return Right(UnificationResult.success(
-        unifiedTasks: unifiedTasks,
-        report: report,
-        originalData: data,
-      ));
+      return Right(
+        UnificationResult.success(
+          unifiedTasks: unifiedTasks,
+          report: report,
+          originalData: data,
+        ),
+      );
     } catch (e) {
       if (kDebugMode) {
         print('❌ UnifyPlantTasksUseCase: Erro na execução: $e');
@@ -162,22 +177,30 @@ class UnifyPlantTasksUseCase implements UseCase<UnificationResult, UnifyPlantTas
   }
 
   /// Sincroniza tasks unificadas com repositório principal
-  Future<void> _syncUnifiedTasks(List<task_entity.Task> tasks, UnificationData data) async {
+  Future<void> _syncUnifiedTasks(
+    List<task_entity.Task> tasks,
+    UnificationData data,
+  ) async {
     if (kDebugMode) {
-      print('🔄 UnifyPlantTasksUseCase: Sincronizando ${tasks.length} tasks unificadas');
+      print(
+        '🔄 UnifyPlantTasksUseCase: Sincronizando ${tasks.length} tasks unificadas',
+      );
     }
 
     // TODO: Implementar sincronização baseada na estratégia escolhida
     // Por enquanto, apenas log do que seria feito
 
-    final tasksFromPlantTasks = tasks
-        .where((task) => PlantTaskTaskAdapter.isTaskFromPlantTask(task))
-        .length;
+    final tasksFromPlantTasks =
+        tasks
+            .where((task) => PlantTaskTaskAdapter.isTaskFromPlantTask(task))
+            .length;
 
     if (kDebugMode) {
       print('📊 UnifyPlantTasksUseCase: Sincronização simulada:');
       print('   - $tasksFromPlantTasks tasks originadas de PlantTasks');
-      print('   - ${tasks.length - tasksFromPlantTasks} tasks existentes mantidas');
+      print(
+        '   - ${tasks.length - tasksFromPlantTasks} tasks existentes mantidas',
+      );
     }
   }
 }
@@ -196,9 +219,8 @@ class UnifyPlantTasksParams {
 
   factory UnifyPlantTasksParams.preview() => const UnifyPlantTasksParams();
 
-  factory UnifyPlantTasksParams.execute() => const UnifyPlantTasksParams(
-    syncWithTasksRepository: true,
-  );
+  factory UnifyPlantTasksParams.execute() =>
+      const UnifyPlantTasksParams(syncWithTasksRepository: true);
 
   factory UnifyPlantTasksParams.force() => const UnifyPlantTasksParams(
     forceResolveConflicts: true,

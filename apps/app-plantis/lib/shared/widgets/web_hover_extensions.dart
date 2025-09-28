@@ -4,15 +4,10 @@ import 'package:flutter/material.dart';
 /// Extension para adicionar hover states automaticamente aos widgets interativos
 extension WebHoverExtension on Widget {
   /// Aplica hover effect com cursor pointer em widgets interativos
-  Widget withHoverPointer({
-    bool enabled = true,
-  }) {
+  Widget withHoverPointer({bool enabled = true}) {
     if (!enabled || !kIsWeb) return this;
-    
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: this,
-    );
+
+    return MouseRegion(cursor: SystemMouseCursors.click, child: this);
   }
 
   /// Aplica hover effect com escala e elevação
@@ -22,12 +17,8 @@ extension WebHoverExtension on Widget {
     bool enabled = true,
   }) {
     if (!enabled || !kIsWeb) return this;
-    
-    return _HoverScaleWidget(
-      scale: scale,
-      duration: duration,
-      child: this,
-    );
+
+    return _HoverScaleWidget(scale: scale, duration: duration, child: this);
   }
 
   /// Aplica hover effect com mudança de opacidade
@@ -37,7 +28,7 @@ extension WebHoverExtension on Widget {
     bool enabled = true,
   }) {
     if (!enabled || !kIsWeb) return this;
-    
+
     return _HoverOpacityWidget(
       opacity: opacity,
       duration: duration,
@@ -52,7 +43,7 @@ extension WebHoverExtension on Widget {
     bool enabled = true,
   }) {
     if (!enabled || !kIsWeb) return this;
-    
+
     return _HoverColorWidget(
       hoverColor: hoverColor,
       duration: duration,
@@ -68,7 +59,7 @@ extension WebHoverExtension on Widget {
     bool enabled = true,
   }) {
     if (!enabled || !kIsWeb) return this;
-    
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: _HoverFeedbackWidget(
@@ -248,11 +239,12 @@ class WebOptimizedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return _HoverButtonWidget(
       onPressed: onPressed,
       backgroundColor: backgroundColor ?? theme.colorScheme.primary,
-      hoverColor: hoverColor ?? theme.colorScheme.primary.withValues(alpha: 0.8),
+      hoverColor:
+          hoverColor ?? theme.colorScheme.primary.withValues(alpha: 0.8),
       padding: padding,
       borderRadius: borderRadius ?? BorderRadius.circular(8),
       elevation: elevation,
@@ -294,9 +286,10 @@ class _HoverButtonWidgetState extends State<_HoverButtonWidget> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: widget.onPressed != null 
-          ? SystemMouseCursors.click 
-          : SystemMouseCursors.forbidden,
+      cursor:
+          widget.onPressed != null
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.forbidden,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -310,8 +303,12 @@ class _HoverButtonWidgetState extends State<_HoverButtonWidget> {
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: _isHovered ? widget.hoverElevation : widget.elevation,
-                offset: Offset(0, _isHovered ? widget.hoverElevation / 2 : widget.elevation / 2),
+                blurRadius:
+                    _isHovered ? widget.hoverElevation : widget.elevation,
+                offset: Offset(
+                  0,
+                  _isHovered ? widget.hoverElevation / 2 : widget.elevation / 2,
+                ),
               ),
             ],
           ),

@@ -39,16 +39,15 @@ class WebOptimizedFormLayout extends StatelessWidget {
             mainAxisAlignment: mainAxisAlignment,
             children: [
               if (title != null) ...[
-                Text(
-                  title!,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
+                Text(title!, style: Theme.of(context).textTheme.headlineMedium),
                 SizedBox(height: spacing * 1.5),
               ],
-              ...children.map((child) => Padding(
-                    padding: EdgeInsets.only(bottom: spacing),
-                    child: child,
-                  )),
+              ...children.map(
+                (child) => Padding(
+                  padding: EdgeInsets.only(bottom: spacing),
+                  child: child,
+                ),
+              ),
               if (actions != null) ...[
                 SizedBox(height: spacing),
                 WebOptimizedFormActions(children: actions!),
@@ -79,17 +78,27 @@ class WebOptimizedFormActions extends StatelessWidget {
     return AdaptiveLayout(
       mobile: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children.map((child) => Padding(
-              padding: EdgeInsets.only(bottom: spacing),
-              child: child,
-            )).toList(),
+        children:
+            children
+                .map(
+                  (child) => Padding(
+                    padding: EdgeInsets.only(bottom: spacing),
+                    child: child,
+                  ),
+                )
+                .toList(),
       ),
       desktop: Row(
         mainAxisAlignment: mainAxisAlignment,
-        children: children.map((child) => Padding(
-              padding: EdgeInsets.only(left: spacing),
-              child: child,
-            )).toList(),
+        children:
+            children
+                .map(
+                  (child) => Padding(
+                    padding: EdgeInsets.only(left: spacing),
+                    child: child,
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -112,10 +121,15 @@ class WebOptimizedFormRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdaptiveLayout(
       mobile: Column(
-        children: children.map((child) => Padding(
-              padding: EdgeInsets.only(bottom: spacing),
-              child: child,
-            )).toList(),
+        children:
+            children
+                .map(
+                  (child) => Padding(
+                    padding: EdgeInsets.only(bottom: spacing),
+                    child: child,
+                  ),
+                )
+                .toList(),
       ),
       desktop: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +202,7 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
     super.initState();
     _isWebEnvironment = kIsWeb;
     _focusNode = widget.focusNode ?? FocusNode();
-    
+
     // Add listener with enhanced safety for web
     if (mounted) {
       _focusNode.addListener(_onFocusChange);
@@ -215,7 +229,7 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
   void _onFocusChange() {
     // Critical: Enhanced mounted check with web considerations
     if (!mounted) return;
-    
+
     if (_isWebEnvironment) {
       // Web: Add micro-delay to prevent race conditions
       Future.delayed(const Duration(milliseconds: 1), () {
@@ -239,15 +253,18 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        boxShadow: _isFocused
-            ? [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
+        boxShadow:
+            _isFocused
+                ? [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+                : null,
       ),
       child: TextFormField(
         controller: widget.controller,
@@ -268,9 +285,7 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
           helperText: widget.helperText,
           prefixIcon: widget.prefixIcon,
           suffixIcon: widget.suffixIcon,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
@@ -317,9 +332,7 @@ class WebOptimizedDropdown<T> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
@@ -408,22 +421,20 @@ class WebOptimizedFormButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = isLoading
-        ? const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon),
-                const SizedBox(width: 8),
+    Widget child =
+        isLoading
+            ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+            : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
+                Text(text),
               ],
-              Text(text),
-            ],
-          );
+            );
 
     if (isPrimary) {
       return ElevatedButton(

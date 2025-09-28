@@ -51,7 +51,10 @@ class AnalyticsState {
   }
 
   @override
-  int get hashCode => isInitialized.hashCode ^ isAnalyticsEnabled.hashCode ^ errorMessage.hashCode;
+  int get hashCode =>
+      isInitialized.hashCode ^
+      isAnalyticsEnabled.hashCode ^
+      errorMessage.hashCode;
 }
 
 /// StateNotifier para gerenciar analytics usando EnhancedAnalyticsService
@@ -61,17 +64,17 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   AnalyticsNotifier({
     required IAnalyticsRepository analyticsRepository,
     required ICrashlyticsRepository crashlyticsRepository,
-  })  : _enhancedService = EnhancedAnalyticsService(
-          analytics: analyticsRepository,
-          crashlytics: crashlyticsRepository,
-          config: AnalyticsConfig.forApp(
-            appId: 'plantis',
-            version: '1.0.0', // TODO: Get from package_info
-            enableAnalytics: EnvironmentConfig.enableAnalytics,
-            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
-          ),
-        ),
-        super(AnalyticsState.initial()) {
+  }) : _enhancedService = EnhancedAnalyticsService(
+         analytics: analyticsRepository,
+         crashlytics: crashlyticsRepository,
+         config: AnalyticsConfig.forApp(
+           appId: 'plantis',
+           version: '1.0.0', // TODO: Get from package_info
+           enableAnalytics: EnvironmentConfig.enableAnalytics,
+           enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
+         ),
+       ),
+       super(AnalyticsState.initial()) {
     _initialize();
   }
 
@@ -96,7 +99,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
 
     try {
       await _enhancedService.setCurrentScreen(screenName);
-      await _enhancedService.logEvent('screen_view', {'screen_name': screenName});
+      await _enhancedService.logEvent('screen_view', {
+        'screen_name': screenName,
+      });
       state = state.clearError();
     } catch (e) {
       state = state.copyWith(errorMessage: 'Erro ao registrar tela: $e');
@@ -156,7 +161,8 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
         error,
         stackTrace,
         reason: reason,
-        logAsAnalyticsEvent: true, // Log erros críticos como eventos de analytics
+        logAsAnalyticsEvent:
+            true, // Log erros críticos como eventos de analytics
       );
       state = state.clearError();
     } catch (e) {
@@ -214,7 +220,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar criação de planta: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar criação de planta: $e',
+      );
     }
   }
 
@@ -228,7 +236,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar exclusão de planta: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar exclusão de planta: $e',
+      );
     }
   }
 
@@ -242,11 +252,16 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar atualização de planta: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar atualização de planta: $e',
+      );
     }
   }
 
-  Future<void> logTaskCompleted(String taskType, {Map<String, dynamic>? additionalData}) async {
+  Future<void> logTaskCompleted(
+    String taskType, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     if (!state.isAnalyticsEnabled) return;
 
     try {
@@ -259,7 +274,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar conclusão de tarefa: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar conclusão de tarefa: $e',
+      );
     }
   }
 
@@ -273,7 +290,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar criação de tarefa: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar criação de tarefa: $e',
+      );
     }
   }
 
@@ -287,7 +306,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar criação de espaço: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar criação de espaço: $e',
+      );
     }
   }
 
@@ -301,11 +322,16 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar exclusão de espaço: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar exclusão de espaço: $e',
+      );
     }
   }
 
-  Future<void> logPremiumFeatureAttempted(String featureName, {Map<String, dynamic>? additionalData}) async {
+  Future<void> logPremiumFeatureAttempted(
+    String featureName, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     if (!state.isAnalyticsEnabled) return;
 
     try {
@@ -318,7 +344,10 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar tentativa de funcionalidade premium: $e');
+      state = state.copyWith(
+        errorMessage:
+            'Erro ao registrar tentativa de funcionalidade premium: $e',
+      );
     }
   }
 
@@ -332,11 +361,15 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar log de cuidado: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar log de cuidado: $e',
+      );
     }
   }
 
-  Future<void> logPlantPhotoAdded({Map<String, dynamic>? additionalData}) async {
+  Future<void> logPlantPhotoAdded({
+    Map<String, dynamic>? additionalData,
+  }) async {
     if (!state.isAnalyticsEnabled) return;
 
     try {
@@ -346,7 +379,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar adição de foto: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar adição de foto: $e',
+      );
     }
   }
 
@@ -366,7 +401,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       );
       state = state.clearError();
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao registrar compra de assinatura: $e');
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar compra de assinatura: $e',
+      );
     }
   }
 
@@ -378,10 +415,7 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   }
 
   Future<void> logTrialEnded(String reason) async {
-    await logEvent('trial_ended', {
-      'app': 'plantis',
-      'reason': reason,
-    });
+    await logEvent('trial_ended', {'app': 'plantis', 'reason': reason});
   }
 
   // ==========================================================================
@@ -451,7 +485,10 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   }
 
   /// Registra evento de desenvolvimento para depuração
-  Future<void> logDevelopmentEvent(String event, Map<String, dynamic>? data) async {
+  Future<void> logDevelopmentEvent(
+    String event,
+    Map<String, dynamic>? data,
+  ) async {
     if (kDebugMode && state.isAnalyticsEnabled) {
       await logEvent('dev_$event', {
         'is_development': true,
@@ -490,15 +527,16 @@ final crashlyticsRepositoryProvider = Provider<ICrashlyticsRepository>((ref) {
 });
 
 /// Provider principal do AnalyticsNotifier
-final analyticsNotifierProvider = StateNotifierProvider<AnalyticsNotifier, AnalyticsState>((ref) {
-  final analyticsRepository = ref.watch(analyticsRepositoryProvider);
-  final crashlyticsRepository = ref.watch(crashlyticsRepositoryProvider);
+final analyticsNotifierProvider =
+    StateNotifierProvider<AnalyticsNotifier, AnalyticsState>((ref) {
+      final analyticsRepository = ref.watch(analyticsRepositoryProvider);
+      final crashlyticsRepository = ref.watch(crashlyticsRepositoryProvider);
 
-  return AnalyticsNotifier(
-    analyticsRepository: analyticsRepository,
-    crashlyticsRepository: crashlyticsRepository,
-  );
-});
+      return AnalyticsNotifier(
+        analyticsRepository: analyticsRepository,
+        crashlyticsRepository: crashlyticsRepository,
+      );
+    });
 
 // =============================================================================
 // PROVIDERS DERIVADOS PARA FACILITAR USO

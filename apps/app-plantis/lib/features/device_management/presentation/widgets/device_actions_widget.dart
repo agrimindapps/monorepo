@@ -6,7 +6,7 @@ import '../providers/device_management_provider.dart';
 /// Widget de ações rápidas para gerenciamento de dispositivos
 /// Fornece acesso rápido às funcionalidades principais
 class DeviceActionsWidget extends StatelessWidget {
-  const DeviceActionsWidget({Key? key}) : super(key: key);
+  const DeviceActionsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,8 @@ class DeviceActionsWidget extends StatelessWidget {
                       subtitle: 'Registrar este aparelho',
                       icon: Icons.verified,
                       color: Colors.blue,
-                      enabled: !provider.isValidating && provider.canAddMoreDevices,
+                      enabled:
+                          !provider.isValidating && provider.canAddMoreDevices,
                       loading: provider.isValidating,
                       onTap: () => _validateCurrentDevice(context, provider),
                     ),
@@ -79,7 +80,10 @@ class DeviceActionsWidget extends StatelessWidget {
                         title: '${provider.activeDeviceCount}/3',
                         subtitle: 'Dispositivos ativos',
                         icon: Icons.devices,
-                        color: provider.hasReachedDeviceLimit ? Colors.orange : Colors.grey,
+                        color:
+                            provider.hasReachedDeviceLimit
+                                ? Colors.orange
+                                : Colors.grey,
                       ),
                     ),
                   ],
@@ -120,23 +124,27 @@ class DeviceActionsWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: enabled ? color.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
+                  color:
+                      enabled
+                          ? color.withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: loading
-                    ? SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(color),
+                child:
+                    loading
+                        ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(color),
+                          ),
+                        )
+                        : Icon(
+                          icon,
+                          color: enabled ? color : Colors.grey,
+                          size: 24,
                         ),
-                      )
-                    : Icon(
-                        icon,
-                        color: enabled ? color : Colors.grey,
-                        size: 24,
-                      ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -144,9 +152,10 @@ class DeviceActionsWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: enabled
-                      ? Theme.of(context).textTheme.titleMedium?.color
-                      : Colors.grey,
+                  color:
+                      enabled
+                          ? Theme.of(context).textTheme.titleMedium?.color
+                          : Colors.grey,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -155,9 +164,10 @@ class DeviceActionsWidget extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: enabled
-                      ? Theme.of(context).textTheme.bodySmall?.color
-                      : Colors.grey,
+                  color:
+                      enabled
+                          ? Theme.of(context).textTheme.bodySmall?.color
+                          : Colors.grey,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -189,11 +199,7 @@ class DeviceActionsWidget extends StatelessWidget {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 24,
-              ),
+              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(height: 8),
             Text(
@@ -233,11 +239,7 @@ class DeviceActionsWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.warning_amber,
-            color: Colors.orange.shade600,
-            size: 20,
-          ),
+          Icon(Icons.warning_amber, color: Colors.orange.shade600, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -254,10 +256,7 @@ class DeviceActionsWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Revogue um dispositivo inativo para adicionar um novo.',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.orange.shade600,
-                  ),
+                  style: TextStyle(fontSize: 11, color: Colors.orange.shade600),
                 ),
               ],
             ),
@@ -277,22 +276,24 @@ class DeviceActionsWidget extends StatelessWidget {
       String message = result.message ?? 'Falha na validação';
 
       if (result.status.name == 'exceeded') {
-        message = 'Limite de dispositivos atingido. Revogue um dispositivo inativo primeiro.';
+        message =
+            'Limite de dispositivos atingido. Revogue um dispositivo inativo primeiro.';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
-          action: result.status.name == 'exceeded'
-              ? SnackBarAction(
-                  label: 'Ver Dispositivos',
-                  textColor: Colors.white,
-                  onPressed: () {
-                    // O usuário já está na tela de dispositivos
-                  },
-                )
-              : null,
+          action:
+              result.status.name == 'exceeded'
+                  ? SnackBarAction(
+                    label: 'Ver Dispositivos',
+                    textColor: Colors.white,
+                    onPressed: () {
+                      // O usuário já está na tela de dispositivos
+                    },
+                  )
+                  : null,
         ),
       );
     }
@@ -306,62 +307,63 @@ class DeviceActionsWidget extends StatelessWidget {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout Remoto'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Esta ação irá desconectar todos os outros dispositivos '
-              '($otherDevicesCount ${otherDevicesCount == 1 ? 'dispositivo' : 'dispositivos'}), '
-              'mantendo apenas este ativo.',
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.orange.shade600,
-                    size: 20,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Logout Remoto'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Esta ação irá desconectar todos os outros dispositivos '
+                  '($otherDevicesCount ${otherDevicesCount == 1 ? 'dispositivo' : 'dispositivos'}), '
+                  'mantendo apenas este ativo.',
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange.shade200),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Os dispositivos desconectados precisarão fazer login novamente.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.orange.shade700,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.orange.shade600,
+                        size: 20,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Os dispositivos desconectados precisarão fazer login novamente.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Desconectar Outros'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Desconectar Outros'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {

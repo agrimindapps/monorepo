@@ -77,6 +77,7 @@ class PlantModel extends Plant {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -194,16 +195,19 @@ class PlantConfigModel extends PlantConfig {
       idealTemperature: (json['idealTemperature'] as num?)?.toDouble(),
       idealHumidity: (json['idealHumidity'] as num?)?.toDouble(),
       enableWateringCare: json['enableWateringCare'] as bool?,
-      lastWateringDate: json['lastWateringDate'] != null 
-          ? DateTime.parse(json['lastWateringDate'] as String)
-          : null,
+      lastWateringDate:
+          json['lastWateringDate'] != null
+              ? DateTime.parse(json['lastWateringDate'] as String)
+              : null,
       enableFertilizerCare: json['enableFertilizerCare'] as bool?,
-      lastFertilizerDate: json['lastFertilizerDate'] != null 
-          ? DateTime.parse(json['lastFertilizerDate'] as String)
-          : null,
+      lastFertilizerDate:
+          json['lastFertilizerDate'] != null
+              ? DateTime.parse(json['lastFertilizerDate'] as String)
+              : null,
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'wateringIntervalDays': wateringIntervalDays,

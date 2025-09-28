@@ -1,8 +1,7 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
-import '../repositories/device_repository.dart';
 import '../../data/models/device_model.dart';
+import '../repositories/device_repository.dart';
 
 class UpdateDeviceActivityUseCase {
   final DeviceRepository _repository;

@@ -61,7 +61,7 @@ class RegisterLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Loading message
                       Text(
                         message,
@@ -73,7 +73,7 @@ class RegisterLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Subtitle
                       Text(
                         'Por favor, aguarde...',
@@ -193,25 +193,27 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                           borderRadius: BorderRadius.circular(40),
                         ),
                         child: Center(
-                          child: progress != null
-                              ? CircularProgressIndicator(
-                                  value: progress,
-                                  strokeWidth: 4,
-                                  valueColor: const AlwaysStoppedAnimation<Color>(
-                                    PlantisColors.primary,
+                          child:
+                              progress != null
+                                  ? CircularProgressIndicator(
+                                    value: progress,
+                                    strokeWidth: 4,
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                          PlantisColors.primary,
+                                        ),
+                                    backgroundColor: Colors.grey.shade300,
+                                  )
+                                  : const CircularProgressIndicator(
+                                    strokeWidth: 4,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      PlantisColors.primary,
+                                    ),
                                   ),
-                                  backgroundColor: Colors.grey.shade300,
-                                )
-                              : const CircularProgressIndicator(
-                                  strokeWidth: 4,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    PlantisColors.primary,
-                                  ),
-                                ),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Step indicator
                       Text(
                         'Passo $currentStep de $totalSteps',
@@ -222,7 +224,7 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Loading message
                       Text(
                         message,
@@ -234,7 +236,7 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Subtitle
                       Text(
                         'Por favor, aguarde enquanto processamos suas informações...',

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 /// Provider for managing license state and operations
 class LicenseProvider extends ChangeNotifier {
@@ -65,14 +65,11 @@ class LicenseProvider extends ChangeNotifier {
     try {
       final result = await _licenseService.getLicenseInfo();
 
-      result.fold(
-        (failure) => _setError(failure.toString()),
-        (info) {
-          _licenseInfo = info;
-          _error = null;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure.toString()), (info) {
+        _licenseInfo = info;
+        _error = null;
+        notifyListeners();
+      });
     } catch (e) {
       _setError('Erro ao obter informações da licença: $e');
     }
@@ -82,10 +79,7 @@ class LicenseProvider extends ChangeNotifier {
   Future<bool> canAccessFeature(PremiumFeature feature) async {
     try {
       final result = await _licenseService.canAccessFeature(feature);
-      return result.fold(
-        (failure) => false,
-        (canAccess) => canAccess,
-      );
+      return result.fold((failure) => false, (canAccess) => canAccess);
     } catch (e) {
       return false;
     }
@@ -199,10 +193,7 @@ class LicenseProvider extends ChangeNotifier {
   Future<String?> getExpirationWarning() async {
     try {
       final result = await _licenseService.getExpirationWarning();
-      return result.fold(
-        (failure) => null,
-        (warning) => warning,
-      );
+      return result.fold((failure) => null, (warning) => warning);
     } catch (e) {
       return null;
     }

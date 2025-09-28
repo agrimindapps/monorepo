@@ -95,13 +95,14 @@ class _TasksAppBarState extends State<TasksAppBar> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _FilterBottomSheet(
-        activeFilters: _activeFilters,
-        activeTaskTypes: _activeTaskTypes,
-        activePriorities: _activePriorities,
-        selectedPlantFilter: _selectedPlantFilter,
-        onFiltersChanged: _onFiltersChanged,
-      ),
+      builder:
+          (context) => _FilterBottomSheet(
+            activeFilters: _activeFilters,
+            activeTaskTypes: _activeTaskTypes,
+            activePriorities: _activePriorities,
+            selectedPlantFilter: _selectedPlantFilter,
+            onFiltersChanged: _onFiltersChanged,
+          ),
     );
   }
 
@@ -125,10 +126,9 @@ class _TasksAppBarState extends State<TasksAppBar> {
 
   void _applyAllFilters() {
     // Apply the primary filter (first active filter or all)
-    final primaryFilter = _activeFilters.isNotEmpty 
-        ? _activeFilters.first 
-        : TasksFilterType.all;
-    
+    final primaryFilter =
+        _activeFilters.isNotEmpty ? _activeFilters.first : TasksFilterType.all;
+
     context.read<TasksProvider>().setAdvancedFilters(
       filter: primaryFilter,
       plantId: _selectedPlantFilter,
@@ -155,10 +155,10 @@ class _TasksAppBarState extends State<TasksAppBar> {
   }
 
   int get _totalActiveFilters {
-    return _activeFilters.length + 
-           _activeTaskTypes.length + 
-           _activePriorities.length + 
-           (_selectedPlantFilter != null ? 1 : 0);
+    return _activeFilters.length +
+        _activeTaskTypes.length +
+        _activePriorities.length +
+        (_selectedPlantFilter != null ? 1 : 0);
   }
 
   @override
@@ -223,44 +223,53 @@ class _TasksAppBarState extends State<TasksAppBar> {
                   if (_totalActiveFilters > 0) _buildActiveFilterChips(theme),
                   // Quick filters
                   Container(
-                    padding: const EdgeInsets.only(left: 20, bottom: 16, top: 8),
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      bottom: 16,
+                      top: 8,
+                    ),
                     child: Row(
                       children: [
-                    Consumer<TasksProvider>(
-                      builder: (context, provider, child) {
-                        return Row(
-                          children: [
-                            // Para hoje button
-                            _FilterButton(
-                              text: AppStrings.todayQuickFilter,
-                              isSelected:
-                                  provider.currentFilter == TasksFilterType.today,
-                              onTap:
-                                  () => _handleFilterChange(
-                                    context,
-                                    TasksFilterType.today,
-                                  ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Próximas button
-                            _FilterButton(
-                              text: AppStrings.upcomingQuickFilterFormat
-                                  .replaceAll('%d', '${provider.upcomingTasksCount}'),
-                              isSelected:
-                                  provider.currentFilter == TasksFilterType.upcoming,
-                              onTap:
-                                  () => _handleFilterChange(
-                                    context,
-                                    TasksFilterType.upcoming,
-                                  ),
-                            ),
-                          ],
-                        );
-                      },
+                        Consumer<TasksProvider>(
+                          builder: (context, provider, child) {
+                            return Row(
+                              children: [
+                                // Para hoje button
+                                _FilterButton(
+                                  text: AppStrings.todayQuickFilter,
+                                  isSelected:
+                                      provider.currentFilter ==
+                                      TasksFilterType.today,
+                                  onTap:
+                                      () => _handleFilterChange(
+                                        context,
+                                        TasksFilterType.today,
+                                      ),
+                                ),
+                                const SizedBox(width: 16),
+                                // Próximas button
+                                _FilterButton(
+                                  text: AppStrings.upcomingQuickFilterFormat
+                                      .replaceAll(
+                                        '%d',
+                                        '${provider.upcomingTasksCount}',
+                                      ),
+                                  isSelected:
+                                      provider.currentFilter ==
+                                      TasksFilterType.upcoming,
+                                  onTap:
+                                      () => _handleFilterChange(
+                                        context,
+                                        TasksFilterType.upcoming,
+                                      ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
                 ],
               ),
             ),
@@ -275,11 +284,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
       builder: (context, provider, child) {
         return Row(
           children: [
-            Icon(
-              Icons.task_alt,
-              color: theme.colorScheme.primary,
-              size: 28,
-            ),
+            Icon(Icons.task_alt, color: theme.colorScheme.primary, size: 28),
             const SizedBox(width: 8),
             Text(
               AppStrings.tasksTitle,
@@ -292,16 +297,16 @@ class _TasksAppBarState extends State<TasksAppBar> {
             const Spacer(),
             // Badge with total tasks
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 border: Border.all(color: theme.colorScheme.secondary),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                AppStrings.totalTasksFormat.replaceAll('%d', '${provider.totalTasks}'),
+                AppStrings.totalTasksFormat.replaceAll(
+                  '%d',
+                  '${provider.totalTasks}',
+                ),
                 style: TextStyle(
                   color: theme.colorScheme.secondary,
                   fontSize: 14,
@@ -327,63 +332,62 @@ class _TasksAppBarState extends State<TasksAppBar> {
         border: InputBorder.none,
         contentPadding: EdgeInsets.zero,
       ),
-      style: TextStyle(
-        fontSize: 18,
-        color: theme.colorScheme.onSurface,
-      ),
+      style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurface),
     );
   }
 
   Widget _buildActiveFilterChips(ThemeData theme) {
     final allChips = <Widget>[];
-    
+
     // Filter chips
     for (final filter in _activeFilters) {
-      allChips.add(_buildFilterChip(
-        filter.displayName,
-        () => _removeFilter(filter),
-        theme,
-      ));
+      allChips.add(
+        _buildFilterChip(
+          filter.displayName,
+          () => _removeFilter(filter),
+          theme,
+        ),
+      );
     }
-    
+
     // Task type chips
     for (final taskType in _activeTaskTypes) {
-      allChips.add(_buildFilterChip(
-        TaskDisplayUtils.getTaskTypeName(taskType),
-        () => _removeTaskType(taskType),
-        theme,
-      ));
+      allChips.add(
+        _buildFilterChip(
+          TaskDisplayUtils.getTaskTypeName(taskType),
+          () => _removeTaskType(taskType),
+          theme,
+        ),
+      );
     }
-    
+
     // Priority chips
     for (final priority in _activePriorities) {
-      allChips.add(_buildFilterChip(
-        TaskDisplayUtils.getPriorityName(priority),
-        () => _removePriority(priority),
-        theme,
-      ));
+      allChips.add(
+        _buildFilterChip(
+          TaskDisplayUtils.getPriorityName(priority),
+          () => _removePriority(priority),
+          theme,
+        ),
+      );
     }
-    
+
     // Plant filter chip
     if (_selectedPlantFilter != null) {
-      allChips.add(_buildFilterChip(
-        'Planta: $_selectedPlantFilter',
-        () => _removePlantFilter(),
-        theme,
-      ));
+      allChips.add(
+        _buildFilterChip(
+          'Planta: $_selectedPlantFilter',
+          () => _removePlantFilter(),
+          theme,
+        ),
+      );
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Expanded(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: allChips,
-            ),
-          ),
+          Expanded(child: Wrap(spacing: 8, runSpacing: 4, children: allChips)),
           if (_totalActiveFilters > 0)
             TextButton(
               onPressed: _clearAllFilters,
@@ -394,7 +398,11 @@ class _TasksAppBarState extends State<TasksAppBar> {
     );
   }
 
-  Widget _buildFilterChip(String label, VoidCallback onRemove, ThemeData theme) {
+  Widget _buildFilterChip(
+    String label,
+    VoidCallback onRemove,
+    ThemeData theme,
+  ) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.primary,
@@ -416,7 +424,12 @@ class _TasksAppBarState extends State<TasksAppBar> {
           GestureDetector(
             onTap: onRemove,
             child: Padding(
-              padding: const EdgeInsets.only(left: 4, right: 8, top: 6, bottom: 6),
+              padding: const EdgeInsets.only(
+                left: 4,
+                right: 8,
+                top: 6,
+                bottom: 6,
+              ),
               child: Icon(
                 Icons.close,
                 size: 16,
@@ -520,7 +533,8 @@ class _FilterBottomSheet extends StatefulWidget {
     List<task_entity.TaskType>? taskTypes,
     List<task_entity.TaskPriority>? priorities,
     String? plantFilter,
-  }) onFiltersChanged;
+  })
+  onFiltersChanged;
 
   const _FilterBottomSheet({
     required this.activeFilters,
@@ -561,7 +575,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
@@ -615,7 +629,9 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                   children: [
                     _buildFilterSection(
                       AppStrings.taskStatusSection,
-                      TasksFilterType.values.where((f) => f != TasksFilterType.byPlant),
+                      TasksFilterType.values.where(
+                        (f) => f != TasksFilterType.byPlant,
+                      ),
                       _tempFilters,
                       (filter) => _toggleFilter(filter),
                       (filter) => filter.displayName,
@@ -668,7 +684,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     String Function(T) getName,
   ) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -684,14 +700,15 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: options.map((option) {
-            final isSelected = selectedItems.contains(option);
-            return _buildFilterChipButton(
-              getName(option),
-              isSelected,
-              () => onToggle(option),
-            );
-          }).toList(),
+          children:
+              options.map((option) {
+                final isSelected = selectedItems.contains(option);
+                return _buildFilterChipButton(
+                  getName(option),
+                  isSelected,
+                  () => onToggle(option),
+                );
+              }).toList(),
         ),
       ],
     );
@@ -699,7 +716,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
 
   Widget _buildPlantFilterSection() {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -716,21 +733,23 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
           controller: _plantFilterController,
           decoration: InputDecoration(
             hintText: AppStrings.plantNameHint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            suffixIcon: _tempPlantFilter != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _tempPlantFilter = null;
-                        _plantFilterController.clear();
-                      });
-                    },
-                  )
-                : null,
+            suffixIcon:
+                _tempPlantFilter != null
+                    ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _tempPlantFilter = null;
+                          _plantFilterController.clear();
+                        });
+                      },
+                    )
+                    : null,
           ),
           onChanged: (value) {
             setState(() {
@@ -742,30 +761,37 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     );
   }
 
-  Widget _buildFilterChipButton(String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildFilterChipButton(
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     final theme = Theme.of(context);
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? theme.colorScheme.primary
-              : theme.colorScheme.surfaceContainerHighest,
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected 
-                ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.3),
+            color:
+                isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected 
-                ? theme.colorScheme.onPrimary
-                : theme.colorScheme.onSurface,
+            color:
+                isSelected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurface,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

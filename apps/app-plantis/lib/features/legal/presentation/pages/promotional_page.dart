@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
@@ -26,21 +26,22 @@ class _PromotionalPageState extends State<PromotionalPage>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
 
     _animationController.forward();
   }
@@ -180,37 +181,43 @@ class _PromotionalPageState extends State<PromotionalPage>
       {
         'icon': Icons.cloud_sync,
         'title': 'Sincronização na Nuvem',
-        'description': 'Mantenha seus dados seguros e sincronizados entre todos os seus dispositivos',
+        'description':
+            'Mantenha seus dados seguros e sincronizados entre todos os seus dispositivos',
         'color': PlantisColors.water,
       },
       {
         'icon': Icons.analytics,
         'title': 'Relatórios Avançados',
-        'description': 'Análises detalhadas do desenvolvimento das suas plantas com gráficos interativos',
+        'description':
+            'Análises detalhadas do desenvolvimento das suas plantas com gráficos interativos',
         'color': PlantisColors.leaf,
       },
       {
         'icon': Icons.notifications_active,
         'title': 'Lembretes Inteligentes',
-        'description': 'Sistema de notificações personalizáveis baseado no tipo e necessidades de cada planta',
+        'description':
+            'Sistema de notificações personalizáveis baseado no tipo e necessidades de cada planta',
         'color': PlantisColors.flower,
       },
       {
         'icon': Icons.backup,
         'title': 'Backup Automático',
-        'description': 'Nunca perca suas informações com backup automático e restauração fácil',
+        'description':
+            'Nunca perca suas informações com backup automático e restauração fácil',
         'color': PlantisColors.soil,
       },
       {
         'icon': Icons.camera_enhance,
         'title': 'Galeria Ilimitada',
-        'description': 'Armazene quantas fotos quiser das suas plantas com qualidade HD',
+        'description':
+            'Armazene quantas fotos quiser das suas plantas com qualidade HD',
         'color': PlantisColors.sun,
       },
       {
         'icon': Icons.support_agent,
         'title': 'Suporte Prioritário',
-        'description': 'Atendimento preferencial e suporte técnico especializado em plantas',
+        'description':
+            'Atendimento preferencial e suporte técnico especializado em plantas',
         'color': PlantisColors.primary,
       },
     ];
@@ -237,7 +244,9 @@ class _PromotionalPageState extends State<PromotionalPage>
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: (feature['color'] as Color).withValues(alpha: 0.3),
@@ -310,7 +319,10 @@ class _PromotionalPageState extends State<PromotionalPage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: PlantisColors.flower,
                   borderRadius: BorderRadius.circular(20),
@@ -400,11 +412,7 @@ class _PromotionalPageState extends State<PromotionalPage>
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.eco,
-                color: PlantisColors.leaf,
-                size: 28,
-              ),
+              const Icon(Icons.eco, color: PlantisColors.leaf, size: 28),
               const SizedBox(width: 12),
               Text(
                 'Por que escolher o Premium?',
@@ -490,12 +498,14 @@ class _PromotionalPageState extends State<PromotionalPage>
     final testimonials = [
       {
         'name': 'Maria Silva',
-        'text': 'O Plantis Premium transformou minha experiência! Minhas plantas nunca estiveram tão saudáveis.',
+        'text':
+            'O Plantis Premium transformou minha experiência! Minhas plantas nunca estiveram tão saudáveis.',
         'rating': 5,
       },
       {
         'name': 'João Santos',
-        'text': 'Os relatórios avançados me ajudaram a entender melhor as necessidades das minhas plantas.',
+        'text':
+            'Os relatórios avançados me ajudaram a entender melhor as necessidades das minhas plantas.',
         'rating': 5,
       },
     ];
@@ -524,7 +534,9 @@ class _PromotionalPageState extends State<PromotionalPage>
                 margin: const EdgeInsets.only(right: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: PlantisColors.primary.withValues(alpha: 0.2),
@@ -603,11 +615,7 @@ class _PromotionalPageState extends State<PromotionalPage>
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.rocket_launch,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                Icon(Icons.rocket_launch, color: Colors.white, size: 24),
                 SizedBox(width: 12),
                 Text(
                   'Começar Teste Gratuito',
@@ -717,7 +725,7 @@ class _PromotionalPageState extends State<PromotionalPage>
 
   void _handleSubscription(BuildContext context) {
     final premiumProvider = context.read<PremiumProvider?>();
-    
+
     if (premiumProvider == null) {
       _showSubscriptionConfirmation(context);
       return;
@@ -725,81 +733,87 @@ class _PromotionalPageState extends State<PromotionalPage>
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Iniciar Teste Premium',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Você está prestes a iniciar seu teste gratuito de 7 dias do Plantis Premium.',
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Iniciar Teste Premium',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: PlantisColors.leaf.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '✨ Seus benefícios incluem:',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Você está prestes a iniciar seu teste gratuito de 7 dias do Plantis Premium.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '• Sincronização na nuvem\n• Backup automático\n• Relatórios avançados\n• Suporte prioritário',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                    ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.leaf.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '✨ Seus benefícios incluem:',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '• Sincronização na nuvem\n• Backup automático\n• Relatórios avançados\n• Suporte prioritário',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _startPremiumTrial(context, premiumProvider);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Iniciar Teste'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _startPremiumTrial(context, premiumProvider);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Iniciar Teste'),
-          ),
-        ],
-      ),
     );
   }
 
-  void _startPremiumTrial(BuildContext context, PremiumProvider premiumProvider) async {
+  void _startPremiumTrial(
+    BuildContext context,
+    PremiumProvider premiumProvider,
+  ) async {
     // Try to purchase the first available product (trial)
     if (premiumProvider.availableProducts.isNotEmpty) {
       final firstProduct = premiumProvider.availableProducts.first;
-      final success = await premiumProvider.purchaseProduct(firstProduct.productId);
-      
+      final success = await premiumProvider.purchaseProduct(
+        firstProduct.productId,
+      );
+
       if (success && context.mounted) {
         _showSuccessMessage(context, 'Teste premium iniciado com sucesso!');
       } else if (context.mounted) {
@@ -828,7 +842,9 @@ class _PromotionalPageState extends State<PromotionalPage>
   void _showSubscriptionConfirmation(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Funcionalidade em desenvolvimento! Em breve você poderá assinar o premium.'),
+        content: const Text(
+          'Funcionalidade em desenvolvimento! Em breve você poderá assinar o premium.',
+        ),
         backgroundColor: PlantisColors.primary,
         behavior: SnackBarBehavior.floating,
         action: SnackBarAction(
@@ -843,103 +859,93 @@ class _PromotionalPageState extends State<PromotionalPage>
   void _showMoreInfo(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          'Sobre o Plantis Premium',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'O Plantis Premium oferece recursos avançados para jardineiros que querem levar o cuidado das plantas ao próximo nível.',
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '🌱 Recursos Inclusos:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '• Plantas ilimitadas\n'
-                '• Lembretes inteligentes personalizados\n'
-                '• Backup automático na nuvem\n'
-                '• Análises detalhadas de crescimento\n'
-                '• Identificação de plantas por IA\n'
-                '• Diagnóstico de doenças\n'
-                '• Temas personalizados\n'
-                '• Suporte prioritário 24/7',
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '💡 Por que Premium?',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Com o Premium, suas plantas ficam mais saudáveis através de cuidados baseados em dados científicos e tecnologia avançada.',
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: PlantisColors.leaf.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: PlantisColors.leaf.withValues(alpha: 0.3),
+      builder:
+          (context) => AlertDialog(
+            title: const Text(
+              'Sobre o Plantis Premium',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'O Plantis Premium oferece recursos avançados para jardineiros que querem levar o cuidado das plantas ao próximo nível.',
+                    style: TextStyle(fontSize: 16),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.security,
-                      color: PlantisColors.leaf,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Teste grátis por 7 dias, depois R\$ 12,90/mês. Cancele a qualquer momento.',
-                        style: TextStyle(
-                          color: PlantisColors.leaf.withValues(alpha: 0.8),
-                          fontSize: 12,
-                        ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '🌱 Recursos Inclusos:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '• Plantas ilimitadas\n'
+                    '• Lembretes inteligentes personalizados\n'
+                    '• Backup automático na nuvem\n'
+                    '• Análises detalhadas de crescimento\n'
+                    '• Identificação de plantas por IA\n'
+                    '• Diagnóstico de doenças\n'
+                    '• Temas personalizados\n'
+                    '• Suporte prioritário 24/7',
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '💡 Por que Premium?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Com o Premium, suas plantas ficam mais saudáveis através de cuidados baseados em dados científicos e tecnologia avançada.',
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: PlantisColors.leaf.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: PlantisColors.leaf.withValues(alpha: 0.3),
                       ),
                     ),
-                  ],
+                    child: Row(
+                      children: [
+                        const Icon(Icons.security, color: PlantisColors.leaf),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Teste grátis por 7 dias, depois R\$ 12,90/mês. Cancele a qualquer momento.',
+                            style: TextStyle(
+                              color: PlantisColors.leaf.withValues(alpha: 0.8),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _handleSubscription(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.primary,
+                  foregroundColor: Colors.white,
                 ),
+                child: const Text('Iniciar Teste'),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _handleSubscription(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Iniciar Teste'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -947,88 +953,86 @@ class _PromotionalPageState extends State<PromotionalPage>
     // Show sharing dialog with app information
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          'Compartilhar Plantis',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Ajude seus amigos a cuidarem melhor das plantas deles!',
-              style: TextStyle(fontSize: 16),
+      builder:
+          (context) => AlertDialog(
+            title: const Text(
+              'Compartilhar Plantis',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: PlantisColors.leaf.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: PlantisColors.leaf.withValues(alpha: 0.3),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ajude seus amigos a cuidarem melhor das plantas deles!',
+                  style: TextStyle(fontSize: 16),
                 ),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Plantis - Cuidado de Plantas',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.leaf.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: PlantisColors.leaf.withValues(alpha: 0.3),
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Cuide das suas plantas com amor e tecnologia. O melhor app para jardineiros iniciantes e experientes!',
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Plantis - Cuidado de Plantas',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Cuide das suas plantas com amor e tecnologia. O melhor app para jardineiros iniciantes e experientes!',
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '• Lembretes inteligentes\n'
+                        '• Diário visual das plantas\n'
+                        '• Dicas personalizadas\n'
+                        '• Organização por espaços',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    '• Lembretes inteligentes\n'
-                    '• Diário visual das plantas\n'
-                    '• Dicas personalizadas\n'
-                    '• Organização por espaços',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Copie o texto acima e compartilhe onde quiser!',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Obrigado por compartilhar o Plantis! 🌱'),
-                  backgroundColor: PlantisColors.success,
-                  behavior: SnackBarBehavior.floating,
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.primary,
-              foregroundColor: Colors.white,
+                const SizedBox(height: 16),
+                const Text(
+                  'Copie o texto acima e compartilhe onde quiser!',
+                  style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                ),
+              ],
             ),
-            child: const Text('Compartilhar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Obrigado por compartilhar o Plantis! 🌱'),
+                      backgroundColor: PlantisColors.success,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Compartilhar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

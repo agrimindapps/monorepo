@@ -17,7 +17,8 @@ class EnhancedPlantisNotificationService {
   EnhancedPlantisNotificationService._internal();
 
   // Enhanced notification service from core
-  final IEnhancedNotificationRepository _enhancedService = EnhancedNotificationService();
+  final IEnhancedNotificationRepository _enhancedService =
+      EnhancedNotificationService();
 
   // Plant care plugin
   late PlantCareNotificationPlugin _plantCarePlugin;
@@ -30,7 +31,8 @@ class EnhancedPlantisNotificationService {
 
     try {
       // Initialize enhanced notification service with proper casting
-      final enhancedServiceImpl = _enhancedService as EnhancedNotificationService;
+      final enhancedServiceImpl =
+          _enhancedService as EnhancedNotificationService;
       final coreInitialized = await enhancedServiceImpl.initialize(
         defaultChannels: PlantisNotificationConfig.plantisChannels,
         settings: const EnhancedNotificationSettings(
@@ -48,7 +50,9 @@ class EnhancedPlantisNotificationService {
 
       // Initialize and register plant care plugin
       _plantCarePlugin = PlantCareNotificationPlugin();
-      final pluginRegistered = await _enhancedService.registerPlugin(_plantCarePlugin);
+      final pluginRegistered = await _enhancedService.registerPlugin(
+        _plantCarePlugin,
+      );
 
       if (!pluginRegistered) {
         if (kDebugMode) {
@@ -60,13 +64,17 @@ class EnhancedPlantisNotificationService {
       _isInitialized = true;
 
       if (kDebugMode) {
-        debugPrint('✅ EnhancedPlantisNotificationService initialized successfully');
+        debugPrint(
+          '✅ EnhancedPlantisNotificationService initialized successfully',
+        );
       }
 
       return true;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Error initializing EnhancedPlantisNotificationService: $e');
+        debugPrint(
+          '❌ Error initializing EnhancedPlantisNotificationService: $e',
+        );
       }
       return false;
     }
@@ -108,7 +116,9 @@ class EnhancedPlantisNotificationService {
   Future<void> initializeAllNotifications() async {
     // Na nova implementação, isso é feito sob demanda
     if (kDebugMode) {
-      debugPrint('🔄 Enhanced service: initializeAllNotifications - usando agendamento sob demanda');
+      debugPrint(
+        '🔄 Enhanced service: initializeAllNotifications - usando agendamento sob demanda',
+      );
     }
   }
 
@@ -124,7 +134,9 @@ class EnhancedPlantisNotificationService {
       // TODO: Implement logic to identify overdue tasks
       // This would typically involve checking plant care schedules
       if (kDebugMode) {
-        debugPrint('🔍 Enhanced service: checking overdue tasks - ${analytics.totalScheduled} notifications tracked');
+        debugPrint(
+          '🔍 Enhanced service: checking overdue tasks - ${analytics.totalScheduled} notifications tracked',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -171,12 +183,14 @@ class EnhancedPlantisNotificationService {
         pluginId: 'plant_care',
       );
 
-      final taskNotifications = notifications
-          .where((n) =>
-              n.data['task_id'] == taskId ||
-              n.data['plant_id'] == taskId)
-          .map((n) => n.id)
-          .toList();
+      final taskNotifications =
+          notifications
+              .where(
+                (n) =>
+                    n.data['task_id'] == taskId || n.data['plant_id'] == taskId,
+              )
+              .map((n) => n.id)
+              .toList();
 
       if (taskNotifications.isNotEmpty) {
         await _enhancedService.cancelBatch(taskNotifications);
@@ -198,10 +212,7 @@ class EnhancedPlantisNotificationService {
       title: '🌱 Nova planta adicionada!',
       body: message ?? 'Você adicionou $plantName ao seu jardim',
       type: 'new_plant',
-      extraData: {
-        'plantName': plantName,
-        'plantType': plantType,
-      },
+      extraData: {'plantName': plantName, 'plantType': plantType},
     );
   }
 
@@ -222,7 +233,9 @@ class EnhancedPlantisNotificationService {
   /// Agenda cuidados diários para todas as plantas (compatibilidade) (Legacy API)
   Future<void> scheduleDailyCareForAllPlants() async {
     if (kDebugMode) {
-      debugPrint('🔄 Enhanced service: scheduleDailyCareForAllPlants - usando agendamento individual por planta');
+      debugPrint(
+        '🔄 Enhanced service: scheduleDailyCareForAllPlants - usando agendamento individual por planta',
+      );
     }
     // TODO: Implement bulk scheduling for all plants
     // This would typically iterate through all plants and schedule their care
@@ -471,12 +484,17 @@ class EnhancedPlantisNotificationService {
   }
 
   /// Lista notificações de uma planta específica
-  Future<List<ScheduledNotification>> getPlantNotifications(String plantId) async {
+  Future<List<ScheduledNotification>> getPlantNotifications(
+    String plantId,
+  ) async {
     return await _plantCarePlugin.getPlantNotifications(plantId);
   }
 
   /// Verifica se uma notificação específica está agendada
-  Future<bool> isPlantNotificationScheduled(String plantId, String careType) async {
+  Future<bool> isPlantNotificationScheduled(
+    String plantId,
+    String careType,
+  ) async {
     try {
       final plantNotifications = await getPlantNotifications(plantId);
       return plantNotifications.any((n) => n.data['care_type'] == careType);
@@ -543,7 +561,10 @@ class EnhancedPlantisNotificationService {
       // Note: We pass the enhanced service and a dummy legacy service since we'll handle
       // the migration manually using the PlantisNotificationService public API
       final dummyLegacyService = LocalNotificationService();
-      final migrationHelper = NotificationMigrationHelper(_enhancedService, dummyLegacyService);
+      final migrationHelper = NotificationMigrationHelper(
+        _enhancedService,
+        dummyLegacyService,
+      );
 
       // Use the helper's migration method directly
       return await migrationHelper.migrateAllNotifications();
@@ -581,7 +602,9 @@ class EnhancedPlantisNotificationService {
     final cutoff = olderThan ?? const Duration(days: 90);
 
     if (kDebugMode) {
-      debugPrint('🧹 Would clear analytics data older than ${cutoff.inDays} days');
+      debugPrint(
+        '🧹 Would clear analytics data older than ${cutoff.inDays} days',
+      );
     }
   }
 
@@ -600,9 +623,12 @@ class EnhancedPlantisNotificationService {
 
     final newSettings = EnhancedNotificationSettings(
       enableAnalytics: enableAnalytics ?? currentSettings.enableAnalytics,
-      enableSmartScheduling: enableSmartScheduling ?? currentSettings.enableSmartScheduling,
-      defaultSnoozeInterval: defaultSnoozeInterval ?? currentSettings.defaultSnoozeInterval,
-      maxNotificationsPerDay: maxNotificationsPerDay ?? currentSettings.maxNotificationsPerDay,
+      enableSmartScheduling:
+          enableSmartScheduling ?? currentSettings.enableSmartScheduling,
+      defaultSnoozeInterval:
+          defaultSnoozeInterval ?? currentSettings.defaultSnoozeInterval,
+      maxNotificationsPerDay:
+          maxNotificationsPerDay ?? currentSettings.maxNotificationsPerDay,
       enableDebugLogs: currentSettings.enableDebugLogs,
     );
 
@@ -640,4 +666,3 @@ extension LegacyCompatibility on EnhancedPlantisNotificationService {
     }
   }
 }
-

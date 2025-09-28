@@ -39,7 +39,9 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
         return tasksData
             .map<TaskModel>((data) {
               // Safe cast to handle LinkedMap and other Map types
-              final Map<String, dynamic> taskMap = Map<String, dynamic>.from(data as Map);
+              final Map<String, dynamic> taskMap = Map<String, dynamic>.from(
+                data as Map,
+              );
               return TaskModel.fromJson(taskMap);
             })
             .where((task) => !task.isDeleted)

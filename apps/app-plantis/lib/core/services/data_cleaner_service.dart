@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
@@ -26,7 +25,8 @@ class DataCleanerService implements IAppDataCleaner {
   String get version => '1.0.0';
 
   @override
-  String get description => 'Limpeza de plantas, tarefas e dados relacionados do Plantis';
+  String get description =>
+      'Limpeza de plantas, tarefas e dados relacionados do Plantis';
 
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
@@ -59,13 +59,17 @@ class DataCleanerService implements IAppDataCleaner {
             try {
               await tasksRepository.deleteTask(task.id);
             } catch (e) {
-              (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+              (result['errors'] as List<String>).add(
+                'Erro ao deletar tarefa ${task.id}: $e',
+              );
             }
           }
         }
         (result['clearedBoxes'] as List<String>).add('tasks_box');
       } catch (e) {
-        (result['errors'] as List<String>).add('Erro ao limpar tasks localmente: $e');
+        (result['errors'] as List<String>).add(
+          'Erro ao limpar tasks localmente: $e',
+        );
       }
 
       // 2. Limpar todas as plantas individualmente (limpeza local sem soft delete)
@@ -77,13 +81,17 @@ class DataCleanerService implements IAppDataCleaner {
             try {
               await deletePlantUseCase(plant.id);
             } catch (e) {
-              (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+              (result['errors'] as List<String>).add(
+                'Erro ao deletar planta ${plant.id}: $e',
+              );
             }
           }
         }
         (result['clearedBoxes'] as List<String>).add('plants_box');
       } catch (e) {
-        (result['errors'] as List<String>).add('Erro ao limpar plants localmente: $e');
+        (result['errors'] as List<String>).add(
+          'Erro ao limpar plants localmente: $e',
+        );
       }
 
       // 3. Limpar todos os espaços individualmente (limpeza local sem soft delete)
@@ -95,13 +103,17 @@ class DataCleanerService implements IAppDataCleaner {
             try {
               await spacesRepository.deleteSpace(space.id);
             } catch (e) {
-              (result['errors'] as List<String>).add('Erro ao deletar espaço ${space.id}: $e');
+              (result['errors'] as List<String>).add(
+                'Erro ao deletar espaço ${space.id}: $e',
+              );
             }
           }
         }
         (result['clearedBoxes'] as List<String>).add('spaces_box');
       } catch (e) {
-        (result['errors'] as List<String>).add('Erro ao limpar spaces localmente: $e');
+        (result['errors'] as List<String>).add(
+          'Erro ao limpar spaces localmente: $e',
+        );
       }
 
       result['totalRecordsCleared'] = totalBefore;
@@ -137,7 +149,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await tasksRepository.deleteTask(task.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar tarefa ${task.id}: $e',
+            );
           }
         }
         (result['clearedBoxes'] as List<String>).add('tasks_box');
@@ -151,7 +165,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await deletePlantUseCase(plant.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar planta ${plant.id}: $e',
+            );
           }
         }
         (result['clearedBoxes'] as List<String>).add('plants_box');
@@ -263,7 +279,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await deletePlantUseCase(plant.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar planta ${plant.id}: $e',
+            );
           }
         }
         result['totalRecordsCleared'] = plants.length;
@@ -294,7 +312,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await tasksRepository.deleteTask(task.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar tarefa ${task.id}: $e',
+            );
           }
         }
         result['totalRecordsCleared'] = tasks.length;
@@ -334,7 +354,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await tasksRepository.deleteTask(task.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar tarefa ${task.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar tarefa ${task.id}: $e',
+            );
           }
         }
         result['tasksCleaned'] = tasks.length;
@@ -350,7 +372,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await deletePlantUseCase(plant.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar planta ${plant.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar planta ${plant.id}: $e',
+            );
           }
         }
         result['plantsCleaned'] = plants.length;
@@ -366,7 +390,9 @@ class DataCleanerService implements IAppDataCleaner {
           try {
             await spacesRepository.deleteSpace(space.id);
           } catch (e) {
-            (result['errors'] as List<String>).add('Erro ao deletar espaço ${space.id}: $e');
+            (result['errors'] as List<String>).add(
+              'Erro ao deletar espaço ${space.id}: $e',
+            );
           }
         }
         result['spacesCleaned'] = spaces.length;

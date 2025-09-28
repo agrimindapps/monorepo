@@ -13,13 +13,13 @@ class DeviceTileWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const DeviceTileWidget({
-    Key? key,
+    super.key,
     required this.device,
     this.isCurrentDevice = false,
     this.isBeingRevoked = false,
     this.onRevoke,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +28,10 @@ class DeviceTileWidget extends StatelessWidget {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isCurrentDevice
-            ? BorderSide(
-                color: Theme.of(context).primaryColor,
-                width: 2,
-              )
-            : BorderSide.none,
+        side:
+            isCurrentDevice
+                ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
+                : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap,
@@ -106,7 +104,8 @@ class DeviceTileWidget extends StatelessWidget {
                           device.model,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                            color: Theme.of(context).textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.7),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -134,7 +133,9 @@ class DeviceTileWidget extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Color(
-                        int.parse(device.statusColorHex.replaceFirst('#', '0xFF'))
+                        int.parse(
+                          device.statusColorHex.replaceFirst('#', '0xFF'),
+                        ),
                       ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -144,7 +145,9 @@ class DeviceTileWidget extends StatelessWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Color(
-                          int.parse(device.statusColorHex.replaceFirst('#', '0xFF'))
+                          int.parse(
+                            device.statusColorHex.replaceFirst('#', '0xFF'),
+                          ),
                         ),
                       ),
                     ),
@@ -230,20 +233,23 @@ class DeviceTileWidget extends StatelessWidget {
       },
       icon: Icon(
         Icons.more_vert,
-        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+        color: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
       ),
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'revoke',
-          child: ListTile(
-            leading: Icon(Icons.block, color: Colors.red),
-            title: Text('Revogar'),
-            subtitle: Text('Desconectar dispositivo'),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-      ],
+      itemBuilder:
+          (context) => [
+            const PopupMenuItem(
+              value: 'revoke',
+              child: ListTile(
+                leading: Icon(Icons.block, color: Colors.red),
+                title: Text('Revogar'),
+                subtitle: Text('Desconectar dispositivo'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
     );
   }
 
@@ -273,10 +279,10 @@ class DeviceTileWidget extends StatelessWidget {
       return 'há ${difference.inDays}d';
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return weeks == 1 ? 'há 1 semana' : 'há ${weeks} semanas';
+      return weeks == 1 ? 'há 1 semana' : 'há $weeks semanas';
     } else if (difference.inDays < 365) {
       final months = (difference.inDays / 30).floor();
-      return months == 1 ? 'há 1 mês' : 'há ${months} meses';
+      return months == 1 ? 'há 1 mês' : 'há $months meses';
     } else {
       // Para atividades muito antigas, mostra data
       return DateFormat('dd/MM/yyyy').format(device.lastActiveAt);

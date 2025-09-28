@@ -20,9 +20,9 @@ enum SyncErrorType {
 
 /// Severidade dos erros para priorização do tratamento
 enum SyncErrorSeverity {
-  low,    // Continuar operação normalmente
+  low, // Continuar operação normalmente
   medium, // Mostrar aviso mas continuar
-  high,   // Requer ação do usuário
+  high, // Requer ação do usuário
   critical, // Bloquear operação
 }
 
@@ -90,7 +90,8 @@ class SyncError {
       severity = SyncErrorSeverity.high;
       userMessage = 'Erro ao salvar dados localmente';
       recovery = SyncRecoveryStrategy.requireUserAction;
-    } else if (error.toString().contains('authentication') || error.toString().contains('auth')) {
+    } else if (error.toString().contains('authentication') ||
+        error.toString().contains('auth')) {
       type = SyncErrorType.authentication;
       severity = SyncErrorSeverity.high;
       userMessage = 'Faça login novamente para sincronizar';
@@ -105,7 +106,8 @@ class SyncError {
       severity = SyncErrorSeverity.low;
       userMessage = 'Operação demorou mais que o esperado';
       recovery = SyncRecoveryStrategy.retry;
-    } else if (error.toString().contains('quota') || error.toString().contains('limit')) {
+    } else if (error.toString().contains('quota') ||
+        error.toString().contains('limit')) {
       type = SyncErrorType.quota;
       severity = SyncErrorSeverity.high;
       userMessage = 'Limite de armazenamento atingido';
@@ -132,7 +134,8 @@ class SyncError {
   }
 
   @override
-  String toString() => 'SyncError(type: $type, severity: $severity, message: $message)';
+  String toString() =>
+      'SyncError(type: $type, severity: $severity, message: $message)';
 }
 
 /// Handler robusto para erros de sincronização
@@ -160,10 +163,11 @@ class SyncErrorHandler {
   Stream<SyncError> get errorStream => _errorController.stream;
   Stream<String> get recoveryStream => _recoveryController.stream;
   List<SyncError> get errorHistory => List.unmodifiable(_errorHistory);
-  
-  bool get hasRecentErrors => _errorHistory
-      .where((e) => DateTime.now().difference(e.timestamp).inMinutes < 5)
-      .isNotEmpty;
+
+  bool get hasRecentErrors =>
+      _errorHistory
+          .where((e) => DateTime.now().difference(e.timestamp).inMinutes < 5)
+          .isNotEmpty;
 
   /// Inicializa o handler
   void initialize() {
@@ -201,7 +205,9 @@ class SyncErrorHandler {
       final recovered = await _executeRecoveryStrategy(syncError, context);
 
       if (recovered) {
-        _recoveryController.add('Erro ${syncError.id} recuperado automaticamente');
+        _recoveryController.add(
+          'Erro ${syncError.id} recuperado automaticamente',
+        );
       }
 
       return recovered;
@@ -213,25 +219,25 @@ class SyncErrorHandler {
 
   /// Executa estratégia de recuperação baseada no tipo de erro
   Future<bool> _executeRecoveryStrategy(
-    SyncError syncError, 
+    SyncError syncError,
     BuildContext? context,
   ) async {
     switch (syncError.recoveryStrategy) {
       case SyncRecoveryStrategy.retry:
         return await _attemptRetry(syncError);
-      
+
       case SyncRecoveryStrategy.fallbackOffline:
         return _fallbackToOfflineMode(syncError);
-      
+
       case SyncRecoveryStrategy.skipItem:
         return _skipItem(syncError);
-      
+
       case SyncRecoveryStrategy.requireUserAction:
         if (context != null) {
           _showUserActionDialog(context, syncError);
         }
         return false;
-      
+
       case SyncRecoveryStrategy.none:
         return false;
     }
@@ -240,23 +246,30 @@ class SyncErrorHandler {
   /// Tenta retry com backoff exponencial
   Future<bool> _attemptRetry(SyncError syncError) async {
     final retries = _retryCount[syncError.id] ?? 0;
-    
+
     if (retries >= _maxRetries) {
-      developer.log('Máximo de tentativas atingido para erro ${syncError.id}', name: 'SyncErrorHandler');
+      developer.log(
+        'Máximo de tentativas atingido para erro ${syncError.id}',
+        name: 'SyncErrorHandler',
+      );
       return false;
     }
 
     _retryCount[syncError.id] = retries + 1;
-    
+
     // Backoff exponencial
     final delay = _retryBaseDelay * (2 << retries);
     await Future<void>.delayed(delay);
 
-    developer.log('Tentativa ${retries + 1}/$_maxRetries para erro ${syncError.id}', name: 'SyncErrorHandler');
-    
+    developer.log(
+      'Tentativa ${retries + 1}/$_maxRetries para erro ${syncError.id}',
+      name: 'SyncErrorHandler',
+    );
+
     // Aqui seria chamada a operação original novamente
     // Por simplicidade, consideramos que o retry foi bem-sucedido em alguns casos
-    if (syncError.type == SyncErrorType.network || syncError.type == SyncErrorType.timeout) {
+    if (syncError.type == SyncErrorType.network ||
+        syncError.type == SyncErrorType.timeout) {
       // Simular sucesso para erros de rede/timeout após algumas tentativas
       return retries > 0;
     }
@@ -266,20 +279,26 @@ class SyncErrorHandler {
 
   /// Fallback para modo offline
   bool _fallbackToOfflineMode(SyncError syncError) {
-    developer.log('Fallback para modo offline devido ao erro ${syncError.id}', name: 'SyncErrorHandler');
-    
+    developer.log(
+      'Fallback para modo offline devido ao erro ${syncError.id}',
+      name: 'SyncErrorHandler',
+    );
+
     // Notificar que operação continuará offline
     _recoveryController.add('Operação continuando offline');
-    
+
     return true; // Considera recuperado pois continuará offline
   }
 
   /// Pula item problemático
   bool _skipItem(SyncError syncError) {
-    developer.log('Item pulado devido ao erro ${syncError.id}', name: 'SyncErrorHandler');
-    
+    developer.log(
+      'Item pulado devido ao erro ${syncError.id}',
+      name: 'SyncErrorHandler',
+    );
+
     _recoveryController.add('Item com problema foi ignorado');
-    
+
     return true; // Considera recuperado pois continuará sem o item
   }
 
@@ -415,7 +434,7 @@ class SyncErrorHandler {
   /// Log estruturado do erro
   void _logError(SyncError syncError) {
     final logLevel = _getLogLevel(syncError.severity);
-    
+
     developer.log(
       'Erro de sincronização: ${syncError.message}',
       name: 'SyncErrorHandler',
@@ -451,21 +470,26 @@ class SyncErrorHandler {
   /// Suprime um erro específico
   void _suppressError(String errorId) {
     _suppressedErrors.add(errorId);
-    developer.log('Erro $errorId suprimido pelo usuário', name: 'SyncErrorHandler');
+    developer.log(
+      'Erro $errorId suprimido pelo usuário',
+      name: 'SyncErrorHandler',
+    );
   }
 
   /// Limpa histórico de erros antigos
   void _cleanupOldErrors() {
     final cutoff = DateTime.now().subtract(const Duration(hours: 24));
     _errorHistory.removeWhere((error) => error.timestamp.isBefore(cutoff));
-    
+
     // Limpar contadores de retry para erros antigos
-    _retryCount.removeWhere((id, _) => 
-        !_errorHistory.any((error) => error.id == id));
-    
+    _retryCount.removeWhere(
+      (id, _) => !_errorHistory.any((error) => error.id == id),
+    );
+
     // Limpar supressões antigas
-    _suppressedErrors.removeWhere((id) => 
-        !_errorHistory.any((error) => error.id == id));
+    _suppressedErrors.removeWhere(
+      (id) => !_errorHistory.any((error) => error.id == id),
+    );
   }
 
   /// Configura timer de limpeza
@@ -480,13 +504,14 @@ class SyncErrorHandler {
   /// Obtém estatísticas de erro
   Map<String, dynamic> getErrorStats() {
     final now = DateTime.now();
-    final last24h = _errorHistory
-        .where((e) => now.difference(e.timestamp).inHours < 24)
-        .toList();
-    
+    final last24h =
+        _errorHistory
+            .where((e) => now.difference(e.timestamp).inHours < 24)
+            .toList();
+
     final byType = <SyncErrorType, int>{};
     final bySeverity = <SyncErrorSeverity, int>{};
-    
+
     for (final error in last24h) {
       byType[error.type] = (byType[error.type] ?? 0) + 1;
       bySeverity[error.severity] = (bySeverity[error.severity] ?? 0) + 1;

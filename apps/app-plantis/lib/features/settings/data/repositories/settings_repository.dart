@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/repositories/i_settings_repository.dart';
@@ -11,20 +10,23 @@ class SettingsRepository implements ISettingsRepository {
   final SettingsLocalDataSource _localDataSource;
 
   SettingsRepository({required SettingsLocalDataSource localDataSource})
-      : _localDataSource = localDataSource;
+    : _localDataSource = localDataSource;
 
   @override
   Future<Either<Failure, SettingsEntity>> loadSettings() async {
     try {
       // Migra configurações legacy se necessário
       await _localDataSource.migrateFromLegacySettings();
-      
+
       final settingsData = await _localDataSource.loadSettings();
-      final settings = settingsData ?? data_models.SettingsData.defaultSettings();
-      
+      final settings =
+          settingsData ?? data_models.SettingsData.defaultSettings();
+
       return Right(_mapToEntity(settings));
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar configurações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao carregar configurações: ${e.toString()}'),
+      );
     }
   }
 
@@ -35,28 +37,42 @@ class SettingsRepository implements ISettingsRepository {
       await _localDataSource.saveSettings(settingsData);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao salvar configurações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao salvar configurações: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, NotificationSettingsEntity>> loadNotificationSettings() async {
+  Future<Either<Failure, NotificationSettingsEntity>>
+  loadNotificationSettings() async {
     try {
-      final notificationSettings = await _localDataSource.loadNotificationSettings();
+      final notificationSettings =
+          await _localDataSource.loadNotificationSettings();
       return Right(_mapNotificationToEntity(notificationSettings));
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar configurações de notificação: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          'Erro ao carregar configurações de notificação: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveNotificationSettings(NotificationSettingsEntity settings) async {
+  Future<Either<Failure, void>> saveNotificationSettings(
+    NotificationSettingsEntity settings,
+  ) async {
     try {
       final notificationSettings = _mapNotificationFromEntity(settings);
       await _localDataSource.saveNotificationSettings(notificationSettings);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao salvar configurações de notificação: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          'Erro ao salvar configurações de notificação: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -66,18 +82,26 @@ class SettingsRepository implements ISettingsRepository {
       final backupSettings = await _localDataSource.loadBackupSettings();
       return Right(_mapBackupToEntity(backupSettings));
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar configurações de backup: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          'Erro ao carregar configurações de backup: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveBackupSettings(BackupSettingsEntity settings) async {
+  Future<Either<Failure, void>> saveBackupSettings(
+    BackupSettingsEntity settings,
+  ) async {
     try {
       final backupSettings = _mapBackupFromEntity(settings);
       await _localDataSource.saveBackupSettings(backupSettings);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao salvar configurações de backup: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao salvar configurações de backup: ${e.toString()}'),
+      );
     }
   }
 
@@ -87,18 +111,24 @@ class SettingsRepository implements ISettingsRepository {
       final themeSettings = await _localDataSource.loadThemeSettings();
       return Right(_mapThemeToEntity(themeSettings));
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar configurações de tema: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao carregar configurações de tema: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveThemeSettings(ThemeSettingsEntity settings) async {
+  Future<Either<Failure, void>> saveThemeSettings(
+    ThemeSettingsEntity settings,
+  ) async {
     try {
       final themeSettings = _mapThemeFromEntity(settings);
       await _localDataSource.saveThemeSettings(themeSettings);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao salvar configurações de tema: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao salvar configurações de tema: ${e.toString()}'),
+      );
     }
   }
 
@@ -108,18 +138,26 @@ class SettingsRepository implements ISettingsRepository {
       final accountSettings = await _localDataSource.loadAccountSettings();
       return Right(_mapAccountToEntity(accountSettings));
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar configurações de conta: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          'Erro ao carregar configurações de conta: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveAccountSettings(AccountSettingsEntity settings) async {
+  Future<Either<Failure, void>> saveAccountSettings(
+    AccountSettingsEntity settings,
+  ) async {
     try {
       final accountSettings = _mapAccountFromEntity(settings);
       await _localDataSource.saveAccountSettings(accountSettings);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao salvar configurações de conta: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao salvar configurações de conta: ${e.toString()}'),
+      );
     }
   }
 
@@ -131,17 +169,24 @@ class SettingsRepository implements ISettingsRepository {
       await _localDataSource.saveSettings(defaultSettings);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao resetar configurações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao resetar configurações: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> migrateSettings({int? fromVersion, int? toVersion}) async {
+  Future<Either<Failure, void>> migrateSettings({
+    int? fromVersion,
+    int? toVersion,
+  }) async {
     try {
       await _localDataSource.migrateFromLegacySettings();
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao migrar configurações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao migrar configurações: ${e.toString()}'),
+      );
     }
   }
 
@@ -151,17 +196,23 @@ class SettingsRepository implements ISettingsRepository {
       final exportData = await _localDataSource.exportSettings();
       return Right(exportData);
     } catch (e) {
-      return Left(CacheFailure('Erro ao exportar configurações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao exportar configurações: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> importSettings(Map<String, dynamic> data) async {
+  Future<Either<Failure, void>> importSettings(
+    Map<String, dynamic> data,
+  ) async {
     try {
       await _localDataSource.importSettings(data);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao importar configurações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao importar configurações: ${e.toString()}'),
+      );
     }
   }
 
@@ -213,7 +264,9 @@ class SettingsRepository implements ISettingsRepository {
     );
   }
 
-  NotificationSettingsEntity _mapNotificationToEntity(data_models.NotificationSettings data) {
+  NotificationSettingsEntity _mapNotificationToEntity(
+    data_models.NotificationSettings data,
+  ) {
     return NotificationSettingsEntity(
       permissionsGranted: data.permissionsGranted,
       taskRemindersEnabled: data.taskRemindersEnabled,
@@ -225,7 +278,9 @@ class SettingsRepository implements ISettingsRepository {
     );
   }
 
-  data_models.NotificationSettings _mapNotificationFromEntity(NotificationSettingsEntity entity) {
+  data_models.NotificationSettings _mapNotificationFromEntity(
+    NotificationSettingsEntity entity,
+  ) {
     return data_models.NotificationSettings(
       permissionsGranted: entity.permissionsGranted,
       taskRemindersEnabled: entity.taskRemindersEnabled,
@@ -257,7 +312,9 @@ class SettingsRepository implements ISettingsRepository {
     );
   }
 
-  BackupFrequencyEntity _mapBackupFrequencyToEntity(data_models.BackupFrequency frequency) {
+  BackupFrequencyEntity _mapBackupFrequencyToEntity(
+    data_models.BackupFrequency frequency,
+  ) {
     switch (frequency) {
       case data_models.BackupFrequency.daily:
         return BackupFrequencyEntity.daily;
@@ -268,7 +325,9 @@ class SettingsRepository implements ISettingsRepository {
     }
   }
 
-  data_models.BackupFrequency _mapBackupFrequencyFromEntity(BackupFrequencyEntity frequency) {
+  data_models.BackupFrequency _mapBackupFrequencyFromEntity(
+    BackupFrequencyEntity frequency,
+  ) {
     switch (frequency) {
       case BackupFrequencyEntity.daily:
         return data_models.BackupFrequency.daily;
@@ -302,7 +361,9 @@ class SettingsRepository implements ISettingsRepository {
     );
   }
 
-  data_models.AccountSettings _mapAccountFromEntity(AccountSettingsEntity entity) {
+  data_models.AccountSettings _mapAccountFromEntity(
+    AccountSettingsEntity entity,
+  ) {
     return data_models.AccountSettings(
       isAnonymous: entity.isAnonymous,
       displayName: entity.displayName,

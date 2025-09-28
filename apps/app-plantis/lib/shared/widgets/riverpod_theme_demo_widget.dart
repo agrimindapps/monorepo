@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/riverpod_providers/theme_providers.dart';
 
@@ -44,8 +43,8 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                 Text(
                   'Migração Provider → Riverpod',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -67,7 +66,7 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                         SizedBox(width: 8),
-                        Text('Carregando configurações...')
+                        Text('Carregando configurações...'),
                       ],
                     ),
 
@@ -75,7 +74,9 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Row(
@@ -89,9 +90,11 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               riverpodError,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
                             ),
                           ),
                         ],
@@ -125,12 +128,14 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                           icon: const Icon(Icons.light_mode, size: 16),
                           label: const Text('Claro'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: riverpodThemeSettings.isLightMode
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                            foregroundColor: riverpodThemeSettings.isLightMode
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : null,
+                            backgroundColor:
+                                riverpodThemeSettings.isLightMode
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                            foregroundColor:
+                                riverpodThemeSettings.isLightMode
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : null,
                           ),
                         ),
                         ElevatedButton.icon(
@@ -138,12 +143,14 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                           icon: const Icon(Icons.dark_mode, size: 16),
                           label: const Text('Escuro'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: riverpodThemeSettings.isDarkMode
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                            foregroundColor: riverpodThemeSettings.isDarkMode
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : null,
+                            backgroundColor:
+                                riverpodThemeSettings.isDarkMode
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                            foregroundColor:
+                                riverpodThemeSettings.isDarkMode
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : null,
                           ),
                         ),
                         ElevatedButton.icon(
@@ -151,12 +158,14 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                           icon: const Icon(Icons.settings_brightness, size: 16),
                           label: const Text('Sistema'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: riverpodThemeSettings.followSystemTheme
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                            foregroundColor: riverpodThemeSettings.followSystemTheme
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : null,
+                            backgroundColor:
+                                riverpodThemeSettings.followSystemTheme
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                            foregroundColor:
+                                riverpodThemeSettings.followSystemTheme
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : null,
                           ),
                         ),
                       ],
@@ -174,9 +183,7 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
               title: '⚡ Providers de Conveniência',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildProviderDemo(context, ref),
-                ],
+                children: [_buildProviderDemo(context, ref)],
               ),
             ),
           ],
@@ -204,9 +211,9 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           child,
@@ -221,15 +228,12 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -273,9 +277,10 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
         '$label: ${value ? "✓" : "✗"}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      backgroundColor: value
-          ? Theme.of(context).colorScheme.primaryContainer
-          : Theme.of(context).colorScheme.surfaceContainerHighest,
+      backgroundColor:
+          value
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
       side: BorderSide.none,
     );
   }

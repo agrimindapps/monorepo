@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/data/models/backup_model.dart';
-import '../../../../core/services/backup_restore_service.dart' show RestoreOptions, RestoreMergeStrategy;
+import '../../../../core/services/backup_restore_service.dart'
+    show RestoreOptions, RestoreMergeStrategy;
 import '../../../../core/theme/plantis_colors.dart';
 
 /// Dialog para escolher opções de restauração do backup
@@ -116,11 +117,13 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               _buildRestoreOption(
                 icon: Icons.eco,
                 title: 'Plantas',
-                subtitle: '${widget.backup.metadata.plantsCount} plantas serão restauradas',
+                subtitle:
+                    '${widget.backup.metadata.plantsCount} plantas serão restauradas',
                 value: options.restorePlants,
-                onChanged: (value) => setState(() {
-                  options = options.copyWith(restorePlants: value ?? false);
-                }),
+                onChanged:
+                    (value) => setState(() {
+                      options = options.copyWith(restorePlants: value ?? false);
+                    }),
                 color: PlantisColors.leaf,
               ),
 
@@ -128,11 +131,13 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               _buildRestoreOption(
                 icon: Icons.task_alt,
                 title: 'Tarefas',
-                subtitle: '${widget.backup.metadata.tasksCount} tarefas serão restauradas',
+                subtitle:
+                    '${widget.backup.metadata.tasksCount} tarefas serão restauradas',
                 value: options.restoreTasks,
-                onChanged: (value) => setState(() {
-                  options = options.copyWith(restoreTasks: value);
-                }),
+                onChanged:
+                    (value) => setState(() {
+                      options = options.copyWith(restoreTasks: value);
+                    }),
                 color: PlantisColors.secondary,
               ),
 
@@ -140,11 +145,13 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               _buildRestoreOption(
                 icon: Icons.location_on,
                 title: 'Espaços',
-                subtitle: '${widget.backup.metadata.spacesCount} espaços serão restaurados',
+                subtitle:
+                    '${widget.backup.metadata.spacesCount} espaços serão restaurados',
                 value: options.restoreSpaces,
-                onChanged: (value) => setState(() {
-                  options = options.copyWith(restoreSpaces: value);
-                }),
+                onChanged:
+                    (value) => setState(() {
+                      options = options.copyWith(restoreSpaces: value);
+                    }),
                 color: PlantisColors.accent,
               ),
 
@@ -153,9 +160,10 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               title: 'Configurações',
               subtitle: 'Preferências e configurações do app',
               value: options.restoreSettings,
-              onChanged: (value) => setState(() {
-                options = options.copyWith(restoreSettings: value);
-              }),
+              onChanged:
+                  (value) => setState(() {
+                    options = options.copyWith(restoreSettings: value);
+                  }),
               color: PlantisColors.primary,
             ),
 
@@ -172,8 +180,8 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
             ),
             const SizedBox(height: 8),
 
-            ...RestoreMergeStrategy.values.map((strategy) => 
-              RadioListTile<RestoreMergeStrategy>(
+            ...RestoreMergeStrategy.values.map(
+              (strategy) => RadioListTile<RestoreMergeStrategy>(
                 title: Text(_getStrategyTitle(strategy)),
                 subtitle: Text(
                   _getStrategyDescription(strategy),
@@ -205,9 +213,7 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               decoration: BoxDecoration(
                 color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.orange.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,9 +245,12 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton.icon(
-          onPressed: _hasSelectedOptions() ? () {
-            widget.onRestore(options);
-          } : null,
+          onPressed:
+              _hasSelectedOptions()
+                  ? () {
+                    widget.onRestore(options);
+                  }
+                  : null,
           icon: const Icon(Icons.restore),
           label: const Text('Restaurar'),
           style: ElevatedButton.styleFrom(
@@ -254,7 +263,12 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
   }
 
   /// Constrói um badge de informação
-  Widget _buildInfoBadge(IconData icon, String count, String label, Color color) {
+  Widget _buildInfoBadge(
+    IconData icon,
+    String count,
+    String label,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
@@ -338,9 +352,9 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
 
   /// Verifica se pelo menos uma opção foi selecionada
   bool _hasSelectedOptions() {
-    return options.restorePlants || 
-           options.restoreTasks || 
-           options.restoreSpaces || 
-           options.restoreSettings;
+    return options.restorePlants ||
+        options.restoreTasks ||
+        options.restoreSpaces ||
+        options.restoreSettings;
   }
 }

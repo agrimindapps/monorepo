@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
@@ -12,10 +11,7 @@ class RevokeDeviceUseCase {
   final DeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
-  RevokeDeviceUseCase(
-    this._deviceRepository,
-    this._authStateNotifier,
-  );
+  RevokeDeviceUseCase(this._deviceRepository, this._authStateNotifier);
 
   /// Revoga um dispositivo específico
   Future<Either<Failure, void>> call(RevokeDeviceParams params) async {
@@ -27,85 +23,84 @@ class RevokeDeviceUseCase {
       // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
-        return const Left(
-          AuthFailure('Usuário não autenticado'),
-        );
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
 
       // Verifica se o dispositivo existe
-      final deviceResult = await _deviceRepository.getDeviceByUuid(params.deviceUuid);
+      final deviceResult = await _deviceRepository.getDeviceByUuid(
+        params.deviceUuid,
+      );
 
-      return await deviceResult.fold(
-        (failure) => Left(failure),
-        (device) async {
-          if (device == null) {
-            if (kDebugMode) {
-              debugPrint('❌ RevokeDevice: Device not found');
-            }
-            return const Left(
-              NotFoundFailure(
-                'Dispositivo não encontrado',
-                code: 'DEVICE_NOT_FOUND',
-              ),
-            );
+      return await deviceResult.fold((failure) => Left(failure), (
+        device,
+      ) async {
+        if (device == null) {
+          if (kDebugMode) {
+            debugPrint('❌ RevokeDevice: Device not found');
           }
+          return const Left(
+            NotFoundFailure(
+              'Dispositivo não encontrado',
+              code: 'DEVICE_NOT_FOUND',
+            ),
+          );
+        }
 
-          if (!device.isActive) {
+        if (!device.isActive) {
+          if (kDebugMode) {
+            debugPrint('⚠️ RevokeDevice: Device already revoked');
+          }
+          return const Left(
+            ValidationFailure(
+              'Dispositivo já está revogado',
+              code: 'DEVICE_ALREADY_REVOKED',
+            ),
+          );
+        }
+
+        // Verifica se é o dispositivo atual (se deve impedir)
+        if (params.preventSelfRevoke) {
+          final currentDevice = await DeviceModel.fromCurrentDevice();
+          if (device.uuid == currentDevice.uuid) {
             if (kDebugMode) {
-              debugPrint('⚠️ RevokeDevice: Device already revoked');
+              debugPrint('❌ RevokeDevice: Cannot revoke current device');
             }
             return const Left(
               ValidationFailure(
-                'Dispositivo já está revogado',
-                code: 'DEVICE_ALREADY_REVOKED',
+                'Não é possível revogar o dispositivo atual',
+                code: 'CANNOT_REVOKE_CURRENT_DEVICE',
               ),
             );
           }
+        }
 
-          // Verifica se é o dispositivo atual (se deve impedir)
-          if (params.preventSelfRevoke) {
-            final currentDevice = await DeviceModel.fromCurrentDevice();
-            if (device.uuid == currentDevice.uuid) {
-              if (kDebugMode) {
-                debugPrint('❌ RevokeDevice: Cannot revoke current device');
-              }
-              return const Left(
-                ValidationFailure(
-                  'Não é possível revogar o dispositivo atual',
-                  code: 'CANNOT_REVOKE_CURRENT_DEVICE',
-                ),
-              );
+        // Executa a revogação
+        if (kDebugMode) {
+          debugPrint('🔐 RevokeDevice: Executing revocation');
+        }
+
+        final revokeResult = await _deviceRepository.revokeDevice(
+          userId: userId,
+          deviceUuid: params.deviceUuid,
+        );
+
+        return revokeResult.fold(
+          (failure) {
+            if (kDebugMode) {
+              debugPrint('❌ RevokeDevice: Revocation failed - $failure');
             }
-          }
-
-          // Executa a revogação
-          if (kDebugMode) {
-            debugPrint('🔐 RevokeDevice: Executing revocation');
-          }
-
-          final revokeResult = await _deviceRepository.revokeDevice(
-            userId: userId,
-            deviceUuid: params.deviceUuid,
-          );
-
-          return revokeResult.fold(
-            (failure) {
-              if (kDebugMode) {
-                debugPrint('❌ RevokeDevice: Revocation failed - $failure');
-              }
-              return Left(failure);
-            },
-            (_) {
-              if (kDebugMode) {
-                debugPrint('✅ RevokeDevice: Device revoked successfully');
-              }
-              return const Right(null);
-            },
-          );
-        },
-      );
+            return Left(failure);
+          },
+          (_) {
+            if (kDebugMode) {
+              debugPrint('✅ RevokeDevice: Device revoked successfully');
+            }
+            return const Right(null);
+          },
+        );
+      });
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ RevokeDevice: Unexpected error - $e');
@@ -126,13 +121,12 @@ class RevokeAllOtherDevicesUseCase {
   final DeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
-  RevokeAllOtherDevicesUseCase(
-    this._deviceRepository,
-    this._authStateNotifier,
-  );
+  RevokeAllOtherDevicesUseCase(this._deviceRepository, this._authStateNotifier);
 
   /// Revoga todos os outros dispositivos mantendo apenas o atual
-  Future<Either<Failure, RevokeAllResult>> call([RevokeAllOtherDevicesParams? params]) async {
+  Future<Either<Failure, RevokeAllResult>> call([
+    RevokeAllOtherDevicesParams? params,
+  ]) async {
     try {
       if (kDebugMode) {
         debugPrint('🔐 RevokeAllOther: Revoking all other devices');
@@ -141,9 +135,7 @@ class RevokeAllOtherDevicesUseCase {
       // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
-        return const Left(
-          AuthFailure('Usuário não autenticado'),
-        );
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
@@ -159,9 +151,12 @@ class RevokeAllOtherDevicesUseCase {
 
       // Obtém lista atual de dispositivos para contagem
       final devicesResult = await _deviceRepository.getUserDevices(userId);
-      final deviceCount = await devicesResult.fold(
+      final deviceCount = devicesResult.fold(
         (failure) => 0,
-        (devices) => devices.where((d) => d.isActive && d.uuid != currentDeviceUuid).length,
+        (devices) =>
+            devices
+                .where((d) => d.isActive && d.uuid != currentDeviceUuid)
+                .length,
       );
 
       if (deviceCount == 0) {
@@ -195,18 +190,18 @@ class RevokeAllOtherDevicesUseCase {
         },
         (_) {
           if (kDebugMode) {
-            debugPrint('✅ RevokeAllOther: All other devices revoked successfully');
+            debugPrint(
+              '✅ RevokeAllOther: All other devices revoked successfully',
+            );
           }
 
-          final message = deviceCount == 1
-              ? '1 dispositivo foi revogado'
-              : '$deviceCount dispositivos foram revogados';
+          final message =
+              deviceCount == 1
+                  ? '1 dispositivo foi revogado'
+                  : '$deviceCount dispositivos foram revogados';
 
           return Right(
-            RevokeAllResult(
-              revokedCount: deviceCount,
-              message: message,
-            ),
+            RevokeAllResult(revokedCount: deviceCount, message: message),
           );
         },
       );
@@ -247,10 +242,12 @@ class RevokeDeviceParams {
   }
 
   @override
-  int get hashCode => deviceUuid.hashCode ^ preventSelfRevoke.hashCode ^ reason.hashCode;
+  int get hashCode =>
+      deviceUuid.hashCode ^ preventSelfRevoke.hashCode ^ reason.hashCode;
 
   @override
-  String toString() => 'RevokeDeviceParams(deviceUuid: $deviceUuid, preventSelfRevoke: $preventSelfRevoke)';
+  String toString() =>
+      'RevokeDeviceParams(deviceUuid: $deviceUuid, preventSelfRevoke: $preventSelfRevoke)';
 }
 
 /// Parâmetros para RevokeAllOtherDevicesUseCase
@@ -258,10 +255,7 @@ class RevokeAllOtherDevicesParams {
   final String? currentDeviceUuid;
   final String? reason;
 
-  const RevokeAllOtherDevicesParams({
-    this.currentDeviceUuid,
-    this.reason,
-  });
+  const RevokeAllOtherDevicesParams({this.currentDeviceUuid, this.reason});
 
   @override
   bool operator ==(Object other) {
@@ -275,7 +269,8 @@ class RevokeAllOtherDevicesParams {
   int get hashCode => currentDeviceUuid.hashCode ^ reason.hashCode;
 
   @override
-  String toString() => 'RevokeAllOtherDevicesParams(currentDeviceUuid: $currentDeviceUuid)';
+  String toString() =>
+      'RevokeAllOtherDevicesParams(currentDeviceUuid: $currentDeviceUuid)';
 }
 
 /// Resultado da revogação em massa
@@ -283,11 +278,9 @@ class RevokeAllResult {
   final int revokedCount;
   final String message;
 
-  const RevokeAllResult({
-    required this.revokedCount,
-    required this.message,
-  });
+  const RevokeAllResult({required this.revokedCount, required this.message});
 
   @override
-  String toString() => 'RevokeAllResult(revokedCount: $revokedCount, message: $message)';
+  String toString() =>
+      'RevokeAllResult(revokedCount: $revokedCount, message: $message)';
 }

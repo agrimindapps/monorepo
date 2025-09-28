@@ -44,7 +44,9 @@ class RegisterProvider extends ChangeNotifier {
   /// Moves to next step in registration flow
   void nextStep() {
     if (_canProceedToNextStep()) {
-      _registerData = _registerData.copyWith(currentStep: _registerData.currentStep + 1);
+      _registerData = _registerData.copyWith(
+        currentStep: _registerData.currentStep + 1,
+      );
       _clearError();
       notifyListeners();
     }
@@ -53,7 +55,9 @@ class RegisterProvider extends ChangeNotifier {
   /// Moves to previous step in registration flow
   void previousStep() {
     if (_registerData.currentStep > 0) {
-      _registerData = _registerData.copyWith(currentStep: _registerData.currentStep - 1);
+      _registerData = _registerData.copyWith(
+        currentStep: _registerData.currentStep - 1,
+      );
       _clearError();
       notifyListeners();
     }
@@ -85,40 +89,40 @@ class RegisterProvider extends ChangeNotifier {
   /// Validates personal info step
   bool validatePersonalInfo() {
     _clearError();
-    
+
     final nameError = _registerData.validateName();
     final emailError = _registerData.validateEmail();
-    
+
     if (nameError != null) {
       _setError(nameError);
       return false;
     }
-    
+
     if (emailError != null) {
       _setError(emailError);
       return false;
     }
-    
+
     return true;
   }
 
   /// Validates password step
   bool validatePassword() {
     _clearError();
-    
+
     final passwordError = _registerData.validatePassword();
     final confirmPasswordError = _registerData.validateConfirmPassword();
-    
+
     if (passwordError != null) {
       _setError(passwordError);
       return false;
     }
-    
+
     if (confirmPasswordError != null) {
       _setError(confirmPasswordError);
       return false;
     }
-    
+
     return true;
   }
 
@@ -127,22 +131,24 @@ class RegisterProvider extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      
+
       // Simulate API call delay
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      
+
       // Simulate email check (replace with real implementation)
       final exists = email.toLowerCase() == 'test@test.com';
-      
+
       _isLoading = false;
       notifyListeners();
-      
+
       return exists;
     } catch (e) {
       _isLoading = false;
       _setError('Erro ao verificar email. Tente novamente.');
       if (kDebugMode) {
-        debugPrint('Erro verificação email: ${DataSanitizationService.sanitizeForLogging(e.toString())}');
+        debugPrint(
+          'Erro verificação email: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+        );
       }
       return false;
     }
@@ -153,14 +159,14 @@ class RegisterProvider extends ChangeNotifier {
     if (!validatePersonalInfo()) {
       return false;
     }
-    
+
     // Check if email already exists
     final emailExists = await checkEmailExists(_registerData.email);
     if (emailExists) {
       _setError('Este email já possui uma conta.');
       return false;
     }
-    
+
     nextStep();
     return true;
   }
@@ -170,7 +176,7 @@ class RegisterProvider extends ChangeNotifier {
     if (!validatePassword()) {
       return false;
     }
-    
+
     nextStep();
     return true;
   }
@@ -228,10 +234,11 @@ class RegisterProvider extends ChangeNotifier {
   /// Debug method to print current state (sanitized for security)
   @override
   String toString() {
-    final sanitizedData = 'RegisterProvider(step: ${_registerData.currentStep}, '
-                         'hasName: ${_registerData.name.isNotEmpty}, '
-                         'hasEmail: ${_registerData.email.isNotEmpty}, '
-                         'hasError: ${_errorMessage != null})';
+    final sanitizedData =
+        'RegisterProvider(step: ${_registerData.currentStep}, '
+        'hasName: ${_registerData.name.isNotEmpty}, '
+        'hasEmail: ${_registerData.email.isNotEmpty}, '
+        'hasError: ${_errorMessage != null})';
     return DataSanitizationService.sanitizeForLogging(sanitizedData);
   }
 }

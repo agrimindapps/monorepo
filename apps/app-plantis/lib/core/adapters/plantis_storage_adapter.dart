@@ -15,8 +15,8 @@ class PlantisStorageAdapter {
   PlantisStorageAdapter({
     required EnhancedSecureStorageService secureStorage,
     required EnhancedEncryptedStorageService encryptedStorage,
-  })  : _secureStorage = secureStorage,
-        _encryptedStorage = encryptedStorage;
+  }) : _secureStorage = secureStorage,
+       _encryptedStorage = encryptedStorage;
 
   // ==========================================================================
   // BACKWARD COMPATIBLE METHODS - SecureStorageService Interface
@@ -31,7 +31,10 @@ class PlantisStorageAdapter {
     );
 
     result.fold(
-      (failure) => throw Exception('Failed to store user credentials: ${failure.message}'),
+      (failure) =>
+          throw Exception(
+            'Failed to store user credentials: ${failure.message}',
+          ),
       (_) => <String, dynamic>{},
     );
   }
@@ -43,10 +46,7 @@ class PlantisStorageAdapter {
       serializer: UserCredentialsSerializer(),
     );
 
-    return result.fold(
-      (failure) => null,
-      (data) => data,
-    );
+    return result.fold((failure) => null, (data) => data);
   }
 
   /// Store location data securely (backward compatible)
@@ -58,7 +58,8 @@ class PlantisStorageAdapter {
     );
 
     result.fold(
-      (failure) => throw Exception('Failed to store location data: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to store location data: ${failure.message}'),
       (_) => <String, dynamic>{},
     );
   }
@@ -70,10 +71,7 @@ class PlantisStorageAdapter {
       serializer: LocationDataSerializer(),
     );
 
-    return result.fold(
-      (failure) => null,
-      (data) => data,
-    );
+    return result.fold((failure) => null, (data) => data);
   }
 
   /// Store personal information securely (backward compatible)
@@ -85,7 +83,8 @@ class PlantisStorageAdapter {
     );
 
     result.fold(
-      (failure) => throw Exception('Failed to store personal info: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to store personal info: ${failure.message}'),
       (_) => <String, dynamic>{},
     );
   }
@@ -97,10 +96,7 @@ class PlantisStorageAdapter {
       serializer: PersonalInfoSerializer(),
     );
 
-    return result.fold(
-      (failure) => null,
-      (data) => data,
-    );
+    return result.fold((failure) => null, (data) => data);
   }
 
   /// Get or create Hive encryption key (backward compatible)
@@ -110,7 +106,8 @@ class PlantisStorageAdapter {
     );
 
     return result.fold(
-      (failure) => throw Exception('Failed to get encryption key: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to get encryption key: ${failure.message}'),
       (key) => key,
     );
   }
@@ -120,7 +117,8 @@ class PlantisStorageAdapter {
     final result = await _secureStorage.storeBiometricHash(biometricHash);
 
     result.fold(
-      (failure) => throw Exception('Failed to store biometric data: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to store biometric data: ${failure.message}'),
       (_) => <String, dynamic>{},
     );
   }
@@ -135,7 +133,8 @@ class PlantisStorageAdapter {
     final result = await _secureStorage.clearAllSecureData();
 
     result.fold(
-      (failure) => throw Exception('Failed to clear secure data: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to clear secure data: ${failure.message}'),
       (_) => <String, dynamic>{},
     );
   }
@@ -149,7 +148,8 @@ class PlantisStorageAdapter {
     final result = await _encryptedStorage.getEncryptedBox(boxName);
 
     return result.fold(
-      (failure) => throw Exception('Failed to get encrypted box: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to get encrypted box: ${failure.message}'),
       (box) => box,
     );
   }
@@ -159,7 +159,10 @@ class PlantisStorageAdapter {
     final result = await _encryptedStorage.getSensitiveDataBox();
 
     return result.fold(
-      (failure) => throw Exception('Failed to get sensitive data box: ${failure.message}'),
+      (failure) =>
+          throw Exception(
+            'Failed to get sensitive data box: ${failure.message}',
+          ),
       (box) => box,
     );
   }
@@ -169,7 +172,8 @@ class PlantisStorageAdapter {
     final result = await _encryptedStorage.getPiiDataBox();
 
     return result.fold(
-      (failure) => throw Exception('Failed to get PII data box: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to get PII data box: ${failure.message}'),
       (box) => box,
     );
   }
@@ -179,7 +183,10 @@ class PlantisStorageAdapter {
     final result = await _encryptedStorage.getLocationDataBox();
 
     return result.fold(
-      (failure) => throw Exception('Failed to get location data box: ${failure.message}'),
+      (failure) =>
+          throw Exception(
+            'Failed to get location data box: ${failure.message}',
+          ),
       (box) => box,
     );
   }
@@ -201,7 +208,8 @@ class PlantisStorageAdapter {
     );
 
     result.fold(
-      (failure) => throw Exception('Failed to store secure data: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to store secure data: ${failure.message}'),
       (_) => <String, dynamic>{},
     );
   }
@@ -216,10 +224,7 @@ class PlantisStorageAdapter {
       serializer: serializer,
     );
 
-    return result.fold(
-      (failure) => null,
-      (data) => data,
-    );
+    return result.fold((failure) => null, (data) => data);
   }
 
   /// Store encrypted data in custom boxes
@@ -235,7 +240,8 @@ class PlantisStorageAdapter {
     );
 
     result.fold(
-      (failure) => throw Exception('Failed to store encrypted data: ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to store encrypted data: ${failure.message}'),
       (_) => <String, dynamic>{},
     );
   }
@@ -252,10 +258,7 @@ class PlantisStorageAdapter {
       fromJson: fromJson,
     );
 
-    return result.fold(
-      (failure) => null,
-      (data) => data,
-    );
+    return result.fold((failure) => null, (data) => data);
   }
 }
 
@@ -264,7 +267,8 @@ class PlantisStorageAdapter {
 // ==========================================================================
 
 /// Serializer for UserCredentials
-class UserCredentialsSerializer implements SecureDataSerializer<UserCredentials> {
+class UserCredentialsSerializer
+    implements SecureDataSerializer<UserCredentials> {
   @override
   String serialize(UserCredentials data) => jsonEncode(data.toJson());
 
@@ -313,14 +317,12 @@ class SecureStorageServiceAdapter {
   Future<void> storeLocationData(LocationData locationData) =>
       _adapter.storeLocationData(locationData);
 
-  Future<LocationData?> getLocationData() =>
-      _adapter.getLocationData();
+  Future<LocationData?> getLocationData() => _adapter.getLocationData();
 
   Future<void> storePersonalInfo(PersonalInfo personalInfo) =>
       _adapter.storePersonalInfo(personalInfo);
 
-  Future<PersonalInfo?> getPersonalInfo() =>
-      _adapter.getPersonalInfo();
+  Future<PersonalInfo?> getPersonalInfo() => _adapter.getPersonalInfo();
 
   Future<List<int>> getOrCreateHiveEncryptionKey() =>
       _adapter.getOrCreateHiveEncryptionKey();
@@ -331,6 +333,5 @@ class SecureStorageServiceAdapter {
   Future<bool> isSecureStorageAvailable() =>
       _adapter.isSecureStorageAvailable();
 
-  Future<void> clearAllSecureData() =>
-      _adapter.clearAllSecureData();
+  Future<void> clearAllSecureData() => _adapter.clearAllSecureData();
 }

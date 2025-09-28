@@ -1,15 +1,13 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/data/models/backup_model.dart';
-import '../../../../shared/widgets/responsive_layout.dart';
 import '../../../../core/services/backup_service.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../features/premium/presentation/providers/premium_provider.dart';
 import '../../../../presentation/widgets/settings_item.dart';
 import '../../../../presentation/widgets/settings_section.dart';
+import '../../../../shared/widgets/responsive_layout.dart';
 import '../providers/backup_settings_provider.dart';
 import '../widgets/backup_list_item.dart';
 import '../widgets/restore_options_dialog.dart';
@@ -22,10 +20,11 @@ class BackupSettingsPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ChangeNotifierProvider<BackupSettingsProvider>(
-      create: (context) => BackupSettingsProvider(
-        backupService: context.read<BackupService>(),
-        connectivity: context.read<Connectivity>(),
-      ),
+      create:
+          (context) => BackupSettingsProvider(
+            backupService: context.read<BackupService>(),
+            connectivity: context.read<Connectivity>(),
+          ),
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -40,49 +39,46 @@ class BackupSettingsPage extends StatelessWidget {
           ),
           centerTitle: true,
           leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: theme.colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
             onPressed: () => context.pop(),
           ),
         ),
         body: ResponsiveLayout(
           child: Consumer<PremiumProvider>(
             builder: (context, premiumProvider, child) {
-            // Verificação de segurança: usar PremiumProvider real
-            if (!premiumProvider.isPremium) {
-              return _buildPremiumRequired(context);
-            }
+              // Verificação de segurança: usar PremiumProvider real
+              if (!premiumProvider.isPremium) {
+                return _buildPremiumRequired(context);
+              }
 
-            return Consumer<BackupSettingsProvider>(
-              builder: (context, provider, child) {
-                return RefreshIndicator(
-                  onRefresh: provider.refresh,
-                  color: PlantisColors.primary,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Status e ação rápida
-                        _buildQuickActionCard(context, provider),
-                        const SizedBox(height: 24),
+              return Consumer<BackupSettingsProvider>(
+                builder: (context, provider, child) {
+                  return RefreshIndicator(
+                    onRefresh: provider.refresh,
+                    color: PlantisColors.primary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Status e ação rápida
+                          _buildQuickActionCard(context, provider),
+                          const SizedBox(height: 24),
 
-                        // Configurações de backup
-                        _buildBackupSettings(context, provider),
-                        const SizedBox(height: 24),
+                          // Configurações de backup
+                          _buildBackupSettings(context, provider),
+                          const SizedBox(height: 24),
 
-                        // Lista de backups
-                        _buildBackupsList(context, provider),
-                        const SizedBox(height: 40),
-                      ],
+                          // Lista de backups
+                          _buildBackupsList(context, provider),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            );
+                  );
+                },
+              );
             },
           ),
         ),
@@ -91,7 +87,10 @@ class BackupSettingsPage extends StatelessWidget {
   }
 
   /// Card com status e botão de backup rápido
-  Widget _buildQuickActionCard(BuildContext context, BackupSettingsProvider provider) {
+  Widget _buildQuickActionCard(
+    BuildContext context,
+    BackupSettingsProvider provider,
+  ) {
     final theme = Theme.of(context);
 
     return Card(
@@ -182,8 +181,12 @@ class BackupSettingsPage extends StatelessWidget {
                 children: [
                   LinearProgressIndicator(
                     value: provider.backupProgress,
-                    backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.primary),
+                    backgroundColor: PlantisColors.primary.withValues(
+                      alpha: 0.1,
+                    ),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      PlantisColors.primary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -222,7 +225,9 @@ class BackupSettingsPage extends StatelessWidget {
                   LinearProgressIndicator(
                     value: provider.restoreProgress,
                     backgroundColor: PlantisColors.leaf.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.leaf),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      PlantisColors.leaf,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -230,7 +235,8 @@ class BackupSettingsPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          provider.restoreStatusMessage ?? 'Restaurando backup...',
+                          provider.restoreStatusMessage ??
+                              'Restaurando backup...',
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.onSurfaceVariant,
@@ -257,25 +263,29 @@ class BackupSettingsPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: provider.canCreateBackup && !provider.isRestoringBackup ? () {
-                  provider.createBackup();
-                } : null,
-                icon: provider.isCreatingBackup 
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.cloud_upload),
+                onPressed:
+                    provider.canCreateBackup && !provider.isRestoringBackup
+                        ? () {
+                          provider.createBackup();
+                        }
+                        : null,
+                icon:
+                    provider.isCreatingBackup
+                        ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Icon(Icons.cloud_upload),
                 label: Text(
-                  provider.isCreatingBackup 
-                      ? 'Criando Backup...' 
+                  provider.isCreatingBackup
+                      ? 'Criando Backup...'
                       : provider.isRestoringBackup
-                          ? 'Restaurando...'
-                          : 'Fazer Backup Agora',
+                      ? 'Restaurando...'
+                      : 'Fazer Backup Agora',
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PlantisColors.primary,
@@ -291,16 +301,20 @@ class BackupSettingsPage extends StatelessWidget {
   }
 
   /// Seção de configurações de backup
-  Widget _buildBackupSettings(BuildContext context, BackupSettingsProvider provider) {
+  Widget _buildBackupSettings(
+    BuildContext context,
+    BackupSettingsProvider provider,
+  ) {
     return SettingsSection(
       title: 'Configurações',
       children: [
         SettingsItem(
           icon: Icons.schedule,
           title: 'Backup Automático',
-          subtitle: provider.settings.autoBackupEnabled 
-              ? 'Ativo - ${provider.settings.frequency.displayName}'
-              : 'Desativado',
+          subtitle:
+              provider.settings.autoBackupEnabled
+                  ? 'Ativo - ${provider.settings.frequency.displayName}'
+                  : 'Desativado',
           iconColor: PlantisColors.primary,
           isFirst: true,
           trailing: Switch(
@@ -320,9 +334,10 @@ class BackupSettingsPage extends StatelessWidget {
         SettingsItem(
           icon: Icons.wifi,
           title: 'Apenas no Wi-Fi',
-          subtitle: provider.settings.wifiOnlyEnabled 
-              ? 'Backup apenas quando conectado ao Wi-Fi'
-              : 'Usar qualquer conexão de internet',
+          subtitle:
+              provider.settings.wifiOnlyEnabled
+                  ? 'Backup apenas quando conectado ao Wi-Fi'
+                  : 'Usar qualquer conexão de internet',
           iconColor: PlantisColors.secondary,
           trailing: Switch(
             value: provider.settings.wifiOnlyEnabled,
@@ -338,7 +353,8 @@ class BackupSettingsPage extends StatelessWidget {
         SettingsItem(
           icon: Icons.storage,
           title: 'Backups a Manter',
-          subtitle: 'Manter os ${provider.settings.maxBackupsToKeep} backups mais recentes',
+          subtitle:
+              'Manter os ${provider.settings.maxBackupsToKeep} backups mais recentes',
           iconColor: PlantisColors.accent,
           isLast: true,
           onTap: () {
@@ -350,7 +366,10 @@ class BackupSettingsPage extends StatelessWidget {
   }
 
   /// Lista de backups disponíveis
-  Widget _buildBackupsList(BuildContext context, BackupSettingsProvider provider) {
+  Widget _buildBackupsList(
+    BuildContext context,
+    BackupSettingsProvider provider,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -408,11 +427,13 @@ class BackupSettingsPage extends StatelessWidget {
             ),
           )
         else
-          ...provider.backups.map((backup) => BackupListItem(
-                backup: backup,
-                onRestore: () => _showRestoreDialog(context, provider, backup),
-                onDelete: () => _showDeleteDialog(context, provider, backup),
-              )),
+          ...provider.backups.map(
+            (backup) => BackupListItem(
+              backup: backup,
+              onRestore: () => _showRestoreDialog(context, provider, backup),
+              onDelete: () => _showDeleteDialog(context, provider, backup),
+            ),
+          ),
       ],
     );
   }
@@ -420,7 +441,7 @@ class BackupSettingsPage extends StatelessWidget {
   /// Tela para usuários não premium
   Widget _buildPremiumRequired(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -470,11 +491,7 @@ class BackupSettingsPage extends StatelessWidget {
               ),
               child: const Row(
                 children: [
-                  Icon(
-                    Icons.star,
-                    color: PlantisColors.sun,
-                    size: 20,
-                  ),
+                  Icon(Icons.star, color: PlantisColors.sun, size: 20),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -496,7 +513,10 @@ class BackupSettingsPage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: PlantisColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -506,183 +526,206 @@ class BackupSettingsPage extends StatelessWidget {
   }
 
   /// Dialog para escolher frequência de backup
-  void _showFrequencyDialog(BuildContext context, BackupSettingsProvider provider) {
+  void _showFrequencyDialog(
+    BuildContext context,
+    BackupSettingsProvider provider,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Frequência do Backup'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: BackupFrequency.values.map((frequency) {
-            return RadioListTile<BackupFrequency>(
-              title: Text(frequency.displayName),
-              value: frequency,
-              groupValue: provider.settings.frequency,
-              onChanged: (value) {
-                if (value != null) {
-                  final newSettings = provider.settings.copyWith(frequency: value);
-                  provider.updateSettings(newSettings);
-                  Navigator.of(context).pop();
-                }
-              },
-              activeColor: PlantisColors.primary,
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Frequência do Backup'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  BackupFrequency.values.map((frequency) {
+                    return RadioListTile<BackupFrequency>(
+                      title: Text(frequency.displayName),
+                      value: frequency,
+                      groupValue: provider.settings.frequency,
+                      onChanged: (value) {
+                        if (value != null) {
+                          final newSettings = provider.settings.copyWith(
+                            frequency: value,
+                          );
+                          provider.updateSettings(newSettings);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      activeColor: PlantisColors.primary,
+                    );
+                  }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   /// Dialog para escolher número máximo de backups
-  void _showMaxBackupsDialog(BuildContext context, BackupSettingsProvider provider) {
+  void _showMaxBackupsDialog(
+    BuildContext context,
+    BackupSettingsProvider provider,
+  ) {
     int selectedValue = provider.settings.maxBackupsToKeep;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Máximo de Backups'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [3, 5, 10, 20].map((count) {
-            return RadioListTile<int>(
-              title: Text('$count backups'),
-              subtitle: count == 3 
-                  ? const Text('Recomendado para uso básico')
-                  : count == 5
-                      ? const Text('Padrão')
-                      : null,
-              value: count,
-              groupValue: selectedValue,
-              onChanged: (value) {
-                if (value != null) {
-                  selectedValue = value;
-                  final newSettings = provider.settings.copyWith(
-                    maxBackupsToKeep: value,
-                  );
-                  provider.updateSettings(newSettings);
-                  Navigator.of(context).pop();
-                }
-              },
-              activeColor: PlantisColors.primary,
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Máximo de Backups'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  [3, 5, 10, 20].map((count) {
+                    return RadioListTile<int>(
+                      title: Text('$count backups'),
+                      subtitle:
+                          count == 3
+                              ? const Text('Recomendado para uso básico')
+                              : count == 5
+                              ? const Text('Padrão')
+                              : null,
+                      value: count,
+                      groupValue: selectedValue,
+                      onChanged: (value) {
+                        if (value != null) {
+                          selectedValue = value;
+                          final newSettings = provider.settings.copyWith(
+                            maxBackupsToKeep: value,
+                          );
+                          provider.updateSettings(newSettings);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      activeColor: PlantisColors.primary,
+                    );
+                  }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   /// Dialog de confirmação de restauração
-  void _showRestoreDialog(BuildContext context, BackupSettingsProvider provider, BackupInfo backup) {
+  void _showRestoreDialog(
+    BuildContext context,
+    BackupSettingsProvider provider,
+    BackupInfo backup,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => RestoreOptionsDialog(
-        backup: backup,
-        onRestore: (options) {
-          Navigator.of(context).pop();
-          provider.restoreBackup(backup.id, options);
-        },
-      ),
+      builder:
+          (context) => RestoreOptionsDialog(
+            backup: backup,
+            onRestore: (options) {
+              Navigator.of(context).pop();
+              provider.restoreBackup(backup.id, options);
+            },
+          ),
     );
   }
 
   /// Dialog de confirmação de exclusão
-  void _showDeleteDialog(BuildContext context, BackupSettingsProvider provider, BackupInfo backup) {
+  void _showDeleteDialog(
+    BuildContext context,
+    BackupSettingsProvider provider,
+    BackupInfo backup,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.warning,
-              color: Theme.of(context).colorScheme.error,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
+                const SizedBox(width: 8),
+                const Text('Deletar Backup'),
+              ],
             ),
-            const SizedBox(width: 8),
-            const Text('Deletar Backup'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Tem certeza que deseja deletar este backup?'),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    backup.fileName,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Tem certeza que deseja deletar este backup?'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  Text('Data: ${backup.formattedDate}'),
-                  Text('Tamanho: ${backup.formattedSize}'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.error,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        backup.fileName,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      Text('Data: ${backup.formattedDate}'),
+                      Text('Tamanho: ${backup.formattedSize}'),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Esta ação não pode ser desfeita',
-                      style: TextStyle(
-                        fontSize: 12,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
                         color: Theme.of(context).colorScheme.error,
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          'Esta ação não pode ser desfeita',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  provider.deleteBackup(backup);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Deletar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              provider.deleteBackup(backup);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Deletar'),
-          ),
-        ],
-      ),
     );
   }
 }

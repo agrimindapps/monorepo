@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../data/models/backup_model.dart';
 import 'backup_service.dart';
@@ -19,7 +17,9 @@ class BackupScheduler {
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _isRunning = false;
 
-  static const Duration _checkInterval = Duration(minutes: 30); // Verifica a cada 30 minutos
+  static const Duration _checkInterval = Duration(
+    minutes: 30,
+  ); // Verifica a cada 30 minutos
 
   BackupScheduler({
     required BackupService backupService,
@@ -42,16 +42,16 @@ class BackupScheduler {
     });
 
     // Monitora conectividade para tentar backup quando voltar online
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      (List<ConnectivityResult> results) {
-        if (results.any((result) => result != ConnectivityResult.none)) {
-          // Voltou a ter conexão, verifica se precisa fazer backup
-          Future.delayed(const Duration(seconds: 5), () {
-            _checkAndExecuteBackup();
-          });
-        }
-      },
-    );
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
+      if (results.any((result) => result != ConnectivityResult.none)) {
+        // Voltou a ter conexão, verifica se precisa fazer backup
+        Future.delayed(const Duration(seconds: 5), () {
+          _checkAndExecuteBackup();
+        });
+      }
+    });
 
     // Faz verificação inicial
     Future.delayed(const Duration(seconds: 10), () {
@@ -97,7 +97,7 @@ class BackupScheduler {
 
       // Carrega configurações de backup
       final settings = await _backupService.getBackupSettings();
-      
+
       // Verifica se backup automático está habilitado
       if (!settings.autoBackupEnabled) {
         debugPrint('BackupScheduler: Backup automático desabilitado');
@@ -112,36 +112,45 @@ class BackupScheduler {
 
       // Verifica se deve usar apenas WiFi
       if (settings.wifiOnlyEnabled && !await _isConnectedToWifi()) {
-        debugPrint('BackupScheduler: Configurado apenas para WiFi, mas não está no WiFi');
+        debugPrint(
+          'BackupScheduler: Configurado apenas para WiFi, mas não está no WiFi',
+        );
         return;
       }
 
       debugPrint('BackupScheduler: Iniciando backup automático');
-      
+
       // Executa o backup
       final result = await _backupService.createBackup();
-      
+
       result.fold(
         (failure) {
-          debugPrint('BackupScheduler: Erro no backup automático: ${failure.message}');
+          debugPrint(
+            'BackupScheduler: Erro no backup automático: ${failure.message}',
+          );
           // Aqui poderia enviar notificação de erro se necessário
         },
         (backupResult) {
-          debugPrint('BackupScheduler: Backup automático concluído com sucesso: ${backupResult.fileName}');
-          
+          debugPrint(
+            'BackupScheduler: Backup automático concluído com sucesso: ${backupResult.fileName}',
+          );
+
           // Aqui poderia enviar notificação de sucesso se necessário
           _showBackupSuccessNotification(backupResult);
         },
       );
     } catch (e) {
-      debugPrint('BackupScheduler: Erro inesperado durante backup automático: $e');
+      debugPrint(
+        'BackupScheduler: Erro inesperado durante backup automático: $e',
+      );
     }
   }
 
   /// Verifica se o usuário é premium
   Future<bool> _isPremiumUser() async {
     try {
-      final subscriptionResult = await _subscriptionRepository.getCurrentSubscription();
+      final subscriptionResult =
+          await _subscriptionRepository.getCurrentSubscription();
       return subscriptionResult.fold(
         (failure) => false,
         (subscription) => subscription?.isActive ?? false,
@@ -183,15 +192,19 @@ class BackupScheduler {
   /// Agenda um backup para ser executado em horário específico
   Future<void> scheduleBackupAt(DateTime scheduledTime) async {
     final now = DateTime.now();
-    
+
     if (scheduledTime.isBefore(now)) {
-      debugPrint('BackupScheduler: Horário agendado já passou, executando agora');
+      debugPrint(
+        'BackupScheduler: Horário agendado já passou, executando agora',
+      );
       await _checkAndExecuteBackup();
       return;
     }
 
     final delay = scheduledTime.difference(now);
-    debugPrint('BackupScheduler: Backup agendado para ${scheduledTime.toString()}');
+    debugPrint(
+      'BackupScheduler: Backup agendado para ${scheduledTime.toString()}',
+    );
 
     Timer(delay, () {
       _checkAndExecuteBackup();
@@ -202,8 +215,9 @@ class BackupScheduler {
   Future<DateTime?> getNextScheduledBackup() async {
     try {
       final settings = await _backupService.getBackupSettings();
-      
-      if (!settings.autoBackupEnabled || settings.frequency == BackupFrequency.manual) {
+
+      if (!settings.autoBackupEnabled ||
+          settings.frequency == BackupFrequency.manual) {
         return null;
       }
 
@@ -228,9 +242,8 @@ class BackupScheduler {
   BackupSchedulerStatus getStatus() {
     return BackupSchedulerStatus(
       isRunning: _isRunning,
-      nextCheck: _schedulerTimer != null 
-          ? DateTime.now().add(_checkInterval)
-          : null,
+      nextCheck:
+          _schedulerTimer != null ? DateTime.now().add(_checkInterval) : null,
     );
   }
 
@@ -245,10 +258,7 @@ class BackupSchedulerStatus {
   final bool isRunning;
   final DateTime? nextCheck;
 
-  const BackupSchedulerStatus({
-    required this.isRunning,
-    this.nextCheck,
-  });
+  const BackupSchedulerStatus({required this.isRunning, this.nextCheck});
 
   @override
   String toString() {
@@ -267,20 +277,20 @@ class BackupSchedulerManager {
   /// Inicializa o scheduler (chamado no startup da app)
   void initialize() {
     if (_isInitialized) return;
-    
+
     _isInitialized = true;
     _scheduler.start();
-    
+
     debugPrint('BackupSchedulerManager: Inicializado');
   }
 
   /// Para o scheduler (chamado no shutdown da app)
   void shutdown() {
     if (!_isInitialized) return;
-    
+
     _scheduler.stop();
     _isInitialized = false;
-    
+
     debugPrint('BackupSchedulerManager: Parado');
   }
 

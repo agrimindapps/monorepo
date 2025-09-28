@@ -88,9 +88,7 @@ class NotificationServiceConfig {
   }
 
   /// Enables gradual migration mode
-  static void enableGradualMigration({
-    bool fallbackToLegacyOnError = false,
-  }) {
+  static void enableGradualMigration({bool fallbackToLegacyOnError = false}) {
     _enhancedNotificationsEnabled = true;
     _migrationCompleted = false;
     _fallbackToLegacyOnError = fallbackToLegacyOnError;
@@ -122,7 +120,8 @@ class NotificationServiceConfig {
   // Getters for current configuration
 
   /// Returns true if enhanced notifications are enabled
-  static bool get isEnhancedNotificationsEnabled => _enhancedNotificationsEnabled;
+  static bool get isEnhancedNotificationsEnabled =>
+      _enhancedNotificationsEnabled;
 
   /// Returns true if auto migration is enabled
   static bool get isAutoMigrateEnabled => _autoMigrateOnInit;
@@ -293,7 +292,9 @@ class NotificationServiceConfig {
 
     // Check for conflicting settings
     if (!_enhancedNotificationsEnabled && _migrationCompleted) {
-      errors.add('Migration cannot be completed with enhanced notifications disabled');
+      errors.add(
+        'Migration cannot be completed with enhanced notifications disabled',
+      );
     }
 
     if (_autoMigrateOnInit && !_enhancedNotificationsEnabled) {
@@ -316,7 +317,9 @@ class NotificationServiceConfig {
   static void assertValidConfiguration() {
     final errors = validateConfiguration();
     if (errors.isNotEmpty) {
-      throw StateError('Invalid notification service configuration: ${errors.join(', ')}');
+      throw StateError(
+        'Invalid notification service configuration: ${errors.join(', ')}',
+      );
     }
   }
 }
@@ -325,7 +328,9 @@ class NotificationServiceConfig {
 extension NotificationServiceTypeChecking on dynamic {
   bool get isEnhancedService => this is EnhancedPlantisNotificationService;
   bool get isV2Service => this is PlantisNotificationServiceV2;
-  bool get isLegacyService => this is PlantisNotificationService && this is! PlantisNotificationServiceV2;
+  bool get isLegacyService =>
+      this is PlantisNotificationService &&
+      this is! PlantisNotificationServiceV2;
 
   String get serviceTypeName {
     if (isEnhancedService) return 'Enhanced';

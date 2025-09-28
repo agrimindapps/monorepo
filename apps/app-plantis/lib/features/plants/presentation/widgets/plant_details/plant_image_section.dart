@@ -156,7 +156,9 @@ class PlantImageSection extends StatelessWidget {
                                 : null,
                         boxShadow: [
                           BoxShadow(
-                            color: theme.colorScheme.shadow.withValues(alpha: 0.1),
+                            color: theme.colorScheme.shadow.withValues(
+                              alpha: 0.1,
+                            ),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -225,7 +227,8 @@ class PlantImageSection extends StatelessWidget {
                           imageUrl: imageUrls[index],
                           fit: BoxFit.contain,
                           cacheKey: index,
-                          enablePreloading: false, // Disable for fullscreen view
+                          enablePreloading:
+                              false, // Disable for fullscreen view
                         ),
                       ),
                     );
@@ -320,7 +323,8 @@ class PlantImageSection extends StatelessWidget {
                           fit: BoxFit.cover,
                           borderRadius: BorderRadius.circular(12),
                           cacheKey: index,
-                          enablePreloading: false, // Gallery view doesn't need preloading
+                          enablePreloading:
+                              false, // Gallery view doesn't need preloading
                         ),
                       ),
                     ),

@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/data/models/backup_model.dart';
+import '../../../../core/services/backup_restore_service.dart'
+    show RestoreOptions, RestoreResult;
 import '../../../../core/services/backup_service.dart';
-import '../../../../core/services/backup_restore_service.dart' show RestoreOptions, RestoreResult;
 
 /// Provider para gerenciar configurações e operações de backup
 class BackupSettingsProvider extends ChangeNotifier {
@@ -55,8 +54,8 @@ class BackupSettingsProvider extends ChangeNotifier {
 
   bool get hasBackups => _backups.isNotEmpty;
   bool get canCreateBackup => !_isCreatingBackup && !_isRestoringBackup;
-  bool get canRestoreBackup => !_isCreatingBackup && !_isRestoringBackup && hasBackups;
-
+  bool get canRestoreBackup =>
+      !_isCreatingBackup && !_isRestoringBackup && hasBackups;
 
   /// Verifica se há conexão com internet
   /// Nota: Esta é uma verificação simplificada. Para verificação completa,
@@ -78,13 +77,13 @@ class BackupSettingsProvider extends ChangeNotifier {
     _loadSettings();
     _loadBackups();
     _loadLastBackupTime();
-    
+
     // Monitora conectividade
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      (List<ConnectivityResult> results) {
-        notifyListeners(); // Atualiza UI quando conectividade muda
-      },
-    );
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
+      notifyListeners(); // Atualiza UI quando conectividade muda
+    });
   }
 
   /// Carrega configurações salvas
@@ -100,17 +99,18 @@ class BackupSettingsProvider extends ChangeNotifier {
   /// Carrega lista de backups disponíveis
   Future<void> _loadBackups() async {
     _setLoading(true);
-    
+
     final result = await _backupService.listBackups();
-    
+
     result.fold(
-      (Failure failure) => _setError('Erro ao carregar backups: ${failure.message}'),
+      (Failure failure) =>
+          _setError('Erro ao carregar backups: ${failure.message}'),
       (List<BackupInfo> backupList) {
         _backups = backupList;
         _clearError();
       },
     );
-    
+
     _setLoading(false);
   }
 
@@ -173,9 +173,9 @@ class BackupSettingsProvider extends ChangeNotifier {
           _lastBackupTime = DateTime.now();
           _setSuccess(
             'Backup criado com sucesso! '
-            'Tamanho: ${_formatFileSize(backupResult.sizeInBytes ?? 0)}'
+            'Tamanho: ${_formatFileSize(backupResult.sizeInBytes ?? 0)}',
           );
-          
+
           // Recarrega lista de backups
           _loadBackups();
         },
@@ -208,18 +208,20 @@ class BackupSettingsProvider extends ChangeNotifier {
     try {
       // Fase 1: Validação (0% - 10%)
       _updateRestoreProgress(0.0, 'Validando integridade do backup...');
-      await Future<void>.delayed(const Duration(milliseconds: 500)); // Simular tempo de validação
-      
+      await Future<void>.delayed(
+        const Duration(milliseconds: 500),
+      ); // Simular tempo de validação
+
       _updateRestoreProgress(0.05, 'Verificando compatibilidade...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      
+
       _updateRestoreProgress(0.1, 'Criando backup de segurança...');
       await Future<void>.delayed(const Duration(milliseconds: 700));
 
       // Fase 2: Preparação (10% - 20%)
       _updateRestoreProgress(0.15, 'Preparando restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      
+
       _updateRestoreProgress(0.2, 'Iniciando processo de restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
 
@@ -233,13 +235,15 @@ class BackupSettingsProvider extends ChangeNotifier {
         },
         (RestoreResult restoreResult) {
           _lastRestoreResult = restoreResult;
-          
+
           final itemsText = restoreResult.itemsRestored == 1 ? 'item' : 'itens';
-          final countsText = _buildRestoreCountsText(restoreResult.restoredCounts);
-          
+          final countsText = _buildRestoreCountsText(
+            restoreResult.restoredCounts,
+          );
+
           _setSuccess(
             'Backup restaurado com sucesso! '
-            '${restoreResult.itemsRestored} $itemsText restaurados.$countsText'
+            '${restoreResult.itemsRestored} $itemsText restaurados.$countsText',
           );
         },
       );
@@ -259,7 +263,7 @@ class BackupSettingsProvider extends ChangeNotifier {
 
   /// Executa restore com progress tracking detalhado
   Future<Either<Failure, RestoreResult>> _executeRestoreWithProgress(
-    String backupId, 
+    String backupId,
     RestoreOptions options,
   ) async {
     try {
@@ -268,25 +272,25 @@ class BackupSettingsProvider extends ChangeNotifier {
         _updateRestoreProgress(0.3, 'Restaurando plantas...');
         await Future<void>.delayed(const Duration(milliseconds: 1000));
       }
-      
+
       if (options.restoreSpaces) {
         _updateRestoreProgress(0.5, 'Restaurando espaços...');
         await Future<void>.delayed(const Duration(milliseconds: 800));
       }
-      
+
       if (options.restoreTasks) {
         _updateRestoreProgress(0.7, 'Restaurando tarefas...');
         await Future<void>.delayed(const Duration(milliseconds: 1200));
       }
-      
+
       if (options.restoreSettings) {
         _updateRestoreProgress(0.85, 'Restaurando configurações...');
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
-      
+
       _updateRestoreProgress(0.95, 'Finalizando restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      
+
       // Chamar o método real do serviço
       return await _backupService.restoreBackup(backupId, options);
     } catch (e) {
@@ -297,7 +301,7 @@ class BackupSettingsProvider extends ChangeNotifier {
   /// Constrói texto descritivo das contagens restauradas
   String _buildRestoreCountsText(Map<String, int> counts) {
     if (counts.isEmpty) return '';
-    
+
     final parts = <String>[];
     if (counts['plants'] != null && counts['plants']! > 0) {
       final plantText = counts['plants']! == 1 ? 'planta' : 'plantas';
@@ -311,18 +315,18 @@ class BackupSettingsProvider extends ChangeNotifier {
       final taskText = counts['tasks']! == 1 ? 'tarefa' : 'tarefas';
       parts.add('${counts['tasks']} $taskText');
     }
-    
+
     if (parts.isEmpty) return '';
-    
+
     return ' (${parts.join(', ')})';
   }
 
   /// Deleta um backup específico
   Future<void> deleteBackup(BackupInfo backup) async {
     _setLoading(true);
-    
+
     final result = await _backupService.deleteBackup(backup.id);
-    
+
     result.fold(
       (failure) => _setError('Erro ao deletar backup: ${failure.message}'),
       (_) {
@@ -330,17 +334,13 @@ class BackupSettingsProvider extends ChangeNotifier {
         _setSuccess('Backup deletado com sucesso');
       },
     );
-    
+
     _setLoading(false);
   }
 
   /// Recarrega dados
   Future<void> refresh() async {
-    await Future.wait([
-      _loadSettings(),
-      _loadBackups(),
-      _loadLastBackupTime(),
-    ]);
+    await Future.wait([_loadSettings(), _loadBackups(), _loadLastBackupTime()]);
   }
 
   /// Verifica se deve fazer backup automático
@@ -413,10 +413,10 @@ extension BackupSettingsProviderExtension on BackupSettingsProvider {
   /// Texto para exibir status do último backup
   String get lastBackupStatusText {
     if (_lastBackupTime == null) return 'Nenhum backup realizado';
-    
+
     final now = DateTime.now();
     final difference = now.difference(_lastBackupTime!);
-    
+
     if (difference.inMinutes < 1) return 'Backup realizado agora';
     if (difference.inHours < 1) return 'Backup há ${difference.inMinutes} min';
     if (difference.inDays < 1) return 'Backup há ${difference.inHours}h';
@@ -427,9 +427,9 @@ extension BackupSettingsProviderExtension on BackupSettingsProvider {
   /// Cor para o status do último backup
   Color get lastBackupStatusColor {
     if (_lastBackupTime == null) return Colors.red;
-    
+
     final difference = DateTime.now().difference(_lastBackupTime!);
-    
+
     if (difference.inDays <= 1) return Colors.green;
     if (difference.inDays <= 7) return Colors.orange;
     return Colors.red;
@@ -439,9 +439,9 @@ extension BackupSettingsProviderExtension on BackupSettingsProvider {
   IconData get lastBackupStatusIcon {
     if (_isCreatingBackup) return Icons.cloud_upload;
     if (_lastBackupTime == null) return Icons.warning;
-    
+
     final difference = DateTime.now().difference(_lastBackupTime!);
-    
+
     if (difference.inDays <= 1) return Icons.check_circle;
     if (difference.inDays <= 7) return Icons.schedule;
     return Icons.warning;

@@ -39,7 +39,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void initState() {
     super.initState();
     _plantsProvider = di.sl<PlantsProvider>();
-    
+
     // Add observer for app lifecycle changes
     WidgetsBinding.instance.addObserver(this);
 
@@ -187,11 +187,12 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
             children: [
               // Enhanced App Bar - Optimized with Selector
               Selector<PlantsProvider, Map<String, dynamic>>(
-                selector: (context, provider) => {
-                  'plantsCount': provider.plantsCount,
-                  'searchQuery': provider.searchQuery,
-                  'viewMode': provider.viewMode,
-                },
+                selector:
+                    (context, provider) => {
+                      'plantsCount': provider.plantsCount,
+                      'searchQuery': provider.searchQuery,
+                      'viewMode': provider.viewMode,
+                    },
                 builder: (context, appBarData, child) {
                   return EnhancedPlantsAppBar(
                     plantsCount: appBarData['plantsCount'] as int,
@@ -210,14 +211,15 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
               // Content Area - Optimized with Selector
               Expanded(
                 child: Selector<PlantsProvider, Map<String, dynamic>>(
-                  selector: (context, provider) => {
-                    'isLoading': provider.isLoading,
-                    'error': provider.error,
-                    'plants': provider.plants,
-                    'searchResults': provider.searchResults,
-                    'searchQuery': provider.searchQuery,
-                    'viewMode': provider.viewMode,
-                  },
+                  selector:
+                      (context, provider) => {
+                        'isLoading': provider.isLoading,
+                        'error': provider.error,
+                        'plants': provider.plants,
+                        'searchResults': provider.searchResults,
+                        'searchQuery': provider.searchQuery,
+                        'viewMode': provider.viewMode,
+                      },
                   builder: (context, contentData, child) {
                     // Loading state
                     if ((contentData['isLoading'] as bool) &&
@@ -243,7 +245,8 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                     // Empty state
                     if (plantsToShow.isEmpty) {
                       return EmptyPlantsWidget(
-                        isSearching: (contentData['searchQuery'] as String).isNotEmpty,
+                        isSearching:
+                            (contentData['searchQuery'] as String).isNotEmpty,
                         searchQuery: contentData['searchQuery'] as String,
                         onClearSearch: onClearSearch,
                         onAddPlant: _showAddPlantModal,

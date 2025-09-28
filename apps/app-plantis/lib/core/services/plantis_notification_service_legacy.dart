@@ -16,9 +16,8 @@ class PlantisNotificationService {
   static const String _appName = 'Plantis';
   static const int _primaryColor = 0xFF4CAF50; // Verde plantas
 
-  final INotificationRepository _notificationRepository = kIsWeb 
-      ? WebNotificationService()
-      : LocalNotificationService();
+  final INotificationRepository _notificationRepository =
+      kIsWeb ? WebNotificationService() : LocalNotificationService();
   bool _isInitialized = false;
 
   /// Inicializa o serviço de notificações do Plantis
@@ -74,7 +73,7 @@ class PlantisNotificationService {
   /// Verifica se as notificações estão habilitadas
   Future<bool> areNotificationsEnabled() async {
     if (kIsWeb) return false; // Web não suporta notificações locais
-    
+
     try {
       final permission = await _notificationRepository.getPermissionStatus();
       return permission.isGranted;
@@ -87,7 +86,7 @@ class PlantisNotificationService {
   /// Solicita permissão para notificações
   Future<bool> requestNotificationPermission() async {
     if (kIsWeb) return false; // Web não suporta notificações locais
-    
+
     try {
       final permission = await _notificationRepository.requestPermission();
       return permission.isGranted;
@@ -100,7 +99,7 @@ class PlantisNotificationService {
   /// Abre configurações de notificação
   Future<bool> openNotificationSettings() async {
     if (kIsWeb) return false; // Web não suporta configurações nativas
-    
+
     try {
       return await _notificationRepository.openNotificationSettings();
     } catch (e) {
@@ -240,7 +239,7 @@ class PlantisNotificationService {
   /// Cancela notificação específica
   Future<bool> cancelNotification(String identifier) async {
     if (kIsWeb) return true; // Web não precisa cancelar notificações
-    
+
     try {
       final id = _notificationRepository.generateNotificationId(identifier);
       return await _notificationRepository.cancelNotification(id);
@@ -253,7 +252,7 @@ class PlantisNotificationService {
   /// Cancela todas as notificações
   Future<bool> cancelAllNotifications() async {
     if (kIsWeb) return true; // Web não precisa cancelar notificações
-    
+
     try {
       return await _notificationRepository.cancelAllNotifications();
     } catch (e) {
@@ -264,8 +263,12 @@ class PlantisNotificationService {
 
   /// Lista notificações pendentes
   Future<List<PendingNotificationEntity>> getPendingNotifications() async {
-    if (kIsWeb) return <PendingNotificationEntity>[]; // Web não tem notificações pendentes
-    
+    if (kIsWeb) {
+      return <
+        PendingNotificationEntity
+      >[]; // Web não tem notificações pendentes
+    }
+
     try {
       return await _notificationRepository.getPendingNotifications();
     } catch (e) {
@@ -299,7 +302,9 @@ class PlantisNotificationService {
   }
 
   /// Agenda uma notificação diretamente
-  Future<bool> scheduleDirectNotification(NotificationEntity notification) async {
+  Future<bool> scheduleDirectNotification(
+    NotificationEntity notification,
+  ) async {
     if (kIsWeb) return false;
 
     try {

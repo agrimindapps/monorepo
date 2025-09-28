@@ -71,9 +71,7 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
   }
 
   Future<void> deletePlant(String id) async {
-    await handleEitherOperation(
-      () => _plantsRepository.deletePlant(id),
-    );
+    await handleEitherOperation(() => _plantsRepository.deletePlant(id));
 
     // Se chegou até aqui, a operação foi bem-sucedida
     _plants.removeWhere((plant) => plant.id == id);

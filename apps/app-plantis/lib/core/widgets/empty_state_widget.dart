@@ -28,6 +28,7 @@ class EmptyStateConfig {
 enum EmptyStateStyle {
   /// Shows icon inside a circular container (for tasks)
   illustration,
+
   /// Shows large standalone icon (for plants)
   icon,
 }
@@ -62,7 +63,8 @@ class EmptyStateWidget extends StatelessWidget {
         config: EmptyStateConfig(
           icon: Icons.search_off,
           title: 'Nenhuma planta encontrada',
-          description: 'Não encontramos nenhuma planta com "$searchQuery".\nTente usar outros termos.',
+          description:
+              'Não encontramos nenhuma planta com "$searchQuery".\nTente usar outros termos.',
           buttonText: 'Limpar busca',
           onButtonPressed: onClearSearch,
           showButton: onClearSearch != null,
@@ -77,7 +79,8 @@ class EmptyStateWidget extends StatelessWidget {
       config: EmptyStateConfig(
         icon: Icons.eco_outlined,
         title: 'Nenhuma planta cadastrada',
-        description: 'Adicione sua primeira planta para começar a cuidar\ndela com o Grow',
+        description:
+            'Adicione sua primeira planta para começar a cuidar\ndela com o Grow',
         buttonText: 'Adicionar primeira planta',
         onButtonPressed: onAddPlant,
         showButton: onAddPlant != null,
@@ -95,7 +98,7 @@ class EmptyStateWidget extends StatelessWidget {
     required VoidCallback onAddTask,
   }) {
     final config = _getTaskEmptyStateConfig(filterType, onAddTask);
-    
+
     return EmptyStateWidget(
       key: key,
       config: config,
@@ -104,7 +107,10 @@ class EmptyStateWidget extends StatelessWidget {
     );
   }
 
-  static EmptyStateConfig _getTaskEmptyStateConfig(TasksFilterType filterType, VoidCallback onAddTask) {
+  static EmptyStateConfig _getTaskEmptyStateConfig(
+    TasksFilterType filterType,
+    VoidCallback onAddTask,
+  ) {
     switch (filterType) {
       case TasksFilterType.all:
         return const EmptyStateConfig(
@@ -134,7 +140,8 @@ class EmptyStateWidget extends StatelessWidget {
         return const EmptyStateConfig(
           icon: Icons.schedule,
           title: 'Nenhuma tarefa próxima',
-          description: 'Você não tem tarefas pendentes para os próximos 15 dias.\nParabéns! Você está em dia com seus cuidados.',
+          description:
+              'Você não tem tarefas pendentes para os próximos 15 dias.\nParabéns! Você está em dia com seus cuidados.',
           showButton: false,
         );
 
@@ -142,7 +149,8 @@ class EmptyStateWidget extends StatelessWidget {
         return const EmptyStateConfig(
           icon: Icons.calendar_month,
           title: 'Nenhuma tarefa futura programada',
-          description: 'Não há tarefas pendentes programadas para o futuro.\nTodas as suas plantas estão com os cuidados em dia!',
+          description:
+              'Não há tarefas pendentes programadas para o futuro.\nTodas as suas plantas estão com os cuidados em dia!',
           showButton: false,
         );
 
@@ -179,7 +187,9 @@ class EmptyStateWidget extends StatelessWidget {
             // Icon/Illustration
             _buildIcon(context, theme),
 
-            SizedBox(height: config.style == EmptyStateStyle.illustration ? 24 : 32),
+            SizedBox(
+              height: config.style == EmptyStateStyle.illustration ? 24 : 32,
+            ),
 
             // Title
             _buildTitle(theme),
@@ -190,7 +200,9 @@ class EmptyStateWidget extends StatelessWidget {
             _buildDescription(theme),
 
             if (config.showButton && config.onButtonPressed != null) ...[
-              SizedBox(height: config.style == EmptyStateStyle.illustration ? 32 : 48),
+              SizedBox(
+                height: config.style == EmptyStateStyle.illustration ? 32 : 48,
+              ),
               _buildActionButton(theme),
             ],
           ],
@@ -209,11 +221,7 @@ class EmptyStateWidget extends StatelessWidget {
             color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            config.icon,
-            color: theme.colorScheme.primary,
-            size: 60,
-          ),
+          child: Icon(config.icon, color: theme.colorScheme.primary, size: 60),
         );
 
       case EmptyStateStyle.icon:
@@ -304,7 +312,7 @@ class EmptyStateWidget extends StatelessWidget {
             ),
           );
         }
-        
+
         // Regular elevated button for tasks
         return ElevatedButton.icon(
           onPressed: config.onButtonPressed,
@@ -339,4 +347,3 @@ class EmptyStateWidget extends StatelessWidget {
     }
   }
 }
-

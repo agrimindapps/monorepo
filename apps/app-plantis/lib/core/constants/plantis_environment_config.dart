@@ -3,7 +3,8 @@ import 'package:core/core.dart';
 /// Plantis-specific environment configuration
 /// Extends the generic AppEnvironmentConfig with plantis-specific settings
 class PlantisEnvironmentConfig extends AppEnvironmentConfig {
-  static final PlantisEnvironmentConfig _instance = PlantisEnvironmentConfig._internal();
+  static final PlantisEnvironmentConfig _instance =
+      PlantisEnvironmentConfig._internal();
   factory PlantisEnvironmentConfig() => _instance;
   PlantisEnvironmentConfig._internal();
 
@@ -18,34 +19,38 @@ class PlantisEnvironmentConfig extends AppEnvironmentConfig {
 
   // Plantis-specific API Keys
   String get weatherApiKey => EnvironmentConfig.getApiKey(
-        'WEATHER_API_KEY',
-        fallback: 'weather_dummy_key',
-      );
+    'WEATHER_API_KEY',
+    fallback: 'weather_dummy_key',
+  );
 
   String get googleMapsApiKey => EnvironmentConfig.getApiKey(
-        'GOOGLE_MAPS_API_KEY',
-        fallback: 'maps_dummy_key',
-      );
+    'GOOGLE_MAPS_API_KEY',
+    fallback: 'maps_dummy_key',
+  );
 
   // RevenueCat Configuration
   String get revenueCatApiKey => EnvironmentConfig.getApiKey(
-        'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
-        fallback: 'rcat_dev_dummy_key',
-      );
+    'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
+    fallback: 'rcat_dev_dummy_key',
+  );
 
   // Plantis Subscription Products
-  String get monthlyProductId => EnvironmentConfig.getProductId('plantis_premium_monthly');
-  String get yearlyProductId => EnvironmentConfig.getProductId('plantis_premium_yearly');
+  String get monthlyProductId =>
+      EnvironmentConfig.getProductId('plantis_premium_monthly');
+  String get yearlyProductId =>
+      EnvironmentConfig.getProductId('plantis_premium_yearly');
 
   /// Print plantis-specific configuration for debugging
   void printPlantisConfig() {
-    EnvironmentConfig.printConfig(additionalConfig: {
-      'App ID': appId,
-      'Firebase Project': firebaseProjectId,
-      'API Base URL': apiBaseUrl,
-      'Monthly Product': monthlyProductId,
-      'Yearly Product': yearlyProductId,
-    });
+    EnvironmentConfig.printConfig(
+      additionalConfig: {
+        'App ID': appId,
+        'Firebase Project': firebaseProjectId,
+        'API Base URL': apiBaseUrl,
+        'Monthly Product': monthlyProductId,
+        'Yearly Product': yearlyProductId,
+      },
+    );
   }
 }
 

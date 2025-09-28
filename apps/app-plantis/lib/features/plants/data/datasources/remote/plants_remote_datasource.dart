@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import '../../models/plant_model.dart';
 
@@ -29,18 +28,19 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     try {
       // Using simple query to avoid composite index requirement
       final snapshot =
-          await _getPlantsCollection(userId)
-              .where('isDeleted', isEqualTo: false)
-              .get();
+          await _getPlantsCollection(
+            userId,
+          ).where('isDeleted', isEqualTo: false).get();
 
-      final plants = snapshot.docs
-          .map(
-            (doc) => PlantModel.fromJson({
-              ...doc.data() as Map<String, dynamic>,
-              'id': doc.id,
-            }),
-          )
-          .toList();
+      final plants =
+          snapshot.docs
+              .map(
+                (doc) => PlantModel.fromJson({
+                  ...doc.data() as Map<String, dynamic>,
+                  'id': doc.id,
+                }),
+              )
+              .toList();
 
       // Apply sorting on client-side to avoid composite index
       plants.sort((a, b) {
@@ -172,14 +172,15 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
               .where('spaceId', isEqualTo: spaceId)
               .get();
 
-      final plants = snapshot.docs
-          .map(
-            (doc) => PlantModel.fromJson({
-              ...doc.data() as Map<String, dynamic>,
-              'id': doc.id,
-            }),
-          )
-          .toList();
+      final plants =
+          snapshot.docs
+              .map(
+                (doc) => PlantModel.fromJson({
+                  ...doc.data() as Map<String, dynamic>,
+                  'id': doc.id,
+                }),
+              )
+              .toList();
 
       // Apply sorting on client-side to avoid composite index
       plants.sort((a, b) {

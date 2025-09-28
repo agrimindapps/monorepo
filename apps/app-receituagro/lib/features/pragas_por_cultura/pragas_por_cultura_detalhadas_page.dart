@@ -331,21 +331,40 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
                                 filtroTipo: _filtroTipo,
                                 onOrdenacaoChanged: (valor) => setState(() {
                                   _ordenacao = valor;
-                                  _aplicarFiltros();
+                                  _separarPragasPorTipo();
                                 }),
                                 onFiltroTipoChanged: (valor) => setState(() {
                                   _filtroTipo = valor;
-                                  _aplicarFiltros();
+                                  _separarPragasPorTipo();
                                 }),
                               ),
                             ),
                           ),
                           
-                          // Lista de pragas
-                          PragasListView(
-                            pragasPorCultura: _pragasPorCultura,
-                            onPragaTap: _navegarParaDetalhes,
-                            onVerDefensivos: _verDefensivosDaPraga,
+                          // Tab Bar
+                          SliverToBoxAdapter(
+                            child: Container(
+                              margin: const EdgeInsets.all(16),
+                              child: PragaCulturaTabBarWidget(
+                                tabController: _tabController,
+                                onTabTap: (index) {
+                                  // Tab já é trocada automaticamente pelo TabController
+                                },
+                                isDark: isDark,
+                              ),
+                            ),
+                          ),
+                          
+                          // Tab Content
+                          SliverFillRemaining(
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildTabContent(_plantasDaninhas, 'Plantas Daninhas'),
+                                _buildTabContent(_doencas, 'Doenças'),
+                                _buildTabContent(_insetos, 'Insetos'),
+                              ],
+                            ),
                           ),
                         ],
                       ],
@@ -430,16 +449,124 @@ class _PragasPorCulturaDetalhadasPageState extends State<PragasPorCulturaDetalha
       onOrdenacaoChanged: (valor) {
         setState(() {
           _ordenacao = valor;
-          _aplicarFiltros();
+          _separarPragasPorTipo();
         });
       },
       onFiltroTipoChanged: (valor) {
         setState(() {
           _filtroTipo = valor;
-          _aplicarFiltros();
+          _separarPragasPorTipo();
         });
       },
     );
+  }
+
+  /// Constrói o conteúdo de cada tab
+  Widget _buildTabContent(List<PragaPorCultura> pragasList, String tipoNome) {
+    if (pragasList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma praga do tipo "$tipoNome" encontrada',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'para a cultura selecionada',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return CustomScrollView(
+      slivers: [
+        // Cabeçalho da tab com estatísticas
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _getIconByTipo(tipoNome),
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tipoNome,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '${pragasList.length} praga(s) • ${pragasList.where((p) => p.isCritica).length} crítica(s)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Lista de pragas para esta tab
+        PragasListView(
+          pragasPorCultura: pragasList,
+          onPragaTap: _navegarParaDetalhes,
+          onVerDefensivos: _verDefensivosDaPraga,
+        ),
+      ],
+    );
+  }
+
+  /// Retorna o ícone apropriado para cada tipo de praga
+  IconData _getIconByTipo(String tipoNome) {
+    switch (tipoNome) {
+      case 'Plantas Daninhas':
+        return Icons.grass_outlined;
+      case 'Doenças':
+        return Icons.coronavirus_outlined;
+      case 'Insetos':
+        return Icons.bug_report_outlined;
+      default:
+        return Icons.pest_control_outlined;
+    }
   }
 
 }

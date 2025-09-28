@@ -26,10 +26,10 @@ class SettingsProvider extends ChangeNotifier {
     required PlantisNotificationService notificationService,
     BackupService? backupService,
     ThemeProvider? themeProvider,
-  })  : _settingsRepository = settingsRepository,
-        _notificationService = notificationService,
-        _backupService = backupService,
-        _themeProvider = themeProvider;
+  }) : _settingsRepository = settingsRepository,
+       _notificationService = notificationService,
+       _backupService = backupService,
+       _themeProvider = themeProvider;
 
   // Getters
   SettingsEntity get settings => _settings;
@@ -39,7 +39,8 @@ class SettingsProvider extends ChangeNotifier {
   String? get successMessage => _successMessage;
 
   // Getters específicos para facilitar uso nas páginas
-  NotificationSettingsEntity get notificationSettings => _settings.notifications;
+  NotificationSettingsEntity get notificationSettings =>
+      _settings.notifications;
   BackupSettingsEntity get backupSettings => _settings.backup;
   ThemeSettingsEntity get themeSettings => _settings.theme;
   AccountSettingsEntity get accountSettings => _settings.account;
@@ -48,7 +49,7 @@ class SettingsProvider extends ChangeNotifier {
   // Estados derivados
   bool get hasPermissionsGranted => _settings.notifications.permissionsGranted;
   bool get isDarkMode => _settings.theme.isDarkMode;
-  
+
   // Verificação de plataforma web
   bool get isWebPlatform => kIsWeb;
 
@@ -84,9 +85,10 @@ class SettingsProvider extends ChangeNotifier {
   /// Carrega configurações do repositório
   Future<void> _loadSettings() async {
     final result = await _settingsRepository.loadSettings();
-    
+
     result.fold(
-      (Failure failure) => _setError('Erro ao carregar configurações: ${failure.message}'),
+      (Failure failure) =>
+          _setError('Erro ao carregar configurações: ${failure.message}'),
       (SettingsEntity settings) {
         _settings = settings;
         _clearError();
@@ -98,8 +100,9 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> _syncWithServices() async {
     try {
       // Sincronizar permissões de notificação
-      final hasPermissions = await _notificationService.areNotificationsEnabled();
-      
+      final hasPermissions =
+          await _notificationService.areNotificationsEnabled();
+
       if (_settings.notifications.permissionsGranted != hasPermissions) {
         await updateNotificationSettings(
           _settings.notifications.copyWith(permissionsGranted: hasPermissions),
@@ -135,13 +138,14 @@ class SettingsProvider extends ChangeNotifier {
 
     try {
       final result = await _settingsRepository.saveSettings(newSettings);
-      
+
       result.fold(
-        (Failure failure) => _setError('Erro ao salvar configurações: ${failure.message}'),
+        (Failure failure) =>
+            _setError('Erro ao salvar configurações: ${failure.message}'),
         (void _) {
           _settings = newSettings;
           _setSuccess('Configurações salvas com sucesso');
-          
+
           // Sincronizar com services externos
           _applyCascadeEffects(newSettings);
         },
@@ -154,7 +158,9 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   /// Atualiza configurações específicas de notificações
-  Future<void> updateNotificationSettings(NotificationSettingsEntity newSettings) async {
+  Future<void> updateNotificationSettings(
+    NotificationSettingsEntity newSettings,
+  ) async {
     final updatedSettings = _settings.copyWith(notifications: newSettings);
     await updateSettings(updatedSettings);
   }
@@ -169,7 +175,7 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> updateThemeSettings(ThemeSettingsEntity newSettings) async {
     final updatedSettings = _settings.copyWith(theme: newSettings);
     await updateSettings(updatedSettings);
-    
+
     // Aplicar tema imediatamente
     _applyThemeChanges(newSettings);
   }
@@ -230,7 +236,9 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Toggle para tipo específico de tarefa
   Future<void> toggleTaskType(String taskType, bool enabled) async {
-    final updatedTaskTypes = Map<String, bool>.from(_settings.notifications.taskTypeSettings);
+    final updatedTaskTypes = Map<String, bool>.from(
+      _settings.notifications.taskTypeSettings,
+    );
     updatedTaskTypes[taskType] = enabled;
 
     final newSettings = _settings.notifications.copyWith(
@@ -340,10 +348,12 @@ class SettingsProvider extends ChangeNotifier {
 
     try {
       final exportResult = await _settingsRepository.exportSettings();
-      
+
       exportResult.fold(
-        (Failure failure) => _setError('Erro ao exportar configurações: ${failure.message}'),
-        (Map<String, dynamic> data) => _setSuccess('Configurações incluídas no próximo backup'),
+        (Failure failure) =>
+            _setError('Erro ao exportar configurações: ${failure.message}'),
+        (Map<String, dynamic> data) =>
+            _setSuccess('Configurações incluídas no próximo backup'),
       );
     } catch (e) {
       _setError('Erro ao preparar backup: $e');
@@ -357,13 +367,14 @@ class SettingsProvider extends ChangeNotifier {
 
     try {
       final result = await _settingsRepository.resetToDefaults();
-      
+
       result.fold(
-        (Failure failure) => _setError('Erro ao resetar configurações: ${failure.message}'),
+        (Failure failure) =>
+            _setError('Erro ao resetar configurações: ${failure.message}'),
         (void _) async {
           _settings = SettingsEntity.defaults();
           _setSuccess('Configurações resetadas com sucesso');
-          
+
           // Reaplica configurações nos services
           await _syncWithServices();
         },
@@ -446,7 +457,9 @@ extension SettingsProviderExtensions on SettingsProvider {
     if (isWebPlatform) {
       return Icons.web;
     }
-    return hasPermissionsGranted ? Icons.notifications_active : Icons.notifications_off;
+    return hasPermissionsGranted
+        ? Icons.notifications_active
+        : Icons.notifications_off;
   }
 
   /// Texto para subtitle do tema

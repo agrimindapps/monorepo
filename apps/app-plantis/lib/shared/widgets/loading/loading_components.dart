@@ -21,12 +21,12 @@ class LoadingConstants {
   static const Duration shortTimeout = Duration(seconds: 10);
   static const Duration mediumTimeout = Duration(seconds: 30);
   static const Duration longTimeout = Duration(minutes: 2);
-  
+
   // Common delay durations
   static const Duration quickDelay = Duration(milliseconds: 300);
   static const Duration standardDelay = Duration(milliseconds: 500);
   static const Duration slowDelay = Duration(seconds: 1);
-  
+
   // Skeleton item counts
   static const int defaultSkeletonCount = 3;
   static const int listSkeletonCount = 5;
@@ -51,50 +51,50 @@ class LoadingUtils {
       timeout: timeout,
     );
   }
-  
+
   /// Shows loading for save operations
   static void showSaveLoading(String context, {String? itemName}) {
     showLoadingWithTimeout(
       context,
-      message: itemName != null 
-          ? 'Salvando $itemName...'
-          : 'Salvando alterações...',
-      semanticLabel: itemName != null
-          ? 'Salvando $itemName'
-          : 'Salvando alterações',
+      message:
+          itemName != null ? 'Salvando $itemName...' : 'Salvando alterações...',
+      semanticLabel:
+          itemName != null ? 'Salvando $itemName' : 'Salvando alterações',
       type: LoadingType.save,
     );
   }
-  
+
   /// Shows loading for purchase operations
   static void showPurchaseLoading(String context, {String? productName}) {
     showLoadingWithTimeout(
       context,
-      message: productName != null
-          ? 'Processando compra de $productName...'
-          : 'Processando compra...',
-      semanticLabel: productName != null
-          ? 'Processando compra de $productName'
-          : 'Processando compra',
+      message:
+          productName != null
+              ? 'Processando compra de $productName...'
+              : 'Processando compra...',
+      semanticLabel:
+          productName != null
+              ? 'Processando compra de $productName'
+              : 'Processando compra',
       type: LoadingType.purchase,
       timeout: LoadingConstants.longTimeout, // Purchases may take longer
     );
   }
-  
+
   /// Shows loading for sync operations
   static void showSyncLoading(String context, {String? syncType}) {
     showLoadingWithTimeout(
       context,
-      message: syncType != null
-          ? 'Sincronizando $syncType...'
-          : 'Sincronizando dados...',
-      semanticLabel: syncType != null
-          ? 'Sincronizando $syncType'
-          : 'Sincronizando dados',
+      message:
+          syncType != null
+              ? 'Sincronizando $syncType...'
+              : 'Sincronizando dados...',
+      semanticLabel:
+          syncType != null ? 'Sincronizando $syncType' : 'Sincronizando dados',
       type: LoadingType.sync,
     );
   }
-  
+
   /// Shows loading for auth operations
   static void showAuthLoading(String context, {required String operation}) {
     showLoadingWithTimeout(
@@ -104,12 +104,12 @@ class LoadingUtils {
       type: LoadingType.auth,
     );
   }
-  
+
   /// Stops loading for a specific context
   static void stopLoading(String context) {
     ContextualLoadingManager.stopLoading(context);
   }
-  
+
   /// Stops all active loadings
   static void stopAllLoadings() {
     ContextualLoadingManager.stopAllLoadings();
@@ -134,7 +134,7 @@ class LoadingPresets {
       onError: onError,
     );
   }
-  
+
   /// Purchase button with loading states
   static Widget purchaseButton({
     required Future<void> Function() onPurchase,
@@ -153,7 +153,7 @@ class LoadingPresets {
       onError: onError,
     );
   }
-  
+
   /// Sync button for data synchronization
   static Widget syncButton({
     required Future<void> Function() onSync,
@@ -170,27 +170,21 @@ class LoadingPresets {
       onError: onError,
     );
   }
-  
+
   /// Plant list skeleton for loading states
   static Widget plantListSkeleton({
     int count = LoadingConstants.defaultSkeletonCount,
   }) {
-    return PlantListSkeleton(
-      itemCount: count,
-      isLoading: true,
-    );
+    return PlantListSkeleton(itemCount: count, isLoading: true);
   }
-  
-  /// Task list skeleton for loading states  
+
+  /// Task list skeleton for loading states
   static Widget taskListSkeleton({
     int count = LoadingConstants.listSkeletonCount,
   }) {
-    return TaskListSkeleton(
-      itemCount: count,
-      isLoading: true,
-    );
+    return TaskListSkeleton(itemCount: count, isLoading: true);
   }
-  
+
   /// Network error recovery widget
   static Widget networkError({
     VoidCallback? onRetry,
@@ -203,18 +197,15 @@ class LoadingPresets {
       isOffline: isOffline,
     );
   }
-  
+
   /// Form error recovery widget
   static Widget formErrors({
     required Map<String, String> errors,
     VoidCallback? onFix,
   }) {
-    return FormErrorRecovery(
-      fieldErrors: errors,
-      onFixErrors: onFix,
-    );
+    return FormErrorRecovery(fieldErrors: errors, onFixErrors: onFix);
   }
-  
+
   /// Auto-save indicator
   static Widget autoSave({
     required bool hasChanges,
@@ -229,7 +220,7 @@ class LoadingPresets {
       statusText: statusText,
     );
   }
-  
+
   /// Save indicator with manual save
   static Widget saveIndicator({
     bool isSaving = false,
@@ -247,9 +238,7 @@ class LoadingPresets {
 }
 
 /// Mixin that combines all loading functionality for pages
-mixin LoadingPageMixin<T extends StatefulWidget> 
-    on State<T> {
-  
+mixin LoadingPageMixin<T extends StatefulWidget> on State<T> {
   void startContextualLoading(
     String context, {
     required String message,
@@ -273,15 +262,12 @@ mixin LoadingPageMixin<T extends StatefulWidget>
   bool hasContextualLoading(String context) {
     return ContextualLoadingManager.hasActiveLoading(context);
   }
-  
+
   /// Convenience method for save operations
   void startSaveLoading({String? itemName}) {
-    LoadingUtils.showSaveLoading(
-      LoadingContexts.plantSave,
-      itemName: itemName,
-    );
+    LoadingUtils.showSaveLoading(LoadingContexts.plantSave, itemName: itemName);
   }
-  
+
   /// Convenience method for purchase operations
   void startPurchaseLoading({String? productName}) {
     LoadingUtils.showPurchaseLoading(
@@ -289,32 +275,26 @@ mixin LoadingPageMixin<T extends StatefulWidget>
       productName: productName,
     );
   }
-  
+
   /// Convenience method for sync operations
   void startSyncLoading({String? syncType}) {
-    LoadingUtils.showSyncLoading(
-      LoadingContexts.sync,
-      syncType: syncType,
-    );
+    LoadingUtils.showSyncLoading(LoadingContexts.sync, syncType: syncType);
   }
-  
+
   /// Convenience method for auth operations
   void startAuthLoading({required String operation}) {
-    LoadingUtils.showAuthLoading(
-      LoadingContexts.auth,
-      operation: operation,
-    );
+    LoadingUtils.showAuthLoading(LoadingContexts.auth, operation: operation);
   }
-  
+
   /// Stop loading for common contexts
   void stopSaveLoading() => stopContextualLoading(LoadingContexts.plantSave);
   void stopPurchaseLoading() => stopContextualLoading(LoadingContexts.premium);
   void stopSyncLoading() => stopContextualLoading(LoadingContexts.sync);
   void stopAuthLoading() => stopContextualLoading(LoadingContexts.auth);
-  
+
   /// Stop all loadings (cleanup method)
   void stopAllLoadings() => LoadingUtils.stopAllLoadings();
-  
+
   void disposeLoadings() {
     // Clean up any loading states for this widget
     stopAllLoadings();

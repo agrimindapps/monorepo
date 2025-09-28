@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 
 import '../../../domain/entities/plant.dart';
 import '../../models/plant_model.dart';
@@ -28,7 +27,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   List<Plant>? _cachedPlants;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
-
 
   final PlantsSearchService _searchService = PlantsSearchService.instance;
 

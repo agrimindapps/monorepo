@@ -18,7 +18,8 @@ class PlantTasksSection extends StatefulWidget {
   State<PlantTasksSection> createState() => _PlantTasksSectionState();
 }
 
-class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAdapter {
+class _PlantTasksSectionState extends State<PlantTasksSection>
+    with PlantTaskAdapter {
   bool _showAllCompletedTasks = false;
 
   @override
@@ -52,7 +53,9 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
                 ? const Color(0xFF2C2C2E)
                 : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         children: [
@@ -102,9 +105,13 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
             )
             .toList();
     final completedTasks = tasks.where((task) => task.isCompleted).toList();
-    
+
     // Ordenar tarefas concluídas por data de conclusão (mais recente primeiro)
-    completedTasks.sort((a, b) => (b.completedDate ?? DateTime(1970)).compareTo(a.completedDate ?? DateTime(1970)));
+    completedTasks.sort(
+      (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
+        a.completedDate ?? DateTime(1970),
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +163,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
       ],
     );
   }
-
 
   Widget _buildTaskSection(
     BuildContext context, {
@@ -236,9 +242,10 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
         ],
       ),
       child: InkWell(
-        onTap: task.isCompleted 
-            ? null 
-            : () => _showTaskCompletionDialog(context, task, taskProvider),
+        onTap:
+            task.isCompleted
+                ? null
+                : () => _showTaskCompletionDialog(context, task, taskProvider),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -270,7 +277,9 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
                                 ? theme.colorScheme.onSurfaceVariant
                                 : theme.colorScheme.onSurface,
                         decoration:
-                            task.isCompleted ? TextDecoration.lineThrough : null,
+                            task.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
                       ),
                     ),
                     if (task.description?.isNotEmpty == true) ...[
@@ -352,7 +361,6 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     }
   }
 
-
   /// Seção de tarefas concluídas agrupadas por data com opção de carregar todas
   Widget _buildCompletedTasksSection(
     BuildContext context,
@@ -360,15 +368,16 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     PlantTaskProvider taskProvider,
   ) {
     final theme = Theme.of(context);
-    
+
     // Determinar quantas tarefas mostrar
-    final tasksToShow = _showAllCompletedTasks 
-        ? completedTasks 
-        : completedTasks.take(15).toList();
-    
+    final tasksToShow =
+        _showAllCompletedTasks
+            ? completedTasks
+            : completedTasks.take(15).toList();
+
     // Agrupar tarefas por data de conclusão
     final groupedTasks = <String, List<PlantTask>>{};
-    
+
     for (final task in tasksToShow) {
       final completedDate = task.completedDate;
       if (completedDate != null) {
@@ -376,10 +385,10 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
         groupedTasks.putIfAbsent(dateKey, () => []).add(task);
       }
     }
-    
+
     // Ordenar as chaves de data (mais recente primeiro)
-    final sortedDateKeys = groupedTasks.keys.toList()
-      ..sort((a, b) => _compareDateKeys(a, b));
+    final sortedDateKeys =
+        groupedTasks.keys.toList()..sort((a, b) => _compareDateKeys(a, b));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,20 +418,23 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Tarefas agrupadas por data
         ...sortedDateKeys.map((dateKey) {
           final dayTasks = groupedTasks[dateKey]!;
-          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header do grupo de data
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: Colors.green.withValues(alpha: 0.1),
@@ -448,7 +460,10 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -464,18 +479,20 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
                   ],
                 ),
               ),
-              
+
               // Tarefas do dia
-              ...dayTasks.map((task) => Padding(
-                padding: const EdgeInsets.only(bottom: 8, left: 16),
-                child: _buildCompletedTaskCard(context, task, taskProvider),
-              )),
-              
+              ...dayTasks.map(
+                (task) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8, left: 16),
+                  child: _buildCompletedTaskCard(context, task, taskProvider),
+                ),
+              ),
+
               const SizedBox(height: 16),
             ],
           );
         }),
-        
+
         // Botão para carregar todas as tarefas
         if (!_showAllCompletedTasks && completedTasks.length > 15) ...[
           const SizedBox(height: 8),
@@ -500,7 +517,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
             ),
           ),
         ],
-        
+
         // Botão para mostrar menos (se estiver mostrando todas)
         if (_showAllCompletedTasks && completedTasks.length > 15) ...[
           const SizedBox(height: 8),
@@ -535,13 +552,12 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFFFFFFF), // Branco puro
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.green.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -553,11 +569,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
               color: Colors.green,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: const Icon(
-              Icons.check, 
-              color: Colors.white, 
-              size: 12,
-            ),
+            child: const Icon(Icons.check, color: Colors.white, size: 12),
           ),
 
           const SizedBox(width: 12),
@@ -569,11 +581,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
               color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
-              _getTaskIcon(task.type), 
-              color: Colors.green, 
-              size: 16,
-            ),
+            child: Icon(_getTaskIcon(task.type), color: Colors.green, size: 16),
           ),
 
           const SizedBox(width: 12),
@@ -596,11 +604,13 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
                   Text(
                     task.description!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
                     ),
                   ),
                 ],
-                
+
                 // Horário de conclusão
                 if (task.completedDate != null) ...[
                   const SizedBox(height: 4),
@@ -643,10 +653,20 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
       return 'Ontem';
     } else {
       final months = [
-        'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
       ];
-      
+
       if (date.year == now.year) {
         return '${date.day} de ${months[date.month - 1]}';
       } else {
@@ -660,11 +680,11 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     // Hoje sempre primeiro
     if (a == 'Hoje') return -1;
     if (b == 'Hoje') return 1;
-    
+
     // Ontem vem depois de hoje
     if (a == 'Ontem') return -1;
     if (b == 'Ontem') return 1;
-    
+
     // Para outras datas, comparar alfabeticamente reverso (aproximação)
     return b.compareTo(a);
   }
@@ -681,7 +701,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     PlantTaskProvider taskProvider,
   ) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -695,9 +715,10 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2C2C2E)
-                  : const Color(0xFFFFFFFF),
+              color:
+                  theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: PlantisColors.primary.withValues(alpha: 0.3),
@@ -758,21 +779,22 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          child: _showAllCompletedTasks
-              ? Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    _buildTaskSection(
-                      context,
-                      title: 'Tarefas concluídas',
-                      tasks: completedTasks,
-                      color: Colors.green,
-                      taskProvider: taskProvider,
-                      isCompleted: true,
-                    ),
-                  ],
-                )
-              : const SizedBox.shrink(),
+          child:
+              _showAllCompletedTasks
+                  ? Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      _buildTaskSection(
+                        context,
+                        title: 'Tarefas concluídas',
+                        tasks: completedTasks,
+                        color: Colors.green,
+                        taskProvider: taskProvider,
+                        isCompleted: true,
+                      ),
+                    ],
+                  )
+                  : const SizedBox.shrink(),
         ),
       ],
     );
@@ -786,10 +808,14 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
     final theme = Theme.of(context);
 
     // Pegar as últimas 5 tarefas
-    final recentTasks = [...completedTasks]
-      ..sort((a, b) => (b.completedDate ?? DateTime(1970))
-          .compareTo(a.completedDate ?? DateTime(1970)))
-      ..take(5).toList();
+    final recentTasks =
+        [...completedTasks]
+          ..sort(
+            (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
+              a.completedDate ?? DateTime(1970),
+            ),
+          )
+          ..take(5).toList();
 
     if (recentTasks.isEmpty) return const SizedBox.shrink();
 
@@ -798,11 +824,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
       children: [
         Row(
           children: [
-            const Icon(
-              Icons.history,
-              color: PlantisColors.primary,
-              size: 18,
-            ),
+            const Icon(Icons.history, color: PlantisColors.primary, size: 18),
             const SizedBox(width: 8),
             Text(
               'Últimos cuidados',
@@ -841,9 +863,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: taskColor.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: taskColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -854,11 +874,7 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
               color: taskColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Icon(
-              _getTaskIcon(task.type),
-              color: taskColor,
-              size: 14,
-            ),
+            child: Icon(_getTaskIcon(task.type), color: taskColor, size: 14),
           ),
 
           const SizedBox(width: 8),
@@ -910,14 +926,17 @@ class _PlantTasksSectionState extends State<PlantTasksSection> with PlantTaskAda
 
   /// Exibe dialog de conclusão de tarefa (igual ao comportamento da página principal)
   Future<void> _showTaskCompletionDialog(
-    BuildContext context, 
-    PlantTask plantTask, 
+    BuildContext context,
+    PlantTask plantTask,
     PlantTaskProvider taskProvider,
   ) async {
     try {
       // Converter PlantTask para Task usando o adaptador
-      final taskEntity = PlantTaskAdapter.plantTaskToTask(plantTask, widget.plant.name);
-      
+      final taskEntity = PlantTaskAdapter.plantTaskToTask(
+        plantTask,
+        widget.plant.name,
+      );
+
       // Exibir dialog de conclusão
       final result = await TaskCompletionDialog.show(
         context: context,

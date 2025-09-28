@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/theme/plantis_colors.dart';
 import '../providers/license_provider.dart';
@@ -121,31 +120,30 @@ class PremiumGatedButton extends StatelessWidget {
           future: licenseProvider.canAccessFeature(feature),
           builder: (context, snapshot) {
             final hasAccess = snapshot.data ?? false;
-            final isLoading = snapshot.connectionState == ConnectionState.waiting;
+            final isLoading =
+                snapshot.connectionState == ConnectionState.waiting;
 
             return ElevatedButton.icon(
-              onPressed: (!enabled || isLoading)
-                  ? null
-                  : hasAccess
+              onPressed:
+                  (!enabled || isLoading)
+                      ? null
+                      : hasAccess
                       ? onPressed
                       : () => _showUpgradeDialog(context),
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Icon(
-                      hasAccess
-                          ? (icon ?? Icons.star)
-                          : Icons.lock,
-                    ),
+              icon:
+                  isLoading
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : Icon(hasAccess ? (icon ?? Icons.star) : Icons.lock),
               label: Text(hasAccess ? text : '$text (Premium)'),
-              style: style ??
+              style:
+                  style ??
                   ElevatedButton.styleFrom(
-                    backgroundColor: hasAccess
-                        ? PlantisColors.primary
-                        : Colors.orange,
+                    backgroundColor:
+                        hasAccess ? PlantisColors.primary : Colors.orange,
                     foregroundColor: Colors.white,
                   ),
             );
@@ -171,33 +169,20 @@ class PremiumBadge extends StatelessWidget {
   /// Whether to show text
   final bool showText;
 
-  const PremiumBadge({
-    super.key,
-    this.size = 20,
-    this.showText = false,
-  });
+  const PremiumBadge({super.key, this.size = 20, this.showText = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: showText ? 8 : 4,
-        vertical: 2,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: showText ? 8 : 4, vertical: 2),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.orange, Colors.amber],
-        ),
+        gradient: const LinearGradient(colors: [Colors.orange, Colors.amber]),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.workspace_premium,
-            size: size,
-            color: Colors.white,
-          ),
+          Icon(Icons.workspace_premium, size: size, color: Colors.white),
           if (showText) ...[
             const SizedBox(width: 4),
             const Text(
@@ -253,11 +238,7 @@ class LicenseStatusIndicator extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.schedule,
-                  size: 16,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.schedule, size: 16, color: Colors.white),
                 const SizedBox(width: 8),
                 if (showDetails)
                   Flexible(
@@ -361,11 +342,7 @@ class _UpgradePrompt extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.workspace_premium,
-              color: Colors.orange,
-              size: 32,
-            ),
+            const Icon(Icons.workspace_premium, color: Colors.orange, size: 32),
             const SizedBox(height: 8),
             Text(
               message ?? 'Recurso Premium',
@@ -418,9 +395,7 @@ class _PremiumUpgradeDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange, Colors.amber],
-              ),
+              gradient: LinearGradient(colors: [Colors.orange, Colors.amber]),
               shape: BoxShape.circle,
             ),
             child: const Icon(

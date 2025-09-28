@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/riverpod_providers/plants_providers.dart' show ViewMode;
+import '../../../../core/riverpod_providers/plants_providers.dart'
+    show ViewMode;
 
 class PlantsAppBar extends StatelessWidget {
   final int plantsCount;
@@ -111,58 +112,61 @@ class PlantsAppBar extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   ViewMode newMode;
-                  
+
                   // Se está agrupado, alterna entre os modos agrupados
-                  if (viewMode == ViewMode.groupedBySpaces || 
+                  if (viewMode == ViewMode.groupedBySpaces ||
                       viewMode == ViewMode.groupedBySpacesGrid) {
                     newMode = ViewMode.groupedBySpacesList;
                   } else if (viewMode == ViewMode.groupedBySpacesList) {
                     newMode = ViewMode.groupedBySpacesGrid;
                   } else {
                     // Se não está agrupado, alterna normalmente
-                    newMode = viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
+                    newMode =
+                        viewMode == ViewMode.grid
+                            ? ViewMode.list
+                            : ViewMode.grid;
                   }
-                  
+
                   onViewModeChanged(newMode);
                 },
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? const Color(0xFF2C2C2E)
-                              : const Color(0xFFFFFFFF), // Branco puro
-                      borderRadius: BorderRadius.circular(12),
-                      border:
-                          isDark
-                              ? Border.all(
-                                color: Colors.grey.withValues(alpha: 0.1),
-                              )
-                              : Border.all(
-                                color: theme.colorScheme.outline.withValues(
-                                  alpha: 0.3,
-                                ),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? const Color(0xFF2C2C2E)
+                            : const Color(0xFFFFFFFF), // Branco puro
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        isDark
+                            ? Border.all(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                            )
+                            : Border.all(
+                              color: theme.colorScheme.outline.withValues(
+                                alpha: 0.3,
                               ),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              isDark
-                                  ? Colors.black.withValues(alpha: 0.25)
-                                  : Colors.black.withValues(alpha: 0.06),
-                          blurRadius: isDark ? 6 : 8,
-                          offset: const Offset(0, 2),
-                          spreadRadius: isDark ? 0 : 1,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      _getToggleIcon(viewMode),
-                      color: theme.colorScheme.secondary,
-                      size: 20,
-                    ),
+                            ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            isDark
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.06),
+                        blurRadius: isDark ? 6 : 8,
+                        offset: const Offset(0, 2),
+                        spreadRadius: isDark ? 0 : 1,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    _getToggleIcon(viewMode),
+                    color: theme.colorScheme.secondary,
+                    size: 20,
                   ),
                 ),
+              ),
             ],
           ),
         ],

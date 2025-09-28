@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../data/models/sync_queue_item.dart';
 import 'sync_queue.dart';
@@ -23,7 +22,8 @@ class SyncOperations {
     _networkSubscription = _connectivityService.networkStatusStream.listen((
       status,
     ) {
-      if (status != ConnectivityType.offline && status != ConnectivityType.none) {
+      if (status != ConnectivityType.offline &&
+          status != ConnectivityType.none) {
         processOfflineQueue();
       }
     });

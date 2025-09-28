@@ -1,10 +1,8 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/data/models/planta_config_model.dart';
 import '../../../../core/services/task_generation_service.dart';
 import '../../../plants/domain/repositories/plants_repository.dart';
-import '../../data/models/task_model.dart';
 import '../entities/task.dart' as task_entity;
 import '../repositories/tasks_repository.dart';
 
@@ -199,7 +197,9 @@ class CompleteTaskWithRegenerationUseCase
 
       final nextTask = generationResult.fold((_) => null, (task) => task);
       if (nextTask == null) {
-        return const Left(ValidationFailure('Nenhuma próxima tarefa foi gerada'));
+        return const Left(
+          ValidationFailure('Nenhuma próxima tarefa foi gerada'),
+        );
       }
 
       // Salvar próxima tarefa
@@ -248,7 +248,8 @@ class CompleteTaskWithRegenerationUseCase
           ((config?.fertilizingIntervalDays as int?) ?? 0) > 0,
       intervaloAdubacaoDias: (config?.fertilizingIntervalDays as int?) ?? 14,
       podaAtiva:
-          (config?.pruningIntervalDays != null) && ((config?.pruningIntervalDays as int?) ?? 0) > 0,
+          (config?.pruningIntervalDays != null) &&
+          ((config?.pruningIntervalDays as int?) ?? 0) > 0,
       intervaloPodaDias: (config?.pruningIntervalDays as int?) ?? 30,
       banhoSolAtivo:
           (config?.sunlightIntervalDays != null) &&
@@ -257,7 +258,8 @@ class CompleteTaskWithRegenerationUseCase
       inspecaoPragasAtiva:
           (config?.pestInspectionIntervalDays != null) &&
           ((config?.pestInspectionIntervalDays as int?) ?? 0) > 0,
-      intervaloInspecaoPragasDias: (config?.pestInspectionIntervalDays as int?) ?? 7,
+      intervaloInspecaoPragasDias:
+          (config?.pestInspectionIntervalDays as int?) ?? 7,
       replantarAtivo: true,
       intervaloReplantarDias: 180,
     );

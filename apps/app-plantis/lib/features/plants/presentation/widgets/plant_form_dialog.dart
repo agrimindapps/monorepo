@@ -1,39 +1,38 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/riverpod_providers/solid_providers.dart';
+import '../../../../core/state/plant_form_state_manager.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/plant_details_provider.dart';
-import '../providers/plant_form_provider.dart';
 import '../providers/plants_provider.dart';
 import 'plant_form_basic_info.dart';
 import 'plant_form_care_config.dart';
 
 /// Dialog moderna para cadastro de plantas
 /// Reutiliza os widgets existentes do PlantFormPage
-class PlantFormDialog extends StatefulWidget {
+class PlantFormDialog extends ConsumerStatefulWidget {
   final String? plantId;
 
   const PlantFormDialog({super.key, this.plantId});
 
   @override
-  State<PlantFormDialog> createState() => _PlantFormDialogState();
+  ConsumerState<PlantFormDialog> createState() => _PlantFormDialogState();
 
   /// Factory method para mostrar a dialog
   static Future<bool?> show(BuildContext context, {String? plantId}) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ChangeNotifierProvider(
-        create: (_) => di.sl<PlantFormProvider>(),
-        child: PlantFormDialog(plantId: plantId),
-      ),
+      builder: (context) => PlantFormDialog(plantId: plantId),
     );
   }
 }
 
-class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin {
+class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
+    with LoadingPageMixin {
   bool _initialized = false;
   final ScrollController _scrollController = ScrollController();
 
@@ -41,7 +40,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeProvider();
+      _initializeFormManager();
     });
   }
 
@@ -52,22 +51,26 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
     super.dispose();
   }
 
-  void _initializeProvider() {
+  void _initializeFormManager() {
     if (_initialized || !mounted) return;
-    
+
     _initialized = true;
-    final provider = Provider.of<PlantFormProvider>(context, listen: false);
-    
+    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+
     if (widget.plantId != null) {
       if (kDebugMode) {
-        print('🔧 PlantFormDialog._initializeProvider() - Iniciando edição para plantId: ${widget.plantId}');
+        print(
+          '🔧 PlantFormDialog._initializeFormManager() - Iniciando edição para plantId: ${widget.plantId}',
+        );
       }
-      provider.initializeForEdit(widget.plantId!);
+      formManager.loadPlant(widget.plantId!);
     } else {
       if (kDebugMode) {
-        print('🔧 PlantFormDialog._initializeProvider() - Iniciando adição de nova planta');
+        print(
+          '🔧 PlantFormDialog._initializeFormManager() - Iniciando adição de nova planta',
+        );
       }
-      provider.initializeForAdd();
+      formManager.initializeForNewPlant();
     }
   }
 
@@ -77,7 +80,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
     final colorScheme = theme.colorScheme;
     final isEditing = widget.plantId != null;
     final screenSize = MediaQuery.of(context).size;
-    
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(
@@ -90,9 +93,10 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           maxHeight: screenSize.height * 0.9,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark 
-              ? const Color(0xFF2D2D2D) 
-              : const Color(0xFFFFFFFF), // Branco puro para modo claro
+          color:
+              Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF2D2D2D)
+                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
@@ -107,24 +111,26 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           children: [
             // Header moderno
             _buildModernHeader(colorScheme, isEditing),
-            
+
             // Content
             Expanded(
-              child: Consumer<PlantFormProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final formState = ref.watch(solidPlantFormStateProvider);
+                  
+                  if (formState.isLoading) {
                     return _buildLoadingState();
                   }
 
-                  if (provider.hasError) {
-                    return _buildErrorState(provider, isEditing);
+                  if (formState.hasError) {
+                    return _buildErrorState(formState, isEditing);
                   }
 
-                  return _buildFormContent(provider);
+                  return _buildFormContent(formState);
                 },
               ),
             ),
-            
+
             // Footer com actions
             _buildFooter(colorScheme),
           ],
@@ -152,7 +158,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Título e subtítulo
           Expanded(
             child: Column(
@@ -167,7 +173,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isEditing 
+                  isEditing
                       ? 'Atualize as informações da sua planta'
                       : 'Adicione uma nova planta ao seu jardim',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -177,7 +183,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
               ],
             ),
           ),
-          
+
           // Botão fechar
           IconButton(
             onPressed: () => _handleClose(),
@@ -205,40 +211,39 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
             const SizedBox(height: 12),
             SkeletonShapes.text(height: 16, width: 200),
             const SizedBox(height: 24),
-            ...List.generate(3, (index) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: SkeletonShapes.listTile(),
-            )),
+            ...List.generate(
+              3,
+              (index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: SkeletonShapes.listTile(),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildErrorState(PlantFormProvider provider, bool isEditing) {
+  Widget _buildErrorState(PlantFormState formState, bool isEditing) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(24),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'Ops! Algo deu errado',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: colorScheme.error,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(color: colorScheme.error),
             ),
             const SizedBox(height: 8),
             Text(
-              isEditing 
+              isEditing
                   ? 'Erro ao carregar dados da planta'
                   : 'Erro ao inicializar formulário',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -246,7 +251,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
               ),
               textAlign: TextAlign.center,
             ),
-            if (provider.errorMessage != null) ...[
+            if (formState.errorMessage != null) ...[
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -255,7 +260,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  provider.errorMessage!,
+                  formState.errorMessage!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onErrorContainer,
                   ),
@@ -274,8 +279,9 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
                 const SizedBox(width: 16),
                 FilledButton(
                   onPressed: () {
-                    provider.clearError();
-                    _initializeProvider();
+                    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+                    formManager.clearError();
+                    _initializeFormManager();
                   },
                   child: const Text('Tentar Novamente'),
                 ),
@@ -287,7 +293,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
     );
   }
 
-  Widget _buildFormContent(PlantFormProvider provider) {
+  Widget _buildFormContent(PlantFormState formState) {
     return Scrollbar(
       controller: _scrollController,
       child: SingleChildScrollView(
@@ -303,8 +309,11 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
 
             const SizedBox(height: 24),
 
-            // Configurações de Cuidado  
-            _buildSectionTitle('Configurações de Cuidado', Icons.settings_outlined),
+            // Configurações de Cuidado
+            _buildSectionTitle(
+              'Configurações de Cuidado',
+              Icons.settings_outlined,
+            ),
             const SizedBox(height: 16),
             const PlantFormCareConfig(),
 
@@ -321,11 +330,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
 
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: colorScheme.primary,
-        ),
+        Icon(icon, size: 20, color: colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           title,
@@ -348,33 +353,37 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
           bottomRight: Radius.circular(28),
         ),
       ),
-      child: Consumer<PlantFormProvider>(
-        builder: (context, provider, child) {
+      child: Consumer(
+        builder: (context, ref, child) {
+          final formState = ref.watch(solidPlantFormStateProvider);
+          
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               // Botão Cancelar
               TextButton(
-                onPressed: provider.isSaving ? null : () => _handleClose(),
+                onPressed: formState.isSaving ? null : () => _handleClose(),
                 child: const Text('Cancelar'),
               ),
               const SizedBox(width: 16),
-              
+
               // Botão Salvar
               FilledButton(
-                onPressed: (provider.isValid && !provider.isSaving) 
-                    ? () => _handleSave() 
-                    : null,
-                child: provider.isSaving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(widget.plantId != null ? 'Atualizar' : 'Salvar'),
+                onPressed:
+                    (formState.isFormValid && !formState.isSaving)
+                        ? () => _handleSave()
+                        : null,
+                child:
+                    formState.isSaving
+                        ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : Text(widget.plantId != null ? 'Atualizar' : 'Salvar'),
               ),
             ],
           );
@@ -384,9 +393,9 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
   }
 
   Future<void> _handleClose() async {
-    final provider = Provider.of<PlantFormProvider>(context, listen: false);
-    
-    if (provider.hasUnsavedChanges) {
+    final formState = ref.read(solidPlantFormStateProvider);
+
+    if (formState.hasChanges) {
       final shouldDiscard = await _showDiscardDialog();
       if (shouldDiscard == true && mounted) {
         Navigator.of(context).pop(false);
@@ -397,81 +406,66 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
   }
 
   Future<void> _handleSave() async {
-    final provider = Provider.of<PlantFormProvider>(context, listen: false);
-    
+    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+
     try {
-      final success = await provider.savePlant();
-      
+      final success = await formManager.savePlant();
+
       if (mounted) {
         if (success) {
           // Procurar o PlantsProvider no contexto ou usar DI
           PlantsProvider? plantsProvider;
           try {
-            plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+            plantsProvider = di.sl<PlantsProvider>();
           } catch (e) {
-            // Se não encontrar no contexto, tentar usar DI
-            try {
-              plantsProvider = di.sl<PlantsProvider>();
-            } catch (e2) {
-              // Se não conseguir obter o provider, apenas exibir sucesso
-              print('Aviso: Não foi possível atualizar a lista automaticamente');
-            }
+            // Se não conseguir obter o provider, apenas exibir sucesso
+            print(
+              'Aviso: Não foi possível atualizar a lista automaticamente',
+            );
           }
-          
+
           // Atualizar a lista de plantas se o provider estiver disponível
           if (plantsProvider != null) {
             await plantsProvider.refreshPlants();
           }
-          
+
           // Se for edição, também atualizar o PlantDetailsProvider
           if (widget.plantId != null && mounted) {
             if (kDebugMode) {
-              print('🔧 PlantFormDialog._handleSave() - Tentando atualizar PlantDetailsProvider para plantId: ${widget.plantId}');
+              print(
+                '🔧 PlantFormDialog._handleSave() - Tentando atualizar PlantDetailsProvider para plantId: ${widget.plantId}',
+              );
             }
-            
+
             try {
-              final plantDetailsProvider = Provider.of<PlantDetailsProvider>(context, listen: false);
-              
+              final plantDetailsProvider = di.sl<PlantDetailsProvider>();
+
               if (kDebugMode) {
-                print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider encontrado via Provider.of');
-                print('   - Planta atual no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
+                print(
+                  '✅ PlantFormDialog._handleSave() - PlantDetailsProvider encontrado via DI',
+                );
+                print(
+                  '   - Planta atual no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})',
+                );
               }
-              
+
               await plantDetailsProvider.reloadPlant(widget.plantId!);
-              
+
               if (kDebugMode) {
-                print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider recarregado com sucesso');
-                print('   - Nova planta no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
+                print(
+                  '✅ PlantFormDialog._handleSave() - PlantDetailsProvider (DI) recarregado com sucesso',
+                );
+                print(
+                  '   - Nova planta no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})',
+                );
               }
-            } catch (e) {
+            } catch (e2) {
               if (kDebugMode) {
-                print('⚠️ PlantFormDialog._handleSave() - Provider.of falhou: $e');
-                print('⚠️ PlantFormDialog._handleSave() - Tentando usar DI como fallback...');
-              }
-              
-              // Se não encontrar no contexto, tentar usar DI
-              try {
-                final plantDetailsProvider = di.sl<PlantDetailsProvider>();
-                
-                if (kDebugMode) {
-                  print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider encontrado via DI');
-                  print('   - Planta atual no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
-                }
-                
-                await plantDetailsProvider.reloadPlant(widget.plantId!);
-                
-                if (kDebugMode) {
-                  print('✅ PlantFormDialog._handleSave() - PlantDetailsProvider (DI) recarregado com sucesso');
-                  print('   - Nova planta no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})');
-                }
-              } catch (e2) {
-                if (kDebugMode) {
-                  print('❌ PlantFormDialog._handleSave() - Falha total: $e2');
-                }
+                print('❌ PlantFormDialog._handleSave() - Falha ao atualizar PlantDetailsProvider: $e2');
               }
             }
           }
-          
+
           // Mostrar snackbar de sucesso
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -497,6 +491,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
             Navigator.of(context).pop(true);
           }
         } else {
+          final formState = ref.read(solidPlantFormStateProvider);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -505,7 +500,9 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
                     const Icon(Icons.error, color: Colors.white),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
+                      child: Text(
+                        formState.errorMessage ?? 'Erro ao salvar planta',
+                      ),
                     ),
                   ],
                 ),
@@ -524,9 +521,7 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
               children: [
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Erro inesperado: $e'),
-                ),
+                Expanded(child: Text('Erro inesperado: $e')),
               ],
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
@@ -541,33 +536,33 @@ class _PlantFormDialogState extends State<PlantFormDialog> with LoadingPageMixin
   }
 
   Future<bool?> _showDiscardDialog() {
-    
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        icon: Icon(
-          Icons.warning_amber_rounded,
-          color: Theme.of(context).colorScheme.error,
-          size: 32,
-        ),
-        title: const Text('Descartar alterações?'),
-        content: const Text(
-          'Você tem alterações não salvas que serão perdidas. Deseja realmente sair sem salvar?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Continuar Editando'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+      builder:
+          (context) => AlertDialog(
+            icon: Icon(
+              Icons.warning_amber_rounded,
+              color: Theme.of(context).colorScheme.error,
+              size: 32,
             ),
-            child: const Text('Descartar'),
+            title: const Text('Descartar alterações?'),
+            content: const Text(
+              'Você tem alterações não salvas que serão perdidas. Deseja realmente sair sem salvar?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Continuar Editando'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Descartar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

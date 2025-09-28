@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../../data/models/device_model.dart';
@@ -48,7 +47,9 @@ abstract class DeviceRepository {
 
   /// Obtém estatísticas de dispositivos do usuário
   /// Combina dados remotos e locais conforme conectividade
-  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(String userId);
+  Future<Either<Failure, Map<String, dynamic>>> getDeviceStatistics(
+    String userId,
+  );
 
   /// Sincroniza dispositivos locais com o servidor
   /// Força refresh completo dos dados

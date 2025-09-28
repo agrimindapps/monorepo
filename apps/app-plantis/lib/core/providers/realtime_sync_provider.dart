@@ -36,7 +36,8 @@ class RealtimeSyncProvider with ChangeNotifier {
     PlantisRealtimeService? realtimeService,
     ConnectivityService? connectivityService,
   }) : _realtimeService = realtimeService ?? PlantisRealtimeService.instance,
-       _connectivityService = connectivityService ?? ConnectivityService.instance {
+       _connectivityService =
+           connectivityService ?? ConnectivityService.instance {
     _initializeProvider();
   }
 
@@ -114,10 +115,15 @@ class RealtimeSyncProvider with ChangeNotifier {
       // Estado inicial
       await _updateInitialState();
 
-      developer.log('RealtimeSyncProvider inicializado', name: 'RealtimeSyncProvider');
-
+      developer.log(
+        'RealtimeSyncProvider inicializado',
+        name: 'RealtimeSyncProvider',
+      );
     } catch (e) {
-      developer.log('Erro ao inicializar RealtimeSyncProvider: $e', name: 'RealtimeSyncProvider');
+      developer.log(
+        'Erro ao inicializar RealtimeSyncProvider: $e',
+        name: 'RealtimeSyncProvider',
+      );
     }
   }
 
@@ -126,14 +132,16 @@ class RealtimeSyncProvider with ChangeNotifier {
     _realtimeStatusSubscription = _realtimeService.realtimeStatusStream.listen(
       (isActive) {
         _isRealtimeActive = isActive;
-        _addRecentEvent(isActive
-            ? 'Real-time sync ativado'
-            : 'Real-time sync desativado'
+        _addRecentEvent(
+          isActive ? 'Real-time sync ativado' : 'Real-time sync desativado',
         );
         notifyListeners();
       },
       onError: (Object error) {
-        developer.log('Erro no listener de real-time status: $error', name: 'RealtimeSyncProvider');
+        developer.log(
+          'Erro no listener de real-time status: $error',
+          name: 'RealtimeSyncProvider',
+        );
       },
     );
   }
@@ -147,44 +155,59 @@ class RealtimeSyncProvider with ChangeNotifier {
         notifyListeners();
       },
       onError: (Object error) {
-        developer.log('Erro no listener de sync events: $error', name: 'RealtimeSyncProvider');
+        developer.log(
+          'Erro no listener de sync events: $error',
+          name: 'RealtimeSyncProvider',
+        );
       },
     );
   }
 
   /// Configura listener do status global de sync
   void _setupGlobalSyncListener() {
-    _globalSyncSubscription = UnifiedSyncManager.instance.globalSyncStatusStream.listen(
-      (statusMap) {
-        final plantisStatus = statusMap['plantis'];
-        if (plantisStatus != null && plantisStatus != _currentSyncStatus) {
-          _currentSyncStatus = plantisStatus;
-          _lastSyncTime = DateTime.now();
+    _globalSyncSubscription = UnifiedSyncManager.instance.globalSyncStatusStream
+        .listen(
+          (statusMap) {
+            final plantisStatus = statusMap['plantis'];
+            if (plantisStatus != null && plantisStatus != _currentSyncStatus) {
+              _currentSyncStatus = plantisStatus;
+              _lastSyncTime = DateTime.now();
 
-          _addRecentEvent('Status: ${_getStatusDescription(plantisStatus)}');
-          notifyListeners();
-        }
-      },
-      onError: (error) {
-        developer.log('Erro no listener de global sync: $error', name: 'RealtimeSyncProvider');
-      },
-    );
+              _addRecentEvent(
+                'Status: ${_getStatusDescription(plantisStatus)}',
+              );
+              notifyListeners();
+            }
+          },
+          onError: (error) {
+            developer.log(
+              'Erro no listener de global sync: $error',
+              name: 'RealtimeSyncProvider',
+            );
+          },
+        );
   }
 
   /// Configura listener de eventos individuais de sync
   void _setupSyncEventsListener() {
-    _syncEventsSubscription = UnifiedSyncManager.instance.syncEventStream.listen(
-      (event) {
-        if (event.appName == 'plantis') {
-          _updatePendingChanges();
-          _addRecentEvent('${_getActionDescription(event.action)}: ${event.entityType}');
-          notifyListeners();
-        }
-      },
-      onError: (Object error) {
-        developer.log('Erro no listener de sync events: $error', name: 'RealtimeSyncProvider');
-      },
-    );
+    _syncEventsSubscription = UnifiedSyncManager.instance.syncEventStream
+        .listen(
+          (event) {
+            if (event.appName == 'plantis') {
+              _updatePendingChanges();
+              _addRecentEvent(
+                '${_getActionDescription(event.action)}: ${event.entityType}',
+              );
+              notifyListeners();
+            }
+          },
+          onError: (Object error) {
+            developer.log(
+              'Erro no listener de sync events: $error',
+              name: 'RealtimeSyncProvider',
+            );
+          },
+        );
   }
 
   /// Configura listener de conectividade
@@ -192,7 +215,9 @@ class RealtimeSyncProvider with ChangeNotifier {
     _connectivitySubscription = _connectivityService.networkStatusStream.listen(
       (status) {
         final wasOnline = _isOnline;
-        _isOnline = status != ConnectivityType.offline && status != ConnectivityType.none;
+        _isOnline =
+            status != ConnectivityType.offline &&
+            status != ConnectivityType.none;
 
         if (_isOnline != wasOnline) {
           _addRecentEvent(_isOnline ? 'Conectado' : 'Desconectado');
@@ -203,7 +228,10 @@ class RealtimeSyncProvider with ChangeNotifier {
         }
       },
       onError: (error) {
-        developer.log('Erro no listener de conectividade: $error', name: 'RealtimeSyncProvider');
+        developer.log(
+          'Erro no listener de conectividade: $error',
+          name: 'RealtimeSyncProvider',
+        );
       },
     );
   }
@@ -211,12 +239,18 @@ class RealtimeSyncProvider with ChangeNotifier {
   /// Atualiza estado inicial
   Future<void> _updateInitialState() async {
     _isRealtimeActive = _realtimeService.isRealtimeActive;
-    _currentSyncStatus = UnifiedSyncManager.instance.getAppSyncStatus('plantis');
+    _currentSyncStatus = UnifiedSyncManager.instance.getAppSyncStatus(
+      'plantis',
+    );
 
-    final connectivityResult = await _connectivityService.getCurrentNetworkStatus();
+    final connectivityResult =
+        await _connectivityService.getCurrentNetworkStatus();
     connectivityResult.fold(
       (failure) => _isOnline = false,
-      (status) => _isOnline = status != ConnectivityType.offline && status != ConnectivityType.none,
+      (status) =>
+          _isOnline =
+              status != ConnectivityType.offline &&
+              status != ConnectivityType.none,
     );
 
     _updatePendingChanges();
@@ -239,7 +273,10 @@ class RealtimeSyncProvider with ChangeNotifier {
 
       _pendingChanges = totalPending;
     } catch (e) {
-      developer.log('Erro ao atualizar mudanças pendentes: $e', name: 'RealtimeSyncProvider');
+      developer.log(
+        'Erro ao atualizar mudanças pendentes: $e',
+        name: 'RealtimeSyncProvider',
+      );
     }
   }
 
@@ -261,7 +298,10 @@ class RealtimeSyncProvider with ChangeNotifier {
       _addRecentEvent('Sincronização manual solicitada');
       notifyListeners();
     } catch (e) {
-      developer.log('Erro ao forçar sincronização: $e', name: 'RealtimeSyncProvider');
+      developer.log(
+        'Erro ao forçar sincronização: $e',
+        name: 'RealtimeSyncProvider',
+      );
       _addRecentEvent('Erro na sincronização manual');
       notifyListeners();
     }
@@ -276,7 +316,10 @@ class RealtimeSyncProvider with ChangeNotifier {
         await _realtimeService.enableRealtime();
       }
     } catch (e) {
-      developer.log('Erro ao alternar real-time sync: $e', name: 'RealtimeSyncProvider');
+      developer.log(
+        'Erro ao alternar real-time sync: $e',
+        name: 'RealtimeSyncProvider',
+      );
       _addRecentEvent('Erro ao alternar modo de sincronização');
       notifyListeners();
     }
@@ -286,9 +329,10 @@ class RealtimeSyncProvider with ChangeNotifier {
   void setSyncNotifications(bool enabled) {
     if (_showSyncNotifications != enabled) {
       _showSyncNotifications = enabled;
-      _addRecentEvent(enabled
-          ? 'Notificações de sync ativadas'
-          : 'Notificações de sync desativadas'
+      _addRecentEvent(
+        enabled
+            ? 'Notificações de sync ativadas'
+            : 'Notificações de sync desativadas',
       );
       notifyListeners();
     }
@@ -298,9 +342,10 @@ class RealtimeSyncProvider with ChangeNotifier {
   void setBackgroundSync(bool enabled) {
     if (_enableBackgroundSync != enabled) {
       _enableBackgroundSync = enabled;
-      _addRecentEvent(enabled
-          ? 'Sync em background ativado'
-          : 'Sync em background desativado'
+      _addRecentEvent(
+        enabled
+            ? 'Sync em background ativado'
+            : 'Sync em background desativado',
       );
       notifyListeners();
     }
@@ -366,8 +411,8 @@ class RealtimeSyncProvider with ChangeNotifier {
 
   String _formatTimestamp(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:'
-           '${dateTime.minute.toString().padLeft(2, '0')}:'
-           '${dateTime.second.toString().padLeft(2, '0')}';
+        '${dateTime.minute.toString().padLeft(2, '0')}:'
+        '${dateTime.second.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -383,9 +428,9 @@ class RealtimeSyncProvider with ChangeNotifier {
 
 /// Cores para indicador de status de sync
 enum SyncIndicatorColor {
-  success,    // Verde - tudo sincronizado
-  info,       // Azul - sync por intervalos
-  syncing,    // Laranja - sincronizando
-  warning,    // Amarelo - offline mas funcionando
-  error,      // Vermelho - erro
+  success, // Verde - tudo sincronizado
+  info, // Azul - sync por intervalos
+  syncing, // Laranja - sincronizando
+  warning, // Amarelo - offline mas funcionando
+  error, // Vermelho - erro
 }

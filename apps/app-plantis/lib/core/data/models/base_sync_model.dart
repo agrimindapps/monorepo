@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 import '../../sync/sync_status.dart' as local;
 

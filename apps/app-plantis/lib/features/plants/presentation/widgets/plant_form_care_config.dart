@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/riverpod_providers/solid_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
-import '../providers/plant_form_provider.dart';
 
-class PlantFormCareConfig extends StatefulWidget {
+class PlantFormCareConfig extends ConsumerStatefulWidget {
   const PlantFormCareConfig({super.key});
 
   @override
-  State<PlantFormCareConfig> createState() => _PlantFormCareConfigState();
+  ConsumerState<PlantFormCareConfig> createState() => _PlantFormCareConfigState();
 }
 
-class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
+class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
   final List<String> _intervalOptions = [
     '1 dia',
     '2 dias',
@@ -82,10 +82,13 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PlantFormProvider>(
-      builder: (context, provider, child) {
-        final fieldErrors = provider.fieldErrors; // Get validation errors for real-time display
-        
+    return Consumer(
+      builder: (context, ref, child) {
+        final formState = ref.watch(solidPlantFormStateProvider);
+        final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+        final fieldErrors =
+            formState.fieldErrors; // Get validation errors for real-time display
+
         return Column(
           children: [
             // Water Care Section
@@ -93,15 +96,16 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               title: 'Água',
               icon: Icons.water_drop,
               iconColor: PlantisColors.primary,
-              isEnabled: provider.enableWateringCare ?? false,
-              onToggle: (value) => provider.setEnableWateringCare(value),
-              interval: _getIntervalText(provider.wateringIntervalDays),
+              isEnabled: formState.enableWateringCare ?? false,
+              onToggle: (value) => formManager.setWateringConfig(enabled: value),
+              interval: _getIntervalText(formState.wateringIntervalDays),
               onIntervalChanged: (interval) {
-                provider.setWateringInterval(_getIntervalDays(interval));
+                formManager.setWateringConfig(intervalDays: _getIntervalDays(interval));
               },
-              lastDate: provider.lastWateringDate,
-              onDateChanged: (date) => provider.setLastWateringDate(date),
-              errorText: fieldErrors['wateringInterval'], // Show validation error
+              lastDate: formState.lastWateringDate,
+              onDateChanged: (date) => formManager.setWateringConfig(lastDate: date),
+              errorText:
+                  fieldErrors['wateringInterval'], // Show validation error
             ),
 
             const SizedBox(height: 20),
@@ -111,15 +115,16 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               title: 'Adubo',
               icon: Icons.eco,
               iconColor: PlantisColors.primary,
-              isEnabled: provider.enableFertilizerCare ?? false,
-              onToggle: (value) => provider.setEnableFertilizerCare(value),
-              interval: _getIntervalText(provider.fertilizingIntervalDays),
+              isEnabled: formState.enableFertilizerCare ?? false,
+              onToggle: (value) => formManager.setFertilizerConfig(enabled: value),
+              interval: _getIntervalText(formState.fertilizingIntervalDays),
               onIntervalChanged: (interval) {
-                provider.setFertilizingInterval(_getIntervalDays(interval));
+                formManager.setFertilizerConfig(intervalDays: _getIntervalDays(interval));
               },
-              lastDate: provider.lastFertilizerDate,
-              onDateChanged: (date) => provider.setLastFertilizerDate(date),
-              errorText: fieldErrors['fertilizingInterval'], // Show validation error
+              lastDate: formState.lastFertilizerDate,
+              onDateChanged: (date) => formManager.setFertilizerConfig(lastDate: date),
+              errorText:
+                  fieldErrors['fertilizingInterval'], // Show validation error
             ),
 
             const SizedBox(height: 20),
@@ -129,14 +134,14 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               title: 'Luz solar',
               icon: Icons.wb_sunny,
               iconColor: PlantisColors.primary,
-              isEnabled: provider.enableSunlightCare ?? false,
-              onToggle: (value) => provider.setEnableSunlightCare(value),
-              interval: _getIntervalText(provider.sunlightIntervalDays),
+              isEnabled: formState.enableSunlightCare ?? false,
+              onToggle: (value) => formManager.setSunlightConfig(enabled: value),
+              interval: _getIntervalText(formState.sunlightIntervalDays),
               onIntervalChanged: (interval) {
-                provider.setSunlightInterval(_getIntervalDays(interval));
+                formManager.setSunlightConfig(intervalDays: _getIntervalDays(interval));
               },
-              lastDate: provider.lastSunlightDate,
-              onDateChanged: (date) => provider.setLastSunlightDate(date),
+              lastDate: formState.lastSunlightDate,
+              onDateChanged: (date) => formManager.setSunlightConfig(lastDate: date),
             ),
 
             const SizedBox(height: 20),
@@ -146,14 +151,14 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               title: 'Verificação de pragas',
               icon: Icons.bug_report,
               iconColor: PlantisColors.primary,
-              isEnabled: provider.enablePestInspection ?? false,
-              onToggle: (value) => provider.setEnablePestInspection(value),
-              interval: _getIntervalText(provider.pestInspectionIntervalDays),
+              isEnabled: formState.enablePestInspection ?? false,
+              onToggle: (value) => formManager.setPestInspectionConfig(enabled: value),
+              interval: _getIntervalText(formState.pestInspectionIntervalDays),
               onIntervalChanged: (interval) {
-                provider.setPestInspectionInterval(_getIntervalDays(interval));
+                formManager.setPestInspectionConfig(intervalDays: _getIntervalDays(interval));
               },
-              lastDate: provider.lastPestInspectionDate,
-              onDateChanged: (date) => provider.setLastPestInspectionDate(date),
+              lastDate: formState.lastPestInspectionDate,
+              onDateChanged: (date) => formManager.setPestInspectionConfig(lastDate: date),
             ),
 
             const SizedBox(height: 20),
@@ -163,15 +168,16 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               title: 'Poda',
               icon: Icons.content_cut,
               iconColor: PlantisColors.primary,
-              isEnabled: provider.enablePruning ?? false,
-              onToggle: (value) => provider.setEnablePruning(value),
-              interval: _getIntervalText(provider.pruningIntervalDays),
+              isEnabled: formState.enablePruning ?? false,
+              onToggle: (value) => formManager.setPruningConfig(enabled: value),
+              interval: _getIntervalText(formState.pruningIntervalDays),
               onIntervalChanged: (interval) {
-                provider.setPruningInterval(_getIntervalDays(interval));
+                formManager.setPruningConfig(intervalDays: _getIntervalDays(interval));
               },
-              lastDate: provider.lastPruningDate,
-              onDateChanged: (date) => provider.setLastPruningDate(date),
-              errorText: fieldErrors['pruningInterval'], // Show validation error
+              lastDate: formState.lastPruningDate,
+              onDateChanged: (date) => formManager.setPruningConfig(lastDate: date),
+              errorText:
+                  fieldErrors['pruningInterval'], // Show validation error
             ),
 
             const SizedBox(height: 20),
@@ -181,14 +187,14 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               title: 'Replantio',
               icon: Icons.grass,
               iconColor: PlantisColors.primary,
-              isEnabled: provider.enableReplanting ?? false,
-              onToggle: (value) => provider.setEnableReplanting(value),
-              interval: _getIntervalText(provider.replantingIntervalDays),
+              isEnabled: formState.enableReplanting ?? false,
+              onToggle: (value) => formManager.setReplantingConfig(enabled: value),
+              interval: _getIntervalText(formState.replantingIntervalDays),
               onIntervalChanged: (interval) {
-                provider.setReplantingInterval(_getIntervalDays(interval));
+                formManager.setReplantingConfig(intervalDays: _getIntervalDays(interval));
               },
-              lastDate: provider.lastReplantingDate,
-              onDateChanged: (date) => provider.setLastReplantingDate(date),
+              lastDate: formState.lastReplantingDate,
+              onDateChanged: (date) => formManager.setReplantingConfig(lastDate: date),
             ),
           ],
         );
@@ -213,14 +219,20 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-            ? const Color(0xFF2D2D2D) 
-            : const Color(0xFFFFFFFF), // Branco puro
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2D2D2D)
+                : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: errorText != null 
-              ? theme.colorScheme.error // Show error border
-              : (isEnabled ? iconColor.withValues(alpha: 0.3) : Colors.grey[300]!),
+          color:
+              errorText != null
+                  ? theme
+                      .colorScheme
+                      .error // Show error border
+                  : (isEnabled
+                      ? iconColor.withValues(alpha: 0.3)
+                      : Colors.grey[300]!),
           width: 1.5,
         ),
         boxShadow: [
@@ -274,7 +286,7 @@ class _PlantFormCareConfigState extends State<PlantFormCareConfig> {
               iconColor: iconColor,
             ),
           ],
-          
+
           // Error text display
           if (errorText != null) ...[
             const SizedBox(height: 8),

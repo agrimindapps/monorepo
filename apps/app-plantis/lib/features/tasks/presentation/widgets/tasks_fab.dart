@@ -24,7 +24,7 @@ class TasksFab extends StatelessWidget {
 
   Future<void> _showAddTaskDialog(BuildContext context) async {
     final result = await TaskCreationDialog.show(context: context);
-    
+
     if (result != null && context.mounted) {
       // Create task entity from the form data
       final task = Task(
@@ -42,7 +42,7 @@ class TasksFab extends StatelessWidget {
 
       // Add the task using the provider
       final success = await context.read<TasksProvider>().addTask(task);
-      
+
       if (success && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -63,4 +63,3 @@ class TasksFab extends StatelessWidget {
     }
   }
 }
-

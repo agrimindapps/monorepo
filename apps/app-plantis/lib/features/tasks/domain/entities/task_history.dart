@@ -118,18 +118,28 @@ class TaskHistory extends Equatable {
       originalDueDate: DateTime.fromMillisecondsSinceEpoch(
         (map['originalDueDate'] as int?) ?? 0,
       ),
-      completedAt: DateTime.fromMillisecondsSinceEpoch((map['completedAt'] as int?) ?? 0),
+      completedAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['completedAt'] as int?) ?? 0,
+      ),
       userId: (map['userId'] as String?) ?? '',
       notes: map['notes'] as String?,
-      photosUrls: List<String>.from((map['photosUrls'] as List<dynamic>?) ?? []),
+      photosUrls: List<String>.from(
+        (map['photosUrls'] as List<dynamic>?) ?? [],
+      ),
       timeSpent:
-          map['timeSpent'] != null ? Duration(minutes: (map['timeSpent'] as int)) : null,
+          map['timeSpent'] != null
+              ? Duration(minutes: (map['timeSpent'] as int))
+              : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['createdAt'] as int?) ?? 0,
+      ),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['updatedAt'] as int?) ?? 0,
+      ),
     );
   }
 
@@ -151,18 +161,28 @@ class TaskHistory extends Equatable {
       originalDueDate: DateTime.fromMillisecondsSinceEpoch(
         (map['originalDueDate'] as int?) ?? 0,
       ),
-      completedAt: DateTime.fromMillisecondsSinceEpoch((map['completedAt'] as int?) ?? 0),
+      completedAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['completedAt'] as int?) ?? 0,
+      ),
       userId: (map['userId'] as String?) ?? '',
       notes: map['notes'] as String?,
-      photosUrls: List<String>.from((map['photosUrls'] as List<dynamic>?) ?? []),
+      photosUrls: List<String>.from(
+        (map['photosUrls'] as List<dynamic>?) ?? [],
+      ),
       timeSpent:
-          map['timeSpent'] != null ? Duration(minutes: (map['timeSpent'] as int)) : null,
+          map['timeSpent'] != null
+              ? Duration(minutes: (map['timeSpent'] as int))
+              : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['createdAt'] as int?) ?? 0,
+      ),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['updatedAt'] as int?) ?? 0,
+      ),
     );
   }
 

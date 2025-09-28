@@ -17,7 +17,8 @@ class ExportAvailabilityWidget extends StatefulWidget {
   });
 
   @override
-  State<ExportAvailabilityWidget> createState() => _ExportAvailabilityWidgetState();
+  State<ExportAvailabilityWidget> createState() =>
+      _ExportAvailabilityWidgetState();
 }
 
 class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
@@ -43,7 +44,11 @@ class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
   @override
   Widget build(BuildContext context) {
     return Consumer<DataExportProvider>(
-      builder: (BuildContext context, DataExportProvider provider, Widget? child) {
+      builder: (
+        BuildContext context,
+        DataExportProvider provider,
+        Widget? child,
+      ) {
         if (provider.isLoading) {
           return const _LoadingWidget();
         }
@@ -82,9 +87,7 @@ class _LoadingWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(
-              color: PlantisColors.primary,
-            ),
+            const CircularProgressIndicator(color: PlantisColors.primary),
             const SizedBox(height: 16),
             Text(
               'Verificando disponibilidade dos dados...',
@@ -106,10 +109,7 @@ class _ErrorWidget extends StatelessWidget {
   final String error;
   final VoidCallback onRetry;
 
-  const _ErrorWidget({
-    required this.error,
-    required this.onRetry,
-  });
+  const _ErrorWidget({required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -136,9 +136,9 @@ class _ErrorWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Erro ao verificar disponibilidade',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -226,10 +226,7 @@ class _UnavailableWidget extends StatelessWidget {
   final String reason;
   final DateTime? earliestDate;
 
-  const _UnavailableWidget({
-    required this.reason,
-    this.earliestDate,
-  });
+  const _UnavailableWidget({required this.reason, this.earliestDate});
 
   @override
   Widget build(BuildContext context) {
@@ -273,9 +270,7 @@ class _UnavailableWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.orange.withAlpha(20),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.orange.withAlpha(60),
-                ),
+                border: Border.all(color: Colors.orange.withAlpha(60)),
               ),
               child: Text(
                 reason,
@@ -297,14 +292,14 @@ class _UnavailableWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Icon(
                           Icons.schedule,
                           color: PlantisColors.primary,
                           size: 20,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Text(
                           'Disponível a partir de:',
                           style: TextStyle(
@@ -317,7 +312,7 @@ class _UnavailableWidget extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${earliestDate!.day}/${earliestDate!.month}/${earliestDate!.year} às ${earliestDate!.hour}:${earliestDate!.minute.toString().padLeft(2, '0')}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: PlantisColors.primary,
                         fontWeight: FontWeight.w500,
                       ),
@@ -354,15 +349,17 @@ class _AvailableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final availableTypes = availability.availableDataTypes.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toSet();
+    final availableTypes =
+        availability.availableDataTypes.entries
+            .where((entry) => entry.value)
+            .map((entry) => entry.key)
+            .toSet();
 
-    final unavailableTypes = availability.availableDataTypes.entries
-        .where((entry) => !entry.value)
-        .map((entry) => entry.key)
-        .toSet();
+    final unavailableTypes =
+        availability.availableDataTypes.entries
+            .where((entry) => !entry.value)
+            .map((entry) => entry.key)
+            .toSet();
 
     return Card(
       elevation: 2,
@@ -392,9 +389,8 @@ class _AvailableWidget extends StatelessWidget {
                     children: [
                       Text(
                         'Dados disponíveis para exportação',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         'Seus dados do Plantis estão prontos para exportação',
@@ -422,15 +418,11 @@ class _AvailableWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.storage,
-                      color: PlantisColors.primary,
-                      size: 20,
-                    ),
+                    const Icon(Icons.storage, color: PlantisColors.primary, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Tamanho estimado: ${_formatFileSize(availability.estimatedSizeInBytes!)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         color: PlantisColors.primary,
                       ),
@@ -444,9 +436,9 @@ class _AvailableWidget extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Tipos de dados disponíveis:',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               ...availableTypes.map(
@@ -454,11 +446,7 @@ class _AvailableWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.eco,
-                        color: PlantisColors.leaf,
-                        size: 16,
-                      ),
+                      const Icon(Icons.eco, color: PlantisColors.leaf, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -478,9 +466,9 @@ class _AvailableWidget extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Tipos de dados não disponíveis:',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               ...unavailableTypes.map(
@@ -488,17 +476,14 @@ class _AvailableWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.close,
-                        color: Colors.grey,
-                        size: 16,
-                      ),
+                      const Icon(Icons.close, color: Colors.grey, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           type.displayName,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),

@@ -11,15 +11,15 @@ class AnalyticsProvider {
     required IAnalyticsRepository analyticsRepository,
     required ICrashlyticsRepository crashlyticsRepository,
   }) : _enhancedService = EnhancedAnalyticsService(
-          analytics: analyticsRepository,
-          crashlytics: crashlyticsRepository,
-          config: AnalyticsConfig.forApp(
-            appId: 'plantis',
-            version: '1.0.0', // TODO: Get from package_info
-            enableAnalytics: EnvironmentConfig.enableAnalytics,
-            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
-          ),
-        );
+         analytics: analyticsRepository,
+         crashlytics: crashlyticsRepository,
+         config: AnalyticsConfig.forApp(
+           appId: 'plantis',
+           version: '1.0.0', // TODO: Get from package_info
+           enableAnalytics: EnvironmentConfig.enableAnalytics,
+           enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
+         ),
+       );
 
   /// Direct access to enhanced service for advanced features
   EnhancedAnalyticsService get enhancedService => _enhancedService;
@@ -74,11 +74,17 @@ class AnalyticsProvider {
   // ==========================================================================
 
   Future<void> logLogin(String method) async {
-    await _enhancedService.logAuthEvent('login', parameters: {'method': method});
+    await _enhancedService.logAuthEvent(
+      'login',
+      parameters: {'method': method},
+    );
   }
 
   Future<void> logSignUp(String method) async {
-    await _enhancedService.logAuthEvent('signup', parameters: {'method': method});
+    await _enhancedService.logAuthEvent(
+      'signup',
+      parameters: {'method': method},
+    );
   }
 
   Future<void> logLogout() async {
@@ -130,7 +136,10 @@ class AnalyticsProvider {
     );
   }
 
-  Future<void> logTaskCompleted(String taskType, {Map<String, dynamic>? additionalData}) async {
+  Future<void> logTaskCompleted(
+    String taskType, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     await _enhancedService.logAppSpecificEvent(
       PlantisEvent.taskCompleted,
       additionalParameters: {
@@ -161,7 +170,10 @@ class AnalyticsProvider {
     );
   }
 
-  Future<void> logPremiumFeatureAttempted(String featureName, {Map<String, dynamic>? additionalData}) async {
+  Future<void> logPremiumFeatureAttempted(
+    String featureName, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     await _enhancedService.logAppSpecificEvent(
       PlantisEvent.premiumFeatureAttempted,
       additionalParameters: {
@@ -178,7 +190,9 @@ class AnalyticsProvider {
     );
   }
 
-  Future<void> logPlantPhotoAdded({Map<String, dynamic>? additionalData}) async {
+  Future<void> logPlantPhotoAdded({
+    Map<String, dynamic>? additionalData,
+  }) async {
     await _enhancedService.logAppSpecificEvent(
       PlantisEvent.plantPhotoAdded,
       additionalParameters: additionalData,
@@ -270,7 +284,10 @@ class AnalyticsProvider {
   }
 
   /// Logs a development event for debugging purposes
-  Future<void> logDevelopmentEvent(String event, Map<String, dynamic>? data) async {
+  Future<void> logDevelopmentEvent(
+    String event,
+    Map<String, dynamic>? data,
+  ) async {
     if (kDebugMode) {
       await _enhancedService.logEvent('dev_$event', {
         'is_development': true,

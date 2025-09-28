@@ -1,16 +1,14 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../domain/entities/export_request.dart';
 
 class ExportFileGenerator {
   final IFileRepository _fileRepository;
 
-  ExportFileGenerator({
-    required IFileRepository fileRepository,
-  }) : _fileRepository = fileRepository;
+  ExportFileGenerator({required IFileRepository fileRepository})
+    : _fileRepository = fileRepository;
 
   /// Generate export file in the requested format
   Future<String> generateExportFile({
@@ -18,7 +16,7 @@ class ExportFileGenerator {
     required Map<DataType, dynamic> exportData,
   }) async {
     String content;
-    
+
     switch (request.format) {
       case ExportFormat.json:
         content = _generateJsonContent(exportData);
@@ -43,11 +41,8 @@ class ExportFileGenerator {
     );
   }
 
-
   /// Generate JSON content
-  String _generateJsonContent(
-    Map<DataType, dynamic> exportData,
-  ) {
+  String _generateJsonContent(Map<DataType, dynamic> exportData) {
     final jsonData = <String, dynamic>{
       'export_info': {
         'app_name': 'Plantis',
@@ -102,9 +97,7 @@ class ExportFileGenerator {
   }
 
   /// Generate CSV content
-  String _generateCsvContent(
-    Map<DataType, dynamic> exportData,
-  ) {
+  String _generateCsvContent(Map<DataType, dynamic> exportData) {
     final csvRows = <List<String>>[];
 
     // Header
@@ -151,15 +144,15 @@ class ExportFileGenerator {
   }
 
   /// Generate XML content
-  String _generateXmlContent(
-    Map<DataType, dynamic> exportData,
-  ) {
+  String _generateXmlContent(Map<DataType, dynamic> exportData) {
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
     buffer.writeln('<plantis_export>');
     buffer.writeln('  <export_info>');
     buffer.writeln('    <app_name>Plantis</app_name>');
-    buffer.writeln('    <export_date>${DateTime.now().toIso8601String()}</export_date>');
+    buffer.writeln(
+      '    <export_date>${DateTime.now().toIso8601String()}</export_date>',
+    );
     buffer.writeln('    <version>1.0.0</version>');
     buffer.writeln('    <format>XML</format>');
     buffer.writeln('    <compliance>LGPD</compliance>');
@@ -183,9 +176,7 @@ class ExportFileGenerator {
   }
 
   /// Generate PDF content (simplified version)
-  String _generatePdfContent(
-    Map<DataType, dynamic> exportData,
-  ) {
+  String _generatePdfContent(Map<DataType, dynamic> exportData) {
     // For simplicity, generate a text file with PDF extension
     // In a real implementation, you would use a PDF library like `pdf` package
     final buffer = StringBuffer();
@@ -208,81 +199,111 @@ class ExportFileGenerator {
   Map<String, dynamic> _formatPlantsForJson(List<PlantExportData> plants) {
     return {
       'count': plants.length,
-      'plants': plants.map((plant) => {
-            'id': plant.id,
-            'name': plant.name,
-            'species': plant.species,
-            'space_id': plant.spaceId,
-            'image_urls': plant.imageUrls,
-            'planting_date': plant.plantingDate?.toIso8601String(),
-            'notes': plant.notes,
-            'is_favorited': plant.isFavorited,
-            'config': plant.config != null
-                ? {
-                    'watering_interval_days': plant.config!.wateringIntervalDays,
-                    'fertilizing_interval_days': plant.config!.fertilizingIntervalDays,
-                    'pruning_interval_days': plant.config!.pruningIntervalDays,
-                    'light_requirement': plant.config!.lightRequirement,
-                    'water_amount': plant.config!.waterAmount,
-                    'soil_type': plant.config!.soilType,
-                    'enable_watering_care': plant.config!.enableWateringCare,
-                    'last_watering_date': plant.config!.lastWateringDate?.toIso8601String(),
-                    'enable_fertilizer_care': plant.config!.enableFertilizerCare,
-                    'last_fertilizer_date': plant.config!.lastFertilizerDate?.toIso8601String(),
-                  }
-                : null,
-            'created_at': plant.createdAt?.toIso8601String(),
-            'updated_at': plant.updatedAt?.toIso8601String(),
-          }).toList(),
+      'plants':
+          plants
+              .map(
+                (plant) => {
+                  'id': plant.id,
+                  'name': plant.name,
+                  'species': plant.species,
+                  'space_id': plant.spaceId,
+                  'image_urls': plant.imageUrls,
+                  'planting_date': plant.plantingDate?.toIso8601String(),
+                  'notes': plant.notes,
+                  'is_favorited': plant.isFavorited,
+                  'config':
+                      plant.config != null
+                          ? {
+                            'watering_interval_days':
+                                plant.config!.wateringIntervalDays,
+                            'fertilizing_interval_days':
+                                plant.config!.fertilizingIntervalDays,
+                            'pruning_interval_days':
+                                plant.config!.pruningIntervalDays,
+                            'light_requirement': plant.config!.lightRequirement,
+                            'water_amount': plant.config!.waterAmount,
+                            'soil_type': plant.config!.soilType,
+                            'enable_watering_care':
+                                plant.config!.enableWateringCare,
+                            'last_watering_date':
+                                plant.config!.lastWateringDate
+                                    ?.toIso8601String(),
+                            'enable_fertilizer_care':
+                                plant.config!.enableFertilizerCare,
+                            'last_fertilizer_date':
+                                plant.config!.lastFertilizerDate
+                                    ?.toIso8601String(),
+                          }
+                          : null,
+                  'created_at': plant.createdAt?.toIso8601String(),
+                  'updated_at': plant.updatedAt?.toIso8601String(),
+                },
+              )
+              .toList(),
     };
   }
 
   Map<String, dynamic> _formatTasksForJson(List<TaskExportData> tasks) {
     return {
       'count': tasks.length,
-      'tasks': tasks.map((task) => {
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'plant_id': task.plantId,
-            'plant_name': task.plantName,
-            'type': task.type,
-            'status': task.status,
-            'priority': task.priority,
-            'due_date': task.dueDate.toIso8601String(),
-            'completed_at': task.completedAt?.toIso8601String(),
-            'completion_notes': task.completionNotes,
-            'is_recurring': task.isRecurring,
-            'recurring_interval_days': task.recurringIntervalDays,
-            'next_due_date': task.nextDueDate?.toIso8601String(),
-            'created_at': task.createdAt?.toIso8601String(),
-          }).toList(),
+      'tasks':
+          tasks
+              .map(
+                (task) => {
+                  'id': task.id,
+                  'title': task.title,
+                  'description': task.description,
+                  'plant_id': task.plantId,
+                  'plant_name': task.plantName,
+                  'type': task.type,
+                  'status': task.status,
+                  'priority': task.priority,
+                  'due_date': task.dueDate.toIso8601String(),
+                  'completed_at': task.completedAt?.toIso8601String(),
+                  'completion_notes': task.completionNotes,
+                  'is_recurring': task.isRecurring,
+                  'recurring_interval_days': task.recurringIntervalDays,
+                  'next_due_date': task.nextDueDate?.toIso8601String(),
+                  'created_at': task.createdAt?.toIso8601String(),
+                },
+              )
+              .toList(),
     };
   }
 
   Map<String, dynamic> _formatSpacesForJson(List<SpaceExportData> spaces) {
     return {
       'count': spaces.length,
-      'spaces': spaces.map((space) => {
-            'id': space.id,
-            'name': space.name,
-            'description': space.description,
-            'created_at': space.createdAt?.toIso8601String(),
-            'updated_at': space.updatedAt?.toIso8601String(),
-          }).toList(),
+      'spaces':
+          spaces
+              .map(
+                (space) => {
+                  'id': space.id,
+                  'name': space.name,
+                  'description': space.description,
+                  'created_at': space.createdAt?.toIso8601String(),
+                  'updated_at': space.updatedAt?.toIso8601String(),
+                },
+              )
+              .toList(),
     };
   }
 
   Map<String, dynamic> _formatPhotosForJson(List<PlantPhotoExportData> photos) {
     return {
       'count': photos.length,
-      'photos': photos.map((photo) => {
-            'plant_id': photo.plantId,
-            'plant_name': photo.plantName,
-            'photo_urls': photo.photoUrls,
-            'taken_at': photo.takenAt?.toIso8601String(),
-            'caption': photo.caption,
-          }).toList(),
+      'photos':
+          photos
+              .map(
+                (photo) => {
+                  'plant_id': photo.plantId,
+                  'plant_name': photo.plantName,
+                  'photo_urls': photo.photoUrls,
+                  'taken_at': photo.takenAt?.toIso8601String(),
+                  'caption': photo.caption,
+                },
+              )
+              .toList(),
     };
   }
 
@@ -392,7 +413,10 @@ class ExportFileGenerator {
       }
     } else if (data is Map) {
       for (final entry in data.entries) {
-        final key = entry.key.toString().replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
+        final key = entry.key.toString().replaceAll(
+          RegExp(r'[^a-zA-Z0-9_]'),
+          '_',
+        );
         buffer.writeln('$indent<$key>');
         _formatDataForXml(buffer, entry.value, '$indent  ');
         buffer.writeln('$indent</$key>');
@@ -418,11 +442,13 @@ class ExportFileGenerator {
     required String mimeType,
   }) async {
     try {
-      final fileName = 'export_${request.id}_${DateTime.now().millisecondsSinceEpoch}.${_getFileExtension(request.format)}';
+      final fileName =
+          'export_${request.id}_${DateTime.now().millisecondsSinceEpoch}.${_getFileExtension(request.format)}';
 
       // Get downloads directory
-      final downloadsDir = await _fileRepository.getDownloadsDirectory()
-          ?? await _fileRepository.getDocumentsDirectory();
+      final downloadsDir =
+          await _fileRepository.getDownloadsDirectory() ??
+          await _fileRepository.getDocumentsDirectory();
       final filePath = _fileRepository.joinPaths([downloadsDir, fileName]);
 
       final result = await _fileRepository.writeAsString(

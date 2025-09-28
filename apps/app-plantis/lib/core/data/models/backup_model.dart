@@ -25,7 +25,9 @@ class BackupModel {
       version: json['version'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
       userId: json['userId'] as String,
-      metadata: BackupMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+      metadata: BackupMetadata.fromJson(
+        json['metadata'] as Map<String, dynamic>,
+      ),
       data: BackupData.fromJson(json['data'] as Map<String, dynamic>),
     );
   }
@@ -69,7 +71,11 @@ class BackupModel {
   /// Nome do arquivo de backup
   String get fileName {
     final dateStr = timestamp.toIso8601String().split('T')[0];
-    final timeStr = timestamp.toIso8601String().split('T')[1].split('.')[0].replaceAll(':', '-');
+    final timeStr = timestamp
+        .toIso8601String()
+        .split('T')[1]
+        .split('.')[0]
+        .replaceAll(':', '-');
     return 'plantis_backup_${dateStr}_$timeStr.json';
   }
 
@@ -126,7 +132,9 @@ class BackupMetadata {
       spacesCount: json['spacesCount'] as int,
       appVersion: json['appVersion'] as String,
       platform: json['platform'] as String,
-      additionalInfo: Map<String, dynamic>.from((json['additionalInfo'] as Map<dynamic, dynamic>?) ?? {}),
+      additionalInfo: Map<String, dynamic>.from(
+        (json['additionalInfo'] as Map<dynamic, dynamic>?) ?? {},
+      ),
     );
   }
 
@@ -166,11 +174,21 @@ class BackupData {
 
   factory BackupData.fromJson(Map<String, dynamic> json) {
     return BackupData(
-      plants: List<Map<String, dynamic>>.from((json['plants'] as Iterable<dynamic>?) ?? []),
-      tasks: List<Map<String, dynamic>>.from((json['tasks'] as Iterable<dynamic>?) ?? []),
-      spaces: List<Map<String, dynamic>>.from((json['spaces'] as Iterable<dynamic>?) ?? []),
-      settings: Map<String, dynamic>.from((json['settings'] as Map<dynamic, dynamic>?) ?? {}),
-      userPreferences: Map<String, dynamic>.from((json['userPreferences'] as Map<dynamic, dynamic>?) ?? {}),
+      plants: List<Map<String, dynamic>>.from(
+        (json['plants'] as Iterable<dynamic>?) ?? [],
+      ),
+      tasks: List<Map<String, dynamic>>.from(
+        (json['tasks'] as Iterable<dynamic>?) ?? [],
+      ),
+      spaces: List<Map<String, dynamic>>.from(
+        (json['spaces'] as Iterable<dynamic>?) ?? [],
+      ),
+      settings: Map<String, dynamic>.from(
+        (json['settings'] as Map<dynamic, dynamic>?) ?? {},
+      ),
+      userPreferences: Map<String, dynamic>.from(
+        (json['userPreferences'] as Map<dynamic, dynamic>?) ?? {},
+      ),
     );
   }
 
@@ -213,7 +231,9 @@ class BackupInfo {
       id: json['id'] as String,
       fileName: json['fileName'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
-      metadata: BackupMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+      metadata: BackupMetadata.fromJson(
+        json['metadata'] as Map<String, dynamic>,
+      ),
       downloadUrl: json['downloadUrl'] as String,
       sizeInBytes: json['sizeInBytes'] as int,
     );
@@ -233,7 +253,9 @@ class BackupInfo {
   /// Formata tamanho para exibição
   String get formattedSize {
     if (sizeInBytes < 1024) return '${sizeInBytes}B';
-    if (sizeInBytes < 1024 * 1024) return '${(sizeInBytes / 1024).toStringAsFixed(1)}KB';
+    if (sizeInBytes < 1024 * 1024) {
+      return '${(sizeInBytes / 1024).toStringAsFixed(1)}KB';
+    }
     return '${(sizeInBytes / (1024 * 1024)).toStringAsFixed(1)}MB';
   }
 
@@ -258,7 +280,6 @@ class BackupInfo {
     return 'BackupInfo(id: $id, fileName: $fileName, timestamp: $timestamp)';
   }
 }
-
 
 /// Resultado de uma operação de backup
 class BackupResult {
@@ -300,4 +321,3 @@ class BackupResult {
     );
   }
 }
-

@@ -10,7 +10,7 @@ class DeviceValidationOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    
+
     return authState.when(
       data: (state) {
         // Só mostra se está validando dispositivo ou houve erro
@@ -88,11 +88,7 @@ class DeviceValidationOverlay extends ConsumerWidget {
   Widget _buildLimitExceededContent(BuildContext context) {
     return Column(
       children: [
-        Icon(
-          Icons.block,
-          size: 48,
-          color: Theme.of(context).colorScheme.error,
-        ),
+        Icon(Icons.block, size: 48, color: Theme.of(context).colorScheme.error),
         const SizedBox(height: 16),
         Text(
           'Limite de dispositivos atingido',
@@ -111,7 +107,9 @@ class DeviceValidationOverlay extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+            color: Theme.of(
+              context,
+            ).colorScheme.errorContainer.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -206,7 +204,11 @@ class DeviceValidationOverlay extends ConsumerWidget {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => ref.read(authProvider.notifier).clearDeviceValidationError(),
+              onPressed:
+                  () =>
+                      ref
+                          .read(authProvider.notifier)
+                          .clearDeviceValidationError(),
               child: const Text('Continuar'),
             ),
           ),

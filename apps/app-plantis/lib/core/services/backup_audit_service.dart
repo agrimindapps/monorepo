@@ -8,13 +8,13 @@ import 'secure_storage_service.dart';
 /// Implementa Single Responsibility Principle - apenas logging e auditoria
 class BackupAuditService {
   final SecureStorageService _storageService;
-  
-  static const String _auditLogKey = 'backup_audit_log';
-  static const int _maxLogEntries = 100; // Limitar logs para evitar crescimento excessivo
 
-  const BackupAuditService({
-    required SecureStorageService storageService,
-  }) : _storageService = storageService;
+  static const String _auditLogKey = 'backup_audit_log';
+  static const int _maxLogEntries =
+      100; // Limitar logs para evitar crescimento excessivo
+
+  const BackupAuditService({required SecureStorageService storageService})
+    : _storageService = storageService;
 
   /// Cria log de auditoria para operações de backup
   Future<void> logBackupOperation({
@@ -38,8 +38,10 @@ class BackupAuditService {
       );
 
       await _addLogEntry(logEntry);
-      
-      debugPrint('📋 Audit Log: $operation ${isSuccess ? '✅' : '❌'} - User: $userId');
+
+      debugPrint(
+        '📋 Audit Log: $operation ${isSuccess ? '✅' : '❌'} - User: $userId',
+      );
     } catch (e) {
       debugPrint('❌ Erro ao criar log de auditoria: $e');
       // Não propaga erro para não afetar operação principal
@@ -159,15 +161,18 @@ class BackupAuditService {
   }) async {
     try {
       final logs = await _getAllLogs();
-      
+
       // Aplicar filtros
-      var filteredLogs = logs.where((log) {
-        if (userId != null && log.userId != userId) return false;
-        if (operation != null && log.operation != operation) return false;
-        if (startDate != null && log.timestamp.isBefore(startDate)) return false;
-        if (endDate != null && log.timestamp.isAfter(endDate)) return false;
-        return true;
-      }).toList();
+      var filteredLogs =
+          logs.where((log) {
+            if (userId != null && log.userId != userId) return false;
+            if (operation != null && log.operation != operation) return false;
+            if (startDate != null && log.timestamp.isBefore(startDate)) {
+              return false;
+            }
+            if (endDate != null && log.timestamp.isAfter(endDate)) return false;
+            return true;
+          }).toList();
 
       // Ordenar por timestamp (mais recente primeiro)
       filteredLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -189,16 +194,18 @@ class BackupAuditService {
     try {
       final logs = await _getAllLogs();
       final maxAllowed = maxEntries ?? _maxLogEntries;
-      
+
       if (logs.length <= maxAllowed) return;
 
       // Manter apenas os logs mais recentes
       logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       final logsToKeep = logs.take(maxAllowed).toList();
-      
+
       await _saveLogs(logsToKeep);
-      
-      debugPrint('🧹 Limpeza de logs: mantidos ${logsToKeep.length} de ${logs.length} logs');
+
+      debugPrint(
+        '🧹 Limpeza de logs: mantidos ${logsToKeep.length} de ${logs.length} logs',
+      );
     } catch (e) {
       debugPrint('❌ Erro ao limpar logs antigos: $e');
     }
@@ -208,20 +215,21 @@ class BackupAuditService {
   Future<AuditStatistics> getAuditStatistics({String? userId}) async {
     try {
       final logs = await getAuditLogs(userId: userId);
-      
+
       final Map<String, int> operationCounts = {};
       int successCount = 0;
       int failureCount = 0;
-      
+
       for (final log in logs) {
-        operationCounts[log.operation] = (operationCounts[log.operation] ?? 0) + 1;
+        operationCounts[log.operation] =
+            (operationCounts[log.operation] ?? 0) + 1;
         if (log.isSuccess) {
           successCount++;
         } else {
           failureCount++;
         }
       }
-      
+
       return AuditStatistics(
         totalOperations: logs.length,
         successfulOperations: successCount,
@@ -241,12 +249,12 @@ class BackupAuditService {
   Future<void> _addLogEntry(AuditLogEntry entry) async {
     final logs = await _getAllLogs();
     logs.insert(0, entry); // Adicionar no início (mais recente primeiro)
-    
+
     // Limitar tamanho da lista
     if (logs.length > _maxLogEntries) {
       logs.removeRange(_maxLogEntries, logs.length);
     }
-    
+
     await _saveLogs(logs);
   }
 
@@ -254,7 +262,7 @@ class BackupAuditService {
     try {
       final logsJson = await _storageService.getString(_auditLogKey);
       if (logsJson == null || logsJson.isEmpty) return [];
-      
+
       final dynamic logsData = jsonDecode(logsJson);
       final List<dynamic> logsList = logsData is List ? logsData : [];
       return logsList
@@ -348,13 +356,13 @@ class AuditStatistics {
   });
 
   const AuditStatistics.empty()
-      : totalOperations = 0,
-        successfulOperations = 0,
-        failedOperations = 0,
-        operationCounts = const {},
-        oldestLogDate = null,
-        newestLogDate = null;
+    : totalOperations = 0,
+      successfulOperations = 0,
+      failedOperations = 0,
+      operationCounts = const {},
+      oldestLogDate = null,
+      newestLogDate = null;
 
-  double get successRate => 
+  double get successRate =>
       totalOperations > 0 ? (successfulOperations / totalOperations) : 0.0;
 }

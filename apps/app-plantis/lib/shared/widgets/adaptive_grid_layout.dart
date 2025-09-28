@@ -10,7 +10,7 @@ class AdaptiveGridLayout extends StatelessWidget {
   final EdgeInsets padding;
   final ScrollPhysics? physics;
   final bool shrinkWrap;
-  
+
   /// Número de colunas para cada breakpoint
   final int mobileColumns;
   final int tabletColumns;
@@ -33,7 +33,7 @@ class AdaptiveGridLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int columns = mobileColumns;
-    
+
     if (ResponsiveBreakpoints.isDesktop(context)) {
       columns = desktopColumns;
     } else if (ResponsiveBreakpoints.isTablet(context)) {
@@ -66,7 +66,7 @@ class AdaptiveGridBuilder extends StatelessWidget {
   final EdgeInsets padding;
   final ScrollPhysics? physics;
   final bool shrinkWrap;
-  
+
   /// Número de colunas para cada breakpoint
   final int mobileColumns;
   final int tabletColumns;
@@ -90,7 +90,7 @@ class AdaptiveGridBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int columns = mobileColumns;
-    
+
     if (ResponsiveBreakpoints.isDesktop(context)) {
       columns = desktopColumns;
     } else if (ResponsiveBreakpoints.isTablet(context)) {
@@ -149,7 +149,7 @@ class SliverAdaptiveGrid extends StatelessWidget {
   final double childAspectRatio;
   final double crossAxisSpacing;
   final double mainAxisSpacing;
-  
+
   /// Número de colunas para cada breakpoint
   final int mobileColumns;
   final int tabletColumns;
@@ -169,7 +169,7 @@ class SliverAdaptiveGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int columns = mobileColumns;
-    
+
     if (ResponsiveBreakpoints.isDesktop(context)) {
       columns = desktopColumns;
     } else if (ResponsiveBreakpoints.isTablet(context)) {

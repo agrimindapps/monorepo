@@ -1,52 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/riverpod_providers/solid_providers.dart';
+import '../../../../core/state/plant_form_state_manager.dart';
 import '../../domain/usecases/spaces_usecases.dart';
-import '../providers/plant_form_provider.dart';
 import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';
 
-class PlantFormBasicInfo extends StatefulWidget {
+class PlantFormBasicInfo extends ConsumerStatefulWidget {
   const PlantFormBasicInfo({super.key});
 
   @override
-  State<PlantFormBasicInfo> createState() => _PlantFormBasicInfoState();
+  ConsumerState<PlantFormBasicInfo> createState() => _PlantFormBasicInfoState();
 }
 
-class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
+class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   final _nameController = TextEditingController();
   final _speciesController = TextEditingController();
   final _notesController = TextEditingController();
-  PlantFormProvider? _provider;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _provider = context.read<PlantFormProvider>();
       _updateControllers();
-      _provider?.addListener(_updateControllers);
     });
   }
 
   void _updateControllers() {
-    if (_provider != null && mounted) {
-      if (_nameController.text != _provider!.name) {
-        _nameController.text = _provider!.name;
+    if (mounted) {
+      final formState = ref.read(solidPlantFormStateProvider);
+      if (_nameController.text != formState.name) {
+        _nameController.text = formState.name;
       }
-      if (_speciesController.text != _provider!.species) {
-        _speciesController.text = _provider!.species;
+      if (_speciesController.text != formState.species) {
+        _speciesController.text = formState.species;
       }
-      if (_notesController.text != _provider!.notes) {
-        _notesController.text = _provider!.notes;
+      if (_notesController.text != formState.notes) {
+        _notesController.text = formState.notes;
       }
     }
   }
 
   @override
   void dispose() {
-    _provider?.removeListener(_updateControllers);
     _nameController.dispose();
     _speciesController.dispose();
     _notesController.dispose();
@@ -56,58 +55,53 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   @override
   Widget build(BuildContext context) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image section
-          _buildImageSection(context),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Image section
+        _buildImageSection(context),
 
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-          // Basic information form
-          _buildBasicInfoForm(context),
-        ],
+        // Basic information form
+        _buildBasicInfoForm(context),
+      ],
     );
   }
 
   Widget _buildImageSection(BuildContext context) {
-    // Optimized with Selector - only rebuilds when image-related data changes
-    return Selector<PlantFormProvider, ({bool hasImages, bool isUploading})>(
-      selector: (context, provider) => (
-        hasImages: provider.hasImages,
-        isUploading: provider.isUploadingImages,
-      ),
-      builder: (context, data, child) {
-        final provider = context.read<PlantFormProvider>();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Show upload progress or images
-            if (data.isUploading)
-              _buildUploadProgress(context)
-            else if (data.hasImages)
-              _buildSingleImage(context, provider)
-            else
-              _buildEmptyImageArea(context, provider),
-          ],
-        );
-      },
+    final formState = ref.watch(solidPlantFormStateProvider);
+    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Show upload progress or images
+        if (formState.isUploadingImages)
+          _buildUploadProgress(context)
+        else if (formState.imageUrls.isNotEmpty)
+          _buildSingleImage(context, formState, formManager)
+        else
+          _buildEmptyImageArea(context, formManager),
+      ],
     );
   }
 
-  Widget _buildSingleImage(BuildContext context, PlantFormProvider provider) {
+  Widget _buildSingleImage(BuildContext context, PlantFormState formState, PlantFormStateManager formManager) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.brightness == Brightness.dark
-              ? theme.colorScheme.outline.withValues(alpha: 0.3)
-              : const Color(0xFFE0E0E0),
+          color:
+              theme.brightness == Brightness.dark
+                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                  : const Color(0xFFE0E0E0),
         ),
       ),
       child: Column(
@@ -123,7 +117,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 ),
               ),
               InkWell(
-                onTap: () => _showRemoveImageDialog(context, provider, 0),
+                onTap: () => _showRemoveImageDialog(context, formManager, 0),
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   child: Icon(
@@ -139,7 +133,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: _buildNetworkImageWithFallback(
-              provider.imageUrls.first,
+              formState.imageUrls.first,
               width: double.infinity,
               height: 120,
             ),
@@ -151,31 +145,31 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   Widget _buildEmptyImageArea(
     BuildContext context,
-    PlantFormProvider provider,
+    PlantFormStateManager formManager,
   ) {
     final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.brightness == Brightness.dark
-              ? theme.colorScheme.outline.withValues(alpha: 0.3)
-              : const Color(0xFFE0E0E0),
+          color:
+              theme.brightness == Brightness.dark
+                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                  : const Color(0xFFE0E0E0),
         ),
       ),
       child: InkWell(
-        onTap: () => _showImageOptions(context, provider),
+        onTap: () => _showImageOptions(context, formManager),
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
           child: Row(
             children: [
               Container(
@@ -225,8 +219,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     );
   }
 
-
-  void _showImageOptions(BuildContext context, PlantFormProvider provider) {
+  void _showImageOptions(BuildContext context, PlantFormStateManager formManager) {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -234,7 +227,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       ),
       builder: (BuildContext context) {
         final theme = Theme.of(context);
-        
+
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -245,7 +238,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.4,
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -261,12 +256,12 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   Expanded(
                     child: _buildImageOptionButton(
                       context: context,
-                      provider: provider,
+                      formManager: formManager,
                       icon: Icons.camera_alt,
                       label: 'Câmera',
                       onTap: () {
                         Navigator.of(context).pop();
-                        provider.addImageFromCamera();
+                        formManager.captureImageFromCamera();
                       },
                     ),
                   ),
@@ -274,12 +269,12 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                   Expanded(
                     child: _buildImageOptionButton(
                       context: context,
-                      provider: provider,
+                      formManager: formManager,
                       icon: Icons.photo_library,
                       label: 'Galeria',
                       onTap: () {
                         Navigator.of(context).pop();
-                        provider.addImageFromGallery();
+                        formManager.selectImageFromGallery();
                       },
                     ),
                   ),
@@ -295,33 +290,38 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   Widget _buildImageOptionButton({
     required BuildContext context,
-    required PlantFormProvider provider,
+    required PlantFormStateManager formManager,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    final isDisabled = provider.hasImages || provider.isUploadingImages;
+    final formState = ref.read(solidPlantFormStateProvider);
+    final isDisabled = formState.imageUrls.isNotEmpty || formState.isUploadingImages;
 
     return GestureDetector(
       onTap: isDisabled ? null : onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         decoration: BoxDecoration(
-          color: isDisabled 
-              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
-              : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
+          color:
+              isDisabled
+                  ? theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  )
+                  : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDisabled 
-                ? theme.colorScheme.outline.withValues(alpha: 0.3)
-                : theme.colorScheme.primary.withValues(alpha: 0.3),
+            color:
+                isDisabled
+                    ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                    : theme.colorScheme.primary.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
         child: Column(
           children: [
-            if (provider.isUploadingImages)
+            if (formState.isUploadingImages)
               const SizedBox(
                 width: 32,
                 height: 32,
@@ -331,18 +331,24 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               Icon(
                 icon,
                 size: 32,
-                color: isDisabled 
-                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                    : theme.colorScheme.primary,
+                color:
+                    isDisabled
+                        ? theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        )
+                        : theme.colorScheme.primary,
               ),
             const SizedBox(height: 12),
             Text(
-              provider.isUploadingImages ? 'Enviando...' : label,
+              formState.isUploadingImages ? 'Enviando...' : label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: isDisabled 
-                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                    : theme.colorScheme.primary,
+                color:
+                    isDisabled
+                        ? theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        )
+                        : theme.colorScheme.primary,
               ),
             ),
           ],
@@ -353,7 +359,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
 
   void _showRemoveImageDialog(
     BuildContext context,
-    PlantFormProvider provider,
+    PlantFormStateManager formManager,
     int index,
   ) {
     showDialog<void>(
@@ -369,7 +375,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
               TextButton(
                 onPressed: () {
-                  provider.removeImage(index);
+                  formManager.removeImage(index);
                   Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
@@ -383,14 +389,14 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   }
 
   Widget _buildBasicInfoForm(BuildContext context) {
-    return Consumer<PlantFormProvider>(
-      builder: (context, provider, child) {
-        final fieldErrors = provider.fieldErrors;
-        final theme = Theme.of(context);
+    final formState = ref.watch(solidPlantFormStateProvider);
+    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final fieldErrors = formState.fieldErrors;
+    final theme = Theme.of(context);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
             // Plant name (required) with security validation
             _buildTextField(
               controller: _nameController,
@@ -400,7 +406,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               errorText: fieldErrors['name'],
               onChanged: (value) {
                 // Não sanitizar em tempo real para não interferir na digitação
-                provider.setName(value);
+                formManager.setName(value);
               },
               validator: (value) => _validatePlantName(value),
               prefixIcon: Icon(
@@ -419,7 +425,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               hint: 'Ex: Rosa gallica',
               onChanged: (value) {
                 // Não sanitizar em tempo real para não interferir na digitação
-                provider.setSpecies(value);
+                formManager.setSpecies(value);
               },
               validator: (value) => _validateSpecies(value),
               prefixIcon: Icon(
@@ -432,11 +438,12 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             const SizedBox(height: 12),
 
             // Space selector
-            ChangeNotifierProvider(
+            provider.ChangeNotifierProvider(
               create: (_) => di.sl<SpacesProvider>(),
               child: SpaceSelectorWidget(
-                selectedSpaceId: provider.spaceId,
-                onSpaceChanged: (spaceId) => _handleSpaceSelection(provider, spaceId),
+                selectedSpaceId: formState.spaceId,
+                onSpaceChanged:
+                    (spaceId) => _handleSpaceSelection(formManager, spaceId),
                 errorText: fieldErrors['space'],
               ),
             ),
@@ -447,8 +454,8 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             _buildDateField(
               context: context,
               label: 'Data de plantio',
-              value: provider.plantingDate,
-              onChanged: provider.setPlantingDate,
+              value: formState.plantingDate,
+              onChanged: formManager.setPlantingDate,
               prefixIcon: Icon(
                 Icons.event,
                 color: theme.colorScheme.primary,
@@ -466,7 +473,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               maxLines: 4,
               onChanged: (value) {
                 // Não sanitizar em tempo real para não interferir na digitação
-                provider.setNotes(value);
+                formManager.setNotes(value);
               },
               validator: (value) => _validateNotes(value),
               prefixIcon: Icon(
@@ -475,9 +482,7 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 size: 20,
               ),
             ),
-          ],
-        );
-      },
+      ],
     );
   }
 
@@ -550,8 +555,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
               ),
             ),
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.3,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 6,
+            ),
             errorText: errorText,
           ),
         ),
@@ -601,7 +611,9 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                 color: theme.colorScheme.outline.withValues(alpha: 0.2),
               ),
               borderRadius: BorderRadius.circular(12),
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
             ),
             child: Row(
               children: [
@@ -655,10 +667,13 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
   }
 
   /// Handles space selection including creating new spaces
-  Future<void> _handleSpaceSelection(PlantFormProvider plantProvider, String? value) async {
+  Future<void> _handleSpaceSelection(
+    PlantFormStateManager formManager,
+    String? value,
+  ) async {
     if (value == null) {
       // "Sem espaço" selecionado
-      plantProvider.setSpaceId(null);
+      formManager.setSpaceId(null);
       return;
     }
 
@@ -670,16 +685,18 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       try {
         final spacesProvider = di.sl<SpacesProvider>();
         await spacesProvider.loadSpaces(); // Garantir que temos a lista atual
-        
+
         // Verificar se já existe um espaço com esse nome
         final existingSpace = spacesProvider.findSpaceByName(spaceName);
         if (existingSpace != null) {
           // Usar o espaço existente
-          plantProvider.setSpaceId(existingSpace.id);
+          formManager.setSpaceId(existingSpace.id);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Espaço "$spaceName" já existe. Usando espaço existente.'),
+                content: Text(
+                  'Espaço "$spaceName" já existe. Usando espaço existente.',
+                ),
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );
@@ -688,15 +705,17 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
         }
 
         // Criar novo espaço
-        final success = await spacesProvider.addSpace(AddSpaceParams(name: spaceName));
-        
+        final success = await spacesProvider.addSpace(
+          AddSpaceParams(name: spaceName),
+        );
+
         if (success && mounted) {
           // Buscar o espaço recém-criado
           await spacesProvider.loadSpaces();
           final newSpace = spacesProvider.findSpaceByName(spaceName);
-          
+
           if (newSpace != null) {
-            plantProvider.setSpaceId(newSpace.id);
+            formManager.setSpaceId(newSpace.id);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -726,71 +745,71 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
       }
     } else {
       // Espaço existente selecionado
-      plantProvider.setSpaceId(value);
+      formManager.setSpaceId(value);
     }
   }
-  
+
   /// Validates plant name with security checks
   String? _validatePlantName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Por favor, insira o nome da planta';
     }
-    
+
     final trimmedValue = value.trim();
-    
+
     if (trimmedValue.length < 2) {
       return 'Nome deve ter pelo menos 2 caracteres';
     }
-    
+
     if (trimmedValue.length > 100) {
       return 'Nome muito longo (máximo 100 caracteres)';
     }
-    
+
     // Check for potentially malicious characters
     if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedValue)) {
       return 'Nome contém caracteres não permitidos';
     }
-    
+
     return null;
   }
-  
+
   /// Validates plant species with security checks
   String? _validateSpecies(String? value) {
     if (value == null || value.trim().isEmpty) {
       return null; // Species is optional
     }
-    
+
     final trimmedValue = value.trim();
-    
+
     if (trimmedValue.length > 100) {
       return 'Espécie muito longa (máximo 100 caracteres)';
     }
-    
+
     // Check for potentially malicious characters
     if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedValue)) {
       return 'Espécie contém caracteres não permitidos';
     }
-    
+
     return null;
   }
-  
+
   /// Validates notes with security checks
   String? _validateNotes(String? value) {
     if (value == null || value.trim().isEmpty) {
       return null; // Notes are optional
     }
-    
+
     final trimmedValue = value.trim();
-    
+
     if (trimmedValue.length > 1000) {
       return 'Observações muito longas (máximo 1000 caracteres)';
     }
-    
+
     // Check for potentially malicious characters (allow newlines for notes)
     if (RegExp(r'[<>"\\]').hasMatch(trimmedValue)) {
       return 'Observações contêm caracteres não permitidos';
     }
-    
+
     return null;
   }
 
@@ -801,14 +820,16 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFFFFFFF),
+        color:
+            theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.brightness == Brightness.dark
-              ? theme.colorScheme.outline.withValues(alpha: 0.3)
-              : const Color(0xFFE0E0E0),
+          color:
+              theme.brightness == Brightness.dark
+                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                  : const Color(0xFFE0E0E0),
         ),
       ),
       child: Column(
@@ -842,7 +863,8 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
                     const SizedBox(height: 4),
                     LinearProgressIndicator(
                       borderRadius: BorderRadius.circular(2),
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                     ),
                   ],
                 ),
@@ -876,10 +898,11 @@ class _PlantFormBasicInfoState extends State<PlantFormBasicInfo> {
             child: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
+                value:
+                    loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
               ),
             ),
           );

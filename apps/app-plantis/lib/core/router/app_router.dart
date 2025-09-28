@@ -1,21 +1,22 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
 
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
-import '../riverpod_providers/auth_providers.dart';
+import '../../features/data_export/presentation/pages/data_export_page.dart';
+import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
 import '../../features/legal/presentation/pages/terms_of_service_page.dart';
+import '../../features/license/pages/license_status_page.dart';
 import '../../features/plants/presentation/pages/plant_details_page.dart';
 import '../../features/plants/presentation/pages/plant_form_page.dart';
 import '../../features/plants/presentation/pages/plants_list_page.dart';
 import '../../features/plants/presentation/providers/plant_details_provider.dart';
-import '../../features/plants/presentation/providers/plant_form_provider.dart';
 import '../../features/premium/presentation/pages/premium_subscription_page.dart';
 import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
@@ -23,14 +24,12 @@ import '../../features/settings/presentation/providers/backup_settings_provider.
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
-import '../../features/license/pages/license_status_page.dart';
-import '../../features/data_export/presentation/pages/data_export_page.dart';
-import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
-import '../../shared/widgets/web_optimized_navigation.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
+import '../../shared/widgets/web_optimized_navigation.dart';
 import '../di/injection_container.dart';
+import '../riverpod_providers/auth_providers.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -196,17 +195,13 @@ class AppRouter {
             GoRoute(
               path: plants,
               name: 'plants',
-              builder:
-                  (context, state) => const PlantsListPage(),
+              builder: (context, state) => const PlantsListPage(),
               routes: [
                 GoRoute(
                   path: 'add',
                   name: 'plant-add',
                   builder: (context, state) {
-                    return ChangeNotifierProvider(
-                      create: (context) => sl<PlantFormProvider>(),
-                      child: const PlantFormPage(),
-                    );
+                    return const PlantFormPage();
                   },
                 ),
                 GoRoute(
@@ -232,10 +227,7 @@ class AppRouter {
                   name: 'plant-edit',
                   builder: (context, state) {
                     final plantId = state.pathParameters['id']!;
-                    return ChangeNotifierProvider(
-                      create: (context) => sl<PlantFormProvider>(),
-                      child: PlantFormPage(plantId: plantId),
-                    );
+                    return PlantFormPage(plantId: plantId);
                   },
                 ),
               ],

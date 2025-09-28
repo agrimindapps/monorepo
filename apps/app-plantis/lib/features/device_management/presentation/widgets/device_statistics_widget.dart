@@ -8,7 +8,7 @@ import '../providers/device_management_provider.dart';
 /// Widget que exibe estatísticas detalhadas dos dispositivos
 /// Mostra informações analíticas e recomendações para o usuário
 class DeviceStatisticsWidget extends StatelessWidget {
-  const DeviceStatisticsWidget({Key? key}) : super(key: key);
+  const DeviceStatisticsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,9 @@ class DeviceStatisticsWidget extends StatelessWidget {
             Text(
               'Registre pelo menos um dispositivo para ver estatísticas.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -91,17 +93,11 @@ class DeviceStatisticsWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.analytics,
-                  color: Theme.of(context).primaryColor,
-                ),
+                Icon(Icons.analytics, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Resumo Geral',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -208,7 +204,10 @@ class DeviceStatisticsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildLimitProgressBar(BuildContext context, DeviceStatisticsModel stats) {
+  Widget _buildLimitProgressBar(
+    BuildContext context,
+    DeviceStatisticsModel stats,
+  ) {
     final int active = stats.activeDevices;
     const int limit = 3;
     final double progress = active / limit;
@@ -255,7 +254,10 @@ class DeviceStatisticsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPlatformDistribution(BuildContext context, DeviceStatisticsModel stats) {
+  Widget _buildPlatformDistribution(
+    BuildContext context,
+    DeviceStatisticsModel stats,
+  ) {
     if (stats.devicesByPlatform.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -268,17 +270,11 @@ class DeviceStatisticsWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.pie_chart,
-                  color: Theme.of(context).primaryColor,
-                ),
+                Icon(Icons.pie_chart, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Distribuição por Plataforma',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -286,7 +282,12 @@ class DeviceStatisticsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             ...stats.devicesByPlatform.entries.map(
-              (entry) => _buildPlatformItem(context, entry.key, entry.value, stats.totalDevices),
+              (entry) => _buildPlatformItem(
+                context,
+                entry.key,
+                entry.value,
+                stats.totalDevices,
+              ),
             ),
 
             const SizedBox(height: 12),
@@ -300,7 +301,12 @@ class DeviceStatisticsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPlatformItem(BuildContext context, String platform, int count, int total) {
+  Widget _buildPlatformItem(
+    BuildContext context,
+    String platform,
+    int count,
+    int total,
+  ) {
     final percentage = (count / total * 100).round();
     final platformIcon = _getPlatformIcon(platform);
 
@@ -361,7 +367,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
   }
 
   Widget _buildPlatformInsight(BuildContext context, stats) {
-    final metrics = stats.plantisMetrics!;
+    final metrics = stats.plantisMetrics;
     final mostUsed = metrics['mostUsedPlatform'] as String?;
     final diversity = metrics['platformDiversity'] as int? ?? 0;
 
@@ -406,17 +412,11 @@ class DeviceStatisticsWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.schedule,
-                  color: Theme.of(context).primaryColor,
-                ),
+                Icon(Icons.schedule, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Atividade Recente',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -472,7 +472,9 @@ class DeviceStatisticsWidget extends StatelessWidget {
         Icon(
           icon,
           size: 20,
-          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+          color: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -511,7 +513,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
   Widget _buildRecommendations(BuildContext context, stats) {
     if (stats.plantisMetrics == null) return const SizedBox.shrink();
 
-    final metrics = stats.plantisMetrics!;
+    final metrics = stats.plantisMetrics;
     final recommendations = metrics['recommendations'] as List<String>? ?? [];
 
     if (recommendations.isEmpty) {
@@ -520,11 +522,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 24,
-              ),
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -542,7 +540,9 @@ class DeviceStatisticsWidget extends StatelessWidget {
                       'Seus dispositivos estão bem gerenciados.',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -560,19 +560,13 @@ class DeviceStatisticsWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                Icon(
-                  Icons.recommend,
-                  color: Colors.orange,
-                ),
-                const SizedBox(width: 8),
-                const Text(
+                Icon(Icons.recommend, color: Colors.orange),
+                SizedBox(width: 8),
+                Text(
                   'Recomendações',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -585,11 +579,7 @@ class DeviceStatisticsWidget extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.lightbulb,
-                      size: 18,
-                      color: Colors.orange,
-                    ),
+                    const Icon(Icons.lightbulb, size: 18, color: Colors.orange),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

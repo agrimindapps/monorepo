@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/plant.dart';
+
 import '../../../../../core/theme/plantis_colors.dart';
+import '../../../domain/entities/plant.dart';
 
 /// Widget responsável por exibir as informações de cuidados da planta
 class PlantCareSection extends StatelessWidget {
@@ -36,7 +37,9 @@ class PlantCareSection extends StatelessWidget {
                 ? const Color(0xFF2C2C2E)
                 : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         children: [

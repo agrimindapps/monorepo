@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
 import '../../../../../../core/theme/plantis_colors.dart';
 import '../../../../domain/entities/plant.dart';
 import '../../../../domain/entities/plant_task.dart';
@@ -42,17 +44,16 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
 
     // Criar animações escalonadas
     _itemAnimations = List.generate(6, (index) {
-      return Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: _fadeController,
-        curve: Interval(
-          index * 0.15,
-          0.7 + (index * 0.05),
-          curve: Curves.easeOutBack,
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _fadeController,
+          curve: Interval(
+            index * 0.15,
+            0.7 + (index * 0.05),
+            curve: Curves.easeOutBack,
+          ),
         ),
-      ));
+      );
     });
 
     _fadeController.forward();
@@ -180,9 +181,10 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
 
     // Conquista por especialização
     final typeDistribution = _calculateTypeDistribution();
-    final maxTypePercentage = typeDistribution.values.isEmpty
-        ? 0.0
-        : typeDistribution.values.reduce(math.max);
+    final maxTypePercentage =
+        typeDistribution.values.isEmpty
+            ? 0.0
+            : typeDistribution.values.reduce(math.max);
 
     achievements.add({
       'title': 'Especialização',
@@ -203,13 +205,17 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
     if (widget.completedTasks.isEmpty) return 0;
 
     final tasks = [...widget.completedTasks];
-    tasks.sort((a, b) => (b.completedDate ?? DateTime(1970))
-        .compareTo(a.completedDate ?? DateTime(1970)));
+    tasks.sort(
+      (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
+        a.completedDate ?? DateTime(1970),
+      ),
+    );
 
     final uniqueDates = <String>{};
     for (final task in tasks) {
       if (task.completedDate != null) {
-        final dateKey = '${task.completedDate!.year}-${task.completedDate!.month}-${task.completedDate!.day}';
+        final dateKey =
+            '${task.completedDate!.year}-${task.completedDate!.month}-${task.completedDate!.day}';
         uniqueDates.add(dateKey);
       }
     }
@@ -223,7 +229,11 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
 
     for (int i = 0; i < sortedDates.length; i++) {
       final parts = sortedDates[i].split('-');
-      final date = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+      final date = DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
 
       if (lastDate == null) {
         lastDate = date;
@@ -253,34 +263,39 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
         'icon': Icons.lightbulb_outline,
         'color': Colors.blue,
         'title': 'Comece sua jornada',
-        'description': 'Complete sua primeira tarefa para ver insights personalizados!',
+        'description':
+            'Complete sua primeira tarefa para ver insights personalizados!',
       });
       return insights;
     }
 
     // Insight sobre tipo mais comum
     if (typeDistribution.isNotEmpty) {
-      final mostCommonType = typeDistribution.entries
-          .reduce((a, b) => a.value > b.value ? a : b);
+      final mostCommonType = typeDistribution.entries.reduce(
+        (a, b) => a.value > b.value ? a : b,
+      );
 
       insights.add({
         'icon': _getTaskTypeIcon(mostCommonType.key),
         'color': _getTaskTypeColor(mostCommonType.key),
         'title': 'Seu cuidado favorito',
-        'description': '${mostCommonType.value.toStringAsFixed(1)}% das suas tarefas são ${mostCommonType.key.displayName.toLowerCase()}.',
+        'description':
+            '${mostCommonType.value.toStringAsFixed(1)}% das suas tarefas são ${mostCommonType.key.displayName.toLowerCase()}.',
       });
     }
 
     // Insight sobre dia mais ativo
-    final mostActiveDay = weeklyData.reduce((a, b) =>
-        (a['count'] as int) > (b['count'] as int) ? a : b);
+    final mostActiveDay = weeklyData.reduce(
+      (a, b) => (a['count'] as int) > (b['count'] as int) ? a : b,
+    );
 
     if ((mostActiveDay['count'] as int) > 0) {
       insights.add({
         'icon': Icons.calendar_today,
         'color': PlantisColors.primary,
         'title': 'Dia mais ativo',
-        'description': 'Você cuida mais da sua planta nas ${mostActiveDay['day']}s (${mostActiveDay['count']} cuidados).',
+        'description':
+            'Você cuida mais da sua planta nas ${mostActiveDay['day']}s (${mostActiveDay['count']} cuidados).',
       });
     }
 
@@ -291,7 +306,8 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
         'icon': Icons.trending_up,
         'color': Colors.green,
         'title': 'Excelente consistência!',
-        'description': 'Você está numa sequência de $currentStreak dias. Continue assim!',
+        'description':
+            'Você está numa sequência de $currentStreak dias. Continue assim!',
       });
     }
 
@@ -301,7 +317,8 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
         'icon': Icons.celebration,
         'color': Colors.purple,
         'title': 'Parabéns!',
-        'description': 'Você já completou $total cuidados. Sua planta está muito bem cuidada!',
+        'description':
+            'Você já completou $total cuidados. Sua planta está muito bem cuidada!',
       });
     }
 
@@ -437,61 +454,70 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  children: weeklyData.map((data) {
-                    final count = data['count'] as int;
-                    final day = data['day'] as String;
-                    final height = maxCount > 0 ? (count / maxCount) * 160 : 0.0;
+                  children:
+                      weeklyData.map((data) {
+                        final count = data['count'] as int;
+                        final day = data['day'] as String;
+                        final height =
+                            maxCount > 0 ? (count / maxCount) * 160 : 0.0;
 
-                    return AnimatedBuilder(
-                      animation: _chartController,
-                      builder: (context, child) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // Valor
-                            Text(
-                              '$count',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: count > 0
-                                    ? PlantisColors.primary
-                                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            // Barra
-                            Container(
-                              width: 24,
-                              height: height * _chartController.value,
-                              decoration: BoxDecoration(
-                                gradient: count > 0 ? LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [
-                                    PlantisColors.primary,
-                                    PlantisColors.primaryLight,
-                                  ],
-                                ) : null,
-                                color: count == 0
-                                    ? theme.colorScheme.outline.withValues(alpha: 0.2)
-                                    : null,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Label do dia
-                            Text(
-                              day,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        return AnimatedBuilder(
+                          animation: _chartController,
+                          builder: (context, child) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Valor
+                                Text(
+                                  '$count',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        count > 0
+                                            ? PlantisColors.primary
+                                            : theme.colorScheme.onSurfaceVariant
+                                                .withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                // Barra
+                                Container(
+                                  width: 24,
+                                  height: height * _chartController.value,
+                                  decoration: BoxDecoration(
+                                    gradient:
+                                        count > 0
+                                            ? const LinearGradient(
+                                              begin: Alignment.bottomCenter,
+                                              end: Alignment.topCenter,
+                                              colors: [
+                                                PlantisColors.primary,
+                                                PlantisColors.primaryLight,
+                                              ],
+                                            )
+                                            : null,
+                                    color:
+                                        count == 0
+                                            ? theme.colorScheme.outline
+                                                .withValues(alpha: 0.2)
+                                            : null,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Label do dia
+                                Text(
+                                  day,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         );
-                      },
-                    );
-                  }).toList(),
+                      }).toList(),
                 ),
               ),
             ],
@@ -522,7 +548,9 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -546,17 +574,11 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: color.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    _getTaskTypeIcon(type),
-                    color: color,
-                    size: 20,
-                  ),
+                  Icon(_getTaskTypeIcon(type), color: color, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -644,18 +666,29 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: achieved ? LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.2),
-            color.withValues(alpha: 0.1),
-          ],
-        ) : null,
-        color: achieved ? null : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        gradient:
+            achieved
+                ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.withValues(alpha: 0.2),
+                    color.withValues(alpha: 0.1),
+                  ],
+                )
+                : null,
+        color:
+            achieved
+                ? null
+                : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: achieved ? color.withValues(alpha: 0.5) : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color:
+              achieved
+                  ? color.withValues(alpha: 0.5)
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -665,16 +698,16 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             children: [
               Icon(
                 achievement['icon'] as IconData,
-                color: achieved ? color : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color:
+                    achieved
+                        ? color
+                        : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
                 size: 24,
               ),
               const Spacer(),
-              if (achieved)
-                Icon(
-                  Icons.check_circle,
-                  color: color,
-                  size: 16,
-                ),
+              if (achieved) Icon(Icons.check_circle, color: color, size: 16),
             ],
           ),
           const SizedBox(height: 12),
@@ -698,8 +731,13 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           // Progress bar
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: achieved ? color.withValues(alpha: 0.3) : theme.colorScheme.outline.withValues(alpha: 0.3),
-            valueColor: AlwaysStoppedAnimation<Color>(achieved ? color : theme.colorScheme.onSurfaceVariant),
+            backgroundColor:
+                achieved
+                    ? color.withValues(alpha: 0.3)
+                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              achieved ? color : theme.colorScheme.onSurfaceVariant,
+            ),
             borderRadius: BorderRadius.circular(4),
             minHeight: 4,
           ),
@@ -707,7 +745,12 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           Text(
             '${achievement['current']}/${achievement['target']}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: achieved ? color : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              color:
+                  achieved
+                      ? color
+                      : theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -749,9 +792,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [

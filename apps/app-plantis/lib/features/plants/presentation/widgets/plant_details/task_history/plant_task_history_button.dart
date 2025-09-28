@@ -34,26 +34,18 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
 
     // Animação de glow pulsante
     _glowController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    _glowAnimation = Tween<double>(
-      begin: 0.3,
-      end: 0.8,
-    ).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeInOut,
-    ));
+    _glowAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
 
     // Iniciar animação de glow
     _glowController.repeat(reverse: true);
@@ -84,8 +76,11 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
     if (widget.completedTasks.isEmpty) return 0;
 
     final tasks = [...widget.completedTasks];
-    tasks.sort((a, b) => (b.completedDate ?? DateTime(1970))
-        .compareTo(a.completedDate ?? DateTime(1970)));
+    tasks.sort(
+      (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
+        a.completedDate ?? DateTime(1970),
+      ),
+    );
 
     int streak = 0;
     DateTime? lastDate;
@@ -122,11 +117,12 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
     final currentMonth = DateTime(now.year, now.month);
     final nextMonth = DateTime(now.year, now.month + 1);
 
-    final monthTasks = widget.completedTasks.where((task) {
-      if (task.completedDate == null) return false;
-      return task.completedDate!.isAfter(currentMonth) &&
-          task.completedDate!.isBefore(nextMonth);
-    }).toList();
+    final monthTasks =
+        widget.completedTasks.where((task) {
+          if (task.completedDate == null) return false;
+          return task.completedDate!.isAfter(currentMonth) &&
+              task.completedDate!.isBefore(nextMonth);
+        }).toList();
 
     final typeCount = <TaskType, int>{};
     for (final task in monthTasks) {
@@ -138,7 +134,8 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
       'watering': typeCount[TaskType.watering] ?? 0,
       'fertilizing': typeCount[TaskType.fertilizing] ?? 0,
       'pruning': typeCount[TaskType.pruning] ?? 0,
-      'others': monthTasks.length -
+      'others':
+          monthTasks.length -
           (typeCount[TaskType.watering] ?? 0) -
           (typeCount[TaskType.fertilizing] ?? 0) -
           (typeCount[TaskType.pruning] ?? 0),
@@ -170,7 +167,9 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                     boxShadow: [
                       // Glow effect
                       BoxShadow(
-                        color: PlantisColors.primary.withValues(alpha: _glowAnimation.value * 0.3),
+                        color: PlantisColors.primary.withValues(
+                          alpha: _glowAnimation.value * 0.3,
+                        ),
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),
@@ -207,7 +206,9 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: PlantisColors.primary.withValues(alpha: 0.2),
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -223,10 +224,11 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                                 children: [
                                   Text(
                                     'Histórico de cuidados',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.onSurface,
+                                        ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -295,10 +297,14 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.surface.withValues(
+                                alpha: 0.7,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.2,
+                                ),
                               ),
                             ),
                             child: Row(
@@ -358,18 +364,11 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
+          Icon(icon, color: color, size: 20),
           const SizedBox(height: 4),
           Text(
             value,
@@ -402,11 +401,7 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
 
     return Column(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 16,
-        ),
+        Icon(icon, color: color, size: 16),
         const SizedBox(height: 2),
         Text(
           '$count',

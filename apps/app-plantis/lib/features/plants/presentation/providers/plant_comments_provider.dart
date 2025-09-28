@@ -7,9 +7,8 @@ import '../../domain/repositories/plant_comments_repository.dart';
 class PlantCommentsProvider extends ChangeNotifier {
   final PlantCommentsRepository _repository;
 
-  PlantCommentsProvider({
-    required PlantCommentsRepository repository,
-  }) : _repository = repository;
+  PlantCommentsProvider({required PlantCommentsRepository repository})
+    : _repository = repository;
 
   List<ComentarioModel> _comments = [];
   bool _isLoading = false;
@@ -34,7 +33,7 @@ class PlantCommentsProvider extends ChangeNotifier {
     _currentPlantId = plantId;
 
     final result = await _repository.getCommentsForPlant(plantId);
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -60,7 +59,7 @@ class PlantCommentsProvider extends ChangeNotifier {
     _setLoading(true);
 
     final result = await _repository.addComment(plantId, content.trim());
-    
+
     final success = result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -96,10 +95,12 @@ class PlantCommentsProvider extends ChangeNotifier {
     _setLoading(true);
 
     final originalComment = _comments[commentIndex];
-    final updatedComment = originalComment.copyWith(conteudo: newContent.trim());
-    
+    final updatedComment = originalComment.copyWith(
+      conteudo: newContent.trim(),
+    );
+
     final result = await _repository.updateComment(updatedComment);
-    
+
     final success = result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -128,7 +129,7 @@ class PlantCommentsProvider extends ChangeNotifier {
     _setLoading(true);
 
     final result = await _repository.deleteComment(commentId);
-    
+
     final success = result.fold(
       (failure) {
         _errorMessage = failure.message;

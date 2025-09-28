@@ -132,7 +132,6 @@ class _PlantGridCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               // Plant illustration
               Expanded(
                 child: Center(
@@ -310,7 +309,6 @@ class _DefaultPlantIcon extends StatelessWidget {
     );
   }
 }
-
 
 class _TaskStatusSection extends StatelessWidget {
   final Plant plant;

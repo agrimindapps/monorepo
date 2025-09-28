@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/providers/background_sync_provider.dart';
 import '../../../core/sync/background_sync_status.dart';
@@ -11,11 +10,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onDismiss;
 
-  const DiscreteSyncIndicator({
-    super.key,
-    this.onRetry,
-    this.onDismiss,
-  });
+  const DiscreteSyncIndicator({super.key, this.onRetry, this.onDismiss});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +25,14 @@ class DiscreteSyncIndicator extends StatelessWidget {
     );
   }
 
-  Widget _buildSyncBanner(BuildContext context, BackgroundSyncProvider syncProvider) {
+  Widget _buildSyncBanner(
+    BuildContext context,
+    BackgroundSyncProvider syncProvider,
+  ) {
     final isError = syncProvider.syncStatus.toString().contains('error');
-    final isCompleted = syncProvider.syncStatus.toString().contains('completed');
+    final isCompleted = syncProvider.syncStatus.toString().contains(
+      'completed',
+    );
     final isInProgress = syncProvider.isSyncInProgress;
 
     Color backgroundColor;
@@ -64,10 +64,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: iconColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: iconColor.withValues(alpha: 0.3), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -88,11 +85,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
               ),
             )
           else
-            Icon(
-              icon,
-              size: 16,
-              color: iconColor,
-            ),
+            Icon(icon, size: 16, color: iconColor),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -143,10 +136,7 @@ class DiscreteSyncIndicator extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.7),
               ),
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 24,
-                minHeight: 24,
-              ),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
             ),
         ],
       ),
@@ -203,7 +193,10 @@ class FloatingSyncIndicator extends StatelessWidget {
     );
   }
 
-  Widget _buildFloatingCard(BuildContext context, BackgroundSyncProvider syncProvider) {
+  Widget _buildFloatingCard(
+    BuildContext context,
+    BackgroundSyncProvider syncProvider,
+  ) {
     final isError = syncProvider.syncStatus.toString().contains('error');
     final isInProgress = syncProvider.isSyncInProgress;
 
@@ -216,9 +209,10 @@ class FloatingSyncIndicator extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isError
-                ? Colors.red.shade300
-                : PlantisColors.primary.withValues(alpha: 0.3),
+            color:
+                isError
+                    ? Colors.red.shade300
+                    : PlantisColors.primary.withValues(alpha: 0.3),
           ),
           boxShadow: [
             BoxShadow(
@@ -295,11 +289,7 @@ class SyncDotIndicator extends StatelessWidget {
   final double size;
   final VoidCallback? onTap;
 
-  const SyncDotIndicator({
-    super.key,
-    this.size = 8.0,
-    this.onTap,
-  });
+  const SyncDotIndicator({super.key, this.size = 8.0, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -339,15 +329,18 @@ class SyncDotIndicator extends StatelessWidget {
                   ),
               ],
             ),
-            child: isInProgress
-                ? Container(
-                    padding: EdgeInsets.all(size * 0.2),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : null,
+            child:
+                isInProgress
+                    ? Container(
+                      padding: EdgeInsets.all(size * 0.2),
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 1,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    )
+                    : null,
           ),
         );
       },

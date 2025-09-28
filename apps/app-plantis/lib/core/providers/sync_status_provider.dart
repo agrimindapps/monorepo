@@ -76,24 +76,25 @@ class SyncStatusProvider with ChangeNotifier {
 
   // Method to manually trigger sync or check sync status
   Future<void> checkSyncStatus() async {
-    final networkStatusResult = await _connectivityService.getCurrentNetworkStatus();
-    
-    networkStatusResult.fold(
-      (failure) => _updateSyncState(SyncState.error),
-      (networkStatus) {
-        if (networkStatus == ConnectivityType.offline || networkStatus == ConnectivityType.none) {
-          _updateSyncState(SyncState.offline);
-        } else {
-          final pendingItems = _syncQueue.getPendingItems();
+    final networkStatusResult =
+        await _connectivityService.getCurrentNetworkStatus();
 
-          if (pendingItems.isEmpty) {
-            _updateSyncState(SyncState.idle);
-          } else {
-            _updateSyncState(SyncState.syncing);
-          }
+    networkStatusResult.fold((failure) => _updateSyncState(SyncState.error), (
+      networkStatus,
+    ) {
+      if (networkStatus == ConnectivityType.offline ||
+          networkStatus == ConnectivityType.none) {
+        _updateSyncState(SyncState.offline);
+      } else {
+        final pendingItems = _syncQueue.getPendingItems();
+
+        if (pendingItems.isEmpty) {
+          _updateSyncState(SyncState.idle);
+        } else {
+          _updateSyncState(SyncState.syncing);
         }
-      },
-    );
+      }
+    });
   }
 
   // Helper method to get a user-friendly status message

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Enhanced loading states with better UX and animations
 class EnhancedLoadingStates {
-  
   /// Adaptive loading indicator that changes based on context
   static Widget adaptiveLoading({
     String? message,
@@ -13,7 +12,7 @@ class EnhancedLoadingStates {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -53,14 +52,12 @@ class EnhancedLoadingStates {
       builder: (context) {
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
-        
+
         return Container(
           width: width,
           height: height,
           decoration: BoxDecoration(
-            color: isDark 
-                ? Colors.grey[800]
-                : Colors.grey[300],
+            color: isDark ? Colors.grey[800] : Colors.grey[300],
             borderRadius: borderRadius ?? BorderRadius.circular(8),
           ),
           child: _ShimmerAnimation(
@@ -69,9 +66,18 @@ class EnhancedLoadingStates {
               height: height,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: isDark
-                      ? [Colors.grey[800]!, Colors.grey[700]!, Colors.grey[800]!]
-                      : [Colors.grey[300]!, Colors.grey[100]!, Colors.grey[300]!],
+                  colors:
+                      isDark
+                          ? [
+                            Colors.grey[800]!,
+                            Colors.grey[700]!,
+                            Colors.grey[800]!,
+                          ]
+                          : [
+                            Colors.grey[300]!,
+                            Colors.grey[100]!,
+                            Colors.grey[300]!,
+                          ],
                   stops: const [0.0, 0.5, 1.0],
                   begin: const Alignment(-1.0, 0.0),
                   end: const Alignment(1.0, 0.0),
@@ -94,13 +100,15 @@ class EnhancedLoadingStates {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Container(
           width: double.infinity,
           height: double.infinity,
-          color: showBackground 
-              ? (backgroundColor ?? theme.colorScheme.surface.withValues(alpha: 0.8))
-              : Colors.transparent,
+          color:
+              showBackground
+                  ? (backgroundColor ??
+                      theme.colorScheme.surface.withValues(alpha: 0.8))
+                  : Colors.transparent,
           child: Center(
             child: Card(
               elevation: 8,
@@ -153,7 +161,11 @@ class EnhancedLoadingStates {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         children: [
-          shimmerLoading(height: 40, width: 40, borderRadius: BorderRadius.circular(20)),
+          shimmerLoading(
+            height: 40,
+            width: 40,
+            borderRadius: BorderRadius.circular(20),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -187,7 +199,7 @@ class EnhancedLoadingStates {
       builder: (context) {
         final theme = Theme.of(context);
         final percentage = (progress * 100).round();
-        
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -203,7 +215,9 @@ class EnhancedLoadingStates {
                     child: CircularProgressIndicator(
                       value: progress,
                       strokeWidth: 6,
-                      backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
+                      backgroundColor: theme.colorScheme.outline.withValues(
+                        alpha: 0.2,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         theme.colorScheme.primary,
                       ),
@@ -238,11 +252,7 @@ class EnhancedLoadingStates {
 }
 
 /// Skeleton loader types
-enum SkeletonType {
-  plantCard,
-  taskItem,
-  listTile,
-}
+enum SkeletonType { plantCard, taskItem, listTile }
 
 /// Shimmer animation widget
 class _ShimmerAnimation extends StatefulWidget {
@@ -266,9 +276,10 @@ class _ShimmerAnimationState extends State<_ShimmerAnimation>
       duration: const Duration(seconds: 1),
       vsync: this,
     );
-    _animation = Tween<double>(begin: -1.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: -1.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _controller.repeat();
   }
 
@@ -322,9 +333,7 @@ mixin LoadingStateMixin<T extends StatefulWidget> on State<T> {
       children: [
         child,
         if (_isLoading)
-          EnhancedLoadingStates.screenLoading(
-            message: _loadingMessage,
-          ),
+          EnhancedLoadingStates.screenLoading(message: _loadingMessage),
       ],
     );
   }

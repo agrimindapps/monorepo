@@ -1,6 +1,6 @@
 // ignore_for_file: overridden_fields
 
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
 part 'planta_config_model.g.dart';
@@ -390,19 +390,19 @@ class PlantaConfigModel extends BaseSyncModel {
     // Safe conversion with null checks and proper logic
     bool aguaAtiva = false;
     int intervaloRegaDias = 3; // default
-    
+
     bool aduboAtivo = false;
     int intervaloAdubacaoDias = 14; // default
-    
+
     bool banhoSolAtivo = false;
     int intervaloBanhoSolDias = 7; // default
-    
+
     bool inspecaoPragasAtiva = false;
     int intervaloInspecaoPragasDias = 14; // default
-    
+
     bool podaAtiva = false;
     int intervaloPodaDias = 90; // default
-    
+
     bool replantarAtivo = false;
     int intervaloReplantarDias = 365; // default
 
@@ -417,7 +417,7 @@ class PlantaConfigModel extends BaseSyncModel {
           aguaAtiva = true;
         }
       }
-      
+
       final wateringInterval = plantConfig.wateringIntervalDays;
       if (wateringInterval is int && wateringInterval > 0) {
         intervaloRegaDias = wateringInterval;
@@ -433,7 +433,7 @@ class PlantaConfigModel extends BaseSyncModel {
           aduboAtivo = true;
         }
       }
-      
+
       final fertilizingInterval = plantConfig.fertilizingIntervalDays;
       if (fertilizingInterval is int && fertilizingInterval > 0) {
         intervaloAdubacaoDias = fertilizingInterval;

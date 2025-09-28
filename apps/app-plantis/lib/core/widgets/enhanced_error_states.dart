@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Enhanced error states with better UX and recovery options
 class EnhancedErrorStates {
-  
   /// Adaptive error display with context-aware styling
   static Widget adaptiveError({
     required String title,
@@ -17,7 +16,7 @@ class EnhancedErrorStates {
       builder: (context) {
         final theme = Theme.of(context);
         final errorConfig = _getErrorConfig(severity, theme);
-        
+
         return Container(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -78,10 +77,7 @@ class EnhancedErrorStates {
   }
 
   /// Network error with specific network troubleshooting
-  static Widget networkError({
-    VoidCallback? onRetry,
-    VoidCallback? onDismiss,
-  }) {
+  static Widget networkError({VoidCallback? onRetry, VoidCallback? onDismiss}) {
     return adaptiveError(
       title: 'Sem conexão',
       message: 'Verifique sua conexão com a internet e tente novamente.',
@@ -100,9 +96,10 @@ class EnhancedErrorStates {
   }) {
     return adaptiveError(
       title: 'Erro no servidor',
-      message: errorCode != null 
-          ? 'Ocorreu um problema no servidor (Código: $errorCode). Tente novamente em alguns instantes.'
-          : 'Ocorreu um problema no servidor. Tente novamente em alguns instantes.',
+      message:
+          errorCode != null
+              ? 'Ocorreu um problema no servidor (Código: $errorCode). Tente novamente em alguns instantes.'
+              : 'Ocorreu um problema no servidor. Tente novamente em alguns instantes.',
       icon: Icons.cloud_off,
       onRetry: onRetry,
       severity: ErrorSeverity.critical,
@@ -110,10 +107,7 @@ class EnhancedErrorStates {
   }
 
   /// Authentication error
-  static Widget authError({
-    VoidCallback? onLogin,
-    VoidCallback? onDismiss,
-  }) {
+  static Widget authError({VoidCallback? onLogin, VoidCallback? onDismiss}) {
     return adaptiveError(
       title: 'Acesso expirado',
       message: 'Sua sessão expirou. Faça login novamente para continuar.',
@@ -133,7 +127,8 @@ class EnhancedErrorStates {
   }) {
     return adaptiveError(
       title: 'Permissão necessária',
-      message: 'Para usar esta funcionalidade, é necessário permitir o acesso $permission.',
+      message:
+          'Para usar esta funcionalidade, é necessário permitir o acesso $permission.',
       icon: Icons.security,
       onRetry: onOpenSettings,
       retryText: 'Abrir configurações',
@@ -153,7 +148,7 @@ class EnhancedErrorStates {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Container(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -207,13 +202,15 @@ class EnhancedErrorStates {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Container(
           margin: const EdgeInsets.only(top: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
-            border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: theme.colorScheme.error.withValues(alpha: 0.3),
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -260,17 +257,13 @@ class EnhancedErrorStates {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Container(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon ?? Icons.check_circle,
-                size: 64,
-                color: Colors.green,
-              ),
+              Icon(icon ?? Icons.check_circle, size: 64, color: Colors.green),
               const SizedBox(height: 16),
               Text(
                 title,
@@ -307,10 +300,7 @@ class EnhancedErrorStates {
                     if (onDismiss != null) const SizedBox(width: 12),
                   ],
                   if (onDismiss != null)
-                    TextButton(
-                      onPressed: onDismiss,
-                      child: const Text('OK'),
-                    ),
+                    TextButton(onPressed: onDismiss, child: const Text('OK')),
                 ],
               ),
             ],
@@ -328,31 +318,20 @@ class EnhancedErrorStates {
           icon: Icons.info_outline,
         );
       case ErrorSeverity.warning:
-        return _ErrorConfig(
-          color: Colors.orange,
-          icon: Icons.warning_outlined,
-        );
+        return _ErrorConfig(color: Colors.orange, icon: Icons.warning_outlined);
       case ErrorSeverity.error:
         return _ErrorConfig(
           color: theme.colorScheme.error,
           icon: Icons.error_outline,
         );
       case ErrorSeverity.critical:
-        return _ErrorConfig(
-          color: Colors.red,
-          icon: Icons.dangerous_outlined,
-        );
+        return _ErrorConfig(color: Colors.red, icon: Icons.dangerous_outlined);
     }
   }
 }
 
 /// Error severity levels
-enum ErrorSeverity {
-  info,
-  warning,
-  error,
-  critical,
-}
+enum ErrorSeverity { info, warning, error, critical }
 
 class _ErrorConfig {
   final Color color;
@@ -371,7 +350,10 @@ mixin ErrorStateMixin<T extends StatefulWidget> on State<T> {
   ErrorSeverity get errorSeverity => _errorSeverity;
 
   /// Show error state
-  void showError(String message, {ErrorSeverity severity = ErrorSeverity.error}) {
+  void showError(
+    String message, {
+    ErrorSeverity severity = ErrorSeverity.error,
+  }) {
     setState(() {
       _errorMessage = message;
       _errorSeverity = severity;
@@ -386,10 +368,7 @@ mixin ErrorStateMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Build error widget if needed
-  Widget buildWithError({
-    required Widget child,
-    VoidCallback? onRetry,
-  }) {
+  Widget buildWithError({required Widget child, VoidCallback? onRetry}) {
     if (hasError) {
       return EnhancedErrorStates.adaptiveError(
         title: 'Ops, algo deu errado',

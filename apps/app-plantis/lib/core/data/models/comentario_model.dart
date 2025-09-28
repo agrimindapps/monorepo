@@ -1,4 +1,3 @@
-import 'package:hive/hive.dart';
 import 'package:core/core.dart';
 
 part 'comentario_model.g.dart';
@@ -8,15 +7,30 @@ part 'comentario_model.g.dart';
 @HiveType(typeId: 0)
 class ComentarioModel extends BaseSyncEntity {
   // Base sync fields (required for Hive generation)
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
+  @HiveField(0)
+  @override
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
+  @HiveField(4)
+  @override
+  final bool isDirty;
+  @HiveField(5)
+  @override
+  final bool isDeleted;
+  @HiveField(6)
+  @override
+  final int version;
+  @HiveField(7)
+  @override
+  final String? userId;
+  @HiveField(8)
+  @override
+  final String? moduleName;
 
   // Comentario specific fields
   @HiveField(10)
@@ -30,13 +44,22 @@ class ComentarioModel extends BaseSyncEntity {
 
   // Getters para compatibilidade com BaseSyncEntity
   @override
-  DateTime? get createdAt => createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!) : null;
+  DateTime? get createdAt =>
+      createdAtMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!)
+          : null;
 
   @override
-  DateTime? get updatedAt => updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!) : null;
+  DateTime? get updatedAt =>
+      updatedAtMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!)
+          : null;
 
   @override
-  DateTime? get lastSyncAt => lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!) : null;
+  DateTime? get lastSyncAt =>
+      lastSyncAtMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
+          : null;
 
   ComentarioModel({
     required this.id,
@@ -53,16 +76,25 @@ class ComentarioModel extends BaseSyncEntity {
     this.dataCriacao,
     this.plantId,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt:
+             createdAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+                 : null,
+         updatedAt:
+             updatedAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+                 : null,
+         lastSyncAt:
+             lastSyncAtMs != null
+                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+                 : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
   /// Factory constructor for creating new comentario
   factory ComentarioModel.create({
@@ -95,9 +127,12 @@ class ComentarioModel extends BaseSyncEntity {
 
     return ComentarioModel(
       id: baseFields['id'] as String,
-      createdAtMs: (baseFields['createdAt'] as DateTime?)?.millisecondsSinceEpoch,
-      updatedAtMs: (baseFields['updatedAt'] as DateTime?)?.millisecondsSinceEpoch,
-      lastSyncAtMs: (baseFields['lastSyncAt'] as DateTime?)?.millisecondsSinceEpoch,
+      createdAtMs:
+          (baseFields['createdAt'] as DateTime?)?.millisecondsSinceEpoch,
+      updatedAtMs:
+          (baseFields['updatedAt'] as DateTime?)?.millisecondsSinceEpoch,
+      lastSyncAtMs:
+          (baseFields['lastSyncAt'] as DateTime?)?.millisecondsSinceEpoch,
       isDirty: baseFields['isDirty'] as bool,
       isDeleted: baseFields['isDeleted'] as bool,
       version: baseFields['version'] as int,
@@ -134,9 +169,12 @@ class ComentarioModel extends BaseSyncEntity {
 
     return ComentarioModel(
       id: baseFields['id'] as String,
-      createdAtMs: (baseFields['createdAt'] as DateTime?)?.millisecondsSinceEpoch,
-      updatedAtMs: (baseFields['updatedAt'] as DateTime?)?.millisecondsSinceEpoch,
-      lastSyncAtMs: (baseFields['lastSyncAt'] as DateTime?)?.millisecondsSinceEpoch,
+      createdAtMs:
+          (baseFields['createdAt'] as DateTime?)?.millisecondsSinceEpoch,
+      updatedAtMs:
+          (baseFields['updatedAt'] as DateTime?)?.millisecondsSinceEpoch,
+      lastSyncAtMs:
+          (baseFields['lastSyncAt'] as DateTime?)?.millisecondsSinceEpoch,
       isDirty: baseFields['isDirty'] as bool,
       isDeleted: baseFields['isDeleted'] as bool,
       version: baseFields['version'] as int,

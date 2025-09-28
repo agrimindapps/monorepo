@@ -38,38 +38,30 @@ class _SaveIndicatorState extends State<SaveIndicator>
   late AnimationController _pulseController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
-  
+
   bool _showSaved = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     _saveController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _saveController,
-      curve: Curves.elasticOut,
-    ));
-    
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _saveController, curve: Curves.elasticOut),
+    );
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     if (widget.hasUnsavedChanges) {
       _pulseController.repeat(reverse: true);
@@ -79,12 +71,12 @@ class _SaveIndicatorState extends State<SaveIndicator>
   @override
   void didUpdateWidget(SaveIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Handle save completion
     if (oldWidget.isSaving && !widget.isSaving) {
       _onSaveCompleted();
     }
-    
+
     // Handle unsaved changes pulsing
     if (widget.hasUnsavedChanges != oldWidget.hasUnsavedChanges) {
       if (widget.hasUnsavedChanges) {
@@ -106,10 +98,10 @@ class _SaveIndicatorState extends State<SaveIndicator>
   void _onSaveCompleted() async {
     await _saveController.forward();
     setState(() => _showSaved = true);
-    
+
     // Auto-hide after duration
     await Future<void>.delayed(widget.autoHideDuration);
-    
+
     if (mounted) {
       setState(() => _showSaved = false);
       await _saveController.reverse();
@@ -148,20 +140,16 @@ class _SaveIndicatorState extends State<SaveIndicator>
 
   Widget _buildChip() {
     final theme = Theme.of(context);
-    
+
     if (_showSaved) {
       return Chip(
-        avatar: const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 18,
-        ),
+        avatar: const Icon(Icons.check_circle, color: Colors.green, size: 18),
         label: Text(widget.savedText ?? 'Salvo!'),
         backgroundColor: Colors.green.withValues(alpha: 0.1),
         side: const BorderSide(color: Colors.green),
       );
     }
-    
+
     if (widget.isSaving) {
       return Chip(
         avatar: SizedBox(
@@ -179,7 +167,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
         side: BorderSide(color: theme.colorScheme.primary),
       );
     }
-    
+
     return ActionChip(
       avatar: widget.customIcon ?? const Icon(Icons.save, size: 18),
       label: Text(widget.saveText ?? 'Alterações não salvas'),
@@ -228,9 +216,10 @@ class _SaveIndicatorState extends State<SaveIndicator>
       icon: widget.customIcon ?? const Icon(Icons.save),
       label: Text(widget.saveText ?? 'Salvar'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: widget.hasUnsavedChanges
-            ? theme.colorScheme.primary
-            : theme.colorScheme.surfaceContainer,
+        backgroundColor:
+            widget.hasUnsavedChanges
+                ? theme.colorScheme.primary
+                : theme.colorScheme.surfaceContainer,
       ),
     );
   }
@@ -246,11 +235,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
     if (_showSaved) {
       return Semantics(
         label: 'Alterações salvas com sucesso',
-        child: const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 24,
-        ),
+        child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
       );
     }
 
@@ -315,10 +300,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
           ),
           if (widget.hasUnsavedChanges && widget.onSave != null) ...[
             const SizedBox(width: 16),
-            TextButton(
-              onPressed: widget.onSave,
-              child: const Text('SALVAR'),
-            ),
+            TextButton(onPressed: widget.onSave, child: const Text('SALVAR')),
           ],
         ],
       ),
@@ -327,15 +309,17 @@ class _SaveIndicatorState extends State<SaveIndicator>
 
   Color _getBannerColor() {
     final theme = Theme.of(context);
-    
+
     if (_showSaved) return Colors.green.withValues(alpha: 0.1);
-    if (widget.isSaving) return theme.colorScheme.primary.withValues(alpha: 0.1);
+    if (widget.isSaving) {
+      return theme.colorScheme.primary.withValues(alpha: 0.1);
+    }
     return Colors.orange.withValues(alpha: 0.1);
   }
 
   Color _getBannerBorderColor() {
     final theme = Theme.of(context);
-    
+
     if (_showSaved) return Colors.green;
     if (widget.isSaving) return theme.colorScheme.primary;
     return Colors.orange;
@@ -343,7 +327,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
 
   Color _getBannerTextColor() {
     final theme = Theme.of(context);
-    
+
     if (_showSaved) return Colors.green;
     if (widget.isSaving) return theme.colorScheme.primary;
     return Colors.orange;
@@ -353,7 +337,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
     if (_showSaved) {
       return const Icon(Icons.check_circle, color: Colors.green, size: 20);
     }
-    
+
     if (widget.isSaving) {
       return SizedBox(
         width: 20,
@@ -366,12 +350,8 @@ class _SaveIndicatorState extends State<SaveIndicator>
         ),
       );
     }
-    
-    return const Icon(
-      Icons.warning,
-      color: Colors.orange,
-      size: 20,
-    );
+
+    return const Icon(Icons.warning, color: Colors.orange, size: 20);
   }
 
   String _getBannerText() {
@@ -382,12 +362,7 @@ class _SaveIndicatorState extends State<SaveIndicator>
 }
 
 /// Estilos disponíveis para o SaveIndicator
-enum SaveIndicatorStyle {
-  chip,
-  button,
-  icon,
-  banner,
-}
+enum SaveIndicatorStyle { chip, button, icon, banner }
 
 /// Widget para auto-save com debounce
 class AutoSaveIndicator extends StatefulWidget {
@@ -416,7 +391,7 @@ class _AutoSaveIndicatorState extends State<AutoSaveIndicator> {
   @override
   void didUpdateWidget(AutoSaveIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (widget.hasChanges && !oldWidget.hasChanges) {
       _scheduleAutoSave();
     } else if (!widget.hasChanges) {
@@ -449,13 +424,13 @@ class _AutoSaveIndicatorState extends State<AutoSaveIndicator> {
 
     try {
       await widget.onSave();
-      
+
       if (mounted) {
         setState(() {
           _isSaving = false;
           _savedRecently = true;
         });
-        
+
         // Hide "saved" status after 3 seconds
         Timer(const Duration(seconds: 3), () {
           if (mounted) {
@@ -502,21 +477,21 @@ class _AutoSaveIndicatorState extends State<AutoSaveIndicator> {
 
   Color _getBackgroundColor() {
     final theme = Theme.of(context);
-    
+
     if (_savedRecently) {
       return Colors.green.withValues(alpha: 0.1);
     }
-    
+
     if (_isSaving) {
       return theme.colorScheme.primary.withValues(alpha: 0.1);
     }
-    
+
     return theme.colorScheme.outline.withValues(alpha: 0.1);
   }
 
   Color _getTextColor() {
     final theme = Theme.of(context);
-    
+
     if (_savedRecently) return Colors.green;
     if (_isSaving) return theme.colorScheme.primary;
     return theme.colorScheme.onSurfaceVariant;
@@ -526,7 +501,7 @@ class _AutoSaveIndicatorState extends State<AutoSaveIndicator> {
     if (_savedRecently) {
       return const Icon(Icons.check, color: Colors.green, size: 16);
     }
-    
+
     if (_isSaving) {
       return SizedBox(
         width: 16,
@@ -539,7 +514,7 @@ class _AutoSaveIndicatorState extends State<AutoSaveIndicator> {
         ),
       );
     }
-    
+
     return Icon(
       Icons.edit,
       size: 16,
@@ -563,9 +538,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
 
   @override
   CustomColors copyWith({Color? warning}) {
-    return CustomColors(
-      warning: warning ?? this.warning,
-    );
+    return CustomColors(warning: warning ?? this.warning);
   }
 
   @override
@@ -573,8 +546,6 @@ class CustomColors extends ThemeExtension<CustomColors> {
     if (other is! CustomColors) {
       return this;
     }
-    return CustomColors(
-      warning: Color.lerp(warning, other.warning, t),
-    );
+    return CustomColors(warning: Color.lerp(warning, other.warning, t));
   }
 }

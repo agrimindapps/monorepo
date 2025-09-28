@@ -9,7 +9,8 @@ import '../plantis_sync_config.dart';
 /// Serviço para gerenciar sincronização em tempo real do Plantis
 /// com otimizações de performance e bateria
 class PlantisRealtimeService with WidgetsBindingObserver {
-  static final PlantisRealtimeService _instance = PlantisRealtimeService._internal();
+  static final PlantisRealtimeService _instance =
+      PlantisRealtimeService._internal();
   static PlantisRealtimeService get instance => _instance;
 
   PlantisRealtimeService._internal();
@@ -37,10 +38,15 @@ class PlantisRealtimeService with WidgetsBindingObserver {
       await _configureSyncMode();
 
       _isInitialized = true;
-      developer.log('PlantisRealtimeService inicializado', name: 'RealtimeService');
-
+      developer.log(
+        'PlantisRealtimeService inicializado',
+        name: 'RealtimeService',
+      );
     } catch (e) {
-      developer.log('Erro ao inicializar PlantisRealtimeService: $e', name: 'RealtimeService');
+      developer.log(
+        'Erro ao inicializar PlantisRealtimeService: $e',
+        name: 'RealtimeService',
+      );
     }
   }
 
@@ -57,7 +63,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
 
       developer.log('Real-time sync ativado', name: 'RealtimeService');
       _syncEventController.add('Real-time sync ativado');
-
     } catch (e) {
       developer.log('Erro ao ativar real-time: $e', name: 'RealtimeService');
       _syncEventController.add('Erro ao ativar real-time: $e');
@@ -75,9 +80,11 @@ class PlantisRealtimeService with WidgetsBindingObserver {
       _isRealtimeActive = false;
       _realtimeStatusController.add(false);
 
-      developer.log('Real-time sync desativado - fallback para intervalos', name: 'RealtimeService');
+      developer.log(
+        'Real-time sync desativado - fallback para intervalos',
+        name: 'RealtimeService',
+      );
       _syncEventController.add('Fallback para sync por intervalos');
-
     } catch (e) {
       developer.log('Erro ao desativar real-time: $e', name: 'RealtimeService');
     }
@@ -90,7 +97,10 @@ class PlantisRealtimeService with WidgetsBindingObserver {
       _syncEventController.add('Sincronização manual executada');
       developer.log('Sincronização manual executada', name: 'RealtimeService');
     } catch (e) {
-      developer.log('Erro na sincronização manual: $e', name: 'RealtimeService');
+      developer.log(
+        'Erro na sincronização manual: $e',
+        name: 'RealtimeService',
+      );
       _syncEventController.add('Erro na sincronização manual');
     }
   }
@@ -100,10 +110,16 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     if (!_isInitialized) return;
 
     if (isConnected) {
-      developer.log('Conectividade restaurada - tentando ativar real-time', name: 'RealtimeService');
+      developer.log(
+        'Conectividade restaurada - tentando ativar real-time',
+        name: 'RealtimeService',
+      );
       await _configureSyncMode();
     } else {
-      developer.log('Sem conectividade - mantendo dados locais', name: 'RealtimeService');
+      developer.log(
+        'Sem conectividade - mantendo dados locais',
+        name: 'RealtimeService',
+      );
       _syncEventController.add('Modo offline ativo');
     }
   }
@@ -116,7 +132,10 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     final oldState = _currentLifecycleState;
     _currentLifecycleState = state;
 
-    developer.log('App lifecycle mudou: ${oldState.name} -> ${state.name}', name: 'RealtimeService');
+    developer.log(
+      'App lifecycle mudou: ${oldState.name} -> ${state.name}',
+      name: 'RealtimeService',
+    );
 
     switch (state) {
       case AppLifecycleState.resumed:
@@ -157,7 +176,10 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     _backgroundTimer = Timer(const Duration(minutes: 5), () async {
       if (_currentLifecycleState != AppLifecycleState.resumed) {
         await disableRealtime();
-        developer.log('Real-time desativado após 5min em background', name: 'RealtimeService');
+        developer.log(
+          'Real-time desativado após 5min em background',
+          name: 'RealtimeService',
+        );
       }
     });
 
@@ -189,7 +211,10 @@ class PlantisRealtimeService with WidgetsBindingObserver {
         await disableRealtime();
       }
     } catch (e) {
-      developer.log('Erro ao configurar modo de sync: $e', name: 'RealtimeService');
+      developer.log(
+        'Erro ao configurar modo de sync: $e',
+        name: 'RealtimeService',
+      );
     }
   }
 
@@ -201,7 +226,8 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     }
 
     // Se está em background mas timer ainda não expirou
-    if (_currentLifecycleState == AppLifecycleState.paused && _backgroundTimer?.isActive == true) {
+    if (_currentLifecycleState == AppLifecycleState.paused &&
+        _backgroundTimer?.isActive == true) {
       return true;
     }
 
@@ -228,7 +254,9 @@ class PlantisRealtimeService with WidgetsBindingObserver {
       'current_lifecycle_state': _currentLifecycleState.name,
       'should_use_realtime': _shouldUseRealtime(),
       'background_timer_active': _backgroundTimer?.isActive ?? false,
-      'unified_sync_debug': UnifiedSyncManager.instance.getAppDebugInfo('plantis'),
+      'unified_sync_debug': UnifiedSyncManager.instance.getAppDebugInfo(
+        'plantis',
+      ),
     };
   }
 
@@ -245,7 +273,10 @@ class PlantisRealtimeService with WidgetsBindingObserver {
 
       developer.log('PlantisRealtimeService disposed', name: 'RealtimeService');
     } catch (e) {
-      developer.log('Erro ao fazer dispose do PlantisRealtimeService: $e', name: 'RealtimeService');
+      developer.log(
+        'Erro ao fazer dispose do PlantisRealtimeService: $e',
+        name: 'RealtimeService',
+      );
     }
   }
 }

@@ -254,8 +254,8 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                         !widget.isLast
                             ? Border(
                               bottom: BorderSide(
-                                color: theme.colorScheme.outline.withValues(alpha: 
-                                  0.3,
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.3,
                                 ),
                                 width: 0.5,
                               ),

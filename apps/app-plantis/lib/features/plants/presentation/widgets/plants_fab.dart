@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../providers/plant_form_provider.dart';
+import '../../../../core/riverpod_providers/solid_providers.dart';
 import 'plant_form_dialog.dart';
 
-class PlantsFab extends StatelessWidget {
+class PlantsFab extends ConsumerWidget {
   final VoidCallback onScrollToTop;
   final ScrollController scrollController;
 
@@ -15,26 +14,19 @@ class PlantsFab extends StatelessWidget {
     required this.scrollController,
   });
 
-  Future<void> _onAddPlant(BuildContext context) async {
-    // Criar um novo provider para a dialog
-    final plantFormProvider = di.sl<PlantFormProvider>();
-    
-    // Mostrar dialog com o provider
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => ChangeNotifierProvider.value(
-        value: plantFormProvider,
-        child: const PlantFormDialog(),
-      ),
-    );
-    
-    // Limpar o provider após fechar a dialog
-    plantFormProvider.dispose();
+  Future<void> _onAddPlant(BuildContext context, WidgetRef ref) async {
+    // Inicializar o formulário para adição de nova planta
+    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    formManager.initializeForNewPlant();
+
+    // Mostrar dialog
+    await PlantFormDialog.show(context);
+
+    // O cleanup é automático com Riverpod
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Container(
@@ -47,7 +39,7 @@ class PlantsFab extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _onAddPlant(context),
+          onTap: () => _onAddPlant(context, ref),
           borderRadius: BorderRadius.circular(28),
           child: const Icon(Icons.add, color: Colors.black, size: 28),
         ),

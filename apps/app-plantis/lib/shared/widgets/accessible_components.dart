@@ -30,17 +30,20 @@ class AccessiblePlantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lastWateredText = lastWatered != null 
-        ? 'Regada pela última vez há ${_daysSince(lastWatered!)} dias'
-        : 'Sem registro de rega';
-    
-    final nextTaskText = nextTask != null 
-        ? 'Próxima tarefa: $nextTask'
-        : 'Nenhuma tarefa pendente';
+    final lastWateredText =
+        lastWatered != null
+            ? 'Regada pela última vez há ${_daysSince(lastWatered!)} dias'
+            : 'Sem registro de rega';
+
+    final nextTaskText =
+        nextTask != null
+            ? 'Próxima tarefa: $nextTask'
+            : 'Nenhuma tarefa pendente';
 
     return Semantics(
       label: 'Planta $plantName, tipo $plantType',
-      hint: '$lastWateredText. $nextTaskText. Toque duas vezes para ver detalhes.',
+      hint:
+          '$lastWateredText. $nextTaskText. Toque duas vezes para ver detalhes.',
       button: true,
       selected: isSelected,
       onTap: onTap,
@@ -50,19 +53,26 @@ class AccessiblePlantCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: isSelected 
-              ? BorderSide(color: theme.colorScheme.primary, width: 2)
-              : BorderSide.none,
+          side:
+              isSelected
+                  ? BorderSide(color: theme.colorScheme.primary, width: 2)
+                  : BorderSide.none,
         ),
         child: InkWell(
-          onTap: onTap != null ? () {
-            AccessibilityTokens.performHapticFeedback('light');
-            onTap!();
-          } : null,
-          onLongPress: onLongPress != null ? () {
-            AccessibilityTokens.performHapticFeedback('heavy');
-            onLongPress!();
-          } : null,
+          onTap:
+              onTap != null
+                  ? () {
+                    AccessibilityTokens.performHapticFeedback('light');
+                    onTap!();
+                  }
+                  : null,
+          onLongPress:
+              onLongPress != null
+                  ? () {
+                    AccessibilityTokens.performHapticFeedback('heavy');
+                    onLongPress!();
+                  }
+                  : null,
           borderRadius: BorderRadius.circular(12),
           child: Container(
             constraints: const BoxConstraints(
@@ -74,12 +84,10 @@ class AccessiblePlantCard extends StatelessWidget {
                 // Imagem da planta ou placeholder
                 _buildPlantImage(context),
                 const SizedBox(width: 16),
-                
+
                 // Informações da planta
-                Expanded(
-                  child: _buildPlantInfo(context),
-                ),
-                
+                Expanded(child: _buildPlantInfo(context)),
+
                 // Indicador de status
                 _buildStatusIndicator(context),
               ],
@@ -101,16 +109,18 @@ class AccessiblePlantCard extends StatelessWidget {
           color: PlantisColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: imageUrl != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
-                ),
-              )
-            : _buildPlaceholderIcon(),
+        child:
+            imageUrl != null
+                ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (context, error, stackTrace) => _buildPlaceholderIcon(),
+                  ),
+                )
+                : _buildPlaceholderIcon(),
       ),
     );
   }
@@ -142,7 +152,9 @@ class AccessiblePlantCard extends StatelessWidget {
           plantType,
           style: TextStyle(
             fontSize: AccessibilityTokens.getAccessibleFontSize(context, 14),
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -158,7 +170,10 @@ class AccessiblePlantCard extends StatelessWidget {
             child: Text(
               nextTask!,
               style: TextStyle(
-                fontSize: AccessibilityTokens.getAccessibleFontSize(context, 12),
+                fontSize: AccessibilityTokens.getAccessibleFontSize(
+                  context,
+                  12,
+                ),
                 color: PlantisColors.primary,
                 fontWeight: FontWeight.w500,
               ),
@@ -172,7 +187,8 @@ class AccessiblePlantCard extends StatelessWidget {
   }
 
   Widget _buildStatusIndicator(BuildContext context) {
-    final daysSinceWatering = lastWatered != null ? _daysSince(lastWatered!) : 99;
+    final daysSinceWatering =
+        lastWatered != null ? _daysSince(lastWatered!) : 99;
     final isOverdue = daysSinceWatering > 7;
     final isWarning = daysSinceWatering > 3;
 
@@ -203,11 +219,7 @@ class AccessiblePlantCard extends StatelessWidget {
           color: statusColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          statusIcon,
-          color: statusColor,
-          size: 20,
-        ),
+        child: Icon(statusIcon, color: statusColor, size: 20),
       ),
     );
   }
@@ -240,7 +252,10 @@ class AccessibleSearchBar extends StatelessWidget {
 
     return Semantics(
       textField: true,
-      label: AccessibilityTokens.getSemanticLabel('search_field', 'Campo de pesquisa'),
+      label: AccessibilityTokens.getSemanticLabel(
+        'search_field',
+        'Campo de pesquisa',
+      ),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -268,20 +283,21 @@ class AccessibleSearchBar extends StatelessWidget {
               excludeSemantics: true,
               child: const Icon(Icons.search),
             ),
-            suffixIcon: controller?.text.isNotEmpty == true
-                ? Semantics(
-                    label: 'Limpar pesquisa',
-                    button: true,
-                    child: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        AccessibilityTokens.performHapticFeedback('light');
-                        controller?.clear();
-                        onClear?.call();
-                      },
-                    ),
-                  )
-                : null,
+            suffixIcon:
+                controller?.text.isNotEmpty == true
+                    ? Semantics(
+                      label: 'Limpar pesquisa',
+                      button: true,
+                      child: IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          AccessibilityTokens.performHapticFeedback('light');
+                          controller?.clear();
+                          onClear?.call();
+                        },
+                      ),
+                    )
+                    : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
@@ -385,7 +401,10 @@ class AccessibleEmptyState extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: AccessibilityTokens.getAccessibleFontSize(context, 20),
+                  fontSize: AccessibilityTokens.getAccessibleFontSize(
+                    context,
+                    20,
+                  ),
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -395,7 +414,10 @@ class AccessibleEmptyState extends StatelessWidget {
               Text(
                 description,
                 style: TextStyle(
-                  fontSize: AccessibilityTokens.getAccessibleFontSize(context, 16),
+                  fontSize: AccessibilityTokens.getAccessibleFontSize(
+                    context,
+                    16,
+                  ),
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   height: 1.4,
                 ),
@@ -496,21 +518,25 @@ class AccessibleSwitch extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle!,
-                style: TextStyle(
-                  fontSize: AccessibilityTokens.getAccessibleFontSize(context, 14),
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              )
-            : null,
+        subtitle:
+            subtitle != null
+                ? Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: AccessibilityTokens.getAccessibleFontSize(
+                      context,
+                      14,
+                    ),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                )
+                : null,
         trailing: Switch(
           value: value,
           onChanged: (newValue) {
             AccessibilityTokens.performHapticFeedback('selection');
             onChanged(newValue);
-            
+
             // Anunciar mudança para screen readers
             final message = newValue ? '$label ativado' : '$label desativado';
             SemanticsService.announce(message, TextDirection.ltr);
@@ -554,13 +580,14 @@ class AccessibleConfirmDialog extends StatelessWidget {
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AccessibleConfirmDialog(
-        title: title,
-        content: content,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        isDestructive: isDestructive,
-      ),
+      builder:
+          (context) => AccessibleConfirmDialog(
+            title: title,
+            content: content,
+            confirmText: confirmText,
+            cancelText: cancelText,
+            isDestructive: isDestructive,
+          ),
     );
   }
 
@@ -602,12 +629,14 @@ class AccessibleConfirmDialog extends StatelessWidget {
               Navigator.of(context).pop(true);
             },
             semanticLabel: confirmText,
-            backgroundColor: isDestructive
-                ? theme.colorScheme.error
-                : theme.colorScheme.primary,
-            foregroundColor: isDestructive
-                ? theme.colorScheme.onError
-                : theme.colorScheme.onPrimary,
+            backgroundColor:
+                isDestructive
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.primary,
+            foregroundColor:
+                isDestructive
+                    ? theme.colorScheme.onError
+                    : theme.colorScheme.onPrimary,
             child: Text(confirmText),
           ),
         ],

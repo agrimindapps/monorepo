@@ -61,10 +61,16 @@ class SettingsData {
   factory SettingsData.fromMap(Map<String, dynamic> map) {
     return SettingsData(
       app: AppSettings.fromMap(map['app'] as Map<String, dynamic>? ?? {}),
-      notifications: NotificationSettings.fromMap(map['notifications'] as Map<String, dynamic>? ?? {}),
-      backup: BackupSettings.fromMap(map['backup'] as Map<String, dynamic>? ?? {}),
+      notifications: NotificationSettings.fromMap(
+        map['notifications'] as Map<String, dynamic>? ?? {},
+      ),
+      backup: BackupSettings.fromMap(
+        map['backup'] as Map<String, dynamic>? ?? {},
+      ),
       theme: ThemeSettings.fromMap(map['theme'] as Map<String, dynamic>? ?? {}),
-      account: AccountSettings.fromMap(map['account'] as Map<String, dynamic>? ?? {}),
+      account: AccountSettings.fromMap(
+        map['account'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -220,7 +226,8 @@ class NotificationSettings {
       overdueNotificationsEnabled:
           overdueNotificationsEnabled ?? this.overdueNotificationsEnabled,
       dailySummaryEnabled: dailySummaryEnabled ?? this.dailySummaryEnabled,
-      reminderMinutesBefore: reminderMinutesBefore ?? this.reminderMinutesBefore,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
       dailySummaryTime: dailySummaryTime ?? this.dailySummaryTime,
       taskTypeSettings: taskTypeSettings ?? Map.from(this.taskTypeSettings),
     );
@@ -242,28 +249,33 @@ class NotificationSettings {
   }
 
   factory NotificationSettings.fromMap(Map<String, dynamic> map) {
-    final timeMap = map['dailySummaryTime'] as Map<String, dynamic>? ?? {'hour': 8, 'minute': 0};
+    final timeMap =
+        map['dailySummaryTime'] as Map<String, dynamic>? ??
+        {'hour': 8, 'minute': 0};
     return NotificationSettings(
       permissionsGranted: map['permissionsGranted'] as bool? ?? false,
       taskRemindersEnabled: map['taskRemindersEnabled'] as bool? ?? true,
-      overdueNotificationsEnabled: map['overdueNotificationsEnabled'] as bool? ?? true,
+      overdueNotificationsEnabled:
+          map['overdueNotificationsEnabled'] as bool? ?? true,
       dailySummaryEnabled: map['dailySummaryEnabled'] as bool? ?? true,
       reminderMinutesBefore: map['reminderMinutesBefore'] as int? ?? 60,
       dailySummaryTime: TimeOfDay(
         hour: timeMap['hour'] as int? ?? 8,
         minute: timeMap['minute'] as int? ?? 0,
       ),
-      taskTypeSettings:
-          Map<String, bool>.from(map['taskTypeSettings'] as Map<dynamic, dynamic>? ?? {
-            'Regar': true,
-            'Adubar': true,
-            'Podar': true,
-            'Replantar': true,
-            'Limpar': true,
-            'Pulverizar': true,
-            'Sol': true,
-            'Sombra': true,
-          }),
+      taskTypeSettings: Map<String, bool>.from(
+        map['taskTypeSettings'] as Map<dynamic, dynamic>? ??
+            {
+              'Regar': true,
+              'Adubar': true,
+              'Podar': true,
+              'Replantar': true,
+              'Limpar': true,
+              'Pulverizar': true,
+              'Sol': true,
+              'Sombra': true,
+            },
+      ),
     );
   }
 
@@ -382,9 +394,10 @@ class BackupSettings {
       frequency: _parseFrequency(map['frequency'] as String?),
       wifiOnlyEnabled: map['wifiOnlyEnabled'] as bool? ?? true,
       maxBackupsToKeep: map['maxBackupsToKeep'] as int? ?? 5,
-      lastBackupTime: map['lastBackupTime'] != null
-          ? DateTime.parse(map['lastBackupTime'] as String)
-          : null,
+      lastBackupTime:
+          map['lastBackupTime'] != null
+              ? DateTime.parse(map['lastBackupTime'] as String)
+              : null,
     );
   }
 
@@ -440,10 +453,7 @@ class ThemeSettings {
     );
   }
 
-  ThemeSettings copyWith({
-    ThemeMode? themeMode,
-    bool? followSystemTheme,
-  }) {
+  ThemeSettings copyWith({ThemeMode? themeMode, bool? followSystemTheme}) {
     return ThemeSettings(
       themeMode: themeMode ?? this.themeMode,
       followSystemTheme: followSystemTheme ?? this.followSystemTheme,

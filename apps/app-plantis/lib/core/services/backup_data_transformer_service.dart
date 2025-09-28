@@ -112,7 +112,9 @@ class BackupDataTransformerService {
         updatedAt: _parseOptionalDateTime(data['updatedAt']),
       );
     } catch (e) {
-      throw TransformException('Erro ao criar Plant dos dados de backup: ${e.toString()}');
+      throw TransformException(
+        'Erro ao criar Plant dos dados de backup: ${e.toString()}',
+      );
     }
   }
 
@@ -139,7 +141,9 @@ class BackupDataTransformerService {
         updatedAt: _parseOptionalDateTime(data['updatedAt']),
       );
     } catch (e) {
-      throw TransformException('Erro ao criar Task dos dados de backup: ${e.toString()}');
+      throw TransformException(
+        'Erro ao criar Task dos dados de backup: ${e.toString()}',
+      );
     }
   }
 
@@ -158,7 +162,9 @@ class BackupDataTransformerService {
         updatedAt: _parseOptionalDateTime(data['updatedAt']),
       );
     } catch (e) {
-      throw TransformException('Erro ao criar Space dos dados de backup: ${e.toString()}');
+      throw TransformException(
+        'Erro ao criar Space dos dados de backup: ${e.toString()}',
+      );
     }
   }
 
@@ -171,7 +177,8 @@ class BackupDataTransformerService {
       species: backup.species,
       spaceId: backup.spaceId,
       imageBase64: backup.imageBase64,
-      imageUrls: backup.imageUrls.isNotEmpty ? backup.imageUrls : existing.imageUrls,
+      imageUrls:
+          backup.imageUrls.isNotEmpty ? backup.imageUrls : existing.imageUrls,
       plantingDate: backup.plantingDate ?? existing.plantingDate,
       notes: backup.notes ?? existing.notes,
       isFavorited: backup.isFavorited,
@@ -181,9 +188,7 @@ class BackupDataTransformerService {
 
   /// Merge dados de Task existente com dados do backup
   Task mergeTaskData(Task existing, Task backup) {
-    return existing.copyWith(
-      updatedAt: DateTime.now(),
-    );
+    return existing.copyWith(updatedAt: DateTime.now());
   }
 
   /// Merge dados de Space existente com dados do backup
@@ -222,7 +227,7 @@ class BackupDataTransformerService {
   /// Parse TaskType do backup
   TaskType _parseTaskType(String? value) {
     if (value == null) return TaskType.custom;
-    
+
     try {
       return TaskType.values.firstWhere(
         (type) => type.name == value,
@@ -237,7 +242,7 @@ class BackupDataTransformerService {
   /// Parse TaskPriority do backup
   TaskPriority _parseTaskPriority(String? value) {
     if (value == null) return TaskPriority.medium;
-    
+
     try {
       return TaskPriority.values.firstWhere(
         (priority) => priority.name == value,
@@ -252,7 +257,7 @@ class BackupDataTransformerService {
   /// Parse TaskStatus do backup
   TaskStatus _parseTaskStatus(String? value) {
     if (value == null) return TaskStatus.pending;
-    
+
     try {
       return TaskStatus.values.firstWhere(
         (status) => status.name == value,
@@ -263,15 +268,14 @@ class BackupDataTransformerService {
       return TaskStatus.pending;
     }
   }
-
 }
 
 /// Exceção específica para erros de transformação de dados
 class TransformException implements Exception {
   final String message;
-  
+
   const TransformException(this.message);
-  
+
   @override
   String toString() => 'TransformException: $message';
 }

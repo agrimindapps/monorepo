@@ -64,7 +64,8 @@ class PremiumProviderImproved extends ChangeNotifier {
   PlantisSubscriptionSyncEvent? get lastSyncEvent => _lastSyncEvent;
 
   // Status de conectividade de sincronização
-  bool get hasSyncErrors => _lastSyncEvent?.type == PlantisSubscriptionSyncEventType.failed;
+  bool get hasSyncErrors =>
+      _lastSyncEvent?.type == PlantisSubscriptionSyncEventType.failed;
   String? get syncErrorMessage => hasSyncErrors ? _lastSyncEvent?.error : null;
 
   bool get _isAnonymousUser {
@@ -304,11 +305,14 @@ class PremiumProviderImproved extends ChangeNotifier {
           currency: product.currencyCode,
         );
 
-        await _analytics.logEvent('plantis_purchase_success', parameters: {
-          'product_id': productId,
-          'price': product.price.toString(),
-          'tier': subscription.tier.name,
-        });
+        await _analytics.logEvent(
+          'plantis_purchase_success',
+          parameters: {
+            'product_id': productId,
+            'price': product.price.toString(),
+            'tier': subscription.tier.name,
+          },
+        );
 
         _isLoading = false;
         _currentOperation = null;
@@ -382,15 +386,25 @@ class PremiumProviderImproved extends ChangeNotifier {
     return maxPlants == -1 || isPremium;
   }
 
-  bool canAccessAdvancedFeatures() => isPremium && _premiumFeaturesEnabled.contains('advanced_reminders');
-  bool canExportData() => isPremium && _premiumFeaturesEnabled.contains('export_data');
-  bool canUseCustomReminders() => isPremium && _premiumFeaturesEnabled.contains('advanced_reminders');
-  bool canAccessPremiumThemes() => isPremium && _premiumFeaturesEnabled.contains('custom_themes');
-  bool canBackupToCloud() => isPremium && _premiumFeaturesEnabled.contains('cloud_backup');
-  bool canIdentifyPlants() => isPremium && _premiumFeaturesEnabled.contains('plant_identification');
-  bool canDiagnoseDiseases() => isPremium && _premiumFeaturesEnabled.contains('disease_diagnosis');
-  bool canUseWeatherNotifications() => isPremium && _premiumFeaturesEnabled.contains('weather_based_notifications');
-  bool canUseCareCalendar() => isPremium && _premiumFeaturesEnabled.contains('care_calendar');
+  bool canAccessAdvancedFeatures() =>
+      isPremium && _premiumFeaturesEnabled.contains('advanced_reminders');
+  bool canExportData() =>
+      isPremium && _premiumFeaturesEnabled.contains('export_data');
+  bool canUseCustomReminders() =>
+      isPremium && _premiumFeaturesEnabled.contains('advanced_reminders');
+  bool canAccessPremiumThemes() =>
+      isPremium && _premiumFeaturesEnabled.contains('custom_themes');
+  bool canBackupToCloud() =>
+      isPremium && _premiumFeaturesEnabled.contains('cloud_backup');
+  bool canIdentifyPlants() =>
+      isPremium && _premiumFeaturesEnabled.contains('plant_identification');
+  bool canDiagnoseDiseases() =>
+      isPremium && _premiumFeaturesEnabled.contains('disease_diagnosis');
+  bool canUseWeatherNotifications() =>
+      isPremium &&
+      _premiumFeaturesEnabled.contains('weather_based_notifications');
+  bool canUseCareCalendar() =>
+      isPremium && _premiumFeaturesEnabled.contains('care_calendar');
 
   // Verifica se uma funcionalidade específica está disponível
   bool hasFeature(String featureId) {
@@ -413,27 +427,40 @@ class PremiumProviderImproved extends ChangeNotifier {
   // Event handlers para eventos de sincronização
 
   Future<void> _handlePurchaseEvent(PlantisSubscriptionSyncEvent event) async {
-    await _analytics.logEvent('plantis_purchase_synced', parameters: {
-      'product_id': event.productId ?? 'unknown',
-      'purchased_at': event.purchasedAt?.toIso8601String() ?? 'unknown',
-    });
+    await _analytics.logEvent(
+      'plantis_purchase_synced',
+      parameters: {
+        'product_id': event.productId ?? 'unknown',
+        'purchased_at': event.purchasedAt?.toIso8601String() ?? 'unknown',
+      },
+    );
 
     // Recarregar dados após compra
     await _checkCurrentSubscription();
     await _loadPlantLimits();
   }
 
-  Future<void> _handleCancellationEvent(PlantisSubscriptionSyncEvent event) async {
-    await _analytics.logEvent('plantis_cancellation_synced', parameters: {
-      'reason': event.reason ?? 'unknown',
-      'expires_at': event.expiresAt?.toIso8601String() ?? 'unknown',
-    });
+  Future<void> _handleCancellationEvent(
+    PlantisSubscriptionSyncEvent event,
+  ) async {
+    await _analytics.logEvent(
+      'plantis_cancellation_synced',
+      parameters: {
+        'reason': event.reason ?? 'unknown',
+        'expires_at': event.expiresAt?.toIso8601String() ?? 'unknown',
+      },
+    );
   }
 
-  Future<void> _handleExpirationEvent(PlantisSubscriptionSyncEvent event) async {
-    await _analytics.logEvent('plantis_expiration_synced', parameters: {
-      'expired_at': event.expiredAt?.toIso8601String() ?? 'unknown',
-    });
+  Future<void> _handleExpirationEvent(
+    PlantisSubscriptionSyncEvent event,
+  ) async {
+    await _analytics.logEvent(
+      'plantis_expiration_synced',
+      parameters: {
+        'expired_at': event.expiredAt?.toIso8601String() ?? 'unknown',
+      },
+    );
 
     // Resetar estado premium quando expira
     _premiumFeaturesEnabled = [];
@@ -507,10 +534,10 @@ class PremiumProviderImproved extends ChangeNotifier {
         'enabled': _premiumFeaturesEnabled,
         'plantLimits': _plantLimits,
       },
-      'products': _availableProducts.map((p) => {
-        'id': p.productId,
-        'price': p.priceString,
-      }).toList(),
+      'products':
+          _availableProducts
+              .map((p) => {'id': p.productId, 'price': p.priceString})
+              .toList(),
     };
   }
 

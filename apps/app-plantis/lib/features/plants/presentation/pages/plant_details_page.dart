@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
+import '../providers/plant_comments_provider.dart';
 import '../providers/plant_details_provider.dart';
 import '../providers/plant_task_provider.dart';
-import '../providers/plant_comments_provider.dart';
 import '../widgets/plant_details/plant_details_view.dart';
 
 /// Plant details page with proper dependency injection
@@ -13,7 +14,7 @@ import '../widgets/plant_details/plant_details_view.dart';
 /// - Modular component breakdown from 1,371-line God Class into 6 specialized components
 /// - PlantDetailsController: Business logic and navigation
 /// - PlantImageSection: Image management
-/// - PlantInfoSection: Basic plant information  
+/// - PlantInfoSection: Basic plant information
 /// - PlantCareSection: Care configuration
 /// - PlantTasksSection: Task management
 /// - PlantNotesSection: Observations and comments

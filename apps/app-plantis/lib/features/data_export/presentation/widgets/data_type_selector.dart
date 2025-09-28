@@ -161,9 +161,9 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
           children: [
             Text(
               'Tipos de Dados',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const Spacer(),
             TextButton.icon(
@@ -194,21 +194,26 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _selectedTypes.isEmpty
-                ? Colors.orange.withAlpha(20)
-                : PlantisColors.primary.withAlpha(20),
+            color:
+                _selectedTypes.isEmpty
+                    ? Colors.orange.withAlpha(20)
+                    : PlantisColors.primary.withAlpha(20),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _selectedTypes.isEmpty
-                  ? Colors.orange.withAlpha(60)
-                  : PlantisColors.primary.withAlpha(60),
+              color:
+                  _selectedTypes.isEmpty
+                      ? Colors.orange.withAlpha(60)
+                      : PlantisColors.primary.withAlpha(60),
             ),
           ),
           child: Row(
             children: [
               Icon(
                 _selectedTypes.isEmpty ? Icons.warning : Icons.check_circle,
-                color: _selectedTypes.isEmpty ? Colors.orange : PlantisColors.primary,
+                color:
+                    _selectedTypes.isEmpty
+                        ? Colors.orange
+                        : PlantisColors.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -219,7 +224,10 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
                       : '${_selectedTypes.length} tipos de dados selecionados',
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: _selectedTypes.isEmpty ? Colors.orange : PlantisColors.primary,
+                    color:
+                        _selectedTypes.isEmpty
+                            ? Colors.orange
+                            : PlantisColors.primary,
                   ),
                 ),
               ),
@@ -231,127 +239,142 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
 
         // Data type list
         Column(
-          children: availableTypes.map((dataType) {
-            final isSelected = _selectedTypes.contains(dataType);
-            final color = _getDataTypeColor(dataType);
-            final count = widget.dataStatistics?[dataType];
+          children:
+              availableTypes.map((dataType) {
+                final isSelected = _selectedTypes.contains(dataType);
+                final color = _getDataTypeColor(dataType);
+                final count = widget.dataStatistics?[dataType];
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => _toggleDataType(dataType),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? color.withAlpha(30)
-                          : Theme.of(context).colorScheme.surface,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _toggleDataType(dataType),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                            ? color.withAlpha(100)
-                            : Theme.of(context).colorScheme.outline.withAlpha(100),
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? color.withAlpha(50)
-                                : color.withAlpha(30),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _getDataTypeIcon(dataType),
-                            color: color,
-                            size: 20,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? color.withAlpha(30)
+                                  : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? color.withAlpha(100)
+                                    : Theme.of(
+                                      context,
+                                    ).colorScheme.outline.withAlpha(100),
+                            width: isSelected ? 2 : 1,
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? color.withAlpha(50)
+                                        : color.withAlpha(30),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _getDataTypeIcon(dataType),
+                                color: color,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      dataType.displayName,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context).colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  if (count != null) ...[
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: color.withAlpha(30),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        '$count',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: color,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          dataType.displayName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                          ),
                                         ),
                                       ),
+                                      if (count != null) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: color.withAlpha(30),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '$count',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: color,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _getDataTypeDescription(dataType),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
                                     ),
-                                  ],
+                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _getDataTypeDescription(dataType),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 12),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: isSelected ? color : Colors.transparent,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected ? color : Colors.grey,
+                                  width: 2,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: isSelected ? color : Colors.transparent,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected ? color : Colors.grey,
-                              width: 2,
+                              child:
+                                  isSelected
+                                      ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 14,
+                                      )
+                                      : null,
                             ),
-                          ),
-                          child: isSelected
-                              ? const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 14,
-                                )
-                              : null,
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
         ),
       ],
     );

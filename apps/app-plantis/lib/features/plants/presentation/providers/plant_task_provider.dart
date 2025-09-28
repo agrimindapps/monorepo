@@ -33,7 +33,9 @@ class PlantTaskProvider extends ChangeNotifier {
   Future<void> loadTasksForPlant(String plantId) async {
     if (_repository == null) {
       if (kDebugMode) {
-        print('⚠️ PlantTaskProvider: Repository não disponível para carregar tasks');
+        print(
+          '⚠️ PlantTaskProvider: Repository não disponível para carregar tasks',
+        );
       }
       return;
     }
@@ -47,18 +49,22 @@ class PlantTaskProvider extends ChangeNotifier {
         print('📥 PlantTaskProvider: Carregando tasks para planta $plantId');
       }
 
-      final result = await _repository!.getPlantTasksByPlantId(plantId);
+      final result = await _repository.getPlantTasksByPlantId(plantId);
       result.fold(
         (failure) {
           _errorMessage = 'Erro ao carregar tarefas: ${failure.message}';
           if (kDebugMode) {
-            print('❌ PlantTaskProvider: Erro ao carregar tasks: ${failure.message}');
+            print(
+              '❌ PlantTaskProvider: Erro ao carregar tasks: ${failure.message}',
+            );
           }
         },
         (tasks) {
           _plantTasks[plantId] = tasks;
           if (kDebugMode) {
-            print('✅ PlantTaskProvider: ${tasks.length} tasks carregadas para planta $plantId');
+            print(
+              '✅ PlantTaskProvider: ${tasks.length} tasks carregadas para planta $plantId',
+            );
           }
         },
       );
@@ -123,21 +129,27 @@ class PlantTaskProvider extends ChangeNotifier {
       // CRÍTICO: Persistir tasks geradas se repository disponível
       if (_repository != null && tasks.isNotEmpty) {
         if (kDebugMode) {
-          print('💾 PlantTaskProvider: Persistindo ${tasks.length} tasks geradas');
+          print(
+            '💾 PlantTaskProvider: Persistindo ${tasks.length} tasks geradas',
+          );
         }
 
-        final result = await _repository!.addPlantTasks(tasks);
+        final result = await _repository.addPlantTasks(tasks);
         result.fold(
           (failure) {
             _errorMessage = 'Erro ao salvar tarefas: ${failure.message}';
             if (kDebugMode) {
-              print('❌ PlantTaskProvider: Erro ao persistir tasks: ${failure.message}');
+              print(
+                '❌ PlantTaskProvider: Erro ao persistir tasks: ${failure.message}',
+              );
             }
           },
           (savedTasks) {
             _plantTasks[plant.id] = savedTasks;
             if (kDebugMode) {
-              print('✅ PlantTaskProvider: ${savedTasks.length} tasks persistidas com sucesso');
+              print(
+                '✅ PlantTaskProvider: ${savedTasks.length} tasks persistidas com sucesso',
+              );
             }
           },
         );
@@ -145,7 +157,9 @@ class PlantTaskProvider extends ChangeNotifier {
         // Fallback para comportamento anterior se repository não disponível
         _plantTasks[plant.id] = tasks;
         if (kDebugMode) {
-          print('⚠️ PlantTaskProvider: Repository não disponível, tasks mantidas em memória');
+          print(
+            '⚠️ PlantTaskProvider: Repository não disponível, tasks mantidas em memória',
+          );
         }
       }
 
@@ -186,7 +200,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
         // CRÍTICO: Atualizar na persistência
         if (_repository != null) {
-          await _repository!.updatePlantTask(pendingTask);
+          await _repository.updatePlantTask(pendingTask);
         }
       } else {
         // Mark as completed
@@ -195,7 +209,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
         // CRÍTICO: Atualizar na persistência
         if (_repository != null) {
-          await _repository!.updatePlantTask(completedTask);
+          await _repository.updatePlantTask(completedTask);
         }
 
         // Generate next task
@@ -204,7 +218,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
         // CRÍTICO: Salvar nova task na persistência
         if (_repository != null) {
-          await _repository!.addPlantTask(nextTask);
+          await _repository.addPlantTask(nextTask);
         }
       }
 
@@ -253,7 +267,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
   /// Marks a task as completed with specific completion date and notes
   Future<void> completeTaskWithDate(
-    String plantId, 
+    String plantId,
     String taskId, {
     required DateTime completionDate,
     String? notes,
@@ -269,7 +283,7 @@ class PlantTaskProvider extends ChangeNotifier {
       }
 
       final task = tasks[taskIndex];
-      
+
       // Mark as completed with specific date
       final completedTask = task.copyWith(
         status: TaskStatus.completed,
@@ -282,7 +296,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
       // CRÍTICO: Atualizar na persistência se disponível
       if (_repository != null) {
-        await _repository!.updatePlantTask(completedTask);
+        await _repository.updatePlantTask(completedTask);
       }
 
       // Generate next task based on completion date
@@ -291,7 +305,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
       // CRÍTICO: Salvar nova task na persistência se disponível
       if (_repository != null) {
-        await _repository!.addPlantTask(nextTask);
+        await _repository.addPlantTask(nextTask);
       }
 
       _plantTasks[plantId] = tasks;
@@ -300,7 +314,9 @@ class PlantTaskProvider extends ChangeNotifier {
       await _updateTaskStatuses(plantId);
 
       if (kDebugMode) {
-        print('✅ PlantTaskProvider: Tarefa $taskId concluída em ${completionDate.day}/${completionDate.month}/${completionDate.year}');
+        print(
+          '✅ PlantTaskProvider: Tarefa $taskId concluída em ${completionDate.day}/${completionDate.month}/${completionDate.year}',
+        );
       }
     } catch (e) {
       _errorMessage = 'Erro ao completar tarefa: $e';
@@ -379,9 +395,11 @@ class PlantTaskProvider extends ChangeNotifier {
     try {
       // CRÍTICO: Remover da persistência
       if (_repository != null) {
-        await _repository!.deletePlantTasksByPlantId(plantId);
+        await _repository.deletePlantTasksByPlantId(plantId);
         if (kDebugMode) {
-          print('✅ PlantTaskProvider: Tasks da planta $plantId removidas da persistência');
+          print(
+            '✅ PlantTaskProvider: Tasks da planta $plantId removidas da persistência',
+          );
         }
       }
 

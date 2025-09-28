@@ -13,12 +13,12 @@ import 'app.dart';
 // Import Hive adapters - these include the generated adapters from .g.dart files
 import 'core/data/models/comentario_model.dart';
 import 'core/data/models/espaco_model.dart';
-import 'core/storage/plantis_boxes_setup.dart';
 // import 'core/data/models/tarefa_model.dart'; // DEPRECATED: Migrado para TaskModel em inglês
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/plantis_sync_config.dart';
 import 'core/services/plantis_notification_service.dart';
+import 'core/storage/plantis_boxes_setup.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
@@ -87,7 +87,8 @@ void main() async {
   AppDataInspectorInitializer.initialize();
 
   // Initialize unified subscription services (NEW - Simplified)
-  final simpleSubscriptionSyncService = di.sl<core.SimpleSubscriptionSyncService>();
+  final simpleSubscriptionSyncService =
+      di.sl<core.SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
 
   // Initialize notifications

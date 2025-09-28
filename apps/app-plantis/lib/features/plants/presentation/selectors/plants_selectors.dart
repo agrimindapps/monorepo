@@ -11,7 +11,8 @@ class PlantsSelectors {
   static Selector<PlantsProvider, int> plantsCount() {
     return Selector<PlantsProvider, int>(
       selector: (_, provider) => provider.plantsCount,
-      builder: (context, plantsCount, child) => child ?? const SizedBox.shrink(),
+      builder:
+          (context, plantsCount, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -19,7 +20,8 @@ class PlantsSelectors {
   static Selector<PlantsProvider, String> searchQuery() {
     return Selector<PlantsProvider, String>(
       selector: (_, provider) => provider.searchQuery,
-      builder: (context, searchQuery, child) => child ?? const SizedBox.shrink(),
+      builder:
+          (context, searchQuery, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -81,7 +83,8 @@ class PlantsSelectors {
 
         return false;
       },
-      builder: (context, searchResults, child) => child ?? const SizedBox.shrink(),
+      builder:
+          (context, searchResults, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -102,7 +105,8 @@ class PlantsSelectors {
             previous.isSearching != next.isSearching ||
             previous.searchQuery != next.searchQuery;
       },
-      builder: (context, displayData, child) => child ?? const SizedBox.shrink(),
+      builder:
+          (context, displayData, child) => child ?? const SizedBox.shrink(),
     );
   }
 
@@ -207,10 +211,10 @@ class LoadingErrorState {
 
   /// Returns true if this represents an actual error state that should show error UI
   bool get shouldShowError => error != null && !hasPlants && !isLoading;
-  
+
   /// Returns true if this represents an empty state (no error, no plants, not loading)
   bool get shouldShowEmpty => error == null && !hasPlants && !isLoading;
-  
+
   /// Returns true if this represents a loading state (loading with no plants)
   bool get shouldShowLoading => isLoading && !hasPlants;
 

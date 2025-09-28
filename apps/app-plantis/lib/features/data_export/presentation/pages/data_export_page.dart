@@ -1,15 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../domain/entities/export_request.dart';
 import '../providers/data_export_provider.dart';
-import '../widgets/export_availability_widget.dart';
-import '../widgets/export_progress_dialog.dart';
 import '../widgets/data_type_selector.dart';
+import '../widgets/export_availability_widget.dart';
 import '../widgets/export_format_selector.dart';
+import '../widgets/export_progress_dialog.dart';
 
 class DataExportPage extends StatefulWidget {
   const DataExportPage({super.key});
@@ -133,10 +132,7 @@ class _DataExportPageState extends State<DataExportPage>
         ),
         centerTitle: false,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.colorScheme.onSurface,
-          ),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -153,19 +149,13 @@ class _DataExportPageState extends State<DataExportPage>
           labelColor: PlantisColors.primary,
           unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
           indicatorColor: PlantisColors.primary,
-          tabs: const [
-            Tab(text: 'Exportar Dados'),
-            Tab(text: 'Histórico'),
-          ],
+          tabs: const [Tab(text: 'Exportar Dados'), Tab(text: 'Histórico')],
         ),
       ),
       body: ResponsiveLayout(
         child: TabBarView(
           controller: _tabController,
-          children: [
-            _buildExportTab(),
-            _buildHistoryTab(),
-          ],
+          children: [_buildExportTab(), _buildHistoryTab()],
         ),
       ),
     );
@@ -215,7 +205,7 @@ class _DataExportPageState extends State<DataExportPage>
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
+                        const Expanded(
                           child: Text(
                             'Direito à Portabilidade - LGPD',
                             style: TextStyle(
@@ -281,25 +271,25 @@ class _DataExportPageState extends State<DataExportPage>
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: provider.isLoading ||
-                          _selectedDataTypes.isEmpty ||
-                          (provider.availabilityResult?.isAvailable != true)
-                      ? null
-                      : _requestExport,
-                  icon: provider.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.download),
+                  onPressed:
+                      provider.isLoading ||
+                              _selectedDataTypes.isEmpty ||
+                              (provider.availabilityResult?.isAvailable != true)
+                          ? null
+                          : _requestExport,
+                  icon:
+                      provider.isLoading
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Icon(Icons.download),
                   label: Text(
-                    provider.isLoading
-                        ? 'Processando...'
-                        : 'Exportar Dados',
+                    provider.isLoading ? 'Processando...' : 'Exportar Dados',
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PlantisColors.primary,
@@ -322,9 +312,7 @@ class _DataExportPageState extends State<DataExportPage>
                   decoration: BoxDecoration(
                     color: Colors.orange.withAlpha(20),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.orange.withAlpha(60),
-                    ),
+                    border: Border.all(color: Colors.orange.withAlpha(60)),
                   ),
                   child: Row(
                     children: [
@@ -360,9 +348,7 @@ class _DataExportPageState extends State<DataExportPage>
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: PlantisColors.primary,
-            ),
+            child: CircularProgressIndicator(color: PlantisColors.primary),
           );
         }
 
@@ -439,11 +425,7 @@ class _DataExportPageState extends State<DataExportPage>
                     color: statusColor.withAlpha(30),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    statusIcon,
-                    color: statusColor,
-                    size: 20,
-                  ),
+                  child: Icon(statusIcon, color: statusColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -452,9 +434,7 @@ class _DataExportPageState extends State<DataExportPage>
                     children: [
                       Text(
                         'Export ${request.format.displayName}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         request.status.displayName,
@@ -470,10 +450,7 @@ class _DataExportPageState extends State<DataExportPage>
                 if (request.status == ExportRequestStatus.completed) ...[
                   IconButton(
                     onPressed: () => provider.downloadExport(request.id),
-                    icon: Icon(
-                      Icons.download,
-                      color: PlantisColors.leaf,
-                    ),
+                    icon: const Icon(Icons.download, color: PlantisColors.leaf),
                   ),
                 ],
                 PopupMenuButton<String>(
@@ -485,18 +462,19 @@ class _DataExportPageState extends State<DataExportPage>
                       }
                     }
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Deletar'),
-                        ],
-                      ),
-                    ),
-                  ],
+                  itemBuilder:
+                      (context) => [
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Deletar'),
+                            ],
+                          ),
+                        ),
+                      ],
                 ),
               ],
             ),
@@ -529,10 +507,7 @@ class _DataExportPageState extends State<DataExportPage>
                 ),
                 child: Text(
                   request.errorMessage!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.red,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
                 ),
               ),
             ],
@@ -561,10 +536,7 @@ class _DataExportPageState extends State<DataExportPage>
           ),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -603,21 +575,24 @@ class _DataExportPageState extends State<DataExportPage>
   Future<bool> _showDeleteConfirmation() async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Deletar exportação'),
-        content: const Text('Tem certeza que deseja deletar esta exportação?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Deletar exportação'),
+            content: const Text(
+              'Tem certeza que deseja deletar esta exportação?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Deletar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Deletar'),
-          ),
-        ],
-      ),
     );
     return result ?? false;
   }
@@ -625,61 +600,62 @@ class _DataExportPageState extends State<DataExportPage>
   void _showHelpDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.help_outline, color: PlantisColors.primary),
-            SizedBox(width: 8),
-            Text('Ajuda - Exportação de Dados'),
-          ],
-        ),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Sobre a LGPD:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+      builder:
+          (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.help_outline, color: PlantisColors.primary),
+                SizedBox(width: 8),
+                Text('Ajuda - Exportação de Dados'),
+              ],
+            ),
+            content: const SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Sobre a LGPD:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'A Lei Geral de Proteção de Dados garante o seu direito de exportar seus dados pessoais em formato estruturado.',
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Tipos de dados incluídos:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text('• Plantas cadastradas por você'),
+                  Text('• Tarefas e lembretes criados'),
+                  Text('• Espaços organizacionais'),
+                  Text('• Configurações personalizadas'),
+                  Text('• Metadados de fotos (não as imagens)'),
+                  SizedBox(height: 16),
+                  Text(
+                    'Segurança:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text('• Limite de uma exportação por hora'),
+                  Text('• Arquivos válidos por 30 dias'),
+                  Text('• Dados criptografados durante o processamento'),
+                ],
               ),
-              SizedBox(height: 8),
-              Text(
-                'A Lei Geral de Proteção de Dados garante o seu direito de exportar seus dados pessoais em formato estruturado.',
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Entendi'),
               ),
-              SizedBox(height: 16),
-              Text(
-                'Tipos de dados incluídos:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• Plantas cadastradas por você'),
-              Text('• Tarefas e lembretes criados'),
-              Text('• Espaços organizacionais'),
-              Text('• Configurações personalizadas'),
-              Text('• Metadados de fotos (não as imagens)'),
-              SizedBox(height: 16),
-              Text(
-                'Segurança:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• Limite de uma exportação por hora'),
-              Text('• Arquivos válidos por 30 dias'),
-              Text('• Dados criptografados durante o processamento'),
             ],
           ),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Entendi'),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,8 +1,8 @@
-import '../../../domain/entities/export_request.dart';
-import '../../../../plants/domain/repositories/plants_repository.dart';
 import '../../../../plants/domain/repositories/plant_comments_repository.dart';
-import '../../../../tasks/domain/repositories/tasks_repository.dart';
+import '../../../../plants/domain/repositories/plants_repository.dart';
 import '../../../../plants/domain/repositories/spaces_repository.dart';
+import '../../../../tasks/domain/repositories/tasks_repository.dart';
+import '../../../domain/entities/export_request.dart';
 
 abstract class PlantsExportDataSource {
   Future<List<PlantExportData>> getUserPlantsData(String userId);
@@ -32,33 +32,48 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   Future<List<PlantExportData>> getUserPlantsData(String userId) async {
     try {
       final plantsResult = await _plantsRepository.getPlants();
-      
+
       return plantsResult.fold(
-        (failure) => throw Exception('Erro ao buscar plantas: ${failure.message}'),
-        (plants) => plants.map((plant) => PlantExportData(
-          id: plant.id,
-          name: plant.name,
-          species: plant.species,
-          spaceId: plant.spaceId,
-          imageUrls: plant.imageUrls,
-          plantingDate: plant.plantingDate,
-          notes: plant.notes,
-          config: plant.config != null ? PlantConfigExportData(
-            wateringIntervalDays: plant.config!.wateringIntervalDays,
-            fertilizingIntervalDays: plant.config!.fertilizingIntervalDays,
-            pruningIntervalDays: plant.config!.pruningIntervalDays,
-            lightRequirement: plant.config!.lightRequirement,
-            waterAmount: plant.config!.waterAmount,
-            soilType: plant.config!.soilType,
-            enableWateringCare: plant.config!.enableWateringCare,
-            lastWateringDate: plant.config!.lastWateringDate,
-            enableFertilizerCare: plant.config!.enableFertilizerCare,
-            lastFertilizerDate: plant.config!.lastFertilizerDate,
-          ) : null,
-          isFavorited: plant.isFavorited,
-          createdAt: plant.createdAt,
-          updatedAt: plant.updatedAt,
-        )).toList(),
+        (failure) =>
+            throw Exception('Erro ao buscar plantas: ${failure.message}'),
+        (plants) =>
+            plants
+                .map(
+                  (plant) => PlantExportData(
+                    id: plant.id,
+                    name: plant.name,
+                    species: plant.species,
+                    spaceId: plant.spaceId,
+                    imageUrls: plant.imageUrls,
+                    plantingDate: plant.plantingDate,
+                    notes: plant.notes,
+                    config:
+                        plant.config != null
+                            ? PlantConfigExportData(
+                              wateringIntervalDays:
+                                  plant.config!.wateringIntervalDays,
+                              fertilizingIntervalDays:
+                                  plant.config!.fertilizingIntervalDays,
+                              pruningIntervalDays:
+                                  plant.config!.pruningIntervalDays,
+                              lightRequirement: plant.config!.lightRequirement,
+                              waterAmount: plant.config!.waterAmount,
+                              soilType: plant.config!.soilType,
+                              enableWateringCare:
+                                  plant.config!.enableWateringCare,
+                              lastWateringDate: plant.config!.lastWateringDate,
+                              enableFertilizerCare:
+                                  plant.config!.enableFertilizerCare,
+                              lastFertilizerDate:
+                                  plant.config!.lastFertilizerDate,
+                            )
+                            : null,
+                    isFavorited: plant.isFavorited,
+                    createdAt: plant.createdAt,
+                    updatedAt: plant.updatedAt,
+                  ),
+                )
+                .toList(),
       );
     } catch (e) {
       throw Exception('Erro ao buscar dados de plantas: ${e.toString()}');
@@ -112,7 +127,9 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   }
 
   @override
-  Future<List<PlantPhotoExportData>> getUserPlantPhotosData(String userId) async {
+  Future<List<PlantPhotoExportData>> getUserPlantPhotosData(
+    String userId,
+  ) async {
     try {
       // Mock data for demonstration
       return [
@@ -130,7 +147,9 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   }
 
   @override
-  Future<List<PlantCommentExportData>> getUserPlantCommentsData(String userId) async {
+  Future<List<PlantCommentExportData>> getUserPlantCommentsData(
+    String userId,
+  ) async {
     try {
       // Mock data for demonstration
       return [
@@ -146,7 +165,8 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
           id: '2',
           plantId: '1',
           plantName: 'Plantas Mock para Export',
-          content: 'Outro comentário de exemplo para validar estrutura de exportação',
+          content:
+              'Outro comentário de exemplo para validar estrutura de exportação',
           createdAt: DateTime.now().subtract(const Duration(days: 1)),
           updatedAt: DateTime.now(),
         ),

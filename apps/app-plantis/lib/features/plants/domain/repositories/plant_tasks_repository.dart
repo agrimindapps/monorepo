@@ -1,11 +1,12 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../entities/plant_task.dart';
 
 abstract class PlantTasksRepository {
   Future<Either<Failure, List<PlantTask>>> getPlantTasks();
-  Future<Either<Failure, List<PlantTask>>> getPlantTasksByPlantId(String plantId);
+  Future<Either<Failure, List<PlantTask>>> getPlantTasksByPlantId(
+    String plantId,
+  );
   Future<Either<Failure, PlantTask>> getPlantTaskById(String id);
   Future<Either<Failure, PlantTask>> addPlantTask(PlantTask task);
   Future<Either<Failure, List<PlantTask>>> addPlantTasks(List<PlantTask> tasks);

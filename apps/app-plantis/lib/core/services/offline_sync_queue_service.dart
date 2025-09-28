@@ -16,21 +16,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - Ensures data integrity across app restarts
 class OfflineSyncQueueService {
   static OfflineSyncQueueService? _instance;
-  static OfflineSyncQueueService get instance => _instance ??= OfflineSyncQueueService._();
-  
+  static OfflineSyncQueueService get instance =>
+      _instance ??= OfflineSyncQueueService._();
+
   OfflineSyncQueueService._();
 
   static const String _queueKey = 'offline_sync_queue';
   static const String _processingKey = 'sync_queue_processing';
-  
+
   final List<QueuedOperation> _queue = [];
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
-  
+
   bool _isInitialized = false;
   bool _isProcessing = false;
   bool _isOnline = false;
-  
+
   Timer? _processTimer;
   Timer? _retryTimer;
 
@@ -41,25 +42,25 @@ class OfflineSyncQueueService {
     try {
       // Load persisted queue from storage
       await _loadQueueFromStorage();
-      
+
       // Check initial connectivity
       final connectivityResults = await _connectivity.checkConnectivity();
       _isOnline = _isConnected(connectivityResults);
-      
+
       // Listen to connectivity changes
-      _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-        (List<ConnectivityResult> results) {
-          final wasOnline = _isOnline;
-          _isOnline = _isConnected(results);
-          
-          if (!wasOnline && _isOnline) {
-            debugPrint('🌐 Connectivity restored - processing offline queue');
-            _processQueueWhenOnline();
-          } else if (wasOnline && !_isOnline) {
-            debugPrint('📴 Connectivity lost - queueing operations');
-          }
-        },
-      );
+      _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
+        List<ConnectivityResult> results,
+      ) {
+        final wasOnline = _isOnline;
+        _isOnline = _isConnected(results);
+
+        if (!wasOnline && _isOnline) {
+          debugPrint('🌐 Connectivity restored - processing offline queue');
+          _processQueueWhenOnline();
+        } else if (wasOnline && !_isOnline) {
+          debugPrint('📴 Connectivity lost - queueing operations');
+        }
+      });
 
       // Start periodic queue processing
       _processTimer = Timer.periodic(
@@ -73,8 +74,9 @@ class OfflineSyncQueueService {
       }
 
       _isInitialized = true;
-      debugPrint('🗃️ Offline sync queue initialized with ${_queue.length} items');
-      
+      debugPrint(
+        '🗃️ Offline sync queue initialized with ${_queue.length} items',
+      );
     } catch (e) {
       debugPrint('❌ Error initializing offline sync queue: $e');
     }
@@ -85,17 +87,18 @@ class OfflineSyncQueueService {
     try {
       // Add to in-memory queue
       _queue.add(operation);
-      
+
       // Persist to storage
       await _saveQueueToStorage();
-      
-      debugPrint('📝 Queued ${operation.type} operation (${_queue.length} total)');
-      
+
+      debugPrint(
+        '📝 Queued ${operation.type} operation (${_queue.length} total)',
+      );
+
       // If online, try to process immediately
       if (_isOnline) {
         _processQueueWhenOnline();
       }
-      
     } catch (e) {
       debugPrint('❌ Error queueing operation: $e');
     }
@@ -129,23 +132,24 @@ class OfflineSyncQueueService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final queueJson = prefs.getString(_queueKey);
-      
+
       if (queueJson != null) {
         final List<dynamic> queueData = jsonDecode(queueJson) as List<dynamic>;
         _queue.clear();
-        
+
         for (final itemData in queueData) {
           try {
-            final operation = QueuedOperation.fromJson(itemData as Map<String, dynamic>);
+            final operation = QueuedOperation.fromJson(
+              itemData as Map<String, dynamic>,
+            );
             _queue.add(operation);
           } catch (e) {
             debugPrint('⚠️ Skipping invalid queue item: $e');
           }
         }
-        
+
         debugPrint('📂 Loaded ${_queue.length} operations from storage');
       }
-      
     } catch (e) {
       debugPrint('❌ Error loading queue from storage: $e');
       _queue.clear();
@@ -157,19 +161,19 @@ class OfflineSyncQueueService {
       final prefs = await SharedPreferences.getInstance();
       final queueData = _queue.map((op) => op.toJson()).toList();
       final queueJson = jsonEncode(queueData);
-      
+
       await prefs.setString(_queueKey, queueJson);
-      
     } catch (e) {
       debugPrint('❌ Error saving queue to storage: $e');
     }
   }
 
   bool _isConnected(List<ConnectivityResult> results) {
-    return results.any((result) => 
-      result == ConnectivityResult.mobile || 
-      result == ConnectivityResult.wifi ||
-      result == ConnectivityResult.ethernet
+    return results.any(
+      (result) =>
+          result == ConnectivityResult.mobile ||
+          result == ConnectivityResult.wifi ||
+          result == ConnectivityResult.ethernet,
     );
   }
 
@@ -185,49 +189,54 @@ class OfflineSyncQueueService {
     }
 
     _isProcessing = true;
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_processingKey, true);
-      
-      debugPrint('▶️ Processing offline sync queue (${_queue.length} operations)');
-      
+
+      debugPrint(
+        '▶️ Processing offline sync queue (${_queue.length} operations)',
+      );
+
       final operationsToProcess = List<QueuedOperation>.from(_queue);
-      
+
       for (int i = 0; i < operationsToProcess.length; i++) {
         final operation = operationsToProcess[i];
-        
+
         if (!_isOnline) {
           debugPrint('📴 Lost connectivity during processing');
           break;
         }
 
         try {
-          debugPrint('🔄 Processing ${operation.type} (${i + 1}/${operationsToProcess.length})');
-          
+          debugPrint(
+            '🔄 Processing ${operation.type} (${i + 1}/${operationsToProcess.length})',
+          );
+
           final success = await _executeOperation(operation);
-          
+
           if (success) {
             // Remove from queue
             _queue.remove(operation);
             await _saveQueueToStorage();
             debugPrint('✅ Operation ${operation.type} completed');
-            
           } else if (operation.shouldRetry()) {
             // Increment retry count
             operation.retryCount++;
-            debugPrint('⚠️ Operation ${operation.type} failed, retry ${operation.retryCount}/${operation.maxRetries}');
-            
+            debugPrint(
+              '⚠️ Operation ${operation.type} failed, retry ${operation.retryCount}/${operation.maxRetries}',
+            );
           } else {
             // Max retries reached, remove from queue
             _queue.remove(operation);
             await _saveQueueToStorage();
-            debugPrint('💥 Operation ${operation.type} failed permanently, removing from queue');
+            debugPrint(
+              '💥 Operation ${operation.type} failed permanently, removing from queue',
+            );
           }
-          
         } catch (e) {
           debugPrint('❌ Error processing operation ${operation.type}: $e');
-          
+
           if (operation.shouldRetry()) {
             operation.retryCount++;
           } else {
@@ -235,25 +244,26 @@ class OfflineSyncQueueService {
             await _saveQueueToStorage();
           }
         }
-        
+
         // Small delay between operations to prevent overwhelming
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
-      
-      debugPrint('✅ Queue processing completed. ${_queue.length} operations remaining');
-      
+
+      debugPrint(
+        '✅ Queue processing completed. ${_queue.length} operations remaining',
+      );
     } catch (e) {
       debugPrint('❌ Error processing queue: $e');
     } finally {
       _isProcessing = false;
-      
+
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_processingKey, false);
       } catch (e) {
         debugPrint('❌ Error updating processing flag: $e');
       }
-      
+
       // Schedule retry if there are still items and we're online
       if (_queue.isNotEmpty && _isOnline) {
         _scheduleRetry();
@@ -265,7 +275,7 @@ class OfflineSyncQueueService {
     try {
       // This would be implemented by specific services
       // For now, we'll simulate the operation execution
-      
+
       switch (operation.type) {
         case 'add_task':
           return await _executeAddTask(operation);
@@ -279,7 +289,6 @@ class OfflineSyncQueueService {
           debugPrint('⚠️ Unknown operation type: ${operation.type}');
           return false;
       }
-      
     } catch (e) {
       debugPrint('❌ Operation execution error: $e');
       return false;

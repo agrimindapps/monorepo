@@ -32,7 +32,9 @@ class PlantInfoSection extends StatelessWidget {
                 ? const Color(0xFF2C2C2E)
                 : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withValues(alpha: 0.05),
@@ -210,20 +212,21 @@ class PlantInfoSection extends StatelessWidget {
                 ? plant.notes!
                 : 'Nenhuma observação registrada para esta planta.',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: plant.notes?.isNotEmpty == true
-                  ? theme.colorScheme.onSurface
-                  : theme.colorScheme.onSurfaceVariant,
+              color:
+                  plant.notes?.isNotEmpty == true
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurfaceVariant,
               height: 1.5,
-              fontStyle: plant.notes?.isNotEmpty == true
-                  ? FontStyle.normal
-                  : FontStyle.italic,
+              fontStyle:
+                  plant.notes?.isNotEmpty == true
+                      ? FontStyle.normal
+                      : FontStyle.italic,
             ),
           ),
         ),
       ],
     );
   }
-
 
   String _getLightRequirementText(String? lightRequirement) {
     switch (lightRequirement?.toLowerCase()) {

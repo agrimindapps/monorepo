@@ -8,7 +8,6 @@ import 'haptic_service.dart';
 /// Sistema de confirmação com feedback visual e háptico
 /// Para ações críticas que precisam de confirmação do usuário
 class ConfirmationSystem {
-  
   /// Mostra dialog de confirmação simples
   static Future<bool> showConfirmation({
     required BuildContext context,
@@ -23,23 +22,24 @@ class ConfirmationSystem {
     if (includeHaptic) {
       await HapticService.medium();
     }
-    
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ConfirmationDialog(
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        icon: icon,
-        type: type,
-      ),
+      builder:
+          (context) => ConfirmationDialog(
+            title: title,
+            message: message,
+            confirmLabel: confirmLabel,
+            cancelLabel: cancelLabel,
+            icon: icon,
+            type: type,
+          ),
     );
-    
+
     return result ?? false;
   }
-  
+
   /// Mostra dialog de confirmação destrutiva (deletar, etc.)
   static Future<bool> showDestructiveConfirmation({
     required BuildContext context,
@@ -54,23 +54,24 @@ class ConfirmationSystem {
     if (includeHaptic) {
       await HapticService.heavy();
     }
-    
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => DestructiveConfirmationDialog(
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        icon: icon,
-        requiresDoubleConfirmation: requiresDoubleConfirmation,
-      ),
+      builder:
+          (context) => DestructiveConfirmationDialog(
+            title: title,
+            message: message,
+            confirmLabel: confirmLabel,
+            cancelLabel: cancelLabel,
+            icon: icon,
+            requiresDoubleConfirmation: requiresDoubleConfirmation,
+          ),
     );
-    
+
     return result ?? false;
   }
-  
+
   /// Mostra dialog de confirmação com input
   static Future<String?> showInputConfirmation({
     required BuildContext context,
@@ -88,26 +89,27 @@ class ConfirmationSystem {
     if (includeHaptic) {
       await HapticService.medium();
     }
-    
+
     final result = await showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => InputConfirmationDialog(
-        title: title,
-        message: message,
-        initialValue: initialValue,
-        hintText: hintText,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        icon: icon,
-        keyboardType: keyboardType,
-        validator: validator,
-      ),
+      builder:
+          (context) => InputConfirmationDialog(
+            title: title,
+            message: message,
+            initialValue: initialValue,
+            hintText: hintText,
+            confirmLabel: confirmLabel,
+            cancelLabel: cancelLabel,
+            icon: icon,
+            keyboardType: keyboardType,
+            validator: validator,
+          ),
     );
-    
+
     return result;
   }
-  
+
   /// Mostra dialog de confirmação com checklist
   static Future<List<String>?> showChecklistConfirmation({
     required BuildContext context,
@@ -123,24 +125,25 @@ class ConfirmationSystem {
     if (includeHaptic) {
       await HapticService.medium();
     }
-    
+
     final result = await showDialog<List<String>>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ChecklistConfirmationDialog(
-        title: title,
-        message: message,
-        items: items,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        icon: icon,
-        requireAllChecked: requireAllChecked,
-      ),
+      builder:
+          (context) => ChecklistConfirmationDialog(
+            title: title,
+            message: message,
+            items: items,
+            confirmLabel: confirmLabel,
+            cancelLabel: cancelLabel,
+            icon: icon,
+            requireAllChecked: requireAllChecked,
+          ),
     );
-    
+
     return result;
   }
-  
+
   /// Mostra bottom sheet de confirmação
   static Future<bool> showBottomSheetConfirmation({
     required BuildContext context,
@@ -155,21 +158,22 @@ class ConfirmationSystem {
     if (includeHaptic) {
       await HapticService.light();
     }
-    
+
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ConfirmationBottomSheet(
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        icon: icon,
-        type: type,
-      ),
+      builder:
+          (context) => ConfirmationBottomSheet(
+            title: title,
+            message: message,
+            confirmLabel: confirmLabel,
+            cancelLabel: cancelLabel,
+            icon: icon,
+            type: type,
+          ),
     );
-    
+
     return result ?? false;
   }
 }
@@ -182,7 +186,7 @@ class ConfirmationDialog extends StatefulWidget {
   final String cancelLabel;
   final IconData? icon;
   final ConfirmationType type;
-  
+
   const ConfirmationDialog({
     super.key,
     required this.title,
@@ -192,7 +196,7 @@ class ConfirmationDialog extends StatefulWidget {
     this.icon,
     required this.type,
   });
-  
+
   @override
   State<ConfirmationDialog> createState() => _ConfirmationDialogState();
 }
@@ -200,7 +204,7 @@ class ConfirmationDialog extends StatefulWidget {
 class _ConfirmationDialogState extends State<ConfirmationDialog>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -210,18 +214,18 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
     );
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = _getTypeColors(theme);
-    
+
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -260,10 +264,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                   ),
                 ],
               ),
-              content: Text(
-                widget.message,
-                style: theme.textTheme.bodyMedium,
-              ),
+              content: Text(widget.message, style: theme.textTheme.bodyMedium),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -293,7 +294,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
       },
     );
   }
-  
+
   ConfirmationColors _getTypeColors(ThemeData theme) {
     switch (widget.type) {
       case ConfirmationType.info:
@@ -328,7 +329,7 @@ class DestructiveConfirmationDialog extends StatefulWidget {
   final String cancelLabel;
   final IconData icon;
   final bool requiresDoubleConfirmation;
-  
+
   const DestructiveConfirmationDialog({
     super.key,
     required this.title,
@@ -338,20 +339,20 @@ class DestructiveConfirmationDialog extends StatefulWidget {
     required this.icon,
     required this.requiresDoubleConfirmation,
   });
-  
+
   @override
-  State<DestructiveConfirmationDialog> createState() => 
+  State<DestructiveConfirmationDialog> createState() =>
       _DestructiveConfirmationDialogState();
 }
 
-class _DestructiveConfirmationDialogState 
+class _DestructiveConfirmationDialogState
     extends State<DestructiveConfirmationDialog>
     with TickerProviderStateMixin {
   late AnimationController _shakeController;
   bool _firstConfirmation = false;
   int _countdown = 3;
   Timer? _countdownTimer;
-  
+
   @override
   void initState() {
     super.initState();
@@ -359,31 +360,31 @@ class _DestructiveConfirmationDialogState
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
+
     if (widget.requiresDoubleConfirmation) {
       _startCountdown();
     }
   }
-  
+
   void _startCountdown() {
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _countdown--;
       });
-      
+
       if (_countdown <= 0) {
         timer.cancel();
       }
     });
   }
-  
+
   @override
   void dispose() {
     _shakeController.dispose();
     _countdownTimer?.cancel();
     super.dispose();
   }
-  
+
   void _handleConfirm() {
     if (widget.requiresDoubleConfirmation && !_firstConfirmation) {
       setState(() {
@@ -395,21 +396,19 @@ class _DestructiveConfirmationDialogState
       });
       return;
     }
-    
+
     HapticService.heavy();
     Navigator.of(context).pop(true);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AnimatedFeedback.shakeAnimation(
       controller: _shakeController,
       child: AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Container(
@@ -418,11 +417,7 @@ class _DestructiveConfirmationDialogState
                 color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                widget.icon,
-                color: Colors.red,
-                size: 24,
-              ),
+              child: Icon(widget.icon, color: Colors.red, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -440,10 +435,7 @@ class _DestructiveConfirmationDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.message,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(widget.message, style: theme.textTheme.bodyMedium),
             if (_firstConfirmation) ...[
               const SizedBox(height: 16),
               Container(
@@ -455,11 +447,7 @@ class _DestructiveConfirmationDialogState
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.warning,
-                      color: Colors.red.shade600,
-                      size: 20,
-                    ),
+                    Icon(Icons.warning, color: Colors.red.shade600, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -489,17 +477,17 @@ class _DestructiveConfirmationDialogState
             child: Text(widget.cancelLabel),
           ),
           ElevatedButton(
-            onPressed: (_countdown <= 0 || !widget.requiresDoubleConfirmation)
-                ? _handleConfirm
-                : null,
+            onPressed:
+                (_countdown <= 0 || !widget.requiresDoubleConfirmation)
+                    ? _handleConfirm
+                    : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _firstConfirmation 
-                  ? Colors.red.shade700 
-                  : Colors.red,
+              backgroundColor:
+                  _firstConfirmation ? Colors.red.shade700 : Colors.red,
               foregroundColor: Colors.white,
             ),
             child: Text(
-              _firstConfirmation 
+              _firstConfirmation
                   ? 'CONFIRMAR EXCLUSÃO'
                   : (_countdown > 0 && widget.requiresDoubleConfirmation
                       ? '${widget.confirmLabel} ($_countdown)'
@@ -523,7 +511,7 @@ class InputConfirmationDialog extends StatefulWidget {
   final IconData? icon;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
-  
+
   const InputConfirmationDialog({
     super.key,
     required this.title,
@@ -536,28 +524,28 @@ class InputConfirmationDialog extends StatefulWidget {
     required this.keyboardType,
     this.validator,
   });
-  
+
   @override
-  State<InputConfirmationDialog> createState() => 
+  State<InputConfirmationDialog> createState() =>
       _InputConfirmationDialogState();
 }
 
 class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
   late TextEditingController _controller;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialValue);
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   void _handleConfirm() {
     if (_formKey.currentState?.validate() ?? false) {
       HapticService.selection();
@@ -566,15 +554,13 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
       HapticService.warning();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           if (widget.icon != null) ...[
@@ -608,10 +594,7 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.message,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(widget.message, style: theme.textTheme.bodyMedium),
             const SizedBox(height: 16),
             TextFormField(
               controller: _controller,
@@ -664,7 +647,7 @@ class ChecklistConfirmationDialog extends StatefulWidget {
   final String cancelLabel;
   final IconData? icon;
   final bool requireAllChecked;
-  
+
   const ChecklistConfirmationDialog({
     super.key,
     required this.title,
@@ -675,29 +658,29 @@ class ChecklistConfirmationDialog extends StatefulWidget {
     this.icon,
     required this.requireAllChecked,
   });
-  
+
   @override
-  State<ChecklistConfirmationDialog> createState() => 
+  State<ChecklistConfirmationDialog> createState() =>
       _ChecklistConfirmationDialogState();
 }
 
-class _ChecklistConfirmationDialogState 
+class _ChecklistConfirmationDialogState
     extends State<ChecklistConfirmationDialog> {
   late List<bool> _checkedItems;
-  
+
   @override
   void initState() {
     super.initState();
     _checkedItems = widget.items.map((item) => item.isChecked).toList();
   }
-  
+
   bool get _canConfirm {
     if (widget.requireAllChecked) {
       return _checkedItems.every((checked) => checked);
     }
     return _checkedItems.any((checked) => checked);
   }
-  
+
   void _handleConfirm() {
     if (_canConfirm) {
       HapticService.selection();
@@ -712,15 +695,13 @@ class _ChecklistConfirmationDialogState
       HapticService.warning();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           if (widget.icon != null) ...[
@@ -753,10 +734,7 @@ class _ChecklistConfirmationDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.message,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(widget.message, style: theme.textTheme.bodyMedium),
             const SizedBox(height: 16),
             ...List.generate(widget.items.length, (index) {
               final item = widget.items[index];
@@ -769,9 +747,7 @@ class _ChecklistConfirmationDialogState
                   HapticService.selection();
                 },
                 title: Text(item.title),
-                subtitle: item.subtitle != null 
-                    ? Text(item.subtitle!)
-                    : null,
+                subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding: EdgeInsets.zero,
               );
@@ -811,7 +787,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
   final String cancelLabel;
   final IconData? icon;
   final ConfirmationType type;
-  
+
   const ConfirmationBottomSheet({
     super.key,
     required this.title,
@@ -821,13 +797,13 @@ class ConfirmationBottomSheet extends StatelessWidget {
     this.icon,
     required this.type,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final colors = _getTypeColors(theme);
-    
+
     return Container(
       margin: EdgeInsets.only(
         bottom: mediaQuery.viewInsets.bottom,
@@ -854,7 +830,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Icon
             if (icon != null) ...[
               Container(
@@ -864,15 +840,11 @@ class ConfirmationBottomSheet extends StatelessWidget {
                   color: colors.backgroundColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  color: colors.iconColor,
-                  size: 32,
-                ),
+                child: Icon(icon, color: colors.iconColor, size: 32),
               ),
               const SizedBox(height: 16),
             ],
-            
+
             // Title
             Text(
               title,
@@ -882,7 +854,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            
+
             // Message
             Text(
               message,
@@ -892,7 +864,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            
+
             // Actions
             Row(
               children: [
@@ -927,7 +899,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             // Bottom padding for safe area
             SizedBox(height: mediaQuery.padding.bottom + 16),
           ],
@@ -935,7 +907,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
       ),
     );
   }
-  
+
   ConfirmationColors _getTypeColors(ThemeData theme) {
     switch (type) {
       case ConfirmationType.info:
@@ -963,12 +935,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
 }
 
 /// Tipos de confirmação
-enum ConfirmationType {
-  info,
-  success,
-  warning,
-  error,
-}
+enum ConfirmationType { info, success, warning, error }
 
 /// Item de checklist para confirmação
 class ChecklistItem {
@@ -976,7 +943,7 @@ class ChecklistItem {
   final String title;
   final String? subtitle;
   final bool isChecked;
-  
+
   const ChecklistItem({
     required this.id,
     required this.title,
@@ -989,7 +956,7 @@ class ChecklistItem {
 class ConfirmationColors {
   final Color backgroundColor;
   final Color iconColor;
-  
+
   const ConfirmationColors({
     required this.backgroundColor,
     required this.iconColor,
@@ -1003,14 +970,15 @@ class ConfirmationContexts {
     return ConfirmationSystem.showDestructiveConfirmation(
       context: context,
       title: 'Deletar planta',
-      message: 'Tem certeza que deseja remover "$plantName"? '
-               'Todas as tarefas e históricos relacionados serão perdidos.',
+      message:
+          'Tem certeza que deseja remover "$plantName"? '
+          'Todas as tarefas e históricos relacionados serão perdidos.',
       confirmLabel: 'Deletar',
       icon: Icons.delete_forever,
       requiresDoubleConfirmation: true,
     );
   }
-  
+
   // Deletar tarefa
   static Future<bool> deleteTask(BuildContext context, String taskName) {
     return ConfirmationSystem.showConfirmation(
@@ -1022,59 +990,63 @@ class ConfirmationContexts {
       type: ConfirmationType.warning,
     );
   }
-  
+
   // Logout
   static Future<bool> logout(BuildContext context) {
     return ConfirmationSystem.showBottomSheetConfirmation(
       context: context,
       title: 'Fazer logout',
-      message: 'Você será desconectado da sua conta. '
-               'Dados não sincronizados podem ser perdidos.',
+      message:
+          'Você será desconectado da sua conta. '
+          'Dados não sincronizados podem ser perdidos.',
       confirmLabel: 'Sair',
       icon: Icons.logout,
       type: ConfirmationType.warning,
     );
   }
-  
+
   // Reset de dados
   static Future<bool> resetData(BuildContext context) {
     return ConfirmationSystem.showDestructiveConfirmation(
       context: context,
       title: 'Resetar dados',
-      message: 'ATENÇÃO: Todos os seus dados (plantas, tarefas, configurações) '
-               'serão permanentemente removidos. Esta ação não pode ser desfeita.',
+      message:
+          'ATENÇÃO: Todos os seus dados (plantas, tarefas, configurações) '
+          'serão permanentemente removidos. Esta ação não pode ser desfeita.',
       confirmLabel: 'RESETAR TUDO',
       icon: Icons.warning,
       requiresDoubleConfirmation: true,
     );
   }
-  
+
   // Cancelar premium
   static Future<bool> cancelPremium(BuildContext context) {
     return ConfirmationSystem.showConfirmation(
       context: context,
       title: 'Cancelar Premium',
-      message: 'Você perderá acesso aos recursos premium. '
-               'O plano continuará ativo até o fim do período pago.',
+      message:
+          'Você perderá acesso aos recursos premium. '
+          'O plano continuará ativo até o fim do período pago.',
       confirmLabel: 'Cancelar Premium',
       icon: Icons.cancel,
       type: ConfirmationType.warning,
     );
   }
-  
+
   // Restaurar backup
   static Future<bool> restoreBackup(BuildContext context) {
     return ConfirmationSystem.showConfirmation(
       context: context,
       title: 'Restaurar backup',
-      message: 'Os dados atuais serão substituídos pelo backup. '
-               'Deseja continuar?',
+      message:
+          'Os dados atuais serão substituídos pelo backup. '
+          'Deseja continuar?',
       confirmLabel: 'Restaurar',
       icon: Icons.restore,
       type: ConfirmationType.info,
     );
   }
-  
+
   // Criar backup
   static Future<bool> createBackup(BuildContext context) {
     return ConfirmationSystem.showConfirmation(
@@ -1086,7 +1058,7 @@ class ConfirmationContexts {
       type: ConfirmationType.info,
     );
   }
-  
+
   // Nome da planta
   static Future<String?> plantName(BuildContext context, {String? current}) {
     return ConfirmationSystem.showInputConfirmation(
@@ -1104,7 +1076,7 @@ class ConfirmationContexts {
       },
     );
   }
-  
+
   // Configurações de backup
   static Future<List<String>?> backupOptions(BuildContext context) {
     return ConfirmationSystem.showChecklistConfirmation(

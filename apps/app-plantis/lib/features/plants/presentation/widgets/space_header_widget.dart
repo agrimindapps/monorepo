@@ -44,7 +44,7 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       margin: const EdgeInsets.only(bottom: 8, top: 16),
@@ -70,16 +70,17 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
               size: 20,
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Space name (editable if has spaceId)
           Expanded(
-            child: _isEditing
-                ? _buildEditingField(theme)
-                : _buildDisplayName(theme),
+            child:
+                _isEditing
+                    ? _buildEditingField(theme)
+                    : _buildDisplayName(theme),
           ),
-          
+
           // Plant count badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -95,16 +96,13 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
               ),
             ),
           ),
-          
+
           // Edit button (only for spaces with ID)
           if (widget.spaceId != null) ...[
             const SizedBox(width: 8),
             IconButton(
               onPressed: _isEditing ? _saveEdit : _startEditing,
-              icon: Icon(
-                _isEditing ? Icons.check : Icons.edit,
-                size: 18,
-              ),
+              icon: Icon(_isEditing ? Icons.check : Icons.edit, size: 18),
               tooltip: _isEditing ? 'Salvar' : 'Editar nome',
               visualDensity: VisualDensity.compact,
             ),
@@ -163,7 +161,7 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
       _isEditing = true;
       _controller.text = widget.spaceName;
     });
-    
+
     // Focus and select all text after widget rebuilds
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -183,17 +181,17 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
 
   Future<void> _saveEdit() async {
     final newName = _controller.text.trim();
-    
+
     if (newName.isEmpty) {
       _showError('Nome não pode estar vazio');
       return;
     }
-    
+
     if (newName == widget.spaceName) {
       _cancelEdit();
       return;
     }
-    
+
     if (widget.spaceId == null) {
       _cancelEdit();
       return;
@@ -201,31 +199,28 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
 
     try {
       final spacesProvider = context.read<SpacesProvider>();
-      
+
       // Check if name already exists (case insensitive)
       final existingSpace = spacesProvider.findSpaceByName(newName);
       if (existingSpace != null && existingSpace.id != widget.spaceId) {
         _showError('Já existe um espaço com esse nome');
         return;
       }
-      
+
       final success = await spacesProvider.updateSpace(
-        UpdateSpaceParams(
-          id: widget.spaceId!,
-          name: newName,
-        ),
+        UpdateSpaceParams(id: widget.spaceId!, name: newName),
       );
-      
+
       if (success && mounted) {
         setState(() => _isEditing = false);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Nome do espaço atualizado para "$newName"'),
             backgroundColor: Colors.green,
           ),
         );
-        
+
         widget.onEdit?.call();
       } else if (mounted) {
         _showError('Erro ao atualizar nome do espaço');
@@ -248,7 +243,7 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
 
   IconData _getSpaceIcon(String spaceName) {
     final name = spaceName.toLowerCase();
-    
+
     if (name.contains('jardim') || name.contains('garden')) {
       return Icons.yard;
     } else if (name.contains('varanda') || name.contains('balcon')) {
@@ -263,7 +258,9 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
       return Icons.bathroom;
     } else if (name.contains('escritório') || name.contains('office')) {
       return Icons.desk;
-    } else if (name.contains('externa') || name.contains('outside') || name.contains('outdoor')) {
+    } else if (name.contains('externa') ||
+        name.contains('outside') ||
+        name.contains('outdoor')) {
       return Icons.nature;
     } else {
       return Icons.location_on;

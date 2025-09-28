@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../services/plantis_notification_config.dart';
 
 /// Plant care specific notification plugin for the Enhanced Notification Framework
 class PlantCareNotificationPlugin extends NotificationPlugin {
@@ -228,14 +226,14 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   /// Cancels all notifications for a specific plant
   Future<bool> cancelPlantNotifications(String plantId) async {
     try {
-      final scheduledNotifications = await _repository.getScheduledNotifications(
-        pluginId: id,
-      );
+      final scheduledNotifications = await _repository
+          .getScheduledNotifications(pluginId: id);
 
-      final plantNotifications = scheduledNotifications
-          .where((n) => n.data['plant_id'] == plantId)
-          .map((n) => n.id)
-          .toList();
+      final plantNotifications =
+          scheduledNotifications
+              .where((n) => n.data['plant_id'] == plantId)
+              .map((n) => n.id)
+              .toList();
 
       if (plantNotifications.isEmpty) {
         return true;
@@ -252,11 +250,12 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   }
 
   /// Gets all scheduled notifications for a plant
-  Future<List<ScheduledNotification>> getPlantNotifications(String plantId) async {
+  Future<List<ScheduledNotification>> getPlantNotifications(
+    String plantId,
+  ) async {
     try {
-      final scheduledNotifications = await _repository.getScheduledNotifications(
-        pluginId: id,
-      );
+      final scheduledNotifications = await _repository
+          .getScheduledNotifications(pluginId: id);
 
       return scheduledNotifications
           .where((n) => n.data['plant_id'] == plantId)
@@ -287,7 +286,10 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         scheduledDate: newDate,
       );
 
-      return await _repository.updateScheduledNotification(notification.id, update);
+      return await _repository.updateScheduledNotification(
+        notification.id,
+        update,
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ Error updating plant notification schedule: $e');
@@ -309,13 +311,20 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         priority: NotificationPriorityEntity.high,
         pluginId: id,
         requiredFields: ['plant_name', 'plant_id'],
-        defaultData: {
-          'custom_message': 'Que tal dar uma regadinha?',
-        },
+        defaultData: {'custom_message': 'Que tal dar uma regadinha?'},
         actions: [
-          const NotificationAction(id: 'mark_watered', title: 'Marquei como regada'),
-          const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(
+            id: 'mark_watered',
+            title: 'Marquei como regada',
+          ),
+          const NotificationAction(
+            id: 'snooze_reminder',
+            title: 'Lembrar mais tarde',
+          ),
+          const NotificationAction(
+            id: 'view_plant_details',
+            title: 'Ver detalhes',
+          ),
         ],
       ),
 
@@ -328,13 +337,20 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         priority: NotificationPriorityEntity.defaultPriority,
         pluginId: id,
         requiredFields: ['plant_name', 'plant_id'],
-        defaultData: {
-          'custom_message': 'Vamos nutrir essa belezinha?',
-        },
+        defaultData: {'custom_message': 'Vamos nutrir essa belezinha?'},
         actions: [
-          const NotificationAction(id: 'mark_fertilized', title: 'Marquei como adubada'),
-          const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(
+            id: 'mark_fertilized',
+            title: 'Marquei como adubada',
+          ),
+          const NotificationAction(
+            id: 'snooze_reminder',
+            title: 'Lembrar mais tarde',
+          ),
+          const NotificationAction(
+            id: 'view_plant_details',
+            title: 'Ver detalhes',
+          ),
         ],
       ),
 
@@ -342,7 +358,8 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
       NotificationTemplate(
         id: 'repotting_reminder',
         title: '🪴 {{plant_name}} precisa de vaso novo!',
-        body: 'Sua {{plant_name}} cresceu e precisa de mais espaço. {{custom_message}}',
+        body:
+            'Sua {{plant_name}} cresceu e precisa de mais espaço. {{custom_message}}',
         channelId: 'plant_care',
         priority: NotificationPriorityEntity.defaultPriority,
         pluginId: id,
@@ -352,7 +369,10 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         },
         actions: [
           const NotificationAction(id: 'reschedule_care', title: 'Reagendar'),
-          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(
+            id: 'view_plant_details',
+            title: 'Ver detalhes',
+          ),
         ],
       ),
 
@@ -360,17 +380,22 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
       NotificationTemplate(
         id: 'pest_inspection_reminder',
         title: '🔍 Verificar {{plant_name}}',
-        body: 'Hora de verificar se {{plant_name}} está saudável. {{custom_message}}',
+        body:
+            'Hora de verificar se {{plant_name}} está saudável. {{custom_message}}',
         channelId: 'plant_care',
         priority: NotificationPriorityEntity.defaultPriority,
         pluginId: id,
         requiredFields: ['plant_name', 'plant_id'],
-        defaultData: {
-          'custom_message': 'Vamos verificar pragas e doenças?',
-        },
+        defaultData: {'custom_message': 'Vamos verificar pragas e doenças?'},
         actions: [
-          const NotificationAction(id: 'dismiss_notification', title: 'Verificado'),
-          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(
+            id: 'dismiss_notification',
+            title: 'Verificado',
+          ),
+          const NotificationAction(
+            id: 'view_plant_details',
+            title: 'Ver detalhes',
+          ),
         ],
       ),
 
@@ -384,9 +409,18 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         pluginId: id,
         requiredFields: ['plant_name', 'plant_id', 'custom_message'],
         actions: [
-          const NotificationAction(id: 'dismiss_notification', title: 'Concluído'),
-          const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(
+            id: 'dismiss_notification',
+            title: 'Concluído',
+          ),
+          const NotificationAction(
+            id: 'snooze_reminder',
+            title: 'Lembrar mais tarde',
+          ),
+          const NotificationAction(
+            id: 'view_plant_details',
+            title: 'Ver detalhes',
+          ),
         ],
       ),
 
@@ -394,17 +428,22 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
       NotificationTemplate(
         id: 'plant_care_overdue',
         title: '⏰ {{plant_name}} precisa de atenção!',
-        body: 'A tarefa {{care_type}} está atrasada para {{plant_name}}. {{custom_message}}',
+        body:
+            'A tarefa {{care_type}} está atrasada para {{plant_name}}. {{custom_message}}',
         channelId: 'plant_care_urgent',
         priority: NotificationPriorityEntity.high,
         pluginId: id,
         requiredFields: ['plant_name', 'plant_id', 'care_type'],
-        defaultData: {
-          'custom_message': 'Vamos cuidar dela agora?',
-        },
+        defaultData: {'custom_message': 'Vamos cuidar dela agora?'},
         actions: [
-          const NotificationAction(id: 'mark_watered', title: 'Marcar como feito'),
-          const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+          const NotificationAction(
+            id: 'mark_watered',
+            title: 'Marcar como feito',
+          ),
+          const NotificationAction(
+            id: 'view_plant_details',
+            title: 'Ver detalhes',
+          ),
         ],
       ),
     ];
@@ -439,12 +478,23 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createWateringReminder(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '💧 ${data['plant_name'] as String} precisa de água!',
-      body: (data['custom_message'] as String?) ?? 'Sua ${data['plant_name'] as String} está com sede.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Sua ${data['plant_name'] as String} está com sede.',
       data: data,
       actions: [
-        const NotificationAction(id: 'mark_watered', title: 'Marquei como regada'),
-        const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'mark_watered',
+          title: 'Marquei como regada',
+        ),
+        const NotificationAction(
+          id: 'snooze_reminder',
+          title: 'Lembrar mais tarde',
+        ),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care',
       priority: NotificationPriorityEntity.high,
@@ -456,12 +506,23 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createFertilizingReminder(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '🌱 Hora de adubar ${data['plant_name'] as String}!',
-      body: (data['custom_message'] as String?) ?? 'Sua ${data['plant_name'] as String} precisa de nutrientes.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Sua ${data['plant_name'] as String} precisa de nutrientes.',
       data: data,
       actions: [
-        const NotificationAction(id: 'mark_fertilized', title: 'Marquei como adubada'),
-        const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'mark_fertilized',
+          title: 'Marquei como adubada',
+        ),
+        const NotificationAction(
+          id: 'snooze_reminder',
+          title: 'Lembrar mais tarde',
+        ),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care',
       priority: NotificationPriorityEntity.defaultPriority,
@@ -473,11 +534,16 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createRepottingReminder(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '🪴 ${data['plant_name'] as String} precisa de vaso novo!',
-      body: (data['custom_message'] as String?) ?? 'Sua ${data['plant_name'] as String} cresceu e precisa de mais espaço.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Sua ${data['plant_name'] as String} cresceu e precisa de mais espaço.',
       data: data,
       actions: [
         const NotificationAction(id: 'reschedule_care', title: 'Reagendar'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care',
       priority: NotificationPriorityEntity.defaultPriority,
@@ -489,11 +555,19 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createPestInspectionReminder(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '🔍 Verificar ${data['plant_name'] as String}',
-      body: (data['custom_message'] as String?) ?? 'Hora de verificar se ${data['plant_name'] as String} está saudável.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Hora de verificar se ${data['plant_name'] as String} está saudável.',
       data: data,
       actions: [
-        const NotificationAction(id: 'dismiss_notification', title: 'Verificado'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'dismiss_notification',
+          title: 'Verificado',
+        ),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care',
       priority: NotificationPriorityEntity.defaultPriority,
@@ -505,11 +579,16 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createCleaningReminder(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '🧹 Limpar ${data['plant_name'] as String}',
-      body: (data['custom_message'] as String?) ?? 'Hora de limpar as folhas da ${data['plant_name'] as String}.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Hora de limpar as folhas da ${data['plant_name'] as String}.',
       data: data,
       actions: [
         const NotificationAction(id: 'dismiss_notification', title: 'Limpei'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care',
       priority: NotificationPriorityEntity.low,
@@ -521,12 +600,23 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createGeneralCareReminder(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '🌿 Cuidar de ${data['plant_name'] as String}',
-      body: (data['custom_message'] as String?) ?? 'Hora de cuidar da ${data['plant_name'] as String}.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Hora de cuidar da ${data['plant_name'] as String}.',
       data: data,
       actions: [
-        const NotificationAction(id: 'dismiss_notification', title: 'Concluído'),
-        const NotificationAction(id: 'snooze_reminder', title: 'Lembrar mais tarde'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'dismiss_notification',
+          title: 'Concluído',
+        ),
+        const NotificationAction(
+          id: 'snooze_reminder',
+          title: 'Lembrar mais tarde',
+        ),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care',
       priority: NotificationPriorityEntity.defaultPriority,
@@ -535,17 +625,27 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
     );
   }
 
-  NotificationRequest _createOverdueCareNotification(Map<String, dynamic> data) {
+  NotificationRequest _createOverdueCareNotification(
+    Map<String, dynamic> data,
+  ) {
     final careType = data['care_type'] as String;
     final careTypeDisplay = _getCareTypeDisplay(careType);
 
     return NotificationRequest(
       title: '⏰ ${data['plant_name'] as String} precisa de atenção!',
-      body: (data['custom_message'] as String?) ?? 'A tarefa de $careTypeDisplay está atrasada para ${data['plant_name'] as String}.',
+      body:
+          (data['custom_message'] as String?) ??
+          'A tarefa de $careTypeDisplay está atrasada para ${data['plant_name'] as String}.',
       data: data,
       actions: [
-        const NotificationAction(id: 'mark_watered', title: 'Marcar como feito'),
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'mark_watered',
+          title: 'Marcar como feito',
+        ),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
       ],
       channelId: 'plant_care_urgent',
       priority: NotificationPriorityEntity.high,
@@ -557,10 +657,15 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createHealthAlert(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '🚨 Alerta de saúde - ${data['plant_name'] as String}',
-      body: (data['custom_message'] as String?) ?? 'Sua ${data['plant_name'] as String} pode estar com problemas de saúde.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Sua ${data['plant_name'] as String} pode estar com problemas de saúde.',
       data: data,
       actions: [
-        const NotificationAction(id: 'view_plant_details', title: 'Ver detalhes'),
+        const NotificationAction(
+          id: 'view_plant_details',
+          title: 'Ver detalhes',
+        ),
         const NotificationAction(id: 'dismiss_notification', title: 'OK'),
       ],
       channelId: 'plant_health_alerts',
@@ -573,7 +678,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createScheduleUpdate(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '📅 Agenda atualizada - ${data['plant_name'] as String}',
-      body: (data['custom_message'] as String?) ?? 'A agenda de cuidados da ${data['plant_name'] as String} foi atualizada.',
+      body:
+          (data['custom_message'] as String?) ??
+          'A agenda de cuidados da ${data['plant_name'] as String} foi atualizada.',
       data: data,
       actions: [
         const NotificationAction(id: 'view_plant_details', title: 'Ver agenda'),
@@ -589,7 +696,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   NotificationRequest _createSeasonalTip(Map<String, dynamic> data) {
     return NotificationRequest(
       title: '💡 Dica da estação',
-      body: (data['custom_message'] as String?) ?? 'Dica especial para ${data['plant_name'] as String} nesta época do ano.',
+      body:
+          (data['custom_message'] as String?) ??
+          'Dica especial para ${data['plant_name'] as String} nesta época do ano.',
       data: data,
       actions: [
         const NotificationAction(id: 'dismiss_notification', title: 'Entendi'),

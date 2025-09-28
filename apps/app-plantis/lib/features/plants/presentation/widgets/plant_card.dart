@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../../../core/router/app_router.dart';
 import '../../domain/entities/plant.dart';
 import 'optimized_plant_image_widget.dart';
@@ -18,21 +19,28 @@ class PlantCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        color:
+            isDark
+                ? const Color(0xFF2D2D2D)
+                : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.3)
-              : const Color(0xFF000000).withValues(alpha: 0.12), // Sombra mais forte para contraste
+            color:
+                isDark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : const Color(0xFF000000).withValues(
+                      alpha: 0.12,
+                    ), // Sombra mais forte para contraste
             offset: const Offset(0, 3),
             blurRadius: 12,
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: isDark 
-              ? Colors.black.withValues(alpha: 0.1)
-              : const Color(0xFF000000).withValues(alpha: 0.06),
+            color:
+                isDark
+                    ? Colors.black.withValues(alpha: 0.1)
+                    : const Color(0xFF000000).withValues(alpha: 0.06),
             offset: const Offset(0, 1),
             blurRadius: 4,
             spreadRadius: 0,
@@ -42,7 +50,8 @@ class PlantCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap ?? () => context.push(AppRouter.plantDetailsPath(plant.id)),
+          onTap:
+              onTap ?? () => context.push(AppRouter.plantDetailsPath(plant.id)),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -91,7 +100,9 @@ class PlantCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Badge de cuidados pendentes
-                Center(child: PlantTasksHelper.buildTaskBadge(context, plant.id)),
+                Center(
+                  child: PlantTasksHelper.buildTaskBadge(context, plant.id),
+                ),
               ],
             ),
           ),
@@ -111,5 +122,4 @@ class PlantCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(size / 2),
     );
   }
-
 }

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/data/models/planta_config_model.dart';
@@ -30,7 +29,9 @@ class GenerateInitialTasksUseCase
   ) async {
     try {
       if (kDebugMode) {
-        print('🔧 GenerateInitialTasksUseCase.call() - Iniciando geração de tarefas');
+        print(
+          '🔧 GenerateInitialTasksUseCase.call() - Iniciando geração de tarefas',
+        );
         print('🔧 plantaId: ${params.plantaId}');
         print('🔧 activeCareTypes: ${params.config.activeCareTypes}');
         print('🔧 plantingDate: ${params.plantingDate}');
@@ -41,14 +42,18 @@ class GenerateInitialTasksUseCase
       final validationResult = _validateParams(params);
       if (validationResult != null) {
         if (kDebugMode) {
-          print('❌ GenerateInitialTasksUseCase.call() - Validação falhou: ${validationResult.message}');
+          print(
+            '❌ GenerateInitialTasksUseCase.call() - Validação falhou: ${validationResult.message}',
+          );
         }
         return Left(validationResult);
       }
 
       // Gerar tarefas usando o service
       if (kDebugMode) {
-        print('🔧 GenerateInitialTasksUseCase.call() - Chamando taskGenerationService.generateInitialTasks');
+        print(
+          '🔧 GenerateInitialTasksUseCase.call() - Chamando taskGenerationService.generateInitialTasks',
+        );
       }
 
       final generationResult = taskGenerationService.generateInitialTasks(
@@ -59,9 +64,14 @@ class GenerateInitialTasksUseCase
       );
 
       if (generationResult.isLeft()) {
-        final failure = generationResult.fold((failure) => failure, (_) => throw Exception());
+        final failure = generationResult.fold(
+          (failure) => failure,
+          (_) => throw Exception(),
+        );
         if (kDebugMode) {
-          print('❌ GenerateInitialTasksUseCase.call() - TaskGenerationService falhou: ${failure.message}');
+          print(
+            '❌ GenerateInitialTasksUseCase.call() - TaskGenerationService falhou: ${failure.message}',
+          );
         }
         return Left(failure);
       }
@@ -72,7 +82,9 @@ class GenerateInitialTasksUseCase
       );
 
       if (kDebugMode) {
-        print('🔧 GenerateInitialTasksUseCase.call() - ${taskEntities.length} entidades de tarefa geradas');
+        print(
+          '🔧 GenerateInitialTasksUseCase.call() - ${taskEntities.length} entidades de tarefa geradas',
+        );
         for (int i = 0; i < taskEntities.length; i++) {
           final entity = taskEntities[i];
           print('🔧 Tarefa ${i + 1}: ${entity.title} (${entity.type.key})');
@@ -80,7 +92,9 @@ class GenerateInitialTasksUseCase
       }
 
       if (kDebugMode) {
-        print('🔧 GenerateInitialTasksUseCase.call() - Salvando ${taskEntities.length} tarefas');
+        print(
+          '🔧 GenerateInitialTasksUseCase.call() - Salvando ${taskEntities.length} tarefas',
+        );
       }
 
       // Salvar todas as tarefas de forma atômica
@@ -91,9 +105,14 @@ class GenerateInitialTasksUseCase
       // Verificar se alguma falhou
       final failures = saveResults.where((result) => result.isLeft()).toList();
       if (failures.isNotEmpty) {
-        final firstFailure = failures.first.fold((failure) => failure, (_) => throw Exception());
+        final firstFailure = failures.first.fold(
+          (failure) => failure,
+          (_) => throw Exception(),
+        );
         if (kDebugMode) {
-          print('❌ GenerateInitialTasksUseCase.call() - Falha ao salvar tarefas: ${firstFailure.message}');
+          print(
+            '❌ GenerateInitialTasksUseCase.call() - Falha ao salvar tarefas: ${firstFailure.message}',
+          );
           print('❌ Total de falhas: ${failures.length}/${saveResults.length}');
         }
         return Left(firstFailure);
@@ -107,7 +126,9 @@ class GenerateInitialTasksUseCase
               .toList();
 
       if (kDebugMode) {
-        print('✅ GenerateInitialTasksUseCase.call() - ${savedTasks.length} tarefas salvas com sucesso');
+        print(
+          '✅ GenerateInitialTasksUseCase.call() - ${savedTasks.length} tarefas salvas com sucesso',
+        );
       }
 
       return Right(savedTasks);

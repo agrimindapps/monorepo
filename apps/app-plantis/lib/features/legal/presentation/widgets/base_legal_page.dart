@@ -6,25 +6,25 @@ import '../../../../core/theme/plantis_colors.dart';
 abstract class BaseLegalPage extends StatefulWidget {
   /// The title displayed in the app bar
   final String title;
-  
+
   /// The icon displayed in the header
   final IconData headerIcon;
-  
+
   /// The header title (can be different from app bar title)
   final String headerTitle;
-  
+
   /// The gradient used in the header
   final Gradient headerGradient;
-  
+
   /// Footer message displayed at the bottom
   final String footerMessage;
-  
+
   /// Footer icon (optional)
   final IconData? footerIcon;
-  
+
   /// Footer title (optional)
   final String? footerTitle;
-  
+
   /// Footer description (optional)
   final String? footerDescription;
 
@@ -132,10 +132,7 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.share,
-              color: theme.colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.share, color: theme.colorScheme.onSurface),
             onPressed: _shareContent,
           ),
         ],
@@ -151,21 +148,23 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
                 // Header
                 _buildHeader(theme),
                 const SizedBox(height: 24),
-                
+
                 // Sections
-                ...sections.map((section) => _buildSection(
-                  section.title,
-                  section.content,
-                  theme,
-                  titleColor: section.titleColor,
-                  isLast: section.isLast,
-                )),
-                
+                ...sections.map(
+                  (section) => _buildSection(
+                    section.title,
+                    section.content,
+                    theme,
+                    titleColor: section.titleColor,
+                    isLast: section.isLast,
+                  ),
+                ),
+
                 const SizedBox(height: 32),
-                
+
                 // Footer
                 _buildFooter(theme),
-                
+
                 const SizedBox(height: 80),
               ],
             ),
@@ -198,11 +197,7 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
       ),
       child: Column(
         children: [
-          Icon(
-            widget.headerIcon,
-            size: 48,
-            color: Colors.white,
-          ),
+          Icon(widget.headerIcon, size: 48, color: Colors.white),
           const SizedBox(height: 12),
           Text(
             widget.headerTitle,
@@ -252,14 +247,11 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(8),
-              border: Border(
-                left: BorderSide(
-                  width: 4,
-                  color: titleColor,
-                ),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
               ),
+              borderRadius: BorderRadius.circular(8),
+              border: Border(left: BorderSide(width: 4, color: titleColor)),
             ),
             child: Text(
               content,
@@ -283,55 +275,66 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: widget.footerIcon != null && widget.footerTitle != null
-          ? Column(
-              children: [
-                Icon(
-                  widget.footerIcon,
-                  color: PlantisColors.primary,
-                  size: 32,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.footerTitle!,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+      child:
+          widget.footerIcon != null && widget.footerTitle != null
+              ? Column(
+                children: [
+                  Icon(
+                    widget.footerIcon,
+                    color: PlantisColors.primary,
+                    size: 32,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                if (widget.footerDescription != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    widget.footerDescription!,
+                    widget.footerTitle!,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
+                      color: theme.colorScheme.onSurface,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
+                  if (widget.footerDescription != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.footerDescription!,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ],
-              ],
-            )
-          : Text(
-              widget.footerMessage,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
+              )
+              : Text(
+                widget.footerMessage,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
     );
   }
 
   String _getFormattedDate() {
     final now = DateTime.now();
     final months = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
     return '${now.day} de ${months[now.month - 1]} de ${now.year}';
   }

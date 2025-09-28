@@ -1,14 +1,20 @@
 import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
-import '../auth/auth_state_notifier.dart';
 import '../../features/plants/domain/entities/plant.dart';
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
+import '../adapters/auth_state_provider_adapter.dart';
+import '../auth/auth_state_notifier.dart';
+import '../interfaces/i_auth_state_provider.dart';
+import '../services/plants_care_calculator.dart';
+import '../services/plants_data_service.dart';
+import '../services/plants_filter_service.dart';
+import '../state/plants_state_manager.dart' hide ViewMode;
 
 // part 'plants_providers.g.dart';
 
@@ -48,7 +54,8 @@ class PlantsState {
 
   /// Groups plants by spaces for grouped view
   Map<String?, List<Plant>> get plantsGroupedBySpaces {
-    final plantsToGroup = searchQuery.isNotEmpty ? searchResults : filteredPlants;
+    final plantsToGroup =
+        searchQuery.isNotEmpty ? searchResults : filteredPlants;
     final Map<String?, List<Plant>> groupedPlants = {};
 
     for (final plant in plantsToGroup) {
@@ -78,7 +85,8 @@ class PlantsState {
       if (config == null) return false;
 
       // Check if watering care is enabled and has valid interval
-      if (config.enableWateringCare == true && config.wateringIntervalDays != null) {
+      if (config.enableWateringCare == true &&
+          config.wateringIntervalDays != null) {
         final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
         final nextWatering = lastWatering.add(
           Duration(days: config.wateringIntervalDays!),
@@ -113,8 +121,10 @@ class PlantsState {
       if (config == null) return false;
 
       // Check if fertilizer care is enabled and has valid interval
-      if (config.enableFertilizerCare == true && config.fertilizingIntervalDays != null) {
-        final lastFertilizer = config.lastFertilizerDate ?? plant.createdAt ?? now;
+      if (config.enableFertilizerCare == true &&
+          config.fertilizingIntervalDays != null) {
+        final lastFertilizer =
+            config.lastFertilizerDate ?? plant.createdAt ?? now;
         final nextFertilizer = lastFertilizer.add(
           Duration(days: config.fertilizingIntervalDays!),
         );
@@ -161,7 +171,7 @@ class PlantsState {
           return _isPlantInGoodCondition(plant, now);
         case CareStatus.unknown:
           return config.wateringIntervalDays == null &&
-                 config.fertilizingIntervalDays == null;
+              config.fertilizingIntervalDays == null;
       }
     }).toList();
   }
@@ -172,7 +182,8 @@ class PlantsState {
     if (config == null) return false;
 
     // Use new care system if enabled
-    if (config.enableWateringCare == true && config.wateringIntervalDays != null) {
+    if (config.enableWateringCare == true &&
+        config.wateringIntervalDays != null) {
       final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
       final nextWatering = lastWatering.add(
         Duration(days: config.wateringIntervalDays!),
@@ -206,8 +217,10 @@ class PlantsState {
     if (config == null) return false;
 
     // Use new care system if enabled
-    if (config.enableFertilizerCare == true && config.fertilizingIntervalDays != null) {
-      final lastFertilizer = config.lastFertilizerDate ?? plant.createdAt ?? now;
+    if (config.enableFertilizerCare == true &&
+        config.fertilizingIntervalDays != null) {
+      final lastFertilizer =
+          config.lastFertilizerDate ?? plant.createdAt ?? now;
       final nextFertilizer = lastFertilizer.add(
         Duration(days: config.fertilizingIntervalDays!),
       );
@@ -236,15 +249,23 @@ class PlantsState {
 
   // Helper method to check if plant is in good condition
   bool _isPlantInGoodCondition(Plant plant, DateTime now) {
-    final waterGood = !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
-    final fertilizerGood = !_checkFertilizerStatus(plant, now, 0) && !_checkFertilizerStatus(plant, now, 2);
+    final waterGood =
+        !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
+    final fertilizerGood =
+        !_checkFertilizerStatus(plant, now, 0) &&
+        !_checkFertilizerStatus(plant, now, 2);
 
     final config = plant.config;
-    final hasWaterCare = config?.enableWateringCare == true || config?.wateringIntervalDays != null;
-    final hasFertilizerCare = config?.enableFertilizerCare == true || config?.fertilizingIntervalDays != null;
+    final hasWaterCare =
+        config?.enableWateringCare == true ||
+        config?.wateringIntervalDays != null;
+    final hasFertilizerCare =
+        config?.enableFertilizerCare == true ||
+        config?.fertilizingIntervalDays != null;
 
     // Plant is good if it doesn't need water or fertilizer within 2 days
-    return (hasWaterCare ? waterGood : true) && (hasFertilizerCare ? fertilizerGood : true);
+    return (hasWaterCare ? waterGood : true) &&
+        (hasFertilizerCare ? fertilizerGood : true);
   }
 
   // Get plants by space
@@ -270,7 +291,8 @@ class PlantsState {
     return PlantsState(
       allPlants: allPlants ?? this.allPlants,
       filteredPlants: filteredPlants ?? this.filteredPlants,
-      selectedPlant: clearSelectedPlant ? null : (selectedPlant ?? this.selectedPlant),
+      selectedPlant:
+          clearSelectedPlant ? null : (selectedPlant ?? this.selectedPlant),
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
       error: clearError ? null : (error ?? this.error),
@@ -361,21 +383,27 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   /// Initializes the authentication state listener
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      debugPrint('🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}');
+      debugPrint(
+        '🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
+      );
       // Only load plants if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         debugPrint('✅ PlantsProvider: Auth is stable, loading plants...');
         loadInitialData();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        debugPrint('🔄 PlantsProvider: No user but auth initialized - clearing plants');
+        debugPrint(
+          '🔄 PlantsProvider: No user but auth initialized - clearing plants',
+        );
         // Clear plants when user logs out
         final currentState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(currentState.copyWith(
-          allPlants: [],
-          filteredPlants: [],
-          clearSelectedPlant: true,
-          clearError: true,
-        ));
+        state = AsyncData(
+          currentState.copyWith(
+            allPlants: [],
+            filteredPlants: [],
+            clearSelectedPlant: true,
+            clearError: true,
+          ),
+        );
       }
     });
   }
@@ -388,41 +416,57 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       if (dataStream != null) {
         _realtimeDataSubscription = dataStream.listen(
           (List<dynamic> plants) {
-            debugPrint('🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas');
+            debugPrint(
+              '🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas',
+            );
 
             // Convert from sync entities to domain entities
-            final domainPlants = plants
-                .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
-                .where((plant) => plant != null)
-                .cast<Plant>()
-                .toList();
+            final domainPlants =
+                plants
+                    .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
+                    .where((plant) => plant != null)
+                    .cast<Plant>()
+                    .toList();
 
             // Update only if there are real changes
             if (_hasDataChanged(domainPlants)) {
               final currentState = state.valueOrNull ?? const PlantsState();
-              final sortedPlants = _sortPlants(domainPlants, currentState.sortBy);
+              final sortedPlants = _sortPlants(
+                domainPlants,
+                currentState.sortBy,
+              );
               final filteredPlants = _applyFilters(
                 sortedPlants,
                 currentState.filterBySpace,
                 currentState.searchQuery,
               );
 
-              state = AsyncData(currentState.copyWith(
-                allPlants: sortedPlants,
-                filteredPlants: filteredPlants,
-              ));
+              state = AsyncData(
+                currentState.copyWith(
+                  allPlants: sortedPlants,
+                  filteredPlants: filteredPlants,
+                ),
+              );
 
-              debugPrint('✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas');
+              debugPrint(
+                '✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas',
+              );
             }
           },
           onError: (dynamic error) {
-            debugPrint('❌ PlantsProvider: Erro no stream de dados em tempo real: $error');
+            debugPrint(
+              '❌ PlantsProvider: Erro no stream de dados em tempo real: $error',
+            );
           },
         );
 
-        debugPrint('✅ PlantsProvider: Stream de dados em tempo real configurado');
+        debugPrint(
+          '✅ PlantsProvider: Stream de dados em tempo real configurado',
+        );
       } else {
-        debugPrint('⚠️ PlantsProvider: Stream de dados não disponível - usando polling');
+        debugPrint(
+          '⚠️ PlantsProvider: Stream de dados não disponível - usando polling',
+        );
       }
     } catch (e) {
       debugPrint('❌ PlantsProvider: Erro ao configurar stream de dados: $e');
@@ -450,7 +494,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
       return null;
     } catch (e) {
-      debugPrint('❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e');
+      debugPrint(
+        '❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e',
+      );
       return null;
     }
   }
@@ -501,7 +547,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       debugPrint('✅ PlantsProvider: Auth initialization complete');
       return true;
     } on TimeoutException {
-      debugPrint('⚠️ PlantsProvider: Auth initialization timeout after ${timeout.inSeconds}s');
+      debugPrint(
+        '⚠️ PlantsProvider: Auth initialization timeout after ${timeout.inSeconds}s',
+      );
       return false;
     } catch (e) {
       debugPrint('❌ PlantsProvider: Auth initialization error: $e');
@@ -512,15 +560,17 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   // Load plants with offline-first approach
   Future<void> loadPlants() async {
     if (kDebugMode) {
-      print('📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first');
+      print(
+        '📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first',
+      );
     }
 
     // Wait for authentication before loading plants
     if (!await _waitForAuthenticationWithTimeout()) {
       final currentState = state.valueOrNull ?? const PlantsState();
-      state = AsyncData(currentState.copyWith(
-        error: 'Aguardando autenticação...',
-      ));
+      state = AsyncData(
+        currentState.copyWith(error: 'Aguardando autenticação...'),
+      );
       return;
     }
 
@@ -543,10 +593,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       // Only show loading if no plants exist yet (first load)
       final shouldShowLoading = currentState.allPlants.isEmpty;
       if (shouldShowLoading) {
-        state = AsyncData(currentState.copyWith(
-          isLoading: true,
-          clearError: true,
-        ));
+        state = AsyncData(
+          currentState.copyWith(isLoading: true, clearError: true),
+        );
       }
 
       // Try to get cached/local data first (immediate response)
@@ -555,13 +604,17 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       localResult.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}');
+            print(
+              '⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}',
+            );
           }
           // Don't set error yet - try remote sync
         },
         (plants) {
           if (kDebugMode) {
-            print('✅ PlantsProvider: Dados locais carregados: ${plants.length} plantas');
+            print(
+              '✅ PlantsProvider: Dados locais carregados: ${plants.length} plantas',
+            );
           }
           _updatePlantsData(plants);
         },
@@ -586,19 +639,23 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}');
+            print(
+              '❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}',
+            );
           }
           // Only set error if no local data was loaded
           final currentState = state.valueOrNull ?? const PlantsState();
           if (currentState.allPlants.isEmpty) {
-            state = AsyncData(currentState.copyWith(
-              error: _getErrorMessage(failure),
-            ));
+            state = AsyncData(
+              currentState.copyWith(error: _getErrorMessage(failure)),
+            );
           }
         },
         (plants) {
           if (kDebugMode) {
-            print('✅ PlantsProvider: Background sync bem-sucedido: ${plants.length} plantas');
+            print(
+              '✅ PlantsProvider: Background sync bem-sucedido: ${plants.length} plantas',
+            );
           }
           _updatePlantsData(plants);
         },
@@ -616,15 +673,19 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       currentState.searchQuery,
     );
 
-    state = AsyncData(currentState.copyWith(
-      allPlants: sortedPlants,
-      filteredPlants: filteredPlants,
-      isLoading: false,
-      clearError: true,
-    ));
+    state = AsyncData(
+      currentState.copyWith(
+        allPlants: sortedPlants,
+        filteredPlants: filteredPlants,
+        isLoading: false,
+        clearError: true,
+      ),
+    );
 
     if (kDebugMode) {
-      print('✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas');
+      print(
+        '✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas',
+      );
       for (final plant in plants) {
         print('   - ${plant.name} (${plant.id})');
       }
@@ -638,16 +699,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     return result.fold(
       (failure) {
         final currentState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(currentState.copyWith(
-          error: _getErrorMessage(failure),
-        ));
+        state = AsyncData(
+          currentState.copyWith(error: _getErrorMessage(failure)),
+        );
         return null;
       },
       (plant) {
         final currentState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(currentState.copyWith(
-          selectedPlant: plant,
-        ));
+        state = AsyncData(currentState.copyWith(selectedPlant: plant));
         return plant;
       },
     );
@@ -658,36 +717,38 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     final currentState = state.valueOrNull ?? const PlantsState();
 
     if (query.trim().isEmpty) {
-      state = AsyncData(currentState.copyWith(
-        searchResults: [],
-        isSearching: false,
-        searchQuery: '',
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          searchResults: [],
+          isSearching: false,
+          searchQuery: '',
+        ),
+      );
       return;
     }
 
-    state = AsyncData(currentState.copyWith(
-      isSearching: true,
-      searchQuery: query,
-    ));
+    state = AsyncData(
+      currentState.copyWith(isSearching: true, searchQuery: query),
+    );
 
     final result = await _searchPlantsUseCase.call(SearchPlantsParams(query));
 
     result.fold(
       (failure) {
         final newState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(newState.copyWith(
-          error: _getErrorMessage(failure),
-          isSearching: false,
-        ));
+        state = AsyncData(
+          newState.copyWith(
+            error: _getErrorMessage(failure),
+            isSearching: false,
+          ),
+        );
       },
       (results) {
         final newState = state.valueOrNull ?? const PlantsState();
         final sortedResults = _sortPlants(results, newState.sortBy);
-        state = AsyncData(newState.copyWith(
-          searchResults: sortedResults,
-          isSearching: false,
-        ));
+        state = AsyncData(
+          newState.copyWith(searchResults: sortedResults, isSearching: false),
+        );
       },
     );
   }
@@ -695,20 +756,16 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   // Add new plant
   Future<bool> addPlant(AddPlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    state = AsyncData(currentState.copyWith(
-      isLoading: true,
-      clearError: true,
-    ));
+    state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
 
     final result = await _addPlantUseCase.call(params);
 
     return result.fold(
       (failure) {
         final newState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(newState.copyWith(
-          error: _getErrorMessage(failure),
-          isLoading: false,
-        ));
+        state = AsyncData(
+          newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
+        );
         return false;
       },
       (plant) {
@@ -720,12 +777,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
           newState.searchQuery,
         );
 
-        state = AsyncData(newState.copyWith(
-          allPlants: updatedPlants,
-          filteredPlants: filteredPlants,
-          isLoading: false,
-          clearError: true,
-        ));
+        state = AsyncData(
+          newState.copyWith(
+            allPlants: updatedPlants,
+            filteredPlants: filteredPlants,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
         return true;
       },
     );
@@ -734,27 +793,24 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   // Update existing plant
   Future<bool> updatePlant(UpdatePlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    state = AsyncData(currentState.copyWith(
-      isLoading: true,
-      clearError: true,
-    ));
+    state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
 
     final result = await _updatePlantUseCase.call(params);
 
     return result.fold(
       (failure) {
         final newState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(newState.copyWith(
-          error: _getErrorMessage(failure),
-          isLoading: false,
-        ));
+        state = AsyncData(
+          newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
+        );
         return false;
       },
       (updatedPlant) {
         final newState = state.valueOrNull ?? const PlantsState();
-        final updatedPlants = newState.allPlants.map((p) {
-          return p.id == updatedPlant.id ? updatedPlant : p;
-        }).toList();
+        final updatedPlants =
+            newState.allPlants.map((p) {
+              return p.id == updatedPlant.id ? updatedPlant : p;
+            }).toList();
 
         final sortedPlants = _sortPlants(updatedPlants, newState.sortBy);
         final filteredPlants = _applyFilters(
@@ -763,15 +819,18 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
           newState.searchQuery,
         );
 
-        state = AsyncData(newState.copyWith(
-          allPlants: sortedPlants,
-          filteredPlants: filteredPlants,
-          selectedPlant: newState.selectedPlant?.id == updatedPlant.id
-              ? updatedPlant
-              : newState.selectedPlant,
-          isLoading: false,
-          clearError: true,
-        ));
+        state = AsyncData(
+          newState.copyWith(
+            allPlants: sortedPlants,
+            filteredPlants: filteredPlants,
+            selectedPlant:
+                newState.selectedPlant?.id == updatedPlant.id
+                    ? updatedPlant
+                    : newState.selectedPlant,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
         return true;
       },
     );
@@ -780,40 +839,40 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   // Delete plant
   Future<bool> deletePlant(String id) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    state = AsyncData(currentState.copyWith(
-      isLoading: true,
-      clearError: true,
-    ));
+    state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
 
     final result = await _deletePlantUseCase.call(id);
 
     return result.fold(
       (failure) {
         final newState = state.valueOrNull ?? const PlantsState();
-        state = AsyncData(newState.copyWith(
-          error: _getErrorMessage(failure),
-          isLoading: false,
-        ));
+        state = AsyncData(
+          newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
+        );
         return false;
       },
       (_) {
         final newState = state.valueOrNull ?? const PlantsState();
-        final updatedPlants = newState.allPlants.where((plant) => plant.id != id).toList();
-        final updatedSearchResults = newState.searchResults.where((plant) => plant.id != id).toList();
+        final updatedPlants =
+            newState.allPlants.where((plant) => plant.id != id).toList();
+        final updatedSearchResults =
+            newState.searchResults.where((plant) => plant.id != id).toList();
         final filteredPlants = _applyFilters(
           updatedPlants,
           newState.filterBySpace,
           newState.searchQuery,
         );
 
-        state = AsyncData(newState.copyWith(
-          allPlants: updatedPlants,
-          filteredPlants: filteredPlants,
-          searchResults: updatedSearchResults,
-          clearSelectedPlant: newState.selectedPlant?.id == id,
-          isLoading: false,
-          clearError: true,
-        ));
+        state = AsyncData(
+          newState.copyWith(
+            allPlants: updatedPlants,
+            filteredPlants: filteredPlants,
+            searchResults: updatedSearchResults,
+            clearSelectedPlant: newState.selectedPlant?.id == id,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
         return true;
       },
     );
@@ -838,12 +897,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
         currentState.searchQuery,
       );
 
-      state = AsyncData(currentState.copyWith(
-        allPlants: sortedPlants,
-        filteredPlants: filteredPlants,
-        searchResults: sortedSearchResults,
-        sortBy: sort,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          allPlants: sortedPlants,
+          filteredPlants: filteredPlants,
+          searchResults: sortedSearchResults,
+          sortBy: sort,
+        ),
+      );
     }
   }
 
@@ -856,10 +917,12 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
         currentState.searchQuery,
       );
 
-      state = AsyncData(currentState.copyWith(
-        filterBySpace: spaceId,
-        filteredPlants: filteredPlants,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          filterBySpace: spaceId,
+          filteredPlants: filteredPlants,
+        ),
+      );
     }
   }
 
@@ -868,11 +931,13 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (currentState.searchQuery.isNotEmpty ||
         currentState.searchResults.isNotEmpty ||
         currentState.isSearching) {
-      state = AsyncData(currentState.copyWith(
-        searchQuery: '',
-        searchResults: [],
-        isSearching: false,
-      ));
+      state = AsyncData(
+        currentState.copyWith(
+          searchQuery: '',
+          searchResults: [],
+          isSearching: false,
+        ),
+      );
     }
   }
 
@@ -911,7 +976,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (kDebugMode) {
       print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
       final currentState = state.valueOrNull ?? const PlantsState();
-      print('🔄 PlantsProvider.refreshPlants() - Plantas antes: ${currentState.allPlants.length}');
+      print(
+        '🔄 PlantsProvider.refreshPlants() - Plantas antes: ${currentState.allPlants.length}',
+      );
     }
 
     clearError();
@@ -920,7 +987,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (kDebugMode) {
       print('✅ PlantsProvider.refreshPlants() - Refresh completo');
       final currentState = state.valueOrNull ?? const PlantsState();
-      print('🔄 PlantsProvider.refreshPlants() - Plantas depois: ${currentState.allPlants.length}');
+      print(
+        '🔄 PlantsProvider.refreshPlants() - Plantas depois: ${currentState.allPlants.length}',
+      );
     }
   }
 
@@ -956,11 +1025,16 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     return sortedPlants;
   }
 
-  List<Plant> _applyFilters(List<Plant> plants, String? filterBySpace, String searchQuery) {
+  List<Plant> _applyFilters(
+    List<Plant> plants,
+    String? filterBySpace,
+    String searchQuery,
+  ) {
     List<Plant> filtered = List.from(plants);
 
     if (filterBySpace != null) {
-      filtered = filtered.where((plant) => plant.spaceId == filterBySpace).toList();
+      filtered =
+          filtered.where((plant) => plant.spaceId == filterBySpace).toList();
     }
 
     return filtered;
@@ -1002,10 +1076,12 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
             failure.message.contains('Usuário não autenticado')) {
           return 'Sessão expirada. Tente fazer login novamente.';
         }
-        if (failure.message.contains('403') || failure.message.contains('Forbidden')) {
+        if (failure.message.contains('403') ||
+            failure.message.contains('Forbidden')) {
           return 'Acesso negado. Verifique suas permissões.';
         }
-        if (failure.message.contains('500') || failure.message.contains('Internal')) {
+        if (failure.message.contains('500') ||
+            failure.message.contains('Internal')) {
           return 'Erro no servidor. Tente novamente em alguns instantes.';
         }
         return failure.message.isNotEmpty
@@ -1016,9 +1092,8 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
             ? failure.message
             : 'Dados não encontrados';
       default:
-        final errorContext = kDebugMode
-            ? ' (${failure.runtimeType}: ${failure.message})'
-            : '';
+        final errorContext =
+            kDebugMode ? ' (${failure.runtimeType}: ${failure.message})' : '';
         return 'Ops! Algo deu errado$errorContext';
     }
   }
@@ -1090,13 +1165,90 @@ final deletePlantUseCaseProvider = Provider<DeletePlantUseCase>((ref) {
 });
 
 // Enums (ensure these are defined elsewhere or define them here)
-enum ViewMode { grid, list, groupedBySpaces, groupedBySpacesGrid, groupedBySpacesList }
+enum ViewMode {
+  grid,
+  list,
+  groupedBySpaces,
+  groupedBySpacesGrid,
+  groupedBySpacesList,
+}
+
 enum SortBy { newest, oldest, name, species }
+
 enum CareStatus {
   needsWater,
   soonWater,
   needsFertilizer,
   soonFertilizer,
   good,
-  unknown
+  unknown,
 }
+
+// === NEW SOLID-COMPLIANT PROVIDERS ===
+
+/// Provider for AuthStateProvider interface
+final authStateProvider = Provider<IAuthStateProvider>((ref) {
+  return AuthStateProviderAdapter.instance();
+});
+
+/// Provider for PlantsDataService
+final plantsDataServiceProvider = Provider<PlantsDataService>((ref) {
+  return PlantsDataService.create(
+    authProvider: ref.read(authStateProvider),
+  );
+});
+
+/// Provider for PlantsFilterService  
+final plantsFilterServiceProvider = Provider<PlantsFilterService>((ref) {
+  return PlantsFilterService();
+});
+
+/// Provider for PlantsCareCalculator
+final plantsCareCalculatorProvider = Provider<PlantsCareCalculator>((ref) {
+  return PlantsCareCalculator();
+});
+
+/// SOLID Services Providers (Simplified approach for compatibility)
+final _solidPlantsDataService = PlantsDataService.create();
+final _solidPlantsFilterService = PlantsFilterService();
+final _solidPlantsCareCalculator = PlantsCareCalculator();
+final _solidAuthStateProvider = AuthStateProviderAdapter.instance();
+
+/// Provider for PlantsStateManager (new SOLID-compliant state manager)
+final plantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
+  return PlantsStateManager(
+    dataService: _solidPlantsDataService,
+    filterService: _solidPlantsFilterService,
+    careCalculator: _solidPlantsCareCalculator,
+    authProvider: _solidAuthStateProvider,
+  );
+});
+
+/// Convenience providers for accessing state manager data  
+final plantsStateProvider = Provider((ref) {
+  return ref.watch(plantsStateManagerProvider).state;
+});
+
+final plantsListProvider = Provider((ref) {
+  final state = ref.watch(plantsStateProvider);
+  return state.filteredPlants;
+});
+
+final plantsLoadingProvider = Provider((ref) {
+  final state = ref.watch(plantsStateProvider);
+  return state.isLoading;
+});
+
+// Removed duplicate - already defined above
+
+/// Provider for care statistics
+final plantsCareStatisticsProvider = Provider((ref) {
+  final stateManager = ref.watch(plantsStateManagerProvider);
+  return stateManager.getCareStatistics();
+});
+
+/// Provider for plants needing water soon
+final plantsNeedingWaterProvider = Provider((ref) {
+  final stateManager = ref.watch(plantsStateManagerProvider);
+  return stateManager.getPlantsNeedingWaterSoon(2); // Next 2 days
+});

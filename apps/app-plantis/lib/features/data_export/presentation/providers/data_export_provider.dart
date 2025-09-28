@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
-import '../../domain/usecases/request_export_usecase.dart';
 import '../../domain/usecases/get_export_history_usecase.dart';
+import '../../domain/usecases/request_export_usecase.dart';
 
 /// Provider for managing LGPD data export functionality in Plantis
 class DataExportProvider extends ChangeNotifier {
@@ -24,10 +24,10 @@ class DataExportProvider extends ChangeNotifier {
     required RequestExportUseCase requestExportUseCase,
     required GetExportHistoryUseCase getHistoryUseCase,
     required DataExportRepository repository,
-  })  : _checkAvailabilityUseCase = checkAvailabilityUseCase,
-        _requestExportUseCase = requestExportUseCase,
-        _getHistoryUseCase = getHistoryUseCase,
-        _repository = repository;
+  }) : _checkAvailabilityUseCase = checkAvailabilityUseCase,
+       _requestExportUseCase = requestExportUseCase,
+       _getHistoryUseCase = getHistoryUseCase,
+       _repository = repository;
 
   // Getters
   ExportProgress get currentProgress => _currentProgress;
@@ -59,14 +59,16 @@ class DataExportProvider extends ChangeNotifier {
 
     try {
       final userId = _currentUserId;
-      final dataTypes = requestedDataTypes ?? {
-        DataType.plants,
-        DataType.plantTasks,
-        DataType.spaces,
-        DataType.plantPhotos,
-        DataType.plantComments,
-        DataType.settings,
-      };
+      final dataTypes =
+          requestedDataTypes ??
+          {
+            DataType.plants,
+            DataType.plantTasks,
+            DataType.spaces,
+            DataType.plantPhotos,
+            DataType.plantComments,
+            DataType.settings,
+          };
 
       _availabilityResult = await _checkAvailabilityUseCase(
         userId: userId,
@@ -76,7 +78,7 @@ class DataExportProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _setError('Erro ao verificar disponibilidade: ${e.toString()}');
-      _availabilityResult = ExportAvailabilityResult.unavailable(
+      _availabilityResult = const ExportAvailabilityResult.unavailable(
         reason: 'Erro interno do sistema',
       );
     } finally {
@@ -136,9 +138,10 @@ class DataExportProvider extends ChangeNotifier {
         _currentProgress = _currentProgress.copyWith(
           percentage: percentage * 100,
           currentTask: task,
-          estimatedTimeRemaining: i < progressSteps.length - 1
-              ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
-              : null,
+          estimatedTimeRemaining:
+              i < progressSteps.length - 1
+                  ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
+                  : null,
         );
         notifyListeners();
 
@@ -172,7 +175,6 @@ class DataExportProvider extends ChangeNotifier {
       // Mark as completed if reached the end
       _currentProgress = const ExportProgress.completed();
       notifyListeners();
-
     } catch (e) {
       _currentProgress = ExportProgress.error(
         'Erro durante monitoramento: ${e.toString()}',
@@ -183,7 +185,9 @@ class DataExportProvider extends ChangeNotifier {
 
   /// Update request in history
   void _updateRequestInHistory(ExportRequest updatedRequest) {
-    final index = _exportHistory.indexWhere((req) => req.id == updatedRequest.id);
+    final index = _exportHistory.indexWhere(
+      (req) => req.id == updatedRequest.id,
+    );
     if (index != -1) {
       _exportHistory[index] = updatedRequest;
       notifyListeners();
@@ -298,10 +302,7 @@ class DataExportProvider extends ChangeNotifier {
 
   /// Refresh all data
   Future<void> refresh() async {
-    await Future.wait([
-      loadExportHistory(),
-      checkExportAvailability(),
-    ]);
+    await Future.wait([loadExportHistory(), checkExportAvailability()]);
   }
 
   /// Check if user can request new export (rate limiting)
@@ -325,14 +326,17 @@ class DataExportProvider extends ChangeNotifier {
         .where((request) => request.requestDate.isAfter(oneHourAgo))
         .fold<ExportRequest?>(
           null,
-          (most, current) => most == null || current.requestDate.isAfter(most.requestDate)
-              ? current
-              : most,
+          (most, current) =>
+              most == null || current.requestDate.isAfter(most.requestDate)
+                  ? current
+                  : most,
         );
 
     if (mostRecentRequest == null) return null;
 
-    final nextAllowedTime = mostRecentRequest.requestDate.add(const Duration(hours: 1));
+    final nextAllowedTime = mostRecentRequest.requestDate.add(
+      const Duration(hours: 1),
+    );
     return nextAllowedTime.difference(DateTime.now());
   }
 

@@ -43,11 +43,7 @@ class PremiumBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.star,
-            size: dimensions.iconSize,
-            color: Colors.white,
-          ),
+          Icon(Icons.star, size: dimensions.iconSize, color: Colors.white),
           SizedBox(width: dimensions.spacing),
           Text(
             text,
@@ -68,10 +64,7 @@ class PremiumBadge extends StatelessWidget {
         tween: Tween(begin: 0.8, end: 1.2),
         curve: Curves.elasticOut,
         builder: (context, scale, child) {
-          return Transform.scale(
-            scale: scale,
-            child: badge,
-          );
+          return Transform.scale(scale: scale, child: badge);
         },
       );
     }
@@ -159,24 +152,14 @@ class FeatureAvailabilityIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: _getBackgroundColor(),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: _getBorderColor(),
-            width: 2,
-          ),
+          border: Border.all(color: _getBorderColor(), width: 2),
         ),
-        child: Icon(
-          _getIcon(),
-          size: 12,
-          color: _getIconColor(),
-        ),
+        child: Icon(_getIcon(), size: 12, color: _getIconColor()),
       ),
     );
 
     if (tooltip != null) {
-      return Tooltip(
-        message: tooltip!,
-        child: indicator,
-      );
+      return Tooltip(message: tooltip, child: indicator);
     }
 
     return indicator;
@@ -262,21 +245,16 @@ class _UpgradePromptState extends State<UpgradePrompt>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
 
     _animationController.forward();
   }
@@ -303,10 +281,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [
-                    PlantisColors.primary,
-                    PlantisColors.primaryLight,
-                  ],
+                  colors: [PlantisColors.primary, PlantisColors.primaryLight],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -382,28 +357,30 @@ class _UpgradePromptState extends State<UpgradePrompt>
                   // Features list
                   if (widget.features.isNotEmpty) ...[
                     const SizedBox(height: 16),
-                    ...widget.features.map((feature) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              feature,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 14,
+                    ...widget.features.map(
+                      (feature) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                feature,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                   ],
 
                   const SizedBox(height: 20),
@@ -459,10 +436,12 @@ class PlantThemedPremiumIndicator extends StatefulWidget {
   });
 
   @override
-  State<PlantThemedPremiumIndicator> createState() => _PlantThemedPremiumIndicatorState();
+  State<PlantThemedPremiumIndicator> createState() =>
+      _PlantThemedPremiumIndicatorState();
 }
 
-class _PlantThemedPremiumIndicatorState extends State<PlantThemedPremiumIndicator>
+class _PlantThemedPremiumIndicatorState
+    extends State<PlantThemedPremiumIndicator>
     with TickerProviderStateMixin {
   late AnimationController _glowController;
   late AnimationController _rotateController;
@@ -483,21 +462,14 @@ class _PlantThemedPremiumIndicatorState extends State<PlantThemedPremiumIndicato
       vsync: this,
     );
 
-    _glowAnimation = Tween<double>(
-      begin: 0.3,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeInOut,
-    ));
+    _glowAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
 
     _rotateAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _rotateController,
-      curve: Curves.linear,
-    ));
+    ).animate(CurvedAnimation(parent: _rotateController, curve: Curves.linear));
 
     if (widget.isActive) {
       _glowController.repeat(reverse: true);
@@ -533,13 +505,14 @@ class _PlantThemedPremiumIndicatorState extends State<PlantThemedPremiumIndicato
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          gradient: widget.isActive
-              ? const LinearGradient(
-                  colors: [PlantisColors.sun, PlantisColors.sunLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+          gradient:
+              widget.isActive
+                  ? const LinearGradient(
+                    colors: [PlantisColors.sun, PlantisColors.sunLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                  : null,
           color: widget.isActive ? null : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -551,30 +524,42 @@ class _PlantThemedPremiumIndicatorState extends State<PlantThemedPremiumIndicato
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedBuilder(
-              animation: widget.isActive ? _rotateAnimation : const AlwaysStoppedAnimation(0),
+              animation:
+                  widget.isActive
+                      ? _rotateAnimation
+                      : const AlwaysStoppedAnimation(0),
               builder: (context, child) {
                 return Transform.rotate(
                   angle: _rotateAnimation.value * 2 * 3.14159,
                   child: AnimatedBuilder(
-                    animation: widget.isActive ? _glowAnimation : const AlwaysStoppedAnimation(1),
+                    animation:
+                        widget.isActive
+                            ? _glowAnimation
+                            : const AlwaysStoppedAnimation(1),
                     builder: (context, child) {
                       return DecoratedBox(
-                        decoration: widget.isActive
-                            ? BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.white.withValues(alpha: _glowAnimation.value * 0.8),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              )
-                            : const BoxDecoration(),
+                        decoration:
+                            widget.isActive
+                                ? BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white.withValues(
+                                        alpha: _glowAnimation.value * 0.8,
+                                      ),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                )
+                                : const BoxDecoration(),
                         child: Icon(
                           Icons.eco,
                           size: 16,
-                          color: widget.isActive ? Colors.white : Colors.grey.shade600,
+                          color:
+                              widget.isActive
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
                         ),
                       );
                     },

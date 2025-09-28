@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide ValidateDeviceUseCase, DeviceValidationResult;
+import 'package:core/core.dart'
+    hide ValidateDeviceUseCase, DeviceValidationResult;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
@@ -21,8 +22,8 @@ class DeviceValidationInterceptor {
   DeviceValidationInterceptor({
     required ValidateDeviceUseCase validateDeviceUseCase,
     required AuthStateNotifier authStateNotifier,
-  })  : _validateDeviceUseCase = validateDeviceUseCase,
-        _authStateNotifier = authStateNotifier {
+  }) : _validateDeviceUseCase = validateDeviceUseCase,
+       _authStateNotifier = authStateNotifier {
     _startListening();
   }
 
@@ -87,7 +88,9 @@ class DeviceValidationInterceptor {
       result.fold(
         (Failure failure) {
           if (kDebugMode) {
-            debugPrint('❌ DeviceInterceptor: Auto-validation failed - ${failure.message}');
+            debugPrint(
+              '❌ DeviceInterceptor: Auto-validation failed - ${failure.message}',
+            );
           }
 
           // Em caso de falha crítica (limite excedido), pode ser necessário
@@ -99,12 +102,16 @@ class DeviceValidationInterceptor {
         (DeviceValidationResult validationResult) {
           if (validationResult.isValid) {
             if (kDebugMode) {
-              debugPrint('✅ DeviceInterceptor: Device auto-validated successfully');
+              debugPrint(
+                '✅ DeviceInterceptor: Device auto-validated successfully',
+              );
             }
             _hasValidatedThisSession = true;
           } else {
             if (kDebugMode) {
-              debugPrint('⚠️ DeviceInterceptor: Device validation failed - ${validationResult.message}');
+              debugPrint(
+                '⚠️ DeviceInterceptor: Device validation failed - ${validationResult.message}',
+              );
             }
 
             // Dependendo do status, pode ser necessário ação específica
@@ -123,7 +130,9 @@ class DeviceValidationInterceptor {
       );
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ DeviceInterceptor: Unexpected error during auto-validation - $e');
+        debugPrint(
+          '❌ DeviceInterceptor: Unexpected error during auto-validation - $e',
+        );
       }
     } finally {
       _isValidating = false;
@@ -133,7 +142,9 @@ class DeviceValidationInterceptor {
   /// Notifica que o limite de dispositivos foi excedido
   void _notifyDeviceLimitExceeded() {
     if (kDebugMode) {
-      debugPrint('⚠️ DeviceInterceptor: Device limit exceeded - user action required');
+      debugPrint(
+        '⚠️ DeviceInterceptor: Device limit exceeded - user action required',
+      );
     }
 
     // Aqui você pode implementar um callback ou stream para notificar a UI
@@ -161,7 +172,9 @@ class DeviceValidationInterceptor {
 
     if (!_authStateNotifier.isAuthenticated) {
       if (kDebugMode) {
-        debugPrint('🔐 DeviceInterceptor: Cannot validate - user not authenticated');
+        debugPrint(
+          '🔐 DeviceInterceptor: Cannot validate - user not authenticated',
+        );
       }
       return null;
     }
@@ -178,7 +191,9 @@ class DeviceValidationInterceptor {
       return result.fold(
         (Failure failure) {
           if (kDebugMode) {
-            debugPrint('❌ DeviceInterceptor: Force validation failed - ${failure.message}');
+            debugPrint(
+              '❌ DeviceInterceptor: Force validation failed - ${failure.message}',
+            );
           }
           return null;
         },
@@ -194,7 +209,9 @@ class DeviceValidationInterceptor {
       );
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ DeviceInterceptor: Unexpected error during force validation - $e');
+        debugPrint(
+          '❌ DeviceInterceptor: Unexpected error during force validation - $e',
+        );
       }
       return null;
     } finally {

@@ -1,21 +1,17 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../features/plants/domain/entities/plant.dart';
-import '../../features/plants/domain/entities/space.dart';
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
-import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../data/models/backup_model.dart';
 import '../data/repositories/backup_repository.dart';
 import 'backup_audit_service.dart';
 import 'backup_data_transformer_service.dart';
-import 'backup_restore_service.dart' show BackupRestoreService, RestoreOptions, RestoreResult;
+import 'backup_restore_service.dart'
+    show BackupRestoreService, RestoreOptions, RestoreResult;
 import 'backup_validation_service.dart';
 import 'secure_storage_service.dart';
 
@@ -79,9 +75,14 @@ class BackupService {
       debugPrint('📦 Iniciando criação de backup para usuário: ${user.id}');
 
       // Coleta dados usando repositories injetados
-      final plantsResult = await (plantsRepository?.getPlants() ?? _plantsRepository.getPlants());
-      final spacesResult = await (spacesRepository?.getSpaces() ?? _spacesRepository.getSpaces());
-      final tasksResult = await (tasksRepository?.getTasks() ?? _tasksRepository.getTasks());
+      final plantsResult =
+          await (plantsRepository?.getPlants() ??
+              _plantsRepository.getPlants());
+      final spacesResult =
+          await (spacesRepository?.getSpaces() ??
+              _spacesRepository.getSpaces());
+      final tasksResult =
+          await (tasksRepository?.getTasks() ?? _tasksRepository.getTasks());
 
       // Verifica se alguma operação falhou
       if (plantsResult.isLeft()) {
@@ -114,9 +115,21 @@ class BackupService {
 
       // Usa transformer service para converter dados
       final backupData = BackupData(
-        plants: plants.map((plant) => _transformerService.plantToJson(plant as Plant)).toList(),
-        tasks: tasks.map((task) => _transformerService.taskToJson(task as task_entity.Task)).toList(),
-        spaces: spaces.map((space) => _transformerService.spaceToJson(space as Space)).toList(),
+        plants:
+            plants
+                .map((plant) => _transformerService.plantToJson(plant))
+                .toList(),
+        tasks:
+            tasks
+                .map(
+                  (task) =>
+                      _transformerService.taskToJson(task),
+                )
+                .toList(),
+        spaces:
+            spaces
+                .map((space) => _transformerService.spaceToJson(space))
+                .toList(),
         settings: await _loadUserSettings(),
         userPreferences: await _loadUserPreferences(),
       );
@@ -152,7 +165,7 @@ class BackupService {
           );
 
           final totalItems = plants.length + spaces.length + tasks.length;
-          
+
           // Log de sucesso
           await _auditService.logBackupCreation(
             userId: user.id,
@@ -217,9 +230,11 @@ class BackupService {
           (_) => throw StateError('Unexpected success'),
         );
       }
-      
-      final backup = backupResult.getOrElse(() => throw StateError('No backup data'));
-      
+
+      final backup = backupResult.getOrElse(
+        () => throw StateError('No backup data'),
+      );
+
       // Delega para o RestoreService
       return await _restoreService.restoreBackup(backup, user.id, options);
     } catch (e) {
@@ -241,7 +256,9 @@ class BackupService {
     final settingsJson = await _storageService.getString(_backupSettingsKey);
     if (settingsJson != null) {
       try {
-        final settings = BackupSettings.fromJson(jsonDecode(settingsJson) as Map<String, dynamic>);
+        final settings = BackupSettings.fromJson(
+          jsonDecode(settingsJson) as Map<String, dynamic>,
+        );
         return settings;
       } catch (e) {
         // Se falhar ao parsear, retorna configurações padrão
@@ -262,7 +279,7 @@ class BackupService {
   /// Verifica se é necessário fazer backup automático
   Future<bool> shouldAutoBackup() async {
     final settings = await getBackupSettings();
-    
+
     if (!settings.autoBackupEnabled) return false;
     if (settings.frequency == BackupFrequency.manual) return false;
 
@@ -316,7 +333,8 @@ class BackupService {
     // Carrega configurações do app
     return {
       'theme_mode': await _storageService.getString('theme_mode') ?? 'system',
-      'notifications_enabled': await _storageService.getBool('notifications_enabled') ?? true,
+      'notifications_enabled':
+          await _storageService.getBool('notifications_enabled') ?? true,
       'language': await _storageService.getString('language') ?? 'pt_BR',
     };
   }
@@ -324,9 +342,11 @@ class BackupService {
   Future<Map<String, dynamic>> _loadUserPreferences() async {
     // Carrega preferências específicas do usuário
     return {
-      'preferred_units': await _storageService.getString('preferred_units') ?? 'metric',
+      'preferred_units':
+          await _storageService.getString('preferred_units') ?? 'metric',
       'default_space': await _storageService.getString('default_space'),
-      'reminder_time': await _storageService.getString('reminder_time') ?? '09:00',
+      'reminder_time':
+          await _storageService.getString('reminder_time') ?? '09:00',
     };
   }
 
@@ -361,12 +381,12 @@ class BackupService {
     try {
       final backupsResult = await _backupRepository.listBackups(userId);
       final backups = backupsResult.getOrElse(() => []);
-      
+
       if (backups.length > maxBackupsToKeep) {
         // Ordena por timestamp (mais recente primeiro) e remove os mais antigos
         backups.sort((a, b) => b.timestamp.compareTo(a.timestamp));
         final backupsToDelete = backups.skip(maxBackupsToKeep);
-        
+
         for (final backup in backupsToDelete) {
           await _backupRepository.deleteBackup(backup.id);
           debugPrint('🗑️ Backup antigo removido: ${backup.fileName}');
@@ -450,7 +470,7 @@ enum BackupFrequency {
 /// Failure específico para operações de dados
 class DataFailure extends Failure {
   const DataFailure(String message) : super(message: message);
-  
+
   @override
   List<Object?> get props => [message];
 }

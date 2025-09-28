@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
@@ -12,13 +11,12 @@ class ValidateDeviceUseCase {
   final DeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
-  ValidateDeviceUseCase(
-    this._deviceRepository,
-    this._authStateNotifier,
-  );
+  ValidateDeviceUseCase(this._deviceRepository, this._authStateNotifier);
 
   /// Executa validação do dispositivo atual
-  Future<Either<Failure, DeviceValidationResult>> call([ValidateDeviceParams? params]) async {
+  Future<Either<Failure, DeviceValidationResult>> call([
+    ValidateDeviceParams? params,
+  ]) async {
     try {
       if (kDebugMode) {
         debugPrint('🔐 ValidateDevice: Starting device validation');
@@ -27,9 +25,7 @@ class ValidateDeviceUseCase {
       // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
-        return const Left(
-          AuthFailure('Usuário não autenticado'),
-        );
+        return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
@@ -47,110 +43,116 @@ class ValidateDeviceUseCase {
       }
 
       // Verifica se já existe e está ativo
-      final existingResult = await _deviceRepository.getDeviceByUuid(device.uuid);
+      final existingResult = await _deviceRepository.getDeviceByUuid(
+        device.uuid,
+      );
 
-      return await existingResult.fold(
-        (failure) => Left(failure),
-        (existingDevice) async {
-          if (existingDevice != null && existingDevice.isActive) {
+      return await existingResult.fold((failure) => Left(failure), (
+        existingDevice,
+      ) async {
+        if (existingDevice != null && existingDevice.isActive) {
+          if (kDebugMode) {
+            debugPrint(
+              '✅ ValidateDevice: Device already valid, updating activity',
+            );
+          }
+
+          // Dispositivo já válido, apenas atualiza atividade
+          final updateResult = await _deviceRepository.updateLastActivity(
+            userId: userId,
+            deviceUuid: device.uuid,
+          );
+
+          return updateResult.fold(
+            (failure) => Left(failure),
+            (updatedDevice) => Right(
+              DeviceValidationResult(
+                isValid: true,
+                device: updatedDevice,
+                status: DeviceValidationStatus.valid,
+                message: 'Dispositivo já validado e ativo',
+              ),
+            ),
+          );
+        }
+
+        // Dispositivo novo ou inativo, verifica limites
+        if (kDebugMode) {
+          debugPrint('🔐 ValidateDevice: New/inactive device, checking limits');
+        }
+
+        final canAddResult = await _deviceRepository.canAddMoreDevices(userId);
+
+        return await canAddResult.fold((failure) => Left(failure), (
+          canAdd,
+        ) async {
+          if (!canAdd && existingDevice == null) {
             if (kDebugMode) {
-              debugPrint('✅ ValidateDevice: Device already valid, updating activity');
+              debugPrint('❌ ValidateDevice: Device limit exceeded');
             }
 
-            // Dispositivo já válido, apenas atualiza atividade
-            final updateResult = await _deviceRepository.updateLastActivity(
-              userId: userId,
-              deviceUuid: device.uuid,
+            // Obtém contagem atual para informar ao usuário
+            final devicesResult = await _deviceRepository.getUserDevices(
+              userId,
+            );
+            final activeCount = devicesResult.fold(
+              (failure) => 0,
+              (devices) => devices.where((d) => d.isActive).length,
             );
 
-            return updateResult.fold(
-              (failure) => Left(failure),
-              (updatedDevice) => Right(
-                DeviceValidationResult(
-                  isValid: true,
-                  device: updatedDevice,
-                  status: DeviceValidationStatus.valid,
-                  message: 'Dispositivo já validado e ativo',
-                ),
+            return Right(
+              DeviceValidationResult(
+                isValid: false,
+                status: DeviceValidationStatus.exceeded,
+                message: 'Limite de dispositivos atingido ($activeCount/3)',
+                remainingSlots: 0,
               ),
             );
           }
 
-          // Dispositivo novo ou inativo, verifica limites
+          // Valida com o servidor
           if (kDebugMode) {
-            debugPrint('🔐 ValidateDevice: New/inactive device, checking limits');
+            debugPrint('🔐 ValidateDevice: Validating with server');
           }
 
-          final canAddResult = await _deviceRepository.canAddMoreDevices(userId);
+          final validationResult = await _deviceRepository.validateDevice(
+            userId: userId,
+            device: device,
+          );
 
-          return await canAddResult.fold(
-            (failure) => Left(failure),
-            (canAdd) async {
-              if (!canAdd && existingDevice == null) {
-                if (kDebugMode) {
-                  debugPrint('❌ ValidateDevice: Device limit exceeded');
-                }
-
-                // Obtém contagem atual para informar ao usuário
-                final devicesResult = await _deviceRepository.getUserDevices(userId);
-                final activeCount = await devicesResult.fold(
-                  (failure) => 0,
-                  (devices) => devices.where((d) => d.isActive).length,
-                );
-
-                return Right(
-                  DeviceValidationResult(
-                    isValid: false,
-                    status: DeviceValidationStatus.exceeded,
-                    message: 'Limite de dispositivos atingido ($activeCount/3)',
-                    remainingSlots: 0,
-                  ),
-                );
-              }
-
-              // Valida com o servidor
+          return validationResult.fold(
+            (failure) {
               if (kDebugMode) {
-                debugPrint('🔐 ValidateDevice: Validating with server');
+                debugPrint(
+                  '❌ ValidateDevice: Server validation failed - $failure',
+                );
               }
 
-              final validationResult = await _deviceRepository.validateDevice(
-                userId: userId,
-                device: device,
+              return Right(
+                DeviceValidationResult(
+                  isValid: false,
+                  status: DeviceValidationStatus.invalid,
+                  message: failure.message,
+                ),
               );
+            },
+            (validatedDevice) {
+              if (kDebugMode) {
+                debugPrint('✅ ValidateDevice: Device validated successfully');
+              }
 
-              return validationResult.fold(
-                (failure) {
-                  if (kDebugMode) {
-                    debugPrint('❌ ValidateDevice: Server validation failed - $failure');
-                  }
-
-                  return Right(
-                    DeviceValidationResult(
-                      isValid: false,
-                      status: DeviceValidationStatus.invalid,
-                      message: failure.message,
-                    ),
-                  );
-                },
-                (validatedDevice) {
-                  if (kDebugMode) {
-                    debugPrint('✅ ValidateDevice: Device validated successfully');
-                  }
-
-                  return Right(
-                    DeviceValidationResult(
-                      isValid: true,
-                      device: validatedDevice,
-                      status: DeviceValidationStatus.valid,
-                      message: 'Dispositivo validado com sucesso',
-                    ),
-                  );
-                },
+              return Right(
+                DeviceValidationResult(
+                  isValid: true,
+                  device: validatedDevice,
+                  status: DeviceValidationStatus.valid,
+                  message: 'Dispositivo validado com sucesso',
+                ),
               );
             },
           );
-        },
-      );
+        });
+      });
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ ValidateDevice: Unexpected error - $e');
@@ -171,10 +173,7 @@ class ValidateDeviceParams {
   final DeviceModel? device;
   final bool forceValidation;
 
-  const ValidateDeviceParams({
-    this.device,
-    this.forceValidation = false,
-  });
+  const ValidateDeviceParams({this.device, this.forceValidation = false});
 
   @override
   bool operator ==(Object other) {
@@ -188,7 +187,8 @@ class ValidateDeviceParams {
   int get hashCode => device.hashCode ^ forceValidation.hashCode;
 
   @override
-  String toString() => 'ValidateDeviceParams(device: ${device?.uuid}, forceValidation: $forceValidation)';
+  String toString() =>
+      'ValidateDeviceParams(device: ${device?.uuid}, forceValidation: $forceValidation)';
 }
 
 /// Resultado da validação de dispositivo específico do plantis
@@ -222,9 +222,10 @@ class DeviceValidationResult {
   factory DeviceValidationResult.fromJson(Map<String, dynamic> json) {
     return DeviceValidationResult(
       isValid: json['isValid'] as bool,
-      device: json['device'] != null
-          ? DeviceModel.fromJson(json['device'] as Map<String, dynamic>)
-          : null,
+      device:
+          json['device'] != null
+              ? DeviceModel.fromJson(json['device'] as Map<String, dynamic>)
+              : null,
       status: DeviceValidationStatus.values.firstWhere(
         (s) => s.name == json['status'],
         orElse: () => DeviceValidationStatus.invalid,
@@ -235,5 +236,6 @@ class DeviceValidationResult {
   }
 
   @override
-  String toString() => 'DeviceValidationResult(isValid: $isValid, status: $status)';
+  String toString() =>
+      'DeviceValidationResult(isValid: $isValid, status: $status)';
 }

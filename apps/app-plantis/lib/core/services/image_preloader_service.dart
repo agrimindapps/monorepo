@@ -18,10 +18,10 @@ class ImagePreloaderService {
   final Queue<String> _preloadQueue = Queue<String>();
   final Set<String> _preloadedImages = <String>{};
   final Set<String> _preloadingImages = <String>{};
-  
+
   bool _isProcessing = false;
   Timer? _preloadTimer;
-  
+
   // Configuration
   static const int maxConcurrentPreloads = 3;
   static const Duration preloadDelay = Duration(milliseconds: 500);
@@ -56,7 +56,7 @@ class ImagePreloaderService {
   /// Preload images for a list of plants (for plant list optimization)
   void preloadPlantImages(List<dynamic> plants) {
     final imageUrls = <String>[];
-    
+
     for (final plant in plants) {
       // Extract image URLs from plant object
       if (plant is Map<String, dynamic>) {
@@ -70,7 +70,7 @@ class ImagePreloaderService {
         }
       }
     }
-    
+
     preloadImages(imageUrls);
   }
 
@@ -91,11 +91,11 @@ class ImagePreloaderService {
 
     _isProcessing = true;
     final batch = <String>[];
-    
+
     // Take up to maxConcurrentPreloads from queue
     while (batch.length < maxConcurrentPreloads && _preloadQueue.isNotEmpty) {
       final imageUrl = _preloadQueue.removeFirst();
-      if (!_preloadedImages.contains(imageUrl) && 
+      if (!_preloadedImages.contains(imageUrl) &&
           !_preloadingImages.contains(imageUrl)) {
         batch.add(imageUrl);
         _preloadingImages.add(imageUrl);
@@ -131,7 +131,7 @@ class ImagePreloaderService {
       }
 
       _preloadedImages.add(imageUrl);
-      
+
       // Cleanup if we have too many preloaded images
       if (_preloadedImages.length > maxPreloadedImages) {
         final excess = _preloadedImages.length - maxPreloadedImages;
@@ -155,7 +155,7 @@ class ImagePreloaderService {
       // Just resolve the image to trigger caching
       final completer = Completer<void>();
       final imageStream = imageProvider.resolve(const ImageConfiguration());
-      
+
       late ImageStreamListener listener;
       listener = ImageStreamListener(
         (ImageInfo image, bool synchronousCall) {
@@ -167,7 +167,7 @@ class ImagePreloaderService {
           completer.completeError(exception);
         },
       );
-      
+
       imageStream.addListener(listener);
       await completer.future;
     } catch (e) {
@@ -226,7 +226,6 @@ class ImagePreloaderService {
 
 /// Mixin for widgets that need to preload images
 mixin ImagePreloadingMixin<T extends StatefulWidget> on State<T> {
-  
   /// Preload images when widget is initialized
   void preloadImagesOnInit(List<String> imageUrls) {
     WidgetsBinding.instance.addPostFrameCallback((_) {

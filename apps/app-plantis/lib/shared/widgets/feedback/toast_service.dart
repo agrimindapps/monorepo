@@ -7,7 +7,7 @@ class ToastService {
   static OverlayEntry? _currentToast;
   static final List<ToastController> _toastQueue = [];
   static bool _isShowingToast = false;
-  
+
   /// Mostra toast de sucesso
   static void showSuccess({
     required BuildContext context,
@@ -21,7 +21,7 @@ class ToastService {
     if (includeHaptic) {
       HapticContexts.buttonTap();
     }
-    
+
     final controller = ToastController(
       type: ToastType.success,
       message: message,
@@ -30,10 +30,10 @@ class ToastService {
       duration: duration,
       onTap: onTap,
     );
-    
+
     _showToast(context, controller);
   }
-  
+
   /// Mostra toast de erro
   static void showError({
     required BuildContext context,
@@ -48,7 +48,7 @@ class ToastService {
     if (includeHaptic) {
       HapticService.warning();
     }
-    
+
     final controller = ToastController(
       type: ToastType.error,
       message: message,
@@ -58,10 +58,10 @@ class ToastService {
       actionLabel: actionLabel,
       onAction: onAction,
     );
-    
+
     _showToast(context, controller);
   }
-  
+
   /// Mostra toast de informação
   static void showInfo({
     required BuildContext context,
@@ -75,7 +75,7 @@ class ToastService {
     if (includeHaptic) {
       HapticService.light();
     }
-    
+
     final controller = ToastController(
       type: ToastType.info,
       message: message,
@@ -84,10 +84,10 @@ class ToastService {
       duration: duration,
       onTap: onTap,
     );
-    
+
     _showToast(context, controller);
   }
-  
+
   /// Mostra toast de warning
   static void showWarning({
     required BuildContext context,
@@ -102,7 +102,7 @@ class ToastService {
     if (includeHaptic) {
       HapticService.warning();
     }
-    
+
     final controller = ToastController(
       type: ToastType.warning,
       message: message,
@@ -112,10 +112,10 @@ class ToastService {
       actionLabel: actionLabel,
       onAction: onAction,
     );
-    
+
     _showToast(context, controller);
   }
-  
+
   /// Mostra toast customizado
   static void showCustom({
     required BuildContext context,
@@ -133,7 +133,7 @@ class ToastService {
     if (includeHaptic) {
       HapticService.light();
     }
-    
+
     final controller = ToastController(
       type: ToastType.custom,
       message: message,
@@ -146,10 +146,10 @@ class ToastService {
       customBackgroundColor: backgroundColor,
       customTextColor: textColor,
     );
-    
+
     _showToast(context, controller);
   }
-  
+
   /// Remove o toast atual
   static void dismiss() {
     if (_currentToast != null) {
@@ -159,39 +159,40 @@ class ToastService {
       _processQueue();
     }
   }
-  
+
   /// Remove todos os toasts
   static void dismissAll() {
     dismiss();
     _toastQueue.clear();
   }
-  
+
   static void _showToast(BuildContext context, ToastController controller) {
     if (_isShowingToast) {
       // Adicionar à fila se já está mostrando toast
       _toastQueue.add(controller);
       return;
     }
-    
+
     _displayToast(context, controller);
   }
-  
+
   static void _displayToast(BuildContext context, ToastController controller) {
     _isShowingToast = true;
-    
+
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
-      builder: (context) => ToastWidget(
-        controller: controller,
-        onDismiss: () {
-          dismiss();
-        },
-      ),
+      builder:
+          (context) => ToastWidget(
+            controller: controller,
+            onDismiss: () {
+              dismiss();
+            },
+          ),
     );
-    
+
     _currentToast = overlayEntry;
     overlay.insert(overlayEntry);
-    
+
     // Auto-dismiss
     Future.delayed(controller.duration, () {
       if (_currentToast == overlayEntry) {
@@ -199,7 +200,7 @@ class ToastService {
       }
     });
   }
-  
+
   static void _processQueue() {
     if (_toastQueue.isNotEmpty && !_isShowingToast) {
       _toastQueue.removeAt(0);
@@ -221,7 +222,7 @@ class ToastController {
   final VoidCallback? onAction;
   final Color? customBackgroundColor;
   final Color? customTextColor;
-  
+
   const ToastController({
     required this.type,
     required this.message,
@@ -240,13 +241,13 @@ class ToastController {
 class ToastWidget extends StatefulWidget {
   final ToastController controller;
   final VoidCallback onDismiss;
-  
+
   const ToastWidget({
     super.key,
     required this.controller,
     required this.onDismiss,
   });
-  
+
   @override
   State<ToastWidget> createState() => _ToastWidgetState();
 }
@@ -256,52 +257,47 @@ class _ToastWidgetState extends State<ToastWidget>
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
-    _slideAnimation = Tween<double>(
-      begin: -1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.7),
-    ));
-    
+
+    _slideAnimation = Tween<double>(begin: -1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.7),
+      ),
+    );
+
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   void _dismiss() {
     _animationController.reverse().then((_) {
       widget.onDismiss();
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
-    
+
     return Positioned(
       top: mediaQuery.padding.top + 16,
       left: 16,
@@ -320,10 +316,10 @@ class _ToastWidgetState extends State<ToastWidget>
       ),
     );
   }
-  
+
   Widget _buildToastCard(ThemeData theme) {
     final colors = _getToastColors(theme);
-    
+
     return Material(
       color: colors.backgroundColor,
       borderRadius: BorderRadius.circular(12),
@@ -417,7 +413,7 @@ class _ToastWidgetState extends State<ToastWidget>
       ),
     );
   }
-  
+
   ToastColors _getToastColors(ThemeData theme) {
     switch (widget.controller.type) {
       case ToastType.success:
@@ -457,7 +453,9 @@ class _ToastWidgetState extends State<ToastWidget>
           backgroundColor: widget.controller.customBackgroundColor!,
           textColor: widget.controller.customTextColor!,
           iconColor: widget.controller.customTextColor!,
-          iconBackgroundColor: widget.controller.customTextColor!.withValues(alpha: 0.2),
+          iconBackgroundColor: widget.controller.customTextColor!.withValues(
+            alpha: 0.2,
+          ),
           actionColor: widget.controller.customTextColor!,
         );
     }
@@ -471,7 +469,7 @@ class ToastColors {
   final Color iconColor;
   final Color iconBackgroundColor;
   final Color actionColor;
-  
+
   const ToastColors({
     required this.backgroundColor,
     required this.textColor,
@@ -482,13 +480,7 @@ class ToastColors {
 }
 
 /// Tipos de toast
-enum ToastType {
-  success,
-  error,
-  warning,
-  info,
-  custom,
-}
+enum ToastType { success, error, warning, info, custom }
 
 /// Contextos pré-definidos para toasts
 class ToastContexts {
@@ -501,7 +493,7 @@ class ToastContexts {
       icon: Icons.check_circle,
     );
   }
-  
+
   static void taskCreated(BuildContext context, String taskName) {
     ToastService.showSuccess(
       context: context,
@@ -510,7 +502,7 @@ class ToastContexts {
       icon: Icons.add_task,
     );
   }
-  
+
   static void taskError(BuildContext context, String error) {
     ToastService.showError(
       context: context,
@@ -522,7 +514,7 @@ class ToastContexts {
       },
     );
   }
-  
+
   // Plantas
   static void plantSaved(BuildContext context, String plantName) {
     ToastService.showSuccess(
@@ -532,7 +524,7 @@ class ToastContexts {
       icon: Icons.eco,
     );
   }
-  
+
   static void plantUpdated(BuildContext context, String plantName) {
     ToastService.showSuccess(
       context: context,
@@ -541,7 +533,7 @@ class ToastContexts {
       icon: Icons.edit,
     );
   }
-  
+
   static void plantDeleted(BuildContext context, String plantName) {
     ToastService.showInfo(
       context: context,
@@ -550,7 +542,7 @@ class ToastContexts {
       icon: Icons.delete,
     );
   }
-  
+
   static void plantWatered(BuildContext context, String plantName) {
     ToastService.showInfo(
       context: context,
@@ -559,7 +551,7 @@ class ToastContexts {
       icon: Icons.water_drop,
     );
   }
-  
+
   // Premium
   static void purchaseSuccess(BuildContext context) {
     ToastService.showSuccess(
@@ -569,7 +561,7 @@ class ToastContexts {
       icon: Icons.star,
     );
   }
-  
+
   static void purchaseError(BuildContext context, String error) {
     ToastService.showError(
       context: context,
@@ -581,7 +573,7 @@ class ToastContexts {
       },
     );
   }
-  
+
   static void purchaseRestored(BuildContext context) {
     ToastService.showSuccess(
       context: context,
@@ -590,7 +582,7 @@ class ToastContexts {
       icon: Icons.restore,
     );
   }
-  
+
   // Auth
   static void loginSuccess(BuildContext context, String userName) {
     ToastService.showSuccess(
@@ -600,7 +592,7 @@ class ToastContexts {
       icon: Icons.person,
     );
   }
-  
+
   static void loginError(BuildContext context, String error) {
     ToastService.showError(
       context: context,
@@ -609,7 +601,7 @@ class ToastContexts {
       actionLabel: 'Tentar novamente',
     );
   }
-  
+
   static void logoutSuccess(BuildContext context) {
     ToastService.showInfo(
       context: context,
@@ -618,7 +610,7 @@ class ToastContexts {
       icon: Icons.logout,
     );
   }
-  
+
   // Sync
   static void syncSuccess(BuildContext context) {
     ToastService.showSuccess(
@@ -628,7 +620,7 @@ class ToastContexts {
       icon: Icons.sync,
     );
   }
-  
+
   static void syncError(BuildContext context, String error) {
     ToastService.showError(
       context: context,
@@ -640,7 +632,7 @@ class ToastContexts {
       },
     );
   }
-  
+
   static void backupComplete(BuildContext context) {
     ToastService.showSuccess(
       context: context,
@@ -649,7 +641,7 @@ class ToastContexts {
       icon: Icons.backup,
     );
   }
-  
+
   static void backupError(BuildContext context, String error) {
     ToastService.showError(
       context: context,
@@ -658,7 +650,7 @@ class ToastContexts {
       actionLabel: 'Tentar novamente',
     );
   }
-  
+
   // Upload
   static void uploadComplete(BuildContext context, String fileName) {
     ToastService.showSuccess(
@@ -668,7 +660,7 @@ class ToastContexts {
       icon: Icons.cloud_upload,
     );
   }
-  
+
   static void uploadError(BuildContext context, String error) {
     ToastService.showError(
       context: context,
@@ -677,7 +669,7 @@ class ToastContexts {
       actionLabel: 'Tentar novamente',
     );
   }
-  
+
   // Network
   static void connectionLost(BuildContext context) {
     ToastService.showWarning(
@@ -688,7 +680,7 @@ class ToastContexts {
       duration: const Duration(seconds: 5),
     );
   }
-  
+
   static void connectionRestored(BuildContext context) {
     ToastService.showInfo(
       context: context,
@@ -697,7 +689,7 @@ class ToastContexts {
       icon: Icons.wifi,
     );
   }
-  
+
   // Validation
   static void validationError(BuildContext context, String field) {
     ToastService.showWarning(
@@ -707,7 +699,7 @@ class ToastContexts {
       icon: Icons.warning,
     );
   }
-  
+
   static void formSaved(BuildContext context) {
     ToastService.showSuccess(
       context: context,
@@ -716,7 +708,7 @@ class ToastContexts {
       icon: Icons.save,
     );
   }
-  
+
   // Settings
   static void settingsSaved(BuildContext context) {
     ToastService.showSuccess(
@@ -726,7 +718,7 @@ class ToastContexts {
       icon: Icons.settings,
     );
   }
-  
+
   static void settingsError(BuildContext context, String error) {
     ToastService.showError(
       context: context,

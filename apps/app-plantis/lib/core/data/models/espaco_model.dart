@@ -1,6 +1,6 @@
 // ignore_for_file: overridden_fields
 
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
 part 'espaco_model.g.dart';

@@ -7,7 +7,8 @@ class ContextualLoadingManager {
   static final List<VoidCallback> _listeners = [];
 
   /// Registra um loading contextual
-  static void startLoading(String context, {
+  static void startLoading(
+    String context, {
     required String message,
     String? semanticLabel,
     LoadingType type = LoadingType.standard,
@@ -19,12 +20,12 @@ class ContextualLoadingManager {
       type: type,
       startTime: DateTime.now(),
     );
-    
+
     // Auto-timeout para evitar loadings infinitos
     if (timeout != null) {
       Future.delayed(timeout, () => stopLoading(context));
     }
-    
+
     _notifyListeners();
   }
 
@@ -54,7 +55,7 @@ class ContextualLoadingManager {
   }
 
   /// Obtém todos os loadings ativos
-  static Map<String, LoadingState> get activeLoadings => 
+  static Map<String, LoadingState> get activeLoadings =>
       Map.unmodifiable(_activeLoadings);
 
   /// Adiciona listener para mudanças
@@ -94,7 +95,7 @@ class ContextualLoadingListener extends StatefulWidget {
   });
 
   @override
-  State<ContextualLoadingListener> createState() => 
+  State<ContextualLoadingListener> createState() =>
       _ContextualLoadingListenerState();
 }
 
@@ -119,9 +120,10 @@ class _ContextualLoadingListenerState extends State<ContextualLoadingListener> {
 
   @override
   Widget build(BuildContext context) {
-    final loadingState = widget.context != null
-        ? ContextualLoadingManager.getLoadingState(widget.context!)
-        : null;
+    final loadingState =
+        widget.context != null
+            ? ContextualLoadingManager.getLoadingState(widget.context!)
+            : null;
 
     if (widget.loadingBuilder != null && loadingState != null) {
       return widget.loadingBuilder!(context, loadingState);
@@ -130,8 +132,7 @@ class _ContextualLoadingListenerState extends State<ContextualLoadingListener> {
     return Stack(
       children: [
         widget.child,
-        if (loadingState != null)
-          _buildDefaultLoadingOverlay(loadingState),
+        if (loadingState != null) _buildDefaultLoadingOverlay(loadingState),
       ],
     );
   }
@@ -235,13 +236,7 @@ class LoadingState {
 }
 
 /// Tipos de loading contextuais
-enum LoadingType {
-  standard,
-  purchase,
-  save,
-  sync,
-  auth,
-}
+enum LoadingType { standard, purchase, save, sync, auth }
 
 /// Contextos pré-definidos para consistência
 class LoadingContexts {

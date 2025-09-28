@@ -1,7 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart';
 
@@ -17,53 +17,61 @@ class DesktopKeyboardShortcuts extends StatefulWidget {
   });
 
   @override
-  State<DesktopKeyboardShortcuts> createState() => _DesktopKeyboardShortcutsState();
+  State<DesktopKeyboardShortcuts> createState() =>
+      _DesktopKeyboardShortcutsState();
 }
 
 class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
-
   @override
   Widget build(BuildContext context) {
     // Só aplicar shortcuts em desktop/web
-    if (!kIsWeb && !PlatformHelper.isMacOS && !PlatformHelper.isWindows && !PlatformHelper.isLinux) {
+    if (!kIsWeb &&
+        !PlatformHelper.isMacOS &&
+        !PlatformHelper.isWindows &&
+        !PlatformHelper.isLinux) {
       return widget.child;
     }
 
     final shortcuts = <LogicalKeySet, Intent>{
       // Navegação básica
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1): 
-          const NavigateToIntent('/tasks'),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit2): 
-          const NavigateToIntent('/plants'),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit3): 
-          const NavigateToIntent('/settings'),
-      
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.digit1,
+      ): const NavigateToIntent('/tasks'),
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.digit2,
+      ): const NavigateToIntent('/plants'),
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.digit3,
+      ): const NavigateToIntent('/settings'),
+
       // Ações comuns
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN): 
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
           const CreateNewPlantIntent(),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS): 
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
           const SaveIntent(),
-      LogicalKeySet(LogicalKeyboardKey.escape): 
-          const EscapeIntent(),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyQ): 
+      LogicalKeySet(LogicalKeyboardKey.escape): const EscapeIntent(),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyQ):
           const GoBackIntent(),
-      
+
       // Busca
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF): 
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF):
           const SearchIntent(),
-      
+
       // Refresh
-      LogicalKeySet(LogicalKeyboardKey.f5): 
-          const RefreshIntent(),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR): 
+      LogicalKeySet(LogicalKeyboardKey.f5): const RefreshIntent(),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR):
           const RefreshIntent(),
     };
 
     // Adicionar shortcuts customizados
     if (widget.customShortcuts != null) {
       for (final entry in widget.customShortcuts!.entries) {
-        shortcuts[LogicalKeySet.fromSet({entry.key.trigger})] = 
-            CustomIntent(entry.value);
+        shortcuts[LogicalKeySet.fromSet({entry.key.trigger})] = CustomIntent(
+          entry.value,
+        );
       }
     }
 
@@ -80,10 +88,7 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
 
     return Shortcuts(
       shortcuts: shortcuts,
-      child: Actions(
-        actions: actions,
-        child: widget.child,
-      ),
+      child: Actions(actions: actions, child: widget.child),
     );
   }
 }
@@ -324,10 +329,7 @@ class KeyboardShortcutsHelp extends StatelessWidget {
             ),
             child: Text(
               shortcut,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
           ),
           const SizedBox(width: 16),

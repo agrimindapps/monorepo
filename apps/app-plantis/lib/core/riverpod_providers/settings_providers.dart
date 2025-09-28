@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../core/services/backup_service.dart';
 import '../../core/services/plantis_notification_service.dart';
@@ -27,9 +26,7 @@ class SettingsState {
 
   /// Estado inicial padrão
   factory SettingsState.initial() {
-    return SettingsState(
-      settings: SettingsEntity.defaults(),
-    );
+    return SettingsState(settings: SettingsEntity.defaults());
   }
 
   /// Cria uma cópia com alterações
@@ -96,10 +93,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     required ISettingsRepository settingsRepository,
     required PlantisNotificationService notificationService,
     BackupService? backupService,
-  })  : _settingsRepository = settingsRepository,
-        _notificationService = notificationService,
-        _backupService = backupService,
-        super(SettingsState.initial());
+  }) : _settingsRepository = settingsRepository,
+       _notificationService = notificationService,
+       _backupService = backupService,
+       super(SettingsState.initial());
 
   /// Inicializa o notifier carregando configurações
   Future<void> initialize() async {
@@ -122,23 +119,25 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> _loadSettings() async {
     final result = await _settingsRepository.loadSettings();
 
-    result.fold(
-      (Failure failure) => throw Exception(failure.message),
-      (SettingsEntity settings) {
-        state = state.copyWith(settings: settings);
-      },
-    );
+    result.fold((Failure failure) => throw Exception(failure.message), (
+      SettingsEntity settings,
+    ) {
+      state = state.copyWith(settings: settings);
+    });
   }
 
   /// Sincroniza com services externos
   Future<void> _syncWithServices() async {
     try {
       // Sincronizar permissões de notificação
-      final hasPermissions = await _notificationService.areNotificationsEnabled();
+      final hasPermissions =
+          await _notificationService.areNotificationsEnabled();
 
       if (state.settings.notifications.permissionsGranted != hasPermissions) {
         await updateNotificationSettings(
-          state.settings.notifications.copyWith(permissionsGranted: hasPermissions),
+          state.settings.notifications.copyWith(
+            permissionsGranted: hasPermissions,
+          ),
         );
       }
 
@@ -171,25 +170,27 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     try {
       final result = await _settingsRepository.saveSettings(newSettings);
 
-      result.fold(
-        (Failure failure) => throw Exception(failure.message),
-        (void _) {
-          state = state.copyWith(
-            settings: newSettings,
-            isLoading: false,
-          ).withSuccess('Configurações salvas com sucesso');
+      result.fold((Failure failure) => throw Exception(failure.message), (
+        void _,
+      ) {
+        state = state
+            .copyWith(settings: newSettings, isLoading: false)
+            .withSuccess('Configurações salvas com sucesso');
 
-          // Aplicar efeitos cascata
-          _applyCascadeEffects(newSettings);
-        },
-      );
+        // Aplicar efeitos cascata
+        _applyCascadeEffects(newSettings);
+      });
     } catch (e) {
-      state = state.copyWith(isLoading: false).withError('Erro ao salvar configurações: $e');
+      state = state
+          .copyWith(isLoading: false)
+          .withError('Erro ao salvar configurações: $e');
     }
   }
 
   /// Atualiza configurações específicas de notificações
-  Future<void> updateNotificationSettings(NotificationSettingsEntity newSettings) async {
+  Future<void> updateNotificationSettings(
+    NotificationSettingsEntity newSettings,
+  ) async {
     final updatedSettings = state.settings.copyWith(notifications: newSettings);
     await updateSettings(updatedSettings);
   }
@@ -264,7 +265,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   /// Toggle para tipo específico de tarefa
   Future<void> toggleTaskType(String taskType, bool enabled) async {
-    final updatedTaskTypes = Map<String, bool>.from(state.settings.notifications.taskTypeSettings);
+    final updatedTaskTypes = Map<String, bool>.from(
+      state.settings.notifications.taskTypeSettings,
+    );
     updatedTaskTypes[taskType] = enabled;
 
     final newSettings = state.settings.notifications.copyWith(
@@ -362,12 +365,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     try {
       final exportResult = await _settingsRepository.exportSettings();
 
-      exportResult.fold(
-        (Failure failure) => throw Exception(failure.message),
-        (Map<String, dynamic> data) {
-          state = state.withSuccess('Configurações incluídas no próximo backup');
-        },
-      );
+      exportResult.fold((Failure failure) => throw Exception(failure.message), (
+        Map<String, dynamic> data,
+      ) {
+        state = state.withSuccess('Configurações incluídas no próximo backup');
+      });
     } catch (e) {
       state = state.withError('Erro ao preparar backup: $e');
     }
@@ -380,19 +382,17 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     try {
       final result = await _settingsRepository.resetToDefaults();
 
-      result.fold(
-        (Failure failure) => throw Exception(failure.message),
-        (void _) async {
-          final newSettings = SettingsEntity.defaults();
-          state = state.copyWith(
-            settings: newSettings,
-            isLoading: false,
-          ).withSuccess('Configurações resetadas com sucesso');
+      result.fold((Failure failure) => throw Exception(failure.message), (
+        void _,
+      ) async {
+        final newSettings = SettingsEntity.defaults();
+        state = state
+            .copyWith(settings: newSettings, isLoading: false)
+            .withSuccess('Configurações resetadas com sucesso');
 
-          // Reaplica configurações nos services
-          _syncWithServices();
-        },
-      );
+        // Reaplica configurações nos services
+        _syncWithServices();
+      });
     } catch (e) {
       state = state.copyWith(isLoading: false).withError('Erro inesperado: $e');
     }
@@ -428,9 +428,11 @@ final settingsRepositoryProvider = Provider<ISettingsRepository>((ref) {
 });
 
 /// Provider do serviço de notificações (obtido via DI)
-final plantisNotificationServiceProvider = Provider<PlantisNotificationService>((ref) {
-  return PlantisNotificationService();
-});
+final plantisNotificationServiceProvider = Provider<PlantisNotificationService>(
+  (ref) {
+    return PlantisNotificationService();
+  },
+);
 
 /// Provider do serviço de backup (obtido via DI, opcional)
 final backupServiceProvider = Provider<BackupService?>((ref) {
@@ -439,17 +441,18 @@ final backupServiceProvider = Provider<BackupService?>((ref) {
 });
 
 /// Provider principal do SettingsNotifier
-final settingsNotifierProvider = StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
-  final settingsRepository = ref.watch(settingsRepositoryProvider);
-  final notificationService = ref.watch(plantisNotificationServiceProvider);
-  final backupService = ref.watch(backupServiceProvider);
+final settingsNotifierProvider =
+    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
+      final settingsRepository = ref.watch(settingsRepositoryProvider);
+      final notificationService = ref.watch(plantisNotificationServiceProvider);
+      final backupService = ref.watch(backupServiceProvider);
 
-  return SettingsNotifier(
-    settingsRepository: settingsRepository,
-    notificationService: notificationService,
-    backupService: backupService,
-  );
-});
+      return SettingsNotifier(
+        settingsRepository: settingsRepository,
+        notificationService: notificationService,
+        backupService: backupService,
+      );
+    });
 
 // =============================================================================
 // PROVIDERS DERIVADOS PARA FACILITAR USO
@@ -485,7 +488,9 @@ final settingsSuccessProvider = Provider<String?>((ref) {
 // =============================================================================
 
 /// Provider para configurações de notificação
-final notificationSettingsProvider = Provider<NotificationSettingsEntity>((ref) {
+final notificationSettingsProvider = Provider<NotificationSettingsEntity>((
+  ref,
+) {
   return ref.watch(settingsProvider).notifications;
 });
 

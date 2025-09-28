@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
@@ -23,14 +22,18 @@ class SubscriptionSyncService {
        _analytics = analytics;
 
   // Stream controllers para eventos em tempo real
-  final _syncEventsController = StreamController<PlantisSubscriptionSyncEvent>.broadcast();
-  final _subscriptionController = StreamController<SubscriptionEntity?>.broadcast();
+  final _syncEventsController =
+      StreamController<PlantisSubscriptionSyncEvent>.broadcast();
+  final _subscriptionController =
+      StreamController<SubscriptionEntity?>.broadcast();
 
   /// Stream de eventos de sincronização
-  Stream<PlantisSubscriptionSyncEvent> get syncEventsStream => _syncEventsController.stream;
+  Stream<PlantisSubscriptionSyncEvent> get syncEventsStream =>
+      _syncEventsController.stream;
 
   /// Stream reativo da assinatura atual
-  Stream<SubscriptionEntity?> get subscriptionStream => _subscriptionController.stream;
+  Stream<SubscriptionEntity?> get subscriptionStream =>
+      _subscriptionController.stream;
 
   // Estado interno
   Timer? _syncTimer;
@@ -50,11 +53,14 @@ class SubscriptionSyncService {
       await _analytics.logEvent('plantis_subscription_sync_started');
 
       // 1. Obter status atual do RevenueCat
-      final subscriptionResult = await _subscriptionRepository.getCurrentSubscription();
+      final subscriptionResult =
+          await _subscriptionRepository.getCurrentSubscription();
 
       await subscriptionResult.fold(
         (failure) async {
-          await _handleSyncError('Erro ao obter assinatura do RevenueCat: ${failure.message}');
+          await _handleSyncError(
+            'Erro ao obter assinatura do RevenueCat: ${failure.message}',
+          );
           throw Exception(failure.message);
         },
         (currentSubscription) async {
@@ -65,7 +71,10 @@ class SubscriptionSyncService {
           }
 
           // 3. Preparar dados para sincronização
-          final subscriptionData = await _prepareSubscriptionData(currentSubscription, currentUser);
+          final subscriptionData = await _prepareSubscriptionData(
+            currentSubscription,
+            currentUser,
+          );
 
           // 4. Verificar conflitos com outros dispositivos
           final conflicts = await _checkDeviceConflicts(subscriptionData);
@@ -81,23 +90,32 @@ class SubscriptionSyncService {
           await _processPlantisFeatures(currentSubscription);
 
           // 7. Emitir evento de sucesso
-          _syncEventsController.add(PlantisSubscriptionSyncEvent.success(
-            subscription: currentSubscription,
-            syncedAt: DateTime.now(),
-            premiumFeaturesEnabled: _getPremiumFeaturesEnabled(currentSubscription),
-          ));
+          _syncEventsController.add(
+            PlantisSubscriptionSyncEvent.success(
+              subscription: currentSubscription,
+              syncedAt: DateTime.now(),
+              premiumFeaturesEnabled: _getPremiumFeaturesEnabled(
+                currentSubscription,
+              ),
+            ),
+          );
 
           _subscriptionController.add(currentSubscription);
 
-          await _analytics.logEvent('plantis_subscription_sync_completed', parameters: {
-            'is_premium': (currentSubscription?.isActive ?? false).toString(),
-            'subscription_type': currentSubscription?.productId ?? 'none',
-            'tier': currentSubscription?.tier.name ?? 'free',
-            'premium_features_count': _getPremiumFeaturesEnabled(currentSubscription).length.toString(),
-          });
+          await _analytics.logEvent(
+            'plantis_subscription_sync_completed',
+            parameters: {
+              'is_premium': (currentSubscription?.isActive ?? false).toString(),
+              'subscription_type': currentSubscription?.productId ?? 'none',
+              'tier': currentSubscription?.tier.name ?? 'free',
+              'premium_features_count':
+                  _getPremiumFeaturesEnabled(
+                    currentSubscription,
+                  ).length.toString(),
+            },
+          );
         },
       );
-
     } catch (e) {
       await _handleSyncError('Erro na sincronização: $e');
       rethrow;
@@ -107,7 +125,9 @@ class SubscriptionSyncService {
   }
 
   /// Processa webhooks do RevenueCat para atualizações em tempo real
-  Future<void> processRevenueCatWebhook(Map<String, dynamic> webhookData) async {
+  Future<void> processRevenueCatWebhook(
+    Map<String, dynamic> webhookData,
+  ) async {
     try {
       final eventType = webhookData['event']?['type'] as String?;
       final userId = webhookData['event']?['app_user_id'] as String?;
@@ -116,10 +136,10 @@ class SubscriptionSyncService {
         throw ArgumentError('Webhook inválido: missing event type or user ID');
       }
 
-      await _analytics.logEvent('plantis_revenuecat_webhook_received', parameters: {
-        'event_type': eventType,
-        'user_id': userId,
-      });
+      await _analytics.logEvent(
+        'plantis_revenuecat_webhook_received',
+        parameters: {'event_type': eventType, 'user_id': userId},
+      );
 
       // Processar diferentes tipos de eventos
       switch (eventType) {
@@ -145,19 +165,22 @@ class SubscriptionSyncService {
           await _handleProductChange(webhookData);
           break;
         default:
-          await _analytics.logEvent('plantis_unhandled_webhook_event', parameters: {
-            'event_type': eventType,
-          });
+          await _analytics.logEvent(
+            'plantis_unhandled_webhook_event',
+            parameters: {'event_type': eventType},
+          );
       }
 
       // Sempre sincronizar após processar webhook
       await syncSubscriptionStatus();
-
     } catch (e) {
-      await _analytics.logEvent('plantis_webhook_processing_failed', parameters: {
-        'webhook_data': webhookData.toString(),
-        'error': e.toString(),
-      });
+      await _analytics.logEvent(
+        'plantis_webhook_processing_failed',
+        parameters: {
+          'webhook_data': webhookData.toString(),
+          'error': e.toString(),
+        },
+      );
       rethrow;
     }
   }
@@ -190,7 +213,8 @@ class SubscriptionSyncService {
       // Datas importantes
       'purchaseDate': subscription?.purchaseDate?.millisecondsSinceEpoch,
       'expirationDate': subscription?.expirationDate?.millisecondsSinceEpoch,
-      'originalPurchaseDate': subscription?.originalPurchaseDate?.millisecondsSinceEpoch,
+      'originalPurchaseDate':
+          subscription?.originalPurchaseDate?.millisecondsSinceEpoch,
       'lastUpdated': now.millisecondsSinceEpoch,
       'lastSyncedAt': FieldValue.serverTimestamp(),
 
@@ -200,7 +224,8 @@ class SubscriptionSyncService {
 
       // Features específicas do Plantis
       'premiumFeatures': _getPremiumFeaturesEnabled(subscription),
-      'plantLimitOverride': subscription?.isActive == true ? -1 : 5, // Ilimitado para premium
+      'plantLimitOverride':
+          subscription?.isActive == true ? -1 : 5, // Ilimitado para premium
       'canUseAdvancedReminders': subscription?.isActive ?? false,
       'canExportData': subscription?.isActive ?? false,
       'canUseCustomThemes': subscription?.isActive ?? false,
@@ -216,16 +241,19 @@ class SubscriptionSyncService {
   }
 
   /// Verifica conflitos entre dispositivos e resolve automaticamente
-  Future<List<DeviceConflict>> _checkDeviceConflicts(Map<String, dynamic> currentData) async {
+  Future<List<DeviceConflict>> _checkDeviceConflicts(
+    Map<String, dynamic> currentData,
+  ) async {
     try {
       final userId = currentData['userId'] as String;
 
       // Obter status de todos os dispositivos do usuário
-      final deviceSnapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('devices')
-          .get();
+      final deviceSnapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('devices')
+              .get();
 
       final conflicts = <DeviceConflict>[];
       final currentDeviceId = currentData['deviceId'] as String;
@@ -243,10 +271,13 @@ class SubscriptionSyncService {
       }
 
       if (conflicts.isNotEmpty) {
-        await _analytics.logEvent('plantis_device_conflicts_detected', parameters: {
-          'conflict_count': conflicts.length.toString(),
-          'device_count': deviceSnapshot.docs.length.toString(),
-        });
+        await _analytics.logEvent(
+          'plantis_device_conflicts_detected',
+          parameters: {
+            'conflict_count': conflicts.length.toString(),
+            'device_count': deviceSnapshot.docs.length.toString(),
+          },
+        );
       }
 
       return conflicts;
@@ -257,25 +288,31 @@ class SubscriptionSyncService {
   }
 
   /// Resolve conflitos automaticamente usando estratégia "server wins"
-  Future<void> _resolveConflicts(List<DeviceConflict> conflicts, Map<String, dynamic> currentData) async {
+  Future<void> _resolveConflicts(
+    List<DeviceConflict> conflicts,
+    Map<String, dynamic> currentData,
+  ) async {
     for (final conflict in conflicts) {
       try {
-        await _analytics.logEvent('plantis_resolving_conflict', parameters: {
-          'conflict_type': conflict.type.name,
-          'device1': conflict.device1Id,
-          'device2': conflict.device2Id,
-        });
+        await _analytics.logEvent(
+          'plantis_resolving_conflict',
+          parameters: {
+            'conflict_type': conflict.type.name,
+            'device1': conflict.device1Id,
+            'device2': conflict.device2Id,
+          },
+        );
 
         // Para assinaturas, sempre usar dados mais recentes (timestamp mais alto)
         final resolution = _resolveConflict(conflict, currentData);
 
         // Aplicar resolução ao Firebase
         await _applyConflictResolution(resolution);
-
       } catch (e) {
-        await _analytics.logEvent('plantis_conflict_resolution_failed', parameters: {
-          'error': e.toString(),
-        });
+        await _analytics.logEvent(
+          'plantis_conflict_resolution_failed',
+          parameters: {'error': e.toString()},
+        );
       }
     }
   }
@@ -310,9 +347,7 @@ class SubscriptionSyncService {
       }, SetOptions(merge: true));
 
       // 3. Adicionar ao histórico
-      final historyRef = _firestore
-          .collection('subscription_history')
-          .doc();
+      final historyRef = _firestore.collection('subscription_history').doc();
 
       transaction.set(historyRef, {
         ...subscriptionData,
@@ -348,16 +383,20 @@ class SubscriptionSyncService {
       // Configurar backup em nuvem
       await _configurePlantisCloudBackup(user.id, isPremium);
 
-      await _analytics.logEvent('plantis_features_processed', parameters: {
-        'is_premium': isPremium.toString(),
-        'features_enabled': _getPremiumFeaturesEnabled(subscription).length.toString(),
-      });
-
+      await _analytics.logEvent(
+        'plantis_features_processed',
+        parameters: {
+          'is_premium': isPremium.toString(),
+          'features_enabled':
+              _getPremiumFeaturesEnabled(subscription).length.toString(),
+        },
+      );
     } catch (e) {
       debugPrint('[PlantisSync] Erro ao processar features: $e');
-      await _analytics.logEvent('plantis_features_processing_failed', parameters: {
-        'error': e.toString(),
-      });
+      await _analytics.logEvent(
+        'plantis_features_processing_failed',
+        parameters: {'error': e.toString()},
+      );
     }
   }
 
@@ -377,7 +416,10 @@ class SubscriptionSyncService {
   }
 
   /// Atualiza configurações de features premium específicas
-  Future<void> _updatePremiumFeatures(String userId, SubscriptionEntity? subscription) async {
+  Future<void> _updatePremiumFeatures(
+    String userId,
+    SubscriptionEntity? subscription,
+  ) async {
     final features = _getPremiumFeaturesEnabled(subscription);
 
     await _firestore
@@ -432,7 +474,10 @@ class SubscriptionSyncService {
   }
 
   /// Configurar backup em nuvem para dados das plantas
-  Future<void> _configurePlantisCloudBackup(String userId, bool isPremium) async {
+  Future<void> _configurePlantisCloudBackup(
+    String userId,
+    bool isPremium,
+  ) async {
     await _firestore
         .collection('users')
         .doc(userId)
@@ -473,13 +518,15 @@ class SubscriptionSyncService {
       });
 
       // Registrar no analytics
-      await _analytics.logEvent('plantis_purchase_completed', parameters: {
-        'product_id': productId,
-        'price': price.toString(),
-        'currency': currency,
-        'platform': defaultTargetPlatform.name,
-      });
-
+      await _analytics.logEvent(
+        'plantis_purchase_completed',
+        parameters: {
+          'product_id': productId,
+          'price': price.toString(),
+          'currency': currency,
+          'platform': defaultTargetPlatform.name,
+        },
+      );
     } catch (e) {
       debugPrint('[PlantisSync] Erro ao logar evento de compra: $e');
     }
@@ -490,82 +537,108 @@ class SubscriptionSyncService {
   Future<void> _handleInitialPurchase(Map<String, dynamic> webhookData) async {
     final event = webhookData['event'] as Map<String, dynamic>;
 
-    await _analytics.logEvent('plantis_initial_purchase', parameters: {
-      'product_id': event['product_id']?.toString() ?? 'unknown',
-      'store': event['store']?.toString() ?? 'unknown',
-      'environment': event['environment']?.toString() ?? 'unknown',
-    });
+    await _analytics.logEvent(
+      'plantis_initial_purchase',
+      parameters: {
+        'product_id': event['product_id']?.toString() ?? 'unknown',
+        'store': event['store']?.toString() ?? 'unknown',
+        'environment': event['environment']?.toString() ?? 'unknown',
+      },
+    );
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.purchased(
-      productId: event['product_id']?.toString(),
-      purchasedAt: DateTime.now(),
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.purchased(
+        productId: event['product_id']?.toString(),
+        purchasedAt: DateTime.now(),
+      ),
+    );
   }
 
   Future<void> _handleRenewal(Map<String, dynamic> webhookData) async {
     final event = webhookData['event'] as Map<String, dynamic>;
 
-    await _analytics.logEvent('plantis_subscription_renewal', parameters: {
-      'product_id': event['product_id']?.toString() ?? 'unknown',
-      'expiration_date': event['expiration_at_ms']?.toString() ?? 'unknown',
-    });
+    await _analytics.logEvent(
+      'plantis_subscription_renewal',
+      parameters: {
+        'product_id': event['product_id']?.toString() ?? 'unknown',
+        'expiration_date': event['expiration_at_ms']?.toString() ?? 'unknown',
+      },
+    );
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.renewed(
-      expirationDate: _parseMilliseconds(event['expiration_at_ms']),
-      renewedAt: DateTime.now(),
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.renewed(
+        expirationDate: _parseMilliseconds(event['expiration_at_ms']),
+        renewedAt: DateTime.now(),
+      ),
+    );
   }
 
   Future<void> _handleCancellation(Map<String, dynamic> webhookData) async {
     final event = webhookData['event'] as Map<String, dynamic>;
 
-    await _analytics.logEvent('plantis_subscription_cancellation', parameters: {
-      'cancel_reason': event['cancel_reason']?.toString() ?? 'unknown',
-      'will_expire_at': event['expiration_at_ms']?.toString() ?? 'unknown',
-    });
+    await _analytics.logEvent(
+      'plantis_subscription_cancellation',
+      parameters: {
+        'cancel_reason': event['cancel_reason']?.toString() ?? 'unknown',
+        'will_expire_at': event['expiration_at_ms']?.toString() ?? 'unknown',
+      },
+    );
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.cancelled(
-      reason: event['cancel_reason']?.toString(),
-      expiresAt: _parseMilliseconds(event['expiration_at_ms']),
-      cancelledAt: DateTime.now(),
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.cancelled(
+        reason: event['cancel_reason']?.toString(),
+        expiresAt: _parseMilliseconds(event['expiration_at_ms']),
+        cancelledAt: DateTime.now(),
+      ),
+    );
   }
 
   Future<void> _handleUncancellation(Map<String, dynamic> webhookData) async {
     await _analytics.logEvent('plantis_subscription_uncancellation');
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.reactivated(
-      reactivatedAt: DateTime.now(),
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.reactivated(reactivatedAt: DateTime.now()),
+    );
   }
 
   Future<void> _handleExpiration(Map<String, dynamic> webhookData) async {
     await _analytics.logEvent('plantis_subscription_expiration');
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.expired(
-      expiredAt: DateTime.now(),
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.expired(expiredAt: DateTime.now()),
+    );
   }
 
   Future<void> _handleBillingIssue(Map<String, dynamic> webhookData) async {
     final event = webhookData['event'] as Map<String, dynamic>;
 
-    await _analytics.logEvent('plantis_subscription_billing_issue', parameters: {
-      'grace_period_expires': event['grace_period_expiration_at_ms']?.toString() ?? 'unknown',
-    });
+    await _analytics.logEvent(
+      'plantis_subscription_billing_issue',
+      parameters: {
+        'grace_period_expires':
+            event['grace_period_expiration_at_ms']?.toString() ?? 'unknown',
+      },
+    );
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.billingIssue(
-      gracePeriodEnds: _parseMilliseconds(event['grace_period_expiration_at_ms']),
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.billingIssue(
+        gracePeriodEnds: _parseMilliseconds(
+          event['grace_period_expiration_at_ms'],
+        ),
+      ),
+    );
   }
 
   Future<void> _handleProductChange(Map<String, dynamic> webhookData) async {
     final event = webhookData['event'] as Map<String, dynamic>;
 
-    await _analytics.logEvent('plantis_subscription_product_change', parameters: {
-      'old_product': event['product_id']?.toString() ?? 'unknown',
-      'new_product': event['new_product_id']?.toString() ?? 'unknown',
-    });
+    await _analytics.logEvent(
+      'plantis_subscription_product_change',
+      parameters: {
+        'old_product': event['product_id']?.toString() ?? 'unknown',
+        'new_product': event['new_product_id']?.toString() ?? 'unknown',
+      },
+    );
   }
 
   // Utility methods
@@ -602,7 +675,9 @@ class SubscriptionSyncService {
   List<String> _getExpectedFeaturesFromProduct(String productId) {
     final id = productId.toLowerCase();
 
-    if (id.contains('premium') || id.contains('monthly') || id.contains('yearly')) {
+    if (id.contains('premium') ||
+        id.contains('monthly') ||
+        id.contains('yearly')) {
       return _getPremiumFeaturesEnabled(
         SubscriptionEntity(
           id: 'temp',
@@ -612,7 +687,7 @@ class SubscriptionSyncService {
           tier: SubscriptionTier.premium,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
-        )
+        ),
       );
     }
 
@@ -622,12 +697,13 @@ class SubscriptionSyncService {
   /// Obtém próxima versão de sincronização
   Future<int> _getNextSyncVersion(String userId) async {
     try {
-      final doc = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('sync_metadata')
-          .doc('version')
-          .get();
+      final doc =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('sync_metadata')
+              .doc('version')
+              .get();
 
       final currentVersion = doc.data()?['version'] as int? ?? 0;
       final nextVersion = currentVersion + 1;
@@ -638,7 +714,10 @@ class SubscriptionSyncService {
           .doc(userId)
           .collection('sync_metadata')
           .doc('version')
-          .set({'version': nextVersion, 'lastUpdated': FieldValue.serverTimestamp()});
+          .set({
+            'version': nextVersion,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
 
       return nextVersion;
     } catch (e) {
@@ -660,9 +739,13 @@ class SubscriptionSyncService {
   }
 
   /// Detecta conflito entre dois estados de dispositivo
-  DeviceConflict? _detectConflict(Map<String, dynamic> current, Map<String, dynamic> other) {
+  DeviceConflict? _detectConflict(
+    Map<String, dynamic> current,
+    Map<String, dynamic> other,
+  ) {
     final currentPremium = current['isPremium'] as bool? ?? false;
-    final otherPremium = other['subscriptionData']?['isPremium'] as bool? ?? false;
+    final otherPremium =
+        other['subscriptionData']?['isPremium'] as bool? ?? false;
 
     final currentProduct = current['productId'] as String?;
     final otherProduct = other['subscriptionData']?['productId'] as String?;
@@ -693,9 +776,14 @@ class SubscriptionSyncService {
   }
 
   /// Resolve conflito específico usando timestamp mais recente
-  ConflictResolution _resolveConflict(DeviceConflict conflict, Map<String, dynamic> currentData) {
+  ConflictResolution _resolveConflict(
+    DeviceConflict conflict,
+    Map<String, dynamic> currentData,
+  ) {
     final currentTimestamp = currentData['lastUpdated'] as int? ?? 0;
-    final conflictTimestamp = conflict.conflictingData['subscriptionData']?['lastUpdated'] as int? ?? 0;
+    final conflictTimestamp =
+        conflict.conflictingData['subscriptionData']?['lastUpdated'] as int? ??
+        0;
 
     // Usar dados mais recentes
     final useCurrentData = currentTimestamp >= conflictTimestamp;
@@ -703,7 +791,10 @@ class SubscriptionSyncService {
     return ConflictResolution(
       strategy: 'use_latest_timestamp',
       winningDeviceId: useCurrentData ? conflict.device1Id : conflict.device2Id,
-      resolvedData: useCurrentData ? currentData : conflict.conflictingData['subscriptionData'],
+      resolvedData:
+          useCurrentData
+              ? currentData
+              : conflict.conflictingData['subscriptionData'],
       resolvedAt: DateTime.now(),
     );
   }
@@ -714,10 +805,13 @@ class SubscriptionSyncService {
       final data = resolution.resolvedData as Map<String, dynamic>;
       await _saveToFirebase(data);
 
-      await _analytics.logEvent('plantis_conflict_resolved', parameters: {
-        'strategy': resolution.strategy,
-        'winning_device': resolution.winningDeviceId,
-      });
+      await _analytics.logEvent(
+        'plantis_conflict_resolved',
+        parameters: {
+          'strategy': resolution.strategy,
+          'winning_device': resolution.winningDeviceId,
+        },
+      );
     } catch (e) {
       debugPrint('[PlantisSync] Erro ao aplicar resolução: $e');
     }
@@ -747,16 +841,21 @@ class SubscriptionSyncService {
 
     _retryCount[retryKey] = (_retryCount[retryKey] ?? 0) + 1;
 
-    _syncEventsController.add(PlantisSubscriptionSyncEvent.failed(
-      error: error,
-      failedAt: DateTime.now(),
-      retryCount: _retryCount[retryKey]!,
-    ));
+    _syncEventsController.add(
+      PlantisSubscriptionSyncEvent.failed(
+        error: error,
+        failedAt: DateTime.now(),
+        retryCount: _retryCount[retryKey]!,
+      ),
+    );
 
-    await _analytics.logEvent('plantis_sync_error', parameters: {
-      'error': error,
-      'retry_count': _retryCount[retryKey].toString(),
-    });
+    await _analytics.logEvent(
+      'plantis_sync_error',
+      parameters: {
+        'error': error,
+        'retry_count': _retryCount[retryKey].toString(),
+      },
+    );
 
     // Implementar retry exponencial
     if (_retryCount[retryKey]! < maxRetries) {
@@ -772,7 +871,9 @@ class SubscriptionSyncService {
     }
     if (milliseconds is String) {
       final parsed = int.tryParse(milliseconds);
-      return parsed != null ? DateTime.fromMillisecondsSinceEpoch(parsed) : null;
+      return parsed != null
+          ? DateTime.fromMillisecondsSinceEpoch(parsed)
+          : null;
     }
     return null;
   }
@@ -791,35 +892,44 @@ class SubscriptionSyncService {
           .doc('current')
           .snapshots()
           .map((snapshot) {
-        if (!snapshot.exists || snapshot.data() == null) return null;
+            if (!snapshot.exists || snapshot.data() == null) return null;
 
-        final data = snapshot.data()!;
-        final isPremium = data['isPremium'] as bool? ?? false;
+            final data = snapshot.data()!;
+            final isPremium = data['isPremium'] as bool? ?? false;
 
-        if (!isPremium) return null;
+            if (!isPremium) return null;
 
-        return SubscriptionEntity(
-          id: data['productId'] as String? ?? '',
-          userId: user.id,
-          productId: data['productId'] as String? ?? '',
-          status: _parseSubscriptionStatus(data['status'] as String?),
-          tier: _parseSubscriptionTier(data['tier'] as String?),
-          expirationDate: data['expirationDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(data['expirationDate'] as int)
-              : null,
-          purchaseDate: data['purchaseDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(data['purchaseDate'] as int)
-              : null,
-          originalPurchaseDate: data['originalPurchaseDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(data['originalPurchaseDate'] as int)
-              : null,
-          store: _parseStore(data['store'] as String?),
-          isInTrial: data['isInTrial'] as bool? ?? false,
-          isSandbox: data['isSandbox'] as bool? ?? false,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-      });
+            return SubscriptionEntity(
+              id: data['productId'] as String? ?? '',
+              userId: user.id,
+              productId: data['productId'] as String? ?? '',
+              status: _parseSubscriptionStatus(data['status'] as String?),
+              tier: _parseSubscriptionTier(data['tier'] as String?),
+              expirationDate:
+                  data['expirationDate'] != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                        data['expirationDate'] as int,
+                      )
+                      : null,
+              purchaseDate:
+                  data['purchaseDate'] != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                        data['purchaseDate'] as int,
+                      )
+                      : null,
+              originalPurchaseDate:
+                  data['originalPurchaseDate'] != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                        data['originalPurchaseDate'] as int,
+                      )
+                      : null,
+              store: _parseStore(data['store'] as String?),
+              isInTrial: data['isInTrial'] as bool? ?? false,
+              isSandbox: data['isSandbox'] as bool? ?? false,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+          });
     });
   }
 
@@ -982,19 +1092,17 @@ class PlantisSubscriptionSyncEvent {
     cancelledAt: cancelledAt,
   );
 
-  factory PlantisSubscriptionSyncEvent.reactivated({
-    DateTime? reactivatedAt,
-  }) => PlantisSubscriptionSyncEvent._(
-    type: PlantisSubscriptionSyncEventType.reactivated,
-    reactivatedAt: reactivatedAt,
-  );
+  factory PlantisSubscriptionSyncEvent.reactivated({DateTime? reactivatedAt}) =>
+      PlantisSubscriptionSyncEvent._(
+        type: PlantisSubscriptionSyncEventType.reactivated,
+        reactivatedAt: reactivatedAt,
+      );
 
-  factory PlantisSubscriptionSyncEvent.expired({
-    DateTime? expiredAt,
-  }) => PlantisSubscriptionSyncEvent._(
-    type: PlantisSubscriptionSyncEventType.expired,
-    expiredAt: expiredAt,
-  );
+  factory PlantisSubscriptionSyncEvent.expired({DateTime? expiredAt}) =>
+      PlantisSubscriptionSyncEvent._(
+        type: PlantisSubscriptionSyncEventType.expired,
+        expiredAt: expiredAt,
+      );
 
   factory PlantisSubscriptionSyncEvent.billingIssue({
     DateTime? gracePeriodEnds,

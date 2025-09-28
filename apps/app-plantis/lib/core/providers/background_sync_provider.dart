@@ -22,34 +22,38 @@ class BackgroundSyncProvider extends ChangeNotifier {
 
   // Expose service getters
   bool get isSyncInProgress => _backgroundSyncService.isSyncInProgress;
-  bool get hasPerformedInitialSync => _backgroundSyncService.hasPerformedInitialSync;
+  bool get hasPerformedInitialSync =>
+      _backgroundSyncService.hasPerformedInitialSync;
   String get currentSyncMessage => _backgroundSyncService.currentSyncMessage;
   BackgroundSyncStatus get syncStatus => _backgroundSyncService.syncStatus;
 
   // Expose service streams
-  Stream<BackgroundSyncStatus> get syncStatusStream => _backgroundSyncService.syncStatusStream;
-  Stream<String> get syncMessageStream => _backgroundSyncService.syncMessageStream;
-  Stream<bool> get syncProgressStream => _backgroundSyncService.syncProgressStream;
+  Stream<BackgroundSyncStatus> get syncStatusStream =>
+      _backgroundSyncService.syncStatusStream;
+  Stream<String> get syncMessageStream =>
+      _backgroundSyncService.syncMessageStream;
+  Stream<bool> get syncProgressStream =>
+      _backgroundSyncService.syncProgressStream;
 
   /// Listen to sync service updates and propagate to UI
   void _listenToSyncUpdates() {
-    _messageSubscription = _backgroundSyncService.syncMessageStream.listen(
-      (message) {
-        notifyListeners();
-      },
-    );
+    _messageSubscription = _backgroundSyncService.syncMessageStream.listen((
+      message,
+    ) {
+      notifyListeners();
+    });
 
-    _progressSubscription = _backgroundSyncService.syncProgressStream.listen(
-      (inProgress) {
-        notifyListeners();
-      },
-    );
+    _progressSubscription = _backgroundSyncService.syncProgressStream.listen((
+      inProgress,
+    ) {
+      notifyListeners();
+    });
 
-    _statusSubscription = _backgroundSyncService.syncStatusStream.listen(
-      (status) {
-        notifyListeners();
-      },
-    );
+    _statusSubscription = _backgroundSyncService.syncStatusStream.listen((
+      status,
+    ) {
+      notifyListeners();
+    });
   }
 
   /// Starts background sync for authenticated user
@@ -102,9 +106,9 @@ class BackgroundSyncProvider extends ChangeNotifier {
   /// Helper method to check if sync is needed
   bool shouldStartInitialSync(String? userId) {
     return userId != null &&
-           userId.isNotEmpty &&
-           !hasPerformedInitialSync &&
-           !isSyncInProgress;
+        userId.isNotEmpty &&
+        !hasPerformedInitialSync &&
+        !isSyncInProgress;
   }
 
   /// Helper method to get sync progress percentage
@@ -112,7 +116,8 @@ class BackgroundSyncProvider extends ChangeNotifier {
     final operations = getOperationStatus();
     if (operations.isEmpty) return 0.0;
 
-    final completedCount = operations.values.where((completed) => completed).length;
+    final completedCount =
+        operations.values.where((completed) => completed).length;
     return completedCount / operations.length;
   }
 

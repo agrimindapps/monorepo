@@ -77,36 +77,37 @@ class BackupListItem extends StatelessWidget {
                         break;
                     }
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'restore',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.restore,
-                            color: PlantisColors.leaf,
-                            size: 18,
+                  itemBuilder:
+                      (context) => [
+                        const PopupMenuItem(
+                          value: 'restore',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.restore,
+                                color: PlantisColors.leaf,
+                                size: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Restaurar'),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Text('Restaurar'),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete,
-                            color: theme.colorScheme.error,
-                            size: 18,
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete,
+                                color: theme.colorScheme.error,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Deletar'),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          const Text('Deletar'),
-                        ],
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
                   child: Icon(
                     Icons.more_vert,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -171,12 +172,12 @@ class BackupListItem extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                     side: BorderSide(color: theme.colorScheme.error),
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.delete,
-                    size: 16,
-                  ),
+                  child: const Icon(Icons.delete, size: 16),
                 ),
               ],
             ),
@@ -203,11 +204,7 @@ class BackupListItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 12,
-            color: color,
-          ),
+          Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
             '$count $label',

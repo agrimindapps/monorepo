@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
@@ -50,7 +49,7 @@ class _LandingPageState extends State<LandingPage>
     // Verifica se o usuário já está logado e redireciona
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       _checkUserLoginStatus();
     });
   }
@@ -111,7 +110,10 @@ class _LandingPageState extends State<LandingPage>
       ),
       child: Center(
         child: Semantics(
-          label: AccessibilityTokens.getSemanticLabel('loading', 'Carregando aplicativo Plantis'),
+          label: AccessibilityTokens.getSemanticLabel(
+            'loading',
+            'Carregando aplicativo Plantis',
+          ),
           liveRegion: true,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -259,10 +261,13 @@ class _LandingPageState extends State<LandingPage>
               AccessibilityTokens.performHapticFeedback('light');
               context.go('/login');
             },
-            semanticLabel: AccessibilityTokens.getSemanticLabel('login_button', 'Ir para página de login'),
+            semanticLabel: AccessibilityTokens.getSemanticLabel(
+              'login_button',
+              'Ir para página de login',
+            ),
             tooltip: 'Fazer login no aplicativo',
             minimumSize: const Size(
-              AccessibilityTokens.recommendedTouchTargetSize + 32, 
+              AccessibilityTokens.recommendedTouchTargetSize + 32,
               AccessibilityTokens.recommendedTouchTargetSize,
             ),
             backgroundColor: Colors.white,
@@ -315,7 +320,10 @@ class _LandingPageState extends State<LandingPage>
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: AccessibilityTokens.getAccessibleFontSize(context, 32),
+                        fontSize: AccessibilityTokens.getAccessibleFontSize(
+                          context,
+                          32,
+                        ),
                         fontWeight: FontWeight.bold,
                         height: 1.2,
                       ),
@@ -346,7 +354,7 @@ class _LandingPageState extends State<LandingPage>
                       semanticLabel: 'Começar a usar o Plantis gratuitamente',
                       tooltip: 'Criar conta ou fazer login no aplicativo',
                       minimumSize: const Size(
-                        double.infinity, 
+                        double.infinity,
                         AccessibilityTokens.largeTouchTargetSize,
                       ),
                       backgroundColor: Colors.white,
@@ -359,7 +367,10 @@ class _LandingPageState extends State<LandingPage>
                       child: Text(
                         'Começar Agora - É Grátis!',
                         style: TextStyle(
-                          fontSize: AccessibilityTokens.getAccessibleFontSize(context, 18),
+                          fontSize: AccessibilityTokens.getAccessibleFontSize(
+                            context,
+                            18,
+                          ),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -385,7 +396,10 @@ class _LandingPageState extends State<LandingPage>
               'Por que escolher o Plantis?',
               style: TextStyle(
                 color: PlantisColors.primary,
-                fontSize: AccessibilityTokens.getAccessibleFontSize(context, 28),
+                fontSize: AccessibilityTokens.getAccessibleFontSize(
+                  context,
+                  28,
+                ),
                 fontWeight: FontWeight.bold,
               ),
             ),

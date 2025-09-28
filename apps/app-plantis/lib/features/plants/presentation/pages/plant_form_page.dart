@@ -1,46 +1,47 @@
+import 'package:core/core.dart' hide Provider, Consumer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' hide Provider;
-import 'package:provider/provider.dart' as provider_pkg;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/riverpod_providers/plants_providers.dart' as riverpod_plants;
+import '../../../../core/riverpod_providers/plants_providers.dart'
+    as riverpod_plants;
+import '../../../../core/riverpod_providers/solid_providers.dart';
+import '../../../../core/state/plant_form_state_manager.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../providers/plant_form_provider.dart';
-import '../providers/plants_provider.dart';
 import '../widgets/plant_form_basic_info.dart';
 import '../widgets/plant_form_care_config.dart';
 
-class PlantFormPage extends StatefulWidget {
+class PlantFormPage extends ConsumerStatefulWidget {
   final String? plantId;
   final VoidCallback? onSaved;
 
   const PlantFormPage({super.key, this.plantId, this.onSaved});
 
   @override
-  State<PlantFormPage> createState() => _PlantFormPageState();
+  ConsumerState<PlantFormPage> createState() => _PlantFormPageState();
 }
 
-class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
+class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageMixin {
   bool _initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
-    // Initialize provider only once
+
+    // Initialize SOLID state manager only once
     if (!_initialized) {
       _initialized = true;
-      final provider = provider_pkg.Provider.of<PlantFormProvider>(context, listen: false);
-      
-      // Initialize provider data
+      final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+
+      // Initialize form data
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           if (widget.plantId != null) {
-            provider.initializeForEdit(widget.plantId!);
+            formManager.loadPlant(widget.plantId!);
           } else {
-            provider.initializeForAdd();
+            formManager.initializeForNewPlant();
           }
         }
       });
@@ -70,14 +71,15 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
           icon: const Icon(Icons.close),
         ),
         actions: [
-          provider_pkg.Consumer<PlantFormProvider>(
-            builder: (context, provider, child) {
-              if (provider.isLoading) return const SizedBox.shrink();
+          Consumer(
+            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              final formState = ref.watch(solidPlantFormStateProvider);
+              if (formState.isLoading) return const SizedBox.shrink();
 
               return SaveButton(
                 onSave: () => _savePlant(context),
                 text: 'Salvar',
-                enabled: provider.isValid && !provider.isSaving,
+                enabled: formState.canSave && !formState.isSaving,
                 onSuccess: () {
                   // Success handled in _savePlant method
                 },
@@ -90,72 +92,75 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
         ],
       ),
       body: ResponsiveLayout(
-        child: provider_pkg.Consumer<PlantFormProvider>(
-          builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return Center(
+        child: Consumer(
+          builder: (BuildContext context, WidgetRef ref, Widget? child) {
+            final formState = ref.watch(solidPlantFormStateProvider);
+            if (formState.isLoading) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SkeletonShapes.rectangularImage(height: 200, width: 200),
+                    const SizedBox(height: 24),
+                    SkeletonShapes.text(height: 20, width: 150),
+                    const SizedBox(height: 12),
+                    SkeletonShapes.text(height: 16, width: 200),
+                    const SizedBox(height: 24),
+                    ...List.generate(
+                      3,
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: SkeletonShapes.listTile(),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (formState.hasError) {
+              return ErrorRecovery(
+                errorMessage:
+                    isEditing
+                        ? 'Erro ao carregar dados da planta: ${formState.errorMessage}'
+                        : 'Erro ao inicializar formulário: ${formState.errorMessage}',
+                onRetry: () {
+                  final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+                  formManager.clearError();
+                  if (widget.plantId != null) {
+                    formManager.loadPlant(widget.plantId!);
+                  } else {
+                    formManager.initializeForNewPlant();
+                  }
+                },
+                onDismiss: () => context.pop(),
+                style: ErrorRecoveryStyle.card,
+                showRetryButton: true,
+                showDismissButton: true,
+                retryText: 'Tentar Novamente',
+                dismissText: 'Voltar',
+              );
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(8),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SkeletonShapes.rectangularImage(
-                    height: 200,
-                    width: 200,
-                  ),
-                  const SizedBox(height: 24),
-                  SkeletonShapes.text(height: 20, width: 150),
-                  const SizedBox(height: 12),
-                  SkeletonShapes.text(height: 16, width: 200),
-                  const SizedBox(height: 24),
-                  ...List.generate(3, (index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: SkeletonShapes.listTile(),
-                  )),
+                  // Informações Básicas
+                  _buildSectionTitle('Informações Básicas'),
+                  const PlantFormBasicInfo(),
+
+                  const SizedBox(height: 32),
+
+                  // Configurações de Cuidado
+                  _buildSectionTitle('Configurações de Cuidado'),
+                  const PlantFormCareConfig(),
+
+                  const SizedBox(height: 32),
                 ],
               ),
             );
-          }
-
-          if (provider.hasError) {
-            return ErrorRecovery(
-              errorMessage: isEditing 
-                  ? 'Erro ao carregar dados da planta: ${provider.errorMessage}'
-                  : 'Erro ao inicializar formulário: ${provider.errorMessage}',
-              onRetry: () {
-                provider.clearError();
-                if (widget.plantId != null) {
-                  provider.initializeForEdit(widget.plantId!);
-                } else {
-                  provider.initializeForAdd();
-                }
-              },
-              onDismiss: () => context.pop(),
-              style: ErrorRecoveryStyle.card,
-              showRetryButton: true,
-              showDismissButton: true,
-              retryText: 'Tentar Novamente',
-              dismissText: 'Voltar',
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Informações Básicas
-                _buildSectionTitle('Informações Básicas'),
-                const PlantFormBasicInfo(),
-
-                const SizedBox(height: 32),
-
-                // Configurações de Cuidado
-                _buildSectionTitle('Configurações de Cuidado'),
-                const PlantFormCareConfig(),
-
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
           },
         ),
       ),
@@ -178,47 +183,42 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
   }
 
   Future<void> _savePlant(BuildContext context) async {
-    final provider = provider_pkg.Provider.of<PlantFormProvider>(context, listen: false);
-    final plantName = provider.name.trim();
-    
+    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formState = ref.read(solidPlantFormStateProvider);
+    final plantName = formState.name.trim();
+
     // Start contextual loading
     startSaveLoading(itemName: plantName.isNotEmpty ? plantName : 'planta');
-    
-    try {
-      final success = await provider.savePlant();
 
-      if (mounted) {
-        // Stop loading
-        stopSaveLoading();
-        
-        if (success) {
-          if (kDebugMode) {
-            print('🔄 PlantFormPage._savePlant() - Atualizando lista de plantas via Riverpod');
+    try {
+      final success = await formManager.savePlant();
+
+      if (!mounted) return;
+
+      // Stop loading
+      stopSaveLoading();
+
+      if (success) {
+        if (kDebugMode) {
+          print(
+            '🔄 PlantFormPage._savePlant() - Atualizando lista de plantas via Riverpod',
+          );
+        }
+
+        // Atualizar lista de plantas via Riverpod
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
           }
-          
-          // CORRIGIDO: Atualizar tanto Provider quanto Riverpod durante a migração
-          try {
-            // Tentar atualizar Provider (para compatibilidade com código antigo)
-            final plantsProvider = provider_pkg.Provider.of<PlantsProvider>(context, listen: false);
-            await plantsProvider.refreshPlants();
-          } catch (e) {
-            if (kDebugMode) {
-              print('⚠️ PlantFormPage._savePlant() - Provider não encontrado (normal durante migração): $e');
-            }
-          }
-          
-          // PRINCIPAL: Atualizar Riverpod (sistema atual)
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              final container = ProviderScope.containerOf(context);
-              container.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
-            }
-          });
-          
-          if (kDebugMode) {
-            print('✅ PlantFormPage._savePlant() - Lista atualizada via Riverpod, navegando de volta');
-          }
-          
+        });
+
+        if (kDebugMode) {
+          print(
+            '✅ PlantFormPage._savePlant() - Lista atualizada via Riverpod, navegando de volta',
+          );
+        }
+
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -238,12 +238,14 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
               behavior: SnackBarBehavior.floating,
             ),
           );
-          
+
           // Call the onSaved callback if provided
           widget.onSaved?.call();
-          
+
           context.pop();
-        } else {
+        }
+      } else {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -251,7 +253,9 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
                   const Icon(Icons.error, color: Colors.white),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(provider.errorMessage ?? 'Erro ao salvar planta'),
+                    child: Text(
+                      formState.errorMessage ?? 'Erro ao salvar planta',
+                    ),
                   ),
                 ],
               ),
@@ -270,9 +274,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
               children: [
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Erro inesperado ao salvar planta: $e'),
-                ),
+                Expanded(child: Text('Erro inesperado ao salvar planta: $e')),
               ],
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
@@ -287,45 +289,46 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
   }
 
   Future<void> _handleBackPressed(BuildContext context) async {
-    final provider = provider_pkg.Provider.of<PlantFormProvider>(context, listen: false);
-    
+    final formState = ref.read(solidPlantFormStateProvider);
+
     // Use comprehensive change detection instead of just checking name
-    final hasChanges = provider.hasUnsavedChanges;
+    final hasChanges = _hasUnsavedChanges(formState);
 
     if (hasChanges) {
       final shouldDiscard = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Descartar alterações?'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Você tem alterações não salvas que serão perdidas:',
-                style: TextStyle(fontWeight: FontWeight.w500),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Descartar alterações?'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Você tem alterações não salvas que serão perdidas:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 12),
+                  ..._buildChangesList(formState),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Deseja realmente sair sem salvar?',
+                    style: TextStyle(fontWeight: FontWeight.w400),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              ..._buildChangesList(provider),
-              const SizedBox(height: 16),
-              const Text(
-                'Deseja realmente sair sem salvar?',
-                style: TextStyle(fontWeight: FontWeight.w400),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Descartar'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Descartar'),
-            ),
-          ],
-        ),
       );
 
       if (shouldDiscard == true && mounted) {
@@ -336,77 +339,102 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
     }
   }
 
+  /// Check if there are unsaved changes in the form
+  bool _hasUnsavedChanges(PlantFormState formState) {
+    // Basic info changes
+    if (formState.name.trim().isNotEmpty) return true;
+    if (formState.species.trim().isNotEmpty) return true;
+    if (formState.spaceId != null) return true;
+    if (formState.notes.trim().isNotEmpty) return true;
+    if (formState.plantingDate != null) return true;
+    if (formState.imageUrls.isNotEmpty) return true;
+
+    // Care configuration changes
+    if (formState.enableWateringCare == true || formState.wateringIntervalDays != null) return true;
+    if (formState.enableFertilizerCare == true || formState.fertilizingIntervalDays != null) return true;
+    if (formState.enableSunlightCare == true) return true;
+    if (formState.enablePestInspection == true) return true;
+    if (formState.enablePruning == true) return true;
+    if (formState.enableReplanting == true) return true;
+
+    return false;
+  }
+
   /// Builds a list of changes to show user what they would lose
-  List<Widget> _buildChangesList(PlantFormProvider provider) {
+  List<Widget> _buildChangesList(PlantFormState formState) {
     final changes = <String>[];
     final theme = Theme.of(context);
-    
+
     // Check what data would be lost
-    if (provider.name.trim().isNotEmpty) {
+    if (formState.name.trim().isNotEmpty) {
       changes.add('Nome da planta');
     }
-    if (provider.species.trim().isNotEmpty) {
+    if (formState.species.trim().isNotEmpty) {
       changes.add('Espécie');
     }
-    if (provider.spaceId != null) {
+    if (formState.spaceId != null) {
       changes.add('Espaço selecionado');
     }
-    if (provider.notes.trim().isNotEmpty) {
+    if (formState.notes.trim().isNotEmpty) {
       changes.add('Observações');
     }
-    if (provider.plantingDate != null) {
+    if (formState.plantingDate != null) {
       changes.add('Data de plantio');
     }
-    if (provider.imageUrls.isNotEmpty) {
-      changes.add('Foto${provider.imageUrls.length > 1 ? 's' : ''} da planta');
+    if (formState.imageUrls.isNotEmpty) {
+      changes.add('Foto${formState.imageUrls.length > 1 ? 's' : ''} da planta');
     }
-    
+
     // Care configurations
-    if (provider.enableWateringCare == true || provider.wateringIntervalDays != null) {
+    if (formState.enableWateringCare == true ||
+        formState.wateringIntervalDays != null) {
       changes.add('Configuração de rega');
     }
-    if (provider.enableFertilizerCare == true || provider.fertilizingIntervalDays != null) {
+    if (formState.enableFertilizerCare == true ||
+        formState.fertilizingIntervalDays != null) {
       changes.add('Configuração de adubo');
     }
-    if (provider.enableSunlightCare == true) {
+    if (formState.enableSunlightCare == true) {
       changes.add('Configuração de luz solar');
     }
-    if (provider.enablePestInspection == true) {
+    if (formState.enablePestInspection == true) {
       changes.add('Configuração de verificação de pragas');
     }
-    if (provider.enablePruning == true) {
+    if (formState.enablePruning == true) {
       changes.add('Configuração de poda');
     }
-    if (provider.enableReplanting == true) {
+    if (formState.enableReplanting == true) {
       changes.add('Configuração de replantio');
     }
-    
+
     // Limit to show maximum 4 changes + "and X more" to avoid overwhelming dialog
     final displayChanges = changes.take(4).toList();
     final remainingCount = changes.length - displayChanges.length;
-    
+
     return [
-      ...displayChanges.map((change) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          children: [
-            Icon(
-              Icons.circle,
-              size: 6,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                change,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+      ...displayChanges.map(
+        (change) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [
+              Icon(
+                Icons.circle,
+                size: 6,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  change,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      )),
+      ),
       if (remainingCount > 0)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 2),

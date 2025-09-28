@@ -332,7 +332,9 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
       return await _enhancedService.updatePlantNotificationSchedule(
         plantId: plantId,
         careType: careType,
-        newDate: DateTime.now().subtract(const Duration(days: 1)), // Cancel by setting to past
+        newDate: DateTime.now().subtract(
+          const Duration(days: 1),
+        ), // Cancel by setting to past
       );
     } else {
       return await _legacyService!.cancelPlantNotification(plantId, careType);
@@ -367,28 +369,44 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
   }
 
   @override
-  Future<List<PendingNotificationEntity>> getPlantNotifications(String plantId) async {
+  Future<List<PendingNotificationEntity>> getPlantNotifications(
+    String plantId,
+  ) async {
     if (_useEnhancedFramework) {
       // Convert ScheduledNotification to PendingNotificationEntity for compatibility
-      final scheduledNotifications = await _enhancedService.getPlantNotifications(plantId);
+      final scheduledNotifications = await _enhancedService
+          .getPlantNotifications(plantId);
 
-      return scheduledNotifications.map((scheduled) => PendingNotificationEntity(
-        id: scheduled.id,
-        title: scheduled.title,
-        body: scheduled.body,
-        payload: jsonEncode(scheduled.data),
-      )).toList();
+      return scheduledNotifications
+          .map(
+            (scheduled) => PendingNotificationEntity(
+              id: scheduled.id,
+              title: scheduled.title,
+              body: scheduled.body,
+              payload: jsonEncode(scheduled.data),
+            ),
+          )
+          .toList();
     } else {
       return await _legacyService!.getPlantNotifications(plantId);
     }
   }
 
   @override
-  Future<bool> isPlantNotificationScheduled(String plantId, String careType) async {
+  Future<bool> isPlantNotificationScheduled(
+    String plantId,
+    String careType,
+  ) async {
     if (_useEnhancedFramework) {
-      return await _enhancedService.isPlantNotificationScheduled(plantId, careType);
+      return await _enhancedService.isPlantNotificationScheduled(
+        plantId,
+        careType,
+      );
     } else {
-      return await _legacyService!.isPlantNotificationScheduled(plantId, careType);
+      return await _legacyService!.isPlantNotificationScheduled(
+        plantId,
+        careType,
+      );
     }
   }
 
@@ -401,12 +419,16 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
       await _legacyService!.initialize();
     }
 
-    final result = await _enhancedService.migrateFromLegacyService(_legacyService!);
+    final result = await _enhancedService.migrateFromLegacyService(
+      _legacyService!,
+    );
 
     if (result.isSuccessful) {
       _useEnhancedFramework = true;
       if (kDebugMode) {
-        debugPrint('✅ Successfully migrated to Enhanced Framework: ${result.summary}');
+        debugPrint(
+          '✅ Successfully migrated to Enhanced Framework: ${result.summary}',
+        );
       }
     } else {
       if (kDebugMode) {
@@ -423,7 +445,9 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
   /// Gets enhanced analytics (only available with enhanced framework)
   Future<NotificationAnalytics?> getAnalytics({DateRange? dateRange}) async {
     if (_useEnhancedFramework) {
-      return await _enhancedService.getPlantNotificationAnalytics(dateRange: dateRange);
+      return await _enhancedService.getPlantNotificationAnalytics(
+        dateRange: dateRange,
+      );
     }
     return null;
   }
@@ -483,7 +507,9 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
   dynamic noSuchMethod(Invocation invocation) {
     // Log attempted access to unknown methods/properties
     if (kDebugMode) {
-      debugPrint('⚠️ Attempted to access ${invocation.memberName} on PlantisNotificationServiceV2');
+      debugPrint(
+        '⚠️ Attempted to access ${invocation.memberName} on PlantisNotificationServiceV2',
+      );
       debugPrint('   This might be legacy code accessing private fields.');
     }
 
@@ -508,20 +534,21 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
       // In practice, you'd need to expose this through the enhanced service
       throw UnimplementedError(
         'Direct access to _notificationService is not supported in Enhanced Framework. '
-        'Use the public API methods instead.'
+        'Use the public API methods instead.',
       );
     } else {
       // Access through public interface instead of private field
       throw UnimplementedError(
         'Direct access to internal notification service is deprecated. '
-        'Use the public API methods instead.'
+        'Use the public API methods instead.',
       );
     }
   }
 }
 
 // Extension methods for easier migration
-extension PlantisNotificationServiceV2Extensions on PlantisNotificationServiceV2 {
+extension PlantisNotificationServiceV2Extensions
+    on PlantisNotificationServiceV2 {
   /// Automatically migrates to enhanced framework if not already using it
   Future<bool> autoMigrate() async {
     if (!isUsingEnhancedFramework) {

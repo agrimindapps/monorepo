@@ -26,10 +26,12 @@ class PremiumSubscriptionPage extends StatefulWidget {
   const PremiumSubscriptionPage({super.key});
 
   @override
-  State<PremiumSubscriptionPage> createState() => _PremiumSubscriptionPageState();
+  State<PremiumSubscriptionPage> createState() =>
+      _PremiumSubscriptionPageState();
 }
 
-class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with LoadingPageMixin {
+class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage>
+    with LoadingPageMixin {
   String? _selectedPlanId;
 
   @override
@@ -56,9 +58,9 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  PlantisColors.primary,        // Verde Plantis principal
-                  PlantisColors.primaryDark,    // Verde escuro
-                  PlantisColors.leaf,           // Verde folha
+                  PlantisColors.primary, // Verde Plantis principal
+                  PlantisColors.primaryDark, // Verde escuro
+                  PlantisColors.leaf, // Verde folha
                 ],
               ),
             ),
@@ -70,9 +72,10 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
 
                   // Conteúdo principal
                   Expanded(
-                    child: provider.isLoading
-                        ? _buildLoadingView()
-                        : provider.isPremium
+                    child:
+                        provider.isLoading
+                            ? _buildLoadingView()
+                            : provider.isPremium
                             ? _buildActiveSubscriptionView(provider)
                             : _buildPlansView(provider),
                   ),
@@ -102,10 +105,7 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(
-              Icons.close,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.close, color: Colors.white),
           ),
         ],
       ),
@@ -229,9 +229,7 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -283,10 +281,10 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
 
     try {
       final success = await provider.purchaseProduct(_selectedPlanId!);
-      
+
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
-        
+
         if (success) {
           _showSuccessSnackBar('Bem-vindo ao Premium Plantis! 🌱');
         }
@@ -308,10 +306,10 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> with 
 
     try {
       final success = await provider.restorePurchases();
-      
+
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
-        
+
         if (success && provider.isPremium) {
           _showSuccessSnackBar('Compras restauradas com sucesso!');
         } else if (success) {

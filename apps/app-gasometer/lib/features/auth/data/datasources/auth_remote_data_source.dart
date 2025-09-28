@@ -42,7 +42,6 @@ abstract class AuthRemoteDataSource {
 
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-
   AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore);
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;

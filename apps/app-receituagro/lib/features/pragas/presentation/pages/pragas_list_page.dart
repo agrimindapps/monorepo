@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 
 import '../providers/pragas_provider.dart';
 

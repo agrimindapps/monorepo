@@ -114,9 +114,11 @@ class DetalhePragaProvider extends ChangeNotifier {
 
   /// Initialize usando ID da praga para melhor precisão
   Future<void> initializeById(String pragaId) async {
+    debugPrint('🔍 [PRAGA] Inicializando por ID: $pragaId');
     _setLoading(true);
     try {
       // Buscar praga pelo ID
+      debugPrint('🔍 [PRAGA] Buscando todas as pragas...');
       final allPragasResult = await _pragasRepository.getAll();
       allPragasResult.fold(
         (failure) {
@@ -124,9 +126,11 @@ class DetalhePragaProvider extends ChangeNotifier {
           _pragaData = null;
         },
         (allPragas) {
+          debugPrint('🔍 [PRAGA] Pragas encontradas: ${allPragas.length}');
           final matchingPragas = allPragas
               .where((PragasHive p) => p.idReg == pragaId || p.objectId == pragaId);
           _pragaData = matchingPragas.isNotEmpty ? matchingPragas.first : null;
+          debugPrint('🔍 [PRAGA] Pragas correspondentes: ${matchingPragas.length}');
         },
       );
     
@@ -174,7 +178,7 @@ class DetalhePragaProvider extends ChangeNotifier {
     try {
       _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
     } catch (e) {
-      // Fallback para repository direto em caso de erro
+      // Fallback para repository direto em caso de erro - usando mesmo tipo
       _isFavorited = await _favoritosRepository.isFavorito('pragas', itemId);
     }
     
@@ -216,7 +220,7 @@ class DetalhePragaProvider extends ChangeNotifier {
     try {
       _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
     } catch (e) {
-      // Fallback para repository direto em caso de erro  
+      // Fallback para repository direto em caso de erro - usando mesmo tipo
       _isFavorited = await _favoritosRepository.isFavorito('pragas', itemId);
     }
     
@@ -360,6 +364,11 @@ class DetalhePragaProvider extends ChangeNotifier {
     
     // Usa ID único do repositório se disponível, senão fallback para nome
     final itemId = _pragaData?.idReg ?? _pragaName;
+    
+    debugPrint('🔄 [FAVORITO] Iniciando toggle favorito');
+    debugPrint('🔄 [FAVORITO] wasAlreadyFavorited: $wasAlreadyFavorited');
+    debugPrint('🔄 [FAVORITO] itemId: $itemId');
+    debugPrint('🔄 [FAVORITO] pragaName: $_pragaName');
 
     // Atualiza UI imediatamente
     _isFavorited = !wasAlreadyFavorited;
@@ -367,20 +376,25 @@ class DetalhePragaProvider extends ChangeNotifier {
 
     try {
       // Usa o sistema simplificado de favoritos
+      debugPrint('🔄 [FAVORITO] Chamando favoritosProvider.toggleFavorito...');
       final success = await _favoritosProvider.toggleFavorito('praga', itemId);
+      debugPrint('🔄 [FAVORITO] Resultado do provider: $success');
 
       if (!success) {
         // Revert on failure
+        debugPrint('❌ [FAVORITO] Provider falhou, revertendo estado');
         _isFavorited = wasAlreadyFavorited;
         _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
         notifyListeners();
         return false;
       }
 
+      debugPrint('✅ [FAVORITO] Provider teve sucesso');
       _errorMessage = null;
       return true;
     } catch (e) {
       // Fallback para sistema antigo em caso de erro
+      debugPrint('❌ [FAVORITO] Provider falhou, tentando fallback repository: $e');
       try {
         final itemData = {
           'nome': _pragaData?.nomeComum ?? _pragaName,
@@ -388,21 +402,26 @@ class DetalhePragaProvider extends ChangeNotifier {
           'idReg': itemId,
         };
 
+        debugPrint('🔄 [FAVORITO] Chamando repository direto...');
         final success = wasAlreadyFavorited
             ? await _favoritosRepository.removeFavorito('pragas', itemId)
             : await _favoritosRepository.addFavorito('pragas', itemId, itemData);
+        debugPrint('🔄 [FAVORITO] Resultado do repository: $success');
 
         if (!success) {
+          debugPrint('❌ [FAVORITO] Repository também falhou, revertendo estado');
           _isFavorited = wasAlreadyFavorited;
           _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
           notifyListeners();
           return false;
         }
 
+        debugPrint('✅ [FAVORITO] Repository teve sucesso');
         _errorMessage = null;
         return true;
       } catch (fallbackError) {
         // Revert on error
+        debugPrint('❌ [FAVORITO] Fallback repository também falhou: $fallbackError');
         _isFavorited = wasAlreadyFavorited;
         _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
         notifyListeners();

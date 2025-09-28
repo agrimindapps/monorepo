@@ -92,14 +92,23 @@ class ReceitaAgroNavigationService {
     String? defensivoId,
     Map<String, dynamic>? extraData,
   }) async {
+    debugPrint('=== RECEITA AGRO NAVIGATION SERVICE ===');
+    debugPrint('Navegando para: /detalhe-defensivo');
+    debugPrint('Defensivo Name: $defensivoName');
+    debugPrint('Defensivo ID: $defensivoId');
+    debugPrint('Extra Data: $extraData');
+    
+    final arguments = {
+      'defensivoName': defensivoName,
+      if (defensivoId != null) 'defensivoId': defensivoId,
+      ...?extraData,
+    };
+    debugPrint('Arguments: $arguments');
+    
     await _coreService.navigateTo(
-      '/defensivo-detail',
+      '/detalhe-defensivo',
       pageType: AgriculturalPageType.detalheDefensivo.value,
-      arguments: {
-        'defensivoName': defensivoName,
-        if (defensivoId != null) 'defensivoId': defensivoId,
-        ...?extraData,
-      },
+      arguments: arguments,
     );
   }
 

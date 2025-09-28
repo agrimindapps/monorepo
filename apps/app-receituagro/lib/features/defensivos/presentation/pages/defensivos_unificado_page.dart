@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:core/core.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -410,11 +409,17 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   void _navegarParaDetalhes(DefensivoEntity defensivo) {
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    debugPrint('=== NAVEGANDO PARA DETALHES ===');
+    debugPrint('Defensivo: ${defensivo.displayName}');
+    debugPrint('Fabricante: ${defensivo.fabricante}');
 
-    navigationService.navigateToDetalheDefensivo(
-      defensivoName: defensivo.displayName,
-      extraData: {'fabricante': defensivo.fabricante},
+    // Navegação direta sem usar o service para debug
+    Navigator.of(context).pushNamed(
+      '/detalhe-defensivo',
+      arguments: {
+        'defensivoName': defensivo.displayName,
+        'fabricante': defensivo.fabricante ?? '',
+      },
     );
   }
 

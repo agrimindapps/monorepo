@@ -17,18 +17,9 @@ dependencies:
   # Core Package - Serviços compartilhados (Firebase, Riverpod, Hive, GetIt, Injectable, Provider, dartz, equatable, etc.)
   core:
     path: ../../packages/core
-  
-  # Provider for state management (selectors)
-  provider: ^6.1.2
-
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-
-  
-  # Integration Testing
-  integration_test:
     sdk: flutter
 
 flutter:

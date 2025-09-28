@@ -250,6 +250,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
@@ -276,38 +277,35 @@ class EstatisticasCulturaWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           
-          Row(
+          // Usar Column em vez de Row com Expanded para evitar constraint issues
+          Column(
             children: [
-              Expanded(
-                child: _buildDropdownFiltro(
-                  theme: theme,
-                  label: 'Ordenar por',
-                  valor: ordenacao,
-                  opcoes: const {
-                    'ameaca': 'Nível de Ameaça',
-                    'nome': 'Nome da Praga',
-                    'diagnosticos': 'Quantidade Diagnósticos',
-                  },
-                  icon: Icons.sort,
-                  color: Colors.purple,
-                  onChanged: onOrdenacaoChanged,
-                ),
+              _buildDropdownFiltro(
+                theme: theme,
+                label: 'Ordenar por',
+                valor: ordenacao,
+                opcoes: const {
+                  'ameaca': 'Nível de Ameaça',
+                  'nome': 'Nome da Praga',
+                  'diagnosticos': 'Quantidade Diagnósticos',
+                },
+                icon: Icons.sort,
+                color: Colors.purple,
+                onChanged: onOrdenacaoChanged,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildDropdownFiltro(
-                  theme: theme,
-                  label: 'Filtrar por',
-                  valor: filtroTipo,
-                  opcoes: const {
-                    'todos': 'Todas as Pragas',
-                    'criticas': 'Apenas Críticas',
-                    'normais': 'Apenas Normais',
-                  },
-                  icon: Icons.filter_list,
-                  color: Colors.blue,
-                  onChanged: onFiltroTipoChanged,
-                ),
+              const SizedBox(height: 12),
+              _buildDropdownFiltro(
+                theme: theme,
+                label: 'Filtrar por',
+                valor: filtroTipo,
+                opcoes: const {
+                  'todos': 'Todas as Pragas',
+                  'criticas': 'Apenas Críticas',
+                  'normais': 'Apenas Normais',
+                },
+                icon: Icons.filter_list,
+                color: Colors.blue,
+                onChanged: onFiltroTipoChanged,
               ),
             ],
           ),

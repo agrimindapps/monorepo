@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:core/core.dart';
 
 import '../../features/defensivos/home_defensivos_page.dart';
 import '../../features/defensivos/presentation/pages/defensivos_unificado_page.dart';
+import '../../features/defensivos/presentation/providers/defensivos_unificado_provider.dart';
 import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
+import '../../features/pragas/lista_pragas_page.dart';
+import '../../features/pragas/detalhe_praga_page.dart';
+import '../../features/culturas/lista_culturas_page.dart';
 import '../../features/subscription/presentation/pages/subscription_clean_page.dart';
+import '../di/injection_container.dart';
 
 /// Classe responsável por gerenciar o roteamento da aplicação
 /// Implementa padrão Clean Architecture para navegação
@@ -21,19 +27,46 @@ class AppRouter {
         );
 
       case '/defensivos':
+        final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => const HomeDefensivosPage(),
+          builder: (_) => ChangeNotifierProvider<DefensivosUnificadoProvider>(
+            create: (_) => sl<DefensivosUnificadoProvider>(),
+            child: DefensivosUnificadoPage(
+              tipoAgrupamento: args?['categoria'] as String?,
+              textoFiltro: args?['textoFiltro'] as String?,
+              modoCompleto: true, // Lista completa de defensivos
+              isAgrupados: false, // Lista simples, não agrupada
+            ),
+          ),
           settings: settings,
         );
 
       case '/defensivos-unificado':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => DefensivosUnificadoPage(
-            tipoAgrupamento: args?['tipoAgrupamento'] as String?,
-            textoFiltro: args?['textoFiltro'] as String?,
-            modoCompleto: args?['modoCompleto'] as bool? ?? false,
-            isAgrupados: args?['isAgrupados'] as bool? ?? false,
+          builder: (_) => ChangeNotifierProvider<DefensivosUnificadoProvider>(
+            create: (_) => sl<DefensivosUnificadoProvider>(),
+            child: DefensivosUnificadoPage(
+              tipoAgrupamento: args?['tipoAgrupamento'] as String?,
+              textoFiltro: args?['textoFiltro'] as String?,
+              modoCompleto: args?['modoCompleto'] as bool? ?? false,
+              isAgrupados: args?['isAgrupados'] as bool? ?? false,
+            ),
+          ),
+          settings: settings,
+        );
+
+      case '/defensivos-agrupados':
+        final args = arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ChangeNotifierProvider<DefensivosUnificadoProvider>(
+            create: (_) => sl<DefensivosUnificadoProvider>(),
+            child: DefensivosUnificadoPage(
+              tipoAgrupamento: args?['tipoAgrupamento'] as String?,
+              textoFiltro: args?['textoFiltro'] as String?,
+              modoCompleto: args?['modoCompleto'] as bool? ?? false,
+              isAgrupados: true, // Força modo agrupado
+            ),
           ),
           settings: settings,
         );
@@ -51,6 +84,32 @@ class AppRouter {
       case '/subscription':
         return MaterialPageRoute(
           builder: (_) => const SubscriptionCleanPage(),
+          settings: settings,
+        );
+
+      case '/pragas':
+        final args = arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ListaPragasPage(
+            pragaType: args?['categoria'] as String?,
+          ),
+          settings: settings,
+        );
+
+      case '/culturas':
+        return MaterialPageRoute(
+          builder: (_) => const ListaCulturasPage(),
+          settings: settings,
+        );
+
+      case '/praga-detail':
+        final args = arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => DetalhePragaPage(
+            pragaName: args?['pragaName'] as String? ?? '',
+            pragaId: args?['pragaId'] as String?,
+            pragaScientificName: args?['pragaScientificName'] as String? ?? '',
+          ),
           settings: settings,
         );
 

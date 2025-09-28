@@ -11,47 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados (Firebase, Riverpod, Hive, GetIt, Injectable, Provider, dartz, equatable, etc.)
+  # Core Package - Serviços compartilhados (Firebase, Riverpod, etc.)
   core:
     path: ../../packages/core
 
-
-  provider: any
-  flutter_secure_storage: any
-  cloud_firestore: any
-  connectivity_plus: any
-  device_info_plus: any
-  firebase_auth: any
-  get_it: any
-  injectable: any
-  shared_preferences: any
-  firebase_analytics: any
-  firebase_crashlytics: any
-  flutter_riverpod: any
-  hive_flutter: any
-  intl: any
-  hive: any
-  equatable: any
-  image_picker: any
-  collection: any
-  dartz: any
-  uuid: any
-  image: any
-  permission_handler: any
-  firebase_storage: any
-  path: any
-  go_router: any
-  path_provider: any
-  flutter_staggered_grid_view: any
-  rxdart: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
-  # Code Generation  
-  build_runner: ^2.4.13
-  injectable_generator: ^2.6.2
-
 
 # The following section is specific to Flutter packages.
 flutter:

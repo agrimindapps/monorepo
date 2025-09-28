@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide Provider;
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider_pkg;
 
+import '../../../../core/riverpod_providers/plants_providers.dart' as riverpod_plants;
 import '../../../../core/theme/plantis_colors.dart';
-
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../providers/plant_form_provider.dart';
@@ -32,7 +32,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
     // Initialize provider only once
     if (!_initialized) {
       _initialized = true;
-      final provider = Provider.of<PlantFormProvider>(context, listen: false);
+      final provider = provider_pkg.Provider.of<PlantFormProvider>(context, listen: false);
       
       // Initialize provider data
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -70,7 +70,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
           icon: const Icon(Icons.close),
         ),
         actions: [
-          Consumer<PlantFormProvider>(
+          provider_pkg.Consumer<PlantFormProvider>(
             builder: (context, provider, child) {
               if (provider.isLoading) return const SizedBox.shrink();
 
@@ -90,7 +90,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
         ],
       ),
       body: ResponsiveLayout(
-        child: Consumer<PlantFormProvider>(
+        child: provider_pkg.Consumer<PlantFormProvider>(
           builder: (context, provider, child) {
           if (provider.isLoading) {
             return Center(
@@ -178,7 +178,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
   }
 
   Future<void> _savePlant(BuildContext context) async {
-    final provider = Provider.of<PlantFormProvider>(context, listen: false);
+    final provider = provider_pkg.Provider.of<PlantFormProvider>(context, listen: false);
     final plantName = provider.name.trim();
     
     // Start contextual loading
@@ -193,15 +193,30 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
         
         if (success) {
           if (kDebugMode) {
-            print('🔄 PlantFormPage._savePlant() - Atualizando lista de plantas');
+            print('🔄 PlantFormPage._savePlant() - Atualizando lista de plantas via Riverpod');
           }
           
-          // Atualizar a lista de plantas antes de navegar
-          final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-          await plantsProvider.refreshPlants();
+          // CORRIGIDO: Atualizar tanto Provider quanto Riverpod durante a migração
+          try {
+            // Tentar atualizar Provider (para compatibilidade com código antigo)
+            final plantsProvider = provider_pkg.Provider.of<PlantsProvider>(context, listen: false);
+            await plantsProvider.refreshPlants();
+          } catch (e) {
+            if (kDebugMode) {
+              print('⚠️ PlantFormPage._savePlant() - Provider não encontrado (normal durante migração): $e');
+            }
+          }
+          
+          // PRINCIPAL: Atualizar Riverpod (sistema atual)
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final container = ProviderScope.containerOf(context);
+              container.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
+            }
+          });
           
           if (kDebugMode) {
-            print('✅ PlantFormPage._savePlant() - Lista atualizada, navegando de volta');
+            print('✅ PlantFormPage._savePlant() - Lista atualizada via Riverpod, navegando de volta');
           }
           
           ScaffoldMessenger.of(context).showSnackBar(
@@ -272,7 +287,7 @@ class _PlantFormPageState extends State<PlantFormPage> with LoadingPageMixin {
   }
 
   Future<void> _handleBackPressed(BuildContext context) async {
-    final provider = Provider.of<PlantFormProvider>(context, listen: false);
+    final provider = provider_pkg.Provider.of<PlantFormProvider>(context, listen: false);
     
     // Use comprehensive change detection instead of just checking name
     final hasChanges = provider.hasUnsavedChanges;

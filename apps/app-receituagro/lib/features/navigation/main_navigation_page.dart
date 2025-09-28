@@ -20,19 +20,11 @@ class MainNavigationPage extends StatefulWidget {
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentBottomNavIndex = 0;
-  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
     _currentBottomNavIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -86,13 +78,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     setState(() {
       _currentBottomNavIndex = index;
     });
-
-    // Anima para a página selecionada
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
 
     // Recarrega favoritos quando a tab for selecionada
     if (index == 2) { // Index 2 é a página de favoritos

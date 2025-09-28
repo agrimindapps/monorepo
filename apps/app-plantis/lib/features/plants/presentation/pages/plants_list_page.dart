@@ -218,16 +218,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
     }
   }
 
-  Future<void> _navigateToAddPlant(BuildContext context) async {
-    // TODO: Migrate PlantFormDialog to Riverpod
-    // For now, showing a simple dialog until PlantFormDialog is migrated
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade de adicionar planta será migrada para Riverpod em breve'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -465,7 +455,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> with RouteAware
                 isSearching: displayData.isSearching,
                 searchQuery: displayData.searchQuery,
                 onClearSearch: () => _onSearchChanged(''),
-                onAddPlant: () => _navigateToAddPlant(context),
+                // onAddPlant removido - botão não será exibido
               );
             }
 

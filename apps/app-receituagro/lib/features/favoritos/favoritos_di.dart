@@ -33,7 +33,7 @@ class FavoritosDI {
     );
 
     // 3. Provider simplificado (usa repository diretamente, sem use cases)
-    _getIt.registerFactory<FavoritosProviderSimplified>(
+    _getIt.registerLazySingleton<FavoritosProviderSimplified>(
       () => FavoritosProviderSimplified(
         repository: _getIt<FavoritosRepositorySimplified>(),
       ),

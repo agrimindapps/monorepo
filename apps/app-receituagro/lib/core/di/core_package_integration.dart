@@ -38,6 +38,22 @@ class CorePackageIntegration {
 
   /// Register Core Package repositories (primary integration layer)
   static Future<void> _registerCoreRepositories() async {
+    // Hive Manager from Core Package (essential for Hive repositories)
+    try {
+      final hiveManager = core.HiveManager.instance;
+      _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
+      
+      // Initialize the HiveManager
+      final initResult = await hiveManager.initialize('receituagro');
+      if (!initResult.isError) {
+        if (kDebugMode) print('✅ Core Package: Hive Manager registered and initialized');
+      } else {
+        if (kDebugMode) print('❌ Core Package: Hive Manager initialization failed - ${initResult.error}');
+      }
+    } catch (e) {
+      if (kDebugMode) print('IHiveManager registration failed: $e');
+    }
+    
     // Enhanced Storage Service from Core Package (advanced features)
     try {
       _sl.registerLazySingleton<core.EnhancedStorageService>(
@@ -325,6 +341,22 @@ class CorePackageIntegration {
 
   /// Register only auth services from Core Package
   static Future<void> _registerAuthServices() async {
+    // Hive Manager from Core Package (essential for Hive repositories)
+    try {
+      final hiveManager = core.HiveManager.instance;
+      _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
+      
+      // Initialize the HiveManager
+      final initResult = await hiveManager.initialize('receituagro');
+      if (!initResult.isError) {
+        if (kDebugMode) print('✅ Core Package: Hive Manager registered and initialized');
+      } else {
+        if (kDebugMode) print('❌ Core Package: Hive Manager initialization failed - ${initResult.error}');
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ Core Package: Hive Manager registration failed - $e');
+    }
+    
     // Firebase Auth Service
     try {
       _sl.registerLazySingleton<core.IAuthRepository>(
@@ -357,6 +389,29 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('❌ Core Package: Firebase Crashlytics Service registration failed - $e');
     }
+
+    // ReceitaAgro Enhanced Analytics Provider (this provides the ReceitaAgroAnalyticsService alias)
+    try {
+      _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
+        () => ReceitaAgroEnhancedAnalyticsProvider(
+          analyticsRepository: _sl<core.IAnalyticsRepository>(),
+          crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
+        ),
+      );
+      if (kDebugMode) print('✅ ReceitaAgro: Enhanced Analytics Provider registered');
+    } catch (e) {
+      if (kDebugMode) print('❌ ReceitaAgro: Enhanced Analytics Provider registration failed - $e');
+    }
+
+    // Register the alias for backward compatibility
+    try {
+      _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+        () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
+      );
+      if (kDebugMode) print('✅ ReceitaAgro: Analytics Service alias registered');
+    } catch (e) {
+      if (kDebugMode) print('❌ ReceitaAgro: Analytics Service alias registration failed - $e');
+    }
   }
 
   /// Register ReceitaAgro-specific auth services
@@ -379,19 +434,8 @@ class CorePackageIntegration {
       rethrow; // Re-throw to see the actual error
     }
 
-    // Register alias for backward compatibility - Always register
-    try {
-      if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
-        _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-          () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
-        );
-        if (kDebugMode) print('✅ ReceitaAgroAnalyticsService registered successfully');
-      } else {
-        if (kDebugMode) print('⚠️ ReceitaAgroAnalyticsService already registered');
-      }
-    } catch (e) {
-      if (kDebugMode) print('❌ ReceitaAgroAnalyticsService registration failed: $e');
-    }
+    // Note: ReceitaAgroAnalyticsService is now registered in _registerAnalyticsServices()
+    // No need for alias registration here
 
     // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)
     if (!_sl.isRegistered<ReceitaAgroAuthProvider>()) {

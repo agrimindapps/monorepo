@@ -111,6 +111,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
             ],
               const SizedBox(height: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildChip(
                     theme, 

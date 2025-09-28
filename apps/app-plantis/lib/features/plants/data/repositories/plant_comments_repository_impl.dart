@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
+import '../../../../core/plantis_sync_config.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
 /// Implementation of PlantCommentsRepository using the unified sync system
@@ -10,60 +10,147 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
   PlantCommentsRepositoryImpl();
 
+  /// Ensure sync system is properly initialized for comments
+  Future<void> _ensureSyncInitialized() async {
+    try {
+      await PlantisSyncConfig.configure();
+    } catch (e) {
+      // Log error but don't fail - will fallback to empty data
+      print('Warning: Failed to initialize sync for comments: $e');
+    }
+  }
+
   @override
   Future<Either<Failure, List<ComentarioModel>>> getCommentsForPlant(String plantId) async {
-    // Use UnifiedSyncManager to find all comments and filter locally
-    final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(_appName);
-    
-    return result.fold(
-      (failure) => Left(failure),
-      (comments) {
-        // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
-        final filteredComments = comments
-            .where((comment) => !comment.isDeleted && comment.plantId == plantId)
-            .toList()
-          ..sort((a, b) => (b.dataCriacao ?? DateTime.now())
-              .compareTo(a.dataCriacao ?? DateTime.now()));
-        
-        return Right(filteredComments);
-      },
-    );
+    try {
+      // Use UnifiedSyncManager to find all comments and filter locally
+      final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(_appName);
+      
+      return result.fold(
+        (failure) async {
+          // If failure is because sync not initialized, try to initialize
+          if (failure.message.contains('No sync repository found') || 
+              failure.message.contains('not initialized')) {
+            await _ensureSyncInitialized();
+            // Try again after initialization
+            final retryResult = await UnifiedSyncManager.instance.findAll<ComentarioModel>(_appName);
+            return retryResult.fold(
+              (retryFailure) => Left(retryFailure),
+              (comments) {
+                final filteredComments = comments
+                    .where((comment) => !comment.isDeleted && comment.plantId == plantId)
+                    .toList()
+                  ..sort((a, b) => (b.dataCriacao ?? DateTime.now())
+                      .compareTo(a.dataCriacao ?? DateTime.now()));
+                return Right(filteredComments);
+              },
+            );
+          }
+          return Left(failure);
+        },
+        (comments) {
+          // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
+          final filteredComments = comments
+              .where((comment) => !comment.isDeleted && comment.plantId == plantId)
+              .toList()
+            ..sort((a, b) => (b.dataCriacao ?? DateTime.now())
+                .compareTo(a.dataCriacao ?? DateTime.now()));
+          
+          return Right(filteredComments);
+        },
+      );
+    } catch (e) {
+      // Fallback: return empty list if sync not available
+      return const Right([]);
+    }
   }
 
   @override
   Future<Either<Failure, ComentarioModel>> addComment(String plantId, String content) async {
-    // Create new comment with plant association
-    final comment = ComentarioModel.create(
-      conteudo: content,
-      plantId: plantId,
-    );
+    try {
+      // Create new comment with plant association
+      final comment = ComentarioModel.create(
+        conteudo: content,
+        plantId: plantId,
+      );
 
-    final result = await UnifiedSyncManager.instance.create<ComentarioModel>(_appName, comment);
-    
-    return result.fold(
-      (failure) => Left(failure),
-      (commentId) => Right(comment),
-    );
+      final result = await UnifiedSyncManager.instance.create<ComentarioModel>(_appName, comment);
+      
+      return result.fold(
+        (failure) async {
+          // If failure is because sync not initialized, try to initialize
+          if (failure.message.contains('No sync repository found') || 
+              failure.message.contains('not initialized')) {
+            await _ensureSyncInitialized();
+            // Try again after initialization
+            final retryResult = await UnifiedSyncManager.instance.create<ComentarioModel>(_appName, comment);
+            return retryResult.fold(
+              (retryFailure) => Left(retryFailure),
+              (commentId) => Right(comment),
+            );
+          }
+          return Left(failure);
+        },
+        (commentId) => Right(comment),
+      );
+    } catch (e) {
+      return Left(CacheFailure('Failed to add comment: $e'));
+    }
   }
 
   @override
   Future<Either<Failure, ComentarioModel>> updateComment(ComentarioModel comment) async {
-    // Update comment with new timestamp
-    final updatedComment = comment.copyWith(
-      dataAtualizacao: DateTime.now(),
-    );
-    
-    final result = await UnifiedSyncManager.instance.update<ComentarioModel>(_appName, comment.id, updatedComment);
-    
-    return result.fold(
-      (failure) => Left(failure),
-      (_) => Right(updatedComment),
-    );
+    try {
+      // Update comment with new timestamp
+      final updatedComment = comment.copyWith(
+        dataAtualizacao: DateTime.now(),
+      );
+      
+      final result = await UnifiedSyncManager.instance.update<ComentarioModel>(_appName, comment.id, updatedComment);
+      
+      return result.fold(
+        (failure) async {
+          // If failure is because sync not initialized, try to initialize
+          if (failure.message.contains('No sync repository found') || 
+              failure.message.contains('not initialized')) {
+            await _ensureSyncInitialized();
+            // Try again after initialization
+            final retryResult = await UnifiedSyncManager.instance.update<ComentarioModel>(_appName, comment.id, updatedComment);
+            return retryResult.fold(
+              (retryFailure) => Left(retryFailure),
+              (_) => Right(updatedComment),
+            );
+          }
+          return Left(failure);
+        },
+        (_) => Right(updatedComment),
+      );
+    } catch (e) {
+      return Left(CacheFailure('Failed to update comment: $e'));
+    }
   }
 
   @override
   Future<Either<Failure, void>> deleteComment(String commentId) async {
-    return await UnifiedSyncManager.instance.delete<ComentarioModel>(_appName, commentId);
+    try {
+      final result = await UnifiedSyncManager.instance.delete<ComentarioModel>(_appName, commentId);
+      
+      return result.fold(
+        (failure) async {
+          // If failure is because sync not initialized, try to initialize
+          if (failure.message.contains('No sync repository found') || 
+              failure.message.contains('not initialized')) {
+            await _ensureSyncInitialized();
+            // Try again after initialization
+            return await UnifiedSyncManager.instance.delete<ComentarioModel>(_appName, commentId);
+          }
+          return Left(failure);
+        },
+        (success) => Right(success),
+      );
+    } catch (e) {
+      return Left(CacheFailure('Failed to delete comment: $e'));
+    }
   }
 
   @override

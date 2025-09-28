@@ -590,10 +590,6 @@ posix
 3.0
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/posix-6.0.3/
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/posix-6.0.3/lib/
-process
-3.3
-file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/process-5.0.3/
-file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/process-5.0.3/lib/
 provider
 2.12
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/provider-6.1.5/
@@ -710,10 +706,6 @@ string_scanner
 3.1
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/string_scanner-1.4.1/
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/string_scanner-1.4.1/lib/
-sync_http
-2.12
-file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/sync_http-0.3.1/
-file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/sync_http-0.3.1/lib/
 synchronized
 3.7
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/synchronized-3.3.1/
@@ -782,10 +774,6 @@ web
 3.4
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/web-1.1.1/
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/web-1.1.1/lib/
-webdriver
-3.1
-file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/webdriver-3.1.0/
-file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/webdriver-3.1.0/lib/
 win32
 3.7
 file:///Users/agrimindsolucoes/.pub-cache/hosted/pub.dev/win32-5.13.0/
@@ -818,10 +806,6 @@ flutter
 3.7
 file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter/
 file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter/lib/
-flutter_driver
-3.7
-file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter_driver/
-file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter_driver/lib/
 flutter_localizations
 3.7
 file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter_localizations/
@@ -834,12 +818,4 @@ flutter_web_plugins
 3.7
 file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter_web_plugins/
 file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/flutter_web_plugins/lib/
-fuchsia_remote_debug_protocol
-3.7
-file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/fuchsia_remote_debug_protocol/
-file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/fuchsia_remote_debug_protocol/lib/
-integration_test
-3.7
-file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/integration_test/
-file:///opt/homebrew/Caskroom/flutter/3.32.5/flutter/packages/integration_test/lib/
 2

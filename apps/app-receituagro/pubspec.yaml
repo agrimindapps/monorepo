@@ -14,33 +14,6 @@ dependencies:
 
   core:
     path: ../../packages/core
-  
-  # State Management
-  provider: ^6.1.5
-  
-  # Utils
-  collection: ^1.18.0
-  
-  # HTTP client
-  http: ^1.2.2
-  
-  # Device info
-  device_info_plus: ^11.1.0
-  
-  # Cryptography
-  crypto: ^3.0.5
-  
-  # Secure storage
-  flutter_secure_storage: ^9.2.2
-  
-  # Firebase messaging (required by core models)
-  firebase_messaging: ^16.0.0
-  
-  # Package info
-  package_info_plus: ^8.0.2
-  
-  # Local notifications
-  flutter_local_notifications: ^19.4.0
 
 flutter:
   uses-material-design: true

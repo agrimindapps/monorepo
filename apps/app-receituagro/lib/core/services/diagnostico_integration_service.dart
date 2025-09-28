@@ -192,27 +192,77 @@ class DiagnosticoIntegrationService {
     }
   }
 
-  /// Obtém pragas por cultura com diagnósticos relacionados
+  /// Obtém pragas por cultura com diagnósticos relacionados (OTIMIZADO)
   Future<List<PragaPorCultura>> getPragasPorCultura(String culturaId) async {
     try {
-      // Buscar diagnósticos da cultura
-      final diagnosticos = await buscarPorCultura(culturaId);
+      print('=== OTIMIZADO: Carregando pragas para cultura $culturaId ===');
       
-      // Agrupar por praga
-      final Map<String, List<DiagnosticoDetalhado>> pragasMap = {};
+      // 1. Buscar APENAS os diagnósticos básicos da cultura (sem join completo)
+      final diagnosticosBrutos = await _diagnosticoRepo.findByCultura(culturaId);
+      print('Encontrados ${diagnosticosBrutos.length} diagnósticos básicos');
       
-      for (final diagnostico in diagnosticos) {
-        final pragaId = diagnostico.diagnostico.fkIdPraga;
-        if (!pragasMap.containsKey(pragaId)) {
-          pragasMap[pragaId] = [];
+      if (diagnosticosBrutos.isEmpty) return [];
+      
+      // 2. Coletar IDs únicos que precisamos buscar
+      final pragaIds = diagnosticosBrutos.map((d) => d.fkIdPraga).toSet();
+      final defensivoIds = diagnosticosBrutos.map((d) => d.fkIdDefensivo).toSet();
+      print('IDs únicos - Pragas: ${pragaIds.length}, Defensivos: ${defensivoIds.length}');
+      
+      // 3. Carregar em lote todas as pragas e defensivos necessários
+      final pragasMap = <String, PragasHive>{};
+      final defensivosMap = <String, FitossanitarioHive>{};
+      
+      // Carregar pragas em cache
+      for (final pragaId in pragaIds) {
+        if (!_pragaCache.containsKey(pragaId)) {
+          final result = await _pragasRepo.getByKey(pragaId);
+          if (result.isSuccess && result.data != null) {
+            _pragaCache[pragaId] = result.data!;
+          }
         }
-        pragasMap[pragaId]!.add(diagnostico);
+        if (_pragaCache.containsKey(pragaId)) {
+          pragasMap[pragaId] = _pragaCache[pragaId]!;
+        }
+      }
+      
+      // Carregar defensivos em cache
+      for (final defensivoId in defensivoIds) {
+        if (!_defensivoCache.containsKey(defensivoId)) {
+          final result = await _fitossanitarioRepo.getByKey(defensivoId);
+          if (result.isSuccess && result.data != null) {
+            _defensivoCache[defensivoId] = result.data!;
+          }
+        }
+        if (_defensivoCache.containsKey(defensivoId)) {
+          defensivosMap[defensivoId] = _defensivoCache[defensivoId]!;
+        }
+      }
+      
+      // 4. Agrupar diagnósticos por praga e criar objetos DetalhadorS
+      final Map<String, List<DiagnosticoDetalhado>> pragasMapDetalhado = {};
+      
+      for (final diagnostico in diagnosticosBrutos) {
+        final pragaId = diagnostico.fkIdPraga;
+        if (!pragasMapDetalhado.containsKey(pragaId)) {
+          pragasMapDetalhado[pragaId] = [];
+        }
+        
+        // Criar DiagnosticoDetalhado apenas com dados já carregados
+        final diagnosticoDetalhado = DiagnosticoDetalhado(
+          diagnostico: diagnostico,
+          defensivo: defensivosMap[diagnostico.fkIdDefensivo],
+          cultura: _culturaCache[culturaId], // já deveria estar em cache
+          praga: pragasMap[pragaId],
+          infoDefensivo: null, // Por performance, não carregar info adicional aqui
+        );
+        
+        pragasMapDetalhado[pragaId]!.add(diagnosticoDetalhado);
       }
 
-      // Converter para resultado
+      // 5. Converter para resultado final
       final List<PragaPorCultura> pragasPorCultura = [];
-      for (final entry in pragasMap.entries) {
-        final praga = await _getPragaById(entry.key);
+      for (final entry in pragasMapDetalhado.entries) {
+        final praga = pragasMap[entry.key];
         if (praga != null) {
           pragasPorCultura.add(PragaPorCultura(
             praga: praga,
@@ -220,10 +270,11 @@ class DiagnosticoIntegrationService {
           ));
         }
       }
-
+      
+      print('Criadas ${pragasPorCultura.length} pragas por cultura');
       return pragasPorCultura;
     } catch (e) {
-      // TODO: Implement proper logging
+      print('Erro otimizado ao carregar pragas: $e');
       return [];
     }
   }

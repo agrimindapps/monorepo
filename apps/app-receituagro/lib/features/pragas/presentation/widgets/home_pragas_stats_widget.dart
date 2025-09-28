@@ -327,21 +327,29 @@ class HomePragasStatsWidget extends StatelessWidget {
   }
 
   void _navigateToCategory(BuildContext context, String category) {
+    debugPrint('=== NAVEGAÇÃO HOME PRAGAS ===');
+    debugPrint('Categoria: $category');
+    
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     switch (category) {
       case 'culturas':
+        debugPrint('Navegando para: Lista de Culturas');
         navigationService.navigateToListaCulturas();
         break;
       case 'insetos':
+        debugPrint('Navegando para: Lista de Pragas (Insetos)');
         navigationService.navigateToListaPragas(categoria: '1');
         break;
       case 'doencas':
+        debugPrint('Navegando para: Lista de Pragas (Doenças)');
         navigationService.navigateToListaPragas(categoria: '2');
         break;
       case 'plantas':
+        debugPrint('Navegando para: Lista de Pragas (Plantas)');
         navigationService.navigateToListaPragas(categoria: '3');
         break;
       default:
+        debugPrint('Navegando para: Lista de Pragas (Default)');
         navigationService.navigateToListaPragas();
     }
   }

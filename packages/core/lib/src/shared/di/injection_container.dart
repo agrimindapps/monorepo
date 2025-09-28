@@ -23,6 +23,14 @@ import '../../shared/config/environment_config.dart';
 import '../../../repositories/license_repository.dart';
 import '../../../repositories/license_local_storage.dart';
 import '../../../services/license_service.dart';
+import '../../sync/interfaces/i_cache_manager.dart';
+import '../../sync/interfaces/i_network_monitor.dart';
+import '../../sync/interfaces/i_sync_orchestrator.dart';
+import '../../sync/implementations/cache_manager_impl.dart';
+import '../../sync/implementations/network_monitor_impl.dart';
+import '../../sync/implementations/sync_orchestrator_impl.dart';
+import '../../sync/factories/sync_service_factory.dart';
+import '../../sync/config/sync_feature_flags.dart';
 
 /// Global service locator instance
 final GetIt getIt = GetIt.instance;
@@ -100,11 +108,74 @@ class InjectionContainer {
           getIt<IAnalyticsRepository>(),
         ),
       );
+
+      // 7. New SOLID Sync Services (with feature flags)
+      _registerSyncServices();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('[InjectionContainer] Initialization failed: $e');
       }
       rethrow;
+    }
+  }
+
+  /// Registers the new SOLID sync services with feature flag support
+  ///
+  /// Only registers services if their corresponding feature flags are enabled
+  static void _registerSyncServices() {
+    final flags = SyncFeatureFlags.instance;
+    
+    if (kDebugMode) {
+      debugPrint('[InjectionContainer] Sync feature flags: ${flags.getDebugInfo()}');
+    }
+    
+    // Cache Manager
+    if (flags.useNewCacheManager) {
+      getIt.registerLazySingleton<ICacheManager>(
+        () => CacheManagerImpl(),
+      );
+      
+      if (kDebugMode) {
+        debugPrint('[InjectionContainer] Registered new CacheManager');
+      }
+    }
+    
+    // Network Monitor
+    if (flags.useNewNetworkMonitor) {
+      getIt.registerLazySingleton<INetworkMonitor>(
+        () => NetworkMonitorImpl(),
+      );
+      
+      if (kDebugMode) {
+        debugPrint('[InjectionContainer] Registered new NetworkMonitor');
+      }
+    }
+    
+    // Sync Service Factory
+    if (flags.useNewSyncServiceFactory) {
+      getIt.registerLazySingleton<SyncServiceFactory>(
+        () => SyncServiceFactory.instance,
+      );
+      
+      if (kDebugMode) {
+        debugPrint('[InjectionContainer] Registered SyncServiceFactory');
+      }
+    }
+    
+    // Sync Orchestrator (depends on Cache and Network Monitor)
+    if (flags.useNewSyncOrchestrator && 
+        flags.useNewCacheManager && 
+        flags.useNewNetworkMonitor) {
+      getIt.registerLazySingleton<ISyncOrchestrator>(
+        () => SyncOrchestratorImpl(
+          cacheManager: getIt<ICacheManager>(),
+          networkMonitor: getIt<INetworkMonitor>(),
+        ),
+      );
+      
+      if (kDebugMode) {
+        debugPrint('[InjectionContainer] Registered new SyncOrchestrator');
+      }
     }
   }
 

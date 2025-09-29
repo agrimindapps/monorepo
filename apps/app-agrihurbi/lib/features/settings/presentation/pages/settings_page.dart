@@ -627,7 +627,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showResetDialog(SettingsProvider provider) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resetar Configurações'),
@@ -667,7 +667,7 @@ class _SettingsPageState extends State<SettingsPage> {
       minute: int.parse(notifications.quietHoursEnd.split(':')[1]),
     );
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(

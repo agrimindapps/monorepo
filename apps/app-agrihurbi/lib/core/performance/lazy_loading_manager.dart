@@ -1,71 +1,133 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 
-/// Gerenciador de lazy loading para otimização de performance
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// === LAZY LOADING STATE ===
+
+/// State para gerenciamento de lazy loading
+class LazyLoadingState {
+  const LazyLoadingState({
+    this.lazyCache = const {},
+    this.loadingFutures = const {},
+    this.loadedKeys = const {},
+  });
+
+  final Map<String, dynamic> lazyCache;
+  final Map<String, Future<dynamic>> loadingFutures;
+  final Set<String> loadedKeys;
+
+  LazyLoadingState copyWith({
+    Map<String, dynamic>? lazyCache,
+    Map<String, Future<dynamic>>? loadingFutures,
+    Set<String>? loadedKeys,
+  }) {
+    return LazyLoadingState(
+      lazyCache: lazyCache ?? this.lazyCache,
+      loadingFutures: loadingFutures ?? this.loadingFutures,
+      loadedKeys: loadedKeys ?? this.loadedKeys,
+    );
+  }
+
+  /// Obtém estatísticas do cache
+  Map<String, dynamic> get cacheStats {
+    return {
+      'total_registered': lazyCache.length,
+      'loaded': loadedKeys.length,
+      'loading': loadingFutures.length,
+      'memory_usage_kb': _estimateMemoryUsage(),
+    };
+  }
+
+  /// Estima o uso de memória do cache
+  double _estimateMemoryUsage() {
+    // Estimativa simples baseada no número de instâncias
+    return loadedKeys.length * 0.5; // 0.5KB por instância (estimativa)
+  }
+}
+
+// === LAZY LOADING NOTIFIER ===
+
+/// StateNotifier para gerenciamento de lazy loading
 /// 
 /// Implementa estratégias de carregamento preguiçoso para:
 /// - Providers
 /// - Datasets grandes
 /// - Componentes pesados
 /// - Cálculos complexos
-class LazyLoadingManager extends ChangeNotifier {
-  static final LazyLoadingManager _instance = LazyLoadingManager._internal();
-  factory LazyLoadingManager() => _instance;
-  LazyLoadingManager._internal();
-
-  // Cache de instâncias lazy
-  final Map<String, dynamic> _lazyCache = {};
-  final Map<String, Future<dynamic>> _loadingFutures = {};
-  final Set<String> _loadedKeys = {};
+class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
+  LazyLoadingNotifier() : super(const LazyLoadingState());
 
   /// Registra um provider para lazy loading
   void registerProvider<T>(String key, T Function() factory) {
-    if (!_lazyCache.containsKey(key)) {
-      _lazyCache[key] = factory;
+    if (!state.lazyCache.containsKey(key)) {
+      final newCache = Map<String, dynamic>.from(state.lazyCache);
+      newCache[key] = factory;
+      state = state.copyWith(lazyCache: newCache);
     }
   }
 
   /// Obtém um provider com lazy loading
   Future<T> getProvider<T>(String key) async {
     // Se já foi carregado, retorna imediatamente
-    if (_loadedKeys.contains(key)) {
-      return _lazyCache[key] as T;
+    if (state.loadedKeys.contains(key)) {
+      return state.lazyCache[key] as T;
     }
 
     // Se está sendo carregado, aguarda o carregamento
-    if (_loadingFutures.containsKey(key)) {
-      return await _loadingFutures[key] as T;
+    if (state.loadingFutures.containsKey(key)) {
+      return await state.loadingFutures[key] as T;
     }
 
     // Inicia o carregamento
     final completer = Completer<T>();
-    _loadingFutures[key] = completer.future;
+    final newLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+    newLoadingFutures[key] = completer.future;
+    state = state.copyWith(loadingFutures: newLoadingFutures);
 
     try {
-      final factory = _lazyCache[key] as T Function();
+      final factory = state.lazyCache[key] as T Function();
       final instance = factory();
       
-      _lazyCache[key] = instance;
-      _loadedKeys.add(key);
+      final newCache = Map<String, dynamic>.from(state.lazyCache);
+      newCache[key] = instance;
       
+      final newLoadedKeys = Set<String>.from(state.loadedKeys);
+      newLoadedKeys.add(key);
+      
+      final finalLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+      // Ignore unawaited_futures para remove() que retorna Future?
+      // ignore: unawaited_futures
+      finalLoadingFutures.remove(key);
+      
+      state = state.copyWith(
+        lazyCache: newCache,
+        loadedKeys: newLoadedKeys,
+        loadingFutures: finalLoadingFutures,
+      );
+      
+      // Evitar warning unawaited_futures - completer é síncrono
+      // ignore: unawaited_futures
       completer.complete(instance);
-      _loadingFutures.remove(key);
-      
-      // Use unawaited to indicate intentional fire-and-forget
-      notifyListeners();
       return instance;
     } catch (error) {
-      _loadingFutures.remove(key);
+      final errorLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+      // Ignore unawaited_futures para remove() que retorna Future?
+      // ignore: unawaited_futures
+      errorLoadingFutures.remove(key);
+      state = state.copyWith(loadingFutures: errorLoadingFutures);
+      
+      // Evitar warning unawaited_futures - completer é síncrono
+      // ignore: unawaited_futures
       completer.completeError(error);
       rethrow;
     }
   }
 
   /// Verifica se um provider está carregado
-  bool isLoaded(String key) => _loadedKeys.contains(key);
+  bool isLoaded(String key) => state.loadedKeys.contains(key);
 
   /// Verifica se um provider está sendo carregado
-  bool isLoading(String key) => _loadingFutures.containsKey(key);
+  bool isLoading(String key) => state.loadingFutures.containsKey(key);
 
   /// Pré-carrega providers com prioridade
   Future<void> preloadProviders(List<String> keys, {int? priority}) async {
@@ -80,54 +142,67 @@ class LazyLoadingManager extends ChangeNotifier {
 
   /// Remove um provider do cache (para economizar memória)
   void unloadProvider(String key) {
-    _lazyCache.remove(key);
-    _loadedKeys.remove(key);
-    _loadingFutures.remove(key);
-    notifyListeners();
+    final newCache = Map<String, dynamic>.from(state.lazyCache);
+    newCache.remove(key);
+    
+    final newLoadedKeys = Set<String>.from(state.loadedKeys);
+    newLoadedKeys.remove(key);
+    
+    final newLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+    newLoadingFutures.remove(key);
+    
+    state = state.copyWith(
+      lazyCache: newCache,
+      loadedKeys: newLoadedKeys,
+      loadingFutures: newLoadingFutures,
+    );
   }
 
   /// Limpa todo o cache
   void clearCache() {
-    _lazyCache.clear();
-    _loadedKeys.clear();
-    _loadingFutures.clear();
-    notifyListeners();
+    state = const LazyLoadingState();
   }
 
   /// Obtém estatísticas do cache
-  Map<String, dynamic> getCacheStats() {
-    return {
-      'total_registered': _lazyCache.length,
-      'loaded': _loadedKeys.length,
-      'loading': _loadingFutures.length,
-      'memory_usage_kb': _estimateMemoryUsage(),
-    };
-  }
-
-  /// Estima o uso de memória do cache
-  double _estimateMemoryUsage() {
-    // Estimativa simples baseada no número de instâncias
-    return _loadedKeys.length * 0.5; // 0.5KB por instância (estimativa)
-  }
+  Map<String, dynamic> getCacheStats() => state.cacheStats;
 }
+
+// === LAZY LOADING PROVIDERS ===
+
+/// Provider para lazy loading
+final lazyLoadingProvider = StateNotifierProvider<LazyLoadingNotifier, LazyLoadingState>((ref) {
+  return LazyLoadingNotifier();
+});
+
+/// Provider derivado para estatísticas do cache
+final lazyLoadingStatsProvider = Provider<Map<String, dynamic>>((ref) {
+  return ref.watch(lazyLoadingProvider).cacheStats;
+});
+
+// === LAZY LOADING MIXIN ===
 
 /// Mixin para facilitar o uso de lazy loading
 mixin LazyLoadingMixin {
-  final LazyLoadingManager _lazyManager = LazyLoadingManager();
+  late final WidgetRef _ref;
+
+  /// Inicializa o mixin com a referência do widget
+  void initLazyLoading(WidgetRef ref) {
+    _ref = ref;
+  }
 
   /// Carrega um provider de forma lazy
   Future<P> loadProvider<P>(String key) {
-    return _lazyManager.getProvider<P>(key);
+    return _ref.read(lazyLoadingProvider.notifier).getProvider<P>(key);
   }
 
   /// Verifica se um provider está carregado
   bool isProviderLoaded(String key) {
-    return _lazyManager.isLoaded(key);
+    return _ref.read(lazyLoadingProvider.notifier).isLoaded(key);
   }
 
   /// Verifica se um provider está sendo carregado
   bool isProviderLoading(String key) {
-    return _lazyManager.isLoading(key);
+    return _ref.read(lazyLoadingProvider.notifier).isLoading(key);
   }
 
   /// Limpa recursos do lazy loading
@@ -141,23 +216,27 @@ mixin LazyLoadingMixin {
 class LazyProvider<T> {
   final String key;
   final T Function() _factory;
-  final LazyLoadingManager _manager = LazyLoadingManager();
+  late final WidgetRef _ref;
 
-  LazyProvider(this.key, this._factory) {
-    _manager.registerProvider<T>(key, _factory);
+  LazyProvider(this.key, this._factory);
+
+  /// Inicializa com a referência do provider
+  void init(WidgetRef ref) {
+    _ref = ref;
+    _ref.read(lazyLoadingProvider.notifier).registerProvider<T>(key, _factory);
   }
 
   /// Obtém a instância (carrega se necessário)
-  Future<T> get instance => _manager.getProvider<T>(key);
+  Future<T> get instance => _ref.read(lazyLoadingProvider.notifier).getProvider<T>(key);
 
   /// Verifica se está carregado
-  bool get isLoaded => _manager.isLoaded(key);
+  bool get isLoaded => _ref.read(lazyLoadingProvider.notifier).isLoaded(key);
 
   /// Verifica se está carregando
-  bool get isLoading => _manager.isLoading(key);
+  bool get isLoading => _ref.read(lazyLoadingProvider.notifier).isLoading(key);
 
   /// Descarrega da memória
-  void unload() => _manager.unloadProvider(key);
+  void unload() => _ref.read(lazyLoadingProvider.notifier).unloadProvider(key);
 }
 
 /// Extensão para facilitar o uso do lazy loading

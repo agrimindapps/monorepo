@@ -1,13 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:core/core.dart' as core;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app.dart';
 // Import Hive adapters - these include the generated adapters from .g.dart files
@@ -21,6 +17,11 @@ import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_boxes_setup.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
+
+// Provider local para SharedPreferences do app-plantis
+final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences must be overridden at app startup');
+});
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -36,9 +37,9 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize Performance Service
-  final performanceService = core.PerformanceService();
+  final performanceService = PerformanceService();
   await performanceService.startPerformanceTracking(
-    config: const core.PerformanceConfig(
+    config: const PerformanceConfig(
       enableFpsMonitoring: true,
       enableMemoryMonitoring: true,
       enableCpuMonitoring: false,
@@ -48,7 +49,7 @@ void main() async {
   await performanceService.markAppStarted();
 
   // Configure Crashlytics (only in production/staging)
-  if (core.EnvironmentConfig.enableAnalytics) {
+  if (EnvironmentConfig.enableAnalytics) {
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
     };
@@ -74,8 +75,8 @@ void main() async {
   Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
 
   // Register License Model adapters (from core package)
-  Hive.registerAdapter(core.LicenseModelAdapter()); // TypeId: 10
-  Hive.registerAdapter(core.LicenseTypeAdapter()); // TypeId: 11
+  Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
+  Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
 
   // Initialize app-specific dependency injection (includes core services)
   await di.init();
@@ -88,7 +89,7 @@ void main() async {
 
   // Initialize unified subscription services (NEW - Simplified)
   final simpleSubscriptionSyncService =
-      di.sl<core.SimpleSubscriptionSyncService>();
+      di.sl<SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
 
   // Initialize notifications
@@ -96,22 +97,25 @@ void main() async {
   await notificationService.initialize();
 
   // Initialize app rating tracking
-  final appRatingService = di.sl<core.IAppRatingRepository>();
+  final appRatingService = di.sl<IAppRatingRepository>();
   await appRatingService.incrementUsageCount();
 
-  // Create ProviderContainer with RiverpodLogger
-  final providerContainer = ProviderContainer();
+  // Initialize SharedPreferences for core providers
+  final prefs = await SharedPreferences.getInstance();
 
   // Run app
-  if (core.EnvironmentConfig.enableAnalytics) {
+  if (EnvironmentConfig.enableAnalytics) {
     // Run app in guarded zone for Crashlytics only in production/staging
     unawaited(
       runZonedGuarded<Future<void>>(
         () async {
           await performanceService.markFirstFrame();
           runApp(
-            UncontrolledProviderScope(
-              container: providerContainer,
+            ProviderScope(
+              overrides: [
+                // Override common providers with app-specific implementations
+                plantisSharedPreferencesProvider.overrideWithValue(prefs),
+              ],
               child: const PlantisApp(),
             ),
           );
@@ -125,8 +129,11 @@ void main() async {
     // Run app normally in development
     await performanceService.markFirstFrame();
     runApp(
-      UncontrolledProviderScope(
-        container: providerContainer,
+      ProviderScope(
+        overrides: [
+          // Override common providers with app-specific implementations
+          plantisSharedPreferencesProvider.overrideWithValue(prefs),
+        ],
         child: const PlantisApp(),
       ),
     );

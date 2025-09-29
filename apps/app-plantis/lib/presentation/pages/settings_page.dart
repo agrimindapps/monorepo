@@ -1,11 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
 
 import '../../core/di/injection_container.dart' as di;
-import '../../core/riverpod_providers/auth_providers.dart';
+import '../../core/riverpod_providers/auth_providers.dart' as auth;
 import '../../core/riverpod_providers/settings_providers.dart';
+import '../../core/riverpod_providers/theme_providers.dart' as theme;
 import '../../core/theme/plantis_colors.dart';
 import '../../core/theme/plantis_design_tokens.dart';
 import '../../features/development/presentation/pages/database_inspector_page.dart';
@@ -25,8 +25,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     with LoadingPageMixin {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final authState = ref.watch(authProvider);
+    final appTheme = Theme.of(context);
+    final authState = ref.watch(auth.authProvider);
     final settingsState = ref.watch(settingsNotifierProvider);
 
     return ContextualLoadingListener(
@@ -58,19 +58,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       ),
                     ),
                     actions: [
-                      provider.Consumer<ThemeProvider>(
-                        builder: (context, themeProvider, _) {
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final themeMode = ref.watch(theme.themeProvider);
                           return Semantics(
                             label: 'Alterar tema',
                             hint:
-                                'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                                'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeMode)}',
                             button: true,
                             onTap:
-                                () => _showThemeDialog(context, themeProvider),
+                                () => _showThemeDialog(context, ref),
                             child: GestureDetector(
                               onTap:
                                   () =>
-                                      _showThemeDialog(context, themeProvider),
+                                      _showThemeDialog(context, ref),
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
@@ -78,9 +79,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
-                                  themeProvider.themeMode == ThemeMode.dark
+                                  themeMode == ThemeMode.dark
                                       ? Icons.brightness_2
-                                      : themeProvider.themeMode ==
+                                      : themeMode ==
                                           ThemeMode.light
                                       ? Icons.brightness_high
                                       : Icons.brightness_auto,
@@ -101,28 +102,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                       children: [
                         // Seção do Usuário
-                        _buildUserSection(context, theme, user, authData),
+                        _buildUserSection(context, appTheme, user, authData),
                         const SizedBox(height: 8),
 
                         // Seção Premium
-                        _buildPremiumSectionCard(context, theme),
+                        _buildPremiumSectionCard(context, appTheme),
                         const SizedBox(height: 8),
 
                         // Seção de Configurações
-                        _buildConfigSection(context, theme, settingsState),
+                        _buildConfigSection(context, appTheme, settingsState),
                         const SizedBox(height: 8),
 
                         // Seção de Suporte
-                        _buildSupportSection(context, theme),
+                        _buildSupportSection(context, appTheme),
                         const SizedBox(height: 8),
 
                         // Seção Sobre (com privacidade e termos)
-                        _buildAboutSection(context, theme),
+                        _buildAboutSection(context, appTheme),
                         const SizedBox(height: 8),
 
                         // Seção de Desenvolvimento (debug only)
                         if (kDebugMode) ...[
-                          _buildDevelopmentSection(context, theme),
+                          _buildDevelopmentSection(context, appTheme),
                           const SizedBox(height: 8),
                         ],
 
@@ -144,7 +145,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     );
   }
 
-  Widget _buildHeader(BuildContext context, ThemeData theme) {
+  Widget _buildHeader(BuildContext context, ThemeData appTheme) {
     return Container(
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(12),
@@ -194,16 +195,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               ],
             ),
           ),
-          provider.Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
+          Consumer(
+            builder: (context, ref, _) {
+              final themeMode = ref.watch(theme.themeProvider);
               return Semantics(
                 label: 'Alterar tema',
                 hint:
-                    'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
+                    'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeMode)}',
                 button: true,
-                onTap: () => _showThemeDialog(context, themeProvider),
+                onTap: () => _showThemeDialog(context, ref),
                 child: GestureDetector(
-                  onTap: () => _showThemeDialog(context, themeProvider),
+                  onTap: () => _showThemeDialog(context, ref),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -211,9 +213,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      themeProvider.themeMode == ThemeMode.dark
+                      themeMode == ThemeMode.dark
                           ? Icons.brightness_2
-                          : themeProvider.themeMode == ThemeMode.light
+                          : themeMode == ThemeMode.light
                           ? Icons.brightness_high
                           : Icons.brightness_auto,
                       color: Colors.white,
@@ -617,7 +619,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     BuildContext context,
     ThemeData theme,
     dynamic user,
-    AuthState authState,
+    dynamic authState,
   ) {
     return PlantisCard(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -1478,7 +1480,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     }
   }
 
-  void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
+  void _showThemeDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder:
@@ -1490,7 +1492,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               children: [
                 _buildThemeOption(
                   context,
-                  themeProvider,
+                  ref,
                   ThemeMode.system,
                   'Automático (Sistema)',
                   'Segue a configuração do sistema',
@@ -1498,7 +1500,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                 ),
                 _buildThemeOption(
                   context,
-                  themeProvider,
+                  ref,
                   ThemeMode.light,
                   'Claro',
                   'Tema claro sempre ativo',
@@ -1506,7 +1508,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                 ),
                 _buildThemeOption(
                   context,
-                  themeProvider,
+                  ref,
                   ThemeMode.dark,
                   'Escuro',
                   'Tema escuro sempre ativo',
@@ -1526,17 +1528,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
   Widget _buildThemeOption(
     BuildContext context,
-    ThemeProvider themeProvider,
+    WidgetRef ref,
     ThemeMode mode,
     String title,
     String subtitle,
     IconData icon,
   ) {
-    final isSelected = themeProvider.themeMode == mode;
+    final currentThemeMode = ref.watch(theme.themeProvider);
+    final isSelected = currentThemeMode == mode;
 
     return InkWell(
       onTap: () {
-        themeProvider.setThemeMode(mode);
+        ref.read(theme.themeNotifierProvider.notifier).setThemeMode(mode);
         Navigator.of(context).pop();
       },
       borderRadius: BorderRadius.circular(12),

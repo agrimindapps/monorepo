@@ -1,4 +1,5 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Provider, StateNotifier, Consumer, ProviderContainer;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart' as app_auth;

@@ -266,7 +266,7 @@ class _MarketsListPageState extends State<MarketsListPage>
 
   /// Show search dialog
   void _showSearchDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Buscar Mercados'),
@@ -407,9 +407,9 @@ class _EmptyStateCard extends StatelessWidget {
   final IconData icon;
 
   const _EmptyStateCard({
-    required this.message,
-    this.subtitle,
-    required this.icon,
+    required message,
+    subtitle,
+    required icon,
   });
 
   @override
@@ -454,8 +454,8 @@ class _ShimmerContainer extends StatelessWidget {
   final double height;
 
   const _ShimmerContainer({
-    required this.width,
-    required this.height,
+    required width,
+    required height,
   });
 
   @override

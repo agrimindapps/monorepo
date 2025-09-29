@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
@@ -69,7 +70,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SubscriptionProvider, FeatureFlagsProvider>(
+    return provider_lib.Consumer2<SubscriptionProvider, FeatureFlagsProvider>(
       builder: (context, subscriptionProvider, featureFlags, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,7 +655,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
       );
       
       if (!mounted) return;
-      final subscriptionProvider = context.read<SubscriptionProvider>();
+      final subscriptionProvider = provider_lib.Provider.of<SubscriptionProvider>(context, listen: false);
       await subscriptionProvider.purchasePlan(_selectedPlanId!);
       
       if (widget.onPurchaseSuccess != null) {

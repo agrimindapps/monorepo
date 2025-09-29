@@ -1,7 +1,4 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart' as core_exceptions;
 import '../../domain/entities/animal_base_entity.dart';
@@ -28,9 +25,9 @@ class LivestockRepositoryImpl implements LivestockRepository {
   final Connectivity _connectivity;
   
   LivestockRepositoryImpl(
-    this._localDataSource,
-    this._remoteDataSource,
-    this._connectivity,
+    _localDataSource,
+    _remoteDataSource,
+    _connectivity,
   );
   
   // === OPERAÇÕES BOVINOS ===

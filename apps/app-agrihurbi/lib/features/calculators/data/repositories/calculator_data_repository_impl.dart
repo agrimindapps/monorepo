@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+
 import '../../domain/repositories/calculator_data_repository.dart';
 
 /// Implementação do repositório de dados das calculadoras

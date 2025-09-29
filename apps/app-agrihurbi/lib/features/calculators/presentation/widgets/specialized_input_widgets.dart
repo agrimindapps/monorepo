@@ -10,10 +10,10 @@ class CoordinateInputWidget extends StatefulWidget {
 
   const CoordinateInputWidget({
     super.key,
-    required this.label,
-    this.value,
-    required this.onChanged,
-    this.required = false,
+    required label,
+    value,
+    required onChanged,
+    required = false,
   });
 
   @override
@@ -142,13 +142,13 @@ class RangeInputWidget extends StatefulWidget {
 
   const RangeInputWidget({
     super.key,
-    required this.label,
-    this.value,
-    required this.onChanged,
-    this.minLimit,
-    this.maxLimit,
-    this.unit,
-    this.required = false,
+    required label,
+    value,
+    required onChanged,
+    minLimit,
+    maxLimit,
+    unit,
+    required = false,
   });
 
   @override
@@ -266,12 +266,12 @@ class MultiSelectionWidget extends StatefulWidget {
 
   const MultiSelectionWidget({
     super.key,
-    required this.label,
-    required this.options,
-    this.selectedValues,
-    required this.onChanged,
-    this.required = false,
-    this.maxSelections,
+    required label,
+    required options,
+    selectedValues,
+    required onChanged,
+    required = false,
+    maxSelections,
   });
 
   @override
@@ -364,14 +364,14 @@ class SliderInputWidget extends StatefulWidget {
 
   const SliderInputWidget({
     super.key,
-    required this.label,
-    this.value,
-    required this.onChanged,
-    required this.min,
-    required this.max,
-    this.divisions,
-    this.unit,
-    this.required = false,
+    required label,
+    value,
+    required onChanged,
+    required min,
+    required max,
+    divisions,
+    unit,
+    required = false,
   });
 
   @override
@@ -493,7 +493,7 @@ class LatLng {
   final double latitude;
   final double longitude;
 
-  LatLng(this.latitude, this.longitude);
+  LatLng(latitude, longitude);
 
   @override
   String toString() => '($latitude, $longitude)';
@@ -503,7 +503,7 @@ class ValueRange {
   final double min;
   final double max;
 
-  ValueRange(this.min, this.max);
+  ValueRange(min, max);
 
   @override
   String toString() => '$min - $max';

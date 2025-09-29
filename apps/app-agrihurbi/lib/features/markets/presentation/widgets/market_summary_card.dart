@@ -11,7 +11,7 @@ class MarketSummaryCard extends StatelessWidget {
 
   const MarketSummaryCard({
     super.key,
-    required this.summary,
+    required summary,
   });
 
   @override

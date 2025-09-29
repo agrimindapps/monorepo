@@ -184,10 +184,10 @@ class SupportedLanguage {
   final bool isSupported;
 
   const SupportedLanguage({
-    required this.code,
-    required this.name,
-    required this.nativeName,
-    this.isSupported = true,
+    required code,
+    required name,
+    required nativeName,
+    isSupported = true,
   });
 }
 
@@ -198,9 +198,9 @@ class BiometricInfo {
   final List<BiometricType> availableTypes;
 
   const BiometricInfo({
-    required this.isAvailable,
-    required this.isEnrolled,
-    required this.availableTypes,
+    required isAvailable,
+    required isEnrolled,
+    required availableTypes,
   });
 }
 
@@ -223,13 +223,13 @@ class BackupInfo {
   final BackupStatus status;
 
   const BackupInfo({
-    required this.id,
-    required this.name,
-    required this.createdAt,
-    required this.sizeBytes,
-    required this.includesImages,
-    required this.storage,
-    required this.status,
+    required id,
+    required name,
+    required createdAt,
+    required sizeBytes,
+    required includesImages,
+    required storage,
+    required status,
   });
 }
 
@@ -250,11 +250,11 @@ class ExportResult {
   final List<DataType> includedTypes;
 
   const ExportResult({
-    required this.filePath,
-    required this.format,
-    required this.sizeBytes,
-    required this.createdAt,
-    required this.includedTypes,
+    required filePath,
+    required format,
+    required sizeBytes,
+    required createdAt,
+    required includedTypes,
   });
 }
 
@@ -268,12 +268,12 @@ class ExportInfo {
   final ExportStatus status;
 
   const ExportInfo({
-    required this.id,
-    required this.fileName,
-    required this.format,
-    required this.createdAt,
-    required this.sizeBytes,
-    required this.status,
+    required id,
+    required fileName,
+    required format,
+    required createdAt,
+    required sizeBytes,
+    required status,
   });
 }
 
@@ -302,9 +302,9 @@ class CacheInfo {
   final DateTime lastCleared;
 
   const CacheInfo({
-    required this.cacheSizes,
-    required this.totalSizeBytes,
-    required this.lastCleared,
+    required cacheSizes,
+    required totalSizeBytes,
+    required lastCleared,
   });
 }
 
@@ -326,11 +326,11 @@ class AppVersionInfo {
   final bool isDebug;
 
   const AppVersionInfo({
-    required this.version,
-    required this.buildNumber,
-    required this.buildDate,
-    required this.gitCommit,
-    required this.isDebug,
+    required version,
+    required buildNumber,
+    required buildDate,
+    required gitCommit,
+    required isDebug,
   });
 }
 
@@ -346,14 +346,14 @@ class DeviceInfo {
   final int availableStorage;
 
   const DeviceInfo({
-    required this.platform,
-    required this.version,
-    required this.model,
-    required this.brand,
-    required this.totalMemory,
-    required this.availableMemory,
-    required this.totalStorage,
-    required this.availableStorage,
+    required platform,
+    required version,
+    required model,
+    required brand,
+    required totalMemory,
+    required availableMemory,
+    required totalStorage,
+    required availableStorage,
   });
 }
 
@@ -366,11 +366,11 @@ class DiagnosticInfo {
   final DateTime generatedAt;
 
   const DiagnosticInfo({
-    required this.appVersion,
-    required this.deviceInfo,
-    required this.systemMetrics,
-    required this.errorLogs,
-    required this.generatedAt,
+    required appVersion,
+    required deviceInfo,
+    required systemMetrics,
+    required errorLogs,
+    required generatedAt,
   });
 }
 
@@ -381,9 +381,9 @@ class SettingsValidationResult {
   final List<SettingsValidationWarning> warnings;
 
   const SettingsValidationResult({
-    required this.isValid,
-    required this.errors,
-    required this.warnings,
+    required isValid,
+    required errors,
+    required warnings,
   });
 }
 
@@ -394,9 +394,9 @@ class SettingsValidationError {
   final SettingsErrorSeverity severity;
 
   const SettingsValidationError({
-    required this.field,
-    required this.message,
-    required this.severity,
+    required field,
+    required message,
+    required severity,
   });
 }
 
@@ -406,8 +406,8 @@ class SettingsValidationWarning {
   final String message;
 
   const SettingsValidationWarning({
-    required this.field,
-    required this.message,
+    required field,
+    required message,
   });
 }
 

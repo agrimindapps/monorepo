@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../../../features/plants/data/datasources/local/plants_local_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/riverpod_providers/auth_providers.dart';
 // Plants providers now imported from Riverpod - using plants_providers.dart
@@ -214,7 +214,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
       context: context,
       builder:
           (context) => Consumer(
-            builder: (context, ref, _) {
+            builder: (BuildContext context, WidgetRef ref, Widget? _) {
               final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
               return plantsAsync.when(
                 data:
@@ -286,7 +286,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
   Widget build(BuildContext context) {
     // Build UI without blocking for sync - sync happens in background
     return Consumer(
-      builder: (context, ref, _) {
+      builder: (BuildContext context, WidgetRef ref, Widget? _) {
         // Simple auth state monitoring without complex sync logic for now
         // Auth state monitoring and plant data display
 
@@ -301,7 +301,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
                 // Search and filters section
                 Consumer(
-                  builder: (context, ref, child) {
+                  builder: (BuildContext context, WidgetRef ref, Widget? child) {
                     final plantsState = ref.watch(
                       riverpod_plants.plantsProvider,
                     );
@@ -353,7 +353,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
   Widget _buildHeaderWithSyncIndicator(BuildContext context) {
     return Consumer(
-      builder: (context, ref, _) {
+      builder: (BuildContext context, WidgetRef ref, Widget? _) {
         final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
 
         return plantsAsync.when(
@@ -503,7 +503,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
   /// loading state, error state, or hasPlants state actually changes
   Widget _buildOptimizedPlantsContent() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final plantsState = ref.watch(riverpod_plants.plantsProvider);
 
         return plantsState.when(
@@ -559,7 +559,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
   /// This uses Riverpod watch to rebuild only when necessary data changes
   Widget _buildPlantsContent() {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
 
         return plantsAsync.when(
@@ -604,7 +604,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
       case ViewMode.groupedBySpacesGrid:
       case ViewMode.groupedBySpacesList:
         return Consumer(
-          builder: (context, ref, child) {
+          builder: (BuildContext context, WidgetRef ref, Widget? child) {
             final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
             return plantsAsync.when(
               data: (plantsState) {

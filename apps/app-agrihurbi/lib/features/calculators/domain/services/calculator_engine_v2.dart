@@ -345,10 +345,10 @@ class CalculationOptions {
   final FormattingOptions? formattingOptions;
 
   const CalculationOptions({
-    this.performValidation = true,
-    this.allowInvalidInputs = false,
-    this.formatResults = true,
-    this.formattingOptions,
+    performValidation = true,
+    allowInvalidInputs = false,
+    formatResults = true,
+    formattingOptions,
   });
 }
 
@@ -358,9 +358,9 @@ class BatchOptions {
   final Duration? timeout;
 
   const BatchOptions({
-    this.stopOnFirstError = false,
-    this.maxConcurrentCalculations,
-    this.timeout,
+    stopOnFirstError = false,
+    maxConcurrentCalculations,
+    timeout,
   });
 }
 
@@ -372,9 +372,9 @@ class CompleteCalculationResult {
   final EngineError? error;
 
   const CompleteCalculationResult._({
-    required this.isSuccess,
-    this.success,
-    this.error,
+    required isSuccess,
+    success,
+    error,
   });
 
   factory CompleteCalculationResult.success(CompleteCalculationSuccess success) {
@@ -396,13 +396,13 @@ class CompleteCalculationSuccess {
   final CalculationMetadata metadata;
 
   const CompleteCalculationSuccess({
-    required this.strategyId,
-    required this.strategy,
-    required this.rawResult,
-    this.formattedResult,
-    this.validationResult,
-    required this.executionTime,
-    required this.metadata,
+    required strategyId,
+    required strategy,
+    required rawResult,
+    formattedResult,
+    validationResult,
+    required executionTime,
+    required metadata,
   });
 }
 
@@ -416,13 +416,13 @@ class EngineError {
   final Object? exception;
 
   const EngineError({
-    required this.type,
-    required this.message,
-    this.strategyId,
-    required this.phase,
-    this.validationErrors,
-    this.executionError,
-    this.exception,
+    required type,
+    required message,
+    strategyId,
+    required phase,
+    validationErrors,
+    executionError,
+    exception,
   });
 }
 
@@ -433,10 +433,10 @@ class CalculationMetadata {
   final CalculationOptions optionsUsed;
 
   const CalculationMetadata({
-    required this.startTime,
-    required this.endTime,
-    required this.inputsUsed,
-    required this.optionsUsed,
+    required startTime,
+    required endTime,
+    required inputsUsed,
+    required optionsUsed,
   });
 }
 
@@ -447,10 +447,10 @@ class BatchCalculationRequest {
   final CalculationOptions? options;
 
   const BatchCalculationRequest({
-    required this.id,
-    required this.strategyId,
-    required this.inputs,
-    this.options,
+    required id,
+    required strategyId,
+    required inputs,
+    options,
   });
 }
 
@@ -464,13 +464,13 @@ class BatchCalculationResult {
   final BatchMetadata metadata;
 
   const BatchCalculationResult({
-    required this.totalRequests,
-    required this.processedRequests,
-    required this.successCount,
-    required this.errorCount,
-    required this.results,
-    required this.executionTime,
-    required this.metadata,
+    required totalRequests,
+    required processedRequests,
+    required successCount,
+    required errorCount,
+    required results,
+    required executionTime,
+    required metadata,
   });
 
   double get successRate => processedRequests > 0 ? successCount / processedRequests : 0.0;
@@ -484,9 +484,9 @@ class BatchMetadata {
   final BatchOptions options;
 
   const BatchMetadata({
-    required this.startTime,
-    required this.endTime,
-    required this.options,
+    required startTime,
+    required endTime,
+    required options,
   });
 }
 
@@ -498,11 +498,11 @@ class CalculationCompatibilityResult {
   final ICalculatorStrategy? strategy;
 
   const CalculationCompatibilityResult({
-    required this.isCompatible,
-    required this.strategyId,
-    required this.errors,
-    this.warnings,
-    this.strategy,
+    required isCompatible,
+    required strategyId,
+    required errors,
+    warnings,
+    strategy,
   });
 }
 
@@ -512,9 +512,9 @@ class EngineStatistics {
   final Map<String, String> serviceComponents;
 
   const EngineStatistics({
-    required this.totalStrategiesAvailable,
-    required this.registryInitialized,
-    required this.serviceComponents,
+    required totalStrategiesAvailable,
+    required registryInitialized,
+    required serviceComponents,
   });
 }
 
@@ -526,11 +526,11 @@ class EngineHealthCheck {
   final EngineStatistics statistics;
 
   const EngineHealthCheck({
-    required this.isHealthy,
-    required this.issues,
-    required this.warnings,
-    required this.timestamp,
-    required this.statistics,
+    required isHealthy,
+    required issues,
+    required warnings,
+    required timestamp,
+    required statistics,
   });
 }
 

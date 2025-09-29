@@ -19,9 +19,9 @@ class NewsRepositoryImpl implements NewsRepository {
   final NetworkInfo _networkInfo;
 
   const NewsRepositoryImpl(
-    this._remoteDataSource,
-    this._localDataSource,
-    this._networkInfo,
+    _remoteDataSource,
+    _localDataSource,
+    _networkInfo,
   );
 
   // === NEWS ARTICLES ===

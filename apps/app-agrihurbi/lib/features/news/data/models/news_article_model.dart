@@ -46,18 +46,18 @@ class NewsArticleModel extends NewsArticleEntity {
   final int readTimeMinutes;
 
   const NewsArticleModel({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.content,
-    required this.author,
-    required this.sourceUrl,
-    required this.imageUrl,
-    required this.publishedAt,
+    required id,
+    required title,
+    required description,
+    required content,
+    required author,
+    required sourceUrl,
+    required imageUrl,
+    required publishedAt,
     required NewsCategoryModel category,
-    required this.tags,
-    this.isPremium = false,
-    this.readTimeMinutes = 3,
+    required tags,
+    isPremium = false,
+    readTimeMinutes = 3,
   }) : _category = category,
        super(
           id: id,
@@ -148,18 +148,18 @@ class NewsArticleModel extends NewsArticleEntity {
     int? readTimeMinutes,
   }) {
     return NewsArticleModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      content: content ?? this.content,
-      author: author ?? this.author,
-      sourceUrl: sourceUrl ?? this.sourceUrl,
-      imageUrl: imageUrl ?? this.imageUrl,
-      publishedAt: publishedAt ?? this.publishedAt,
-      category: category ?? this._category,
-      tags: tags ?? this.tags,
-      isPremium: isPremium ?? this.isPremium,
-      readTimeMinutes: readTimeMinutes ?? this.readTimeMinutes,
+      id: id ?? id,
+      title: title ?? title,
+      description: description ?? description,
+      content: content ?? content,
+      author: author ?? author,
+      sourceUrl: sourceUrl ?? sourceUrl,
+      imageUrl: imageUrl ?? imageUrl,
+      publishedAt: publishedAt ?? publishedAt,
+      category: category ?? _category,
+      tags: tags ?? tags,
+      isPremium: isPremium ?? isPremium,
+      readTimeMinutes: readTimeMinutes ?? readTimeMinutes,
     );
   }
 }
@@ -300,11 +300,11 @@ class NewsFilterModel {
   final String? searchQuery;
 
   const NewsFilterModel({
-    this.categories = const [],
-    this.showOnlyPremium = false,
-    this.fromDate,
-    this.toDate,
-    this.searchQuery,
+    categories = const [],
+    showOnlyPremium = false,
+    fromDate,
+    toDate,
+    searchQuery,
   });
 
   /// Convert to domain entity

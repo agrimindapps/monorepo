@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 // Package imports
 import 'package:core/core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart' as provider;
 
 // Local imports
 import 'core/di/injection_container.dart' as di;
@@ -15,6 +16,7 @@ import 'core/providers/auth_provider.dart';
 import 'core/providers/feature_flags_provider.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/remote_config_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 import 'core/services/diagnosticos_data_loader.dart';
@@ -304,30 +306,30 @@ class ReceitaAgroApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider.MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
-        ChangeNotifierProvider(
+        provider.ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
+        provider.ChangeNotifierProvider(
           create: (_) => PreferencesProvider()..initialize(),
         ),
         // Auth Provider from Core Package Integration
-        ChangeNotifierProvider(create: (_) => di.sl<ReceitaAgroAuthProvider>()),
+        provider.ChangeNotifierProvider(create: (_) => di.sl<ReceitaAgroAuthProvider>()),
         // Sprint 1 Providers
-        ChangeNotifierProvider(
+        provider.ChangeNotifierProvider(
           create: (_) => di.sl<RemoteConfigProvider>()..initialize(),
         ),
-        ChangeNotifierProvider(
+        provider.ChangeNotifierProvider(
           create: (_) => di.sl<FeatureFlagsProvider>()..initialize(),
         ),
-        ChangeNotifierProvider(
+        provider.ChangeNotifierProvider(
           create: (_) => di.sl<ReceitaAgroPremiumService>(),
         ),
         // Profile Provider for user profile management
-        ChangeNotifierProvider(create: (_) => di.sl<ProfileProvider>()),
+        provider.ChangeNotifierProvider(create: (_) => di.sl<ProfileProvider>()),
         // Settings Provider for device management and settings
-        ChangeNotifierProvider(create: (_) => di.sl<SettingsProvider>()),
+        provider.ChangeNotifierProvider(create: (_) => di.sl<SettingsProvider>()),
       ],
-      child: Consumer<ThemeProvider>(
+      child: provider.Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
             title: 'Pragas Soja',

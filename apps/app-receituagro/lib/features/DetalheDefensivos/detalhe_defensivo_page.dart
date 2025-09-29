@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart';
@@ -262,10 +263,10 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider.MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: _defensivoProvider),
-        ChangeNotifierProvider.value(value: _diagnosticosProvider),
+        provider.ChangeNotifierProvider.value(value: _defensivoProvider),
+        provider.ChangeNotifierProvider.value(value: _diagnosticosProvider),
       ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -290,7 +291,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildHeader() {
-    return Consumer<DetalheDefensivoProvider>(
+    return provider.Consumer<DetalheDefensivoProvider>(
       builder: (context, provider, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -311,7 +312,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildBody() {
-    return Consumer<DetalheDefensivoProvider>(
+    return provider.Consumer<DetalheDefensivoProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return LoadingErrorWidgets.buildLoadingState(context);
@@ -390,7 +391,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildInformacoesTab() {
-    return Consumer<DetalheDefensivoProvider>(
+    return provider.Consumer<DetalheDefensivoProvider>(
       builder: (context, provider, child) {
         if (provider.defensivoData == null) {
           return LoadingErrorWidgets.buildEmptyState(

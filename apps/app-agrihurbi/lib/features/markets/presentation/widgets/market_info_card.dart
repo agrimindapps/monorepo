@@ -10,7 +10,7 @@ class MarketInfoCard extends StatelessWidget {
 
   const MarketInfoCard({
     super.key,
-    required this.market,
+    required market,
   });
 
   @override

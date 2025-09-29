@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+
 import '../../../../core/network/dio_client.dart';
 import '../../domain/failures/weather_failures.dart';
 import '../models/rain_gauge_model.dart';
@@ -13,7 +14,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   final DioClient _dioClient;
   static const String _baseEndpoint = '/weather';
   
-  WeatherRemoteDataSourceImpl(this._dioClient);
+  WeatherRemoteDataSourceImpl(_dioClient);
   
   // ============================================================================
   // WEATHER MEASUREMENTS

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';

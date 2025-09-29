@@ -64,7 +64,7 @@ abstract class MarketRemoteDataSource {
 class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
   final DioClient _dioClient;
 
-  MarketRemoteDataSourceImpl(this._dioClient);
+  MarketRemoteDataSourceImpl(_dioClient);
 
   static const String _baseEndpoint = '/api/v1/markets';
 

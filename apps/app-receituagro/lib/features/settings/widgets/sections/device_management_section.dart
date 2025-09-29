@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
@@ -19,7 +20,7 @@ class DeviceManagementSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer2<SettingsProvider, ReceitaAgroAuthProvider>(
+    return provider_lib.Consumer2<SettingsProvider, ReceitaAgroAuthProvider>(
       builder: (context, provider, authProvider, child) {
         final devices = provider.connectedDevicesInfo;
         final currentDevice = provider.currentDeviceInfo;

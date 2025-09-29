@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 
 import 'package:core/core.dart';
 
@@ -65,7 +66,7 @@ class _DiagnosticoDefensivoFilterWidgetState
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Consumer<DiagnosticosProvider>(
+      child: provider.Consumer<DiagnosticosProvider>(
         builder: (context, provider, child) {
           return Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -227,7 +228,7 @@ class DiagnosticoDefensivoStateManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DiagnosticosProvider>(
+    return provider.Consumer<DiagnosticosProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const DiagnosticoDefensivoLoadingWidget();

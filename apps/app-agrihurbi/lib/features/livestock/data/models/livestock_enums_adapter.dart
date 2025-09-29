@@ -1,4 +1,6 @@
-import 'package:hive/hive.dart';
+
+import 'package:core/core.dart';
+
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/entities/equine_entity.dart';
 

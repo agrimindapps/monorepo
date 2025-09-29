@@ -1,5 +1,4 @@
 import 'package:app_agrihurbi/core/network/dio_client.dart';
-// Core
 import 'package:app_agrihurbi/core/network/network_info.dart';
 import 'package:app_agrihurbi/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:app_agrihurbi/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -10,25 +9,21 @@ import 'package:app_agrihurbi/features/auth/domain/usecases/login_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/refresh_user_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/register_usecase.dart';
-// App Features - Auth
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app_agrihurbi/features/calculators/data/datasources/calculator_local_datasource.dart';
 import 'package:app_agrihurbi/features/calculators/data/datasources/calculator_remote_datasource.dart';
 import 'package:app_agrihurbi/features/calculators/data/repositories/calculator_repository_impl.dart';
 import 'package:app_agrihurbi/features/calculators/domain/registry/calculator_registry.dart';
 import 'package:app_agrihurbi/features/calculators/domain/repositories/calculator_repository.dart';
-// Calculator System Services
 import 'package:app_agrihurbi/features/calculators/domain/services/calculator_engine.dart';
 import 'package:app_agrihurbi/features/calculators/domain/services/calculator_favorites_service.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/execute_calculation.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/get_calculators.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/manage_calculation_history.dart';
-// App Features - Calculators
 import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
 import 'package:app_agrihurbi/features/livestock/data/datasources/livestock_local_datasource.dart';
 import 'package:app_agrihurbi/features/livestock/data/datasources/livestock_remote_datasource.dart';
 import 'package:app_agrihurbi/features/livestock/data/repositories/livestock_repository_impl.dart';
-// import 'package:app_agrihurbi/features/livestock/presentation/providers/equines_provider.dart' as equines_providers;
 import 'package:app_agrihurbi/features/livestock/domain/repositories/livestock_repository.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/create_bovine.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/delete_bovine.dart';
@@ -38,7 +33,6 @@ import 'package:app_agrihurbi/features/livestock/domain/usecases/get_equines.dar
 import 'package:app_agrihurbi/features/livestock/domain/usecases/search_animals.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/update_bovine.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/providers/bovines_provider.dart' as bovines_providers;
-// App Features - Livestock
 import 'package:app_agrihurbi/features/livestock/presentation/providers/livestock_provider.dart';
 import 'package:app_agrihurbi/features/weather/data/datasources/weather_local_datasource.dart';
 import 'package:app_agrihurbi/features/weather/data/datasources/weather_remote_datasource.dart';
@@ -48,10 +42,8 @@ import 'package:app_agrihurbi/features/weather/domain/usecases/calculate_weather
 import 'package:app_agrihurbi/features/weather/domain/usecases/create_weather_measurement.dart';
 import 'package:app_agrihurbi/features/weather/domain/usecases/get_rain_gauges.dart';
 import 'package:app_agrihurbi/features/weather/domain/usecases/get_weather_measurements.dart';
-// App Features - Weather
 import 'package:app_agrihurbi/features/weather/presentation/providers/weather_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-// Core Services Integration
 import 'package:core/core.dart' as core_lib;
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

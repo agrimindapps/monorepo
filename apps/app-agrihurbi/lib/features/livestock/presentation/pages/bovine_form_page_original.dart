@@ -13,7 +13,7 @@ import '../providers/bovines_provider.dart';
 class BovineFormPage extends StatefulWidget {
   const BovineFormPage({
     super.key,
-    this.bovineId,
+    bovineId,
   });
 
   /// ID do bovino para edição (null para criação)

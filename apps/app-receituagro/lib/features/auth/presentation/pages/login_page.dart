@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/providers/auth_provider.dart';
 import '../controllers/login_controller.dart';
@@ -73,11 +73,11 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return provider.ChangeNotifierProvider<LoginController>(
       create: (context) => LoginController(
-        authProvider: context.read<ReceitaAgroAuthProvider>(),
+        authProvider: provider.Provider.of<ReceitaAgroAuthProvider>(context, listen: false),
       ),
-      child: Consumer<LoginController>(
+      child: provider.Consumer<LoginController>(
         builder: (context, controller, child) {
           return Scaffold(
             body: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -299,7 +299,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _buildAuthContent() {
-    return Consumer<LoginController>(
+    return provider.Consumer<LoginController>(
       builder: (context, controller, child) {
         if (controller.isShowingRecoveryForm) {
           return const RecoveryFormWidget();

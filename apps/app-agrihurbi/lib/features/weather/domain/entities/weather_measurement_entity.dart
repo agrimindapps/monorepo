@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:equatable/equatable.dart';
 
 /// Weather measurement entity following Clean Architecture
@@ -69,28 +70,28 @@ class WeatherMeasurementEntity extends Equatable {
   final DateTime updatedAt;
 
   const WeatherMeasurementEntity({
-    required this.id,
-    required this.locationId,
-    required this.locationName,
-    required this.timestamp,
-    required this.temperature,
-    required this.humidity,
-    required this.pressure,
-    required this.windSpeed,
-    required this.windDirection,
-    required this.rainfall,
-    required this.uvIndex,
-    required this.visibility,
-    required this.weatherCondition,
-    required this.description,
-    required this.latitude,
-    required this.longitude,
-    required this.source,
-    required this.qualityScore,
-    required this.isRealTime,
-    this.notes,
-    required this.createdAt,
-    required this.updatedAt,
+    required id,
+    required locationId,
+    required locationName,
+    required timestamp,
+    required temperature,
+    required humidity,
+    required pressure,
+    required windSpeed,
+    required windDirection,
+    required rainfall,
+    required uvIndex,
+    required visibility,
+    required weatherCondition,
+    required description,
+    required latitude,
+    required longitude,
+    required source,
+    required qualityScore,
+    required isRealTime,
+    notes,
+    required createdAt,
+    required updatedAt,
   });
 
   /// Creates empty weather measurement for initialization
@@ -124,26 +125,26 @@ class WeatherMeasurementEntity extends Equatable {
     if (temperature < 27) return temperature; // Heat index only relevant for high temps
     
     final T = temperature;
-    final RH = humidity;
+    final relativeHumidity = humidity;
     
     // Simplified heat index formula (Rothfusz regression)
-    final HI = -8.78469475556 +
+    final heatIndex = -8.78469475556 +
         1.61139411 * T +
-        2.33854883889 * RH +
-        -0.14611605 * T * RH +
+        2.33854883889 * relativeHumidity +
+        -0.14611605 * T * relativeHumidity +
         -0.012308094 * T * T +
-        -0.0164248277778 * RH * RH +
-        0.002211732 * T * T * RH +
-        0.00072546 * T * RH * RH +
-        -0.000003582 * T * T * RH * RH;
+        -0.0164248277778 * relativeHumidity * relativeHumidity +
+        0.002211732 * T * T * relativeHumidity +
+        0.00072546 * T * relativeHumidity * relativeHumidity +
+        -0.000003582 * T * T * relativeHumidity * relativeHumidity;
     
-    return double.parse(HI.toStringAsFixed(1));
+    return double.parse(heatIndex.toStringAsFixed(1));
   }
 
   /// Calculate dew point based on temperature and humidity
   double get dewPoint {
     final T = temperature;
-    final RH = humidity;
+    final relativeHumidity = humidity;
     
     // Magnus formula approximation
     const a = 17.27;
@@ -228,28 +229,28 @@ class WeatherMeasurementEntity extends Equatable {
     DateTime? updatedAt,
   }) {
     return WeatherMeasurementEntity(
-      id: id ?? this.id,
-      locationId: locationId ?? this.locationId,
-      locationName: locationName ?? this.locationName,
-      timestamp: timestamp ?? this.timestamp,
-      temperature: temperature ?? this.temperature,
-      humidity: humidity ?? this.humidity,
-      pressure: pressure ?? this.pressure,
-      windSpeed: windSpeed ?? this.windSpeed,
-      windDirection: windDirection ?? this.windDirection,
-      rainfall: rainfall ?? this.rainfall,
-      uvIndex: uvIndex ?? this.uvIndex,
-      visibility: visibility ?? this.visibility,
-      weatherCondition: weatherCondition ?? this.weatherCondition,
-      description: description ?? this.description,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      source: source ?? this.source,
-      qualityScore: qualityScore ?? this.qualityScore,
-      isRealTime: isRealTime ?? this.isRealTime,
-      notes: notes ?? this.notes,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      id: id ?? id,
+      locationId: locationId ?? locationId,
+      locationName: locationName ?? locationName,
+      timestamp: timestamp ?? timestamp,
+      temperature: temperature ?? temperature,
+      humidity: humidity ?? humidity,
+      pressure: pressure ?? pressure,
+      windSpeed: windSpeed ?? windSpeed,
+      windDirection: windDirection ?? windDirection,
+      rainfall: rainfall ?? rainfall,
+      uvIndex: uvIndex ?? uvIndex,
+      visibility: visibility ?? visibility,
+      weatherCondition: weatherCondition ?? weatherCondition,
+      description: description ?? description,
+      latitude: latitude ?? latitude,
+      longitude: longitude ?? longitude,
+      source: source ?? source,
+      qualityScore: qualityScore ?? qualityScore,
+      isRealTime: isRealTime ?? isRealTime,
+      notes: notes ?? notes,
+      createdAt: createdAt ?? createdAt,
+      updatedAt: updatedAt ?? updatedAt,
     );
   }
 

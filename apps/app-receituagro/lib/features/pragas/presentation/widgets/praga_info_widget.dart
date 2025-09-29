@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
@@ -19,7 +20,7 @@ class PragaInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DetalhePragaProvider>(
+    return provider_lib.Consumer<DetalhePragaProvider>(
       builder: (context, provider, child) {
         return SingleChildScrollView(
           padding: const EdgeInsets.only(

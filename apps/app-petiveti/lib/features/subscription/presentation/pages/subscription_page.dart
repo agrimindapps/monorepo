@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SubscriptionState;
 import '../providers/subscription_provider.dart';
 import '../widgets/current_subscription_card.dart';
 import '../widgets/subscription_empty_state.dart';

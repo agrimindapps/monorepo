@@ -1,26 +1,14 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-// Import generated model adapters
-// import '../../features/auth/data/models/user_model.dart';
-// import '../../features/livestock/data/models/bovine_model.dart';
-// import '../../features/livestock/data/models/equine_model.dart';
 import '../../features/livestock/data/models/livestock_enums_adapter.dart';
-
-// Import weather models
+import '../../features/markets/data/models/market_enums_adapter.dart';
+import '../../features/news/data/models/commodity_price_model.dart';
+import '../../features/news/data/models/news_article_model.dart';
+import '../../features/subscription/data/models/subscription_model.dart';
 import '../../features/weather/data/models/rain_gauge_model.dart';
 import '../../features/weather/data/models/weather_measurement_model.dart';
 import '../../features/weather/data/models/weather_statistics_model.dart';
-
-// Import subscription models
-import '../../features/subscription/data/models/subscription_model.dart';
-
-// Import news models
-import '../../features/news/data/models/commodity_price_model.dart';
-import '../../features/news/data/models/news_article_model.dart';
-
-// Import markets models
-import '../../features/markets/data/models/market_enums_adapter.dart';
 
 /// Inicializador do Hive para configuração de adapters
 /// 
@@ -151,19 +139,19 @@ class HiveInitializer {
     try {
       // RainGaugeModel - TypeId: 51
       if (!Hive.isAdapterRegistered(51)) {
-        Hive.registerAdapter(RainGaugeModelAdapter());
+        Hive.registerAdapter<RainGaugeModel>(RainGaugeModelAdapter());
         debugPrint('HiveInitializer: RainGaugeModelAdapter registrado (TypeId: 51)');
       }
       
       // WeatherMeasurementModel - TypeId: 50
       if (!Hive.isAdapterRegistered(50)) {
-        Hive.registerAdapter(WeatherMeasurementModelAdapter());
+        Hive.registerAdapter<WeatherMeasurementModel>(WeatherMeasurementModelAdapter());
         debugPrint('HiveInitializer: WeatherMeasurementModelAdapter registrado (TypeId: 50)');
       }
       
       // WeatherStatisticsModel - TypeId: 52
       if (!Hive.isAdapterRegistered(52)) {
-        Hive.registerAdapter(WeatherStatisticsModelAdapter());
+        Hive.registerAdapter<WeatherStatisticsModel>(WeatherStatisticsModelAdapter());
         debugPrint('HiveInitializer: WeatherStatisticsModelAdapter registrado (TypeId: 52)');
       }
       
@@ -179,19 +167,19 @@ class HiveInitializer {
     try {
       // SubscriptionModel - TypeId: 16
       if (!Hive.isAdapterRegistered(16)) {
-        Hive.registerAdapter(SubscriptionModelAdapter());
+        Hive.registerAdapter<SubscriptionModel>(SubscriptionModelAdapter());
         debugPrint('HiveInitializer: SubscriptionModelAdapter registrado (TypeId: 16)');
       }
       
       // SubscriptionTierModel - TypeId: 17
       if (!Hive.isAdapterRegistered(17)) {
-        Hive.registerAdapter(SubscriptionTierModelAdapter());
+        Hive.registerAdapter<SubscriptionTierModel>(SubscriptionTierModelAdapter());
         debugPrint('HiveInitializer: SubscriptionTierModelAdapter registrado (TypeId: 17)');
       }
       
       // PaymentMethodModel - TypeId: 21
       if (!Hive.isAdapterRegistered(21)) {
-        Hive.registerAdapter(PaymentMethodModelAdapter());
+        Hive.registerAdapter<PaymentMethodModel>(PaymentMethodModelAdapter());
         debugPrint('HiveInitializer: PaymentMethodModelAdapter registrado (TypeId: 21)');
       }
       
@@ -207,13 +195,13 @@ class HiveInitializer {
     try {
       // CommodityPriceModel - TypeId: 30
       if (!Hive.isAdapterRegistered(30)) {
-        Hive.registerAdapter(CommodityPriceModelAdapter());
+        Hive.registerAdapter<CommodityPriceModel>(CommodityPriceModelAdapter());
         debugPrint('HiveInitializer: CommodityPriceModelAdapter registrado (TypeId: 30)');
       }
       
       // NewsArticleModel - TypeId: 31
       if (!Hive.isAdapterRegistered(31)) {
-        Hive.registerAdapter(NewsArticleModelAdapter());
+        Hive.registerAdapter<NewsArticleModel>(NewsArticleModelAdapter());
         debugPrint('HiveInitializer: NewsArticleModelAdapter registrado (TypeId: 31)');
       }
       

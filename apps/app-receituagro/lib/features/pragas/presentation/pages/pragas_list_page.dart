@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../providers/pragas_provider.dart';
@@ -18,7 +19,7 @@ class PragasListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
+    return provider_lib.ChangeNotifierProvider.value(
       value: GetIt.instance<PragasProvider>(),
       child: PragasListView(
         filtroTipo: filtroTipo,
@@ -56,7 +57,7 @@ class _PragasListViewState extends State<PragasListView> {
     
     // Inicia o loading imediatamente para evitar flash do empty state
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<PragasProvider>();
+      final provider = provider_lib.Provider.of<PragasProvider>(context, listen: false);
       provider.startInitialLoading();
       _loadInitialData();
     });
@@ -70,7 +71,7 @@ class _PragasListViewState extends State<PragasListView> {
   }
 
   Future<void> _loadInitialData() async {
-    final provider = context.read<PragasProvider>();
+    final provider = provider_lib.Provider.of<PragasProvider>(context, listen: false);
     
     try {
       if (widget.culturaId != null) {
@@ -114,7 +115,7 @@ class _PragasListViewState extends State<PragasListView> {
     }
     
     _lastSearchTerm = trimmedTerm;
-    final provider = context.read<PragasProvider>();
+    final provider = provider_lib.Provider.of<PragasProvider>(context, listen: false);
     
     try {
       if (trimmedTerm.isEmpty) {
@@ -146,7 +147,7 @@ class _PragasListViewState extends State<PragasListView> {
     _debounceTimer?.cancel();
     _lastSearchTerm = '';
     
-    final provider = context.read<PragasProvider>();
+    final provider = provider_lib.Provider.of<PragasProvider>(context, listen: false);
     _searchController.clear();
     
     try {
@@ -222,7 +223,7 @@ class _PragasListViewState extends State<PragasListView> {
           
           // Lista de pragas
           Expanded(
-            child: Consumer<PragasProvider>(
+            child: provider_lib.Consumer<PragasProvider>(
               builder: (context, provider, child) {
                 return _buildPragasList(provider);
               },

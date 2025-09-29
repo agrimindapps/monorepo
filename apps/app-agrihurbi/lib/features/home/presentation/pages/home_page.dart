@@ -22,10 +22,10 @@ class HomePage extends StatelessWidget {
                 onSelected: (value) async {
                   switch (value) {
                     case 'profile':
-                      context.push('/home/profile');
+                      await context.push('/home/profile');
                       break;
                     case 'settings':
-                      context.push('/home/settings');
+                      await context.push('/home/settings');
                       break;
                     case 'logout':
                       final result = await authProvider.logout();

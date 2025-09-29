@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../constants/settings_design_tokens.dart';
@@ -72,7 +73,7 @@ class DevelopmentSection extends StatelessWidget {
 
 
   Future<void> _generateTestLicense(BuildContext context) async {
-    final provider = context.read<SettingsProvider>();
+    final provider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
     
     try {
       final success = await provider.generateTestLicense();
@@ -144,7 +145,7 @@ class DevelopmentSection extends StatelessWidget {
     );
     
     if (confirmed == true && context.mounted) {
-      final provider = context.read<SettingsProvider>();
+      final provider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
       
       try {
         final success = await provider.removeTestLicense();

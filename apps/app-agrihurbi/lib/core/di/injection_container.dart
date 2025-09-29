@@ -1,8 +1,6 @@
 import 'package:app_agrihurbi/core/network/dio_client.dart';
-// Core
 import 'package:app_agrihurbi/core/network/network_info.dart';
 import 'package:app_agrihurbi/core/services/premium_service.dart';
-// Auth Dependencies
 import 'package:app_agrihurbi/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:app_agrihurbi/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:app_agrihurbi/features/auth/data/repositories/auth_repository_impl.dart';
@@ -13,7 +11,6 @@ import 'package:app_agrihurbi/features/auth/domain/usecases/logout_usecase.dart'
 import 'package:app_agrihurbi/features/auth/domain/usecases/refresh_user_usecase.dart';
 import 'package:app_agrihurbi/features/auth/domain/usecases/register_usecase.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-// Calculator Dependencies
 import 'package:app_agrihurbi/features/calculators/data/datasources/calculator_local_datasource.dart';
 import 'package:app_agrihurbi/features/calculators/data/datasources/calculator_remote_datasource.dart';
 import 'package:app_agrihurbi/features/calculators/data/repositories/calculator_repository_impl.dart';
@@ -23,11 +20,10 @@ import 'package:app_agrihurbi/features/calculators/domain/services/calculator_en
 import 'package:app_agrihurbi/features/calculators/domain/services/calculator_favorites_service.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/execute_calculation.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/get_calculators.dart';
-import 'package:app_agrihurbi/features/calculators/domain/usecases/manage_favorites.dart';
 import 'package:app_agrihurbi/features/calculators/domain/usecases/manage_calculation_history.dart';
+import 'package:app_agrihurbi/features/calculators/domain/usecases/manage_favorites.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_favorites_provider.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/providers/calculator_provider_simple.dart';
-// Livestock Dependencies
 import 'package:app_agrihurbi/features/livestock/data/datasources/livestock_local_datasource.dart';
 import 'package:app_agrihurbi/features/livestock/data/datasources/livestock_remote_datasource.dart';
 import 'package:app_agrihurbi/features/livestock/data/repositories/livestock_repository_impl.dart';
@@ -40,17 +36,14 @@ import 'package:app_agrihurbi/features/livestock/domain/usecases/get_equines.dar
 import 'package:app_agrihurbi/features/livestock/domain/usecases/search_animals.dart';
 import 'package:app_agrihurbi/features/livestock/domain/usecases/update_bovine.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/providers/livestock_provider.dart';
-// Market Dependencies
 import 'package:app_agrihurbi/features/markets/data/datasources/market_local_datasource.dart';
 import 'package:app_agrihurbi/features/markets/data/datasources/market_remote_datasource.dart';
 import 'package:app_agrihurbi/features/markets/data/repositories/market_repository_impl.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
-import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart';
 import 'package:app_agrihurbi/features/markets/domain/usecases/get_market_summary.dart';
+import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart';
 import 'package:app_agrihurbi/features/markets/domain/usecases/manage_market_favorites.dart';
-// import 'package:app_agrihurbi/features/markets/presentation/providers/market_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-// Core Services Integration
 import 'package:core/core.dart' as core_lib;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';

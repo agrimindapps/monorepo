@@ -432,7 +432,7 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   void _showSearchDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Pesquisar Notícias'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/calculator_category.dart';
 
 /// Widget de filtro por categoria de calculadoras
@@ -12,9 +13,9 @@ class CalculatorCategoryFilter extends StatelessWidget {
 
   const CalculatorCategoryFilter({
     super.key,
-    required this.selectedCategory,
-    required this.onCategoryChanged,
-    required this.onClearFilters,
+    required selectedCategory,
+    required onCategoryChanged,
+    required onClearFilters,
   });
 
   @override

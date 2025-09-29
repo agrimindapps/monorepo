@@ -77,7 +77,7 @@ class RegisterUseCase {
       // Analytics: track registration result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
       
-      result.fold(
+      await result.fold(
         (failure) async {
           await _analyticsService.logEvent(
             'registration_failed',

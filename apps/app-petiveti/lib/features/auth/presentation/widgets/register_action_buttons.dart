@@ -1,5 +1,6 @@
+import 'package:core/core.dart' hide AuthState, FormState;
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
 import '../providers/auth_provider.dart';
 import 'register_page_coordinator.dart';
 
@@ -79,7 +80,7 @@ class RegisterActionButtons extends ConsumerWidget {
   /// Main registration button with loading state and validation.
   /// Disabled when form is invalid or terms are not accepted.
   Widget _buildRegisterButton(BuildContext context, WidgetRef ref, AuthState authState) {
-    final isLoading = authState.isLoading;
+    final isLoading = authState.isLoading == true;
     final canProceed = acceptedTerms && !isLoading;
 
     return Semantics(

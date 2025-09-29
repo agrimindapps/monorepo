@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart' hide SubscriptionPage;
 
 import '../../../subscription/subscription_page.dart';
@@ -12,7 +13,7 @@ class PremiumSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return provider_lib.Consumer<SettingsProvider>(
       builder: (context, provider, child) {
         if (provider.isPremiumUser) {
           return _buildActivePremiumCard(context);

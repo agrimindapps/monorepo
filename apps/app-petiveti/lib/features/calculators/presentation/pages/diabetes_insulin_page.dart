@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../providers/diabetes_insulin_provider.dart';
 import '../widgets/calculation_result_card.dart';

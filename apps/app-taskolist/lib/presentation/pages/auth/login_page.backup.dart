@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../../../core/errors/failures.dart' as local;
 import '../../../core/theme/app_colors.dart';

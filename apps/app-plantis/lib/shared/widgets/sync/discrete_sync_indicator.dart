@@ -14,13 +14,10 @@ class DiscreteSyncIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BackgroundSyncProvider?>(
-      builder: (context, syncProvider, child) {
-        if (syncProvider == null || !syncProvider.shouldShowSyncIndicator()) {
-          return const SizedBox.shrink();
-        }
-
-        return _buildSyncBanner(context, syncProvider);
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        // For now, hide sync indicator until we implement proper Riverpod providers
+        return const SizedBox.shrink();
       },
     );
   }
@@ -176,19 +173,10 @@ class FloatingSyncIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BackgroundSyncProvider?>(
-      builder: (context, syncProvider, child) {
-        if (syncProvider == null || !syncProvider.shouldShowSyncIndicator()) {
-          return const SizedBox.shrink();
-        }
-
-        return Align(
-          alignment: alignment,
-          child: Container(
-            margin: margin,
-            child: _buildFloatingCard(context, syncProvider),
-          ),
-        );
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        // For now, hide sync indicator until we implement proper Riverpod providers
+        return const SizedBox.shrink();
       },
     );
   }
@@ -293,57 +281,12 @@ class SyncDotIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BackgroundSyncProvider?>(
-      builder: (context, syncProvider, child) {
-        if (syncProvider == null || !syncProvider.shouldShowSyncIndicator()) {
-          return const SizedBox.shrink();
-        }
-
-        final isError = syncProvider.syncStatus.toString().contains('error');
-        final isInProgress = syncProvider.isSyncInProgress;
-
-        Color color;
-        if (isError) {
-          color = Colors.red;
-        } else if (isInProgress) {
-          color = PlantisColors.primary;
-        } else {
-          color = Colors.green;
-        }
-
-        return GestureDetector(
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                if (isInProgress)
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.5),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-              ],
-            ),
-            child:
-                isInProgress
-                    ? Container(
-                      padding: EdgeInsets.all(size * 0.2),
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 1,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    )
-                    : null,
-          ),
-        );
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        // For now, hide sync indicator until we implement proper Riverpod providers
+        return const SizedBox.shrink();
       },
     );
+
   }
 }

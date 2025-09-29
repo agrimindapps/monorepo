@@ -1,6 +1,6 @@
+import 'package:core/core.dart' hide AuthState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
 
 import '../providers/auth_provider.dart';
 
@@ -407,12 +407,13 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
   }
 
   Widget _buildAuthenticationOptions(ThemeData theme, AuthState authState) {
+    final isLoading = authState.isLoading == true;
     return Column(
       children: [
-        if (authState.isLoading)
+        if (isLoading)
           _buildAdvancedLoadingIndicator(theme, authState),
         
-        if (!authState.isLoading) ...[
+        if (!isLoading) ...[
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
@@ -541,7 +542,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       }
     } catch (e) {
       widget.onAuthenticationError?.call('Erro na autenticação biométrica: $e');
-      HapticFeedback.heavyImpact();
+      await HapticFeedback.heavyImpact();
     } finally {
       setState(() => _isBiometricLoading = false);
     }

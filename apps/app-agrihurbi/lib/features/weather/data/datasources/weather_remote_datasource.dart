@@ -114,7 +114,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   static const String _openWeatherApiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
   static const String _accuWeatherApiKey = 'YOUR_ACCUWEATHER_API_KEY';
   
-  WeatherRemoteDataSourceImpl(this._dioClient);
+  WeatherRemoteDataSourceImpl(_dioClient);
 
   // ============================================================================
   // WEATHER MEASUREMENTS IMPLEMENTATION

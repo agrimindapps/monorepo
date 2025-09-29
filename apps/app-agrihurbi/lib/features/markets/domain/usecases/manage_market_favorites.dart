@@ -11,7 +11,7 @@ import 'package:injectable/injectable.dart';
 class ManageMarketFavorites {
   final MarketRepository _repository;
 
-  ManageMarketFavorites(this._repository);
+  ManageMarketFavorites(_repository);
 
   /// Get favorite markets
   ResultFuture<List<MarketEntity>> getFavorites() async {

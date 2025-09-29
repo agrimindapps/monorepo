@@ -34,11 +34,11 @@ export 'src/domain/repositories/i_analytics_repository.dart';
 export 'src/domain/repositories/i_app_rating_repository.dart';
 export 'src/domain/repositories/i_auth_repository.dart';
 export 'src/domain/repositories/i_crashlytics_repository.dart';
-export 'src/domain/repositories/i_device_repository.dart';
+export 'src/domain/repositories/i_device_repository.dart' hide DeviceValidationResult;
 export 'src/domain/repositories/i_encrypted_storage_repository.dart';
 export 'src/domain/repositories/i_enhanced_notification_repository.dart';
 export 'src/domain/repositories/i_file_repository.dart';
-export 'src/domain/repositories/i_local_storage_repository.dart';
+export 'src/domain/repositories/i_local_storage_repository.dart' hide OfflineData;
 export 'src/domain/repositories/i_notification_repository.dart';
 export 'src/domain/repositories/i_performance_repository.dart';
 export 'src/domain/repositories/i_security_repository.dart';
@@ -96,7 +96,7 @@ export 'src/infrastructure/services/firebase_crashlytics_service.dart';
 export 'src/infrastructure/services/firebase_device_service.dart';
 export 'src/infrastructure/services/firebase_storage_service.dart';
 export 'src/infrastructure/services/hive_storage_service.dart';
-export 'src/infrastructure/services/http_client_service.dart';
+export 'src/infrastructure/services/http_client_service.dart' hide CacheItem;
 export 'src/infrastructure/services/image_service.dart';
 export 'src/infrastructure/services/local_notification_service.dart';
 export 'src/infrastructure/services/enhanced_notification_service.dart';
@@ -106,7 +106,6 @@ export 'src/infrastructure/services/monorepo_auth_cache.dart';
 export 'src/infrastructure/services/performance_service.dart';
 export 'src/infrastructure/services/profile_image_service.dart';
 export 'src/infrastructure/services/revenue_cat_service.dart';
-export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/selective_sync_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
@@ -120,7 +119,6 @@ export 'src/infrastructure/storage/hive/hive_storage.dart';
 export 'src/presentation/theme/base/base_colors.dart';
 export 'src/presentation/theme/base/base_theme.dart';
 export 'src/presentation/theme/base/base_typography.dart';
-export 'src/presentation/theme/providers/theme_provider.dart';
 // export 'src/presentation/widgets/error_widget.dart';
 // export 'src/presentation/widgets/image_widgets.dart';
 // export 'src/presentation/widgets/loading_widget.dart';
@@ -168,7 +166,7 @@ export 'src/shared/services/version_manager_service.dart';
 
 // Utils
 export 'src/shared/utils/app_error.dart';
-export 'src/shared/utils/error_adapter.dart';
+export 'src/shared/utils/error_adapter.dart' hide ErrorHandlingMixin;
 export 'src/shared/utils/failure.dart';
 export 'src/shared/utils/result.dart';
 
@@ -176,7 +174,6 @@ export 'src/shared/utils/result.dart';
 export 'src/sync/app_sync_config.dart';
 export 'src/sync/conflict_resolution/conflict_resolver_factory.dart' hide SyncFailure;
 export 'src/sync/entity_sync_registration.dart' hide IConflictResolver;
-export 'src/sync/providers/unified_sync_provider.dart';
 export 'src/sync/unified_sync_manager.dart';
 
 // ========== FEATURES ==========
@@ -194,12 +191,9 @@ export 'repositories/license_repository.dart';
 export 'repositories/license_local_storage.dart';
 
 // ========== EXTERNAL PACKAGES ==========
-// Provider State Management
-export 'package:provider/provider.dart' hide Locator, FutureProvider, Provider, StreamProvider;
-
-// Riverpod State Management  
-export 'package:riverpod/riverpod.dart' hide Locator, AsyncValueX, Provider, StreamProvider;
-export 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider, Consumer;
+// Riverpod State Management (Provider REMOVIDO - migração para Riverpod completa)
+export 'package:riverpod/riverpod.dart' hide Locator, AsyncValueX, StreamProvider;
+export 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Navigation
 export 'package:go_router/go_router.dart';
@@ -221,9 +215,25 @@ export 'services/image_compression_service.dart';
 export 'services/shimmer_service.dart';
 
 // ========== RIVERPOD UTILITIES ==========
-export 'src/riverpod/common_providers.dart';
+export 'src/riverpod/common_providers.dart' hide currentUserProvider, isConnectedProvider, syncStateProvider, lastSyncProvider, SyncState;
 export 'src/riverpod/riverpod_utils.dart';
 export 'src/riverpod/common_notifiers.dart';
+
+// ========== DOMAIN-SPECIFIC PROVIDERS ==========
+// Auth Domain Providers
+export 'src/riverpod/domain/auth/auth_domain_providers.dart';
+
+// Premium/Subscription Domain Providers  
+export 'src/riverpod/domain/premium/subscription_providers.dart';
+
+// Device Management Domain Providers
+export 'src/riverpod/domain/device/device_management_providers.dart';
+
+// Sync/Offline Domain Providers
+export 'src/riverpod/domain/sync/sync_providers.dart';
+
+// Analytics Domain Providers
+export 'src/riverpod/domain/analytics/analytics_providers.dart';
 
 // ========== ADDITIONAL EXTERNAL PACKAGES ==========
 // Firebase
@@ -231,7 +241,9 @@ export 'package:firebase_core/firebase_core.dart';
 export 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 export 'package:firebase_analytics/firebase_analytics.dart';
 export 'package:firebase_crashlytics/firebase_crashlytics.dart';
+export 'package:firebase_storage/firebase_storage.dart' hide Task;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
+export 'package:cloud_functions/cloud_functions.dart' hide Result;
 
 // Storage and Preferences
 export 'package:hive/hive.dart';

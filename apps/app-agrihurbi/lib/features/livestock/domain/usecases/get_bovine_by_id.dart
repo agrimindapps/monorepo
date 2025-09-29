@@ -1,14 +1,11 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/bovine_entity.dart';
 import '../repositories/livestock_repository.dart';
 
 /// Parâmetros para obter bovino por ID
 class GetBovineByIdParams extends Equatable {
-  const GetBovineByIdParams({required this.bovineId});
+  const GetBovineByIdParams({required bovineId});
 
   final String bovineId;
 
@@ -24,7 +21,7 @@ class GetBovineByIdParams extends Equatable {
 /// 3. Salva automaticamente no cache para consultas futuras
 @lazySingleton
 class GetBovineByIdUseCase implements UseCase<BovineEntity, GetBovineByIdParams> {
-  const GetBovineByIdUseCase(this._repository);
+  const GetBovineByIdUseCase(_repository);
 
   final LivestockRepository _repository;
 

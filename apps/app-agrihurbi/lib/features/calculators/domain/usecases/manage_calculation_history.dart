@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
@@ -28,7 +27,7 @@ class DeleteCalculationHistory {
 // class GetCalculatorUsageStats {
 //   final CalculatorRepository repository;
 
-//   GetCalculatorUsageStats(this.repository);
+//   GetCalculatorUsageStats(repository);
 
 //   Future<Either<Failure, Map<String, int>>> call(String userId) async {
 //     return await repository.getCalculatorUsageStats(userId);

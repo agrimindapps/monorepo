@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculator_category.dart';
-import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_ui_service.dart';
 import '../providers/calculator_provider.dart';
 import '../widgets/calculator_category_filter.dart';
@@ -21,7 +19,7 @@ import '../widgets/calculator_search_widget.dart';
 class CalculatorsListPage extends StatefulWidget {
   final String? category;
   
-  const CalculatorsListPage({super.key, this.category});
+  const CalculatorsListPage({super.key, category});
 
   @override
   State<CalculatorsListPage> createState() => _CalculatorsListPageState();

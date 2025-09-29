@@ -1,7 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';

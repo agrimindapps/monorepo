@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 import 'secure_storage_service.dart';
 
 /// Authentication security service implementing OWASP Mobile Top 10 protections

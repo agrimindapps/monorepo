@@ -76,28 +76,28 @@ class WeatherMeasurementModel extends Equatable {
   final DateTime updatedAt;
 
   const WeatherMeasurementModel({
-    required this.id,
-    required this.locationId,
-    required this.locationName,
-    required this.timestamp,
-    required this.temperature,
-    required this.humidity,
-    required this.pressure,
-    required this.windSpeed,
-    required this.windDirection,
-    required this.rainfall,
-    required this.uvIndex,
-    required this.visibility,
-    required this.weatherCondition,
-    required this.description,
-    required this.latitude,
-    required this.longitude,
-    required this.source,
-    required this.qualityScore,
-    required this.isRealTime,
-    this.notes,
-    required this.createdAt,
-    required this.updatedAt,
+    required id,
+    required locationId,
+    required locationName,
+    required timestamp,
+    required temperature,
+    required humidity,
+    required pressure,
+    required windSpeed,
+    required windDirection,
+    required rainfall,
+    required uvIndex,
+    required visibility,
+    required weatherCondition,
+    required description,
+    required latitude,
+    required longitude,
+    required source,
+    required qualityScore,
+    required isRealTime,
+    notes,
+    required createdAt,
+    required updatedAt,
   });
 
   /// Create model from domain entity
@@ -218,11 +218,11 @@ class WeatherMeasurementModel extends Equatable {
     String locationId,
     String locationName,
   ) {
-    final main = json['main'] ?? {};
-    final weather = json['weather']?[0] ?? {};
-    final wind = json['wind'] ?? {};
-    final rain = json['rain'] ?? {};
-    final sys = json['sys'] ?? {};
+    final main = json['main'] ?? <String, dynamic>{};
+    final weather = json['weather']?[0] ?? <String, dynamic>{};
+    final wind = json['wind'] ?? <String, dynamic>{};
+    final rain = json['rain'] ?? <String, dynamic>{};
+    final sys = json['sys'] ?? <String, dynamic>{};
     
     return WeatherMeasurementModel(
       id: 'owm_${DateTime.now().millisecondsSinceEpoch}',
@@ -256,11 +256,11 @@ class WeatherMeasurementModel extends Equatable {
     String locationId,
     String locationName,
   ) {
-    final temperature = json['Temperature'] ?? {};
+    final temperature = json['Temperature'] ?? <String, dynamic>{};
     final humidity = json['RelativeHumidity'] ?? 0;
-    final pressure = json['Pressure'] ?? {};
-    final wind = json['Wind'] ?? {};
-    final precipitation = json['PrecipitationSummary'] ?? {};
+    final pressure = json['Pressure'] ?? <String, dynamic>{};
+    final wind = json['Wind'] ?? <String, dynamic>{};
+    final precipitation = json['PrecipitationSummary'] ?? <String, dynamic>{};
     
     return WeatherMeasurementModel(
       id: 'aw_${DateTime.now().millisecondsSinceEpoch}',
@@ -348,28 +348,28 @@ class WeatherMeasurementModel extends Equatable {
     DateTime? updatedAt,
   }) {
     return WeatherMeasurementModel(
-      id: id ?? this.id,
-      locationId: locationId ?? this.locationId,
-      locationName: locationName ?? this.locationName,
-      timestamp: timestamp ?? this.timestamp,
-      temperature: temperature ?? this.temperature,
-      humidity: humidity ?? this.humidity,
-      pressure: pressure ?? this.pressure,
-      windSpeed: windSpeed ?? this.windSpeed,
-      windDirection: windDirection ?? this.windDirection,
-      rainfall: rainfall ?? this.rainfall,
-      uvIndex: uvIndex ?? this.uvIndex,
-      visibility: visibility ?? this.visibility,
-      weatherCondition: weatherCondition ?? this.weatherCondition,
-      description: description ?? this.description,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      source: source ?? this.source,
-      qualityScore: qualityScore ?? this.qualityScore,
-      isRealTime: isRealTime ?? this.isRealTime,
-      notes: notes ?? this.notes,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      id: id ?? id,
+      locationId: locationId ?? locationId,
+      locationName: locationName ?? locationName,
+      timestamp: timestamp ?? timestamp,
+      temperature: temperature ?? temperature,
+      humidity: humidity ?? humidity,
+      pressure: pressure ?? pressure,
+      windSpeed: windSpeed ?? windSpeed,
+      windDirection: windDirection ?? windDirection,
+      rainfall: rainfall ?? rainfall,
+      uvIndex: uvIndex ?? uvIndex,
+      visibility: visibility ?? visibility,
+      weatherCondition: weatherCondition ?? weatherCondition,
+      description: description ?? description,
+      latitude: latitude ?? latitude,
+      longitude: longitude ?? longitude,
+      source: source ?? source,
+      qualityScore: qualityScore ?? qualityScore,
+      isRealTime: isRealTime ?? isRealTime,
+      notes: notes ?? notes,
+      createdAt: createdAt ?? createdAt,
+      updatedAt: updatedAt ?? updatedAt,
     );
   }
 

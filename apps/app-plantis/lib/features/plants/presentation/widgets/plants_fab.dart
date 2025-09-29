@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/riverpod_providers/solid_providers.dart';
 import 'plant_form_dialog.dart';
@@ -16,7 +16,7 @@ class PlantsFab extends ConsumerWidget {
 
   Future<void> _onAddPlant(BuildContext context, WidgetRef ref) async {
     // Inicializar o formulário para adição de nova planta
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
     formManager.initializeForNewPlant();
 
     // Mostrar dialog

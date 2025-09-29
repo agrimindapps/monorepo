@@ -10,7 +10,7 @@ import 'package:injectable/injectable.dart';
 class GetCommodityPrices {
   final NewsRepository _repository;
 
-  const GetCommodityPrices(this._repository);
+  const GetCommodityPrices(_repository);
 
   /// Get current prices for all or specific commodity types
   ResultFuture<List<CommodityPriceEntity>> call({
@@ -25,7 +25,7 @@ class GetCommodityPrices {
 class GetCommodityById {
   final NewsRepository _repository;
 
-  const GetCommodityById(this._repository);
+  const GetCommodityById(_repository);
 
   ResultFuture<CommodityPriceEntity> call(String commodityId) {
     return _repository.getCommodityById(commodityId);
@@ -37,7 +37,7 @@ class GetCommodityById {
 class GetCommodityHistory {
   final NewsRepository _repository;
 
-  const GetCommodityHistory(this._repository);
+  const GetCommodityHistory(_repository);
 
   ResultFuture<List<HistoricalPrice>> call({
     required String commodityId,
@@ -57,7 +57,7 @@ class GetCommodityHistory {
 class GetMarketSummary {
   final NewsRepository _repository;
 
-  const GetMarketSummary(this._repository);
+  const GetMarketSummary(_repository);
 
   ResultFuture<MarketSummaryEntity> call() {
     return _repository.getMarketSummary();
@@ -69,7 +69,7 @@ class GetMarketSummary {
 class ManagePriceAlerts {
   final NewsRepository _repository;
 
-  const ManagePriceAlerts(this._repository);
+  const ManagePriceAlerts(_repository);
 
   /// Set price alert for commodity
   ResultVoid setPriceAlert({

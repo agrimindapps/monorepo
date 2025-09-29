@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as flutter_provider;
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
@@ -25,7 +25,7 @@ class UserProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<SettingsProvider, FeatureFlagsProvider, ReceitaAgroAuthProvider>(
+    return provider_lib.Consumer3<SettingsProvider, FeatureFlagsProvider, ReceitaAgroAuthProvider>(
       builder: (context, settingsProvider, featureFlags, authProvider, child) {
         return Card(
           margin: SettingsDesignTokens.sectionMargin,
@@ -444,7 +444,7 @@ class UserProfileSection extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
               // Chamar o método de criar conta
-              final authProvider = flutter_provider.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
+              final authProvider = provider_lib.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
               _showSignupDialog(context, authProvider);
             },
             child: const Text('Criar Conta'),

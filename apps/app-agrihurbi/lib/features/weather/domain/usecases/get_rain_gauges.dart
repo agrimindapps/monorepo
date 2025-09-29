@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+
 import '../entities/rain_gauge_entity.dart';
 import '../failures/weather_failures.dart';
 import '../repositories/weather_repository.dart';
@@ -8,7 +9,7 @@ import '../repositories/weather_repository.dart';
 class GetRainGauges {
   final WeatherRepository _repository;
 
-  const GetRainGauges(this._repository);
+  const GetRainGauges(_repository);
 
   /// Get all rain gauges
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> call() async {

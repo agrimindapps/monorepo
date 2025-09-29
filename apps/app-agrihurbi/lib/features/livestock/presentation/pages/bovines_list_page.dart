@@ -299,7 +299,7 @@ class _BovinesListPageState extends State<BovinesListPage> {
   void _showStatistics() {
     final provider = context.read<LivestockProvider>();
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Estatísticas do Rebanho'),
@@ -349,7 +349,7 @@ class _BovinesListPageState extends State<BovinesListPage> {
   }
 
   void _confirmDeleteBovine(BuildContext context, BovineEntity bovine) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),

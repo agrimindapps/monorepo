@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
@@ -12,7 +13,7 @@ class AuthSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ReceitaAgroAuthProvider>(
+    return provider_lib.Consumer<ReceitaAgroAuthProvider>(
       builder: (context, authProvider, child) {
         if (authProvider.isLoading) {
           return _buildLoadingSection(context);

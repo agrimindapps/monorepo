@@ -12,8 +12,8 @@ class MarketPriceChart extends StatelessWidget {
 
   const MarketPriceChart({
     super.key,
-    required this.marketId,
-    required this.market,
+    required marketId,
+    required market,
   });
 
   @override

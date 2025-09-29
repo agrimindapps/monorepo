@@ -3,7 +3,7 @@ import 'dart:async';
 // import 'package:flutter/foundation.dart'; // TODO: Use for debug features
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide AuthState, FormState;
 
 import '../../../../shared/constants/splash_constants.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
@@ -189,11 +189,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
     ref.watch(authProvider);
 
     ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next.isAuthenticated) {
+      if (next.isAuthenticated == true) {
         // Mostrar SimpleSyncLoading e depois navegar
         _handleAuthSuccess();
       }
-      if (next.hasError) {
+      if (next.hasError == true && next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),

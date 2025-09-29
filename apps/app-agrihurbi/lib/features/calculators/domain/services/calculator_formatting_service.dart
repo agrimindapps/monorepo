@@ -394,17 +394,17 @@ class FormattedCalculationResult {
   final CalculationResult? originalResult;
 
   const FormattedCalculationResult({
-    required this.calculatorId,
-    required this.strategyId,
-    required this.strategyName,
-    required this.title,
-    required this.subtitle,
-    required this.formattedValues,
-    required this.formattedRecommendations,
-    required this.formattedTableData,
-    required this.summary,
-    required this.metadata,
-    this.originalResult,
+    required calculatorId,
+    required strategyId,
+    required strategyName,
+    required title,
+    required subtitle,
+    required formattedValues,
+    required formattedRecommendations,
+    required formattedTableData,
+    required summary,
+    required metadata,
+    originalResult,
   });
 }
 
@@ -418,13 +418,13 @@ class FormattedResultValue {
   final ValueCategory category;
 
   const FormattedResultValue({
-    required this.label,
-    required this.formattedValue,
-    required this.originalValue,
-    required this.unit,
-    required this.description,
-    required this.isPrimary,
-    required this.category,
+    required label,
+    required formattedValue,
+    required originalValue,
+    required unit,
+    required description,
+    required isPrimary,
+    required category,
   });
 }
 
@@ -436,11 +436,11 @@ class FormattedRecommendation {
   final bool actionable;
 
   const FormattedRecommendation({
-    required this.id,
-    required this.text,
-    required this.priority,
-    required this.category,
-    required this.actionable,
+    required id,
+    required text,
+    required priority,
+    required category,
+    required actionable,
   });
 }
 
@@ -449,8 +449,8 @@ class FormattedTableRow {
   final Map<String, String> formattedCells;
 
   const FormattedTableRow({
-    required this.originalData,
-    required this.formattedCells,
+    required originalData,
+    required formattedCells,
   });
 }
 
@@ -461,10 +461,10 @@ class FormattingMetadata {
   final String currency;
 
   const FormattingMetadata({
-    required this.formattedAt,
-    required this.locale,
-    required this.precision,
-    required this.currency,
+    required formattedAt,
+    required locale,
+    required precision,
+    required currency,
   });
 }
 
@@ -476,11 +476,11 @@ class ResultSummary {
   final double confidence;
 
   const ResultSummary({
-    required this.title,
-    required this.primaryResults,
-    required this.keyInsights,
-    required this.totalRecommendations,
-    required this.confidence,
+    required title,
+    required primaryResults,
+    required keyInsights,
+    required totalRecommendations,
+    required confidence,
   });
 }
 

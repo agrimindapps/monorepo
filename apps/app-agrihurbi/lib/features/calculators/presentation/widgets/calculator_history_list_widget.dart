@@ -18,10 +18,10 @@ class CalculatorHistoryListWidget extends StatelessWidget {
 
   const CalculatorHistoryListWidget({
     super.key,
-    required this.history,
-    this.scrollController,
-    required this.onReapply,
-    required this.onDelete,
+    required history,
+    scrollController,
+    required onReapply,
+    required onDelete,
   });
 
   @override

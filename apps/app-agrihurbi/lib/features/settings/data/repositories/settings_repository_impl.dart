@@ -1,10 +1,10 @@
 import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:app_agrihurbi/core/error/failures.dart';
+import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:app_agrihurbi/features/settings/data/datasources/settings_local_datasource.dart';
 import 'package:app_agrihurbi/features/settings/data/models/settings_model.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
@@ -13,7 +13,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _localDataSource;
   final AuthProvider _authProvider;
 
-  const SettingsRepositoryImpl(this._localDataSource, this._authProvider);
+  const SettingsRepositoryImpl(_localDataSource, _authProvider);
 
   /// Get current user ID from auth provider
   String _getCurrentUserId() {

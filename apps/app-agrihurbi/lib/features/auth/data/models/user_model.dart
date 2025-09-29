@@ -170,15 +170,15 @@ class UserModel extends UserEntity {
     // UserModel mapeia apenas os campos que tem implementação local
     // Os demais parâmetros são aceitos para compatibilidade mas serão valores padrão
     return UserModel(
-      userModelId: id ?? this.userModelId,
-      userModelDisplayName: displayName ?? this.userModelDisplayName,
-      userModelEmail: email ?? this.userModelEmail,
-      userModelPhotoUrl: photoUrl ?? this.userModelPhotoUrl,
-      userModelIsEmailVerified: isEmailVerified ?? this.userModelIsEmailVerified,
-      userModelLastLoginAt: lastLoginAt ?? this.userModelLastLoginAt,
-      userModelProvider: provider ?? this.userModelProvider,
-      userModelCreatedAt: createdAt ?? this.userModelCreatedAt,
-      userModelUpdatedAt: updatedAt ?? this.userModelUpdatedAt,
+      userModelId: id ?? userModelId,
+      userModelDisplayName: displayName ?? userModelDisplayName,
+      userModelEmail: email ?? userModelEmail,
+      userModelPhotoUrl: photoUrl ?? userModelPhotoUrl,
+      userModelIsEmailVerified: isEmailVerified ?? userModelIsEmailVerified,
+      userModelLastLoginAt: lastLoginAt ?? userModelLastLoginAt,
+      userModelProvider: provider ?? userModelProvider,
+      userModelCreatedAt: createdAt ?? userModelCreatedAt,
+      userModelUpdatedAt: updatedAt ?? userModelUpdatedAt,
     );
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/riverpod_providers/solid_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
@@ -83,9 +83,9 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, ref, child) {
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final formState = ref.watch(solidPlantFormStateProvider);
-        final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+        final formManager = ref.read(solidPlantFormStateManagerProvider);
         final fieldErrors =
             formState.fieldErrors; // Get validation errors for real-time display
 

@@ -14,12 +14,12 @@ import '../../domain/services/bovine_form_service.dart';
 class BovineBasicInfoSection extends StatelessWidget {
   const BovineBasicInfoSection({
     super.key,
-    required this.commonNameController,
-    required this.registrationIdController,
-    required this.breedController,
-    required this.originCountryController,
-    required this.formService,
-    this.enabled = true,
+    required commonNameController,
+    required registrationIdController,
+    required breedController,
+    required originCountryController,
+    required formService,
+    enabled = true,
   });
 
   final TextEditingController commonNameController;
@@ -176,10 +176,10 @@ class BovineBasicInfoSection extends StatelessWidget {
 class RegistrationIdField extends StatefulWidget {
   const RegistrationIdField({
     super.key,
-    required this.controller,
-    required this.formService,
-    this.enabled = true,
-    this.onChanged,
+    required controller,
+    required formService,
+    enabled = true,
+    onChanged,
   });
 
   final TextEditingController controller;

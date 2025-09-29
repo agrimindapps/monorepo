@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/rain_gauge_entity.dart';
 
 /// Widget to display rain gauges summary
@@ -8,8 +9,8 @@ class RainGaugesSummary extends StatelessWidget {
 
   const RainGaugesSummary({
     super.key,
-    required this.rainGauges,
-    this.isLoading = false,
+    required rainGauges,
+    isLoading = false,
   });
 
   @override

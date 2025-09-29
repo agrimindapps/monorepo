@@ -14,10 +14,10 @@ class CalculatorSearchBarWidget extends StatelessWidget {
 
   const CalculatorSearchBarWidget({
     super.key,
-    required this.controller,
-    required this.onChanged,
-    this.hintText = 'Digite para buscar calculadoras...',
-    this.isLoading = false,
+    required controller,
+    required onChanged,
+    hintText = 'Digite para buscar calculadoras...',
+    isLoading = false,
   });
 
   @override

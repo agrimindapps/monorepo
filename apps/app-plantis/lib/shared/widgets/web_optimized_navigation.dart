@@ -306,12 +306,10 @@ class _NavigationList extends StatelessWidget {
           ],
 
           // Itens de navegação (sem Configurações)
-          Consumer<TasksProvider>(
-            builder: (context, tasksProvider, child) {
-              final pendingTasksCount =
-                  tasksProvider.allTasks
-                      .where((task) => task.status == TaskStatus.pending)
-                      .length;
+          Consumer(
+            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              // For now, show 0 pending tasks until we implement proper Riverpod providers
+              final pendingTasksCount = 0;
 
               return Column(
                 children: [
@@ -679,20 +677,16 @@ class _SidebarFooter extends StatelessWidget {
               ),
             ),
           ),
-          child: Consumer<local.AuthProvider>(
-            builder: (context, authProvider, child) {
-              final user = authProvider.currentUser;
-              final isAnonymous = authProvider.isAnonymous;
+          child: Consumer(
+            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              // For now, show guest user until we implement proper Riverpod providers
+              final user = null;
+              final isAnonymous = true;
 
               if (!isExpanded) {
                 // Versão colapsada - apenas avatar com tooltip
                 return Tooltip(
-                  message:
-                      isAnonymous
-                          ? 'Usuário Anônimo'
-                          : (user?.displayName.isNotEmpty == true)
-                          ? user!.displayName
-                          : user?.email.split('@').first ?? 'Usuário',
+                  message: 'Usuário Anônimo',
                   waitDuration: const Duration(milliseconds: 500),
                   child: Center(
                     child: Stack(
@@ -728,12 +722,8 @@ class _SidebarFooter extends StatelessWidget {
                                       color: Colors.white,
                                       size: 22,
                                     )
-                                    : Text(
-                                      (user?.displayName.isNotEmpty == true)
-                                          ? user!.displayName[0].toUpperCase()
-                                          : (user?.email.isNotEmpty == true)
-                                          ? user!.email[0].toUpperCase()
-                                          : '?',
+                                    : const Text(
+                                      '?',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -802,12 +792,8 @@ class _SidebarFooter extends StatelessWidget {
                                 color: Colors.white,
                                 size: 20,
                               )
-                              : Text(
-                                (user?.displayName.isNotEmpty == true)
-                                    ? user!.displayName[0].toUpperCase()
-                                    : (user?.email.isNotEmpty == true)
-                                    ? user!.email[0].toUpperCase()
-                                    : '?',
+                              : const Text(
+                                '?',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -825,11 +811,7 @@ class _SidebarFooter extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isAnonymous
-                              ? 'Usuário Anônimo'
-                              : (user?.displayName.isNotEmpty == true)
-                              ? user!.displayName
-                              : user?.email.split('@').first ?? 'Usuário',
+                          'Usuário Anônimo',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,

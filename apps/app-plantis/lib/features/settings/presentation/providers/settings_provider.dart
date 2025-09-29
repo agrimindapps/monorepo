@@ -12,8 +12,6 @@ class SettingsProvider extends ChangeNotifier {
   final ISettingsRepository _settingsRepository;
   final PlantisNotificationService _notificationService;
   final BackupService? _backupService;
-  final ThemeProvider? _themeProvider;
-
   // Estado unificado
   SettingsEntity _settings = SettingsEntity.defaults();
   bool _isLoading = false;
@@ -25,11 +23,9 @@ class SettingsProvider extends ChangeNotifier {
     required ISettingsRepository settingsRepository,
     required PlantisNotificationService notificationService,
     BackupService? backupService,
-    ThemeProvider? themeProvider,
   }) : _settingsRepository = settingsRepository,
        _notificationService = notificationService,
-       _backupService = backupService,
-       _themeProvider = themeProvider;
+       _backupService = backupService;
 
   // Getters
   SettingsEntity get settings => _settings;
@@ -281,11 +277,8 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Aplica mudanças de tema no ThemeProvider
   void _applyThemeChanges(ThemeSettingsEntity themeSettings) {
-    final themeProvider = _themeProvider;
-    if (themeProvider == null) return;
-
-    // Usar o método setThemeMode disponível no ThemeProvider
-    themeProvider.setThemeMode(themeSettings.themeMode);
+    // A aplicação de temas agora é feita através dos providers Riverpod
+    // Este método é mantido para compatibilidade mas não implementa nada
   }
 
   // Métodos de notificação integrados

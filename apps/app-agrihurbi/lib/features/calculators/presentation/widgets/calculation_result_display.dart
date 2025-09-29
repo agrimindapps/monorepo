@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/calculation_result.dart';
 
 /// Widget para exibição de resultados de cálculo
@@ -10,7 +11,7 @@ class CalculationResultDisplay extends StatelessWidget {
 
   const CalculationResultDisplay({
     super.key,
-    required this.result,
+    required result,
   });
 
   @override

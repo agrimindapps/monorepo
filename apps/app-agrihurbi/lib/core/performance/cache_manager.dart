@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 
 // Configurações padrão

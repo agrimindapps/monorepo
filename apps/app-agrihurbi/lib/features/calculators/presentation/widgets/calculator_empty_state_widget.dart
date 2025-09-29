@@ -15,11 +15,11 @@ class CalculatorEmptyStateWidget extends StatelessWidget {
 
   const CalculatorEmptyStateWidget({
     super.key,
-    required this.type,
-    this.customMessage,
-    this.customSubtitle,
-    this.onAction,
-    this.actionLabel,
+    required type,
+    customMessage,
+    customSubtitle,
+    onAction,
+    actionLabel,
   });
 
   @override
@@ -147,11 +147,11 @@ class _EmptyStateConfig {
   final IconData? actionIcon;
 
   _EmptyStateConfig({
-    required this.icon,
-    required this.message,
-    required this.subtitle,
-    this.hasDefaultAction = false,
-    this.defaultActionLabel = '',
-    this.actionIcon,
+    required icon,
+    required message,
+    required subtitle,
+    hasDefaultAction = false,
+    defaultActionLabel = '',
+    actionIcon,
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../providers/diagnosticos_praga_provider.dart';
@@ -90,7 +91,7 @@ class DiagnosticoEmptyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Consumer<DiagnosticosPragaProvider>(
+      child: provider_lib.Consumer<DiagnosticosPragaProvider>(
         builder: (context, provider, child) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32.0),
@@ -148,7 +149,7 @@ class DiagnosticoStateManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DiagnosticosPragaProvider>(
+    return provider_lib.Consumer<DiagnosticosPragaProvider>(
       builder: (context, provider, child) {
         // Estado de carregamento
         if (provider.isLoading) {

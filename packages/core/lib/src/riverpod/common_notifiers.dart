@@ -1,180 +1,493 @@
-// ========== COMMON RIVERPOD NOTIFIERS ==========
-// StateNotifiers compartilhados e reutilizáveis entre apps
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:riverpod/riverpod.dart';
+/// Notifiers comuns que podem ser reutilizados entre todos os apps
+/// Implementam padrões comuns de state management
 
-// ========== GENERIC LIST NOTIFIER ==========
-/// StateNotifier genérico para listas
-class ListNotifier<T> extends StateNotifier<List<T>> {
-  ListNotifier([List<T>? initialList]) : super(initialList ?? []);
+// ========== AUTENTICAÇÃO ==========
 
-  /// Adicionar item à lista
-  void add(T item) {
-    state = [...state, item];
+/// Notifier base para estado de autenticação
+/// Apps podem estender este notifier para implementação específica
+abstract class BaseAuthNotifier extends StateNotifier<AuthState> {
+  BaseAuthNotifier() : super(const AuthState.unauthenticated());
+  
+  /// Método abstrato para login - cada app implementa sua lógica
+  Future<void> login(String email, String password);
+  
+  /// Método abstrato para logout - cada app implementa sua lógica
+  Future<void> logout();
+  
+  /// Método abstrato para registro - cada app implementa sua lógica
+  Future<void> register(String email, String password, Map<String, dynamic> userData);
+  
+  /// Método abstrato para recuperação de senha
+  Future<void> resetPassword(String email);
+  
+  /// Método abstrato para verificar se usuário está logado
+  Future<void> checkAuthStatus();
+  
+  /// Helpers comuns
+  void setLoading() {
+    state = const AuthState.loading();
   }
-
-  /// Adicionar múltiplos itens
-  void addAll(List<T> items) {
-    state = [...state, ...items];
+  
+  void setAuthenticated(Map<String, dynamic> user) {
+    state = AuthState.authenticated(user);
   }
-
-  /// Remover item da lista
-  void remove(T item) {
-    state = state.where((element) => element != item).toList();
+  
+  void setUnauthenticated() {
+    state = const AuthState.unauthenticated();
   }
-
-  /// Remover item por índice
-  void removeAt(int index) {
-    if (index >= 0 && index < state.length) {
-      final newList = List<T>.from(state);
-      newList.removeAt(index);
-      state = newList;
-    }
-  }
-
-  /// Atualizar item por índice
-  void updateAt(int index, T newItem) {
-    if (index >= 0 && index < state.length) {
-      final newList = List<T>.from(state);
-      newList[index] = newItem;
-      state = newList;
-    }
-  }
-
-  /// Limpar lista
-  void clear() {
-    state = [];
-  }
-
-  /// Substituir lista completa
-  void replace(List<T> newList) {
-    state = newList;
-  }
-
-  /// Filtrar lista
-  void filter(bool Function(T) predicate) {
-    state = state.where(predicate).toList();
-  }
-
-  /// Ordenar lista
-  void sort([int Function(T, T)? compare]) {
-    final newList = List<T>.from(state);
-    newList.sort(compare);
-    state = newList;
+  
+  void setError(String error) {
+    state = AuthState.error(error);
   }
 }
 
-// ========== GENERIC MAP NOTIFIER ==========
-/// StateNotifier genérico para Maps
-class MapNotifier<K, V> extends StateNotifier<Map<K, V>> {
-  MapNotifier([Map<K, V>? initialMap]) : super(initialMap ?? {});
+/// Estados possíveis de autenticação
+class AuthState {
+  const AuthState._();
+  
+  const factory AuthState.loading() = _Loading;
+  const factory AuthState.authenticated(Map<String, dynamic> user) = _Authenticated;
+  const factory AuthState.unauthenticated() = _Unauthenticated;
+  const factory AuthState.error(String message) = _Error;
+  
+  T when<T>({
+    required T Function() loading,
+    required T Function(Map<String, dynamic> user) authenticated,
+    required T Function() unauthenticated,
+    required T Function(String message) error,
+  }) {
+    if (this is _Loading) return loading();
+    if (this is _Authenticated) return authenticated((this as _Authenticated).user);
+    if (this is _Unauthenticated) return unauthenticated();
+    if (this is _Error) return error((this as _Error).message);
+    throw StateError('Unknown state: $this');
+  }
+  
+  T maybeWhen<T>({
+    T Function()? loading,
+    T Function(Map<String, dynamic> user)? authenticated,
+    T Function()? unauthenticated,
+    T Function(String message)? error,
+    required T Function() orElse,
+  }) {
+    if (this is _Loading && loading != null) return loading();
+    if (this is _Authenticated && authenticated != null) return authenticated((this as _Authenticated).user);
+    if (this is _Unauthenticated && unauthenticated != null) return unauthenticated();
+    if (this is _Error && error != null) return error((this as _Error).message);
+    return orElse();
+  }
+}
 
-  /// Adicionar/atualizar entrada
-  void set(K key, V value) {
+class _Loading extends AuthState {
+  const _Loading() : super._();
+}
+
+class _Authenticated extends AuthState {
+  const _Authenticated(this.user) : super._();
+  final Map<String, dynamic> user;
+}
+
+class _Unauthenticated extends AuthState {
+  const _Unauthenticated() : super._();
+}
+
+class _Error extends AuthState {
+  const _Error(this.message) : super._();
+  final String message;
+}
+
+// ========== PREFERÊNCIAS ==========
+
+/// Notifier para gerenciar preferências do usuário
+class PreferencesNotifier extends StateNotifier<Map<String, dynamic>> {
+  PreferencesNotifier(this._prefs) : super({});
+  
+  final SharedPreferences _prefs;
+  
+  /// Carrega todas as preferências
+  void loadPreferences() {
+    final keys = _prefs.getKeys();
+    final prefs = <String, dynamic>{};
+    
+    for (final key in keys) {
+      final value = _prefs.get(key);
+      if (value != null) {
+        prefs[key] = value;
+      }
+    }
+    
+    state = prefs;
+  }
+  
+  /// Define uma preferência string
+  Future<void> setString(String key, String value) async {
+    await _prefs.setString(key, value);
     state = {...state, key: value};
   }
-
-  /// Adicionar múltiplas entradas
-  void setAll(Map<K, V> entries) {
-    state = {...state, ...entries};
+  
+  /// Define uma preferência boolean
+  Future<void> setBool(String key, bool value) async {
+    await _prefs.setBool(key, value);
+    state = {...state, key: value};
   }
-
-  /// Remover entrada
-  void remove(K key) {
-    final newMap = Map<K, V>.from(state);
-    newMap.remove(key);
-    state = newMap;
+  
+  /// Define uma preferência int
+  Future<void> setInt(String key, int value) async {
+    await _prefs.setInt(key, value);
+    state = {...state, key: value};
   }
+  
+  /// Define uma preferência double
+  Future<void> setDouble(String key, double value) async {
+    await _prefs.setDouble(key, value);
+    state = {...state, key: value};
+  }
+  
+  /// Define uma lista de strings
+  Future<void> setStringList(String key, List<String> value) async {
+    await _prefs.setStringList(key, value);
+    state = {...state, key: value};
+  }
+  
+  /// Remove uma preferência
+  Future<void> remove(String key) async {
+    await _prefs.remove(key);
+    final newState = Map<String, dynamic>.from(state);
+    newState.remove(key);
+    state = newState;
+  }
+  
+  /// Limpa todas as preferências
+  Future<void> clear() async {
+    await _prefs.clear();
+    state = {};
+  }
+  
+  /// Getters helpers
+  String? getString(String key) => state[key] as String?;
+  bool? getBool(String key) => state[key] as bool?;
+  int? getInt(String key) => state[key] as int?;
+  double? getDouble(String key) => state[key] as double?;
+  List<String>? getStringList(String key) => state[key] as List<String>?;
+}
 
-  /// Limpar mapa
+// ========== TEMA ==========
+
+/// Notifier para gerenciar tema da aplicação
+class ThemeNotifier extends StateNotifier<ThemeData> {
+  ThemeNotifier(this._prefs, this._lightTheme, this._darkTheme) : super(_lightTheme) {
+    _loadTheme();
+  }
+  
+  final SharedPreferences _prefs;
+  final ThemeData _lightTheme;
+  final ThemeData _darkTheme;
+  static const String _themeKey = 'app_theme_mode';
+  
+  void _loadTheme() {
+    final isDark = _prefs.getBool(_themeKey) ?? false;
+    state = isDark ? _darkTheme : _lightTheme;
+  }
+  
+  Future<void> toggleTheme() async {
+    final isDark = state == _darkTheme;
+    await _prefs.setBool(_themeKey, !isDark);
+    state = isDark ? _lightTheme : _darkTheme;
+  }
+  
+  Future<void> setLightTheme() async {
+    await _prefs.setBool(_themeKey, false);
+    state = _lightTheme;
+  }
+  
+  Future<void> setDarkTheme() async {
+    await _prefs.setBool(_themeKey, true);
+    state = _darkTheme;
+  }
+  
+  bool get isDarkTheme => state == _darkTheme;
+}
+
+// ========== CONECTIVIDADE ==========
+
+/// Notifier para gerenciar estado de conectividade
+class ConnectivityNotifier extends StateNotifier<ConnectivityState> {
+  ConnectivityNotifier() : super(ConnectivityState.unknown);
+  
+  void updateConnectivity(bool isConnected) {
+    state = isConnected ? ConnectivityState.connected : ConnectivityState.disconnected;
+  }
+  
+  void setUnknown() {
+    state = ConnectivityState.unknown;
+  }
+}
+
+enum ConnectivityState {
+  connected,
+  disconnected,
+  unknown,
+}
+
+// ========== SINCRONIZAÇÃO ==========
+
+/// Notifier para gerenciar estado de sincronização
+class SyncNotifier extends StateNotifier<SyncState> {
+  SyncNotifier() : super(const SyncState.idle());
+  
+  void startSync() {
+    state = const SyncState.syncing(0.0);
+  }
+  
+  void updateProgress(double progress) {
+    state = SyncState.syncing(progress);
+  }
+  
+  void completeSync({int? itemsSynced}) {
+    state = SyncState.completed(
+      itemsSynced: itemsSynced ?? 0,
+      timestamp: DateTime.now(),
+    );
+  }
+  
+  void failSync(String error) {
+    state = SyncState.error(error);
+  }
+  
+  void resetSync() {
+    state = const SyncState.idle();
+  }
+}
+
+/// Estados de sincronização
+class SyncState {
+  const SyncState._();
+  
+  const factory SyncState.idle() = _SyncIdle;
+  const factory SyncState.syncing(double progress) = _SyncSyncing;
+  const factory SyncState.completed({
+    required int itemsSynced,
+    required DateTime timestamp,
+  }) = _SyncCompleted;
+  const factory SyncState.error(String message) = _SyncError;
+  
+  T when<T>({
+    required T Function() idle,
+    required T Function(double progress) syncing,
+    required T Function(int itemsSynced, DateTime timestamp) completed,
+    required T Function(String message) error,
+  }) {
+    if (this is _SyncIdle) return idle();
+    if (this is _SyncSyncing) return syncing((this as _SyncSyncing).progress);
+    if (this is _SyncCompleted) {
+      final completedState = this as _SyncCompleted;
+      return completed(completedState.itemsSynced, completedState.timestamp);
+    }
+    if (this is _SyncError) return error((this as _SyncError).message);
+    throw StateError('Unknown state: $this');
+  }
+}
+
+class _SyncIdle extends SyncState {
+  const _SyncIdle() : super._();
+}
+
+class _SyncSyncing extends SyncState {
+  const _SyncSyncing(this.progress) : super._();
+  final double progress;
+}
+
+class _SyncCompleted extends SyncState {
+  const _SyncCompleted({
+    required this.itemsSynced,
+    required this.timestamp,
+  }) : super._();
+  
+  final int itemsSynced;
+  final DateTime timestamp;
+}
+
+class _SyncError extends SyncState {
+  const _SyncError(this.message) : super._();
+  final String message;
+}
+
+// ========== FORMULÁRIOS ==========
+
+/// Notifier base para formulários
+abstract class BaseFormNotifier<T> extends StateNotifier<FormState<T>> {
+  BaseFormNotifier() : super(const FormState.initial());
+  
+  /// Método abstrato para validar dados
+  String? validateData(T data);
+  
+  /// Método abstrato para submeter formulário
+  Future<void> submitForm(T data);
+  
+  /// Atualiza dados do formulário
+  void updateData(T data) {
+    state = FormState.editing(data);
+  }
+  
+  /// Inicia submissão
+  void startSubmitting() {
+    if (state is _FormEditing<T>) {
+      final data = (state as _FormEditing<T>).data;
+      final validation = validateData(data);
+      
+      if (validation != null) {
+        state = FormState.error(validation);
+      } else {
+        state = FormState.submitting(data);
+        submitForm(data);
+      }
+    }
+  }
+  
+  /// Marca como concluído
+  void markCompleted() {
+    state = const FormState.completed();
+  }
+  
+  /// Marca erro
+  void markError(String error) {
+    state = FormState.error(error);
+  }
+  
+  /// Reset formulário
+  void reset() {
+    state = const FormState.initial();
+  }
+}
+
+/// Estados de formulário
+class FormState<T> {
+  const FormState._();
+  
+  const factory FormState.initial() = _FormInitial<T>;
+  const factory FormState.editing(T data) = _FormEditing<T>;
+  const factory FormState.submitting(T data) = _FormSubmitting<T>;
+  const factory FormState.completed() = _FormCompleted<T>;
+  const factory FormState.error(String message) = _FormError<T>;
+  
+  R when<R>({
+    required R Function() initial,
+    required R Function(T data) editing,
+    required R Function(T data) submitting,
+    required R Function() completed,
+    required R Function(String message) error,
+  }) {
+    if (this is _FormInitial<T>) return initial();
+    if (this is _FormEditing<T>) return editing((this as _FormEditing<T>).data);
+    if (this is _FormSubmitting<T>) return submitting((this as _FormSubmitting<T>).data);
+    if (this is _FormCompleted<T>) return completed();
+    if (this is _FormError<T>) return error((this as _FormError<T>).message);
+    throw StateError('Unknown state: $this');
+  }
+}
+
+class _FormInitial<T> extends FormState<T> {
+  const _FormInitial() : super._();
+}
+
+class _FormEditing<T> extends FormState<T> {
+  const _FormEditing(this.data) : super._();
+  final T data;
+}
+
+class _FormSubmitting<T> extends FormState<T> {
+  const _FormSubmitting(this.data) : super._();
+  final T data;
+}
+
+class _FormCompleted<T> extends FormState<T> {
+  const _FormCompleted() : super._();
+}
+
+class _FormError<T> extends FormState<T> {
+  const _FormError(this.message) : super._();
+  final String message;
+}
+
+// ========== CACHE ==========
+
+/// Notifier para gerenciar cache local
+class CacheNotifier extends StateNotifier<Map<String, CacheItem>> {
+  CacheNotifier() : super({});
+  
+  /// Adiciona item ao cache
+  void put(String key, dynamic value, {Duration? ttl}) {
+    final expiresAt = ttl != null ? DateTime.now().add(ttl) : null;
+    state = {
+      ...state,
+      key: CacheItem(
+        value: value,
+        createdAt: DateTime.now(),
+        expiresAt: expiresAt,
+      ),
+    };
+  }
+  
+  /// Obtém item do cache
+  T? get<T>(String key) {
+    final item = state[key];
+    if (item == null) return null;
+    
+    // Verifica se expirou
+    if (item.expiresAt != null && DateTime.now().isAfter(item.expiresAt!)) {
+      remove(key);
+      return null;
+    }
+    
+    return item.value as T?;
+  }
+  
+  /// Remove item do cache
+  void remove(String key) {
+    final newState = Map<String, CacheItem>.from(state);
+    newState.remove(key);
+    state = newState;
+  }
+  
+  /// Limpa cache expirado
+  void clearExpired() {
+    final now = DateTime.now();
+    final newState = <String, CacheItem>{};
+    
+    for (final entry in state.entries) {
+      final item = entry.value;
+      if (item.expiresAt == null || now.isBefore(item.expiresAt!)) {
+        newState[entry.key] = item;
+      }
+    }
+    
+    state = newState;
+  }
+  
+  /// Limpa todo o cache
   void clear() {
     state = {};
   }
-
-  /// Verificar se contém chave
-  bool containsKey(K key) => state.containsKey(key);
-
-  /// Obter valor ou default
-  V? get(K key) => state[key];
-}
-
-// ========== COUNTER NOTIFIER ==========
-/// StateNotifier para contadores simples
-class CounterNotifier extends StateNotifier<int> {
-  CounterNotifier([int initialValue = 0]) : super(initialValue);
-
-  void increment() => state++;
-  void decrement() => state--;
-  void reset() => state = 0;
-  void set(int value) => state = value;
-  void add(int value) => state += value;
-  void subtract(int value) => state -= value;
-}
-
-// ========== TOGGLE NOTIFIER ==========
-/// StateNotifier para boolean toggles
-class ToggleNotifier extends StateNotifier<bool> {
-  ToggleNotifier([bool initialValue = false]) : super(initialValue);
-
-  void toggle() => state = !state;
-  void setTrue() => state = true;
-  void setFalse() => state = false;
-  void set(bool value) => state = value;
-}
-
-// ========== LOADING STATE NOTIFIER ==========
-/// StateNotifier para estados de loading com dados
-class LoadingStateNotifier<T> extends StateNotifier<LoadingState<T>> {
-  LoadingStateNotifier() : super(const LoadingState.idle());
-
-  void setLoading() => state = const LoadingState.loading();
   
-  void setData(T data) => state = LoadingState.data(data);
-  
-  void setError(String error) => state = LoadingState.error(error);
-  
-  void setIdle() => state = const LoadingState.idle();
-}
-
-// ========== LOADING STATE DATA CLASS ==========
-/// Data class para estados de loading
-sealed class LoadingState<T> {
-  const LoadingState();
-
-  const factory LoadingState.idle() = IdleState<T>;
-  const factory LoadingState.loading() = LoadingStateLoading<T>;
-  const factory LoadingState.data(T data) = DataState<T>;
-  const factory LoadingState.error(String message) = ErrorState<T>;
-
-  R when<R>({
-    required R Function() idle,
-    required R Function() loading,
-    required R Function(T data) data,
-    required R Function(String message) error,
-  }) {
-    return switch (this) {
-      IdleState<T>() => idle(),
-      LoadingStateLoading<T>() => loading(),
-      DataState<T>(data: final d) => data(d),
-      ErrorState<T>(message: final m) => error(m),
-    };
+  /// Verifica se tem item
+  bool has(String key) {
+    return get<dynamic>(key) != null;
   }
 }
 
-class IdleState<T> extends LoadingState<T> {
-  const IdleState();
-}
-
-class LoadingStateLoading<T> extends LoadingState<T> {
-  const LoadingStateLoading();
-}
-
-class DataState<T> extends LoadingState<T> {
-  final T data;
-  const DataState(this.data);
-}
-
-class ErrorState<T> extends LoadingState<T> {
-  final String message;
-  const ErrorState(this.message);
+/// Item do cache
+class CacheItem {
+  const CacheItem({
+    required this.value,
+    required this.createdAt,
+    this.expiresAt,
+  });
+  
+  final dynamic value;
+  final DateTime createdAt;
+  final DateTime? expiresAt;
 }

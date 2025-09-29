@@ -520,9 +520,9 @@ class RecoveryAction {
   final Map<String, dynamic> metadata;
 
   const RecoveryAction({
-    required this.type,
-    required this.description,
-    this.parameterId,
-    this.metadata = const {},
+    required type,
+    required description,
+    parameterId,
+    metadata = const {},
   });
 }

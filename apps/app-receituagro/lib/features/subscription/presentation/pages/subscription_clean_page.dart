@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../providers/subscription_provider.dart';
@@ -31,9 +32,9 @@ class SubscriptionCleanPage extends StatefulWidget {
 class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return provider_lib.ChangeNotifierProvider(
       create: (_) => SubscriptionProvider()..loadSubscriptionData(),
-      child: Consumer<SubscriptionProvider>(
+      child: provider_lib.Consumer<SubscriptionProvider>(
         builder: (context, provider, child) {
           // Mostrar mensagens se existirem
           WidgetsBinding.instance.addPostFrameCallback((_) {

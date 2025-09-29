@@ -1,18 +1,18 @@
-import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/calculators/domain/entities/calculation_history.dart';
 import '../../features/calculators/domain/entities/calculation_result.dart';
+import '../../features/calculators/domain/entities/calculation_template.dart';
 import '../../features/calculators/domain/entities/calculator_category.dart';
 import '../../features/calculators/domain/entities/calculator_entity.dart';
+import '../../features/calculators/domain/services/calculator_favorites_service.dart';
+import '../../features/calculators/domain/services/calculator_template_service.dart';
 import '../../features/calculators/domain/usecases/execute_calculation.dart';
 import '../../features/calculators/domain/usecases/get_calculators.dart';
 import '../../features/calculators/domain/usecases/manage_calculation_history.dart';
 import '../../features/calculators/domain/usecases/manage_favorites.dart';
 import '../../features/calculators/domain/usecases/save_calculation_to_history.dart';
-import '../../features/calculators/domain/entities/calculation_template.dart';
-import '../../features/calculators/domain/services/calculator_favorites_service.dart';
-import '../../features/calculators/domain/services/calculator_template_service.dart';
 
 // === CALCULATOR STATE CLASSES ===
 

@@ -209,17 +209,7 @@ class AppRouter {
                   name: 'plant-details',
                   builder: (context, state) {
                     final plantId = state.pathParameters['id']!;
-                    return MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider(
-                          create: (context) => sl<PlantDetailsProvider>(),
-                        ),
-                        ChangeNotifierProvider(
-                          create: (context) => sl<TasksProvider>(),
-                        ),
-                      ],
-                      child: PlantDetailsPage(plantId: plantId),
-                    );
+                    return PlantDetailsPage(plantId: plantId);
                   },
                 ),
                 GoRoute(
@@ -238,10 +228,7 @@ class AppRouter {
               path: tasks,
               name: 'tasks',
               builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => sl<TasksProvider>(),
-                  child: const TasksListPage(),
-                );
+                return const TasksListPage();
               },
             ),
 
@@ -288,30 +275,21 @@ class AppRouter {
               path: notificationsSettings,
               name: 'notifications-settings',
               builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => sl<NotificationsSettingsProvider>(),
-                  child: const NotificationsSettingsPage(),
-                );
+                return const NotificationsSettingsPage();
               },
             ),
             GoRoute(
               path: backupSettings,
               name: 'backup-settings',
               builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => sl<BackupSettingsProvider>(),
-                  child: const BackupSettingsPage(),
-                );
+                return const BackupSettingsPage();
               },
             ),
             GoRoute(
               path: deviceManagement,
               name: 'device-management',
               builder: (context, state) {
-                return ChangeNotifierProvider.value(
-                  value: sl<DeviceManagementProvider>(),
-                  child: const DeviceManagementPage(),
-                );
+                return const DeviceManagementPage();
               },
             ),
             GoRoute(
@@ -325,10 +303,7 @@ class AppRouter {
               path: dataExport,
               name: 'data-export',
               builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => sl<DataExportProvider>(),
-                  child: const DataExportPage(),
-                );
+                return const DataExportPage();
               },
             ),
           ],

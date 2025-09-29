@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../../domain/entities/expense.dart';
 import '../providers/expenses_provider.dart';

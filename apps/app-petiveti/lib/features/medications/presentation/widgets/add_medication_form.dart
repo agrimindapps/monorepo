@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/medication.dart';

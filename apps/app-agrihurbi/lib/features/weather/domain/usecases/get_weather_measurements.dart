@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+
 import '../entities/weather_measurement_entity.dart';
 import '../failures/weather_failures.dart';
 import '../repositories/weather_repository.dart';
@@ -8,7 +9,7 @@ import '../repositories/weather_repository.dart';
 class GetWeatherMeasurements {
   final WeatherRepository _repository;
 
-  const GetWeatherMeasurements(this._repository);
+  const GetWeatherMeasurements(_repository);
 
   /// Get all weather measurements with optional filters
   Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> call({

@@ -3,25 +3,27 @@ import 'package:core/core.dart' hide AuthProvider;
 // ✅ ThemeProvider now used from core package
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart' as provider;
+// TODO: Replace with Riverpod providers
+// import 'package:provider/provider.dart' as provider;
 
 // ThemeProvider now imported from core package (line 2)
 import '../../../../core/theme/design_tokens.dart';
-import '../providers/settings_provider.dart';
+// TODO: Replace with Riverpod providers
+// import '../providers/settings_provider.dart';
 import '../widgets/account_section_widget.dart';
 // Keep existing widgets for now to avoid breaking changes
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
 import 'database_inspector_page.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
@@ -116,33 +118,26 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            provider.Consumer<ThemeProvider>(
-              builder: (context, themeProvider, _) {
-                return DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(9),
+            // TODO: Replace with Riverpod ThemeProvider
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Semantics(
+                label: 'Alterar tema',
+                hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático',
+                button: true,
+                onTap: () => _showThemeDialog(context),
+                child: IconButton(
+                  onPressed: () => _showThemeDialog(context),
+                  icon: const Icon(
+                    Icons.brightness_auto, // Placeholder default
+                    color: Colors.white,
+                    size: 19,
                   ),
-                  child: Semantics(
-                    label: 'Alterar tema',
-                    hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeProvider.themeMode)}',
-                    button: true,
-                    onTap: () => _showThemeDialog(context, themeProvider),
-                    child: IconButton(
-                      onPressed: () => _showThemeDialog(context, themeProvider),
-                      icon: Icon(
-                        themeProvider.themeMode == ThemeMode.dark
-                          ? Icons.brightness_2
-                          : themeProvider.themeMode == ThemeMode.light
-                            ? Icons.brightness_high
-                            : Icons.brightness_auto,
-                        color: Colors.white,
-                        size: 19,
-                      ),
-                    ),
-                  ),
-                );
-              },
+                ),
+              ),
             ),
           ],
         ),
@@ -224,26 +219,22 @@ class _SettingsPageState extends State<SettingsPage> {
       title: 'Notificações',
       icon: Icons.notifications,
       children: [
-        provider.Consumer<SettingsProvider>(
-          builder: (context, settingsProvider, _) {
-            return SettingsItem(
-              icon: Icons.notifications_active,
-              title: 'Notificações',
-              subtitle: 'Receba lembretes e alertas do aplicativo',
-              trailing: Semantics(
-                label: settingsProvider.notificationsEnabled
-                    ? 'Notificações ativadas'
-                    : 'Notificações desativadas',
-                hint: 'Interruptor para ativar ou desativar todas as notificações',
-                child: Switch(
-                  value: settingsProvider.notificationsEnabled,
-                  onChanged: settingsProvider.isLoading
-                      ? null
-                      : (value) => settingsProvider.toggleNotifications(value),
-                ),
-              ),
-            );
-          },
+        // TODO: Replace with Riverpod SettingsProvider
+        SettingsItem(
+          icon: Icons.notifications_active,
+          title: 'Notificações',
+          subtitle: 'Receba lembretes e alertas do aplicativo',
+          trailing: Semantics(
+            label: 'Notificações',
+            hint: 'Interruptor para ativar ou desativar todas as notificações',
+            child: Switch(
+              value: true, // Placeholder value
+              onChanged: (value) {
+                // TODO: Implement with Riverpod provider
+                _showSnackBar(context, 'Funcionalidade sendo migrada para Riverpod');
+              },
+            ),
+          ),
         ),
       ],
     );
@@ -477,38 +468,18 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
+  void _showThemeDialog(BuildContext context) {
+    // TODO: Implement with Riverpod ThemeProvider
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Escolher Tema'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildThemeOption(
-              context,
-              themeProvider,
-              ThemeMode.system,
-              'Automático (Sistema)',
-              'Segue a configuração do sistema',
-              Icons.brightness_auto,
-            ),
-            _buildThemeOption(
-              context,
-              themeProvider,
-              ThemeMode.light,
-              'Claro',
-              'Tema claro sempre ativo',
-              Icons.brightness_high,
-            ),
-            _buildThemeOption(
-              context,
-              themeProvider,
-              ThemeMode.dark,
-              'Escuro',
-              'Tema escuro sempre ativo',
-              Icons.brightness_2,
-            ),
+            Text('Funcionalidade sendo migrada para Riverpod'),
+            SizedBox(height: 16),
+            Text('Em breve você poderá alterar o tema novamente.'),
           ],
         ),
         actions: [
@@ -521,67 +492,68 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildThemeOption(
-    BuildContext context,
-    ThemeProvider themeProvider,
-    ThemeMode mode,
-    String title,
-    String subtitle,
-    IconData icon,
-  ) {
-    final isSelected = themeProvider.themeMode == mode;
+  // TODO: Implement with Riverpod ThemeProvider
+  // Widget _buildThemeOption(
+  //   BuildContext context,
+  //   ThemeProvider themeProvider,
+  //   ThemeMode mode,
+  //   String title,
+  //   String subtitle,
+  //   IconData icon,
+  // ) {
+  //   final isSelected = themeProvider.themeMode == mode;
     
-    return InkWell(
-      onTap: () {
-        themeProvider.setThemeMode(mode);
-        Navigator.of(context).pop();
-      },
-      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected 
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: isSelected 
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  //   return InkWell(
+  //     onTap: () {
+  //       themeProvider.setThemeMode(mode);
+  //       Navigator.of(context).pop();
+  //     },
+  //     borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+  //     child: Padding(
+  //       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+  //       child: Row(
+  //         children: [
+  //           Icon(
+  //             icon,
+  //             color: isSelected 
+  //               ? Theme.of(context).colorScheme.primary
+  //               : Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+  //           ),
+  //           const SizedBox(width: 16),
+  //           Expanded(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   title,
+  //                   style: TextStyle(
+  //                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+  //                     color: isSelected 
+  //                       ? Theme.of(context).colorScheme.primary
+  //                       : Theme.of(context).colorScheme.onSurface,
+  //                   ),
+  //                 ),
+  //                 Text(
+  //                   subtitle,
+  //                   style: TextStyle(
+  //                     fontSize: 12,
+  //                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //           if (isSelected)
+  //             Icon(
+  //               Icons.check,
+  //               color: Theme.of(context).colorScheme.primary,
+  //               size: 20,
+  //             ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
 
 
@@ -683,12 +655,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _handleRateApp(BuildContext context) async {
+    // TODO: Replace with Riverpod SettingsProvider
     try {
-      final settingsProvider = provider.Provider.of<SettingsProvider>(context, listen: false);
-      final success = await settingsProvider.handleAppRating(context);
+      // final settingsProvider = ref.read(settingsProviderNotifier);
+      // final success = await settingsProvider.handleAppRating(context);
 
-      if (success && mounted) {
-        _showSnackBar(context, 'Obrigado pelo feedback!');
+      // Placeholder implementation
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      
+      if (mounted) {
+        _showSnackBar(context, 'Funcionalidade sendo migrada para Riverpod');
       }
     } catch (e) {
       if (mounted) {

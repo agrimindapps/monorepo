@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../../../animals/presentation/providers/animals_provider.dart';
 import '../providers/weights_provider.dart';

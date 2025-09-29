@@ -573,7 +573,7 @@ class _LivestockSearchPageState extends State<LivestockSearchPage> {
   }
 
   void _confirmDeleteAnimal(AnimalBaseEntity animal) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),

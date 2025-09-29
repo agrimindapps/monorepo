@@ -13,7 +13,7 @@ import '../providers/equines_provider.dart';
 class EquineFormPage extends StatefulWidget {
   const EquineFormPage({
     super.key,
-    this.equineId,
+    equineId,
   });
 
   /// ID do equino para edição (null para criação)
@@ -516,7 +516,7 @@ class _EquineFormPageState extends State<EquineFormPage> {
   }
 
   void _confirmDelete() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),

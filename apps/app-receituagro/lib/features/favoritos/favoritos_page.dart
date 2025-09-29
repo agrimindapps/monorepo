@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../core/widgets/modern_header_widget.dart';
@@ -96,7 +97,7 @@ class _FavoritosPageState extends State<FavoritosPage>
       });
     }
     
-    return ChangeNotifierProvider.value(
+    return provider_lib.ChangeNotifierProvider.value(
       value: provider,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -124,7 +125,7 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return Consumer<FavoritosProviderSimplified>(
+    return provider_lib.Consumer<FavoritosProviderSimplified>(
       builder: (context, provider, child) {
         return ModernHeaderWidget(
           title: 'Favoritos',

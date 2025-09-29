@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 // ignore: avoid_classes_with_only_static_members
 abstract class AuthModule {

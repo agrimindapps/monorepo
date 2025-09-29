@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:core/core.dart';
 
 import 'presentation/pages/detalhe_diagnostico_clean_page.dart';
@@ -28,7 +29,7 @@ class DetalheDiagnosticoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return provider.ChangeNotifierProvider(
       create: (_) => DetalheDiagnosticoProvider(),
       child: DetalheDiagnosticoCleanPage(
         diagnosticoId: diagnosticoId,

@@ -1,6 +1,7 @@
+import 'package:core/core.dart' hide AuthState, FormState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
 import '../providers/auth_provider.dart';
 
 /// **Login Action Section Widget**
@@ -121,7 +122,7 @@ class LoginActionSection extends ConsumerWidget {
   /// 
   /// Main authentication button with enhanced loading states and validation.
   Widget _buildPrimaryActionButton(BuildContext context, AuthState authState) {
-    final isLoading = authState.isLoading || isAuthenticating;
+    final isLoading = (authState.isLoading == true) || isAuthenticating;
     final canSubmit = !isLoading;
 
     return Semantics(
@@ -184,7 +185,7 @@ class LoginActionSection extends ConsumerWidget {
       );
     }
 
-    if (authState.isLoading) {
+    if (authState.isLoading == true) {
       return CircularProgressIndicator(
         color: Theme.of(context).colorScheme.onPrimary,
       );

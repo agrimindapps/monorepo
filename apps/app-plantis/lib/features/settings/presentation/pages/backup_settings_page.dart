@@ -1,523 +1,93 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/data/models/backup_model.dart';
-import '../../../../core/services/backup_service.dart';
+import '../../../../core/riverpod_providers/settings_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
-import '../../../../features/premium/presentation/providers/premium_provider.dart';
-import '../../../../presentation/widgets/settings_item.dart';
-import '../../../../presentation/widgets/settings_section.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../providers/backup_settings_provider.dart';
-import '../widgets/backup_list_item.dart';
-import '../widgets/restore_options_dialog.dart';
 
-class BackupSettingsPage extends StatelessWidget {
+class BackupSettingsPage extends ConsumerWidget {
   const BackupSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final settingsState = ref.watch(settingsNotifierProvider);
 
-    return ChangeNotifierProvider<BackupSettingsProvider>(
-      create:
-          (context) => BackupSettingsProvider(
-            backupService: context.read<BackupService>(),
-            connectivity: context.read<Connectivity>(),
-          ),
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: theme.colorScheme.surface,
-          title: Text(
-            'Backup na Nuvem',
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-            onPressed: () => context.pop(),
-          ),
-        ),
-        body: ResponsiveLayout(
-          child: Consumer<PremiumProvider>(
-            builder: (context, premiumProvider, child) {
-              // Verificação de segurança: usar PremiumProvider real
-              if (!premiumProvider.isPremium) {
-                return _buildPremiumRequired(context);
-              }
-
-              return Consumer<BackupSettingsProvider>(
-                builder: (context, provider, child) {
-                  return RefreshIndicator(
-                    onRefresh: provider.refresh,
-                    color: PlantisColors.primary,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Status e ação rápida
-                          _buildQuickActionCard(context, provider),
-                          const SizedBox(height: 24),
-
-                          // Configurações de backup
-                          _buildBackupSettings(context, provider),
-                          const SizedBox(height: 24),
-
-                          // Lista de backups
-                          _buildBackupsList(context, provider),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Card com status e botão de backup rápido
-  Widget _buildQuickActionCard(
-    BuildContext context,
-    BackupSettingsProvider provider,
-  ) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.cloud_upload,
-                    color: PlantisColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Backup Automático',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        'Seus dados são protegidos na nuvem',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Status do último backup
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: provider.lastBackupStatusColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: provider.lastBackupStatusColor.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    provider.lastBackupStatusIcon,
-                    color: provider.lastBackupStatusColor,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      provider.lastBackupStatusText,
-                      style: TextStyle(
-                        color: provider.lastBackupStatusColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Progresso do backup
-            if (provider.isCreatingBackup) ...[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LinearProgressIndicator(
-                    value: provider.backupProgress,
-                    backgroundColor: PlantisColors.primary.withValues(
-                      alpha: 0.1,
-                    ),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      PlantisColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Criando backup...',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${(provider.backupProgress * 100).toInt()}%',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: PlantisColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Progresso da restauração
-            if (provider.isRestoringBackup) ...[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LinearProgressIndicator(
-                    value: provider.restoreProgress,
-                    backgroundColor: PlantisColors.leaf.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      PlantisColors.leaf,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          provider.restoreStatusMessage ??
-                              'Restaurando backup...',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${(provider.restoreProgress * 100).toInt()}%',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: PlantisColors.leaf,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Botão de backup manual
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed:
-                    provider.canCreateBackup && !provider.isRestoringBackup
-                        ? () {
-                          provider.createBackup();
-                        }
-                        : null,
-                icon:
-                    provider.isCreatingBackup
-                        ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                        : const Icon(Icons.cloud_upload),
-                label: Text(
-                  provider.isCreatingBackup
-                      ? 'Criando Backup...'
-                      : provider.isRestoringBackup
-                      ? 'Restaurando...'
-                      : 'Fazer Backup Agora',
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PlantisColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Seção de configurações de backup
-  Widget _buildBackupSettings(
-    BuildContext context,
-    BackupSettingsProvider provider,
-  ) {
-    return SettingsSection(
-      title: 'Configurações',
-      children: [
-        SettingsItem(
-          icon: Icons.schedule,
-          title: 'Backup Automático',
-          subtitle:
-              provider.settings.autoBackupEnabled
-                  ? 'Ativo - ${provider.settings.frequency.displayName}'
-                  : 'Desativado',
-          iconColor: PlantisColors.primary,
-          isFirst: true,
-          trailing: Switch(
-            value: provider.settings.autoBackupEnabled,
-            onChanged: (value) {
-              final newSettings = provider.settings.copyWith(
-                autoBackupEnabled: value,
-              );
-              provider.updateSettings(newSettings);
-            },
-            activeColor: PlantisColors.primary,
-          ),
-          onTap: () {
-            _showFrequencyDialog(context, provider);
-          },
-        ),
-        SettingsItem(
-          icon: Icons.wifi,
-          title: 'Apenas no Wi-Fi',
-          subtitle:
-              provider.settings.wifiOnlyEnabled
-                  ? 'Backup apenas quando conectado ao Wi-Fi'
-                  : 'Usar qualquer conexão de internet',
-          iconColor: PlantisColors.secondary,
-          trailing: Switch(
-            value: provider.settings.wifiOnlyEnabled,
-            onChanged: (value) {
-              final newSettings = provider.settings.copyWith(
-                wifiOnlyEnabled: value,
-              );
-              provider.updateSettings(newSettings);
-            },
-            activeColor: PlantisColors.primary,
-          ),
-        ),
-        SettingsItem(
-          icon: Icons.storage,
-          title: 'Backups a Manter',
-          subtitle:
-              'Manter os ${provider.settings.maxBackupsToKeep} backups mais recentes',
-          iconColor: PlantisColors.accent,
-          isLast: true,
-          onTap: () {
-            _showMaxBackupsDialog(context, provider);
-          },
-        ),
-      ],
-    );
-  }
-
-  /// Lista de backups disponíveis
-  Widget _buildBackupsList(
-    BuildContext context,
-    BackupSettingsProvider provider,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Backups Disponíveis',
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: theme.colorScheme.surface,
+        title: Text(
+          'Backup na Nuvem',
           style: TextStyle(
-            fontSize: 18,
+            color: theme.colorScheme.onSurface,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 12),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: ResponsiveLayout(
+        child: Consumer(
+          builder: (context, ref, child) {
+            // Verificação de Premium simplificada por enquanto
+            final isPremium = false; // TODO: Implementar verificação de premium
 
-        if (provider.isLoading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (provider.backups.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.cloud_off,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Nenhum backup encontrado',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Crie seu primeiro backup para proteger seus dados',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          ...provider.backups.map(
-            (backup) => BackupListItem(
-              backup: backup,
-              onRestore: () => _showRestoreDialog(context, provider, backup),
-              onDelete: () => _showDeleteDialog(context, provider, backup),
-            ),
-          ),
-      ],
+            if (!isPremium) {
+              return _buildPremiumRequired(context, theme);
+            }
+
+            return _buildBackupSettings(context, theme, settingsState);
+          },
+        ),
+      ),
     );
   }
 
-  /// Tela para usuários não premium
-  Widget _buildPremiumRequired(BuildContext context) {
-    final theme = Theme.of(context);
-
+  Widget _buildPremiumRequired(BuildContext context, ThemeData theme) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: PlantisColors.primaryGradient,
-              ),
-              child: const Icon(
-                Icons.cloud_upload,
-                color: Colors.white,
-                size: 40,
-              ),
+            Icon(
+              Icons.workspace_premium,
+              size: 64,
+              color: PlantisColors.primary,
             ),
             const SizedBox(height: 24),
             Text(
-              'Backup na Nuvem',
-              style: TextStyle(
-                fontSize: 24,
+              'Recurso Premium',
+              style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: PlantisColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'O backup na nuvem está disponível apenas para usuários Premium.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Proteja seus dados com backup automático na nuvem',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: PlantisColors.sun.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PlantisColors.sun.withValues(alpha: 0.3),
-                ),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.star, color: PlantisColors.sun, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Funcionalidade Premium Exclusiva',
-                      style: TextStyle(
-                        color: PlantisColors.sun,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => context.push('/premium'),
-              icon: const Icon(Icons.upgrade),
-              label: const Text('Atualizar para Premium'),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pushNamed('/premium'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PlantisColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+                  horizontal: 32,
+                  vertical: 16,
                 ),
               ),
+              child: const Text('Assinar Premium'),
             ),
           ],
         ),
@@ -525,207 +95,104 @@ class BackupSettingsPage extends StatelessWidget {
     );
   }
 
-  /// Dialog para escolher frequência de backup
-  void _showFrequencyDialog(
+  Widget _buildBackupSettings(
     BuildContext context,
-    BackupSettingsProvider provider,
+    ThemeData theme,
+    SettingsState settingsState,
   ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Frequência do Backup'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  BackupFrequency.values.map((frequency) {
-                    return RadioListTile<BackupFrequency>(
-                      title: Text(frequency.displayName),
-                      value: frequency,
-                      groupValue: provider.settings.frequency,
-                      onChanged: (value) {
-                        if (value != null) {
-                          final newSettings = provider.settings.copyWith(
-                            frequency: value,
-                          );
-                          provider.updateSettings(newSettings);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      activeColor: PlantisColors.primary,
-                    );
-                  }).toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// Dialog para escolher número máximo de backups
-  void _showMaxBackupsDialog(
-    BuildContext context,
-    BackupSettingsProvider provider,
-  ) {
-    int selectedValue = provider.settings.maxBackupsToKeep;
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Máximo de Backups'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  [3, 5, 10, 20].map((count) {
-                    return RadioListTile<int>(
-                      title: Text('$count backups'),
-                      subtitle:
-                          count == 3
-                              ? const Text('Recomendado para uso básico')
-                              : count == 5
-                              ? const Text('Padrão')
-                              : null,
-                      value: count,
-                      groupValue: selectedValue,
-                      onChanged: (value) {
-                        if (value != null) {
-                          selectedValue = value;
-                          final newSettings = provider.settings.copyWith(
-                            maxBackupsToKeep: value,
-                          );
-                          provider.updateSettings(newSettings);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      activeColor: PlantisColors.primary,
-                    );
-                  }).toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// Dialog de confirmação de restauração
-  void _showRestoreDialog(
-    BuildContext context,
-    BackupSettingsProvider provider,
-    BackupInfo backup,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => RestoreOptionsDialog(
-            backup: backup,
-            onRestore: (options) {
-              Navigator.of(context).pop();
-              provider.restoreBackup(backup.id, options);
-            },
-          ),
-    );
-  }
-
-  /// Dialog de confirmação de exclusão
-  void _showDeleteDialog(
-    BuildContext context,
-    BackupSettingsProvider provider,
-    BackupInfo backup,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Row(
-              children: [
-                Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
-                const SizedBox(width: 8),
-                const Text('Deletar Backup'),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Tem certeza que deseja deletar este backup?'),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        backup.fileName,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      Text('Data: ${backup.formattedDate}'),
-                      Text('Tamanho: ${backup.formattedSize}'),
-                    ],
+                Text(
+                  'Configurações de Backup',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.error,
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  title: const Text('Backup Automático'),
+                  subtitle: const Text('Backup automático dos dados'),
+                  value: settingsState.settings.backup.autoBackupEnabled,
+                  onChanged: (value) {
+                    // TODO: Implementar toggle de backup automático
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.cloud_upload),
+                  title: const Text('Fazer Backup Agora'),
+                  subtitle: const Text('Sincronizar dados com a nuvem'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    // TODO: Implementar backup manual
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Backup em desenvolvimento'),
                       ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'Esta ação não pode ser desfeita',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.cloud_download),
+                  title: const Text('Restaurar Backup'),
+                  subtitle: const Text('Restaurar dados da nuvem'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    // TODO: Implementar restauração
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Restauração em desenvolvimento'),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  provider.deleteBackup(backup);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Deletar'),
-              ),
-            ],
           ),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Status do Backup',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                  ),
+                  title: const Text('Último Backup'),
+                  subtitle: const Text('Nunca realizado'),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.storage,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('Espaço Utilizado'),
+                  subtitle: const Text('0 KB de 1 GB'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

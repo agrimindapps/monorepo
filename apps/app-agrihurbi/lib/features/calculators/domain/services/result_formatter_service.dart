@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import '../entities/calculation_result.dart';
 
 /// Serviço de formatação de resultados de calculadoras
@@ -6,7 +7,6 @@ import '../entities/calculation_result.dart';
 /// Implementa formatação contextual, cultural e responsiva para diferentes
 /// tipos de resultados agrícolas com precisão adequada
 class ResultFormatterService {
-  static const String _locale = 'pt_BR';
 
   /// Formata resultado principal com precisão adequada
   static String formatPrimaryResult(
@@ -371,10 +371,10 @@ class QualityRange {
   final String recommendation;
 
   const QualityRange({
-    required this.min,
-    required this.max,
-    required this.quality,
-    required this.recommendation,
+    required min,
+    required max,
+    required quality,
+    required recommendation,
   });
 }
 
@@ -386,9 +386,9 @@ class FormattedQualifiedResult {
   final String recommendation;
 
   const FormattedQualifiedResult({
-    required this.formattedValue,
-    required this.quality,
-    required this.color,
-    required this.recommendation,
+    required formattedValue,
+    required quality,
+    required color,
+    required recommendation,
   });
 }

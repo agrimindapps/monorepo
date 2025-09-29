@@ -19,9 +19,9 @@ class WeatherRepositoryImpl implements WeatherRepository {
   final Connectivity _connectivity;
 
   WeatherRepositoryImpl(
-    this._localDataSource,
-    this._remoteDataSource,
-    this._connectivity,
+    _localDataSource,
+    _remoteDataSource,
+    _connectivity,
   );
 
   /// Check if device is online
@@ -845,14 +845,14 @@ class WeatherRepositoryImpl implements WeatherRepository {
       // Upload pending measurements
       final pendingResult = await uploadPendingMeasurements();
       pendingResult.fold(
-        (failure) => {}, // Log but continue
+        (failure) => <String, dynamic>{}, // Log but continue
         (count) => syncedCount += count,
       );
 
       // Download updates
       final updatesResult = await downloadWeatherUpdates();
       updatesResult.fold(
-        (failure) => {}, // Log but continue
+        (failure) => <String, dynamic>{}, // Log but continue
         (count) => syncedCount += count,
       );
 

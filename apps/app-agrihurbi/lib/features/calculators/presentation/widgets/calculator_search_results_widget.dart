@@ -24,12 +24,12 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
 
   const CalculatorSearchResultsWidget({
     super.key,
-    required this.searchResults,
-    required this.isSearching,
-    this.showCategory = true,
-    this.scrollController,
-    this.onClearFilters,
-    this.searchCallCount = 0,
+    required searchResults,
+    required isSearching,
+    showCategory = true,
+    scrollController,
+    onClearFilters,
+    searchCallCount = 0,
   });
 
   @override

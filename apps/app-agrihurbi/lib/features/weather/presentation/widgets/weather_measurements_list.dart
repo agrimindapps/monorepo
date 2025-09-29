@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/weather_measurement_entity.dart';
 
 /// Widget to display a list of weather measurements
@@ -11,11 +12,11 @@ class WeatherMeasurementsList extends StatelessWidget {
 
   const WeatherMeasurementsList({
     super.key,
-    required this.measurements,
-    this.isLoading = false,
-    this.hasMore = false,
-    this.onLoadMore,
-    this.onRefresh,
+    required measurements,
+    isLoading = false,
+    hasMore = false,
+    onLoadMore,
+    onRefresh,
   });
 
   @override
@@ -488,7 +489,7 @@ class WeatherMeasurementsList extends StatelessWidget {
   }
 
   void _showMeasurementDetails(BuildContext context, WeatherMeasurementEntity measurement) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(measurement.locationName),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
@@ -19,7 +20,7 @@ class FeatureFlagsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SettingsProvider, FeatureFlagsProvider>(
+    return provider_lib.Consumer2<SettingsProvider, FeatureFlagsProvider>(
       builder: (context, settingsProvider, featureFlagsProvider, child) {
         // Only show in development mode or if explicitly enabled
         if (!settingsProvider.isDevelopmentMode && !_shouldShowInProduction(featureFlagsProvider)) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../../domain/calculators/exercise_calculator.dart';
 import '../../domain/entities/calculation_result.dart';

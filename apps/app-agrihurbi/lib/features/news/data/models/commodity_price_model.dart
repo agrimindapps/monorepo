@@ -43,17 +43,17 @@ class CommodityPriceModel extends CommodityPriceEntity {
   final List<HistoricalPriceModel> history;
 
   const CommodityPriceModel({
-    required this.id,
-    required this.commodityName,
+    required id,
+    required commodityName,
     required CommodityTypeModel type,
-    required this.currentPrice,
-    required this.previousPrice,
-    required this.changePercent,
-    required this.currency,
-    required this.unit,
-    required this.market,
-    required this.lastUpdated,
-    this.history = const [],
+    required currentPrice,
+    required previousPrice,
+    required changePercent,
+    required currency,
+    required unit,
+    required market,
+    required lastUpdated,
+    history = const [],
   }) : _type = type,
        super(
           id: id,
@@ -141,17 +141,17 @@ class CommodityPriceModel extends CommodityPriceEntity {
     List<HistoricalPriceModel>? history,
   }) {
     return CommodityPriceModel(
-      id: id ?? this.id,
-      commodityName: commodityName ?? this.commodityName,
+      id: id ?? id,
+      commodityName: commodityName ?? commodityName,
       type: type ?? _type,
-      currentPrice: currentPrice ?? this.currentPrice,
-      previousPrice: previousPrice ?? this.previousPrice,
-      changePercent: changePercent ?? this.changePercent,
-      currency: currency ?? this.currency,
-      unit: unit ?? this.unit,
-      market: market ?? this.market,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-      history: history ?? this.history,
+      currentPrice: currentPrice ?? currentPrice,
+      previousPrice: previousPrice ?? previousPrice,
+      changePercent: changePercent ?? changePercent,
+      currency: currency ?? currency,
+      unit: unit ?? unit,
+      market: market ?? market,
+      lastUpdated: lastUpdated ?? lastUpdated,
+      history: history ?? history,
     );
   }
 }
@@ -336,9 +336,9 @@ class HistoricalPriceModel extends HistoricalPrice {
   final double volume;
 
   const HistoricalPriceModel({
-    required this.date,
-    required this.price,
-    this.volume = 0.0,
+    required date,
+    required price,
+    volume = 0.0,
   }) : super(
           date: date,
           price: price,
@@ -395,12 +395,12 @@ class MarketSummaryModel extends MarketSummaryEntity {
   final double marketIndexChange;
 
   const MarketSummaryModel({
-    required this.marketName,
-    required this.lastUpdated,
-    required this.topGainers,
-    required this.topLosers,
-    required this.marketIndex,
-    required this.marketIndexChange,
+    required marketName,
+    required lastUpdated,
+    required topGainers,
+    required topLosers,
+    required marketIndex,
+    required marketIndexChange,
   }) : super(
           marketName: marketName,
           lastUpdated: lastUpdated,

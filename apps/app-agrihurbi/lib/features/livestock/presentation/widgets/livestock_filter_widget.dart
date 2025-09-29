@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/bovine_entity.dart';
 
 /// Widget de filtros para livestock
@@ -22,19 +23,19 @@ class LivestockFilterWidget extends StatelessWidget {
 
   const LivestockFilterWidget({
     super.key,
-    this.selectedBreed,
-    this.selectedOriginCountry,
-    this.selectedAptitude,
-    this.selectedBreedingSystem,
-    this.availableBreeds = const [],
-    this.availableOriginCountries = const [],
-    this.onBreedChanged,
-    this.onOriginCountryChanged,
-    this.onAptitudeChanged,
-    this.onBreedingSystemChanged,
-    this.onClearFilters,
-    this.showClearButton = true,
-    this.isCollapsible = false,
+    selectedBreed,
+    selectedOriginCountry,
+    selectedAptitude,
+    selectedBreedingSystem,
+    availableBreeds = const [],
+    availableOriginCountries = const [],
+    onBreedChanged,
+    onOriginCountryChanged,
+    onAptitudeChanged,
+    onBreedingSystemChanged,
+    onClearFilters,
+    showClearButton = true,
+    isCollapsible = false,
   });
 
   @override
@@ -292,14 +293,14 @@ class CompactLivestockFilterWidget extends StatelessWidget {
 
   const CompactLivestockFilterWidget({
     super.key,
-    this.selectedBreed,
-    this.selectedAptitude,
-    this.selectedBreedingSystem,
-    this.onBreedChanged,
-    this.onAptitudeChanged,
-    this.onBreedingSystemChanged,
-    this.onClearFilters,
-    this.availableBreeds = const [],
+    selectedBreed,
+    selectedAptitude,
+    selectedBreedingSystem,
+    onBreedChanged,
+    onAptitudeChanged,
+    onBreedingSystemChanged,
+    onClearFilters,
+    availableBreeds = const [],
   });
 
   @override
@@ -412,23 +413,23 @@ class AdvancedLivestockFilterWidget extends StatefulWidget {
 
   const AdvancedLivestockFilterWidget({
     super.key,
-    this.selectedBreed,
-    this.selectedOriginCountry,
-    this.selectedAptitude,
-    this.selectedBreedingSystem,
-    this.dateRange,
-    this.sortBy,
-    this.sortAscending = true,
-    this.onBreedChanged,
-    this.onOriginCountryChanged,
-    this.onAptitudeChanged,
-    this.onBreedingSystemChanged,
-    this.onDateRangeChanged,
-    this.onSortChanged,
-    this.onSortDirectionChanged,
-    this.onClearFilters,
-    this.availableBreeds = const [],
-    this.availableOriginCountries = const [],
+    selectedBreed,
+    selectedOriginCountry,
+    selectedAptitude,
+    selectedBreedingSystem,
+    dateRange,
+    sortBy,
+    sortAscending = true,
+    onBreedChanged,
+    onOriginCountryChanged,
+    onAptitudeChanged,
+    onBreedingSystemChanged,
+    onDateRangeChanged,
+    onSortChanged,
+    onSortDirectionChanged,
+    onClearFilters,
+    availableBreeds = const [],
+    availableOriginCountries = const [],
   });
 
   @override

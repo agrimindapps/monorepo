@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
+
 import '../../domain/entities/export_request.dart';
 import '../providers/data_export_provider.dart';
 
@@ -30,8 +31,8 @@ class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
   }
 
   Future<void> _checkAvailability() async {
-    final provider = context.read<DataExportProvider>();
-    await provider.checkExportAvailability(
+    final dataProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
+    await dataProvider.checkExportAvailability(
       userId: widget.userId,
       requestedDataTypes: widget.requestedDataTypes,
     );
@@ -43,20 +44,20 @@ class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DataExportProvider>(
-      builder: (BuildContext context, DataExportProvider provider, Widget? child) {
-        if (provider.isLoading) {
+    return provider.Consumer<DataExportProvider>(
+      builder: (BuildContext context, DataExportProvider dataProvider, Widget? child) {
+        if (dataProvider.isLoading) {
           return const _LoadingWidget();
         }
 
-        if (provider.error != null) {
+        if (dataProvider.error != null) {
           return _ErrorWidget(
-            error: provider.error!,
+            error: dataProvider.error!,
             onRetry: _checkAvailability,
           );
         }
 
-        final availability = provider.availabilityResult;
+        final availability = dataProvider.availabilityResult;
         if (availability == null) {
           return const _NoDataWidget();
         }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
+import 'package:provider/provider.dart' as provider;
 
 import '../controllers/login_controller.dart';
 
@@ -10,7 +11,7 @@ class AuthTabsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginController>(
+    return provider.Consumer<LoginController>(
       builder: (context, controller, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final primaryColor = _getReceitaAgroPrimaryColor(isDark);

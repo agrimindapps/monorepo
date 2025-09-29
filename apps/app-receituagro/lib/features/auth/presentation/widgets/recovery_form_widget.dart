@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
+import 'package:provider/provider.dart' as provider;
 
 import '../controllers/login_controller.dart';
 import 'auth_button_widget.dart';
@@ -13,7 +14,7 @@ class RecoveryFormWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginController>(
+    return provider.Consumer<LoginController>(
       builder: (context, controller, child) {
         final primaryColor = _getReceitaAgroPrimaryColor(
           Theme.of(context).brightness == Brightness.dark
@@ -131,7 +132,7 @@ class RecoveryFormWidget extends StatelessWidget {
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
-              final controller = context.read<LoginController>();
+              final controller = provider.Provider.of<LoginController>(context, listen: false);
               controller.clearError();
             },
             child: Container(
@@ -153,7 +154,7 @@ class RecoveryFormWidget extends StatelessWidget {
       print('🎯 RecoveryFormWidget: Enviando email de recuperação');
     }
     
-    final controller = context.read<LoginController>();
+    final controller = provider.Provider.of<LoginController>(context, listen: false);
     await controller.sendPasswordReset();
     
     if (!context.mounted) return;

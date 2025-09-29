@@ -1,5 +1,6 @@
+import 'package:core/core.dart' hide AuthState, FormState;
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
 import '../providers/auth_provider.dart';
 
 /// **Registration Page Coordinator**
@@ -121,12 +122,12 @@ abstract class RegisterPageCoordinator {
     required BuildContext context,
   }) {
     ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next.isAuthenticated && context.mounted) {
+      if (next.isAuthenticated == true && context.mounted) {
         context.go('/');
       }
       
-      if (next.hasError && context.mounted) {
-        _showError(context, next.error!);
+      if (next.hasError == true && context.mounted) {
+        _showError(context, next.error ?? 'Erro desconhecido');
         ref.read(authProvider.notifier).clearError();
       }
     });
@@ -197,7 +198,7 @@ abstract class RegisterPageCoordinator {
     required GlobalKey<FormState> formKey,
     required bool termsAccepted,
   }) {
-    if (!formKey.currentState!.validate()) {
+    if (!(formKey.currentState?.validate() == true)) {
       return false;
     }
 

@@ -50,6 +50,9 @@ class UserEntity extends BaseSyncEntity {
   /// Retorna true se o usuário tem foto de perfil
   bool get hasProfilePhoto => photoUrl != null && photoUrl!.isNotEmpty;
 
+  /// Retorna true se o usuário é anônimo
+  bool get isAnonymous => provider == AuthProvider.anonymous;
+
   /// Retorna as iniciais do nome para avatar
   String get initials {
     final names = displayName.trim().split(' ');
@@ -121,6 +124,9 @@ class UserEntity extends BaseSyncEntity {
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
+
+  /// Alias para toJson para compatibilidade
+  Map<String, dynamic> toMap() => toJson();
 
   /// Cria instância do JSON
   factory UserEntity.fromJson(Map<String, dynamic> json) {

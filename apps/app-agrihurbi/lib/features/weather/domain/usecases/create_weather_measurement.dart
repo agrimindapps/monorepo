@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+
 import '../entities/weather_measurement_entity.dart';
 import '../failures/weather_failures.dart';
 import '../repositories/weather_repository.dart';
@@ -8,7 +9,7 @@ import '../repositories/weather_repository.dart';
 class CreateWeatherMeasurement {
   final WeatherRepository _repository;
 
-  const CreateWeatherMeasurement(this._repository);
+  const CreateWeatherMeasurement(_repository);
 
   /// Create a new weather measurement
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> call(

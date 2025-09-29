@@ -12,7 +12,7 @@ import 'package:injectable/injectable.dart';
 class ManageSubscription {
   final SubscriptionRepository _repository;
 
-  const ManageSubscription(this._repository);
+  const ManageSubscription(_repository);
 
   /// Get current subscription
   Future<Either<Failure, SubscriptionEntity?>> getCurrentSubscription() async {
@@ -77,7 +77,7 @@ class ManageSubscription {
 class CheckFeatureAccess {
   final SubscriptionRepository _repository;
 
-  const CheckFeatureAccess(this._repository);
+  const CheckFeatureAccess(_repository);
 
   /// Check if user has access to specific feature
   ResultFuture<bool> hasAccess(PremiumFeature feature) async {
@@ -111,7 +111,7 @@ class CheckFeatureAccess {
 class ManagePaymentMethods {
   final SubscriptionRepository _repository;
 
-  const ManagePaymentMethods(this._repository);
+  const ManagePaymentMethods(_repository);
 
   /// Get all payment methods
   ResultFuture<List<PaymentMethod>> getPaymentMethods() async {
@@ -145,7 +145,7 @@ class ManagePaymentMethods {
 class ManageTrial {
   final SubscriptionRepository _repository;
 
-  const ManageTrial(this._repository);
+  const ManageTrial(_repository);
 
   /// Start free trial
   ResultFuture<SubscriptionEntity> startTrial({
@@ -174,7 +174,7 @@ class ManageTrial {
 class GetSubscriptionPlans {
   final SubscriptionRepository _repository;
 
-  const GetSubscriptionPlans(this._repository);
+  const GetSubscriptionPlans(_repository);
 
   /// Get all available plans
   ResultFuture<List<SubscriptionPlan>> getAllPlans() async {
@@ -197,7 +197,7 @@ class GetSubscriptionPlans {
 class ManagePromoCodes {
   final SubscriptionRepository _repository;
 
-  const ManagePromoCodes(this._repository);
+  const ManagePromoCodes(_repository);
 
   /// Apply promo code
   ResultFuture<PromoCodeResult> applyPromoCode(String code) async {

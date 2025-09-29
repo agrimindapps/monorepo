@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../core/di/injection_container.dart' as di;
 import '../../core/interfaces/i_premium_service.dart';
@@ -22,7 +22,7 @@ class ComentariosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
+    return provider.ChangeNotifierProvider.value(
       value: di.sl<ComentariosProvider>(),
       child: _ComentariosPageContent(
         pkIdentificador: pkIdentificador,
@@ -62,8 +62,8 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
   Future<void> _initializeData() async {
     if (_dataInitialized) return;
     
-    final provider = context.read<ComentariosProvider>();
-    await provider.ensureDataLoaded(
+    final commentProvider = provider.Provider.of<ComentariosProvider>(context, listen: false);
+    await commentProvider.ensureDataLoaded(
       context: widget.pkIdentificador,
       tool: widget.ferramenta,
     );
@@ -88,8 +88,8 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
             children: [
               _buildModernHeader(context, isDark),
               Expanded(
-                child: Consumer<ComentariosProvider>(
-                  builder: (context, provider, child) {
+                child: provider.Consumer<ComentariosProvider>(
+                  builder: (context, commentProvider, child) {
                     // Verificar se o usuário é premium usando o service real
                     final premiumService = di.sl<IPremiumService>();
                     final isPremium = premiumService.isPremium;
@@ -100,17 +100,17 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
                       );
                     }
                     
-                    if (provider.isLoading) {
+                    if (commentProvider.isLoading) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     
-                    if (provider.error != null) {
+                    if (commentProvider.error != null) {
                       return Center(
-                        child: Text('Erro: ${provider.error}'),
+                        child: Text('Erro: ${commentProvider.error}'),
                       );
                     }
                     
-                    final comentariosParaMostrar = provider.comentarios;
+                    final comentariosParaMostrar = commentProvider.comentarios;
                     
                     if (comentariosParaMostrar.isEmpty) {
                       return _buildEmptyState();
@@ -125,14 +125,14 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
           ),
         ),
       ),
-      floatingActionButton: Consumer<ComentariosProvider>(
-        builder: (context, provider, child) {
+      floatingActionButton: provider.Consumer<ComentariosProvider>(
+        builder: (context, commentProvider, child) {
           // Verificar se o usuário é premium usando o service real
           final premiumService = di.sl<IPremiumService>();
           final isPremium = premiumService.isPremium;
           
           return FloatingActionButton(
-            onPressed: provider.isOperating || !isPremium ? null : () => _onAddComentario(context, provider),
+            onPressed: commentProvider.isOperating || !isPremium ? null : () => _onAddComentario(context, commentProvider),
             backgroundColor: !isPremium ? Colors.grey : null,
             child: !isPremium ? const Icon(Icons.lock) : const Icon(Icons.add),
           );
@@ -142,14 +142,14 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return Consumer<ComentariosProvider>(
-      builder: (context, provider, child) {
+    return provider.Consumer<ComentariosProvider>(
+      builder: (context, commentProvider, child) {
         String subtitle;
-        if (provider.isLoading) {
+        if (commentProvider.isLoading) {
           subtitle = 'Carregando comentários...';
         } else {
-          final total = provider.totalCount;
-          final filtered = provider.comentarios.length;
+          final total = commentProvider.totalCount;
+          final filtered = commentProvider.comentarios.length;
           
           if (widget.pkIdentificador != null || widget.ferramenta != null) {
             // Comentários filtrados por contexto
@@ -387,7 +387,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
     }
   }
 
-  void _onAddComentario(BuildContext context, ComentariosProvider provider) {
+  void _onAddComentario(BuildContext context, ComentariosProvider commentProvider) {
     showDialog<void>(
       context: context,
       builder: (context) => AddCommentDialog(
@@ -398,7 +398,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
         onSave: (content) async {
           // Criar entidade a partir do conteúdo
           final comentario = _createComentarioFromContent(content);
-          await provider.addComentario(comentario);
+          await commentProvider.addComentario(comentario);
         },
         onCancel: () {
           // Callback opcional para cancelamento
@@ -422,8 +422,8 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
             onPressed: () {
               Navigator.of(context).pop();
               // Busca o provider atual
-              final provider = context.read<ComentariosProvider>();
-              provider.deleteComentario(comentario.id);
+              final commentProvider = provider.Provider.of<ComentariosProvider>(context, listen: false);
+              commentProvider.deleteComentario(comentario.id);
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,

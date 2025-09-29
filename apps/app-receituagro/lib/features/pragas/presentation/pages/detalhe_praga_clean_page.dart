@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/services/receituagro_navigation_service.dart';
@@ -95,10 +96,10 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider_lib.MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: _pragaProvider),
-        ChangeNotifierProvider.value(value: _diagnosticosProvider),
+        provider_lib.ChangeNotifierProvider.value(value: _pragaProvider),
+        provider_lib.ChangeNotifierProvider.value(value: _diagnosticosProvider),
       ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -112,7 +113,7 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
                   children: [
                     _buildHeader(),
                     Expanded(
-                      child: Consumer<DetalhePragaProvider>(
+                      child: provider_lib.Consumer<DetalhePragaProvider>(
                         builder: (context, provider, child) {
                           return Column(
                             children: [
@@ -153,7 +154,7 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
 
   /// Constrói header da página
   Widget _buildHeader() {
-    return Consumer<DetalhePragaProvider>(
+    return provider_lib.Consumer<DetalhePragaProvider>(
       builder: (context, provider, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
 

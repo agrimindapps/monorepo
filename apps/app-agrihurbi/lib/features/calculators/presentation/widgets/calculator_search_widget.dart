@@ -13,9 +13,9 @@ class CalculatorSearchWidget extends StatefulWidget {
 
   const CalculatorSearchWidget({
     super.key,
-    required this.controller,
-    required this.onChanged,
-    this.hintText = 'Buscar...',
+    required controller,
+    required onChanged,
+    hintText = 'Buscar...',
   });
 
   @override

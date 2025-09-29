@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
@@ -61,7 +62,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FeatureFlagsProvider>(
+    return provider_lib.Consumer<FeatureFlagsProvider>(
       builder: (context, featureFlags, child) {
         return FadeTransition(
           opacity: _fadeAnimation,

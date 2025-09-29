@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../providers/diagnosticos_praga_provider.dart';
@@ -15,7 +16,7 @@ class DiagnosticoFilterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Consumer<DiagnosticosPragaProvider>(
+      child: provider_lib.Consumer<DiagnosticosPragaProvider>(
         builder: (context, provider, child) {
           return Container(
             padding: const EdgeInsets.all(8.0),

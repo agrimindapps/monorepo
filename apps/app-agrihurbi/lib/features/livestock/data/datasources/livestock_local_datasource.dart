@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
 
 import '../models/bovine_model.dart';
@@ -290,7 +290,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
 class CacheException implements Exception {
   final String message;
   
-  const CacheException(this.message);
+  const CacheException(message);
   
   @override
   String toString() => 'CacheException: $message';

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
@@ -11,7 +10,7 @@ import '../repositories/calculator_repository.dart';
 class SaveCalculationToHistory {
   final CalculatorRepository repository;
 
-  SaveCalculationToHistory(this.repository);
+  SaveCalculationToHistory(repository);
 
   Future<Either<Failure, Unit>> call(CalculationHistory historyItem) async {
     return await repository.saveCalculationToHistory(historyItem);
@@ -22,7 +21,7 @@ class SaveCalculationToHistory {
 class RemoveFromHistory {
   final CalculatorRepository repository;
 
-  RemoveFromHistory(this.repository);
+  RemoveFromHistory(repository);
 
   Future<Either<Failure, Unit>> call(String historyId) async {
     return await repository.removeFromHistory(historyId);
@@ -33,7 +32,7 @@ class RemoveFromHistory {
 class ClearHistory {
   final CalculatorRepository repository;
 
-  ClearHistory(this.repository);
+  ClearHistory(repository);
 
   Future<Either<Failure, Unit>> call() async {
     return await repository.clearHistory();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../domain/entities/calculation_result.dart';
 
 /// Widget para exibir resultado principal com destaque
@@ -9,8 +10,8 @@ class PrimaryResultWidget extends StatelessWidget {
 
   const PrimaryResultWidget({
     super.key,
-    required this.result,
-    this.onTap,
+    required result,
+    onTap,
   });
 
   @override
@@ -153,8 +154,8 @@ class SecondaryResultWidget extends StatelessWidget {
 
   const SecondaryResultWidget({
     super.key,
-    required this.result,
-    this.onTap,
+    required result,
+    onTap,
   });
 
   @override
@@ -253,8 +254,8 @@ class DataTableWidget extends StatelessWidget {
 
   const DataTableWidget({
     super.key,
-    required this.data,
-    required this.title,
+    required data,
+    required title,
   });
 
   @override
@@ -344,11 +345,11 @@ class QualityIndicatorWidget extends StatelessWidget {
 
   const QualityIndicatorWidget({
     super.key,
-    required this.label,
-    required this.value,
-    required this.maxValue,
-    this.unit = '',
-    this.color,
+    required label,
+    required value,
+    required maxValue,
+    unit = '',
+    color,
   });
 
   @override
@@ -424,8 +425,8 @@ class RecommendationsWidget extends StatelessWidget {
 
   const RecommendationsWidget({
     super.key,
-    required this.recommendations,
-    this.title = 'Recomendações',
+    required recommendations,
+    title = 'Recomendações',
   });
 
   @override

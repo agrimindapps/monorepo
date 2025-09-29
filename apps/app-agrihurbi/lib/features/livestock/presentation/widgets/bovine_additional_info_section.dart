@@ -13,14 +13,14 @@ import '../../domain/services/bovine_form_service.dart';
 class BovineAdditionalInfoSection extends StatefulWidget {
   const BovineAdditionalInfoSection({
     super.key,
-    required this.tagsController,
-    required this.animalTypeController,
-    required this.originController,
-    required this.characteristicsController,
-    required this.formService,
-    required this.onTagsChanged,
-    this.selectedTags = const [],
-    this.enabled = true,
+    required tagsController,
+    required animalTypeController,
+    required originController,
+    required characteristicsController,
+    required formService,
+    required onTagsChanged,
+    selectedTags = const [],
+    enabled = true,
   });
 
   final TextEditingController tagsController;

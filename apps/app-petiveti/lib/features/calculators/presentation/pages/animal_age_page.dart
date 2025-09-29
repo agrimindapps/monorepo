@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 /// Página da Calculadora de Idade Animal
 class AnimalAgePage extends StatefulWidget {

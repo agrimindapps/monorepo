@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
+import 'package:provider/provider.dart' as provider;
 
 import '../controllers/login_controller.dart';
 import 'auth_button_widget.dart';
@@ -18,7 +19,7 @@ class SignupFormWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginController>(
+    return provider.Consumer<LoginController>(
       builder: (context, controller, child) {
         return Form(
           child: Column(
@@ -194,50 +195,6 @@ class SignupFormWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorMessage(BuildContext context, String message) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red.shade700,
-            size: 20,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: Colors.red.shade700,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              final controller = context.read<LoginController>();
-              controller.clearError();
-            },
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              child: Icon(
-                Icons.close,
-                color: Colors.red.shade700,
-                size: 16,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _navigateBackToProfile(BuildContext context) {
     Navigator.of(context).pop();
@@ -248,7 +205,7 @@ class SignupFormWidget extends StatelessWidget {
       print('🎯 SignupFormWidget: Iniciando cadastro no ReceitaAgro');
     }
     
-    final controller = context.read<LoginController>();
+    final controller = provider.Provider.of<LoginController>(context, listen: false);
     await controller.signUpWithEmailAndSync();
     
     if (!context.mounted) return;

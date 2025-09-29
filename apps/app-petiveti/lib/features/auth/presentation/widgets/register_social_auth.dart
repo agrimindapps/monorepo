@@ -1,5 +1,6 @@
+import 'package:core/core.dart' hide AuthState;
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+
 import '../providers/auth_provider.dart';
 
 /// **Social Authentication Buttons for Registration**
@@ -70,7 +71,7 @@ class RegisterSocialAuth extends ConsumerWidget {
       text: 'Cadastrar com Google',
       icon: Icons.g_mobiledata,
       color: Colors.red,
-      isLoading: authState.isLoading,
+      isLoading: authState.isLoading == true,
       onPressed: () => _handleGoogleSignIn(ref),
     );
   }
@@ -85,7 +86,7 @@ class RegisterSocialAuth extends ConsumerWidget {
       text: 'Cadastrar com Apple',
       icon: Icons.apple,
       color: Colors.black,
-      isLoading: authState.isLoading,
+      isLoading: authState.isLoading == true,
       onPressed: () => _handleAppleSignIn(ref),
     );
   }

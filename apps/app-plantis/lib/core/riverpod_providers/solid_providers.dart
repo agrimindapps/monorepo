@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../di/solid_di_factory.dart';
 import '../interfaces/i_auth_state_provider.dart';
@@ -56,8 +56,8 @@ final plantsCareCalculatorProvider = Provider<PlantsCareCalculator>((ref) {
 
 /// === STATE MANAGERS ===
 
-/// Provider para PlantsStateManager (SOLID-compliant)
-final solidPlantsStateManagerProvider = ChangeNotifierProvider<PlantsStateManager>((ref) {
+/// Provider para PlantsStateManager (usando Provider simples)
+final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
   
   // Usar DI puro em vez de Service Locator
@@ -75,7 +75,7 @@ final solidPlantsStateManagerProvider = ChangeNotifierProvider<PlantsStateManage
 });
 
 /// Provider para PlantFormStateManager (SOLID-compliant)
-final solidPlantFormStateManagerProvider = ChangeNotifierProvider<PlantFormStateManager>((ref) {
+final solidPlantFormStateManagerProvider = Provider<PlantFormStateManager>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
   
   // Usar DI puro em vez de Service Locator
@@ -92,7 +92,8 @@ final solidPlantFormStateManagerProvider = ChangeNotifierProvider<PlantFormState
 
 /// Provider para estado das plantas (SOLID)
 final solidPlantsStateProvider = Provider((ref) {
-  return ref.watch(solidPlantsStateManagerProvider).state;
+  final stateManager = ref.watch(solidPlantsStateManagerProvider);
+  return stateManager.state;
 });
 
 /// Provider para lista de plantas (SOLID)
@@ -129,7 +130,8 @@ final solidPlantsNeedingWaterProvider = Provider((ref) {
 
 /// Provider para estado do formulário (SOLID)
 final solidPlantFormStateProvider = Provider((ref) {
-  return ref.watch(solidPlantFormStateManagerProvider).state;
+  final manager = ref.watch(solidPlantFormStateManagerProvider);
+  return manager.state;
 });
 
 /// Provider para validation errors (SOLID)

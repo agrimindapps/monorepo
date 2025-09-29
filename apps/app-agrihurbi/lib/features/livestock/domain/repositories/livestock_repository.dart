@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';
@@ -8,13 +7,13 @@ import '../entities/equine_entity.dart';
 /// Parâmetros para busca avançada de animais
 class SearchAnimalsParams {
   const SearchAnimalsParams({
-    this.query,
-    this.breed,
-    this.originCountry,
-    this.tags,
-    this.isActive,
-    this.limit = 20,
-    this.offset = 0,
+    query,
+    breed,
+    originCountry,
+    tags,
+    isActive,
+    limit = 20,
+    offset = 0,
   });
 
   final String? query; // Busca por nome/id/características
@@ -36,9 +35,9 @@ class BovineSearchParams extends SearchAnimalsParams {
     super.isActive,
     super.limit,
     super.offset,
-    this.aptitude,
-    this.breedingSystem,
-    this.purpose,
+    aptitude,
+    breedingSystem,
+    purpose,
   });
 
   final BovineAptitude? aptitude;
@@ -56,9 +55,9 @@ class EquineSearchParams extends SearchAnimalsParams {
     super.isActive,
     super.limit,
     super.offset,
-    this.temperament,
-    this.coat,
-    this.primaryUse,
+    temperament,
+    coat,
+    primaryUse,
   });
 
   final EquineTemperament? temperament;

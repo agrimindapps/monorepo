@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/dio_client.dart';
 import '../models/bovine_model.dart';
@@ -28,13 +27,10 @@ abstract class LivestockRemoteDataSource {
 /// Implementação do data source remoto usando HTTP API
 @LazySingleton(as: LivestockRemoteDataSource)
 class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
-  final DioClient _dioClient;
   
   // Endpoints da API
-  static const String _bovinesEndpoint = '/livestock/bovines';
-  static const String _equinesEndpoint = '/livestock/equines';
   
-  LivestockRemoteDataSourceImpl(this._dioClient);
+  LivestockRemoteDataSourceImpl(_dioClient);
   
   // === BOVINOS ===
   

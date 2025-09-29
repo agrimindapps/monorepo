@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/riverpod_providers/solid_providers.dart';
@@ -55,7 +55,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
     if (_initialized || !mounted) return;
 
     _initialized = true;
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
 
     if (widget.plantId != null) {
       if (kDebugMode) {
@@ -115,7 +115,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             // Content
             Expanded(
               child: Consumer(
-                builder: (context, ref, child) {
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
                   final formState = ref.watch(solidPlantFormStateProvider);
                   
                   if (formState.isLoading) {
@@ -279,7 +279,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 const SizedBox(width: 16),
                 FilledButton(
                   onPressed: () {
-                    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+                    final formManager = ref.read(solidPlantFormStateManagerProvider);
                     formManager.clearError();
                     _initializeFormManager();
                   },
@@ -354,7 +354,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         ),
       ),
       child: Consumer(
-        builder: (context, ref, child) {
+        builder: (BuildContext context, WidgetRef ref, Widget? child) {
           final formState = ref.watch(solidPlantFormStateProvider);
           
           return Row(
@@ -406,7 +406,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
   }
 
   Future<void> _handleSave() async {
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
 
     try {
       final success = await formManager.savePlant();

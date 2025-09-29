@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../domain/entities/calculator_parameter.dart';
 
 /// Widget para entrada de parâmetros de calculadora
@@ -13,9 +14,9 @@ class ParameterInputWidget extends StatefulWidget {
 
   const ParameterInputWidget({
     super.key,
-    required this.parameter,
-    required this.value,
-    required this.onChanged,
+    required parameter,
+    required value,
+    required onChanged,
   });
 
   @override

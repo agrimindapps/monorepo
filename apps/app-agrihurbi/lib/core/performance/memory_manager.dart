@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Callback para situações de pressão de memória
 typedef MemoryPressureCallback = Future<void> Function(MemoryPressureLevel level);
@@ -19,7 +21,7 @@ class CacheEntry {
   final int priority; // 1 = alta prioridade, 5 = baixa prioridade
   final DateTime lastAccessed;
 
-  CacheEntry({
+  const CacheEntry({
     required this.name,
     required this.clearCallback,
     required this.priority,
@@ -30,42 +32,102 @@ class CacheEntry {
     return CacheEntry(
       name: name,
       clearCallback: clearCallback,
-        priority: priority,
-        lastAccessed: DateTime.now(),
-      );
-    }
+      priority: priority,
+      lastAccessed: DateTime.now(),
+    );
+  }
+}
+
+// === MEMORY STATE ===
+
+/// State para gerenciamento de memória
+class MemoryState {
+  const MemoryState({
+    this.currentMemoryUsageMB = 0.0,
+    this.isMemoryPressure = false,
+    this.managedCaches = const {},
+    this.cleanupCycles = 0,
+    this.maxMemoryUsageMB = 0.0,
+    this.lastCleanup,
+    this.startTime,
+  });
+
+  final double currentMemoryUsageMB;
+  final bool isMemoryPressure;
+  final Map<String, CacheEntry> managedCaches;
+  final int cleanupCycles;
+  final double maxMemoryUsageMB;
+  final DateTime? lastCleanup;
+  final DateTime? startTime;
+
+  MemoryState copyWith({
+    double? currentMemoryUsageMB,
+    bool? isMemoryPressure,
+    Map<String, CacheEntry>? managedCaches,
+    int? cleanupCycles,
+    double? maxMemoryUsageMB,
+    DateTime? lastCleanup,
+    DateTime? startTime,
+  }) {
+    return MemoryState(
+      currentMemoryUsageMB: currentMemoryUsageMB ?? this.currentMemoryUsageMB,
+      isMemoryPressure: isMemoryPressure ?? this.isMemoryPressure,
+      managedCaches: managedCaches ?? this.managedCaches,
+      cleanupCycles: cleanupCycles ?? this.cleanupCycles,
+      maxMemoryUsageMB: maxMemoryUsageMB ?? this.maxMemoryUsageMB,
+      lastCleanup: lastCleanup ?? this.lastCleanup,
+      startTime: startTime ?? this.startTime,
+    );
   }
 
-/// Gerenciador de memória para otimização de performance
+  /// Determina o nível de pressão de memória
+  MemoryPressureLevel get memoryPressureLevel {
+    if (currentMemoryUsageMB >= _memoryCriticalThresholdMB) {
+      return MemoryPressureLevel.critical;
+    } else if (currentMemoryUsageMB >= _memoryWarningThresholdMB) {
+      return MemoryPressureLevel.warning;
+    }
+    return MemoryPressureLevel.normal;
+  }
+
+  /// Obtém estatísticas de memória
+  Map<String, dynamic> get memoryStats {
+    return {
+      'current_memory_mb': currentMemoryUsageMB,
+      'max_memory_mb': maxMemoryUsageMB,
+      'is_memory_pressure': isMemoryPressure,
+      'managed_caches': managedCaches.length,
+      'cleanup_cycles': cleanupCycles,
+      'last_cleanup': lastCleanup?.toIso8601String(),
+      'memory_level': memoryPressureLevel.name,
+    };
+  }
+
+  // Configurações estáticas
+  static const double _memoryWarningThresholdMB = 150.0; // 150MB
+  static const double _memoryCriticalThresholdMB = 200.0; // 200MB
+}
+
+// === MEMORY NOTIFIER ===
+
+/// StateNotifier para gerenciamento de memória
 /// 
 /// Monitora e gerencia o uso de memória da aplicação:
 /// - Automatic memory cleanup
 /// - Memory pressure detection
 /// - Cache eviction strategies
 /// - Memory usage monitoring
-class MemoryManager extends ChangeNotifier {
-  static final MemoryManager _instance = MemoryManager._internal();
-  factory MemoryManager() => _instance;
-  MemoryManager._internal() {
+class MemoryNotifier extends StateNotifier<MemoryState> {
+  MemoryNotifier() : super(MemoryState(startTime: DateTime.now())) {
     _startMemoryMonitoring();
   }
 
   // Configurações
   static const int _memoryCheckIntervalMs = 30000; // 30 segundos
-  static const double _memoryWarningThresholdMB = 150.0; // 150MB
-  static const double _memoryCriticalThresholdMB = 200.0; // 200MB
 
   // Estado do monitor
   Timer? _memoryTimer;
-  double _currentMemoryUsageMB = 0.0;
-  bool _isMemoryPressure = false;
   final List<MemoryPressureCallback> _pressureCallbacks = [];
-  final Map<String, CacheEntry> _managedCaches = {};
-
-  // Estatísticas
-  int _cleanupCycles = 0;
-  double _maxMemoryUsageMB = 0.0;
-  DateTime? _lastCleanup;
 
   /// Inicia o monitoramento de memória
   void _startMemoryMonitoring() {
@@ -83,22 +145,32 @@ class MemoryManager extends ChangeNotifier {
       // final info = await developer.Service.getInfo();
       
       // Estimativa baseada em heurísticas
-      _currentMemoryUsageMB = _estimateMemoryUsage();
+      final currentUsage = _estimateMemoryUsage();
       
-      if (_currentMemoryUsageMB > _maxMemoryUsageMB) {
-        _maxMemoryUsageMB = _currentMemoryUsageMB;
-      }
+      final newMaxUsage = currentUsage > state.maxMemoryUsageMB ? 
+          currentUsage : state.maxMemoryUsageMB;
 
-      final level = _getMemoryPressureLevel(_currentMemoryUsageMB);
+      final level = _getMemoryPressureLevel(currentUsage);
       
-      if (level != MemoryPressureLevel.normal && !_isMemoryPressure) {
-        _isMemoryPressure = true;
+      if (level != MemoryPressureLevel.normal && !state.isMemoryPressure) {
+        state = state.copyWith(
+          currentMemoryUsageMB: currentUsage,
+          maxMemoryUsageMB: newMaxUsage,
+          isMemoryPressure: true,
+        );
         await _handleMemoryPressure(level);
-      } else if (level == MemoryPressureLevel.normal && _isMemoryPressure) {
-        _isMemoryPressure = false;
+      } else if (level == MemoryPressureLevel.normal && state.isMemoryPressure) {
+        state = state.copyWith(
+          currentMemoryUsageMB: currentUsage,
+          maxMemoryUsageMB: newMaxUsage,
+          isMemoryPressure: false,
+        );
+      } else {
+        state = state.copyWith(
+          currentMemoryUsageMB: currentUsage,
+          maxMemoryUsageMB: newMaxUsage,
+        );
       }
-
-      notifyListeners();
     } catch (e) {
       developer.log('Erro ao verificar uso de memória: $e', name: 'MemoryManager');
     }
@@ -112,17 +184,20 @@ class MemoryManager extends ChangeNotifier {
     // - Número de widgets ativos
     
     const baseMB = 20.0; // Uso base da aplicação
-    final cacheMB = _managedCaches.length * 2.0; // 2MB por cache
-    final timeMB = DateTime.now().millisecondsSinceEpoch / 1000000; // Estimativa temporal
+    final cacheMB = state.managedCaches.length * 2.0; // 2MB por cache
+    // Uso de tempo relativo limitado para evitar overflow de memória
+    final runTimeMinutes = state.startTime != null ? 
+        DateTime.now().difference(state.startTime!).inMinutes : 0;
+    final timeMB = (runTimeMinutes * 0.1).clamp(0.0, 50.0); // Max 50MB por tempo
     
     return baseMB + cacheMB + timeMB;
   }
 
   /// Determina o nível de pressão de memória
   MemoryPressureLevel _getMemoryPressureLevel(double memoryMB) {
-    if (memoryMB >= _memoryCriticalThresholdMB) {
+    if (memoryMB >= MemoryState._memoryCriticalThresholdMB) {
       return MemoryPressureLevel.critical;
-    } else if (memoryMB >= _memoryWarningThresholdMB) {
+    } else if (memoryMB >= MemoryState._memoryWarningThresholdMB) {
       return MemoryPressureLevel.warning;
     }
     return MemoryPressureLevel.normal;
@@ -151,7 +226,7 @@ class MemoryManager extends ChangeNotifier {
   /// Realiza limpeza automática de caches
   Future<void> _performAutomaticCleanup(MemoryPressureLevel level) async {
     final now = DateTime.now();
-    final entries = _managedCaches.values.toList();
+    final entries = state.managedCaches.values.toList();
     
     // Ordena por prioridade (menor = mais prioritário) e último acesso
     entries.sort((a, b) {
@@ -165,6 +240,8 @@ class MemoryManager extends ChangeNotifier {
         entries.length : 
         (entries.length * 0.3).ceil();
 
+    final newManagedCaches = Map<String, CacheEntry>.from(state.managedCaches);
+
     for (final entry in entries) {
       if (cleanupCount >= maxCleanup) break;
       
@@ -174,7 +251,7 @@ class MemoryManager extends ChangeNotifier {
       if (entry.priority >= 4 || hoursSinceAccess >= 2) {
         try {
           entry.clearCallback();
-          _managedCaches.remove(entry.name);
+          newManagedCaches.remove(entry.name);
           cleanupCount++;
           
           developer.log('Cache limpo: ${entry.name}', name: 'MemoryManager');
@@ -184,8 +261,11 @@ class MemoryManager extends ChangeNotifier {
       }
     }
 
-    _cleanupCycles++;
-    _lastCleanup = now;
+    state = state.copyWith(
+      managedCaches: newManagedCaches,
+      cleanupCycles: state.cleanupCycles + 1,
+      lastCleanup: now,
+    );
     
     developer.log('Limpeza automática: $cleanupCount caches removidos', name: 'MemoryManager');
   }
@@ -212,27 +292,34 @@ class MemoryManager extends ChangeNotifier {
     required VoidCallback clearCallback,
     int priority = 3,
   }) {
-    _managedCaches[name] = CacheEntry(
+    final newManagedCaches = Map<String, CacheEntry>.from(state.managedCaches);
+    newManagedCaches[name] = CacheEntry(
       name: name,
       clearCallback: clearCallback,
       priority: priority,
       lastAccessed: DateTime.now(),
     );
     
+    state = state.copyWith(managedCaches: newManagedCaches);
+    
     developer.log('Cache registrado: $name (prioridade: $priority)', name: 'MemoryManager');
   }
 
   /// Marca um cache como acessado (atualiza timestamp)
   void markCacheAccessed(String name) {
-    final entry = _managedCaches[name];
+    final entry = state.managedCaches[name];
     if (entry != null) {
-      _managedCaches[name] = entry.copyWithAccess();
+      final newManagedCaches = Map<String, CacheEntry>.from(state.managedCaches);
+      newManagedCaches[name] = entry.copyWithAccess();
+      state = state.copyWith(managedCaches: newManagedCaches);
     }
   }
 
   /// Remove o registro de um cache
   void unregisterCache(String name) {
-    _managedCaches.remove(name);
+    final newManagedCaches = Map<String, CacheEntry>.from(state.managedCaches);
+    newManagedCaches.remove(name);
+    state = state.copyWith(managedCaches: newManagedCaches);
     developer.log('Cache não registrado: $name', name: 'MemoryManager');
   }
 
@@ -253,24 +340,35 @@ class MemoryManager extends ChangeNotifier {
   }
 
   /// Obtém estatísticas de memória
-  Map<String, dynamic> getMemoryStats() {
-    return {
-      'current_memory_mb': _currentMemoryUsageMB,
-      'max_memory_mb': _maxMemoryUsageMB,
-      'is_memory_pressure': _isMemoryPressure,
-      'managed_caches': _managedCaches.length,
-      'cleanup_cycles': _cleanupCycles,
-      'last_cleanup': _lastCleanup?.toIso8601String(),
-      'memory_level': _getMemoryPressureLevel(_currentMemoryUsageMB).name,
-    };
-  }
+  Map<String, dynamic> getMemoryStats() => state.memoryStats;
 
   /// Para o monitoramento de memória
   @override
   void dispose() {
     _memoryTimer?.cancel();
     _pressureCallbacks.clear();
-    _managedCaches.clear();
     super.dispose();
   }
 }
+
+// === MEMORY PROVIDERS ===
+
+/// Provider para gerenciamento de memória
+final memoryProvider = StateNotifierProvider<MemoryNotifier, MemoryState>((ref) {
+  return MemoryNotifier();
+});
+
+/// Provider derivado para estatísticas de memória
+final memoryStatsProvider = Provider<Map<String, dynamic>>((ref) {
+  return ref.watch(memoryProvider).memoryStats;
+});
+
+/// Provider derivado para nível de pressão de memória
+final memoryPressureLevelProvider = Provider<MemoryPressureLevel>((ref) {
+  return ref.watch(memoryProvider).memoryPressureLevel;
+});
+
+/// Provider derivado para verificar se está sob pressão de memória
+final isMemoryPressureProvider = Provider<bool>((ref) {
+  return ref.watch(memoryProvider).isMemoryPressure;
+});

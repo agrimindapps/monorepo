@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
+
 import '../../domain/entities/export_request.dart';
 import '../providers/data_export_provider.dart';
 
@@ -54,8 +55,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     if (_hasStarted) return;
     _hasStarted = true;
 
-    final provider = context.read<DataExportProvider>();
-    final request = await provider.requestExport(
+    final dataProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
+    final request = await dataProvider.requestExport(
       userId: widget.userId,
       dataTypes: widget.dataTypes,
       format: widget.format,
@@ -74,9 +75,9 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DataExportProvider>(
-      builder: (BuildContext context, DataExportProvider provider, Widget? child) {
-        final progress = provider.currentProgress;
+    return provider.Consumer<DataExportProvider>(
+      builder: (BuildContext context, DataExportProvider dataProvider, Widget? child) {
+        final progress = dataProvider.currentProgress;
 
         return PopScope(
           canPop: progress.isCompleted || progress.errorMessage != null,
@@ -209,7 +210,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            context.read<DataExportProvider>().resetProgress();
+            provider.Provider.of<DataExportProvider>(context, listen: false).resetProgress();
             _hasStarted = false;
             _completedRequest = null;
             _startExport();
@@ -224,8 +225,8 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         if (_completedRequest?.downloadUrl != null)
           TextButton(
             onPressed: () async {
-              final provider = context.read<DataExportProvider>();
-              final success = await provider.downloadExport(_completedRequest!.id);
+              final exportProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
+              final success = await exportProvider.downloadExport(_completedRequest!.id);
 
               if (!success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -278,14 +279,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     );
 
     if (shouldCancel == true && context.mounted) {
-      context.read<DataExportProvider>().resetProgress();
+      provider.Provider.of<DataExportProvider>(context, listen: false).resetProgress();
       _closeDialog();
     }
   }
 }
 
 /// Simplified version for showing quick progress updates
-class ExportProgressSnackBar {
+mixin ExportProgressSnackBar {
   /// Shows a progress snackbar that updates automatically
   static void show(
     BuildContext context, {
@@ -295,9 +296,9 @@ class ExportProgressSnackBar {
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Consumer<DataExportProvider>(
-          builder: (BuildContext context, DataExportProvider provider, Widget? child) {
-            final progress = provider.currentProgress;
+        content: provider.Consumer<DataExportProvider>(
+          builder: (BuildContext context, DataExportProvider dataProvider, Widget? child) {
+            final progress = dataProvider.currentProgress;
 
             if (progress.errorMessage != null) {
               return Row(

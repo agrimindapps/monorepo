@@ -14,8 +14,8 @@ class SubscriptionProvider with ChangeNotifier {
   final ManagePaymentMethods _managePaymentMethods;
 
   SubscriptionProvider(
-    this._manageSubscription,
-    this._managePaymentMethods,
+    _manageSubscription,
+    _managePaymentMethods,
   );
 
   // === STATE VARIABLES ===

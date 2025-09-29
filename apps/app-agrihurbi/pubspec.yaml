@@ -12,11 +12,39 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados (inclui Riverpod, dartz, equatable, shared_preferences)
+  # Core Package - Serviços compartilhados
   core:
     path: ../../packages/core
 
+  # Direct dependencies referenced in the codebase
+  # State Management & Architecture
+  provider: ^6.1.5
+  flutter_riverpod: ^2.6.1
+  riverpod: ^2.6.1
+  equatable: ^2.0.7
+  dartz: ^0.10.1
   
+  # Network & Storage
+  dio: ^5.9.0
+  connectivity_plus: ^6.1.5
+  shared_preferences: ^2.5.3
+  flutter_secure_storage: ^9.2.4
+  hive_flutter: ^1.1.0
+  
+  # Dependency Injection
+  get_it: ^8.2.0
+  injectable: ^2.4.4
+  
+  # Firebase (may be needed for direct imports)
+  firebase_core: ^4.0.0
+  firebase_crashlytics: ^5.0.0
+  
+  # Navigation
+  go_router: ^16.1.0
+  
+  # UI Components
+  cupertino_icons: ^1.0.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

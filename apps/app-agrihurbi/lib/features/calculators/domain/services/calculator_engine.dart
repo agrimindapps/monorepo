@@ -321,11 +321,11 @@ class CalculationEngineResult {
   final CalculatorError? error;
 
   const CalculationEngineResult._({
-    required this.isSuccess,
-    this.result,
-    this.validation,
-    this.session,
-    this.error,
+    required isSuccess,
+    result,
+    validation,
+    session,
+    error,
   });
 
   factory CalculationEngineResult.success(
@@ -378,9 +378,9 @@ class CalculationSession {
   List<String> errors = [];
 
   CalculationSession({
-    required this.calculatorId,
-    required this.parameters,
-    required this.startTime,
+    required calculatorId,
+    required parameters,
+    required startTime,
   });
 
   void complete({
@@ -389,10 +389,10 @@ class CalculationSession {
     List<String>? errors,
   }) {
     endTime = DateTime.now();
-    this.success = success;
-    this.result = result;
+    success = success;
+    result = result;
     if (errors != null) {
-      this.errors.addAll(errors);
+      errors.addAll(errors);
     }
   }
 
@@ -412,12 +412,12 @@ class FormattedCalculationResult {
   final DateTime timestamp;
 
   const FormattedCalculationResult({
-    required this.calculatorId,
-    required this.calculatorName,
-    required this.results,
-    required this.recommendations,
-    required this.additionalData,
-    required this.timestamp,
+    required calculatorId,
+    required calculatorName,
+    required results,
+    required recommendations,
+    required additionalData,
+    required timestamp,
   });
 }
 
@@ -430,11 +430,11 @@ class FormattedResultValue {
   final String description;
 
   const FormattedResultValue({
-    required this.label,
-    required this.formattedValue,
-    required this.originalValue,
-    required this.unit,
-    required this.description,
+    required label,
+    required formattedValue,
+    required originalValue,
+    required unit,
+    required description,
   });
 }
 
@@ -445,8 +445,8 @@ class CalculatorEngineStats {
   final Map<CalculatorCategory, int> categoryStats;
 
   const CalculatorEngineStats({
-    required this.totalCalculators,
-    required this.activeSessions,
-    required this.categoryStats,
+    required totalCalculators,
+    required activeSessions,
+    required categoryStats,
   });
 }

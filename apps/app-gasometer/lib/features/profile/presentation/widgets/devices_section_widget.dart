@@ -3,41 +3,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/design_tokens.dart';
-import '../../../device_management/presentation/providers/vehicle_device_provider.dart';
+// TODO: Replace with Riverpod providers
+// import '../../../device_management/presentation/providers/vehicle_device_provider.dart';
 
 /// Seção de gerenciamento de dispositivos otimizada para UX na página de perfil
 /// Integra de forma coesa o controle de dispositivos conectados
-class DevicesSectionWidget extends StatefulWidget {
+class DevicesSectionWidget extends ConsumerStatefulWidget {
   const DevicesSectionWidget({super.key});
 
   @override
-  State<DevicesSectionWidget> createState() => _DevicesSectionWidgetState();
+  ConsumerState<DevicesSectionWidget> createState() => _DevicesSectionWidgetState();
 }
 
-class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
+class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
 
   @override
   void initState() {
     super.initState();
-    // Carregar dispositivos quando o widget for inicializado
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VehicleDeviceProvider>().loadUserDevices();
-    });
+    // TODO: Replace with Riverpod provider
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   ref.read(vehicleDeviceProviderNotifier).loadUserDevices();
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<VehicleDeviceProvider>(
-      builder: (context, provider, _) {
-        return _buildSection(
-          context,
-          title: 'Dispositivos Conectados',
-          icon: Icons.devices,
-          children: [
-            _buildDevicesOverview(context, provider),
-          ],
-        );
-      },
+    // TODO: Replace Consumer<VehicleDeviceProvider> with Riverpod provider
+    // final provider = ref.watch(vehicleDeviceProviderNotifier);
+    
+    // Placeholder implementation without provider dependencies
+    return _buildSection(
+      context,
+      title: 'Dispositivos Conectados',
+      icon: Icons.devices,
+      children: [
+        _buildPlaceholderDevicesOverview(context),
+      ],
     );
   }
 
@@ -106,201 +107,240 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  Widget _buildDevicesOverview(BuildContext context, VehicleDeviceProvider provider) {
-    if (provider.isLoading) {
-      return _buildLoadingState(context);
-    }
-
-    if (provider.hasError) {
-      return _buildErrorState(context, provider);
-    }
-
-    return DecoratedBox(
+  Widget _buildPlaceholderDevicesOverview(BuildContext context) {
+    // TODO: Replace with actual provider implementation
+    return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
       ),
       child: Column(
         children: [
-          // Current device as ListTile
-          if (provider.currentDevice != null)
-            _buildCurrentDeviceListTile(context, provider.currentDevice!),
-          
-          // Other devices
-          ...provider.devices
-              .where((device) => device.uuid != provider.currentDevice?.uuid)
-              .map((device) => _buildDeviceListTile(context, device, provider)),
-          
-          // Quick actions as ListTiles
-          if (provider.devices.length > 1) ...[
-            _buildDivider(),
-            _buildRevokeAllListTile(context, provider),
-          ],
-          
-          _buildDivider(),
-          _buildViewAllDevicesListTile(context),
+          Icon(
+            Icons.devices,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Dispositivos não disponíveis',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Provider migration in progress',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
         ],
       ),
     );
   }
 
+  // TODO: Implement with Riverpod providers
+  // Widget _buildDevicesOverview(BuildContext context, VehicleDeviceProvider provider) {
+  //   if (provider.isLoading) {
+  //     return _buildLoadingState(context);
+  //   }
+
+  //   if (provider.hasError) {
+  //     return _buildErrorState(context, provider);
+  //   }
+
+  //   return DecoratedBox(
+  //     decoration: BoxDecoration(
+  //       color: Theme.of(context).colorScheme.surfaceContainerHigh,
+  //       borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         // Current device as ListTile
+  //         if (provider.currentDevice != null)
+  //           _buildCurrentDeviceListTile(context, provider.currentDevice!),
+          
+  //         // Other devices
+  //         ...provider.devices
+  //             .where((device) => device.uuid != provider.currentDevice?.uuid)
+  //             .map((device) => _buildDeviceListTile(context, device, provider)),
+          
+  //         // Quick actions as ListTiles
+  //         if (provider.devices.length > 1) ...[
+  //           _buildDivider(),
+  //           _buildRevokeAllListTile(context, provider),
+  //         ],
+          
+  //         _buildDivider(),
+  //         _buildViewAllDevicesListTile(context),
+  //       ],
+  //     ),
+  //   );
+  // }
 
 
 
 
 
-  Widget _buildCurrentDeviceListTile(BuildContext context, DeviceEntity device) {
-    return Semantics(
-      label: 'Dispositivo atual: ${device.name}',
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            _getDeviceIcon(device.platform),
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          device.name,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          '${device.platform} • Este dispositivo',
-          style: TextStyle(
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: GasometerDesignTokens.colorSuccess,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Text(
-            'ATIVO',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildDeviceListTile(BuildContext context, DeviceEntity device, VehicleDeviceProvider provider) {
-    return Semantics(
-      label: 'Dispositivo: ${device.name}, ${device.platform}',
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: device.isActive 
-                ? GasometerDesignTokens.colorSuccess.withValues(alpha: 0.1)
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            _getDeviceIcon(device.platform),
-            color: device.isActive 
-                ? GasometerDesignTokens.colorSuccess
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-            size: 20,
-          ),
-        ),
-        title: Text(
-          device.name,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          '${device.platform} • ${_formatLastAccess(device.lastActiveAt)}',
-          style: TextStyle(
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (action) => _handleDeviceAction(context, device, action, provider),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'revoke',
-              child: Row(
-                children: [
-                  Icon(Icons.logout, size: 16, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Desconectar'),
-                ],
-              ),
-            ),
-          ],
-          child: Icon(
-            Icons.more_vert,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            size: 20,
-          ),
-        ),
-      ),
-    );
-  }
+  // TODO: Implement with Riverpod providers
+  // Widget _buildCurrentDeviceListTile(BuildContext context, DeviceEntity device) {
+  //   return Semantics(
+  //     label: 'Dispositivo atual: ${device.name}',
+  //     child: ListTile(
+  //       leading: Container(
+  //         padding: const EdgeInsets.all(8),
+  //         decoration: BoxDecoration(
+  //           color: Theme.of(context).colorScheme.primary,
+  //           shape: BoxShape.circle,
+  //         ),
+  //         child: Icon(
+  //           _getDeviceIcon(device.platform),
+  //           color: Colors.white,
+  //           size: 20,
+  //         ),
+  //       ),
+  //       title: Text(
+  //         device.name,
+  //         style: TextStyle(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.w600,
+  //           color: Theme.of(context).colorScheme.onSurface,
+  //         ),
+  //       ),
+  //       subtitle: Text(
+  //         '${device.platform} • Este dispositivo',
+  //         style: TextStyle(
+  //           fontSize: 14,
+  //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+  //         ),
+  //       ),
+  //       trailing: Container(
+  //         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //         decoration: BoxDecoration(
+  //           color: GasometerDesignTokens.colorSuccess,
+  //           borderRadius: BorderRadius.circular(8),
+  //         ),
+  //         child: const Text(
+  //           'ATIVO',
+  //           style: TextStyle(
+  //             fontSize: 10,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.white,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildRevokeAllListTile(BuildContext context, VehicleDeviceProvider provider) {
-    return Semantics(
-      label: 'Desconectar todos os outros dispositivos',
-      button: true,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.logout,
-            color: Theme.of(context).colorScheme.error,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          'Desconectar Outros Dispositivos',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        subtitle: Text(
-          'Remove acesso de ${provider.devices.length - 1} dispositivo(s)',
-          style: TextStyle(
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          _showRevokeAllDialog(context, provider);
-        },
-      ),
-    );
-  }
+  // Widget _buildDeviceListTile(BuildContext context, DeviceEntity device, VehicleDeviceProvider provider) {
+  //   return Semantics(
+  //     label: 'Dispositivo: ${device.name}, ${device.platform}',
+  //     child: ListTile(
+  //       leading: Container(
+  //         padding: const EdgeInsets.all(8),
+  //         decoration: BoxDecoration(
+  //           color: device.isActive 
+  //               ? GasometerDesignTokens.colorSuccess.withValues(alpha: 0.1)
+  //               : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+  //           shape: BoxShape.circle,
+  //         ),
+  //         child: Icon(
+  //           _getDeviceIcon(device.platform),
+  //           color: device.isActive 
+  //               ? GasometerDesignTokens.colorSuccess
+  //               : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+  //           size: 20,
+  //         ),
+  //       ),
+  //       title: Text(
+  //         device.name,
+  //         style: TextStyle(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.w500,
+  //           color: Theme.of(context).colorScheme.onSurface,
+  //         ),
+  //       ),
+  //       subtitle: Text(
+  //         '${device.platform} • ${_formatLastAccess(device.lastActiveAt)}',
+  //         style: TextStyle(
+  //           fontSize: 14,
+  //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+  //         ),
+  //       ),
+  //       trailing: PopupMenuButton<String>(
+  //         onSelected: (action) => _handleDeviceAction(context, device, action, provider),
+  //         itemBuilder: (context) => [
+  //           const PopupMenuItem(
+  //             value: 'revoke',
+  //             child: Row(
+  //               children: [
+  //                 Icon(Icons.logout, size: 16, color: Colors.red),
+  //                 SizedBox(width: 8),
+  //                 Text('Desconectar'),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //         child: Icon(
+  //           Icons.more_vert,
+  //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+  //           size: 20,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildRevokeAllListTile(BuildContext context, VehicleDeviceProvider provider) {
+  //   return Semantics(
+  //     label: 'Desconectar todos os outros dispositivos',
+  //     button: true,
+  //     child: ListTile(
+  //       leading: Container(
+  //         padding: const EdgeInsets.all(8),
+  //         decoration: BoxDecoration(
+  //           color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+  //           shape: BoxShape.circle,
+  //         ),
+  //         child: Icon(
+  //           Icons.logout,
+  //           color: Theme.of(context).colorScheme.error,
+  //           size: 20,
+  //         ),
+  //       ),
+  //       title: Text(
+  //         'Desconectar Outros Dispositivos',
+  //         style: TextStyle(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.w500,
+  //           color: Theme.of(context).colorScheme.error,
+  //         ),
+  //       ),
+  //       subtitle: Text(
+  //         'Remove acesso de ${provider.devices.length - 1} dispositivo(s)',
+  //         style: TextStyle(
+  //           fontSize: 14,
+  //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+  //         ),
+  //       ),
+  //       trailing: Icon(
+  //         Icons.chevron_right,
+  //         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+  //       ),
+  //       onTap: () {
+  //         HapticFeedback.lightImpact();
+  //         _showRevokeAllDialog(context, provider);
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildViewAllDevicesListTile(BuildContext context) {
     return Semantics(
@@ -377,58 +417,59 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, VehicleDeviceProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.error,
-            size: 24,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Erro ao carregar dispositivos',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.error,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            provider.errorMessage ?? 'Erro desconhecido',
-            style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              provider.refresh();
-            },
-            icon: const Icon(Icons.refresh, size: 16),
-            label: const Text('Tentar Novamente'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-              side: BorderSide(color: Theme.of(context).colorScheme.error),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // TODO: Implement with Riverpod providers
+  // Widget _buildErrorState(BuildContext context, VehicleDeviceProvider provider) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+  //       borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+  //       border: Border.all(
+  //         color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+  //       ),
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         Icon(
+  //           Icons.error_outline,
+  //           color: Theme.of(context).colorScheme.error,
+  //           size: 24,
+  //         ),
+  //         const SizedBox(height: 8),
+  //         Text(
+  //           'Erro ao carregar dispositivos',
+  //           style: TextStyle(
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.w500,
+  //             color: Theme.of(context).colorScheme.error,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 4),
+  //         Text(
+  //           provider.errorMessage ?? 'Erro desconhecido',
+  //           style: TextStyle(
+  //             fontSize: 12,
+  //             color: Theme.of(context).colorScheme.error.withValues(alpha: 0.8),
+  //           ),
+  //           textAlign: TextAlign.center,
+  //         ),
+  //         const SizedBox(height: 12),
+  //         OutlinedButton.icon(
+  //           onPressed: () {
+  //             HapticFeedback.lightImpact();
+  //             provider.refresh();
+  //           },
+  //           icon: const Icon(Icons.refresh, size: 16),
+  //           label: const Text('Tentar Novamente'),
+  //           style: OutlinedButton.styleFrom(
+  //             foregroundColor: Theme.of(context).colorScheme.error,
+  //             side: BorderSide(color: Theme.of(context).colorScheme.error),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
 
   IconData _getDeviceIcon(String platform) {
@@ -467,30 +508,31 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     }
   }
 
-  void _handleDeviceAction(
-    BuildContext context,
-    DeviceEntity device,
-    String action,
-    VehicleDeviceProvider provider,
-  ) async {
-    switch (action) {
-      case 'revoke':
-        final confirmed = await _showRevokeDeviceDialog(context, device);
-        if (confirmed == true && mounted) {
-          final success = await provider.revokeDevice(device.uuid);
-          if (success && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${device.name} foi desconectado'),
-                backgroundColor: GasometerDesignTokens.colorSuccess,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        }
-        break;
-    }
-  }
+  // TODO: Implement with Riverpod providers
+  // void _handleDeviceAction(
+  //   BuildContext context,
+  //   DeviceEntity device,
+  //   String action,
+  //   VehicleDeviceProvider provider,
+  // ) async {
+  //   switch (action) {
+  //     case 'revoke':
+  //       final confirmed = await _showRevokeDeviceDialog(context, device);
+  //       if (confirmed == true && mounted) {
+  //         final success = await provider.revokeDevice(device.uuid);
+  //         if (success && mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(
+  //               content: Text('${device.name} foi desconectado'),
+  //               backgroundColor: GasometerDesignTokens.colorSuccess,
+  //               behavior: SnackBarBehavior.floating,
+  //             ),
+  //           );
+  //         }
+  //       }
+  //       break;
+  //   }
+  // }
 
   Future<bool?> _showRevokeDeviceDialog(BuildContext context, DeviceEntity device) {
     return showDialog<bool>(
@@ -522,45 +564,46 @@ class _DevicesSectionWidgetState extends State<DevicesSectionWidget> {
     );
   }
 
-  void _showRevokeAllDialog(BuildContext context, VehicleDeviceProvider provider) {
-    showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-        ),
-        title: const Text('Desconectar Outros Dispositivos'),
-        content: const Text(
-          'Isso irá desconectar todos os outros dispositivos, '
-          'mantendo apenas este. Deseja continuar?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              final success = await provider.revokeAllOtherDevices();
-              if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Outros dispositivos desconectados'),
-                    backgroundColor: GasometerDesignTokens.colorSuccess,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Desconectar'),
-          ),
-        ],
-      ),
-    );
-  }
+  // TODO: Implement with Riverpod providers
+  // void _showRevokeAllDialog(BuildContext context, VehicleDeviceProvider provider) {
+  //   showDialog<bool>(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+  //       ),
+  //       title: const Text('Desconectar Outros Dispositivos'),
+  //       content: const Text(
+  //         'Isso irá desconectar todos os outros dispositivos, '
+  //         'mantendo apenas este. Deseja continuar?',
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.of(context).pop(),
+  //           child: const Text('Cancelar'),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () async {
+  //             Navigator.of(context).pop();
+  //             final success = await provider.revokeAllOtherDevices();
+  //             if (success && mounted) {
+  //               ScaffoldMessenger.of(context).showSnackBar(
+  //                 const SnackBar(
+  //                   content: Text('Outros dispositivos desconectados'),
+  //                   backgroundColor: GasometerDesignTokens.colorSuccess,
+  //                   behavior: SnackBarBehavior.floating,
+  //                 ),
+  //               );
+  //             }
+  //           },
+  //           style: ElevatedButton.styleFrom(
+  //             backgroundColor: Theme.of(context).colorScheme.error,
+  //             foregroundColor: Colors.white,
+  //           ),
+  //           child: const Text('Desconectar'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

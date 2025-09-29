@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ThemeNotifier;
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_mode_enum.dart';

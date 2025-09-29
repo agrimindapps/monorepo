@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/ideal_weight_calculator.dart';

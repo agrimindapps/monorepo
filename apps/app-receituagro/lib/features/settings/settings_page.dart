@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart' as di;
@@ -41,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return ChangeNotifierProvider.value(
+    return provider_lib.ChangeNotifierProvider.value(
       value: _settingsProvider,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -53,7 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   _buildModernHeader(context, isDark),
                 Expanded(
-                  child: Consumer<SettingsProvider>(
+                  child: provider_lib.Consumer<SettingsProvider>(
                     builder: (context, provider, child) {
                       if (provider.isLoading) {
                         return const Center(
@@ -108,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSettingsContent() {
-    return Consumer<ReceitaAgroAuthProvider>(
+    return provider_lib.Consumer<ReceitaAgroAuthProvider>(
       builder: (context, authProvider, child) {
         return ListView(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),

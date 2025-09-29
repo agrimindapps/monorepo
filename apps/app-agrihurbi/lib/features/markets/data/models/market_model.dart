@@ -1,5 +1,4 @@
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
-import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'market_model.g.dart';
@@ -75,22 +74,22 @@ class MarketModel extends MarketEntity {
   final String? imageUrl;
 
   const MarketModel({
-    required this.id,
-    required this.name,
-    required this.symbol,
-    required this.type,
-    required this.currentPrice,
-    required this.previousPrice,
-    required this.changePercent,
-    required this.volume,
-    required this.currency,
-    required this.unit,
-    required this.exchange,
-    required this.lastUpdated,
-    required this.status,
-    this.history = const [],
-    this.description,
-    this.imageUrl,
+    required id,
+    required name,
+    required symbol,
+    required type,
+    required currentPrice,
+    required previousPrice,
+    required changePercent,
+    required volume,
+    required currency,
+    required unit,
+    required exchange,
+    required lastUpdated,
+    required status,
+    history = const [],
+    description,
+    imageUrl,
   }) : super(
           id: id,
           name: name,
@@ -183,22 +182,22 @@ class MarketModel extends MarketEntity {
     String? imageUrl,
   }) {
     return MarketModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      symbol: symbol ?? this.symbol,
-      type: type ?? this.type,
-      currentPrice: currentPrice ?? this.currentPrice,
-      previousPrice: previousPrice ?? this.previousPrice,
-      changePercent: changePercent ?? this.changePercent,
-      volume: volume ?? this.volume,
-      currency: currency ?? this.currency,
-      unit: unit ?? this.unit,
-      exchange: exchange ?? this.exchange,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-      status: status ?? this.status,
-      history: history ?? this.history,
-      description: description ?? this.description,
-      imageUrl: imageUrl ?? this.imageUrl,
+      id: id ?? id,
+      name: name ?? name,
+      symbol: symbol ?? symbol,
+      type: type ?? type,
+      currentPrice: currentPrice ?? currentPrice,
+      previousPrice: previousPrice ?? previousPrice,
+      changePercent: changePercent ?? changePercent,
+      volume: volume ?? volume,
+      currency: currency ?? currency,
+      unit: unit ?? unit,
+      exchange: exchange ?? exchange,
+      lastUpdated: lastUpdated ?? lastUpdated,
+      status: status ?? status,
+      history: history ?? history,
+      description: description ?? description,
+      imageUrl: imageUrl ?? imageUrl,
     );
   }
 }
@@ -236,13 +235,13 @@ class PriceHistoryModel extends PriceHistory {
   final double close;
 
   const PriceHistoryModel({
-    required this.date,
-    required this.price,
-    required this.volume,
-    required this.high,
-    required this.low,
-    required this.open,
-    required this.close,
+    required date,
+    required price,
+    required volume,
+    required high,
+    required low,
+    required open,
+    required close,
   }) : super(
           date: date,
           price: price,
@@ -324,17 +323,17 @@ class MarketSummaryModel extends MarketSummary {
   final int marketsUnchanged;
 
   const MarketSummaryModel({
-    required this.marketName,
-    required this.lastUpdated,
-    required this.topGainers,
-    required this.topLosers,
-    required this.mostActive,
-    required this.marketIndex,
-    required this.marketIndexChange,
-    required this.totalMarkets,
-    required this.marketsUp,
-    required this.marketsDown,
-    required this.marketsUnchanged,
+    required marketName,
+    required lastUpdated,
+    required topGainers,
+    required topLosers,
+    required mostActive,
+    required marketIndex,
+    required marketIndexChange,
+    required totalMarkets,
+    required marketsUp,
+    required marketsDown,
+    required marketsUnchanged,
   }) : super(
           marketName: marketName,
           lastUpdated: lastUpdated,

@@ -15,12 +15,12 @@ class NewsArticleCard extends StatelessWidget {
 
   const NewsArticleCard({
     super.key,
-    required this.article,
-    this.onTap,
-    this.onFavorite,
-    this.onShare,
-    this.isPremium = false,
-    this.isFavorite = false,
+    required article,
+    onTap,
+    onFavorite,
+    onShare,
+    isPremium = false,
+    isFavorite = false,
   });
 
   @override

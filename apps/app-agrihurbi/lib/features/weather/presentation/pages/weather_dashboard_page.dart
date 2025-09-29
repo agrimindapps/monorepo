@@ -386,7 +386,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
   /// Show settings dialog
   Future<void> _showSettingsDialog() async {
     // Implementation for settings dialog
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Configurações'),
@@ -423,7 +423,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
   /// Show add measurement dialog
   Future<void> _showAddMeasurementDialog() async {
     // Implementation for manual measurement input
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Adicionar Medição Manual'),
@@ -469,7 +469,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
   /// Show filter dialog
   Future<void> _showFilterDialog() async {
     // Implementation for advanced filters
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Filtros Avançados'),

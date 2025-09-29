@@ -1,5 +1,5 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
 

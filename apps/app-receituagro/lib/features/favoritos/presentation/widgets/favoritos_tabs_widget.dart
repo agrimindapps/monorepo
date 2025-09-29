@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:core/core.dart';
 
 import '../providers/favoritos_provider_simplified.dart';
@@ -27,7 +27,7 @@ class FavoritosTabsWidget extends StatelessWidget {
       children: [
         _buildTabBar(context, theme),
         Expanded(
-          child: Consumer<FavoritosProviderSimplified>(
+          child: provider.Consumer<FavoritosProviderSimplified>(
             builder: (context, provider, child) {
               return TabBarView(
                 controller: tabController,

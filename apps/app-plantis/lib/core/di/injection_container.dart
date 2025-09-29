@@ -1,6 +1,4 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:core/core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
@@ -427,7 +425,6 @@ void _initSettings() {
       settingsRepository: sl<ISettingsRepository>(),
       notificationService: sl<PlantisNotificationService>(),
       backupService: sl<BackupService>(),
-      themeProvider: sl<ThemeProvider>(),
     )..initialize(), // Auto-initialize for better UX
   );
 
@@ -524,8 +521,7 @@ void _initAppServices() {
     ),
   );
 
-  // Theme Provider (using core package implementation)
-  sl.registerLazySingleton<ThemeProvider>(() => ThemeProvider()..initialize());
+  // Theme management is now handled via Riverpod providers in core package
 
   // Sync Status Provider (legacy)
   sl.registerLazySingleton<SyncStatusProvider>(

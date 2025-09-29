@@ -11,9 +11,9 @@ class CommodityPricesWidget extends StatelessWidget {
 
   const CommodityPricesWidget({
     super.key,
-    required this.prices,
-    this.isLoading = false,
-    this.onRefresh,
+    required prices,
+    isLoading = false,
+    onRefresh,
   });
 
   @override

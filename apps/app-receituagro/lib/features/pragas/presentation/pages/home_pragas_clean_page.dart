@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/design/design_tokens.dart';
@@ -22,7 +23,7 @@ class HomePragasCleanPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return provider_lib.ChangeNotifierProvider(
       create: (_) => HomePragasProvider(),
       child: const _HomePragasContent(),
     );
@@ -43,7 +44,7 @@ class _HomePragasContent extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
           child: ResponsiveContentWrapper(
-            child: Consumer<HomePragasProvider>(
+            child: provider_lib.Consumer<HomePragasProvider>(
               builder: (context, provider, child) {
                 return Column(
                   children: [

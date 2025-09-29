@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/entities/calculation_result.dart';
+import '../../domain/entities/calculation_template.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
-import '../../domain/entities/calculation_template.dart';
 import '../../domain/services/calculator_template_service.dart';
-import '../providers/calculator_provider_simple.dart';
 import '../providers/calculator_features_provider.dart';
+import '../providers/calculator_provider_simple.dart';
 import '../widgets/calculation_result_display.dart';
 import '../widgets/parameter_input_widget.dart';
 
@@ -21,7 +21,7 @@ class CalculatorDetailPage extends StatefulWidget {
 
   const CalculatorDetailPage({
     super.key,
-    required this.calculatorId,
+    required calculatorId,
   });
 
   @override

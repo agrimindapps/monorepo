@@ -22,13 +22,13 @@ class MarketProvider with ChangeNotifier {
   final MarketRepository _repository;
 
   MarketProvider(
-    this._getMarkets,
-    this._getMarketSummary,
-    this._getTopGainers,
-    this._getTopLosers,
-    this._getMostActive,
-    this._manageFavorites,
-    this._repository,
+    _getMarkets,
+    _getMarketSummary,
+    _getTopGainers,
+    _getTopLosers,
+    _getMostActive,
+    _manageFavorites,
+    _repository,
   );
 
   // === STATE VARIABLES ===

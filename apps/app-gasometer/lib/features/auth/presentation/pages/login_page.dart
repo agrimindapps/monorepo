@@ -7,8 +7,9 @@ import 'package:flutter/services.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/analytics_service.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
-import '../controllers/login_controller.dart';
-import '../providers/auth_provider.dart';
+// TODO: Replace with Riverpod providers
+// import '../controllers/login_controller.dart';
+// import '../providers/auth_provider.dart';
 import '../widgets/auth_tabs_widget.dart';
 import '../widgets/login_background_widget.dart';
 import '../widgets/login_form_widget.dart';
@@ -17,7 +18,7 @@ import '../widgets/signup_form_widget.dart';
 
 /// Página de login seguindo padrões SOLID
 /// Responsabilidade única: Orquestrar widgets de autenticação
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
 
   const LoginPage({
     super.key,
@@ -26,10 +27,10 @@ class LoginPage extends StatefulWidget {
   final bool? showBackButton;
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _LoginPageState extends ConsumerState<LoginPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
@@ -78,22 +79,13 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => LoginController(
-        authProvider: di.getIt<AuthProvider>(),
-        analytics: AnalyticsService(),
-      ),
-      child: Consumer<LoginController>(
-        builder: (context, controller, child) {
-          return Scaffold(
-            body: AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle.light,
-              child: LoginBackgroundWidget(
-                child: _buildResponsiveLayout(context),
-              ),
-            ),
-          );
-        },
+    // TODO: Replace with Riverpod providers for LoginController and AuthProvider
+    return Scaffold(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: LoginBackgroundWidget(
+          child: _buildResponsiveLayout(context),
+        ),
       ),
     );
   }
@@ -329,97 +321,65 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _buildAuthContent() {
-    return Consumer<LoginController>(
-      builder: (context, controller, child) {
-        if (controller.isShowingRecoveryForm) {
-          return const RecoveryFormWidget();
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AuthTabsWidget(),
-            const SizedBox(height: 24),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.0, 0.1),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
-                    child: child,
-                  ),
-                );
-              },
-              child: controller.isSignUpMode
-                  ? Container(
-                      key: const ValueKey('signup'),
-                      child: SignupFormWidget(
-                        onSignupSuccess: _handleAuthSuccess,
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey('login'),
-                      child: LoginFormWidget(
-                        onLoginSuccess: _handleAuthSuccess,
-                      ),
-                    ),
-            ),
-          ],
-        );
-      },
+    // TODO: Replace Consumer<LoginController> with Riverpod Consumer
+    // For now, return a simplified version without provider dependencies
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const AuthTabsWidget(),
+        const SizedBox(height: 24),
+        // TODO: Implement tab switching with Riverpod state management
+        LoginFormWidget(
+          onLoginSuccess: _handleAuthSuccess,
+        ),
+      ],
     );
   }
 
   void _handleAuthSuccess() {
     if (!mounted) return;
     
-    final authProvider = di.getIt<AuthProvider>();
+    // TODO: Replace with Riverpod auth provider
+    // final authProvider = ref.read(authProviderNotifier);
     final router = GoRouter.of(context);
     
-    // Seguir padrão do app-plantis: mostrar loading simples se sync estiver ativo
-    if (authProvider.isSyncInProgress) {
-      _showSimpleSyncLoading(authProvider, router);
-    } else {
-      // Navegar imediatamente se não há sync em progresso
-      router.go('/vehicles');
-    }
+    // Placeholder: navigate directly without checking sync status
+    router.go('/vehicles');
+    
+    // TODO: Implement sync status checking with Riverpod
+    // if (authProvider.isSyncInProgress) {
+    //   _showSimpleSyncLoading(authProvider, router);
+    // } else {
+    //   router.go('/vehicles');
+    // }
   }
   
-  /// Mostra loading simples de sincronização que navega automaticamente - padrão app-plantis
-  void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
-    SimpleSyncLoading.show(
-      context,
-      message: authProvider.syncMessage,
-    );
-    
-    // Navegar quando sync terminar
-    _navigateAfterSync(authProvider, router);
-  }
+  /// TODO: Implement with Riverpod auth provider
+  // void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
+  //   SimpleSyncLoading.show(
+  //     context,
+  //     message: authProvider.syncMessage,
+  //   );
+  //   
+  //   _navigateAfterSync(authProvider, router);
+  // }
   
-  /// Navega para veículos quando sync terminar - padrão app-plantis
-  void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
-    late StreamSubscription<void> subscription;
-    
-    subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
-        .listen((_) {
-      if (!authProvider.isSyncInProgress) {
-        subscription.cancel();
-        
-        // Pequeno delay para garantir que o loading foi fechado
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            router.go('/vehicles');
-          }
-        });
-      }
-    });
-  }
+  /// TODO: Implement with Riverpod auth provider
+  // void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
+  //   late StreamSubscription<void> subscription;
+  //   
+  //   subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
+  //       .listen((_) {
+  //     if (!authProvider.isSyncInProgress) {
+  //       subscription.cancel();
+  //       
+  //       Future.delayed(const Duration(milliseconds: 100), () {
+  //         if (mounted) {
+  //           router.go('/vehicles');
+  //         }
+  //       });
+  //     }
+  //   });
+  // }
 }

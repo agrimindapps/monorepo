@@ -14,9 +14,9 @@ class TemplateSelectionDialog extends StatefulWidget {
 
   const TemplateSelectionDialog({
     super.key,
-    required this.calculatorId,
-    required this.templateService,
-    required this.onTemplateSelected,
+    required calculatorId,
+    required templateService,
+    required onTemplateSelected,
   });
 
   @override
@@ -121,7 +121,7 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
             backgroundColor: Colors.green,
           ),
         );
-        _loadTemplates();
+        await _loadTemplates();
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

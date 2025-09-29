@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 import 'package:intl/intl.dart';
 
 import '../../../../core/utils/uuid_generator.dart';

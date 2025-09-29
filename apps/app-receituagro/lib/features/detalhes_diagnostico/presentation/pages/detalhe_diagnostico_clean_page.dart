@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:core/core.dart';
 
 import '../../../../core/services/premium_status_notifier.dart';
@@ -38,18 +39,18 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final provider = context.read<DetalheDiagnosticoProvider>();
-      await provider.loadDiagnosticoData(widget.diagnosticoId);
-      await provider.loadFavoritoState(widget.diagnosticoId);
-      await provider.loadPremiumStatus();
+      final detalheDiagnosticoProvider = provider.Provider.of<DetalheDiagnosticoProvider>(context, listen: false);
+      await detalheDiagnosticoProvider.loadDiagnosticoData(widget.diagnosticoId);
+      await detalheDiagnosticoProvider.loadFavoritoState(widget.diagnosticoId);
+      await detalheDiagnosticoProvider.loadPremiumStatus();
     });
   }
   
   @override
   void onPremiumStatusChanged(bool isPremium) {
     // Atualiza o provider quando o status premium muda
-    final provider = context.read<DetalheDiagnosticoProvider>();
-    provider.loadPremiumStatus();
+    final detalheDiagnosticoProvider = provider.Provider.of<DetalheDiagnosticoProvider>(context, listen: false);
+    detalheDiagnosticoProvider.loadPremiumStatus();
   }
 
   @override
@@ -57,7 +58,7 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
-    return Consumer<DetalheDiagnosticoProvider>(
+    return provider.Consumer<DetalheDiagnosticoProvider>(
       builder: (context, provider, child) {
         return BottomNavWrapper(
           selectedIndex: 0, // Assumindo que diagnóstico está relacionado a defensivos

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../providers/tab_controller_provider.dart';
 
@@ -11,7 +10,7 @@ class OptimizedTabBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TabControllerProvider>(
+    return provider.Consumer<TabControllerProvider>(
       builder: (context, tabProvider, child) {
         return Container(
           height: 44,

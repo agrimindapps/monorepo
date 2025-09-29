@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../providers/detalhe_defensivo_provider.dart';
 
@@ -27,7 +27,7 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DetalheDefensivoProvider>(
+    return provider.Consumer<DetalheDefensivoProvider>(
       builder: (context, provider, child) {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),

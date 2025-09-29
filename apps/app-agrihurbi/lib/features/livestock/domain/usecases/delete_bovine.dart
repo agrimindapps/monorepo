@@ -14,7 +14,7 @@ import '../repositories/livestock_repository.dart';
 class DeleteBovineUseCase {
   final LivestockRepository repository;
   
-  const DeleteBovineUseCase(this.repository);
+  const DeleteBovineUseCase(repository);
   
   ResultVoid call(DeleteBovineParams params) async {
     // Validação básica do ID
@@ -98,13 +98,13 @@ class DeleteBovineUseCase {
 /// Parâmetros para exclusão de bovino
 class DeleteBovineParams extends Equatable {
   const DeleteBovineParams({
-    required this.bovineId,
-    this.requireConfirmation = true,
-    this.confirmed = false,
-    this.deleteImages = false,
-    this.deleteRelatedData = false,
-    this.forceDelete = false,
-    this.reason,
+    required bovineId,
+    requireConfirmation = true,
+    confirmed = false,
+    deleteImages = false,
+    deleteRelatedData = false,
+    forceDelete = false,
+    reason,
   });
 
   /// ID do bovino a ser deletado
@@ -145,7 +145,7 @@ class DeleteBovineParams extends Equatable {
 class QuickDeleteBovineUseCase {
   final DeleteBovineUseCase _deleteUseCase;
   
-  const QuickDeleteBovineUseCase(this._deleteUseCase);
+  const QuickDeleteBovineUseCase(_deleteUseCase);
   
   ResultVoid call(String bovineId) async {
     return await _deleteUseCase.call(

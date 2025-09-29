@@ -19,10 +19,10 @@ class CalculatorListWidget extends StatelessWidget {
 
   const CalculatorListWidget({
     super.key,
-    required this.calculators,
-    this.scrollController,
-    this.showCategory = true,
-    this.onRefresh,
+    required calculators,
+    scrollController,
+    showCategory = true,
+    onRefresh,
   });
 
   @override

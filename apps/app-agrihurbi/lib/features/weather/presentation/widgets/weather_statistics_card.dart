@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/weather_statistics_entity.dart';
 
 /// Widget to display weather statistics card
@@ -7,7 +8,7 @@ class WeatherStatisticsCard extends StatelessWidget {
 
   const WeatherStatisticsCard({
     super.key,
-    required this.statistics,
+    required statistics,
   });
 
   @override

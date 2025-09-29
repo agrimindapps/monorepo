@@ -227,44 +227,45 @@ class SyncProgressController {
     _progressController.add(_overallProgress);
   }
 
-  /// Conecta este controlador com o UnifiedSyncProvider
-  void connectToUnifiedSync(UnifiedSyncProvider syncProvider) {
-    // Inicializar etapas específicas do Gasometer
-    initializeGasometerSteps();
+  // TODO: Implement with Riverpod UnifiedSyncProvider
+  // /// Conecta este controlador com o UnifiedSyncProvider
+  // void connectToUnifiedSync(UnifiedSyncProvider syncProvider) {
+  //   // Inicializar etapas específicas do Gasometer
+  //   initializeGasometerSteps();
 
-    // Escutar mudanças de status do sync provider
-    syncProvider.addListener(() {
-      _updateFromUnifiedSync(syncProvider);
-    });
+  //   // Escutar mudanças de status do sync provider
+  //   syncProvider.addListener(() {
+  //     _updateFromUnifiedSync(syncProvider);
+  //   });
 
-    // Atualizar estado inicial
-    _updateFromUnifiedSync(syncProvider);
-  }
+  //   // Atualizar estado inicial
+  //   _updateFromUnifiedSync(syncProvider);
+  // }
 
-  /// Atualiza o estado do controlador baseado no UnifiedSyncProvider
-  void _updateFromUnifiedSync(UnifiedSyncProvider syncProvider) {
-    switch (syncProvider.syncStatus) {
-      case SyncStatus.syncing:
-        updateState(SyncProgressState.syncing, message: 'Sincronizando dados automotivos...');
-        _updateStepsFromDebugInfo(syncProvider.debugInfo);
-        break;
-      case SyncStatus.synced:
-        // Marcar todas as etapas como completadas
-        for (final step in _steps) {
-          completeStep(step.id);
-        }
-        updateState(SyncProgressState.completed, message: 'Seus dados automotivos estão sincronizados!');
-        break;
-      case SyncStatus.error:
-        updateState(SyncProgressState.error, message: 'Erro na sincronização dos dados');
-        break;
-      case SyncStatus.offline:
-        updateState(SyncProgressState.preparing, message: 'Modo offline - dados salvos localmente');
-        break;
-      default:
-        updateState(SyncProgressState.preparing, message: 'Preparando sincronização...');
-    }
-  }
+  // /// Atualiza o estado do controlador baseado no UnifiedSyncProvider
+  // void _updateFromUnifiedSync(UnifiedSyncProvider syncProvider) {
+  //   switch (syncProvider.syncStatus) {
+  //     case SyncStatus.syncing:
+  //       updateState(SyncProgressState.syncing, message: 'Sincronizando dados automotivos...');
+  //       _updateStepsFromDebugInfo(syncProvider.debugInfo);
+  //       break;
+  //     case SyncStatus.synced:
+  //       // Marcar todas as etapas como completadas
+  //       for (final step in _steps) {
+  //         completeStep(step.id);
+  //       }
+  //       updateState(SyncProgressState.completed, message: 'Seus dados automotivos estão sincronizados!');
+  //       break;
+  //     case SyncStatus.error:
+  //       updateState(SyncProgressState.error, message: 'Erro na sincronização dos dados');
+  //       break;
+  //     case SyncStatus.offline:
+  //       updateState(SyncProgressState.preparing, message: 'Modo offline - dados salvos localmente');
+  //       break;
+  //     default:
+  //       updateState(SyncProgressState.preparing, message: 'Preparando sincronização...');
+  //   }
+  // }
 
   /// Atualiza progresso das etapas baseado nas informações de debug do UnifiedSync
   void _updateStepsFromDebugInfo(Map<String, dynamic> debugInfo) {

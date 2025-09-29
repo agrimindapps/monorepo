@@ -17,14 +17,14 @@ class GetFavoritesParams extends FavoriteParams {
 class AddFavoriteParams extends FavoriteParams {
   final String calculatorId;
   
-  const AddFavoriteParams(this.calculatorId);
+  const AddFavoriteParams(calculatorId);
 }
 
 /// Parâmetros para remover favorito  
 class RemoveFavoriteParams extends FavoriteParams {
   final String calculatorId;
   
-  const RemoveFavoriteParams(this.calculatorId);
+  const RemoveFavoriteParams(calculatorId);
 }
 
 /// Use case unificado para gerenciar favoritos
@@ -34,7 +34,7 @@ class RemoveFavoriteParams extends FavoriteParams {
 class ManageFavorites {
   final CalculatorRepository repository;
 
-  ManageFavorites(this.repository);
+  ManageFavorites(repository);
 
   Future<Either<Failure, dynamic>> call(FavoriteParams params) async {
     if (params is GetFavoritesParams) {
@@ -53,7 +53,7 @@ class ManageFavorites {
 class GetFavoriteCalculators {
   final CalculatorRepository repository;
 
-  GetFavoriteCalculators(this.repository);
+  GetFavoriteCalculators(repository);
 
   Future<Either<Failure, List<String>>> call() async {
     return await repository.getFavoriteCalculators();
@@ -63,7 +63,7 @@ class GetFavoriteCalculators {
 class AddToFavorites {
   final CalculatorRepository repository;
 
-  AddToFavorites(this.repository);
+  AddToFavorites(repository);
 
   Future<Either<Failure, Unit>> call(String calculatorId) async {
     return await repository.addToFavorites(calculatorId);
@@ -73,7 +73,7 @@ class AddToFavorites {
 class RemoveFromFavorites {
   final CalculatorRepository repository;
 
-  RemoveFromFavorites(this.repository);
+  RemoveFromFavorites(repository);
 
   Future<Either<Failure, Unit>> call(String calculatorId) async {
     return await repository.removeFromFavorites(calculatorId);

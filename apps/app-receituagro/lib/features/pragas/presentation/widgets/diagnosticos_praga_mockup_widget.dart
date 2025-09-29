@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as flutter_provider;
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
@@ -64,7 +64,7 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
 
   /// Filtros superiores integrados com provider
   Widget _buildFiltersMockup() {
-    return Consumer<DiagnosticosPragaProvider>(
+    return provider_lib.Consumer<DiagnosticosPragaProvider>(
       builder: (context, provider, child) {
         return FiltersMockupWidget(
           searchText: provider.searchQuery,
@@ -80,7 +80,7 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(BuildContext context) {
     final provider =
-        flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+        provider_lib.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
     provider.clearError();
   }
 
@@ -233,7 +233,7 @@ class _DiagnosticosPragaMockupDebugWidgetState
   }
 
   Widget _buildDebugControls() {
-    return Consumer<DiagnosticosPragaProvider>(
+    return provider_lib.Consumer<DiagnosticosPragaProvider>(
       builder: (context, provider, child) {
         return Container(
           color: Colors.yellow.shade100,

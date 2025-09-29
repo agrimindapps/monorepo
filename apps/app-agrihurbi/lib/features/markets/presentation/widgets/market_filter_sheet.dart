@@ -12,8 +12,8 @@ class MarketFilterSheet extends StatefulWidget {
 
   const MarketFilterSheet({
     super.key,
-    required this.currentFilter,
-    required this.onFilterApplied,
+    required currentFilter,
+    required onFilterApplied,
   });
 
   @override

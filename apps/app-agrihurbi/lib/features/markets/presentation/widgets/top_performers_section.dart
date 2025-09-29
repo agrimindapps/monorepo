@@ -14,10 +14,10 @@ class TopPerformersSection extends StatelessWidget {
 
   const TopPerformersSection({
     super.key,
-    required this.topGainers,
-    required this.topLosers,
-    required this.mostActive,
-    required this.onMarketTap,
+    required topGainers,
+    required topLosers,
+    required mostActive,
+    required onMarketTap,
   });
 
   @override

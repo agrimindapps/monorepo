@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 
 import '../providers/feature_flags_provider.dart';
 
@@ -156,8 +156,8 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FeatureFlagsProvider>(
-      builder: (context, featureFlags, child) {
+    return provider_lib.Consumer<FeatureFlagsProvider>(
+      builder: (BuildContext context, FeatureFlagsProvider featureFlags, Widget? child) {
         // Don't show if sync is disabled
         if (!featureFlags.isContentSynchronizationEnabled) {
           return const SizedBox.shrink();

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
+import '../../../../core/providers/theme_provider.dart';
 import '../../constants/settings_design_tokens.dart';
-import 'package:core/core.dart';
 
 class ThemeSelectionDialog extends StatelessWidget {
   const ThemeSelectionDialog({super.key});
@@ -11,7 +12,7 @@ class ThemeSelectionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer<ThemeProvider>(
+    return provider_lib.Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return Dialog(
           shape: RoundedRectangleBorder(

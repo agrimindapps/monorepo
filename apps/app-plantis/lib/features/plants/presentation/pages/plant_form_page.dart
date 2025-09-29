@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Provider, Consumer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/riverpod_providers/plants_providers.dart'
     as riverpod_plants;
@@ -33,7 +33,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     // Initialize SOLID state manager only once
     if (!_initialized) {
       _initialized = true;
-      final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+      final formManager = ref.read(solidPlantFormStateManagerProvider);
 
       // Initialize form data
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -125,7 +125,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
                         ? 'Erro ao carregar dados da planta: ${formState.errorMessage}'
                         : 'Erro ao inicializar formulário: ${formState.errorMessage}',
                 onRetry: () {
-                  final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+                  final formManager = ref.read(solidPlantFormStateManagerProvider);
                   formManager.clearError();
                   if (widget.plantId != null) {
                     formManager.loadPlant(widget.plantId!);
@@ -183,7 +183,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
   }
 
   Future<void> _savePlant(BuildContext context) async {
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
     final formState = ref.read(solidPlantFormStateProvider);
     final plantName = formState.name.trim();
 

@@ -18,30 +18,8 @@ dependencies:
   core:
     path: ../../packages/core
   
-  # Dependências diretas necessárias (não disponíveis via re-export do core)
-  provider: ^6.1.5
-  flutter_riverpod: ^2.6.1
-  hive: ^2.2.3
-  injectable: ^2.4.4
-  get_it: ^8.2.0
-
-  cloud_functions: any
-  firebase_storage: any
-  uuid: any
-  dartz: any
-  connectivity_plus: any
-  shared_preferences: any
-  path_provider: any
-  flutter_secure_storage: any
-  url_launcher: any
-  device_info_plus: any
-  intl: any
-  equatable: any
-  cloud_firestore: any
+  # Dependências específicas não disponíveis via core
   flutter_staggered_grid_view: any
-  firebase_core: any
-  firebase_crashlytics: any
-  hive_flutter: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

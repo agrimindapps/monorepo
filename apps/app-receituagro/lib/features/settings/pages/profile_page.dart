@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../core/providers/auth_provider.dart';
@@ -39,11 +40,11 @@ class _ProfilePageState extends State<ProfilePage> {
     super.didChangeDependencies();
     
     // Initialize UserActionService
-    final authProvider = context.read<ReceitaAgroAuthProvider>();
+    final authProvider = provider_lib.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
     _userActionService = UserActionService(authProvider);
     
     // Initialize SettingsProvider once when authenticated
-    final settingsProvider = context.read<SettingsProvider>();
+    final settingsProvider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
     
     if (!_settingsInitialized && 
         authProvider.isAuthenticated && 
@@ -70,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Consumer2<ReceitaAgroAuthProvider, SettingsProvider>(
+    return provider_lib.Consumer2<ReceitaAgroAuthProvider, SettingsProvider>(
       builder: (context, authProvider, settingsProvider, child) {
         final isAuthenticated = authProvider.isAuthenticated && !authProvider.isAnonymous;
         final user = authProvider.currentUser;

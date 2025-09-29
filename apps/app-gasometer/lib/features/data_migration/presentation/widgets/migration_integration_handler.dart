@@ -2,14 +2,15 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../providers/data_migration_provider.dart';
+// TODO: Replace with Riverpod providers
+// import '../providers/data_migration_provider.dart';
 
 /// Widget that handles the integration of data migration into the authentication flow
 /// 
 /// This widget should be used during the login process to detect and handle
 /// conflicts between anonymous and account data. It provides a seamless
 /// user experience for resolving data conflicts.
-class MigrationIntegrationHandler extends StatelessWidget {
+class MigrationIntegrationHandler extends ConsumerWidget {
   const MigrationIntegrationHandler({
     super.key,
     required this.anonymousUserId,
@@ -43,153 +44,158 @@ class MigrationIntegrationHandler extends StatelessWidget {
   final bool showProgressDialog;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<DataMigrationProvider>(
-      builder: (context, provider, child) {
-        // Auto-detect conflicts if enabled and not already detecting
-        if (autoDetectConflicts && !provider.isDetectingConflicts && provider.conflictResult == null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _detectConflicts(context, provider);
-          });
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    // TODO: Replace Consumer<DataMigrationProvider> with Riverpod provider
+    // final provider = ref.watch(dataMigrationProviderNotifier);
+    
+    // Placeholder implementation without provider dependencies
+    return const SizedBox.shrink();
+    
+    // TODO: Implement with Riverpod providers
+    // Auto-detect conflicts if enabled and not already detecting
+    // if (autoDetectConflicts && !provider.isDetectingConflicts && provider.conflictResult == null) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     _detectConflicts(context, provider);
+    //   });
+    // }
 
-        // Show conflict dialog if conflicts are detected
-        if (provider.hasConflict && provider.conflictResult != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _handleConflictDetected(context, provider);
-          });
-        }
+    // Show conflict dialog if conflicts are detected
+    // if (provider.hasConflict && provider.conflictResult != null) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     _handleConflictDetected(context, provider);
+    //   });
+    // }
 
-        // Handle migration completion
-        if (provider.migrationSuccessful && provider.migrationResult != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            onMigrationComplete(provider.migrationResult!);
-          });
-        }
+    // Handle migration completion
+    // if (provider.migrationSuccessful && provider.migrationResult != null) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     onMigrationComplete(provider.migrationResult!);
+    //   });
+    // }
 
-        // Handle errors
-        if (provider.hasError) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _handleError(context, provider);
-          });
-        }
+    // Handle errors
+    // if (provider.hasError) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     _handleError(context, provider);
+    //   });
+    // }
 
-        // Show loading indicator during conflict detection
-        if (provider.isDetectingConflicts) {
-          return const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Verificando dados existentes...'),
-              ],
-            ),
-          );
-        }
+    // Show loading indicator during conflict detection
+    // if (provider.isDetectingConflicts) {
+    //   return const Center(
+    //     child: Column(
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: [
+    //         CircularProgressIndicator(),
+    //         SizedBox(height: 16),
+    //         Text('Verificando dados existentes...'),
+    //       ],
+    //     ),
+    //   );
+    // }
 
-        // Return empty container when not active
-        return const SizedBox.shrink();
-      },
-    );
+    // Return empty container when not active
+    // return const SizedBox.shrink();
   }
 
-  Future<void> _detectConflicts(BuildContext context, DataMigrationProvider provider) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔍 Auto-detecting conflicts for migration');
-      }
+  // TODO: Implement with Riverpod providers
+  // Future<void> _detectConflicts(BuildContext context, DataMigrationProvider provider) async {
+  //   try {
+  //     if (kDebugMode) {
+  //       debugPrint('🔍 Auto-detecting conflicts for migration');
+  //     }
 
-      final success = await provider.detectConflicts(
-        anonymousUserId: anonymousUserId,
-        accountUserId: accountUserId,
-      );
+  //     final success = await provider.detectConflicts(
+  //       anonymousUserId: anonymousUserId,
+  //       accountUserId: accountUserId,
+  //     );
 
-      if (!success && provider.hasError) {
-        _handleError(context, provider);
-      }
+  //     if (!success && provider.hasError) {
+  //       _handleError(context, provider);
+  //     }
 
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Error in auto-conflict detection: $e');
-      }
-      onMigrationError?.call('Erro ao detectar conflitos: $e');
-    }
-  }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       debugPrint('❌ Error in auto-conflict detection: $e');
+  //     }
+  //     onMigrationError?.call('Erro ao detectar conflitos: $e');
+  //   }
+  // }
 
-  Future<void> _handleConflictDetected(BuildContext context, DataMigrationProvider provider) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('⚠️ Handling detected conflict');
-      }
+  // TODO: Implement with Riverpod providers
+  // Future<void> _handleConflictDetected(BuildContext context, DataMigrationProvider provider) async {
+  //   try {
+  //     if (kDebugMode) {
+  //       debugPrint('⚠️ Handling detected conflict');
+  //     }
 
-      // Show conflict resolution dialog
-      final choice = await provider.showConflictDialog(context);
+  //     // Show conflict resolution dialog
+  //     final choice = await provider.showConflictDialog(context);
       
-      if (choice == null || choice == DataResolutionChoice.cancel) {
-        if (kDebugMode) {
-          debugPrint('🚫 User canceled migration');
-        }
-        onMigrationCanceled();
-        return;
-      }
+  //     if (choice == null || choice == DataResolutionChoice.cancel) {
+  //       if (kDebugMode) {
+  //         debugPrint('🚫 User canceled migration');
+  //       }
+  //       onMigrationCanceled();
+  //       return;
+  //     }
 
-      // Handle user's choice
-      await _executeUserChoice(context, provider, choice);
+  //     // Handle user's choice
+  //     await _executeUserChoice(context, provider, choice);
 
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Error handling conflict: $e');
-      }
-      onMigrationError?.call('Erro ao processar conflito: $e');
-    }
-  }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       debugPrint('❌ Error handling conflict: $e');
+  //     }
+  //     onMigrationError?.call('Erro ao processar conflito: $e');
+  //   }
+  // }
 
-  Future<void> _executeUserChoice(
-    BuildContext context, 
-    DataMigrationProvider provider, 
-    DataResolutionChoice choice,
-  ) async {
-    try {
-      if (choice == DataResolutionChoice.keepAnonymousData) {
-        // Guide user to create new account
-        await _handleKeepAnonymousDataChoice(context);
-        return;
-      }
+  // Future<void> _executeUserChoice(
+  //   BuildContext context, 
+  //   DataMigrationProvider provider, 
+  //   DataResolutionChoice choice,
+  // ) async {
+  //   try {
+  //     if (choice == DataResolutionChoice.keepAnonymousData) {
+  //       // Guide user to create new account
+  //       await _handleKeepAnonymousDataChoice(context);
+  //       return;
+  //     }
 
-      // Show progress dialog if enabled
-      if (showProgressDialog) {
-        // Start migration execution in background
-        _executeMigration(provider, choice);
+  //     // Show progress dialog if enabled
+  //     if (showProgressDialog) {
+  //       // Start migration execution in background
+  //       _executeMigration(provider, choice);
         
-        // Show progress dialog
-        await provider.showProgressDialog(
-          context: context,
-          operationTitle: 'Processando migração de dados',
-          allowCancel: false,
-        );
-      } else {
-        // Execute migration without progress dialog
-        final success = await provider.executeResolution(choice: choice);
-        if (!success) {
-          _handleError(context, provider);
-        }
-      }
+  //       // Show progress dialog
+  //       await provider.showProgressDialog(
+  //         context: context,
+  //         operationTitle: 'Processando migração de dados',
+  //         allowCancel: false,
+  //       );
+  //     } else {
+  //       // Execute migration without progress dialog
+  //       final success = await provider.executeResolution(choice: choice);
+  //       if (!success) {
+  //         _handleError(context, provider);
+  //       }
+  //     }
 
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Error executing user choice: $e');
-      }
-      onMigrationError?.call('Erro ao executar escolha: $e');
-    }
-  }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       debugPrint('❌ Error executing user choice: $e');
+  //     }
+  //     onMigrationError?.call('Erro ao executar escolha: $e');
+  //   }
+  // }
 
-  Future<void> _executeMigration(
-    DataMigrationProvider provider, 
-    DataResolutionChoice choice,
-  ) async {
-    await provider.executeResolution(choice: choice);
-  }
+  // Future<void> _executeMigration(
+  //   DataMigrationProvider provider, 
+  //   DataResolutionChoice choice,
+  // ) async {
+  //   await provider.executeResolution(choice: choice);
+  // }
 
   Future<void> _handleKeepAnonymousDataChoice(BuildContext context) async {
     try {
@@ -265,41 +271,42 @@ class MigrationIntegrationHandler extends StatelessWidget {
     ));
   }
 
-  void _handleError(BuildContext context, DataMigrationProvider provider) {
-    final error = provider.error?.message ?? 'Erro desconhecido durante migração';
+  // TODO: Implement with Riverpod providers
+  // void _handleError(BuildContext context, DataMigrationProvider provider) {
+  //   final error = provider.error?.message ?? 'Erro desconhecido durante migração';
     
-    if (kDebugMode) {
-      debugPrint('❌ Handling migration error: $error');
-    }
+  //   if (kDebugMode) {
+  //     debugPrint('❌ Handling migration error: $error');
+  //   }
 
-    onMigrationError?.call(error);
+  //   onMigrationError?.call(error);
     
-    // Also show error dialog to user
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erro na Migração'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            Text(error),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              provider.resetState();
-              onMigrationCanceled();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+  //   // Also show error dialog to user
+  //   showDialog<void>(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Erro na Migração'),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           const Icon(Icons.error, color: Colors.red, size: 48),
+  //           const SizedBox(height: 16),
+  //           Text(error),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.of(context).pop();
+  //             provider.resetState();
+  //             onMigrationCanceled();
+  //           },
+  //           child: const Text('OK'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   /// Static method to easily integrate into authentication flow
   static Widget integrate({

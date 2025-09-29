@@ -14,7 +14,7 @@ import 'livestock_validation_service.dart';
 class BovineFormService {
   final LivestockValidationService _validationService;
 
-  BovineFormService(this._validationService);
+  BovineFormService(_validationService);
 
   // =====================================================================
   // VALIDATION METHODS
@@ -308,18 +308,18 @@ class BovineFormData {
   final bool? isActive;
 
   const BovineFormData({
-    this.commonName,
-    this.registrationId,
-    this.breed,
-    this.originCountry,
-    this.animalType,
-    this.origin,
-    this.characteristics,
-    this.purpose,
-    this.tagsString,
-    this.aptitude,
-    this.breedingSystem,
-    this.isActive,
+    commonName,
+    registrationId,
+    breed,
+    originCountry,
+    animalType,
+    origin,
+    characteristics,
+    purpose,
+    tagsString,
+    aptitude,
+    breedingSystem,
+    isActive,
   });
 
   BovineFormData copyWith({
@@ -337,18 +337,18 @@ class BovineFormData {
     bool? isActive,
   }) {
     return BovineFormData(
-      commonName: commonName ?? this.commonName,
-      registrationId: registrationId ?? this.registrationId,
-      breed: breed ?? this.breed,
-      originCountry: originCountry ?? this.originCountry,
-      animalType: animalType ?? this.animalType,
-      origin: origin ?? this.origin,
-      characteristics: characteristics ?? this.characteristics,
-      purpose: purpose ?? this.purpose,
-      tagsString: tagsString ?? this.tagsString,
-      aptitude: aptitude ?? this.aptitude,
-      breedingSystem: breedingSystem ?? this.breedingSystem,
-      isActive: isActive ?? this.isActive,
+      commonName: commonName ?? commonName,
+      registrationId: registrationId ?? registrationId,
+      breed: breed ?? breed,
+      originCountry: originCountry ?? originCountry,
+      animalType: animalType ?? animalType,
+      origin: origin ?? origin,
+      characteristics: characteristics ?? characteristics,
+      purpose: purpose ?? purpose,
+      tagsString: tagsString ?? tagsString,
+      aptitude: aptitude ?? aptitude,
+      breedingSystem: breedingSystem ?? breedingSystem,
+      isActive: isActive ?? isActive,
     );
   }
 }
@@ -360,9 +360,9 @@ class FormValidationResult {
   final List<String> generalErrors;
 
   const FormValidationResult({
-    required this.isValid,
-    this.fieldErrors = const {},
-    this.generalErrors = const [],
+    required isValid,
+    fieldErrors = const {},
+    generalErrors = const [],
   });
 
   bool hasFieldError(String fieldName) => fieldErrors.containsKey(fieldName);

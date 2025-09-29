@@ -1,19 +1,18 @@
-import 'package:core/core.dart' hide NotificationSettings, SubscriptionEntity, SubscriptionTier;
+import 'package:core/core.dart' hide NotificationSettings, SubscriptionEntity, SubscriptionTier, Provider, StateNotifier, Consumer, ProviderContainer, PrivacySettings;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../features/settings/domain/entities/settings_entity.dart';
-import '../../features/settings/domain/usecases/manage_settings.dart';
 import '../../features/markets/domain/entities/market_entity.dart';
 import '../../features/markets/domain/entities/market_filter_entity.dart';
 import '../../features/markets/domain/repositories/market_repository.dart';
 import '../../features/markets/domain/usecases/get_market_summary.dart' as market_summary;
 import '../../features/markets/domain/usecases/get_markets.dart';
-import '../../features/markets/domain/usecases/manage_market_favorites.dart';
 import '../../features/news/domain/entities/commodity_price_entity.dart';
 import '../../features/news/domain/entities/news_article_entity.dart';
-import '../../features/news/domain/repositories/news_repository.dart';
 import '../../features/news/domain/usecases/get_commodity_prices.dart';
 import '../../features/news/domain/usecases/get_news.dart';
+import '../../features/settings/domain/entities/settings_entity.dart';
+import '../../features/settings/domain/usecases/manage_settings.dart';
 import '../../features/subscription/domain/entities/subscription_entity.dart';
 import '../../features/subscription/domain/usecases/manage_subscription.dart';
 

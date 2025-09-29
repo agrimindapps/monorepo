@@ -1,6 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/bovine_entity.dart';
 import '../repositories/livestock_repository.dart';
@@ -14,7 +12,7 @@ import '../repositories/livestock_repository.dart';
 class GetBovinesUseCase implements UseCase<List<BovineEntity>, GetBovinesParams> {
   final LivestockRepository repository;
   
-  const GetBovinesUseCase(this.repository);
+  const GetBovinesUseCase(repository);
   
   @override
   Future<Either<Failure, List<BovineEntity>>> call(GetBovinesParams params) async {
@@ -34,7 +32,7 @@ class GetBovinesUseCase implements UseCase<List<BovineEntity>, GetBovinesParams>
 class GetAllBovinesUseCase implements NoParamsUseCase<List<BovineEntity>> {
   final LivestockRepository repository;
   
-  const GetAllBovinesUseCase(this.repository);
+  const GetAllBovinesUseCase(repository);
   
   @override
   Future<Either<Failure, List<BovineEntity>>> call() async {
@@ -45,8 +43,8 @@ class GetAllBovinesUseCase implements NoParamsUseCase<List<BovineEntity>> {
 /// Parâmetros para o GetBovinesUseCase
 class GetBovinesParams {
   const GetBovinesParams({
-    this.searchParams,
-    this.includeInactive = false,
+    searchParams,
+    includeInactive = false,
   });
 
   final BovineSearchParams? searchParams;

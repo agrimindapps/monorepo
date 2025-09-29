@@ -63,7 +63,6 @@ class WeatherProvider with ChangeNotifier {
   // Pagination states
   bool _hasMoreMeasurements = true;
   int _currentPage = 0;
-  final int _pageSize = 20;
 
   // ============================================================================
   // GETTERS

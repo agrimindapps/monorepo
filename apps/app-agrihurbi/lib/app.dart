@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
+import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'core/constants/app_constants.dart';
 
 class AgriHurbiApp extends ConsumerWidget {
   const AgriHurbiApp({super.key});

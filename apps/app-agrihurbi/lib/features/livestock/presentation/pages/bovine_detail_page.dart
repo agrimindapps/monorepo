@@ -13,7 +13,7 @@ import '../providers/bovines_provider.dart';
 class BovineDetailPage extends StatefulWidget {
   const BovineDetailPage({
     super.key,
-    required this.bovineId,
+    required bovineId,
   });
 
   /// ID do bovino a ser exibido
@@ -524,7 +524,7 @@ Compartilhado via AgriHurbi
   }
 
   void _confirmDelete() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),

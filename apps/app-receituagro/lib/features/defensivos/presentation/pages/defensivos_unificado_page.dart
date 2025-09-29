@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -11,7 +10,6 @@ import '../providers/defensivos_drill_down_provider.dart';
 import '../providers/defensivos_unificado_provider.dart';
 import '../widgets/comparacao_defensivos_widget.dart';
 import '../widgets/defensivo_search_field_widget.dart';
-import '../widgets/defensivos_drill_down_navigation_widget.dart';
 import '../widgets/defensivos_group_list_widget.dart';
 import '../widgets/defensivos_list_widget.dart';
 
@@ -115,26 +113,26 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   void _carregarDefensivos() {
-    final provider = context.read<DefensivosUnificadoProvider>();
+    final providerInstance = provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false);
     
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       // Carrega defensivos agrupados e inicializa drill-down
-      provider.carregarDefensivosAgrupados(
+      providerInstance.carregarDefensivosAgrupados(
         tipoAgrupamento: widget.tipoAgrupamento!,
         filtroTexto: widget.textoFiltro,
       ).then((_) {
         // Inicializar drill-down provider com dados carregados
         _drillDownProvider.initializeWithDefensivos(
-          defensivos: provider.defensivos,
+          defensivos: providerInstance.defensivos,
           tipoAgrupamento: widget.tipoAgrupamento!,
         );
       });
     } else if (widget.modoCompleto) {
       // Carrega defensivos completos (lista simples)
-      provider.carregarDefensivosCompletos();
+      providerInstance.carregarDefensivosCompletos();
     } else {
       // Fallback para lista simples
-      provider.carregarDefensivosCompletos();
+      providerInstance.carregarDefensivosCompletos();
     }
   }
 
@@ -151,7 +149,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
-              child: Consumer<DefensivosUnificadoProvider>(
+              child: provider.Consumer<DefensivosUnificadoProvider>(
                 builder: (context, provider, child) {
                   return Column(
                     children: [
@@ -173,7 +171,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
           ),
         ),
       ),
-      floatingActionButton: Consumer<DefensivosUnificadoProvider>(
+      floatingActionButton: provider.Consumer<DefensivosUnificadoProvider>(
         builder: (context, provider, child) {
           if (provider.modoComparacao && provider.defensivosSelecionados.length >= 2) {
             return FloatingActionButton.extended(
@@ -344,11 +342,11 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   Widget _buildItemsList() {
     return DefensivosListWidget(
       defensivos: _drillDownProvider.currentGroupItems,
-      modoComparacao: context.read<DefensivosUnificadoProvider>().modoComparacao,
-      defensivosSelecionados: context.read<DefensivosUnificadoProvider>().defensivosSelecionados,
+      modoComparacao: provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).modoComparacao,
+      defensivosSelecionados: provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).defensivosSelecionados,
       onTap: _navegarParaDetalhes,
-      onSelecaoChanged: context.read<DefensivosUnificadoProvider>().modoComparacao 
-          ? context.read<DefensivosUnificadoProvider>().toggleSelecaoDefensivo 
+      onSelecaoChanged: provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).modoComparacao 
+          ? provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).toggleSelecaoDefensivo 
           : null,
       onClearFilters: _clearSearch,
       hasActiveSearch: _searchText.isNotEmpty,
@@ -433,7 +431,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
           defensivos: defensivos,
           onFechar: () {
             Navigator.of(context).pop();
-            context.read<DefensivosUnificadoProvider>().limparSelecao();
+            provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).limparSelecao();
           },
         ),
       ),

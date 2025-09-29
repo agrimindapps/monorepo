@@ -239,10 +239,10 @@ class SystemStats {
   final int activeSessions;
 
   const SystemStats({
-    required this.registryStats,
-    required this.engineStats,
-    required this.totalCalculators,
-    required this.activeSessions,
+    required registryStats,
+    required engineStats,
+    required totalCalculators,
+    required activeSessions,
   });
 }
 
@@ -253,9 +253,9 @@ class SystemValidationResult {
   final DependencyValidationResult dependencyValidation;
 
   const SystemValidationResult({
-    required this.isValid,
-    required this.registryValidation,
-    required this.dependencyValidation,
+    required isValid,
+    required registryValidation,
+    required dependencyValidation,
   });
 
   List<String> get allErrors => [

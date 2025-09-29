@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -70,7 +70,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   Widget _buildImageSection(BuildContext context) {
     final formState = ref.watch(solidPlantFormStateProvider);
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +390,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   Widget _buildBasicInfoForm(BuildContext context) {
     final formState = ref.watch(solidPlantFormStateProvider);
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
     final fieldErrors = formState.fieldErrors;
     final theme = Theme.of(context);
 

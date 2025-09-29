@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/weather_measurement_entity.dart';
 
 /// Widget to display current weather information
@@ -8,8 +9,8 @@ class WeatherCurrentCard extends StatelessWidget {
 
   const WeatherCurrentCard({
     super.key,
-    this.measurement,
-    this.isLoading = false,
+    measurement,
+    isLoading = false,
   });
 
   @override

@@ -259,9 +259,9 @@ class ValidationResult {
   final List<String> warnings;
 
   const ValidationResult({
-    required this.isValid,
-    required this.errors,
-    required this.warnings,
+    required isValid,
+    required errors,
+    required warnings,
   });
 
   bool get hasErrors => errors.isNotEmpty;
@@ -276,10 +276,10 @@ class BatchValidationResult {
   final List<ValidationResult> results;
 
   const BatchValidationResult({
-    required this.totalItems,
-    required this.validItems,
-    required this.invalidItems,
-    required this.results,
+    required totalItems,
+    required validItems,
+    required invalidItems,
+    required results,
   });
 
   double get validPercentage => 
@@ -297,8 +297,8 @@ class BusinessValidationResult {
   final List<String> issues;
 
   const BusinessValidationResult({
-    required this.hasIssues,
-    required this.issues,
+    required hasIssues,
+    required issues,
   });
 
   bool get isValid => !hasIssues;

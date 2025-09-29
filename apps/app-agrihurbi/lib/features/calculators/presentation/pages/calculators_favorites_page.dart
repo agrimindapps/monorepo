@@ -27,7 +27,6 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
   List<CalculatorEntity> _favoriteCalculators = [];
   FavoritesStats? _stats;
   bool _isLoading = true;
-  final bool _isOrganizing = false;
   CalculatorFavoritesService? _favoritesService;
 
   @override
@@ -500,7 +499,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
   }
 
   void _showOrganizeDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Organizar Favoritos'),
@@ -534,7 +533,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
   }
 
   void _showClearAllDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Limpar Todos os Favoritos'),

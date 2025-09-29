@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../entities/calculator_category.dart';
 import '../entities/calculator_entity.dart';
@@ -18,7 +17,7 @@ class GetCalculators {
 class GetCalculatorsByCategory {
   final CalculatorRepository repository;
 
-  GetCalculatorsByCategory(this.repository);
+  GetCalculatorsByCategory(repository);
 
   Future<Either<Failure, List<CalculatorEntity>>> call(
     CalculatorCategory category,
@@ -30,7 +29,7 @@ class GetCalculatorsByCategory {
 class GetCalculatorById {
   final CalculatorRepository repository;
 
-  GetCalculatorById(this.repository);
+  GetCalculatorById(repository);
 
   Future<Either<Failure, CalculatorEntity>> call(String id) async {
     return repository.getCalculatorById(id);
@@ -40,7 +39,7 @@ class GetCalculatorById {
 class SearchCalculators {
   final CalculatorRepository repository;
 
-  SearchCalculators(this.repository);
+  SearchCalculators(repository);
 
   Future<Either<Failure, List<CalculatorEntity>>> call(
     String searchTerm,

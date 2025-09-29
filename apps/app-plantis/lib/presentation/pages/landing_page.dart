@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as local;
+import '../../core/riverpod_providers/auth_providers.dart' as local;
 
-class LandingPage extends StatefulWidget {
+class LandingPage extends ConsumerStatefulWidget {
   const LandingPage({super.key});
 
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  ConsumerState<LandingPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage>
+class _LandingPageState extends ConsumerState<LandingPage>
     with SingleTickerProviderStateMixin, AccessibilityFocusMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -55,10 +55,12 @@ class _LandingPageState extends State<LandingPage>
   }
 
   void _checkUserLoginStatus() {
-    final authProvider = context.read<local.AuthProvider>();
+    final authState = ref.read(local.authProvider);
+    final isInitialized = ref.read(local.isInitializedProvider);
+    final isAuthenticated = ref.read(local.isAuthenticatedProvider);
 
     // Se já está inicializado e autenticado, redireciona instantaneamente
-    if (authProvider.isInitialized && authProvider.isAuthenticated) {
+    if (isInitialized && isAuthenticated) {
       // Removed artificial delay - redirect immediately for better UX
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -77,15 +79,18 @@ class _LandingPageState extends State<LandingPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<local.AuthProvider>(
-        builder: (context, authProvider, child) {
+      body: Consumer(
+        builder: (context, ref, child) {
+          final isInitialized = ref.watch(local.isInitializedProvider);
+          final isAuthenticated = ref.watch(local.isAuthenticatedProvider);
+          
           // Se ainda está carregando, mostra splash
-          if (!authProvider.isInitialized) {
+          if (!isInitialized) {
             return _buildSplashScreen();
           }
 
           // Se está autenticado, mostra loading e redireciona
-          if (authProvider.isAuthenticated) {
+          if (isAuthenticated) {
             return _buildRedirectingScreen();
           }
 

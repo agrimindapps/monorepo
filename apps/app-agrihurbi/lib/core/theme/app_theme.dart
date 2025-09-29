@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'design_tokens.dart';
+
 import 'app_text_styles.dart';
+import 'design_tokens.dart';
 
 /// Application theme configuration using Design Tokens
 /// This consolidates all theme-related constants and eliminates duplication

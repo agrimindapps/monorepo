@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../comentarios/models/comentario_model.dart';
@@ -25,7 +26,7 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DetalhePragaProvider>(
+    return provider_lib.Consumer<DetalhePragaProvider>(
       builder: (context, provider, child) {
         // Para usuários free, mostra apenas o card premium centralizado
         if (!provider.isPremium) {

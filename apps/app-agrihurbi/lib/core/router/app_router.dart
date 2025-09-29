@@ -14,13 +14,13 @@ import 'package:app_agrihurbi/features/markets/presentation/pages/markets_list_p
 import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
 import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
 import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../riverpod_providers/providers.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final initialRoute = '/login';
+  const initialRoute = '/login';
 
   return GoRouter(
     initialLocation: initialRoute,

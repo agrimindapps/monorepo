@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'
     as riverpod
     show Consumer;
 
-import '../../core/riverpod_providers/auth_providers.dart';
+import '../../core/riverpod_providers/auth_providers.dart' as local;
 import '../../core/riverpod_providers/sync_providers.dart';
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/data_sanitization_service.dart';
@@ -50,7 +50,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                 child: ref
-                    .watch(authProvider)
+                    .watch(local.authProvider)
                     .when(
                       data: (authState) {
                         final user = authState.currentUser;
@@ -406,7 +406,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
   Widget _buildAccountInfoSection(
     BuildContext context,
     dynamic user,
-    AuthState authState,
+    local.AuthState authState,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,7 +472,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
-  Widget _buildDataSyncSection(BuildContext context, AuthState authState) {
+  Widget _buildDataSyncSection(BuildContext context, local.AuthState authState) {
     final theme = Theme.of(context);
 
     return riverpod.Consumer(
@@ -780,7 +780,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showLogoutDialog(BuildContext context, AuthState authState) {
+  void _showLogoutDialog(BuildContext context, local.AuthState authState) {
     final theme = Theme.of(context);
     showDialog<void>(
       context: context,
@@ -912,7 +912,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showClearDataDialog(BuildContext context, AuthState authState) {
+  void _showClearDataDialog(BuildContext context, local.AuthState authState) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -922,7 +922,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showDeleteAccountDialog(BuildContext context, AuthState authState) {
+  void _showDeleteAccountDialog(BuildContext context, local.AuthState authState) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -934,7 +934,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
 
   Future<void> _performLogoutWithProgressDialog(
     BuildContext context,
-    AuthState authState,
+    local.AuthState authState,
   ) async {
     // Show progress dialog
     unawaited(
@@ -950,7 +950,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
       await Future<void>.delayed(const Duration(milliseconds: 800));
 
       // Perform actual logout
-      await ref.read(authProvider.notifier).logout();
+      await ref.read(local.authProvider.notifier).logout();
 
       // Close progress dialog
       if (context.mounted) {
@@ -1187,7 +1187,7 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
 
 /// Dialog stateful para confirmação de limpeza de dados
 class _DataClearDialog extends StatefulWidget {
-  final AuthState authState;
+  final local.AuthState authState;
 
   const _DataClearDialog({required this.authState});
 
@@ -1466,7 +1466,7 @@ class __DataClearDialogState extends State<_DataClearDialog> {
 
 /// Dialog stateful para confirmação de exclusão de conta
 class _AccountDeletionDialog extends ConsumerStatefulWidget {
-  final AuthState authState;
+  final local.AuthState authState;
 
   const _AccountDeletionDialog({required this.authState});
 

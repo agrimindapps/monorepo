@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service centralizado para tracking e logging de erros
 /// 
@@ -15,7 +14,7 @@ class ErrorTrackingService {
   
   const ErrorTrackingService(
     this._analyticsService,
-    // this._hiveStorageService, // Reserved for future use
+    // _hiveStorageService, // Reserved for future use
   );
   
   /// Registra um erro crítico que afeta a funcionalidade principal

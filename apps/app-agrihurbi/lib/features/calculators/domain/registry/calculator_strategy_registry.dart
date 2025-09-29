@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+
 import '../interfaces/calculator_strategy.dart';
 import '../strategies/npk_calculation_strategy.dart';
 

@@ -22,14 +22,14 @@ class NewsProvider with ChangeNotifier {
   final NewsRepository _repository;
 
   NewsProvider(
-    this._getNews,
-    this._getArticleById,
-    this._searchArticles,
-    this._getPremiumArticles,
-    this._manageFavorites,
-    this._refreshRSSFeeds,
-    this._getCommodityPrices,
-    this._repository,
+    _getNews,
+    _getArticleById,
+    _searchArticles,
+    _getPremiumArticles,
+    _manageFavorites,
+    _refreshRSSFeeds,
+    _getCommodityPrices,
+    _repository,
   );
 
   // === STATE VARIABLES ===

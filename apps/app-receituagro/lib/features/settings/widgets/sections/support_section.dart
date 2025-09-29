@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../constants/settings_design_tokens.dart';
@@ -61,7 +62,7 @@ class SupportSection extends StatelessWidget {
   }
 
   Future<void> _showRateApp(BuildContext context) async {
-    final provider = context.read<SettingsProvider>();
+    final provider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
     
     try {
       final success = await provider.showRateAppDialog(context);

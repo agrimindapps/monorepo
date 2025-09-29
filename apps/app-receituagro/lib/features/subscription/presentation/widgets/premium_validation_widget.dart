@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
@@ -59,7 +60,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SubscriptionProvider, FeatureFlagsProvider>(
+    return provider_lib.Consumer2<SubscriptionProvider, FeatureFlagsProvider>(
       builder: (context, subscriptionProvider, featureFlags, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,7 +525,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
       widget.onRestorePressed!();
     } else {
       // Default restore logic
-      final subscriptionProvider = context.read<SubscriptionProvider>();
+      final subscriptionProvider = provider_lib.Provider.of<SubscriptionProvider>(context, listen: false);
       await subscriptionProvider.restorePurchases();
       
       if (mounted) {
@@ -548,7 +549,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
         widget.onSyncPressed!();
       } else {
         // Default sync logic
-        final subscriptionProvider = context.read<SubscriptionProvider>();
+        final subscriptionProvider = provider_lib.Provider.of<SubscriptionProvider>(context, listen: false);
         await subscriptionProvider.validatePremiumStatus();
         await subscriptionProvider.syncPremiumStatus();
       }

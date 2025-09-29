@@ -14,7 +14,7 @@ import '../../domain/services/bovine_form_service.dart';
 class BovineFormProvider extends ChangeNotifier {
   final BovineFormService _formService;
 
-  BovineFormProvider(this._formService);
+  BovineFormProvider(_formService);
 
   // =====================================================================
   // CONTROLLERS POOL - Reutilização otimizada

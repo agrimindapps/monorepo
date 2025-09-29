@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
-import 'package:hive/hive.dart';
 
 /// Hive Type Adapters for Market Enums
 /// 

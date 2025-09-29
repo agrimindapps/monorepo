@@ -489,11 +489,11 @@ class ConversionResult {
   final String? errorMessage;
 
   const ConversionResult._({
-    required this.isSuccess,
-    this.value,
-    this.fromUnit,
-    this.toUnit,
-    this.errorMessage,
+    required isSuccess,
+    value,
+    fromUnit,
+    toUnit,
+    errorMessage,
   });
 
   factory ConversionResult.success(

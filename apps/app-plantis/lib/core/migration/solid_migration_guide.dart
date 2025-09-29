@@ -5,7 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 
 import '../riverpod_providers/solid_providers.dart';
 
@@ -46,7 +46,7 @@ class PlantFormPageSOLID extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Usar o novo provider SOLID
     final formState = ref.watch(solidPlantFormStateProvider);
-    final formManager = ref.read(solidPlantFormStateManagerProvider.notifier);
+    final formManager = ref.read(solidPlantFormStateManagerProvider);
     
     return Scaffold(
       body: Column(
@@ -83,8 +83,8 @@ class PlantFormPageSOLID extends ConsumerWidget {
           ElevatedButton(
             onPressed: formState.canSave 
               ? () async {
-                  final success = await formManager.savePlant();
-                  if (success && context.mounted) {
+                  await formManager.savePlant();
+                  if (context.mounted) {
                     Navigator.of(context).pop();
                   }
                 } 

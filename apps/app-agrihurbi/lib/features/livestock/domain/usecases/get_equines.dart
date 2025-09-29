@@ -1,6 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/equine_entity.dart';
 import '../repositories/livestock_repository.dart';
@@ -13,7 +11,7 @@ import '../repositories/livestock_repository.dart';
 class GetEquinesUseCase implements UseCase<List<EquineEntity>, GetEquinesParams> {
   final LivestockRepository repository;
   
-  const GetEquinesUseCase(this.repository);
+  const GetEquinesUseCase(repository);
   
   @override
   Future<Either<Failure, List<EquineEntity>>> call(GetEquinesParams params) async {
@@ -32,7 +30,7 @@ class GetEquinesUseCase implements UseCase<List<EquineEntity>, GetEquinesParams>
 class GetAllEquinesUseCase implements NoParamsUseCase<List<EquineEntity>> {
   final LivestockRepository repository;
   
-  const GetAllEquinesUseCase(this.repository);
+  const GetAllEquinesUseCase(repository);
   
   @override
   Future<Either<Failure, List<EquineEntity>>> call() async {
@@ -45,7 +43,7 @@ class GetAllEquinesUseCase implements NoParamsUseCase<List<EquineEntity>> {
 class GetEquineByIdUseCase implements UseCase<EquineEntity, String> {
   final LivestockRepository repository;
   
-  const GetEquineByIdUseCase(this.repository);
+  const GetEquineByIdUseCase(repository);
   
   @override
   Future<Either<Failure, EquineEntity>> call(String id) async {
@@ -60,8 +58,8 @@ class GetEquineByIdUseCase implements UseCase<EquineEntity, String> {
 /// Parâmetros para o GetEquinesUseCase
 class GetEquinesParams {
   const GetEquinesParams({
-    this.searchParams,
-    this.includeInactive = false,
+    searchParams,
+    includeInactive = false,
   });
 
   final EquineSearchParams? searchParams;

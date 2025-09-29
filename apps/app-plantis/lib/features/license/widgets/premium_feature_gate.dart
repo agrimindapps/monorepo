@@ -2,10 +2,19 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/plantis_colors.dart';
-import '../providers/license_provider.dart';
+
+/// Features que requerem premium
+enum PremiumFeature {
+  cloudSync,
+  unlimitedPlants,
+  premiumSupport,
+  advancedNotifications,
+  exportData,
+  customThemes,
+}
 
 /// Widget that gates premium features behind license validation
-class PremiumFeatureGate extends StatelessWidget {
+class PremiumFeatureGate extends ConsumerWidget {
   /// The feature to check access for
   final PremiumFeature feature;
 
@@ -35,261 +44,114 @@ class PremiumFeatureGate extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<LicenseProvider>(
-      builder: (context, licenseProvider, _) {
-        return FutureBuilder<bool>(
-          future: licenseProvider.canAccessFeature(feature),
-          builder: (context, snapshot) {
-            // Loading state
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const _LoadingGate();
-            }
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Simulação de verificação de premium por enquanto
+    // TODO: Implementar verificação real via provider
+    final hasAccess = _checkFeatureAccess(feature);
 
-            // Check if access is granted
-            final hasAccess = snapshot.data ?? false;
+    if (hasAccess) {
+      return child;
+    }
 
-            if (hasAccess) {
-              return child;
-            }
+    // Access denied - show fallback or upgrade prompt
+    if (fallback != null) {
+      return fallback!;
+    }
 
-            // Access denied - show fallback or upgrade prompt
-            if (fallback != null) {
-              return fallback!;
-            }
+    if (showUpgradePrompt) {
+      return _buildUpgradePrompt(context);
+    }
 
-            if (showUpgradePrompt) {
-              return _UpgradePrompt(
-                feature: feature,
-                onTap: onAccessDenied ?? () => _showUpgradeDialog(context),
-                message: upgradeMessage,
-              );
-            }
-
-            // Default fallback - empty container
-            return const SizedBox.shrink();
-          },
-        );
-      },
-    );
+    return const SizedBox.shrink();
   }
 
-  void _showUpgradeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _PremiumUpgradeDialog(feature: feature),
-    );
-  }
-}
-
-/// Widget for gated buttons that require premium access
-class PremiumGatedButton extends StatelessWidget {
-  /// The feature this button requires
-  final PremiumFeature feature;
-
-  /// Button text
-  final String text;
-
-  /// Button icon (optional)
-  final IconData? icon;
-
-  /// Callback when button is pressed (only called if access is granted)
-  final VoidCallback onPressed;
-
-  /// Button style
-  final ButtonStyle? style;
-
-  /// Whether button is enabled
-  final bool enabled;
-
-  const PremiumGatedButton({
-    super.key,
-    required this.feature,
-    required this.text,
-    required this.onPressed,
-    this.icon,
-    this.style,
-    this.enabled = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<LicenseProvider>(
-      builder: (context, licenseProvider, _) {
-        return FutureBuilder<bool>(
-          future: licenseProvider.canAccessFeature(feature),
-          builder: (context, snapshot) {
-            final hasAccess = snapshot.data ?? false;
-            final isLoading =
-                snapshot.connectionState == ConnectionState.waiting;
-
-            return ElevatedButton.icon(
-              onPressed:
-                  (!enabled || isLoading)
-                      ? null
-                      : hasAccess
-                      ? onPressed
-                      : () => _showUpgradeDialog(context),
-              icon:
-                  isLoading
-                      ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : Icon(hasAccess ? (icon ?? Icons.star) : Icons.lock),
-              label: Text(hasAccess ? text : '$text (Premium)'),
-              style:
-                  style ??
-                  ElevatedButton.styleFrom(
-                    backgroundColor:
-                        hasAccess ? PlantisColors.primary : Colors.orange,
-                    foregroundColor: Colors.white,
-                  ),
-            );
-          },
-        );
-      },
-    );
+  /// Simula verificação de acesso a features premium
+  bool _checkFeatureAccess(PremiumFeature feature) {
+    // Por enquanto, todas as features retornam false (não premium)
+    // TODO: Integrar com provider de premium real
+    return false;
   }
 
-  void _showUpgradeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _PremiumUpgradeDialog(feature: feature),
-    );
-  }
-}
-
-/// Widget to display premium badge on features
-class PremiumBadge extends StatelessWidget {
-  /// Size of the badge
-  final double size;
-
-  /// Whether to show text
-  final bool showText;
-
-  const PremiumBadge({super.key, this.size = 20, this.showText = false});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildUpgradePrompt(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: showText ? 8 : 4, vertical: 2),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Colors.orange, Colors.amber]),
+        gradient: LinearGradient(
+          colors: [
+            PlantisColors.primary.withOpacity(0.1),
+            PlantisColors.primaryLight.withOpacity(0.05),
+          ],
+        ),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: PlantisColors.primary.withOpacity(0.3),
+          width: 1,
+        ),
       ),
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.workspace_premium, size: size, color: Colors.white),
-          if (showText) ...[
-            const SizedBox(width: 4),
-            const Text(
-              'PRO',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+          Icon(
+            Icons.workspace_premium,
+            color: PlantisColors.primary,
+            size: 32,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Recurso Premium',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: PlantisColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            upgradeMessage ?? _getDefaultMessage(feature),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () {
+              onAccessDenied?.call();
+              Navigator.of(context).pushNamed('/premium');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PlantisColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-          ],
+            child: const Text('Assinar Premium'),
+          ),
         ],
       ),
     );
   }
-}
 
-/// Widget to check license status and show warnings
-class LicenseStatusIndicator extends StatelessWidget {
-  /// Whether to show detailed status
-  final bool showDetails;
-
-  /// Custom callback when tapped
-  final VoidCallback? onTap;
-
-  const LicenseStatusIndicator({
-    super.key,
-    this.showDetails = true,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<LicenseProvider>(
-      builder: (context, licenseProvider, _) {
-        if (!licenseProvider.hasValidLicense) {
-          return const SizedBox.shrink();
-        }
-
-        if (!licenseProvider.shouldShowExpirationWarning) {
-          return const SizedBox.shrink();
-        }
-
-        return GestureDetector(
-          onTap: onTap ?? () => _showLicenseStatus(context),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: _getWarningColor(licenseProvider.warningLevel),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.schedule, size: 16, color: Colors.white),
-                const SizedBox(width: 8),
-                if (showDetails)
-                  Flexible(
-                    child: Text(
-                      'Trial expira em ${licenseProvider.remainingDays} ${licenseProvider.remainingDays == 1 ? 'dia' : 'dias'}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  )
-                else
-                  Text(
-                    '${licenseProvider.remainingDays}d',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Color _getWarningColor(String warningLevel) {
-    switch (warningLevel) {
-      case 'critical':
-        return Colors.red;
-      case 'high':
-        return Colors.orange;
-      case 'medium':
-        return Colors.amber;
-      case 'low':
-        return Colors.blue;
-      default:
-        return Colors.grey;
+  String _getDefaultMessage(PremiumFeature feature) {
+    switch (feature) {
+      case PremiumFeature.cloudSync:
+        return 'Sincronize seus dados na nuvem com Premium';
+      case PremiumFeature.unlimitedPlants:
+        return 'Adicione plantas ilimitadas com Premium';
+      case PremiumFeature.premiumSupport:
+        return 'Acesse suporte prioritário com Premium';
+      case PremiumFeature.advancedNotifications:
+        return 'Receba notificações avançadas com Premium';
+      case PremiumFeature.exportData:
+        return 'Exporte seus dados com Premium';
+      case PremiumFeature.customThemes:
+        return 'Personalize o tema com Premium';
     }
   }
-
-  void _showLicenseStatus(BuildContext context) {
-    // Navigate to license status page
-    Navigator.of(context).pushNamed('/license-status');
-  }
 }
 
-/// Loading state for feature gates
+/// Loading state widget for feature gate
 class _LoadingGate extends StatelessWidget {
   const _LoadingGate();
 
@@ -298,171 +160,78 @@ class _LoadingGate extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       child: const Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: PlantisColors.primary,
-          ),
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 }
 
-/// Upgrade prompt widget
-class _UpgradePrompt extends StatelessWidget {
-  final PremiumFeature feature;
-  final VoidCallback onTap;
-  final String? message;
+/// Simplified version for basic premium checks
+class SimplePremiumGate extends ConsumerWidget {
+  final Widget child;
+  final Widget? fallback;
 
-  const _UpgradePrompt({
-    required this.feature,
-    required this.onTap,
-    this.message,
+  const SimplePremiumGate({
+    super.key,
+    required this.child,
+    this.fallback,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Simulação simples de verificação premium
+    const isPremium = false; // TODO: Implementar verificação real
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.orange.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.orange.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.workspace_premium, color: Colors.orange, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              message ?? 'Recurso Premium',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.orange.shade700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              feature.description,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.orange.shade600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: onTap,
-              icon: const Icon(Icons.upgrade),
-              label: const Text('Fazer Upgrade'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (isPremium) {
+      return child;
+    }
+
+    return fallback ?? 
+        PremiumFeatureGate(
+          feature: PremiumFeature.cloudSync,
+          child: child,
+        );
   }
 }
 
-/// Premium upgrade dialog
-class _PremiumUpgradeDialog extends StatelessWidget {
-  final PremiumFeature feature;
-
-  const _PremiumUpgradeDialog({required this.feature});
+/// Widget para mostrar status de expiração
+class LicenseExpirationWarning extends ConsumerWidget {
+  const LicenseExpirationWarning({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.orange, Colors.amber]),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.workspace_premium,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Text('Recurso Premium'),
-        ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    // TODO: Implementar verificação de expiração real
+    const shouldShowWarning = false;
+    const remainingDays = 0;
+
+    if (!shouldShowWarning) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            'Para acessar "${feature.displayName}", você precisa fazer upgrade para o plano premium.',
+          Icon(Icons.warning, color: Colors.orange),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Sua licença Premium expira em $remainingDays dias',
+              style: TextStyle(color: Colors.orange[800]),
+            ),
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: PlantisColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: PlantisColors.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    feature.description,
-                    style: const TextStyle(
-                      color: PlantisColors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pushNamed('/premium'),
+            child: const Text('Renovar'),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Mais tarde'),
-        ),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop();
-            // Navigate to premium page
-            Navigator.of(context).pushNamed('/premium');
-          },
-          icon: const Icon(Icons.upgrade),
-          label: const Text('Fazer Upgrade'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange,
-            foregroundColor: Colors.white,
-          ),
-        ),
-      ],
     );
   }
 }

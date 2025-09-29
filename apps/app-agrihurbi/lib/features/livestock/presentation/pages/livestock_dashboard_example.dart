@@ -316,7 +316,7 @@ class _LivestockDashboardExampleState extends State<LivestockDashboardExample> {
     LivestockCoordinatorProvider coordinator,
     BovineEntity bovine,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar exclusão'),

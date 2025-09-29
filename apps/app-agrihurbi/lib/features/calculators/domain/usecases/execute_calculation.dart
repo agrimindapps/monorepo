@@ -75,7 +75,7 @@ class ExecuteCalculation {
       // Analytics: track calculation result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
       
-      result.fold(
+      await result.fold(
         (failure) async {
           await _analyticsService.logEvent(
             'calculation_failed',
@@ -226,7 +226,7 @@ class ExecuteCalculationWithHistory {
             final saveResult = await repository.saveCalculationToHistory(history);
             
             // Track history save result
-            saveResult.fold(
+            await saveResult.fold(
               (failure) async {
                 await _analyticsService.logEvent(
                   'calculation_history_save_failed',

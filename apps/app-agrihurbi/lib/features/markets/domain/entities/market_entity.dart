@@ -23,22 +23,22 @@ class MarketEntity extends Equatable {
   final String? imageUrl;
 
   const MarketEntity({
-    required this.id,
-    required this.name,
-    required this.symbol,
-    required this.type,
-    required this.currentPrice,
-    required this.previousPrice,
-    required this.changePercent,
-    required this.volume,
-    required this.currency,
-    required this.unit,
-    required this.exchange,
-    required this.lastUpdated,
-    required this.status,
-    this.history = const [],
-    this.description,
-    this.imageUrl,
+    required id,
+    required name,
+    required symbol,
+    required type,
+    required currentPrice,
+    required previousPrice,
+    required changePercent,
+    required volume,
+    required currency,
+    required unit,
+    required exchange,
+    required lastUpdated,
+    required status,
+    history = const [],
+    description,
+    imageUrl,
   });
 
   /// Check if price is trending up
@@ -106,7 +106,7 @@ enum MarketType {
   corn('Milho', 'Milho em Grão'),
   beef('Boi Gordo', 'Boi Gordo Arrobas');
 
-  const MarketType(this.displayName, this.description);
+  const MarketType(displayName, description);
   final String displayName;
   final String description;
 }
@@ -119,7 +119,7 @@ enum MarketStatus {
   preMarket('Pré-abertura', 'Período pré-abertura'),
   afterMarket('Pós-fechamento', 'Período pós-fechamento');
 
-  const MarketStatus(this.displayName, this.description);
+  const MarketStatus(displayName, description);
   final String displayName;
   final String description;
 }
@@ -135,13 +135,13 @@ class PriceHistory extends Equatable {
   final double close;
 
   const PriceHistory({
-    required this.date,
-    required this.price,
-    required this.volume,
-    required this.high,
-    required this.low,
-    required this.open,
-    required this.close,
+    required date,
+    required price,
+    required volume,
+    required high,
+    required low,
+    required open,
+    required close,
   });
 
   @override
@@ -163,17 +163,17 @@ class MarketSummary extends Equatable {
   final int marketsUnchanged;
 
   const MarketSummary({
-    required this.marketName,
-    required this.lastUpdated,
-    required this.topGainers,
-    required this.topLosers,
-    required this.mostActive,
-    required this.marketIndex,
-    required this.marketIndexChange,
-    required this.totalMarkets,
-    required this.marketsUp,
-    required this.marketsDown,
-    required this.marketsUnchanged,
+    required marketName,
+    required lastUpdated,
+    required topGainers,
+    required topLosers,
+    required mostActive,
+    required marketIndex,
+    required marketIndexChange,
+    required totalMarkets,
+    required marketsUp,
+    required marketsDown,
+    required marketsUnchanged,
   });
 
   /// Get market sentiment based on up/down ratio

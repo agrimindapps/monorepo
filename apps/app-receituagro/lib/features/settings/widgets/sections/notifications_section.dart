@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../constants/settings_design_tokens.dart';
@@ -22,7 +23,7 @@ class NotificationsSection extends StatelessWidget {
           showIcon: false,
         ),
         SettingsCard(
-          child: Consumer<SettingsProvider>(
+          child: provider_lib.Consumer<SettingsProvider>(
             builder: (context, settingsProvider, child) {
               return SettingsListTile(
                 leadingIcon: Icons.notifications_active,

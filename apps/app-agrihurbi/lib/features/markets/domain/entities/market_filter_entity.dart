@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import 'market_entity.dart';
 
 /// Market Filter Entity
@@ -16,15 +17,15 @@ class MarketFilter extends Equatable {
   final bool onlyFavorites;
 
   const MarketFilter({
-    this.types,
-    this.exchanges,
-    this.priceRange,
-    this.volumeRange,
-    this.performance,
-    this.searchQuery,
-    this.sortBy = SortOption.name,
-    this.sortOrder = SortOrder.ascending,
-    this.onlyFavorites = false,
+    types,
+    exchanges,
+    priceRange,
+    volumeRange,
+    performance,
+    searchQuery,
+    sortBy = SortOption.name,
+    sortOrder = SortOrder.ascending,
+    onlyFavorites = false,
   });
 
   /// Create a copy with updated values
@@ -40,15 +41,15 @@ class MarketFilter extends Equatable {
     bool? onlyFavorites,
   }) {
     return MarketFilter(
-      types: types ?? this.types,
-      exchanges: exchanges ?? this.exchanges,
-      priceRange: priceRange ?? this.priceRange,
-      volumeRange: volumeRange ?? this.volumeRange,
-      performance: performance ?? this.performance,
-      searchQuery: searchQuery ?? this.searchQuery,
-      sortBy: sortBy ?? this.sortBy,
-      sortOrder: sortOrder ?? this.sortOrder,
-      onlyFavorites: onlyFavorites ?? this.onlyFavorites,
+      types: types ?? types,
+      exchanges: exchanges ?? exchanges,
+      priceRange: priceRange ?? priceRange,
+      volumeRange: volumeRange ?? volumeRange,
+      performance: performance ?? performance,
+      searchQuery: searchQuery ?? searchQuery,
+      sortBy: sortBy ?? sortBy,
+      sortOrder: sortOrder ?? sortOrder,
+      onlyFavorites: onlyFavorites ?? onlyFavorites,
     );
   }
 
@@ -119,9 +120,9 @@ class PriceRange extends Equatable {
   final String currency;
 
   const PriceRange({
-    this.minPrice,
-    this.maxPrice,
-    this.currency = 'BRL',
+    minPrice,
+    maxPrice,
+    currency = 'BRL',
   });
 
   String get description {
@@ -145,8 +146,8 @@ class VolumeRange extends Equatable {
   final double? maxVolume;
 
   const VolumeRange({
-    this.minVolume,
-    this.maxVolume,
+    minVolume,
+    maxVolume,
   });
 
   String get description {
@@ -179,8 +180,8 @@ class PerformanceFilter extends Equatable {
   final double threshold;
 
   const PerformanceFilter({
-    required this.type,
-    required this.threshold,
+    required type,
+    required threshold,
   });
 
   String get description {
@@ -207,7 +208,7 @@ enum PerformanceType {
   stable('Estáveis'),
   volatile('Voláteis');
 
-  const PerformanceType(this.displayName);
+  const PerformanceType(displayName);
   final String displayName;
 }
 
@@ -219,7 +220,7 @@ enum SortOption {
   volume('Volume'),
   lastUpdated('Última Atualização');
 
-  const SortOption(this.displayName);
+  const SortOption(displayName);
   final String displayName;
 }
 
@@ -228,6 +229,6 @@ enum SortOrder {
   ascending('Crescente'),
   descending('Decrescente');
 
-  const SortOrder(this.displayName);
+  const SortOrder(displayName);
   final String displayName;
 }

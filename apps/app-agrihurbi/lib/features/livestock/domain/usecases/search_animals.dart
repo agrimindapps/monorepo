@@ -17,7 +17,7 @@ import '../repositories/livestock_repository.dart' as repo;
 class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimalsParams> {
   final repo.LivestockRepository repository;
   
-  const SearchAnimalsUseCase(this.repository);
+  const SearchAnimalsUseCase(repository);
   
   @override
   Future<Either<Failure, SearchAnimalsResult>> call(SearchAnimalsParams params) async {
@@ -156,7 +156,7 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
 class QuickSearchAnimalsUseCase implements UseCase<SearchAnimalsResult, String> {
   final SearchAnimalsUseCase _searchUseCase;
   
-  const QuickSearchAnimalsUseCase(this._searchUseCase);
+  const QuickSearchAnimalsUseCase(_searchUseCase);
   
   @override
   Future<Either<Failure, SearchAnimalsResult>> call(String query) async {
@@ -178,31 +178,31 @@ enum AnimalType {
   bovine('Bovino'),
   equine('Equino');
   
-  const AnimalType(this.displayName);
+  const AnimalType(displayName);
   final String displayName;
 }
 
 /// Parâmetros estendidos para busca unificada de animais
 class SearchAnimalsParams {
   const SearchAnimalsParams({
-    this.query,
-    this.breed,
-    this.originCountry,
-    this.tags,
-    this.isActive,
-    this.limit = 20,
-    this.offset = 0,
-    this.animalType,
-    this.sortBy = SortField.name,
-    this.sortOrder = SortOrder.asc,
+    query,
+    breed,
+    originCountry,
+    tags,
+    isActive,
+    limit = 20,
+    offset = 0,
+    animalType,
+    sortBy = SortField.name,
+    sortOrder = SortOrder.asc,
     // Filtros específicos de bovinos
-    this.aptitude,
-    this.breedingSystem,
-    this.purpose,
+    aptitude,
+    breedingSystem,
+    purpose,
     // Filtros específicos de equinos
-    this.temperament,
-    this.coat,
-    this.primaryUse,
+    temperament,
+    coat,
+    primaryUse,
   });
 
   final String? query;
@@ -230,11 +230,11 @@ class SearchAnimalsParams {
 /// Resultado da busca de animais
 class SearchAnimalsResult extends Equatable {
   const SearchAnimalsResult({
-    required this.bovines,
-    required this.equines,
-    required this.totalCount,
-    required this.searchParams,
-    this.hasMore = false,
+    required bovines,
+    required equines,
+    required totalCount,
+    required searchParams,
+    hasMore = false,
   });
 
   final List<BovineEntity> bovines;
@@ -273,7 +273,7 @@ enum SortField {
   updatedAt('Data de Atualização'),
   originCountry('País de Origem');
   
-  const SortField(this.displayName);
+  const SortField(displayName);
   final String displayName;
 }
 
@@ -282,6 +282,6 @@ enum SortOrder {
   asc('Crescente'),
   desc('Decrescente');
   
-  const SortOrder(this.displayName);
+  const SortOrder(displayName);
   final String displayName;
 }

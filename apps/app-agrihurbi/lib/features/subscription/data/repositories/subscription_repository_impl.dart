@@ -16,9 +16,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   final NetworkInfo _networkInfo;
 
   const SubscriptionRepositoryImpl(
-    this._remoteDataSource,
-    this._localDataSource,
-    this._networkInfo,
+    _remoteDataSource,
+    _localDataSource,
+    _networkInfo,
   );
 
   @override

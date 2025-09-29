@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider_lib;
 import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
@@ -66,7 +67,7 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
+    return provider_lib.ChangeNotifierProvider.value(
       value: _provider,
       child: RepaintBoundary(
         child: Column(
@@ -85,7 +86,7 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   /// Constrói header com estatísticas
   Widget _buildHeader() {
-    return Consumer<EnhancedDiagnosticosPragaProvider>(
+    return provider_lib.Consumer<EnhancedDiagnosticosPragaProvider>(
       builder: (context, provider, child) {
         final stats = provider.stats;
         
@@ -191,7 +192,7 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   /// Constrói área de filtros
   Widget _buildFilters() {
-    return Consumer<EnhancedDiagnosticosPragaProvider>(
+    return provider_lib.Consumer<EnhancedDiagnosticosPragaProvider>(
       builder: (context, provider, child) {
         return Container(
           padding: const EdgeInsets.symmetric(
@@ -291,7 +292,7 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   /// Constrói conteúdo principal
   Widget _buildContent() {
-    return Consumer<EnhancedDiagnosticosPragaProvider>(
+    return provider_lib.Consumer<EnhancedDiagnosticosPragaProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return _buildLoadingState();

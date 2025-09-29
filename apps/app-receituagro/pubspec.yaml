@@ -12,6 +12,18 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # State Management
+  provider: ^6.1.2
+
+  # Firebase
+  firebase_messaging: ^16.0.0
+  
+  # HTTP requests
+  http: ^1.2.2
+  
+  # Storage
+  shared_preferences: ^2.3.3
+
   core:
     path: ../../packages/core
 

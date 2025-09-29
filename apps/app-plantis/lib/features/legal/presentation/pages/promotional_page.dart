@@ -5,14 +5,14 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
 
-class PromotionalPage extends StatefulWidget {
+class PromotionalPage extends ConsumerStatefulWidget {
   const PromotionalPage({super.key});
 
   @override
-  State<PromotionalPage> createState() => _PromotionalPageState();
+  ConsumerState<PromotionalPage> createState() => _PromotionalPageState();
 }
 
-class _PromotionalPageState extends State<PromotionalPage>
+class _PromotionalPageState extends ConsumerState<PromotionalPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -724,7 +724,9 @@ class _PromotionalPageState extends State<PromotionalPage>
   }
 
   void _handleSubscription(BuildContext context) {
-    final premiumProvider = context.read<PremiumProvider?>();
+    // Simulação de verificação premium por enquanto
+    // TODO: Implementar provider de premium real
+    const premiumProvider = null;
 
     if (premiumProvider == null) {
       _showSubscriptionConfirmation(context);
@@ -790,7 +792,8 @@ class _PromotionalPageState extends State<PromotionalPage>
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _startPremiumTrial(context, premiumProvider);
+                  // TODO: Implement premium trial when provider is available
+                  // _startPremiumTrial(context, premiumProvider);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PlantisColors.primary,

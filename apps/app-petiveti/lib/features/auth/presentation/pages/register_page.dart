@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 import '../providers/auth_provider.dart';
 import '../widgets/register_page_coordinator.dart';
 import '../widgets/register_page_header.dart';

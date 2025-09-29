@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../core/design/design_tokens.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/models/fitossanitario_hive.dart';
-import '../../core/services/receituagro_navigation_service.dart';
-
 import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/services/receituagro_navigation_service.dart';
 import 'presentation/providers/home_defensivos_provider.dart';
 import 'presentation/widgets/defensivos_error_state.dart';
 import 'presentation/widgets/defensivos_new_items_section.dart';
@@ -31,7 +31,7 @@ class HomeDefensivosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeDefensivosProvider>(
+    return provider.ChangeNotifierProvider<HomeDefensivosProvider>(
       create:
           (_) => HomeDefensivosProvider(
             repository: sl<FitossanitarioHiveRepository>(),
@@ -68,30 +68,30 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
           child: Column(
             children: [
               // Header section with provider-based subtitle
-              Consumer<HomeDefensivosProvider>(
+              provider.Consumer<HomeDefensivosProvider>(
                 builder:
-                    (context, provider, _) => HomeDefensivosHeader(
-                      provider: provider,
+                    (context, defensivosProvider, _) => HomeDefensivosHeader(
+                      provider: defensivosProvider,
                       isDark: isDark,
                     ),
               ),
               // Main content area
               Expanded(
-                child: Consumer<HomeDefensivosProvider>(
-                  builder: (context, provider, _) {
+                child: provider.Consumer<HomeDefensivosProvider>(
+                  builder: (context, defensivosProvider, _) {
                     // Handle error state
-                    if (provider.errorMessage != null) {
+                    if (defensivosProvider.errorMessage != null) {
                       return DefensivosErrorState(
-                        provider: provider,
+                        provider: defensivosProvider,
                         onRetry: () {
-                          provider.clearError();
-                          provider.loadData();
+                          defensivosProvider.clearError();
+                          defensivosProvider.loadData();
                         },
                       );
                     }
 
                     return RefreshIndicator(
-                      onRefresh: () => provider.refreshData(),
+                      onRefresh: () => defensivosProvider.refreshData(),
                       child: CustomScrollView(
                         slivers: [
                           SliverToBoxAdapter(
@@ -101,7 +101,7 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
                                 const SizedBox(height: ReceitaAgroSpacing.sm),
                                 // Statistics grid with category navigation
                                 DefensivosStatsGrid(
-                                  provider: provider,
+                                  provider: defensivosProvider,
                                   onCategoryTap:
                                       (category) => _navigateToCategory(
                                         context,
@@ -111,13 +111,13 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
                                 const SizedBox(height: ReceitaAgroSpacing.sm),
                                 // Recent access section
                                 DefensivosRecentSection(
-                                  provider: provider,
+                                  provider: defensivosProvider,
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
                                 const SizedBox(height: ReceitaAgroSpacing.sm),
                                 // New items section
                                 DefensivosNewItemsSection(
-                                  provider: provider,
+                                  provider: defensivosProvider,
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
                                 const SizedBox(
@@ -147,8 +147,8 @@ class _HomeDefensivosViewState extends State<_HomeDefensivosView> {
     FitossanitarioHive defensivo,
   ) {
     // Register access for analytics (in background)
-    final provider = context.read<HomeDefensivosProvider>();
-    provider.recordDefensivoAccess(defensivo);
+    final defensivosProvider = provider.Provider.of<HomeDefensivosProvider>(context, listen: false);
+    defensivosProvider.recordDefensivoAccess(defensivo);
 
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     navigationService.navigateToDetalheDefensivo(

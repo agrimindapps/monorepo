@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:core/core.dart';
 
 import '../../features/defensivos/home_defensivos_page.dart';
@@ -29,7 +30,7 @@ class AppRouter {
       case '/defensivos':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider<DefensivosUnificadoProvider>(
+          builder: (_) => provider.ChangeNotifierProvider<DefensivosUnificadoProvider>(
             create: (_) => sl<DefensivosUnificadoProvider>(),
             child: DefensivosUnificadoPage(
               tipoAgrupamento: args?['categoria'] as String?,
@@ -44,7 +45,7 @@ class AppRouter {
       case '/defensivos-unificado':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider<DefensivosUnificadoProvider>(
+          builder: (_) => provider.ChangeNotifierProvider<DefensivosUnificadoProvider>(
             create: (_) => sl<DefensivosUnificadoProvider>(),
             child: DefensivosUnificadoPage(
               tipoAgrupamento: args?['tipoAgrupamento'] as String?,
@@ -59,7 +60,7 @@ class AppRouter {
       case '/defensivos-agrupados':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider<DefensivosUnificadoProvider>(
+          builder: (_) => provider.ChangeNotifierProvider<DefensivosUnificadoProvider>(
             create: (_) => sl<DefensivosUnificadoProvider>(),
             child: DefensivosUnificadoPage(
               tipoAgrupamento: args?['tipoAgrupamento'] as String?,

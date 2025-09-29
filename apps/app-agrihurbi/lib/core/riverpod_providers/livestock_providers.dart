@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/livestock/domain/entities/animal_base_entity.dart';

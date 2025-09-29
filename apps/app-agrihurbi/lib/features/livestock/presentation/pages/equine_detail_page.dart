@@ -13,7 +13,7 @@ import '../providers/equines_provider.dart';
 class EquineDetailPage extends StatefulWidget {
   const EquineDetailPage({
     super.key,
-    required this.equineId,
+    required equineId,
   });
 
   /// ID do equino a ser exibido
@@ -558,7 +558,7 @@ Compartilhado via AgriHurbi
   }
 
   void _confirmDelete() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),

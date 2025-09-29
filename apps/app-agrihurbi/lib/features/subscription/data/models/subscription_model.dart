@@ -48,19 +48,19 @@ class SubscriptionModel {
   final bool autoRenew;
 
   const SubscriptionModel({
-    required this.id,
-    required this.userId,
-    required this.tier,
-    required this.status,
-    required this.startDate,
-    this.endDate,
-    this.nextBillingDate,
-    required this.price,
-    required this.currency,
-    required this.billingPeriod,
-    required this.features,
-    this.paymentMethod,
-    this.autoRenew = true,
+    required id,
+    required userId,
+    required tier,
+    required status,
+    required startDate,
+    endDate,
+    nextBillingDate,
+    required price,
+    required currency,
+    required billingPeriod,
+    required features,
+    paymentMethod,
+    autoRenew = true,
   });
   
   /// Convert to domain entity
@@ -454,12 +454,12 @@ class PaymentMethodModel {
   final bool isDefault;
 
   const PaymentMethodModel({
-    required this.id,
-    required this.type,
-    required this.lastFourDigits,
-    required this.brand,
-    required this.expiryDate,
-    this.isDefault = false,
+    required id,
+    required type,
+    required lastFourDigits,
+    required brand,
+    required expiryDate,
+    isDefault = false,
   });
   
   /// Convert to domain entity

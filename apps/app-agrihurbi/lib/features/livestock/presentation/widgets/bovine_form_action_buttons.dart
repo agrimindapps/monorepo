@@ -15,12 +15,12 @@ import '../providers/bovines_provider.dart';
 class BovineFormActionButtons extends StatelessWidget {
   const BovineFormActionButtons({
     super.key,
-    required this.onCancel,
-    required this.onSave,
-    required this.isEditing,
-    this.onDelete,
-    this.hasUnsavedChanges = false,
-    this.enabled = true,
+    required onCancel,
+    required onSave,
+    required isEditing,
+    onDelete,
+    hasUnsavedChanges = false,
+    enabled = true,
   });
 
   final VoidCallback onCancel;
@@ -357,11 +357,11 @@ class BovineFormActionButtons extends StatelessWidget {
 class BovineFormSimpleActions extends StatelessWidget {
   const BovineFormSimpleActions({
     super.key,
-    required this.onSave,
-    required this.onCancel,
-    required this.isEditing,
-    this.isLoading = false,
-    this.enabled = true,
+    required onSave,
+    required onCancel,
+    required isEditing,
+    isLoading = false,
+    enabled = true,
   });
 
   final VoidCallback onSave;

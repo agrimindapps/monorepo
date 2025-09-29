@@ -11,7 +11,7 @@ class SettingsLocalDataSource {
   static const String _settingsBoxName = 'app_settings';
   final SharedPreferences _prefs;
 
-  const SettingsLocalDataSource(this._prefs);
+  const SettingsLocalDataSource(_prefs);
 
   Box<SettingsModel> get _settingsBox => Hive.box<SettingsModel>(_settingsBoxName);
 

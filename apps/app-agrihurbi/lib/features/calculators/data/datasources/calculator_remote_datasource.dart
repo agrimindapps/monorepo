@@ -1,6 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/calculation_history.dart';

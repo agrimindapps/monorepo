@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import 'calculation_result.dart';
 
 class CalculationHistory extends Equatable {

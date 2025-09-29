@@ -1,7 +1,5 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';

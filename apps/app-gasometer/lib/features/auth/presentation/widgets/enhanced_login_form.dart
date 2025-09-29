@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import 'rate_limit_info_widget.dart';
 
 /// Formulário de login aprimorado com rate limiting de segurança
-class EnhancedLoginForm extends StatefulWidget {
+class EnhancedLoginForm extends ConsumerStatefulWidget {
 
   const EnhancedLoginForm({
     super.key,
@@ -17,10 +17,10 @@ class EnhancedLoginForm extends StatefulWidget {
   final VoidCallback? onForgotPasswordTap;
 
   @override
-  State<EnhancedLoginForm> createState() => _EnhancedLoginFormState();
+  ConsumerState<EnhancedLoginForm> createState() => _EnhancedLoginFormState();
 }
 
-class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
+class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -36,33 +36,32 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = di.getIt<AuthProvider>();
-    
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Rate Limiting Info
-              FutureBuilder(
-                future: authProvider.getRateLimitInfo(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return RateLimitInfoWidget(
-                      rateLimitInfo: snapshot.data!,
-                      onReset: kDebugMode 
-                          ? () async {
-                              await authProvider.resetRateLimit();
-                              setState(() {}); // Rebuild to show updated info
-                            }
-                          : null,
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+    final authState = ref.watch(authNotifierProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Rate Limiting Info
+          FutureBuilder(
+            future: authNotifier.getRateLimitInfo(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return RateLimitInfoWidget(
+                  rateLimitInfo: snapshot.data!,
+                  onReset: kDebugMode
+                      ? () async {
+                          await authNotifier.resetRateLimit();
+                          setState(() {}); // Rebuild to show updated info
+                        }
+                      : null,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
               
               const SizedBox(height: 16),
               
@@ -114,11 +113,11 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
                   }
                   return null;
                 },
-                onFieldSubmitted: (_) => _handleLogin(authProvider),
+                onFieldSubmitted: (_) => _handleLogin(),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Forgot Password
               Align(
                 alignment: Alignment.centerRight,
@@ -127,20 +126,20 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
                   child: const Text('Esqueci minha senha'),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Login Button
               FutureBuilder(
-                future: authProvider.canAttemptLogin(),
+                future: authNotifier.canAttemptLogin(),
                 builder: (context, snapshot) {
                   final canAttempt = snapshot.data ?? true;
-                  
+
                   return ElevatedButton(
-                    onPressed: canAttempt && !authProvider.isLoading 
-                        ? () => _handleLogin(authProvider)
+                    onPressed: canAttempt && !authState.isLoading
+                        ? () => _handleLogin()
                         : null,
-                    child: authProvider.isLoading
+                    child: authState.isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
@@ -150,9 +149,9 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
                   );
                 },
               ),
-              
+
               // Error Message
-              if (authProvider.errorMessage != null) ...[
+              if (authState.errorMessage != null) ...[
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -169,7 +168,7 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          authProvider.errorMessage!,
+                          authState.errorMessage!,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onErrorContainer,
                           ),
@@ -197,21 +196,21 @@ class _EnhancedLoginFormState extends State<EnhancedLoginForm> {
             ],
           ),
         );
-      },
-    );
   }
 
-  Future<void> _handleLogin(AuthProvider authProvider) async {
+  Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
+    final authNotifier = ref.read(authNotifierProvider.notifier);
+
     // Verifica rate limiting antes de tentar login
-    final canAttempt = await authProvider.canAttemptLogin();
+    final canAttempt = await authNotifier.canAttemptLogin();
     if (!canAttempt) {
-      // O provider já mostrará a mensagem de erro apropriada
+      // O notifier já mostrará a mensagem de erro apropriada
       return;
     }
-    
-    await authProvider.login(
+
+    await authNotifier.login(
       _emailController.text.trim(),
       _passwordController.text,
     );

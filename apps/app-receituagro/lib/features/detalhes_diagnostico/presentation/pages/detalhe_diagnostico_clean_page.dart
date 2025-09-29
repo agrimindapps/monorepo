@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:core/core.dart';
 
-import '../../../../core/services/premium_status_notifier.dart';
 import '../../../../core/mixins/premium_status_listener.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/premium_test_controls_widget.dart';
@@ -62,7 +60,7 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
       builder: (context, provider, child) {
         return BottomNavWrapper(
           selectedIndex: 0, // Assumindo que diagnóstico está relacionado a defensivos
-          child: Container(
+          child: ColoredBox(
             color: theme.scaffoldBackgroundColor,
             child: SafeArea(
               child: Center(

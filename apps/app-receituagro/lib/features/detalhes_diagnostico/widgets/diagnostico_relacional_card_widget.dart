@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget especializado para exibir um diagnóstico com dados relacionais

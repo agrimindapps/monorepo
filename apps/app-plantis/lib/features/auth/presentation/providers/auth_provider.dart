@@ -635,6 +635,16 @@ class AuthProvider extends ChangeNotifier {
       // Obter UUID do dispositivo atual
       final currentDevice = await DeviceModel.fromCurrentDevice();
 
+      // CRITICAL: Verificar se dispositivo é válido (não-Web)
+      if (currentDevice == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ Device cleanup: Skipping device revocation (unsupported platform)',
+          );
+        }
+        return; // Sair sem erro se plataforma não suportada
+      }
+
       // Revogar este dispositivo (permitir self-revoke no logout)
       final revokeResult = await _revokeDeviceUseCase(
         device_revocation.RevokeDeviceParams(
@@ -917,37 +927,47 @@ class AuthProvider extends ChangeNotifier {
 
       // 2. Agora revogar o dispositivo atual
       final currentDevice = await DeviceModel.fromCurrentDevice();
-      final revokeCurrentResult = await _revokeDeviceUseCase(
-        device_revocation.RevokeDeviceParams(
-          deviceUuid: currentDevice.uuid,
-          preventSelfRevoke: false, // Permitir revogação própria na exclusão
-          reason: 'Account deletion',
-        ),
-      );
 
-      revokeCurrentResult.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint(
-              '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
-            );
-          }
+      // CRITICAL: Verificar se dispositivo é válido (não-Web)
+      if (currentDevice != null) {
+        final revokeCurrentResult = await _revokeDeviceUseCase(
+          device_revocation.RevokeDeviceParams(
+            deviceUuid: currentDevice.uuid,
+            preventSelfRevoke: false, // Permitir revogação própria na exclusão
+            reason: 'Account deletion',
+          ),
+        );
 
-          // Log erro para auditoria
-          _analytics?.logEvent('device_cleanup_current_failed', {
-            'context': 'account_deletion',
-            'error': failure.message,
-            'device_uuid': currentDevice.uuid,
-            'user_id': userId,
-          });
-        },
-        (_) {
-          totalDevicesRemoved += 1;
-          if (kDebugMode) {
-            debugPrint('✅ Device cleanup: Current device revoked successfully');
-          }
-        },
-      );
+        revokeCurrentResult.fold(
+          (failure) {
+            if (kDebugMode) {
+              debugPrint(
+                '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
+              );
+            }
+
+            // Log erro para auditoria
+            _analytics?.logEvent('device_cleanup_current_failed', {
+              'context': 'account_deletion',
+              'error': failure.message,
+              'device_uuid': currentDevice.uuid,
+              'user_id': userId,
+            });
+          },
+          (_) {
+            totalDevicesRemoved += 1;
+            if (kDebugMode) {
+              debugPrint('✅ Device cleanup: Current device revoked successfully');
+            }
+          },
+        );
+      } else {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ Device cleanup: Skipping current device revocation (unsupported platform)',
+          );
+        }
+      }
 
       // 3. Log resultado final da limpeza
       await _analytics?.logEvent('device_cleanup_completed', {

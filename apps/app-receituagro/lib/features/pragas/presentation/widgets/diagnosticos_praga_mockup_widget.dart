@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../providers/diagnosticos_praga_provider.dart';
@@ -127,7 +126,7 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
 
       // Espaçamento após seção
       widgets
-          .add(SizedBox(height: DiagnosticoMockupTokens.sectionToCardSpacing));
+          .add(const SizedBox(height: DiagnosticoMockupTokens.sectionToCardSpacing));
 
       // Cards de diagnósticos mockup
       for (int i = 0; i < diagnostics.length; i++) {
@@ -241,7 +240,7 @@ class _DiagnosticosPragaMockupDebugWidgetState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('DEBUG: Diagnósticos Mockup'),
+              const Text('DEBUG: Diagnósticos Mockup'),
               Text('Total: ${provider.diagnosticos.length}'),
               Text('Filtrados: ${provider.filteredDiagnosticos.length}'),
               Text('Culturas: ${provider.groupedDiagnosticos.keys.length}'),
@@ -253,7 +252,7 @@ class _DiagnosticosPragaMockupDebugWidgetState
                       _useMockupLayout = value ?? true;
                     }),
                   ),
-                  Text('Layout Mockup'),
+                  const Text('Layout Mockup'),
                 ],
               ),
             ],

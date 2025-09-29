@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_provider.dart';

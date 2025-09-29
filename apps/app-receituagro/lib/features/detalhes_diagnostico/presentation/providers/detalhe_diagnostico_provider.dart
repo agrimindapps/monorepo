@@ -9,12 +9,12 @@ import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/models/diagnostico_hive.dart';
 import '../../../../core/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
-import '../../../favoritos/favoritos_di.dart';
-import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 import '../../../../core/services/premium_status_notifier.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
+import '../../../favoritos/favoritos_di.dart';
+import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 
 class DetalheDiagnosticoProvider extends ChangeNotifier {
   final IDiagnosticosRepository _diagnosticosRepository =

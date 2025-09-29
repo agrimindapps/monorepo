@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -87,8 +87,8 @@ class DefensivosListWidget extends StatelessWidget {
     if (defensivo.fabricante?.isNotEmpty == true) {
       return defensivo.fabricante!;
     }
-    if (defensivo.ingredienteAtivo?.isNotEmpty == true) {
-      return defensivo.ingredienteAtivo!;
+    if (defensivo.ingredienteAtivo.isNotEmpty == true) {
+      return defensivo.ingredienteAtivo;
     }
     return 'Defensivo';
   }

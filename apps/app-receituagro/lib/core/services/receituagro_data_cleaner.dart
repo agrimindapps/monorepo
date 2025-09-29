@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'hive_adapter_registry.dart';
 
@@ -93,7 +92,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
         final boxName = entry.value;
         try {
           if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box(boxName);
+            final box = Hive.box<dynamic>(boxName);
             final recordCount = box.keys.length;
             totalRecords += recordCount;
 
@@ -192,7 +191,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
         try {
           if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box(boxName);
+            final box = Hive.box<dynamic>(boxName);
             final recordCount = box.keys.length;
 
             await box.clear();
@@ -248,7 +247,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Verificar se todas as boxes estão vazias
       for (final boxName in HiveAdapterRegistry.boxNames.values) {
         if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box(boxName);
+          final box = Hive.box<dynamic>(boxName);
           if (box.keys.isNotEmpty) {
             if (kDebugMode) {
               debugPrint('⚠️ ReceitaAgroDataCleaner: Box "$boxName" ainda contém ${box.keys.length} registros');
@@ -310,7 +309,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
       try {
         if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box(boxName);
+          final box = Hive.box<dynamic>(boxName);
           final recordCount = box.keys.length;
 
           await box.clear();

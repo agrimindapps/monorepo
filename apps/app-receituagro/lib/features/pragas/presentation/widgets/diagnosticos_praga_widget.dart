@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as flutter_provider;
-import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../providers/diagnosticos_praga_provider.dart';

@@ -1,11 +1,10 @@
 // Dart imports
 import 'dart:async';
 
-// Flutter imports
-import 'package:flutter/foundation.dart';
-
 // Package imports
 import 'package:core/core.dart' as core;
+// Flutter imports
+import 'package:flutter/foundation.dart';
 
 // Local imports
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
@@ -32,8 +31,8 @@ import '../repositories/diagnostico_hive_repository.dart';
 import '../repositories/favoritos_hive_repository.dart';
 import '../repositories/fitossanitario_hive_repository.dart';
 import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
 import '../repositories/plantas_inf_hive_repository.dart';
+import '../repositories/pragas_hive_repository.dart';
 import '../repositories/pragas_inf_hive_repository.dart';
 import '../repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';

@@ -1,8 +1,7 @@
 // Flutter imports
-import 'package:flutter/foundation.dart';
-
 // Package imports
 import 'package:core/core.dart' as core;
+import 'package:flutter/foundation.dart';
 
 // Local imports
 import '../../features/analytics/enhanced_analytics_provider.dart';

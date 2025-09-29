@@ -244,7 +244,8 @@ enum DeviceValidationStatus {
   invalid,
   pending,
   revoked,
-  exceeded;
+  exceeded,
+  unsupportedPlatform; // Web e outras plataformas não suportadas
 
   /// Retorna nome amigável do status
   String get displayName {
@@ -259,6 +260,8 @@ enum DeviceValidationStatus {
         return 'Revogado';
       case DeviceValidationStatus.exceeded:
         return 'Limite Excedido';
+      case DeviceValidationStatus.unsupportedPlatform:
+        return 'Plataforma Não Suportada';
     }
   }
 
@@ -275,6 +278,8 @@ enum DeviceValidationStatus {
         return '#9E9E9E'; // Cinza
       case DeviceValidationStatus.exceeded:
         return '#FF5722'; // Vermelho escuro
+      case DeviceValidationStatus.unsupportedPlatform:
+        return '#9C27B0'; // Roxo
     }
   }
 }

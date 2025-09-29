@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:core/core.dart';
 
+import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
+import '../../features/culturas/lista_culturas_page.dart';
 import '../../features/defensivos/home_defensivos_page.dart';
 import '../../features/defensivos/presentation/pages/defensivos_unificado_page.dart';
 import '../../features/defensivos/presentation/providers/defensivos_unificado_provider.dart';
-import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../../features/pragas/lista_pragas_page.dart';
 import '../../features/pragas/detalhe_praga_page.dart';
-import '../../features/culturas/lista_culturas_page.dart';
+import '../../features/pragas/lista_pragas_page.dart';
 import '../../features/subscription/presentation/pages/subscription_clean_page.dart';
 import '../di/injection_container.dart';
 

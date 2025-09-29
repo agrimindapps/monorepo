@@ -11,10 +11,10 @@
 /// 2. Detalhes da Praga (target)
 /// 3. Detalhes do Defensivo (target)
 /// 4. Lista pragas por cultura (target)
-library tab_bar_blueprint;
+library;
 
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// # SPACING TOKENS
 ///

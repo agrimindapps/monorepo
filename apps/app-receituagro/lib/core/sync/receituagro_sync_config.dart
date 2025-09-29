@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 
 import '../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
-import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
 import '../../features/settings/domain/entities/user_history_sync_entity.dart';
+import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 
 // Funções auxiliares para contornar problema do analyzer

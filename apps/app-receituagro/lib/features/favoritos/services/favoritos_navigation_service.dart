@@ -1,11 +1,10 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
 
-import '../../../core/services/receituagro_navigation_service.dart';
-import 'package:core/core.dart';
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
+import '../../../core/services/receituagro_navigation_service.dart';
 import '../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
 import '../models/favorito_defensivo_model.dart';
 import '../models/favorito_diagnostico_model.dart';
@@ -39,8 +38,8 @@ class FavoritosNavigationService {
       if (defensivoReal != null) {
         final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalheDefensivo(
-          defensivoName: defensivoReal.nomeComum?.isNotEmpty == true
-              ? defensivoReal.nomeComum!
+          defensivoName: defensivoReal.nomeComum.isNotEmpty == true
+              ? defensivoReal.nomeComum
               : defensivoReal.nomeTecnico ?? 'Nome não disponível',
           extraData: {'fabricante': defensivoReal.fabricante ?? 'Fabricante não informado'},
         );
@@ -67,8 +66,8 @@ class FavoritosNavigationService {
         await navigationService.navigateToDetalhePraga(
           pragaName: pragaReal.nomeComum ?? 'Nome não disponível',
           pragaId: pragaReal.objectId ?? praga.idReg, // Use objectId for better precision
-          pragaScientificName: pragaReal.nomeCientifico?.isNotEmpty == true
-              ? pragaReal.nomeCientifico!
+          pragaScientificName: pragaReal.nomeCientifico.isNotEmpty == true
+              ? pragaReal.nomeCientifico
               : 'Nome científico não disponível',
         );
       } else {
@@ -117,7 +116,7 @@ class FavoritosNavigationService {
     try {
       // Aqui seria a navegação para a página específica da cultura
       // Por enquanto mostra um diálogo informativo
-      showDialog(
+      showDialog<dynamic>(
         context: context,
         builder: (context) => AlertDialog(
           title: Text('Cultura: $culturaNome'),
@@ -149,7 +148,7 @@ class FavoritosNavigationService {
       if (pragaId != null) filtros['praga'] = pragaId;
       if (defensivoId != null) filtros['defensivo'] = defensivoId;
 
-      showDialog(
+      showDialog<dynamic>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Busca Avançada'),
@@ -206,7 +205,7 @@ class FavoritosNavigationService {
           final item = result.isSuccess ? result.data : null;
           if (item != null) {
             return {
-              'nome': item.nomeComum?.isNotEmpty == true ? item.nomeComum! : (item.nomeTecnico ?? 'Nome não disponível'),
+              'nome': item.nomeComum.isNotEmpty == true ? item.nomeComum : (item.nomeTecnico ?? 'Nome não disponível'),
               'subtitulo': item.ingredienteAtivo ?? 'Ingrediente não informado',
               'detalhes': '${item.fabricante ?? ''} • ${item.classeAgronomica ?? ''}',
             };
@@ -218,8 +217,8 @@ class FavoritosNavigationService {
           if (item != null) {
             return {
               'nome': item.nomeComum ?? 'Nome não disponível',
-              'subtitulo': item.nomeCientifico?.isNotEmpty == true 
-                  ? item.nomeCientifico! 
+              'subtitulo': item.nomeCientifico.isNotEmpty == true 
+                  ? item.nomeCientifico 
                   : 'Nome científico não disponível',
               'detalhes': 'Praga agrícola',
             };

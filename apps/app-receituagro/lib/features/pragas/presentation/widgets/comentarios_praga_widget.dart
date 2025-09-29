@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../comentarios/models/comentario_model.dart';
 import '../../../comentarios/views/widgets/premium_upgrade_widget.dart';

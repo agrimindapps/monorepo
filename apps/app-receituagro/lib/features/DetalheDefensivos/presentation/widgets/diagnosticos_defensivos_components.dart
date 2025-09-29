@@ -1,7 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
-
-import 'package:core/core.dart';
 
 import '../../../../core/design/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
@@ -1193,7 +1192,7 @@ class _DiagnosticoDefensivoDialogWidgetState
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
-                placeholder: Container(
+                placeholder: ColoredBox(
                   color: theme.colorScheme.surface,
                   child: Center(
                     child: Column(
@@ -1216,7 +1215,7 @@ class _DiagnosticoDefensivoDialogWidgetState
                     ),
                   ),
                 ),
-                errorWidget: Container(
+                errorWidget: ColoredBox(
                   color: theme.colorScheme.surface,
                   child: Center(
                     child: Column(

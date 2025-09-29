@@ -127,7 +127,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
                 final indicatorHeight = _positionAnimation.value * widget.refreshIndicatorExtent;
                 if (indicatorHeight == 0) return const SizedBox.shrink();
                 
-                return Container(
+                return SizedBox(
                   height: indicatorHeight,
                   child: _buildRefreshIndicator(context),
                 );
@@ -276,7 +276,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
     final primaryColor = widget.primaryColor ?? theme.colorScheme.primary;
     final backgroundColor = widget.backgroundColor ?? theme.colorScheme.surface;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor,
         boxShadow: [
@@ -365,7 +365,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         break;
         
       case RefreshPhase.completed:
-        iconWidget = Icon(
+        iconWidget = const Icon(
           Icons.check_circle,
           color: Colors.green,
           size: 24,
@@ -373,7 +373,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         break;
         
       case RefreshPhase.error:
-        iconWidget = Icon(
+        iconWidget = const Icon(
           Icons.error_outline,
           color: Colors.red,
           size: 24,

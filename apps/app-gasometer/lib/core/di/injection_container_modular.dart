@@ -76,6 +76,9 @@ class ModularInjectionContainer {
 /// This allows existing code to continue working while we migrate
 final getIt = ModularInjectionContainer.instance;
 
+/// Service Locator alias - commonly used pattern
+final sl = ModularInjectionContainer.instance;
+
 /// Legacy initialization function - delegates to modular container
 ///
 /// Maintains backward compatibility during Phase 1

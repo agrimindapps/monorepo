@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Widget especializado para exibir dados técnicos de aplicação
 /// Mostra dosagem, intervalos, épocas de aplicação e métodos

@@ -3,16 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../../core/services/input_sanitizer.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 
 /// Provider para gerenciar o estado do formulário de veículos
 class VehicleFormProvider extends ChangeNotifier {
 
-  VehicleFormProvider(this._authProvider);
+  VehicleFormProvider(this._userId);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final AuthProvider _authProvider;
+  final String _userId;
   
   // Controllers para campos de texto
   final TextEditingController marcaController = TextEditingController();
@@ -154,7 +153,7 @@ class VehicleFormProvider extends ChangeNotifier {
   bool _isFileOwnedByUser(File file) {
     try {
       final filePath = file.path;
-      final userId = _authProvider.userId;
+      final userId = _userId;
       
       // Check if file is in user's directory
       if (!filePath.contains(userId)) {
@@ -269,7 +268,7 @@ class VehicleFormProvider extends ChangeNotifier {
     
     return VehicleEntity(
       id: _editingVehicle?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      userId: _authProvider.userId,
+      userId: _userId,
       name: '$sanitizedMarca $sanitizedModelo',
       brand: sanitizedMarca,
       model: sanitizedModelo,

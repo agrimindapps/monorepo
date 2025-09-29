@@ -5,9 +5,9 @@ import 'package:flutter/material.dart' as flutter show FormState;
 import 'package:flutter/material.dart' hide FormState;
 
 import '../../../../core/error/app_error.dart' as local_error;
+import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/base_notifier.dart';
 import '../../../../core/services/input_sanitizer.dart';
-import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import 'vehicles_notifier.dart';
@@ -169,7 +169,8 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
           );
         } else {
           state = state.copyWith(
-            error: local_error.SecurityError(
+            error: local_error.PermissionError(
+              permission: 'delete_image',
               message: 'Tentativa de exclusão não autorizada detectada',
             ),
           );
@@ -297,9 +298,9 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
 
   /// Cria entidade do veículo a partir dos dados do formulário
   VehicleEntity buildVehicleEntity() {
-    final currentUser = ref.read(authStateProvider).valueOrNull;
+    final currentUser = ref.read(currentUserProvider);
     if (currentUser == null) {
-      throw local_error.UnauthorizedError(
+      throw local_error.AuthenticationError(
         message: 'Usuário não autenticado',
       );
     }

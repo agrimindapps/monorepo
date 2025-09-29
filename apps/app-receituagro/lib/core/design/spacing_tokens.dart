@@ -5,7 +5,7 @@
 ///
 /// Baseado em múltiplos de 4dp para garantir consistência visual
 /// e alinhamento perfeito em diferentes resoluções de tela
-library spacing_tokens;
+library;
 
 import 'package:flutter/material.dart';
 

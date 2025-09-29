@@ -143,7 +143,7 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
     return AnimatedRotation(
       turns: isExpanded ? 0.5 : 0,
       duration: DiagnosticoMockupTokens.filterAnimationDuration,
-      child: Icon(
+      child: const Icon(
         Icons.keyboard_arrow_down,
         color: DiagnosticoMockupTokens.textSecondary,
         size: 20,

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:provider/single_child_widget.dart';
 
-import 'package:core/core.dart';
-
 import '../../../core/interfaces/i_premium_service.dart';
 import '../comentarios_page.dart';
 import '../controller/comentarios_controller.dart';

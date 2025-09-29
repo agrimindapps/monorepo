@@ -106,7 +106,7 @@ abstract final class PlantisSyncConfig {
       appName: 'plantis',
       config: AppSyncConfig.simple(
         appName: 'plantis',
-        syncInterval: const Duration(minutes: 10), // Sync menos frequente
+        syncInterval: const Duration(minutes: 15), // OPTIMIZED: Sync otimizado (bateria)
         conflictStrategy: ConflictStrategy.timestamp, // Simples timestamp
       ),
       entities: [

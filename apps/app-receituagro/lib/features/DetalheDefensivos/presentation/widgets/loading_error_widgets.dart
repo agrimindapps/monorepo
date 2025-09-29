@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Widgets para estados de loading e erro
 /// Responsabilidade única: exibir estados visuais consistentes

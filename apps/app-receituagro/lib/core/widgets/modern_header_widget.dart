@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../services/receituagro_navigation_service.dart';
 
@@ -174,7 +173,7 @@ class ModernHeaderWidget extends StatelessWidget {
     try {
       // Usa o novo serviço de navegação unificado
       final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
-      navigationService.goBack();
+      navigationService.goBack<void>();
     } catch (e) {
       // Fallback para navegação padrão do Navigator
       if (Navigator.canPop(context)) {

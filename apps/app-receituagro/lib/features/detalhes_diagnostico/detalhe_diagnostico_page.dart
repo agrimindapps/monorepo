@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:core/core.dart';
 
 import 'presentation/pages/detalhe_diagnostico_clean_page.dart';
 import 'presentation/providers/detalhe_diagnostico_provider.dart';

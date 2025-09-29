@@ -1,7 +1,7 @@
 import '../../../../core/models/fitossanitario_hive.dart';
 import '../../domain/entities/defensivo_entity.dart';
-import '../../models/defensivo_model.dart';
 import '../../models/defensivo_agrupado_item_model.dart';
+import '../../models/defensivo_model.dart';
 
 /// Mapper unificado para conversão entre diferentes models e DefensivoEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas

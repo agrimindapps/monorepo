@@ -601,12 +601,12 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
   /// Get Remote Config Values (Mock)
   List<_RemoteConfigItem> _buildRemoteConfigValues() {
     return [
-      _RemoteConfigItem('enable_premium_features', true, 'Remote'),
-      _RemoteConfigItem('enable_advanced_diagnostics', false, 'Default'),
-      _RemoteConfigItem('enable_offline_mode', true, 'Remote'),
-      _RemoteConfigItem('enable_new_ui_design', false, 'Default'),
-      _RemoteConfigItem('min_app_version', '1.0.0', 'Remote'),
-      _RemoteConfigItem('feature_discovery_delay_ms', 2000, 'Remote'),
+      const _RemoteConfigItem('enable_premium_features', true, 'Remote'),
+      const _RemoteConfigItem('enable_advanced_diagnostics', false, 'Default'),
+      const _RemoteConfigItem('enable_offline_mode', true, 'Remote'),
+      const _RemoteConfigItem('enable_new_ui_design', false, 'Default'),
+      const _RemoteConfigItem('min_app_version', '1.0.0', 'Remote'),
+      const _RemoteConfigItem('feature_discovery_delay_ms', 2000, 'Remote'),
     ];
   }
 
@@ -658,7 +658,7 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
 
   /// Simulate Feature Discovery
   void _simulateFeatureDiscovery() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Feature Discovery'),

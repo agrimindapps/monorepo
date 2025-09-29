@@ -28,7 +28,7 @@ class PremiumDialogHelper {
       return;
     }
 
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title ?? 'Funcionalidade Premium'),

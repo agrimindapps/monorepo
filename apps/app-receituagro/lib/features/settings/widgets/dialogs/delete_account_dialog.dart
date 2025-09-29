@@ -40,7 +40,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
               color: Colors.red.shade50,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(Icons.warning, color: Colors.red, size: 20),
+            child: const Icon(Icons.warning, color: Colors.red, size: 20),
           ),
           const SizedBox(width: 12),
           const Text(
@@ -67,7 +67,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.delete_forever, color: Colors.red, size: 16),
+                child: const Icon(Icons.delete_forever, color: Colors.red, size: 16),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -86,7 +86,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.history, color: Colors.red, size: 16),
+                child: const Icon(Icons.history, color: Colors.red, size: 16),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -105,7 +105,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.block, color: Colors.red, size: 16),
+                child: const Icon(Icons.block, color: Colors.red, size: 16),
               ),
               const SizedBox(width: 12),
               const Expanded(

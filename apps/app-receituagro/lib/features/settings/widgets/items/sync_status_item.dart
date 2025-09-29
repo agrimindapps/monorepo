@@ -90,7 +90,7 @@ class SyncStatusItem extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.check_circle,
             size: 12,
             color: Colors.green,
@@ -120,7 +120,7 @@ class SyncStatusItem extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.sync_problem,
             size: 12,
             color: Colors.orange,

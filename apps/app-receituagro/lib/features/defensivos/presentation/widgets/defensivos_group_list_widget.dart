@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../domain/entities/defensivo_group_entity.dart';

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/design/design_tokens.dart';
-import 'praga_card_content_section.dart';
-import 'praga_card_helpers.dart';
 import 'praga_card_image_section.dart';
 import 'praga_card_main.dart';
 

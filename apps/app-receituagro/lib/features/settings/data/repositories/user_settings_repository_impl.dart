@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/user_settings_entity.dart';
 import '../../domain/repositories/i_user_settings_repository.dart';

@@ -161,7 +161,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
 
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -301,7 +301,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             if (!step.isRequired)
               TextButton(
                 onPressed: _skipStep,
-                child: Text(
+                child: const Text(
                   'Pular',
                   style: TextStyle(color: Colors.white70),
                 ),

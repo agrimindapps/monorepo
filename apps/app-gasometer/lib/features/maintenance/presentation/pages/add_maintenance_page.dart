@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/presentation/widgets/datetime_field.dart';
@@ -15,12 +16,12 @@ import '../../../../core/presentation/widgets/validated_dropdown_field.dart';
 import '../../../../core/presentation/widgets/validated_form_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/form_dialog.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
 
-class AddMaintenancePage extends StatefulWidget {
+class AddMaintenancePage extends ConsumerStatefulWidget {
 
   const AddMaintenancePage({
     super.key,
@@ -31,10 +32,10 @@ class AddMaintenancePage extends StatefulWidget {
   final String? vehicleId;
 
   @override
-  State<AddMaintenancePage> createState() => _AddMaintenancePageState();
+  ConsumerState<AddMaintenancePage> createState() => _AddMaintenancePageState();
 }
 
-class _AddMaintenancePageState extends State<AddMaintenancePage> {
+class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   late MaintenanceFormProvider _formProvider;
   final Map<String, ValidationResult> _validationResults = {};
   
@@ -66,15 +67,15 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
   }
   
   void _initializeProviders() async {
-    _formProvider = Provider.of<MaintenanceFormProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+    _formProvider = provider.Provider.of<MaintenanceFormProvider>(context, listen: false);
+    final authState = ref.read(authNotifierProvider);
+
     // Set context for dependency injection access
     _formProvider.setContext(context);
 
     await _formProvider.initialize(
       vehicleId: widget.vehicleId,
-      userId: authProvider.userId,
+      userId: authState.userId,
     );
     
     if (widget.maintenanceToEdit != null) {
@@ -91,9 +92,9 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     });
   }
 
-  Future<void> _loadMaintenanceForEdit(MaintenanceFormProvider provider) async {
+  Future<void> _loadMaintenanceForEdit(MaintenanceFormProvider prov) async {
     try {
-      await provider.initializeWithMaintenance(widget.maintenanceToEdit!);
+      await prov.initializeWithMaintenance(widget.maintenanceToEdit!);
     } catch (e) {
       throw Exception('Erro ao carregar registro para edição: $e');
     }
@@ -109,7 +110,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MaintenanceFormProvider>(
+    return provider.Consumer<MaintenanceFormProvider>(
       builder: (context, formProvider, child) {
         // Generate subtitle based on vehicle information
         String subtitle = 'Registre a manutenção do seu veículo';
@@ -392,7 +393,7 @@ class _AddMaintenancePageState extends State<AddMaintenancePage> {
     });
 
     final formProvider = _formProvider;
-    final maintenanceProvider = Provider.of<MaintenanceProvider>(context, listen: false);
+    final maintenanceProvider = provider.Provider.of<MaintenanceProvider>(context, listen: false);
 
     try {
       // Setup timeout protection

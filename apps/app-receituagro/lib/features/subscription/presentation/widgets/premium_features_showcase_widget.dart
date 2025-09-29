@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../providers/subscription_provider.dart';
@@ -215,7 +214,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
 
   /// Feature Categories Tabs
   Widget _buildFeatureTabs(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -245,7 +244,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
   /// Core Features Tab
   Widget _buildCoreFeatures(BuildContext context, FeatureFlagsProvider featureFlags) {
     final coreFeatures = [
-      PremiumFeature(
+      const PremiumFeature(
         icon: Icons.favorite,
         title: 'Favoritos Ilimitados',
         description: 'Salve quantos diagnósticos quiser',
@@ -303,7 +302,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
   /// Exclusive Features Tab
   Widget _buildExclusiveFeatures(BuildContext context, FeatureFlagsProvider featureFlags) {
     final exclusiveFeatures = [
-      PremiumFeature(
+      const PremiumFeature(
         icon: Icons.support_agent,
         title: 'Suporte Prioritário',
         description: 'Atendimento exclusivo para membros Premium',
@@ -428,7 +427,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
     final hasSubscription = widget.subscriptionProvider.hasActiveSubscription;
     
     if (hasSubscription && feature.isAvailable) {
-      return Icon(
+      return const Icon(
         Icons.check_circle,
         color: Colors.green,
         size: 20,

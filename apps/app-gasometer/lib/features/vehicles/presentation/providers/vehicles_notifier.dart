@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 
-import '../../../../core/error/app_error.dart';
-import '../../../../core/providers/auth_notifier.dart';
-import '../../../../core/providers/base_notifier.dart';
+import '../../../../core/error/app_error.dart' as local_error;
+import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/base_notifier.dart' hide AsyncValueX;
 import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/usecases/add_vehicle.dart';
@@ -27,7 +27,7 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
   @override
   Future<List<VehicleEntity>> build() async {
     // Limpar subscription anterior se existir
-    _vehicleSubscription?.cancel();
+    await _vehicleSubscription?.cancel();
 
     // Verificar autenticação
     final currentUser = ref.read(currentUserProvider);
@@ -50,7 +50,7 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
         return result.fold(
           (failure) {
             final error = _mapFailureToError(failure);
-            throw error;
+            throw error as Object;
           },
           (vehicles) {
             logInfo('Loaded ${vehicles.length} vehicles successfully');
@@ -77,7 +77,11 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
             (vehicles) {
               logInfo('Stream update: ${vehicles.length} vehicles');
               // Atualizar estado apenas se dados mudaram
-              final currentData = state.valueOrNull;
+              final currentData = state.when(
+                data: (data) => data,
+                loading: () => null,
+                error: (_, __) => null,
+              );
               if (currentData == null || !_areListsEqual(currentData, vehicles)) {
                 state = AsyncValue.data(vehicles);
               }
@@ -111,7 +115,10 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
   Future<VehicleEntity> addVehicle(VehicleEntity vehicle) async {
     logInfo('Adding vehicle: ${vehicle.name}');
 
-    final addedVehicle = await executeOperation(
+    // Executar operação e obter veículo adicionado
+    VehicleEntity? addedVehicle;
+
+    await executeOperation(
       () async {
         final addVehicleUseCase = GetIt.instance<AddVehicle>();
         final result = await addVehicleUseCase(AddVehicleParams(vehicle: vehicle))
@@ -120,11 +127,21 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
         return result.fold(
           (failure) {
             final error = _mapFailureToError(failure);
-            throw error;
+            throw error as Object;
           },
           (added) {
             logInfo('Vehicle added successfully: ${added.id}');
-            return added;
+            addedVehicle = added;
+
+            // Atualizar lista local imediatamente
+            final currentList = state.when(
+              data: (data) => data,
+              loading: () => <VehicleEntity>[],
+              error: (_, __) => <VehicleEntity>[],
+            );
+            state = AsyncValue.data([...currentList, added]);
+
+            return currentList; // Return list to satisfy executeOperation type
           },
         );
       },
@@ -132,18 +149,17 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
       parameters: {'vehicleName': vehicle.name},
     );
 
-    // Atualizar lista local imediatamente
-    final currentList = state.valueOrNull ?? [];
-    state = AsyncValue.data([...currentList, addedVehicle]);
-
-    return addedVehicle;
+    return addedVehicle!;
   }
 
   /// Atualiza veículo existente
   Future<VehicleEntity> updateVehicle(VehicleEntity vehicle) async {
     logInfo('Updating vehicle: ${vehicle.id}');
 
-    final updatedVehicle = await executeOperation(
+    // Executar operação e obter veículo atualizado
+    VehicleEntity? updatedVehicle;
+
+    await executeOperation(
       () async {
         final updateVehicleUseCase = GetIt.instance<UpdateVehicle>();
         final result = await updateVehicleUseCase(UpdateVehicleParams(vehicle: vehicle));
@@ -151,11 +167,25 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
         return result.fold(
           (failure) {
             final error = _mapFailureToError(failure);
-            throw error;
+            throw error as Object;
           },
           (updated) {
             logInfo('Vehicle updated successfully: ${updated.id}');
-            return updated;
+            updatedVehicle = updated;
+
+            // Atualizar lista local imediatamente
+            final currentList = state.when(
+              data: (data) => data,
+              loading: () => <VehicleEntity>[],
+              error: (_, __) => <VehicleEntity>[],
+            );
+            final updatedList = currentList.map((VehicleEntity v) {
+              return v.id == updated.id ? updated : v;
+            }).toList();
+
+            state = AsyncValue.data(updatedList);
+
+            return currentList; // Return list to satisfy executeOperation type
           },
         );
       },
@@ -163,15 +193,7 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
       parameters: {'vehicleId': vehicle.id},
     );
 
-    // Atualizar lista local imediatamente
-    final currentList = state.valueOrNull ?? [];
-    final updatedList = currentList.map((v) {
-      return v.id == updatedVehicle.id ? updatedVehicle : v;
-    }).toList();
-
-    state = AsyncValue.data(updatedList);
-
-    return updatedVehicle;
+    return updatedVehicle!;
   }
 
   /// Remove veículo
@@ -186,22 +208,27 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
         return result.fold(
           (failure) {
             final error = _mapFailureToError(failure);
-            throw error;
+            throw error as Object;
           },
           (_) {
             logInfo('Vehicle deleted successfully: $vehicleId');
-            return null;
+
+            // Atualizar lista local imediatamente
+            final currentList = state.when(
+              data: (data) => data,
+              loading: () => <VehicleEntity>[],
+              error: (_, __) => <VehicleEntity>[],
+            );
+            final updatedList = currentList.where((VehicleEntity v) => v.id != vehicleId).toList();
+            state = AsyncValue.data(updatedList);
+
+            return currentList; // Return list to satisfy executeOperation type
           },
         );
       },
       operationName: 'deleteVehicle',
       parameters: {'vehicleId': vehicleId},
     );
-
-    // Atualizar lista local imediatamente
-    final currentList = state.valueOrNull ?? [];
-    final updatedList = currentList.where((v) => v.id != vehicleId).toList();
-    state = AsyncValue.data(updatedList);
   }
 
   /// Busca veículo por ID
@@ -209,7 +236,9 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
     logInfo('Getting vehicle by ID: $vehicleId');
 
     try {
-      return await executeOperation(
+      VehicleEntity? foundVehicle;
+
+      await executeOperation(
         () async {
           final getVehicleByIdUseCase = GetIt.instance<GetVehicleById>();
           final result = await getVehicleByIdUseCase(GetVehicleByIdParams(vehicleId: vehicleId));
@@ -217,17 +246,24 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
           return result.fold(
             (failure) {
               final error = _mapFailureToError(failure);
-              throw error;
+              throw error as Object;
             },
             (vehicle) {
               logInfo('Vehicle found: ${vehicle.id}');
-              return vehicle;
+              foundVehicle = vehicle;
+              return state.when(
+                data: (data) => data,
+                loading: () => <VehicleEntity>[],
+                error: (_, __) => <VehicleEntity>[],
+              ); // Return list to satisfy executeOperation type
             },
           );
         },
         operationName: 'getVehicleById',
         parameters: {'vehicleId': vehicleId},
       );
+
+      return foundVehicle;
     } catch (e) {
       logWarning('Failed to get vehicle by ID: $e');
       return null;
@@ -239,7 +275,9 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
     logInfo('Searching vehicles: $query');
 
     try {
-      return await executeOperation(
+      List<VehicleEntity> searchResults = [];
+
+      await executeOperation(
         () async {
           final searchVehiclesUseCase = GetIt.instance<SearchVehicles>();
           final result = await searchVehiclesUseCase(SearchVehiclesParams(query: query));
@@ -247,17 +285,24 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
           return result.fold(
             (failure) {
               final error = _mapFailureToError(failure);
-              throw error;
+              throw error as Object;
             },
             (vehicles) {
               logInfo('Found ${vehicles.length} vehicles matching query');
-              return vehicles;
+              searchResults = vehicles;
+              return state.when(
+                data: (data) => data,
+                loading: () => <VehicleEntity>[],
+                error: (_, __) => <VehicleEntity>[],
+              ); // Return list to satisfy executeOperation type
             },
           );
         },
         operationName: 'searchVehicles',
         parameters: {'query': query},
       );
+
+      return searchResults;
     } catch (e) {
       logWarning('Search failed: $e');
       return [];
@@ -273,50 +318,52 @@ class VehiclesNotifier extends BaseAsyncNotifier<List<VehicleEntity>> {
 
   /// Filtra veículos por tipo
   List<VehicleEntity> getVehiclesByType(VehicleType type) {
-    final vehicles = state.valueOrNull ?? [];
-    return vehicles.where((v) => v.type == type && v.isActive).toList();
+    final vehicles = state.when(
+      data: (data) => data,
+      loading: () => <VehicleEntity>[],
+      error: (_, __) => <VehicleEntity>[],
+    );
+    return vehicles.where((VehicleEntity v) => v.type == type && v.isActive).toList();
   }
 
   /// Filtra veículos por tipo de combustível
   List<VehicleEntity> getVehiclesByFuelType(FuelType fuelType) {
-    final vehicles = state.valueOrNull ?? [];
-    return vehicles.where((v) => v.supportedFuels.contains(fuelType) && v.isActive).toList();
+    final vehicles = state.when(
+      data: (data) => data,
+      loading: () => <VehicleEntity>[],
+      error: (_, __) => <VehicleEntity>[],
+    );
+    return vehicles.where((VehicleEntity v) => v.supportedFuels.contains(fuelType) && v.isActive).toList();
   }
 
   /// Mapeia Failure para AppError
-  AppError _mapFailureToError(dynamic failure) {
+  local_error.AppError _mapFailureToError(dynamic failure) {
     if (failure.toString().contains('network') || failure.toString().contains('connection')) {
-      return NetworkError(
+      return local_error.NetworkError(
         message: 'Erro de conexão. Verifique sua internet.',
         technicalDetails: failure.toString(),
       );
     } else if (failure.toString().contains('server')) {
-      return ServerError(
+      return local_error.ServerError(
         message: 'Erro do servidor. Tente novamente mais tarde.',
         technicalDetails: failure.toString(),
       );
     } else if (failure.toString().contains('cache')) {
-      return CacheError(
+      return local_error.CacheError(
         message: 'Erro de cache local.',
         technicalDetails: failure.toString(),
       );
     } else if (failure.toString().contains('not found')) {
-      return NotFoundError(
+      return local_error.NotFoundError(
         message: 'Veículo não encontrado.',
         technicalDetails: failure.toString(),
       );
     } else {
-      return UnexpectedError(
+      return local_error.UnexpectedError(
         message: 'Erro inesperado. Tente novamente.',
         technicalDetails: failure.toString(),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _vehicleSubscription?.cancel();
-    super.dispose();
   }
 }
 
@@ -338,14 +385,16 @@ final selectedVehicleProvider = Provider<VehicleEntity?>((ref) {
   if (selectedId == null) return null;
 
   final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-  return vehiclesAsync.whenOrNull(
-    data: (vehicles) {
+  return vehiclesAsync.when(
+    data: (List<VehicleEntity> vehicles) {
       try {
-        return vehicles.firstWhere((v) => v.id == selectedId);
+        return vehicles.firstWhere((VehicleEntity v) => v.id == selectedId);
       } catch (e) {
         return null;
       }
     },
+    loading: () => null,
+    error: (_, __) => null,
   );
 });
 
@@ -361,11 +410,15 @@ final filteredVehiclesProvider = Provider<AsyncValue<List<VehicleEntity>>>((ref)
     return vehiclesAsync;
   }
 
-  return vehiclesAsync.whenData(
-    (vehicles) => vehicles.where((v) {
-      final searchText = '${v.name} ${v.brand} ${v.model} ${v.licensePlate}'.toLowerCase();
-      return searchText.contains(query);
-    }).toList(),
+  return vehiclesAsync.when<AsyncValue<List<VehicleEntity>>>(
+    data: (List<VehicleEntity> vehicles) => AsyncValue.data(
+      vehicles.where((VehicleEntity v) {
+        final searchText = '${v.name} ${v.brand} ${v.model} ${v.licensePlate}'.toLowerCase();
+        return searchText.contains(query);
+      }).toList(),
+    ),
+    loading: () => const AsyncValue<List<VehicleEntity>>.loading(),
+    error: (Object error, StackTrace stack) => AsyncValue<List<VehicleEntity>>.error(error, stack),
   );
 });
 
@@ -373,21 +426,33 @@ final filteredVehiclesProvider = Provider<AsyncValue<List<VehicleEntity>>>((ref)
 final activeVehiclesProvider = Provider<AsyncValue<List<VehicleEntity>>>((ref) {
   final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
 
-  return vehiclesAsync.whenData(
-    (vehicles) => vehicles.where((v) => v.isActive).toList(),
+  return vehiclesAsync.when<AsyncValue<List<VehicleEntity>>>(
+    data: (List<VehicleEntity> vehicles) => AsyncValue.data(
+      vehicles.where((VehicleEntity v) => v.isActive).toList(),
+    ),
+    loading: () => const AsyncValue<List<VehicleEntity>>.loading(),
+    error: (Object error, StackTrace stack) => AsyncValue<List<VehicleEntity>>.error(error, stack),
   );
 });
 
 /// Provider para contagem de veículos
 final vehicleCountProvider = Provider<int>((ref) {
   final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-  return vehiclesAsync.valueOrNull?.length ?? 0;
+  return vehiclesAsync.when<int>(
+    data: (List<VehicleEntity> vehicles) => vehicles.length,
+    loading: () => 0,
+    error: (_, __) => 0,
+  );
 });
 
 /// Provider para contagem de veículos ativos
 final activeVehicleCountProvider = Provider<int>((ref) {
   final activeVehiclesAsync = ref.watch(activeVehiclesProvider);
-  return activeVehiclesAsync.valueOrNull?.length ?? 0;
+  return activeVehiclesAsync.when<int>(
+    data: (List<VehicleEntity> vehicles) => vehicles.length,
+    loading: () => 0,
+    error: (_, __) => 0,
+  );
 });
 
 /// Provider para verificar se há veículos
@@ -399,13 +464,21 @@ final hasVehiclesProvider = Provider<bool>((ref) {
 /// Provider para veículos por tipo
 final vehiclesByTypeProvider = Provider.family<List<VehicleEntity>, VehicleType>((ref, type) {
   final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-  final vehicles = vehiclesAsync.valueOrNull ?? [];
-  return vehicles.where((v) => v.type == type && v.isActive).toList();
+  final vehicles = vehiclesAsync.when<List<VehicleEntity>>(
+    data: (List<VehicleEntity> vehicles) => vehicles,
+    loading: () => <VehicleEntity>[],
+    error: (_, __) => <VehicleEntity>[],
+  );
+  return vehicles.where((VehicleEntity v) => v.type == type && v.isActive).toList();
 });
 
 /// Provider para veículos por tipo de combustível
 final vehiclesByFuelTypeProvider = Provider.family<List<VehicleEntity>, FuelType>((ref, fuelType) {
   final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-  final vehicles = vehiclesAsync.valueOrNull ?? [];
-  return vehicles.where((v) => v.supportedFuels.contains(fuelType) && v.isActive).toList();
+  final vehicles = vehiclesAsync.when<List<VehicleEntity>>(
+    data: (List<VehicleEntity> vehicles) => vehicles,
+    loading: () => <VehicleEntity>[],
+    error: (_, __) => <VehicleEntity>[],
+  );
+  return vehicles.where((VehicleEntity v) => v.supportedFuels.contains(fuelType) && v.isActive).toList();
 });

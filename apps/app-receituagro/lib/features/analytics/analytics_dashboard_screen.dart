@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' hide PerformanceMetrics, UserEngagementMetrics;
+
 import 'analytics_dashboard_service.dart';
 
 /// Analytics Dashboard Screen for admin/analytics viewing
@@ -16,7 +16,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   late TabController _tabController;
   late AnalyticsDashboardService _analyticsService;
   
-  DateTime _startDate = DateTime.now().subtract(Duration(days: 30));
+  DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
   
   UserEngagementMetrics? _engagementMetrics;
@@ -85,7 +85,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Future<void> _selectDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime.now().subtract(Duration(days: 365)),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now(),
       initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
     );
@@ -107,7 +107,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Relatório exportado com sucesso'),
           backgroundColor: Colors.green,
         ),
@@ -126,10 +126,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Analytics Dashboard'),
+        title: const Text('Analytics Dashboard'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
+          tabs: const [
             Tab(text: 'Engajamento'),
             Tab(text: 'Conversão'),
             Tab(text: 'Performance'),
@@ -138,15 +138,15 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.date_range),
+            icon: const Icon(Icons.date_range),
             onPressed: _selectDateRange,
           ),
           IconButton(
-            icon: Icon(Icons.file_download),
+            icon: const Icon(Icons.file_download),
             onPressed: _exportReport,
           ),
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _loadAnalyticsData,
           ),
         ],
@@ -192,7 +192,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
 
   Widget _buildDateRangeHeader() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       color: Theme.of(context).primaryColor.withOpacity(0.1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -203,7 +203,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
           ),
           TextButton(
             onPressed: _selectDateRange,
-            child: Text('Alterar'),
+            child: const Text('Alterar'),
           ),
         ],
       ),
@@ -211,10 +211,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   }
 
   Widget _buildEngagementTab() {
-    if (_engagementMetrics == null) return SizedBox.shrink();
+    if (_engagementMetrics == null) return const SizedBox.shrink();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -222,7 +222,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             'Métricas de Engajamento',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildMetricsGrid([
             _MetricCard(
               title: 'Usuários Ativos Diários',
@@ -249,23 +249,23 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
               color: Colors.orange,
             ),
           ]),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'Uso de Funcionalidades',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          SizedBox(height: 16),
-          _buildFeatureUsageChart(_engagementMetrics!.featureUsage as Map<String, int>),
+          const SizedBox(height: 16),
+          _buildFeatureUsageChart(_engagementMetrics!.featureUsage),
         ],
       ),
     );
   }
 
   Widget _buildConversionTab() {
-    if (_funnelMetrics == null) return SizedBox.shrink();
+    if (_funnelMetrics == null) return const SizedBox.shrink();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -273,14 +273,14 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             'Funil de Conversão',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildConversionFunnel(_funnelMetrics!),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'Taxas de Conversão',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildConversionRatesTable(_funnelMetrics!.conversionRates),
         ],
       ),
@@ -288,10 +288,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   }
 
   Widget _buildPerformanceTab() {
-    if (_performanceMetrics == null) return SizedBox.shrink();
+    if (_performanceMetrics == null) return const SizedBox.shrink();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -299,7 +299,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             'Métricas de Performance',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildMetricsGrid([
             _MetricCard(
               title: 'Tempo de Inicialização',
@@ -326,12 +326,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
               color: Colors.amber,
             ),
           ]),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'Performance por Feature',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildFeaturePerformanceChart(_performanceMetrics!.featurePerformance),
         ],
       ),
@@ -339,10 +339,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   }
 
   Widget _buildRevenueTab() {
-    if (_revenueMetrics == null) return SizedBox.shrink();
+    if (_revenueMetrics == null) return const SizedBox.shrink();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -350,7 +350,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             'Métricas de Receita',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildMetricsGrid([
             _MetricCard(
               title: 'Receita Total',
@@ -377,12 +377,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
               color: Colors.red,
             ),
           ]),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'Receita por Plano',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildRevenueByPlanChart(_revenueMetrics!.revenueByPlan),
         ],
       ),
@@ -392,7 +392,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Widget _buildMetricsGrid(List<_MetricCard> cards) {
     return GridView.count(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       childAspectRatio: 1.5,
       crossAxisSpacing: 16,
@@ -403,7 +403,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
 
   Widget _buildMetricCard(_MetricCard card) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: card.color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -413,7 +413,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(card.icon, color: card.color, size: 32),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             card.value,
             style: TextStyle(
@@ -439,7 +439,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Widget _buildFeatureUsageChart(Map<String, int> featureUsage) {
     return Container(
       height: 200,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -448,27 +448,27 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         children: featureUsage.entries.map((entry) {
           final percentage = entry.value / featureUsage.values.reduce((a, b) => a > b ? a : b);
           return Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
                 SizedBox(
                   width: 120,
                   child: Text(
                     entry.key.replaceAll('_', ' ').toUpperCase(),
-                    style: TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
                 Expanded(
                   child: LinearProgressIndicator(
                     value: percentage,
                     backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   entry.value.toString(),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -480,7 +480,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
 
   Widget _buildConversionFunnel(ConversionFunnelMetrics metrics) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -493,19 +493,19 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
           final width = count / maxCount;
 
           return Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   step.stepName.replaceAll('_', ' ').toUpperCase(),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         height: 30,
                         child: Stack(
                           children: [
@@ -529,13 +529,13 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
                         ),
                       ),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
                           count.toString(),
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '${rate.toStringAsFixed(1)}%',
@@ -554,7 +554,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   }
 
   Widget _buildConversionRatesTable(Map<ConversionFunnelStep, double> rates) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -562,7 +562,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
       child: Column(
         children: rates.entries.map((entry) {
           return Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: Colors.grey[200]!),
@@ -574,7 +574,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
                 Text(entry.key.stepName.replaceAll('_', ' ')),
                 Text(
                   '${entry.value.toStringAsFixed(1)}%',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -587,7 +587,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Widget _buildFeaturePerformanceChart(Map<String, double> performance) {
     return Container(
       height: 150,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -596,7 +596,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         children: performance.entries.map((entry) {
           final color = entry.value < 1.0 ? Colors.green : entry.value < 2.0 ? Colors.orange : Colors.red;
           return Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
                 SizedBox(
@@ -610,10 +610,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   '${entry.value.toStringAsFixed(2)}s',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -626,7 +626,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Widget _buildRevenueByPlanChart(Map<String, double> revenueByPlan) {
     return Container(
       height: 120,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -637,7 +637,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
           final percentage = entry.value / total;
           
           return Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
                 SizedBox(
@@ -648,13 +648,13 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
                   child: LinearProgressIndicator(
                     value: percentage,
                     backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'R\$ ${entry.value.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

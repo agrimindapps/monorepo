@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';

@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/presentation/widgets/form_section_header.dart';
 import '../../../../core/presentation/widgets/notes_form_field.dart';
@@ -13,7 +14,7 @@ import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/validation/form_validator.dart';
 import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_form_provider.dart';
@@ -22,16 +23,16 @@ import '../providers/vehicles_provider.dart';
 // ✅ ARCHITECTURE FIX: Document refactoring needed for this 800+ line monolithic widget
 // TODO: Extract image picker, form sections, and validation into separate components
 // TODO: Create VehicleFormView, VehicleImagePicker, and VehicleFormActions widgets
-class AddVehiclePage extends StatefulWidget {
+class AddVehiclePage extends ConsumerStatefulWidget {
 
   const AddVehiclePage({super.key, this.vehicle});
   final VehicleEntity? vehicle;
 
   @override
-  State<AddVehiclePage> createState() => _AddVehiclePageState();
+  ConsumerState<AddVehiclePage> createState() => _AddVehiclePageState();
 }
 
-class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMixin {
+class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorHandlerMixin {
   VehicleFormProvider? formProvider;
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _observacoesController = TextEditingController();
@@ -40,10 +41,10 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
   late final FormValidator _formValidator;
   final Map<String, GlobalKey> _fieldKeys = {};
 
-  void _initializeFormProvider(AuthProvider authProvider) {
+  void _initializeFormProvider(String userId) {
     if (formProvider != null) return; // Já inicializado
 
-    formProvider = VehicleFormProvider(authProvider);
+    formProvider = VehicleFormProvider(userId);
 
     if (widget.vehicle != null) {
       formProvider!.initializeForEdit(widget.vehicle!);
@@ -184,36 +185,36 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.vehicle != null;
-    
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        // Aguarda a inicialização do AuthProvider
-        if (!authProvider.isInitialized) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        
-        // Inicializa o form provider quando o auth estiver pronto
-        _initializeFormProvider(authProvider);
-        
-        if (formProvider == null) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        
-        return MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: formProvider!),
-          ],
-          child: Consumer<VehicleFormProvider>(builder: (context, formProviderConsumer, _) {
-            // Use formProvider! já verificado antes
-            final provider = formProvider!;
+    final authState = ref.watch(authNotifierProvider);
+    final userId = ref.watch(userIdProvider);
+
+    // Aguarda a inicialização do AuthState
+    if (authState.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // Inicializa o form provider quando o auth estiver pronto
+    _initializeFormProvider(userId);
+
+    if (formProvider == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return provider.MultiProvider(
+      providers: [
+        provider.ChangeNotifierProvider.value(value: formProvider!),
+      ],
+      child: provider.Consumer<VehicleFormProvider>(builder: (context, formProviderConsumer, _) {
+        // Use formProvider! já verificado antes
+        final provider = formProvider!;
         return FormDialog(
           title: 'Veículos',
           subtitle: 'Gerencie seus veículos cadastrados',
@@ -243,8 +244,6 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
           ),
         );
       }),
-        );
-      },
     );
   }
 
@@ -889,7 +888,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> with FormErrorHandlerMi
 
     try {
       if (!mounted) return;
-      final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
+      final vehiclesProvider = provider.Provider.of<VehiclesProvider>(context, listen: false);
       
       // Criar entidade do veículo usando o FormProvider
       final vehicleEntity = formProvider!.createVehicleEntity();

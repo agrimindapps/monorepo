@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Enhanced loading states specifically designed for favorites
 /// Provides contextual skeleton loaders and smooth transitions

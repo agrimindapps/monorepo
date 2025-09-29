@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/design/design_tokens.dart';
 
@@ -99,7 +99,7 @@ class DefensivosCategoryButton extends StatelessWidget {
                               ),
                               child: Text(
                                 count,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,

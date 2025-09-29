@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:core/core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 
 /// Model específico do app-plantis para dispositivos
 /// Extende a entidade do core com funcionalidades específicas do app
@@ -104,14 +105,23 @@ class DeviceModel extends DeviceEntity {
   }
 
   /// Cria model com device info atual do sistema usando device_info_plus diretamente
-  static Future<DeviceModel> fromCurrentDevice() async {
+  /// REGRA: Apenas Android e iOS são permitidos. Web e outras plataformas são bloqueadas.
+  /// Retorna null se a plataforma não for suportada.
+  static Future<DeviceModel?> fromCurrentDevice() async {
     final deviceInfoPlugin = DeviceInfoPlugin();
     final packageInfo = await PackageInfo.fromPlatform();
     final now = DateTime.now();
 
-    // Obtém informações específicas do dispositivo baseado na plataforma
+    // ✅ ANDROID - Plataforma permitida
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfoPlugin.androidInfo;
+
+      if (kDebugMode) {
+        debugPrint(
+          '📱 DeviceModel: Criando device Android - ${androidInfo.brand} ${androidInfo.model}',
+        );
+      }
+
       return DeviceModel(
         id: '', // Será definido pelo servidor
         uuid: androidInfo.id, // Android ID único
@@ -127,8 +137,16 @@ class DeviceModel extends DeviceEntity {
         lastActiveAt: now,
         isActive: true,
       );
-    } else if (Platform.isIOS) {
+    }
+
+    // ✅ iOS - Plataforma permitida
+    else if (Platform.isIOS) {
       final iosInfo = await deviceInfoPlugin.iosInfo;
+
+      if (kDebugMode) {
+        debugPrint('📱 DeviceModel: Criando device iOS - ${iosInfo.name}');
+      }
+
       return DeviceModel(
         id: '', // Será definido pelo servidor
         uuid: iosInfo.identifierForVendor ?? 'unknown', // iOS identifier
@@ -144,23 +162,22 @@ class DeviceModel extends DeviceEntity {
         lastActiveAt: now,
         isActive: true,
       );
-    } else {
-      // Fallback para outras plataformas
-      return DeviceModel(
-        id: '',
-        uuid: 'unknown-platform',
-        name: 'Unknown Device',
-        model: 'Unknown',
-        platform: Platform.operatingSystem,
-        systemVersion: Platform.operatingSystemVersion,
-        appVersion: packageInfo.version,
-        buildNumber: packageInfo.buildNumber,
-        isPhysicalDevice: true,
-        manufacturer: 'Unknown',
-        firstLoginAt: now,
-        lastActiveAt: now,
-        isActive: true,
-      );
+    }
+
+    // ❌ WEB e outras plataformas - BLOQUEADAS
+    else {
+      if (kDebugMode) {
+        debugPrint(
+          '🚫 DeviceModel: Plataforma ${Platform.operatingSystem} não permitida para registro',
+        );
+        debugPrint(
+          '   Apenas Android e iOS são suportados para gerenciamento de dispositivos',
+        );
+      }
+
+      // Retorna null para indicar que a plataforma não é suportada
+      // O código que chama este método deve tratar o null adequadamente
+      return null;
     }
   }
 

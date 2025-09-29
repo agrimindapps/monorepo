@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../widgets/call_to_action.dart';
 import '../widgets/faq_section.dart';
 import '../widgets/features_carousel.dart';
@@ -13,14 +13,14 @@ import '../widgets/navigation_bar.dart';
 import '../widgets/statistics_section.dart';
 import '../widgets/testimonials_section.dart';
 
-class PromoPage extends StatefulWidget {
+class PromoPage extends ConsumerStatefulWidget {
   const PromoPage({super.key});
 
   @override
-  State<PromoPage> createState() => _PromoPageState();
+  ConsumerState<PromoPage> createState() => _PromoPageState();
 }
 
-class _PromoPageState extends State<PromoPage> {
+class _PromoPageState extends ConsumerState<PromoPage> {
   final ScrollController _scrollController = ScrollController();
   
   // Keys para navegação entre seções
@@ -46,13 +46,13 @@ class _PromoPageState extends State<PromoPage> {
   void _checkAuthenticationAndRedirect() {
     // Verificar se o widget ainda está montado antes de acessar o context
     if (!mounted) return;
-    
-    final authProvider = context.read<AuthProvider>();
-    
+
+    final authState = ref.read(authNotifierProvider);
+
     // Se o usuário estiver autenticado (incluindo anônimo), redirecionar para a página interna
-    if (authProvider.isAuthenticated) {
+    if (authState.isAuthenticated) {
       debugPrint('🔐 Usuário autenticado na página promocional, redirecionando para página interna');
-      
+
       // Verificar novamente se ainda está montado antes da navegação
       if (mounted) {
         context.go('/');

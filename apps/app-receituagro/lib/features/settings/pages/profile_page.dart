@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/services/user_action_service.dart';
@@ -167,7 +166,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Row(
             children: [
               // Avatar com design melhorado
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
@@ -381,7 +380,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-        Container(
+        DecoratedBox(
           decoration: _getCardDecoration(context),
           child: ListTile(
             leading: Container(
@@ -486,7 +485,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-        Container(
+        DecoratedBox(
           decoration: _getCardDecoration(context),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -522,7 +521,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-        Container(
+        DecoratedBox(
           decoration: _getCardDecoration(context),
           child: Column(
             children: [
@@ -610,7 +609,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-        Container(
+        DecoratedBox(
           decoration: _getCardDecoration(context),
           child: Column(
             children: [
@@ -723,7 +722,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.green.shade50,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(Icons.data_object, color: Colors.green, size: 20),
+              child: const Icon(Icons.data_object, color: Colors.green, size: 20),
             ),
             const SizedBox(width: 12),
             const Text('Exportar como JSON'),
@@ -782,7 +781,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.green.shade50,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(Icons.table_chart, color: Colors.green, size: 20),
+              child: const Icon(Icons.table_chart, color: Colors.green, size: 20),
             ),
             const SizedBox(width: 12),
             const Text('Exportar como CSV'),

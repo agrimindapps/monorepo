@@ -9,6 +9,7 @@
 /// - **Localized Messages**: Portuguese language support
 /// - **Smart Cutoffs**: Different formats for different time ranges
 /// - **Consistent Behavior**: Same formatting logic throughout the app
+library;
 
 class ComentariosDateFormatter {
   /// Formats a date as relative time (e.g., "2d atrás", "1h atrás")

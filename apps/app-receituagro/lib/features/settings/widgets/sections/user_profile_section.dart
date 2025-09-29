@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/feature_flags_provider.dart';

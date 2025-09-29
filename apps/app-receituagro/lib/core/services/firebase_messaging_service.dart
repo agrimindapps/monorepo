@@ -196,7 +196,7 @@ class ReceitaAgroFirebaseMessagingService {
       icon: '@mipmap/ic_launcher',
       color: const Color(0xFF4CAF50), // Verde ReceitaAgro
       largeIcon: notification.imageUrl != null 
-          ? DrawableResourceAndroidBitmap('@mipmap/ic_launcher')
+          ? const DrawableResourceAndroidBitmap('@mipmap/ic_launcher')
           : null,
     );
 
@@ -226,7 +226,7 @@ class ReceitaAgroFirebaseMessagingService {
 
     switch (notification.type) {
       case NotificationType.premium:
-        _navigationService!.navigateTo('/premium',
+        _navigationService!.navigateTo<void>('/premium',
           pageType: 'premium');
         break;
       case NotificationType.newFeature:

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
-import '../navigation/agricultural_page_types.dart';
 import '../navigation/agricultural_navigation_extension.dart';
+import '../navigation/agricultural_page_types.dart';
 
 /// Unified navigation service for ReceitaAgro that combines core navigation
 /// with agricultural domain-specific functionality
@@ -50,7 +50,7 @@ class ReceitaAgroNavigationService {
     String? categoria,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/defensivos',
       pageType: AgriculturalPageType.listaDefensivos.value,
       arguments: {
@@ -64,7 +64,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToDefensivosAgrupados({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/defensivos-agrupados',
       pageType: AgriculturalPageType.defensivosAgrupados.value,
       arguments: extraData,
@@ -76,7 +76,7 @@ class ReceitaAgroNavigationService {
     required String categoria,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/defensivos-categoria',
       pageType: AgriculturalPageType.defensivosCategoria.value,
       arguments: {
@@ -104,8 +104,8 @@ class ReceitaAgroNavigationService {
       ...?extraData,
     };
     debugPrint('Arguments: $arguments');
-    
-    await _coreService.navigateTo(
+
+    await _coreService.navigateTo<void>(
       '/detalhe-defensivo',
       pageType: AgriculturalPageType.detalheDefensivo.value,
       arguments: arguments,
@@ -117,7 +117,7 @@ class ReceitaAgroNavigationService {
     String? initialQuery,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/defensivos-search',
       pageType: AgriculturalPageType.defensivosSearch.value,
       arguments: {
@@ -132,7 +132,7 @@ class ReceitaAgroNavigationService {
     Map<String, dynamic>? filters,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/defensivos-advanced-search',
       pageType: AgriculturalPageType.defensivosAdvancedSearch.value,
       arguments: {
@@ -151,7 +151,7 @@ class ReceitaAgroNavigationService {
     String? categoria,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/pragas',
       pageType: AgriculturalPageType.listaPragas.value,
       arguments: {
@@ -165,7 +165,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToPragasAgrupadas({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/pragas-agrupadas',
       pageType: AgriculturalPageType.pragasAgrupadas.value,
       arguments: extraData,
@@ -177,7 +177,7 @@ class ReceitaAgroNavigationService {
     required String categoria,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/pragas-categoria',
       pageType: AgriculturalPageType.pragasCategoria.value,
       arguments: {
@@ -194,7 +194,7 @@ class ReceitaAgroNavigationService {
     String? pragaScientificName,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/praga-detail',
       pageType: AgriculturalPageType.detalhePraga.value,
       arguments: {
@@ -211,7 +211,7 @@ class ReceitaAgroNavigationService {
     String? initialQuery,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/pragas-search',
       pageType: AgriculturalPageType.pragasSearch.value,
       arguments: {
@@ -226,7 +226,7 @@ class ReceitaAgroNavigationService {
     Map<String, dynamic>? filters,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/pragas-advanced-search',
       pageType: AgriculturalPageType.pragasAdvancedSearch.value,
       arguments: {
@@ -244,7 +244,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToListaCulturas({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/culturas',
       pageType: AgriculturalPageType.listaCulturas.value,
       arguments: extraData,
@@ -255,7 +255,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToCulturasAgrupadas({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/culturas-agrupadas',
       pageType: AgriculturalPageType.culturasAgrupadas.value,
       arguments: extraData,
@@ -268,7 +268,7 @@ class ReceitaAgroNavigationService {
     String? culturaId,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/cultura-detail',
       pageType: AgriculturalPageType.detalheCultura.value,
       arguments: {
@@ -284,7 +284,7 @@ class ReceitaAgroNavigationService {
     String? initialQuery,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/culturas-search',
       pageType: AgriculturalPageType.culturasSearch.value,
       arguments: {
@@ -302,7 +302,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToListaDiagnosticos({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/diagnosticos',
       pageType: AgriculturalPageType.listaDiagnosticos.value,
       arguments: extraData,
@@ -314,7 +314,7 @@ class ReceitaAgroNavigationService {
     required String diagnosticoId,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/diagnostico-detail',
       pageType: AgriculturalPageType.detalheDiagnostico.value,
       arguments: {
@@ -328,7 +328,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToDiagnosticoWizard({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/diagnostico-wizard',
       pageType: AgriculturalPageType.diagnosticoWizard.value,
       arguments: extraData,
@@ -343,7 +343,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToFavoritos({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/favoritos',
       pageType: AgriculturalPageType.favoritos.value,
       arguments: extraData,
@@ -354,7 +354,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToFavoritosDefensivos({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/favoritos-defensivos',
       pageType: AgriculturalPageType.favoritosDefensivos.value,
       arguments: extraData,
@@ -365,7 +365,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToFavoritosPragas({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/favoritos-pragas',
       pageType: AgriculturalPageType.favoritosPragas.value,
       arguments: extraData,
@@ -376,7 +376,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToFavoritosCulturas({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/favoritos-culturas',
       pageType: AgriculturalPageType.favoritosCulturas.value,
       arguments: extraData,
@@ -391,7 +391,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToSettings({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/settings',
       pageType: AgriculturalPageType.settings.value,
       arguments: extraData,
@@ -402,7 +402,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToProfile({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/profile',
       pageType: AgriculturalPageType.profile.value,
       arguments: extraData,
@@ -413,7 +413,7 @@ class ReceitaAgroNavigationService {
   Future<void> navigateToPremium({
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateToPremium();
+    await _coreService.navigateToPremium<void>();
   }
 
   // ==========================================================================
@@ -425,7 +425,7 @@ class ReceitaAgroNavigationService {
     String? initialQuery,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/search',
       pageType: AgriculturalPageType.globalSearch.value,
       arguments: {
@@ -440,7 +440,7 @@ class ReceitaAgroNavigationService {
     Map<String, dynamic>? currentFilters,
     Map<String, dynamic>? extraData,
   }) async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/advanced-filters',
       pageType: AgriculturalPageType.advancedFilters.value,
       arguments: {
@@ -572,7 +572,7 @@ class ReceitaAgroNavigationService {
 
   /// Show loading state
   Future<void> showLoading() async {
-    await _coreService.navigateTo(
+    await _coreService.navigateTo<void>(
       '/loading',
       pageType: AgriculturalPageType.loading.value,
     );
@@ -581,7 +581,7 @@ class ReceitaAgroNavigationService {
   /// Hide loading state
   Future<void> hideLoading() async {
     if (canGoBack()) {
-      await goBack();
+      await goBack<void>();
     }
   }
 }

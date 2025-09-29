@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivos_agrupados_usecase.dart';
-import '../../domain/usecases/get_defensivos_completos_usecase.dart';
 import '../../domain/usecases/get_defensivos_com_filtros_usecase.dart';
+import '../../domain/usecases/get_defensivos_completos_usecase.dart';
 
 /// Provider unificado para gerenciar defensivos
 /// Consolida funcionalidades de defensivos individuais e agrupados
@@ -24,7 +24,7 @@ class DefensivosUnificadoProvider extends ChangeNotifier {
   // Estados
   List<DefensivoEntity> _defensivos = [];
   List<DefensivoEntity> _defensivosFiltrados = [];
-  List<DefensivoEntity> _defensivosSelecionados = [];
+  final List<DefensivoEntity> _defensivosSelecionados = [];
   bool _isLoading = false;
   String? _errorMessage;
   

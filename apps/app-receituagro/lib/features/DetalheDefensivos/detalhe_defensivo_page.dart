@@ -1,22 +1,22 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:core/core.dart';
 
 import '../../core/di/injection_container.dart';
-import '../../core/services/receituagro_navigation_service.dart';
-import '../../core/repositories/diagnostico_hive_repository.dart';
-import '../../core/services/diagnosticos_data_loader.dart';
-import '../../core/services/access_history_service.dart';
-import '../../core/models/fitossanitario_hive.dart';
 import '../../core/models/diagnostico_hive.dart';
+import '../../core/models/fitossanitario_hive.dart';
+import '../../core/repositories/diagnostico_hive_repository.dart';
+import '../../core/services/access_history_service.dart';
+import '../../core/services/diagnosticos_data_loader.dart';
+import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
-import 'presentation/providers/diagnosticos_provider.dart';
 import 'presentation/providers/detalhe_defensivo_provider.dart';
+import 'presentation/providers/diagnosticos_provider.dart';
 import 'presentation/widgets/comentarios_tab_widget.dart';
 import 'presentation/widgets/defensivo_info_cards_widget.dart';
 import 'presentation/widgets/diagnosticos_tab_widget.dart';

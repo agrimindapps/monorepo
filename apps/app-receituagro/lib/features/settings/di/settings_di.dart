@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../data/repositories/profile_repository_impl.dart';

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 
 import '../repositories/i_favoritos_repository.dart';
 

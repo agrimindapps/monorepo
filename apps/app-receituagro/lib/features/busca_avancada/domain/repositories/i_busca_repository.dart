@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 import '../entities/busca_entity.dart';
 
 /// Interface para repositório de busca avançada

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as flutter_provider;
-import 'package:core/core.dart';
 
 import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';

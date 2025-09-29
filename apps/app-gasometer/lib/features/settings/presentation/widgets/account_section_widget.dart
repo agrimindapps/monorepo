@@ -1,33 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/components/user_avatar_widget.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/domain/entities/user_entity.dart' as gasometer_entities;
 
-class AccountSectionWidget extends StatelessWidget {
+class AccountSectionWidget extends ConsumerWidget {
   const AccountSectionWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        return Column(
-          children: [
-            if (!authProvider.isInitialized)
-              _buildAccountLoadingCard(context)
-            else if (authProvider.isAuthenticated)
-              _buildAuthenticatedAccountCard(context, authProvider)
-            else
-              _buildUnauthenticatedAccountCard(context, authProvider),
-            const SizedBox(height: 16),
-            _buildPremiumCard(context, authProvider),
-          ],
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = ref.watch(currentUserProvider);
+    final isAuthenticated = ref.watch(isAuthenticatedProvider);
+    final isAnonymous = ref.watch(isAnonymousProvider);
+    final isPremium = ref.watch(isPremiumProvider);
+
+    return Column(
+      children: [
+        if (authState.isLoading)
+          _buildAccountLoadingCard(context)
+        else if (isAuthenticated)
+          _buildAuthenticatedAccountCard(context, ref, user, isAnonymous, isPremium)
+        else
+          _buildUnauthenticatedAccountCard(context, ref, authState),
+        const SizedBox(height: 16),
+        _buildPremiumCard(context, isPremium),
+      ],
     );
   }
 
@@ -59,10 +62,11 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthenticatedAccountCard(BuildContext context, AuthProvider authProvider) {
-    final user = authProvider.currentUser;
-    final isAnonymous = authProvider.isAnonymous;
-    
+  Widget _buildAuthenticatedAccountCard(BuildContext context, WidgetRef ref, gasometer_entities.UserEntity? user, bool isAnonymous, bool isPremium) {
+    // Extract display values safely
+    final displayName = isAnonymous ? 'Usuário Anônimo' : (user?.displayName ?? 'Usuário');
+    final displayEmail = isAnonymous ? 'Dados salvos localmente' : (user?.email ?? 'Email não disponível');
+
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
@@ -93,9 +97,7 @@ class AccountSectionWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isAnonymous 
-                            ? 'Usuário Anônimo'
-                            : user?.displayName ?? 'Usuário',
+                        displayName,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -104,15 +106,13 @@ class AccountSectionWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        isAnonymous 
-                            ? 'Dados salvos localmente'
-                            : user?.email ?? 'Email não disponível',
+                        displayEmail,
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
-                      if (authProvider.isPremium) ...[  
+                      if (isPremium) ...[  
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -146,7 +146,7 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildUnauthenticatedAccountCard(BuildContext context, AuthProvider authProvider) {
+  Widget _buildUnauthenticatedAccountCard(BuildContext context, WidgetRef ref, AuthState authState) {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
@@ -189,9 +189,9 @@ class AccountSectionWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // Show error message if any
-          if (authProvider.errorMessage != null) ...[
+          if (authState.errorMessage != null) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -213,7 +213,7 @@ class AccountSectionWidget extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      authProvider.errorMessage!,
+                      authState.errorMessage!,
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.error,
@@ -221,7 +221,7 @@ class AccountSectionWidget extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => authProvider.clearError(),
+                    onPressed: () => ref.read(authNotifierProvider.notifier).clearError(),
                     icon: const Icon(Icons.close, size: 16),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -235,7 +235,7 @@ class AccountSectionWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: authProvider.isLoading ? null : () {
+                  onPressed: authState.isLoading ? null : () {
                     HapticFeedback.lightImpact();
                     context.go('/login');
                   },
@@ -249,11 +249,11 @@ class AccountSectionWidget extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: authProvider.isLoading ? null : () {
+                  onPressed: authState.isLoading ? null : () {
                     HapticFeedback.lightImpact();
-                    _handleAnonymousLogin(context, authProvider);
+                    _handleAnonymousLogin(context, ref);
                   },
-                  icon: authProvider.isLoading
+                  icon: authState.isLoading
                       ? const SizedBox(
                           width: 16,
                           height: 16,
@@ -264,7 +264,7 @@ class AccountSectionWidget extends StatelessWidget {
                         )
                       : const Icon(Icons.visibility_off, size: 16),
                   label: Text(
-                    authProvider.isLoading ? 'Entrando...' : 'Modo Anônimo',
+                    authState.isLoading ? 'Entrando...' : 'Modo Anônimo',
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -281,8 +281,8 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPremiumCard(BuildContext context, AuthProvider authProvider) {
-    if (authProvider.isPremium) {
+  Widget _buildPremiumCard(BuildContext context, bool isPremium) {
+    if (isPremium) {
       return Card(
         elevation: 8,
         shadowColor: GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.3),
@@ -599,10 +599,11 @@ class AccountSectionWidget extends StatelessWidget {
 
 
   // Auth handling methods
-  Future<void> _handleAnonymousLogin(BuildContext context, AuthProvider authProvider) async {
-    await authProvider.signInAnonymously();
-    if (context.mounted && authProvider.errorMessage != null) {
-      _showSnackBar(context, authProvider.errorMessage!);
+  Future<void> _handleAnonymousLogin(BuildContext context, WidgetRef ref) async {
+    await ref.read(authNotifierProvider.notifier).signInAnonymously();
+    final authState = ref.read(authNotifierProvider);
+    if (context.mounted && authState.errorMessage != null) {
+      _showSnackBar(context, authState.errorMessage!);
     } else if (context.mounted) {
       _showSnackBar(context, 'Login anônimo realizado com sucesso');
     }

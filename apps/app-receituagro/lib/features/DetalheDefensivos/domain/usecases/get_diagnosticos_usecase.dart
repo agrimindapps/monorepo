@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 import '../entities/diagnostico_entity.dart';
 import '../repositories/i_defensivo_details_repository.dart';
 

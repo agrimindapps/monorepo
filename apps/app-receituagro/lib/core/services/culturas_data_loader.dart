@@ -25,7 +25,7 @@ class CulturasDataLoader {
       print('🌱 [CULTURAS] Iniciando carregamento de culturas...');
 
       // 1. Carrega JSON do asset - use path without 'assets/' prefix for web compatibility
-      final String assetPath = kIsWeb 
+      const String assetPath = kIsWeb 
           ? 'database/json/tbculturas/TBCULTURAS0.json'
           : 'assets/database/json/tbculturas/TBCULTURAS0.json';
       

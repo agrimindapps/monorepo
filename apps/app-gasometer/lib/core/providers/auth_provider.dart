@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Failure, AuthenticationFailure, NetworkFailure, ServerFailure, ValidationFailure;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../di/injection_container_modular.dart';
 import '../../features/auth/domain/entities/user_entity.dart' as gasometer_entity;
 import '../../features/auth/domain/usecases/delete_account.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';

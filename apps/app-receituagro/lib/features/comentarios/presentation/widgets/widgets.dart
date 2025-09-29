@@ -2,6 +2,7 @@
 /// 
 /// Centralized exports for all comentarios presentation widgets.
 /// Provides clean imports and better organization.
+library;
 
 export 'comentario_item_widget.dart';
 export 'comentarios_empty_state_widget.dart';

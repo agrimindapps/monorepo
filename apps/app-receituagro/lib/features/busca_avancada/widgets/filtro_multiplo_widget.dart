@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Widget especializado para filtros múltiplos em cascata
 /// Permite selecionar cultura, praga e defensivo simultaneamente

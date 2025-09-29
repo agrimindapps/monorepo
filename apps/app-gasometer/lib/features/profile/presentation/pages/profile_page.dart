@@ -5,29 +5,29 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/services/gasometer_data_cleaner_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 // import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
 import '../../domain/services/profile_image_service.dart';
 import '../widgets/devices_section_widget.dart';
 import '../widgets/profile_image_picker_widget.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   final _scrollController = ScrollController();
 
   @override
@@ -44,12 +44,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        final user = authProvider.currentUser;
-        final isAnonymous = authProvider.isAnonymous;
-        
-        return Scaffold(
+    final user = ref.watch(currentUserProvider);
+    final isAnonymous = ref.watch(isAnonymousProvider);
+
+    return Scaffold(
           body: SafeArea(
             child: Column(
               children: [
@@ -67,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             padding: EdgeInsets.all(
                               GasometerDesignTokens.responsiveSpacing(context),
                             ),
-                            child: _buildContent(context, authProvider, user, isAnonymous),
+                            child: _buildContent(context, user, isAnonymous),
                           ),
                         ),
                       ),
@@ -78,8 +76,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         );
-      },
-    );
   }
 
   Widget _buildHeader(BuildContext context, bool isAnonymous) {
@@ -157,11 +153,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildContent(BuildContext context, AuthProvider authProvider, dynamic user, bool isAnonymous) {
+  Widget _buildContent(BuildContext context, dynamic user, bool isAnonymous) {
     return Column(
       children: [
         // Seção principal do perfil
-        _buildProfileSection(context, authProvider, user, isAnonymous),
+        _buildProfileSection(context, user, isAnonymous),
         
         // Seção de dispositivos conectados (apenas para usuários registrados)
         if (!isAnonymous) ...[
@@ -172,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
         // Informações da conta (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          _buildAccountInfoSection(context, user, authProvider),
+          _buildAccountInfoSection(context, user),
         ],
         
         // Sincronização (apenas para usuários registrados)
@@ -194,17 +190,19 @@ class _ProfilePageState extends State<ProfilePage> {
         // Limpeza de Dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          _buildDataManagementSection(context, authProvider),
+          _buildDataManagementSection(context),
         ],
 
         // Ações da conta
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildActionsSection(context, authProvider, isAnonymous),
+        _buildActionsSection(context, isAnonymous),
       ],
     );
   }
 
-  Widget _buildProfileSection(BuildContext context, AuthProvider authProvider, dynamic user, bool isAnonymous) {
+  Widget _buildProfileSection(BuildContext context, dynamic user, bool isAnonymous) {
+    final isPremium = ref.watch(isPremiumProvider);
+
     return _buildSection(
       context,
       title: 'Informações Pessoais',
@@ -221,7 +219,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
             children: [
               // Avatar section with edit functionality
-              _buildAvatarSection(context, authProvider, user, isAnonymous),
+              _buildAvatarSection(context, user, isAnonymous),
               const SizedBox(height: 20),
               
               if (isAnonymous) ...[
@@ -294,9 +292,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       icon: Icons.email,
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Premium status
-                    if (authProvider.isPremium) ...[
+                    if (isPremium) ...[
                       const SizedBox(height: 16),
                       Container(
                         width: double.infinity,
@@ -348,7 +346,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAccountInfoSection(BuildContext context, dynamic user, AuthProvider authProvider) {
+  Widget _buildAccountInfoSection(BuildContext context, dynamic user) {
+    final isPremium = ref.watch(isPremiumProvider);
+
     return _buildSection(
       context,
       title: 'Informações da Conta',
@@ -365,7 +365,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow('Tipo', authProvider.isPremium ? 'Premium' : 'Gratuita'),
+                _buildInfoRow('Tipo', isPremium ? 'Premium' : 'Gratuita'),
                 if (user?.createdAt != null)
                   _buildInfoRow('Criada em', _formatDate(user!.createdAt as DateTime)),
                 if (user?.lastSignInAt != null)
@@ -546,7 +546,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildDataManagementSection(BuildContext context, AuthProvider authProvider) {
+  Widget _buildDataManagementSection(BuildContext context) {
     return _buildSection(
       context,
       title: 'Gerenciamento de Dados',
@@ -567,7 +567,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 subtitle: 'Limpar veículos, abastecimentos e manutenções',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  _showClearDataDialog(context, authProvider);
+                  _showClearDataDialog(context);
                 },
                 isFirst: true,
                 isLast: true,
@@ -580,7 +580,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildActionsSection(BuildContext context, AuthProvider authProvider, bool isAnonymous) {
+  Widget _buildActionsSection(BuildContext context, bool isAnonymous) {
     return _buildSection(
       context,
       title: 'Ações da Conta',
@@ -599,7 +599,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 icon: Icons.logout,
                 title: 'Sair da Conta',
                 subtitle: isAnonymous ? 'Sair do modo anônimo' : 'Fazer logout',
-                onTap: () => _handleLogout(context, authProvider),
+                onTap: () => _handleLogout(context),
                 isFirst: true,
               ),
               if (!isAnonymous)
@@ -841,10 +841,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Constrói a seção do avatar com funcionalidade de edição
-  Widget _buildAvatarSection(BuildContext context, AuthProvider authProvider, dynamic user, bool isAnonymous) {
+  Widget _buildAvatarSection(BuildContext context, dynamic user, bool isAnonymous) {
     final photoUrl = user?.photoUrl as String?;
     final hasAvatar = photoUrl != null && photoUrl.isNotEmpty;
-    
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -855,7 +855,7 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isAnonymous 
+              color: isAnonymous
                   ? Colors.orange.withValues(alpha: 0.3)
                   : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               width: 3,
@@ -874,13 +874,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 : _buildDefaultAvatar(context, user, isAnonymous),
           ),
         ),
-        
+
         // Botão de editar (apenas para usuários registrados)
         if (!isAnonymous)
           Positioned(
             bottom: 0,
             right: 0,
-            child: _buildEditButton(context, authProvider, hasAvatar),
+            child: _buildEditButton(context, hasAvatar),
           ),
       ],
     );
@@ -968,7 +968,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Constrói botão de editar avatar
-  Widget _buildEditButton(BuildContext context, AuthProvider authProvider, bool hasAvatar) {
+  Widget _buildEditButton(BuildContext context, bool hasAvatar) {
     return Container(
       width: 36,
       height: 36,
@@ -991,7 +991,7 @@ class _ProfilePageState extends State<ProfilePage> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: () => _handleEditAvatar(context, authProvider, hasAvatar),
+          onTap: () => _handleEditAvatar(context, hasAvatar),
           child: const Icon(
             Icons.edit,
             color: Colors.white,
@@ -1003,7 +1003,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Manipula edição do avatar
-  Future<void> _handleEditAvatar(BuildContext context, AuthProvider authProvider, bool hasAvatar) async {
+  Future<void> _handleEditAvatar(BuildContext context, bool hasAvatar) async {
     if (kDebugMode) {
       debugPrint('📷 ProfilePage: Opening avatar editor');
     }
@@ -1013,13 +1013,13 @@ class _ProfilePageState extends State<ProfilePage> {
     await ProfileImagePickerWidget.show(
       context: context,
       hasCurrentImage: hasAvatar,
-      onImageSelected: (File imageFile) => _processNewImage(context, authProvider, imageFile),
-      onRemoveImage: hasAvatar ? () => _removeCurrentImage(context, authProvider) : null,
+      onImageSelected: (File imageFile) => _processNewImage(context, imageFile),
+      onRemoveImage: hasAvatar ? () => _removeCurrentImage(context) : null,
     );
   }
 
   /// Processa nova imagem selecionada
-  Future<void> _processNewImage(BuildContext context, AuthProvider authProvider, File imageFile) async {
+  Future<void> _processNewImage(BuildContext context, File imageFile) async {
     try {
       if (kDebugMode) {
         debugPrint('📷 ProfilePage: Processing new image: ${imageFile.path}');
@@ -1048,15 +1048,16 @@ class _ProfilePageState extends State<ProfilePage> {
           _showErrorSnackBar(context, failure.message);
         },
         (base64String) async {
-          // Atualizar avatar no AuthProvider
-          final success = await authProvider.updateAvatar(base64String);
-          
+          // Atualizar avatar via AuthNotifier
+          final success = await ref.read(authNotifierProvider.notifier).updateAvatar(base64String);
+
           Navigator.of(context).pop(); // Remove loading dialog
-          
+
           if (success) {
             _showSuccessSnackBar(context, 'Foto do perfil atualizada com sucesso!');
           } else {
-            _showErrorSnackBar(context, authProvider.errorMessage ?? 'Erro ao atualizar foto');
+            final errorMsg = ref.read(authNotifierProvider).errorMessage;
+            _showErrorSnackBar(context, errorMsg ?? 'Erro ao atualizar foto');
           }
         },
       );
@@ -1074,7 +1075,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Remove imagem atual
-  Future<void> _removeCurrentImage(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _removeCurrentImage(BuildContext context) async {
     try {
       if (kDebugMode) {
         debugPrint('🗑️ ProfilePage: Removing current avatar');
@@ -1087,15 +1088,16 @@ class _ProfilePageState extends State<ProfilePage> {
       // Mostrar loading
       _showImageProcessingDialog(context);
 
-      // Remover avatar
-      final success = await authProvider.removeAvatar();
-      
+      // Remover avatar via AuthNotifier
+      final success = await ref.read(authNotifierProvider.notifier).removeAvatar();
+
       Navigator.of(context).pop(); // Remove loading dialog
-      
+
       if (success) {
         _showSuccessSnackBar(context, 'Foto do perfil removida com sucesso!');
       } else {
-        _showErrorSnackBar(context, authProvider.errorMessage ?? 'Erro ao remover foto');
+        final errorMsg = ref.read(authNotifierProvider).errorMessage;
+        _showErrorSnackBar(context, errorMsg ?? 'Erro ao remover foto');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -1278,17 +1280,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Auth handling methods
   /// Mostra dialog de confirmação para limpeza de dados
-  Future<void> _showClearDataDialog(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _showClearDataDialog(BuildContext context) async {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return _DataClearDialog(authProvider: authProvider);
+        return _DataClearDialog();
       },
     );
   }
 
-  Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _handleLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -1384,12 +1386,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (confirmed == true && context.mounted) {
-      await _performLogoutWithProgressDialog(context, authProvider);
+      await _performLogoutWithProgressDialog(context);
     }
   }
 
   /// Executa logout com progress dialog animado
-  Future<void> _performLogoutWithProgressDialog(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _performLogoutWithProgressDialog(BuildContext context) async {
     // Mostrar progress dialog
     unawaited(showDialog<void>(
       context: context,
@@ -1401,8 +1403,8 @@ class _ProfilePageState extends State<ProfilePage> {
       // Simular processamento para melhor UX
       await Future<void>.delayed(const Duration(milliseconds: 800));
 
-      // Executar logout real
-      await authProvider.logout();
+      // Executar logout real via AuthNotifier
+      await ref.read(authNotifierProvider.notifier).logout();
 
       // Fechar progress dialog
       if (context.mounted) {
@@ -1841,16 +1843,15 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
 }
 
 /// Dialog stateful para confirmação de limpeza de dados
-class _DataClearDialog extends StatefulWidget {
+class _DataClearDialog extends ConsumerStatefulWidget {
 
-  const _DataClearDialog({required this.authProvider});
-  final AuthProvider authProvider;
+  const _DataClearDialog();
 
   @override
-  State<_DataClearDialog> createState() => __DataClearDialogState();
+  ConsumerState<_DataClearDialog> createState() => __DataClearDialogState();
 }
 
-class __DataClearDialogState extends State<_DataClearDialog> {
+class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
   bool _isLoading = false;

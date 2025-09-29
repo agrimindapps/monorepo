@@ -283,7 +283,7 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
     // Add tooltip if provided
     if (widget.tooltip != null) {
       button = Tooltip(
-        message: widget.tooltip!,
+        message: widget.tooltip,
         child: button,
       );
     }
@@ -379,7 +379,7 @@ class FavoriteFAB extends StatelessWidget {
         backgroundColor: isFavorite ? Colors.red : theme.primaryColor,
         foregroundColor: Colors.white,
         icon: isLoading
-            ? SizedBox(
+            ? const SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 class FavoritosDesignTokens {
   static const Color defensivosColor = Color(0xFF2E7D32);

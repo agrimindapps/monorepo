@@ -1,6 +1,6 @@
+import 'package:core/core.dart'; // OptimizedImageService moved to core
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart'; // OptimizedImageService moved to core
 
 /// Widget otimizado para exibir imagens de pragas com lazy loading
 /// Substitui o PragaImageWidget com performance melhorada para 1181+ imagens

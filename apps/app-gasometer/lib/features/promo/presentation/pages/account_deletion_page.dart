@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 
-class AccountDeletionPage extends StatefulWidget {
+class AccountDeletionPage extends ConsumerStatefulWidget {
   const AccountDeletionPage({super.key});
 
   @override
-  State<AccountDeletionPage> createState() => _AccountDeletionPageState();
+  ConsumerState<AccountDeletionPage> createState() => _AccountDeletionPageState();
 }
 
-class _AccountDeletionPageState extends State<AccountDeletionPage> {
+class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
   final scrollController = ScrollController();
   bool _isDeleting = false;
   bool _confirmationChecked = false;
@@ -39,11 +39,12 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
   Future<void> _handleAccountDeletion() async {
     if (!_confirmationChecked || _isDeleting) return;
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authState = ref.read(authNotifierProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
     String? currentPassword;
 
     // For authenticated (non-anonymous) users, request current password
-    if (authProvider.isAuthenticated && !authProvider.isAnonymous) {
+    if (authState.isAuthenticated && !authState.isAnonymous) {
       currentPassword = await _showPasswordDialog();
       if (currentPassword == null || currentPassword.isEmpty) {
         return; // User cancelled or didn't provide password
@@ -87,15 +88,16 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
     setState(() => _isDeleting = true);
 
     try {
-      // Delete account through AuthProvider with password
-      await authProvider.deleteAccount(currentPassword: currentPassword);
-      
+      // Delete account through AuthNotifier with password
+      await authNotifier.deleteAccount(currentPassword: currentPassword);
+
       // Check if there was an error
-      if (authProvider.errorMessage != null) {
+      final errorMessage = ref.read(authNotifierProvider).errorMessage;
+      if (errorMessage != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(authProvider.errorMessage!),
+              content: Text(errorMessage),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 5),
             ),

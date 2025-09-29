@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as flutter_provider;
-import 'package:core/core.dart';
+
 import '../../../../core/providers/auth_provider.dart';
 import '../../constants/settings_design_tokens.dart';
 
@@ -99,7 +99,7 @@ class _SyncDataSectionState extends State<SyncDataSection> {
                   color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.sync,
                   color: SettingsDesignTokens.primaryColor,
                   size: 24,
@@ -131,7 +131,7 @@ class _SyncDataSectionState extends State<SyncDataSection> {
               
               // Ícone de ação (sync)
               _isSyncing
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
@@ -141,7 +141,7 @@ class _SyncDataSectionState extends State<SyncDataSection> {
                         ),
                       ),
                     )
-                  : Icon(
+                  : const Icon(
                       Icons.sync,
                       size: 20,
                       color: SettingsDesignTokens.primaryColor,

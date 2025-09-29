@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/services/app_data_manager.dart';

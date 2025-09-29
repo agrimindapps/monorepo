@@ -31,11 +31,28 @@ class ValidateDeviceUseCase {
       final userId = currentUser.id;
 
       // Obtém informações do dispositivo atual ou usa fornecido
-      DeviceModel device;
+      DeviceModel? device;
       if (params?.device != null) {
         device = params!.device!;
       } else {
         device = await DeviceModel.fromCurrentDevice();
+      }
+
+      // CRITICAL: Verificar se a plataforma é suportada
+      if (device == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '🚫 ValidateDevice: Plataforma não suportada para gerenciamento de dispositivos',
+          );
+        }
+        return Right(
+          DeviceValidationResult(
+            isValid: false,
+            status: DeviceValidationStatus.unsupportedPlatform,
+            message:
+                'Gerenciamento de dispositivos disponível apenas para Android e iOS',
+          ),
+        );
       }
 
       if (kDebugMode) {

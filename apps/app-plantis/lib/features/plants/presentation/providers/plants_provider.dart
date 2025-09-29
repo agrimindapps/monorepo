@@ -105,81 +105,238 @@ class PlantsProvider extends ChangeNotifier {
   }
 
   /// Inicializa o stream de dados em tempo real do UnifiedSyncManager
+  /// ENHANCED: Improved validation, logging and error handling
   ///
   /// Este método configura um listener para receber atualizações automáticas
   /// dos dados de plantas quando o real-time sync estiver ativo.
   void _initializeRealtimeDataStream() {
     try {
-      final dataStream = UnifiedSyncManager.instance.streamAll('plantis');
+      if (kDebugMode) {
+        debugPrint(
+          '🔄 PlantsProvider: Iniciando configuração de real-time stream...',
+        );
+      }
 
-      if (dataStream != null) {
-        _realtimeDataSubscription = dataStream.listen(
-          (List<dynamic> plants) {
+      final dataStream = UnifiedSyncManager.instance.streamAll<Plant>('plantis');
+
+      if (dataStream == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ PlantsProvider: Stream de dados não disponível - usando polling',
+          );
+          debugPrint(
+            '   Motivos possíveis: UnifiedSyncManager não inicializado, real-time desabilitado, ou tipo Plant não registrado',
+          );
+        }
+        return;
+      }
+
+      // Configurar listener com validação e logging detalhado
+      _realtimeDataSubscription = dataStream.listen(
+        (List<dynamic> plants) {
+          if (kDebugMode) {
             debugPrint(
               '🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas',
             );
+            debugPrint(
+              '   Auth state: ${_authStateNotifier.isInitialized ? "initialized" : "not initialized"}',
+            );
+          }
 
-            // Converter de entidades sync para entidades de domínio
-            final domainPlants =
-                plants
-                    .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
-                    .where((plant) => plant != null)
-                    .cast<Plant>()
-                    .toList();
-
-            // Atualizar apenas se houve mudanças reais
-            if (_hasDataChanged(domainPlants)) {
-              _plants = _sortPlants(domainPlants);
-              _applyFilters();
+          // Validação: só processar se auth estiver inicializado
+          if (!_authStateNotifier.isInitialized) {
+            if (kDebugMode) {
               debugPrint(
-                '✅ PlantsProvider: UI atualizada com ${_plants.length} plantas',
+                '⏸️ PlantsProvider: Aguardando inicialização de auth, dados não processados',
               );
             }
-          },
-          onError: (dynamic error) {
-            debugPrint(
-              '❌ PlantsProvider: Erro no stream de dados em tempo real: $error',
-            );
-          },
-        );
+            return;
+          }
 
+          // Converter de entidades sync para entidades de domínio
+          final conversionResults = <String, dynamic>{
+            'total': plants.length,
+            'successful': 0,
+            'failed': 0,
+            'null_results': 0,
+          };
+
+          final domainPlants = <Plant>[];
+
+          for (final syncPlant in plants) {
+            final plant = _convertSyncPlantToDomain(syncPlant);
+            if (plant != null) {
+              domainPlants.add(plant);
+              conversionResults['successful'] =
+                  (conversionResults['successful'] as int) + 1;
+            } else {
+              conversionResults['failed'] = (conversionResults['failed'] as int) + 1;
+            }
+          }
+
+          if (kDebugMode) {
+            debugPrint(
+              '📊 PlantsProvider: Conversão completa - ${conversionResults['successful']}/${conversionResults['total']} sucesso',
+            );
+            if (conversionResults['failed'] as int > 0) {
+              debugPrint(
+                '   ⚠️ ${conversionResults['failed']} conversões falharam',
+              );
+            }
+          }
+
+          // Atualizar apenas se houve mudanças reais
+          if (_hasDataChanged(domainPlants)) {
+            final oldCount = _plants.length;
+            _plants = _sortPlants(domainPlants);
+            _applyFilters();
+
+            if (kDebugMode) {
+              debugPrint(
+                '✅ PlantsProvider: UI atualizada - ${oldCount} → ${_plants.length} plantas',
+              );
+            }
+          } else {
+            if (kDebugMode) {
+              debugPrint(
+                '⏭️ PlantsProvider: Sem mudanças detectadas, rebuild evitado',
+              );
+            }
+          }
+        },
+        onError: (dynamic error, StackTrace stackTrace) {
+          if (kDebugMode) {
+            debugPrint(
+              '❌ PlantsProvider: Erro no stream de dados em tempo real',
+            );
+            debugPrint('   Erro: $error');
+            debugPrint('   Stack: $stackTrace');
+          }
+        },
+        onDone: () {
+          if (kDebugMode) {
+            debugPrint(
+              '🔚 PlantsProvider: Stream de dados em tempo real encerrado',
+            );
+          }
+        },
+      );
+
+      if (kDebugMode) {
         debugPrint(
-          '✅ PlantsProvider: Stream de dados em tempo real configurado',
-        );
-      } else {
-        debugPrint(
-          '⚠️ PlantsProvider: Stream de dados não disponível - usando polling',
+          '✅ PlantsProvider: Stream de dados em tempo real configurado com sucesso',
         );
       }
-    } catch (e) {
-      debugPrint('❌ PlantsProvider: Erro ao configurar stream de dados: $e');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint(
+          '❌ PlantsProvider: Erro ao configurar stream de dados',
+        );
+        debugPrint('   Erro: $e');
+        debugPrint('   Stack: $stackTrace');
+      }
     }
   }
 
   /// Converte entidade de sync para entidade de domínio
+  /// ENHANCED: Improved error handling and validation
   Plant? _convertSyncPlantToDomain(dynamic syncPlant) {
     try {
+      // Validação inicial
+      if (syncPlant == null) {
+        if (kDebugMode) {
+          debugPrint('⚠️ PlantsProvider: syncPlant is null, skipping...');
+        }
+        return null;
+      }
+
       // Se já é uma Plant do domínio, retorna diretamente
       if (syncPlant is Plant) {
+        // Validar que tem ID válido
+        if (syncPlant.id.isEmpty) {
+          if (kDebugMode) {
+            debugPrint(
+              '⚠️ PlantsProvider: Plant com ID vazio detectada, descartando',
+            );
+          }
+          return null;
+        }
         return syncPlant;
       }
 
       // Se for uma entidade de sync, converte para domínio
       if (syncPlant is BaseSyncEntity) {
-        // Usar o mapeamento do PlantisSyncConfig
-        return Plant.fromJson(syncPlant.toFirebaseMap());
+        try {
+          final firebaseMap = syncPlant.toFirebaseMap();
+
+          // Validar que o map tem campos essenciais
+          if (!firebaseMap.containsKey('id') ||
+              !firebaseMap.containsKey('name')) {
+            if (kDebugMode) {
+              debugPrint(
+                '⚠️ PlantsProvider: Firebase map inválido (faltam campos essenciais)',
+              );
+            }
+            return null;
+          }
+
+          final plant = Plant.fromJson(firebaseMap);
+
+          if (kDebugMode) {
+            debugPrint(
+              '✅ PlantsProvider: Convertido BaseSyncEntity → Plant: ${plant.name}',
+            );
+          }
+
+          return plant;
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint(
+              '❌ PlantsProvider: Erro ao converter BaseSyncEntity: $e',
+            );
+          }
+          return null;
+        }
       }
 
       // Se for um Map, converte diretamente
       if (syncPlant is Map<String, dynamic>) {
-        return Plant.fromJson(syncPlant);
+        // Validar que tem campos essenciais
+        if (!syncPlant.containsKey('id') ||
+            !syncPlant.containsKey('name')) {
+          if (kDebugMode) {
+            debugPrint(
+              '⚠️ PlantsProvider: Map inválido (faltam campos essenciais)',
+            );
+          }
+          return null;
+        }
+
+        final plant = Plant.fromJson(syncPlant);
+
+        if (kDebugMode) {
+          debugPrint(
+            '✅ PlantsProvider: Convertido Map → Plant: ${plant.name}',
+          );
+        }
+
+        return plant;
       }
 
+      // Tipo desconhecido
+      if (kDebugMode) {
+        debugPrint(
+          '⚠️ PlantsProvider: Tipo de entidade não suportado: ${syncPlant.runtimeType}',
+        );
+      }
       return null;
-    } catch (e) {
-      debugPrint(
-        '❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e',
-      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint(
+          '❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e',
+        );
+        debugPrint('Stack trace: $stackTrace');
+      }
       return null;
     }
   }

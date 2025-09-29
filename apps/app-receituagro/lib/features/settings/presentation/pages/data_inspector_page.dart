@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/inspector/receita_agro_data_inspector_initializer.dart';
 
@@ -423,7 +422,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       child: ExpansionTile(
         title: Text(pref.key),
         subtitle: Text(
-          'Tipo: ${pref.type} • ${pref.value.toString().length > 50 ? pref.value.toString().substring(0, 50) + "..." : pref.value}',
+          'Tipo: ${pref.type} • ${pref.value.toString().length > 50 ? "${pref.value.toString().substring(0, 50)}..." : pref.value}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

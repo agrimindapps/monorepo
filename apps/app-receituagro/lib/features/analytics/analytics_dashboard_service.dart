@@ -171,7 +171,7 @@ class AnalyticsDashboardService {
 
   /// Start periodic cache refresh
   void _startCacheRefresh() {
-    _cacheRefreshTimer = Timer.periodic(Duration(minutes: 15), (_) async {
+    _cacheRefreshTimer = Timer.periodic(const Duration(minutes: 15), (_) async {
       await _refreshAllMetrics();
     });
   }

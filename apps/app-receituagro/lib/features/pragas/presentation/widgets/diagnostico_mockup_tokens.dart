@@ -188,16 +188,16 @@ class DiagnosticoMockupTokens {
   // ========================================
   
   /// Text placeholder para dosagem premium
-  static const String hiddenDosage = "••• mg/L";
+  static const String hiddenDosage = '••• mg/L';
   
   /// Text base para dosagem
-  static const String dosagePrefix = "Dosagem: ";
+  static const String dosagePrefix = 'Dosagem: ';
   
   /// Text placeholder campo de busca
-  static const String searchPlaceholder = "Localizar";
+  static const String searchPlaceholder = 'Localizar';
   
   /// Text padrão do dropdown
-  static const String dropdownDefaultValue = "Todas";
+  static const String dropdownDefaultValue = 'Todas';
   
   // ========================================
   // DURAÇÃO DE ANIMAÇÕES

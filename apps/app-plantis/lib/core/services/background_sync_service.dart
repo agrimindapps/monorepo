@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/presentation/providers/plants_provider.dart';
+import '../../features/settings/domain/repositories/i_settings_repository.dart';
+import '../../features/settings/domain/usecases/sync_settings_usecase.dart';
 import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../auth/auth_state_notifier.dart';
@@ -24,6 +26,8 @@ class BackgroundSyncService extends ChangeNotifier {
   // Real sync dependencies
   GetPlantsUseCase? _getPlantsUseCase;
   GetTasksUseCase? _getTasksUseCase;
+  SyncUserProfileUseCase? _syncUserProfileUseCase;
+  SyncSettingsUseCase? _syncSettingsUseCase;
   AuthStateNotifier? _authStateNotifier;
 
   // Providers for notification
@@ -44,6 +48,29 @@ class BackgroundSyncService extends ChangeNotifier {
       _getPlantsUseCase ??= di.sl<GetPlantsUseCase>();
       _getTasksUseCase ??= di.sl<GetTasksUseCase>();
       _authStateNotifier ??= di.sl<AuthStateNotifier>();
+
+      // Initialize new UseCases for user and settings sync
+      try {
+        final authRepo = di.sl<IAuthRepository>();
+        _syncUserProfileUseCase ??= SyncUserProfileUseCase(authRepo);
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ BackgroundSyncService: SyncUserProfileUseCase não disponível: $e',
+          );
+        }
+      }
+
+      try {
+        final settingsRepo = di.sl<ISettingsRepository>();
+        _syncSettingsUseCase ??= SyncSettingsUseCase(settingsRepo);
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ BackgroundSyncService: SyncSettingsUseCase não disponível: $e',
+          );
+        }
+      }
 
       // Try to get providers if available (they might not be registered yet)
       try {
@@ -166,20 +193,48 @@ class BackgroundSyncService extends ChangeNotifier {
     await _syncSettingsData(userId);
   }
 
-  /// Sync user account data
+  /// Sync user account data - REAL IMPLEMENTATION
   Future<void> _syncUserData(String userId) async {
     _updateSyncMessage('Sincronizando informações da conta...');
     _operationStatus['user_data'] = false;
 
     try {
-      // Simulate user data sync - replace with actual implementation
-      await Future<void>.delayed(const Duration(milliseconds: 800));
-
-      _operationStatus['user_data'] = true;
+      if (_syncUserProfileUseCase == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ BackgroundSync: SyncUserProfileUseCase não disponível',
+          );
+        }
+        // Mark as failed but don't throw
+        _operationStatus['user_data'] = false;
+        return;
+      }
 
       if (kDebugMode) {
-        debugPrint('✅ BackgroundSync: Dados do usuário sincronizados');
+        debugPrint('👤 BackgroundSync: Executando sync REAL do perfil...');
       }
+
+      // REAL sync - call the actual use case
+      final result = await _syncUserProfileUseCase!.call();
+
+      result.fold(
+        (failure) {
+          _operationStatus['user_data'] = false;
+          if (kDebugMode) {
+            debugPrint(
+              '❌ BackgroundSync: Falha ao sincronizar perfil: ${failure.message}',
+            );
+          }
+        },
+        (user) {
+          _operationStatus['user_data'] = true;
+          if (kDebugMode) {
+            debugPrint(
+              '✅ BackgroundSync: Perfil sincronizado - ${user?.email ?? "usuário anônimo"}',
+            );
+          }
+        },
+      );
     } catch (e) {
       _operationStatus['user_data'] = false;
 
@@ -291,20 +346,46 @@ class BackgroundSyncService extends ChangeNotifier {
     }
   }
 
-  /// Sync settings data
+  /// Sync settings data - REAL IMPLEMENTATION
   Future<void> _syncSettingsData(String userId) async {
     _updateSyncMessage('Sincronizando preferências...');
     _operationStatus['settings_data'] = false;
 
     try {
-      // Simulate settings data sync - replace with actual implementation
-      await Future<void>.delayed(const Duration(milliseconds: 600));
-
-      _operationStatus['settings_data'] = true;
+      if (_syncSettingsUseCase == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ BackgroundSync: SyncSettingsUseCase não disponível',
+          );
+        }
+        // Mark as failed but don't throw
+        _operationStatus['settings_data'] = false;
+        return;
+      }
 
       if (kDebugMode) {
-        debugPrint('✅ BackgroundSync: Configurações sincronizadas');
+        debugPrint('⚙️ BackgroundSync: Executando sync REAL das configurações...');
       }
+
+      // REAL sync - call the actual use case
+      final result = await _syncSettingsUseCase!.call();
+
+      result.fold(
+        (failure) {
+          _operationStatus['settings_data'] = false;
+          if (kDebugMode) {
+            debugPrint(
+              '❌ BackgroundSync: Falha ao sincronizar configurações: ${failure.message}',
+            );
+          }
+        },
+        (_) {
+          _operationStatus['settings_data'] = true;
+          if (kDebugMode) {
+            debugPrint('✅ BackgroundSync: Configurações sincronizadas');
+          }
+        },
+      );
     } catch (e) {
       _operationStatus['settings_data'] = false;
 
@@ -440,6 +521,7 @@ class BackgroundSyncService extends ChangeNotifier {
   }
 
   /// Notifies providers that sync is complete so they can refresh their data
+  /// OPTIMIZED: Uses Future.microtask for immediate notification in next event loop
   void _notifyProvidersAfterSync() {
     if (kDebugMode) {
       debugPrint(
@@ -455,8 +537,9 @@ class BackgroundSyncService extends ChangeNotifier {
         );
       }
 
-      // Execute refresh in next frame to avoid sync issues
-      Future.delayed(const Duration(milliseconds: 100), () {
+      // OPTIMIZED: Use microtask for immediate execution in next event loop
+      // This is faster than Future.delayed and still avoids sync issues
+      Future.microtask(() {
         try {
           _plantsProvider?.refreshPlants();
           if (kDebugMode) {
@@ -480,8 +563,8 @@ class BackgroundSyncService extends ChangeNotifier {
         );
       }
 
-      // Execute refresh in next frame to avoid sync issues
-      Future.delayed(const Duration(milliseconds: 150), () {
+      // OPTIMIZED: Use microtask for immediate execution in next event loop
+      Future.microtask(() {
         try {
           _tasksProvider?.refresh();
           if (kDebugMode) {

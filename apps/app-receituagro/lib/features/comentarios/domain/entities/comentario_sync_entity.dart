@@ -11,32 +11,22 @@ class ComentarioSyncEntity extends BaseSyncEntity {
   final bool status;
 
   const ComentarioSyncEntity({
-    required String id,
+    required super.id,
     required this.idReg,
     required this.titulo,
     required this.conteudo,
     required this.ferramenta,
     required this.pkIdentificador,
     required this.status,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastSyncAt: lastSyncAt,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+  });
 
   @override
   Map<String, dynamic> toFirebaseMap() {

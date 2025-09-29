@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 
 import '../data/datasources/device_local_datasource.dart';
 import '../data/datasources/device_remote_datasource.dart';

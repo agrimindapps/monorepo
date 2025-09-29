@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart'; // PreferencesService moved to core
+import 'package:flutter/foundation.dart';
 
 /// Provider para gerenciar estado das preferências de usuário
 /// Integra com PreferencesService para resolver TODOs do settings_page.dart

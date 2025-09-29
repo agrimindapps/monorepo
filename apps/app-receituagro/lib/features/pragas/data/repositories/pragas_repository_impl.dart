@@ -33,7 +33,7 @@ class PragasRepositoryImpl implements IPragasRepository {
   Future<Either<Failure, PragaEntity?>> getById(String id) async {
     try {
       if (id.isEmpty) {
-        return Left(CacheFailure('ID não pode ser vazio'));
+        return const Left(CacheFailure('ID não pode ser vazio'));
       }
 
       final result = await _hiveRepository.getByKey(id);
@@ -304,7 +304,7 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
   Future<Either<Failure, void>> markAsAccessed(String pragaId) async {
     try {
       if (pragaId.isEmpty) {
-        return Left(CacheFailure('ID da praga não pode ser vazio'));
+        return const Left(CacheFailure('ID da praga não pode ser vazio'));
       }
 
       // TODO: Implementar com LocalStorage real

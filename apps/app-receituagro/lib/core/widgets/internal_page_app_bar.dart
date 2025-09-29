@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../services/receituagro_navigation_service.dart';
 
@@ -47,7 +47,7 @@ class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget 
 
   void _handleBackPress() {
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
-    navigationService.goBack();
+    navigationService.goBack<void>();
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../core/services/diagnostico_entity_resolver.dart';

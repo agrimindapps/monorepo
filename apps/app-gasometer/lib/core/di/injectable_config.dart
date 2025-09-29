@@ -17,12 +17,8 @@ Future<void> configureDependencies(GetIt getIt) async {
     await getIt.init();
     print('✅ Injectable dependencies configured successfully');
 
-    // Check if AuthProvider is registered
-    if (getIt.isRegistered<AuthProvider>()) {
-      print('✅ AuthProvider is registered in GetIt');
-    } else {
-      print('❌ AuthProvider is NOT registered in GetIt');
-    }
+    // Note: AuthProvider was migrated to AuthNotifier (StateNotifier-based)
+    // and is now managed via Riverpod providers instead of GetIt
 
     // Check if VehiclesProvider is registered
     if (getIt.isRegistered<VehiclesProvider>()) {

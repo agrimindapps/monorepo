@@ -209,7 +209,7 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          (comentario.ferramenta?.toString()?.split(' - ')?.isNotEmpty == true 
+                          (comentario.ferramenta?.toString().split(' - ').isNotEmpty == true 
                               ? comentario.ferramenta.toString().split(' - ').first 
                               : widget.defensivoName),
                           style: TextStyle(
@@ -219,7 +219,7 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
                           ),
                         ),
                         Text(
-                          (comentario.ferramenta?.toString()?.split(' - ')?.length ?? 0) > 1
+                          (comentario.ferramenta?.toString().split(' - ').length ?? 0) > 1
                               ? comentario.ferramenta.toString().split(' - ')[1]
                               : '',
                           style: const TextStyle(

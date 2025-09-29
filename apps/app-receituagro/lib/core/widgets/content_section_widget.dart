@@ -175,7 +175,7 @@ class ContentListItemWidget extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: theme.brightness == Brightness.dark
               ? Colors.white.withValues(alpha: 0.1)

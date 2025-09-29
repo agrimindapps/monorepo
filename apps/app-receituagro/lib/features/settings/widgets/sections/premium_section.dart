@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart' hide SubscriptionPage;
 
 import '../../../subscription/subscription_page.dart';
 import '../../constants/settings_design_tokens.dart';
@@ -34,7 +33,7 @@ class PremiumSection extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
       ),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,

@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/widgets/form_dialog.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../providers/fuel_form_provider.dart';
 import '../providers/fuel_provider.dart';
 import '../widgets/fuel_form_view.dart';
 
-class AddFuelPage extends StatefulWidget {
+class AddFuelPage extends ConsumerStatefulWidget {
   
   const AddFuelPage({
     super.key,
@@ -20,10 +21,10 @@ class AddFuelPage extends StatefulWidget {
   final String? editFuelRecordId;
 
   @override
-  State<AddFuelPage> createState() => _AddFuelPageState();
+  ConsumerState<AddFuelPage> createState() => _AddFuelPageState();
 }
 
-class _AddFuelPageState extends State<AddFuelPage> {
+class _AddFuelPageState extends ConsumerState<AddFuelPage> {
   late FuelFormProvider _formProvider;
   
   // Rate limiting and loading state
@@ -54,15 +55,15 @@ class _AddFuelPageState extends State<AddFuelPage> {
   }
   
   void _initializeProviders() async {
-    _formProvider = Provider.of<FuelFormProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+    _formProvider = provider.Provider.of<FuelFormProvider>(context, listen: false);
+    final authState = ref.read(authNotifierProvider);
+
     // Set context for dependency injection access
     _formProvider.setContext(context);
 
     await _formProvider.initialize(
       vehicleId: widget.vehicleId,
-      userId: authProvider.userId,
+      userId: authState.userId,
     );
     
     if (widget.editFuelRecordId != null) {
@@ -79,16 +80,16 @@ class _AddFuelPageState extends State<AddFuelPage> {
     });
   }
 
-  Future<void> _loadFuelRecordForEdit(FuelFormProvider provider) async {
+  Future<void> _loadFuelRecordForEdit(FuelFormProvider prov) async {
     try {
-      final fuelProvider = context.read<FuelProvider>();
+      final fuelProvider = provider.Provider.of<FuelProvider>(context, listen: false);
       // Primeiro garantir que os dados foram carregados
       await fuelProvider.loadAllFuelRecords();
       
       final record = fuelProvider.getFuelRecordById(widget.editFuelRecordId!);
-      
+
       if (record != null) {
-        await provider.loadFromFuelRecord(record);
+        await prov.loadFromFuelRecord(record);
       } else {
         throw Exception('Registro de abastecimento não encontrado');
       }
@@ -107,7 +108,7 @@ class _AddFuelPageState extends State<AddFuelPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FuelFormProvider>(
+    return provider.Consumer<FuelFormProvider>(
       builder: (context, formProvider, child) {
         // Generate subtitle based on vehicle information
         String subtitle = 'Registre o abastecimento do seu veículo';
@@ -192,7 +193,7 @@ class _AddFuelPageState extends State<AddFuelPage> {
     });
 
     final formProvider = _formProvider;
-    final fuelProvider = Provider.of<FuelProvider>(context, listen: false);
+    final fuelProvider = provider.Provider.of<FuelProvider>(context, listen: false);
 
     try {
       // Setup timeout protection

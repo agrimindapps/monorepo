@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/theme/design_tokens.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../providers/data_export_provider.dart';
 
 /// Seção de exportação de dados para a ProfilePage
-class ExportDataSection extends StatefulWidget {
+class ExportDataSection extends ConsumerStatefulWidget {
   const ExportDataSection({super.key});
 
   @override
-  State<ExportDataSection> createState() => _ExportDataSectionState();
+  ConsumerState<ExportDataSection> createState() => _ExportDataSectionState();
 }
 
-class _ExportDataSectionState extends State<ExportDataSection> {
+class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   @override
   void initState() {
     super.initState();
@@ -24,10 +25,10 @@ class _ExportDataSectionState extends State<ExportDataSection> {
   }
 
   void _loadInitialData() {
-    final authProvider = context.read<AuthProvider>();
-    final exportProvider = context.read<DataExportProvider>();
-    
-    final userId = authProvider.currentUser?.id;
+    final authState = ref.read(authNotifierProvider);
+    final exportProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
+
+    final userId = authState.currentUser?.id;
     if (userId != null) {
       exportProvider.checkCanExport(userId);
       exportProvider.loadExportHistory(userId);
@@ -36,12 +37,14 @@ class _ExportDataSectionState extends State<ExportDataSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthProvider, DataExportProvider>(
-      builder: (context, authProvider, exportProvider, child) {
-        final user = authProvider.currentUser;
-        final isAnonymous = authProvider.isAnonymous;
-        
-        if (isAnonymous || user?.id == null) {
+    final authState = ref.watch(authNotifierProvider);
+
+    return provider.Consumer<DataExportProvider>(
+      builder: (context, exportProvider, child) {
+        final user = authState.currentUser;
+        final isAnonymous = authState.isAnonymous;
+
+        if (isAnonymous || user == null) {
           return const SizedBox.shrink();
         }
 
@@ -50,7 +53,7 @@ class _ExportDataSectionState extends State<ExportDataSection> {
           title: 'Meus Dados',
           icon: Icons.download,
           children: [
-            _buildDataActionsContainer(context, exportProvider, user!.id),
+            _buildDataActionsContainer(context, exportProvider, user.id),
           ],
         );
       },
@@ -316,7 +319,7 @@ class _ExportDataSectionState extends State<ExportDataSection> {
   }
 
   Future<void> _shareFile(String filePath, String fileName) async {
-    final exportProvider = context.read<DataExportProvider>();
+    final exportProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
     await exportProvider.shareExportFile(filePath, '$fileName.json');
   }
 }

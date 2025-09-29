@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/models/fitossanitario_hive.dart';

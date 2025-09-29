@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../constants/receituagro_environment_config.dart';

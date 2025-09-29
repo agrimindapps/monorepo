@@ -160,7 +160,7 @@ class _SearchFieldMockupState extends State<_SearchFieldMockup> {
         style: DiagnosticoMockupTokens.filterHintStyle.copyWith(
           color: DiagnosticoMockupTokens.textPrimary,
         ),
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: DiagnosticoMockupTokens.searchPlaceholder,
           hintStyle: DiagnosticoMockupTokens.filterHintStyle,
           prefixIcon: Icon(
@@ -212,7 +212,7 @@ class _FilterDropdownMockup extends StatelessWidget {
             }
           },
           isExpanded: true,
-          icon: Icon(
+          icon: const Icon(
             DiagnosticoMockupTokens.dropdownIcon,
             color: DiagnosticoMockupTokens.primaryGreen,
             size: 18,

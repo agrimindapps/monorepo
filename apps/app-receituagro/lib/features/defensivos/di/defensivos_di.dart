@@ -1,15 +1,15 @@
 import 'package:core/core.dart';
 
+// Core Repository (Hive implementation)
+import '../../../core/repositories/fitossanitario_hive_repository.dart';
 // Data
 import '../data/repositories/defensivos_repository_impl.dart';
 // Domain
 import '../domain/repositories/i_defensivos_repository.dart';
-// Core Repository (Hive implementation)
-import '../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../domain/usecases/get_defensivos_usecase.dart';
 import '../domain/usecases/get_defensivos_agrupados_usecase.dart';
-import '../domain/usecases/get_defensivos_completos_usecase.dart';
 import '../domain/usecases/get_defensivos_com_filtros_usecase.dart';
+import '../domain/usecases/get_defensivos_completos_usecase.dart';
+import '../domain/usecases/get_defensivos_usecase.dart';
 // Presentation
 import '../presentation/providers/defensivos_provider.dart';
 import '../presentation/providers/defensivos_unificado_provider.dart';

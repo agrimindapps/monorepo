@@ -4,16 +4,15 @@
 library;
 
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/design_tokens.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
-class ResponsiveSidebar extends StatelessWidget {
+class ResponsiveSidebar extends ConsumerWidget {
   
   const ResponsiveSidebar({
     super.key,
@@ -24,7 +23,7 @@ class ResponsiveSidebar extends StatelessWidget {
   final VoidCallback onToggle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOutCubic,
@@ -69,7 +68,7 @@ class ResponsiveSidebar extends StatelessWidget {
                   ),
                 )
               else
-                _SidebarFooter(isCollapsed: isCollapsed),
+                _SidebarFooter(isCollapsed: isCollapsed, ref: ref),
             ],
           ),
         ),
@@ -338,9 +337,10 @@ class _SidebarNavigationItemState extends State<_SidebarNavigationItem> {
 
 /// User and settings section grouped together
 class _SidebarFooter extends StatelessWidget {
-  
-  const _SidebarFooter({required this.isCollapsed});
+
+  const _SidebarFooter({required this.isCollapsed, required this.ref});
   final bool isCollapsed;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
@@ -416,8 +416,8 @@ class _SidebarFooter extends StatelessWidget {
   }
   
   void _showUserMenu(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
-    final isAnonymous = authProvider.isAnonymous;
+    final authState = ref.read(authNotifierProvider);
+    final isAnonymous = authState.isAnonymous;
     
     showMenu(
       context: context,
@@ -442,7 +442,7 @@ class _SidebarFooter extends StatelessWidget {
               dense: true,
             ),
             onTap: () {
-              _handleLogout(context, authProvider);
+              _handleLogout(context);
             },
           ),
       ],
@@ -450,16 +450,18 @@ class _SidebarFooter extends StatelessWidget {
   }
 
   /// Handle logout with enhanced dialog
-  Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _handleLogout(BuildContext context) async {
+    final authNotifier = ref.read(authNotifierProvider.notifier);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => _buildEnhancedLogoutDialog(context),
     );
 
     if (confirmed == true && context.mounted) {
-      await authProvider.logoutWithLoadingDialog(context);
-      if (context.mounted && authProvider.errorMessage != null) {
-        _showSnackBar(context, authProvider.errorMessage!);
+      await authNotifier.logoutWithLoadingDialog(context);
+      final authState = ref.read(authNotifierProvider);
+      if (context.mounted && authState.errorMessage != null) {
+        _showSnackBar(context, authState.errorMessage!);
       } else if (context.mounted) {
         _showSnackBar(context, 'Logout realizado com sucesso');
       }

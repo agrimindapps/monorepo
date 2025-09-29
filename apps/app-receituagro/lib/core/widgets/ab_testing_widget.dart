@@ -364,7 +364,7 @@ class ABTestingCard extends StatelessWidget {
   }
 
   Widget _buildVariantCard() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: variantColor,
         borderRadius: variantBorderRadius ?? BorderRadius.circular(16),

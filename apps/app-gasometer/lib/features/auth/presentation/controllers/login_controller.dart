@@ -1,24 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/services/analytics_service.dart';
-import '../providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 
 /// Controller para a página de login seguindo princípios SOLID
 /// Responsabilidade única: Gerenciar estado e lógica da tela de login
 class LoginController extends ChangeNotifier {
 
   LoginController({
-    required AuthProvider authProvider,
+    required WidgetRef ref,
     AnalyticsService? analytics,
-  })  : _authProvider = authProvider,
+  })  : _ref = ref,
         _analytics = analytics ?? AnalyticsService() {
     _loadSavedData();
     _analytics.logScreenView('LoginPage');
   }
-  final AuthProvider _authProvider;
+  final WidgetRef _ref;
   final AnalyticsService _analytics;
+
+  // Helper getters to access auth state and notifier
+  AuthNotifier get _authNotifier => _ref.read(authNotifierProvider.notifier);
+  AuthState get _authState => _ref.read(authNotifierProvider);
 
   // Controllers dos campos de texto
   final TextEditingController _nameController = TextEditingController();
@@ -59,12 +64,12 @@ class LoginController extends ChangeNotifier {
 
   // Estado do auth provider
   bool get mounted => _mounted;
-  bool get isAuthenticated => _authProvider.isAuthenticated;
-  bool get isAuthLoading => _authProvider.isLoading;
-  String? get authError => _authProvider.errorMessage;
-  
+  bool get isAuthenticated => _authState.isAuthenticated;
+  bool get isAuthLoading => _authState.isLoading;
+  String? get authError => _authState.errorMessage;
+
   // Estado da sincronização simplificado
-  bool get isSyncing => _authProvider.isSyncing;
+  bool get isSyncing => _authState.isSyncing;
 
   @override
   void dispose() {
@@ -128,7 +133,7 @@ class LoginController extends ChangeNotifier {
   /// Limpar mensagem de erro
   void _clearError() {
     _errorMessage = null;
-    _authProvider.clearError();
+    _authNotifier.clearError();
   }
 
   /// Limpar mensagem de erro (método público)
@@ -178,21 +183,22 @@ class LoginController extends ChangeNotifier {
     _clearError();
 
     try {
-      await _authProvider.login(
+      await _authNotifier.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
-      if (_authProvider.isAuthenticated) {
+      final authState = _ref.read(authNotifierProvider);
+      if (authState.isAuthenticated) {
         await _saveFormData();
         _analytics.logUserAction('login_success', parameters: {
           'method': 'email',
           'remember_me': _rememberMe.toString(),
         });
-      } else if (_authProvider.errorMessage != null) {
-        _errorMessage = _authProvider.errorMessage;
+      } else if (authState.errorMessage != null) {
+        _errorMessage = authState.errorMessage;
         _analytics.logUserAction('login_failed', parameters: {
-          'error': _authProvider.errorMessage ?? 'unknown',
+          'error': authState.errorMessage ?? 'unknown',
         });
       }
     } catch (e) {
@@ -213,23 +219,24 @@ class LoginController extends ChangeNotifier {
     if (kDebugMode) {
       print('🔄 LoginController: Iniciando login com sincronização simplificada');
     }
-    
+
     if (!_validateLoginForm()) return;
 
     _setLoading(true);
     _clearError();
 
     try {
-      await _authProvider.loginAndSync(
+      await _authNotifier.loginAndSync(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
+      final authState = _ref.read(authNotifierProvider);
       if (kDebugMode) {
-        print('🔄 LoginController: Após loginAndSync - autenticado: ${_authProvider.isAuthenticated}, erro: ${_authProvider.errorMessage}');
+        print('🔄 LoginController: Após loginAndSync - autenticado: ${authState.isAuthenticated}, erro: ${authState.errorMessage}');
       }
 
-      if (_authProvider.isAuthenticated) {
+      if (authState.isAuthenticated) {
         await _saveFormData();
         await _analytics.logUserAction('login_with_sync_success', parameters: {
           'method': 'email_with_sync_simplified',
@@ -238,13 +245,13 @@ class LoginController extends ChangeNotifier {
         if (kDebugMode) {
           print('✅ LoginController: Login bem-sucedido');
         }
-      } else if (_authProvider.errorMessage != null) {
-        _errorMessage = _authProvider.errorMessage;
+      } else if (authState.errorMessage != null) {
+        _errorMessage = authState.errorMessage;
         if (kDebugMode) {
-          print('❌ LoginController: Login falhou - ${_authProvider.errorMessage}');
+          print('❌ LoginController: Login falhou - ${authState.errorMessage}');
         }
         await _analytics.logUserAction('login_with_sync_failed', parameters: {
-          'error': _authProvider.errorMessage ?? 'unknown',
+          'error': authState.errorMessage ?? 'unknown',
         });
       } else {
         if (kDebugMode) {
@@ -275,21 +282,22 @@ class LoginController extends ChangeNotifier {
     _clearError();
 
     try {
-      await _authProvider.register(
+      await _authNotifier.register(
         _emailController.text.trim(),
         _passwordController.text,
         _nameController.text.trim(),
       );
 
-      if (_authProvider.isAuthenticated) {
+      final authState = _ref.read(authNotifierProvider);
+      if (authState.isAuthenticated) {
         await _saveFormData();
         _analytics.logUserAction('signup_success', parameters: {
           'method': 'email',
         });
-      } else if (_authProvider.errorMessage != null) {
-        _errorMessage = _authProvider.errorMessage;
+      } else if (authState.errorMessage != null) {
+        _errorMessage = authState.errorMessage;
         _analytics.logUserAction('signup_failed', parameters: {
-          'error': _authProvider.errorMessage ?? 'unknown',
+          'error': authState.errorMessage ?? 'unknown',
         });
       }
     } catch (e) {
@@ -313,21 +321,22 @@ class LoginController extends ChangeNotifier {
     _clearError();
 
     try {
-      // Implementar reset password através do AuthProvider
-      await _authProvider.sendPasswordReset(_emailController.text.trim());
-      
-      if (_authProvider.errorMessage != null) {
-        _errorMessage = _authProvider.errorMessage;
+      // Implementar reset password através do AuthNotifier
+      await _authNotifier.sendPasswordReset(_emailController.text.trim());
+
+      final authState = _ref.read(authNotifierProvider);
+      if (authState.errorMessage != null) {
+        _errorMessage = authState.errorMessage;
       } else {
         await _analytics.logUserAction('password_reset_requested', parameters: {
           'email': _emailController.text.trim(),
         });
-        
+
         // Mostrar mensagem de sucesso
         _errorMessage = null;
         hideRecoveryForm();
       }
-      
+
     } catch (e) {
       _errorMessage = 'Erro ao enviar email de recuperação';
       await _analytics.recordError(
@@ -346,9 +355,10 @@ class LoginController extends ChangeNotifier {
     _clearError();
 
     try {
-      await _authProvider.signInAnonymously();
-      
-      if (_authProvider.isAuthenticated) {
+      await _authNotifier.signInAnonymously();
+
+      final authState = _ref.read(authNotifierProvider);
+      if (authState.isAuthenticated) {
         await _analytics.logUserAction('anonymous_login_success');
       }
     } catch (e) {
@@ -568,7 +578,7 @@ class LoginController extends ChangeNotifier {
   
   /// Para sincronização em andamento
   void stopSync() {
-    _authProvider.stopSync();
+    _authNotifier.stopSync();
     _analytics.logUserAction('sync_stopped_by_user');
   }
 }

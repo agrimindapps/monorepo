@@ -2,6 +2,7 @@
 /// 
 /// Sistema de design padronizado para garantir consistência visual
 /// across todas as páginas da aplicação.
+library;
 
 import 'package:flutter/material.dart';
 

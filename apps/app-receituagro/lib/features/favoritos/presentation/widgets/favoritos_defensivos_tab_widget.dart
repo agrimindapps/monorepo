@@ -1,9 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
-import 'package:core/core.dart';
 
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:core/core.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../providers/favoritos_provider_simplified.dart';
 

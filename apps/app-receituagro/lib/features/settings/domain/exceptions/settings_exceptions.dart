@@ -2,6 +2,7 @@
 /// 
 /// Centraliza todas as exceções relacionadas a configurações do usuário
 /// seguindo padrões de Clean Architecture
+library;
 
 /// Exceção lançada quando um ID de usuário é inválido ou vazio
 class InvalidUserIdException implements Exception {

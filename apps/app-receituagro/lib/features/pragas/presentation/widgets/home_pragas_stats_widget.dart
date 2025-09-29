@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
-import 'package:core/core.dart';
 import '../providers/home_pragas_provider.dart';
 
 /// Widget para exibir grid de estatísticas/categorias na home de pragas
@@ -279,7 +278,7 @@ class HomePragasStatsWidget extends StatelessWidget {
                             ),
                             child: Text(
                               count,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,

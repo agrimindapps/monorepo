@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../providers/subscription_provider.dart';
 import '../widgets/payment_actions_widget.dart';

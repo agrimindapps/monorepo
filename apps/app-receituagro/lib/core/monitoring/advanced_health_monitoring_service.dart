@@ -336,7 +336,7 @@ class AdvancedHealthMonitoringService {
       const totalSpace = 32 * 1024 * 1024 * 1024; // 32GB
       const usedSpace = 24 * 1024 * 1024 * 1024; // 24GB
       const availableSpace = totalSpace - usedSpace;
-      final usagePercentage = (usedSpace / totalSpace) * 100;
+      const usagePercentage = (usedSpace / totalSpace) * 100;
 
       HealthStatus status;
       String message;
@@ -382,7 +382,7 @@ class AdvancedHealthMonitoringService {
       const totalMemory = 8 * 1024 * 1024 * 1024; // 8GB
       const usedMemory = 4.5 * 1024 * 1024 * 1024; // 4.5GB
       const availableMemory = totalMemory - usedMemory;
-      final usagePercentage = (usedMemory / totalMemory) * 100;
+      const usagePercentage = (usedMemory / totalMemory) * 100;
 
       HealthStatus status;
       String message;

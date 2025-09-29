@@ -32,6 +32,7 @@
 /// - idReg: Registry identifier for agricultural content
 /// - pkIdentificador: Primary key linking to specific pest/disease/defensive
 /// - Comments provide user annotations for agricultural decision-making
+library;
 
 import '../../constants/comentarios_design_tokens.dart';
 

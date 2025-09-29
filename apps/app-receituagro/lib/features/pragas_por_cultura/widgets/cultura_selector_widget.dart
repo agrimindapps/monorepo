@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Widget especializado para seleção de cultura
 /// Permite escolher uma cultura para explorar suas pragas

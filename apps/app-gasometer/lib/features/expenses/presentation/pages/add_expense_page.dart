@@ -1,16 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/widgets/form_dialog.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../providers/expense_form_provider.dart';
 import '../providers/expenses_provider.dart';
 import '../widgets/expense_form_view.dart';
 
 /// Dialog modal para adicionar/editar despesas
-class AddExpensePage extends StatefulWidget {
+class AddExpensePage extends ConsumerStatefulWidget {
   
   const AddExpensePage({
     super.key,
@@ -21,10 +22,10 @@ class AddExpensePage extends StatefulWidget {
   final String? editExpenseId;
 
   @override
-  State<AddExpensePage> createState() => _AddExpensePageState();
+  ConsumerState<AddExpensePage> createState() => _AddExpensePageState();
 }
 
-class _AddExpensePageState extends State<AddExpensePage> {
+class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   late ExpenseFormProvider _formProvider;
   
   // Rate limiting and loading state
@@ -55,9 +56,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
   }
   
   void _initializeProviders() {
-    _formProvider = Provider.of<ExpenseFormProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+    _formProvider = provider.Provider.of<ExpenseFormProvider>(context, listen: false);
+    final authState = ref.read(authNotifierProvider);
+
     // Set context for dependency injection access
     _formProvider.setContext(context);
 
@@ -65,7 +66,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _formProvider.initialize(
         vehicleId: widget.vehicleId,
-        userId: authProvider.userId,
+        userId: authState.userId,
       );
       
         if (widget.editExpenseId != null) {
@@ -77,16 +78,16 @@ class _AddExpensePageState extends State<AddExpensePage> {
     // The Consumer<ExpenseFormProvider> will automatically rebuild when provider state changes
   }
 
-  Future<void> _loadExpenseForEdit(ExpenseFormProvider provider) async {
+  Future<void> _loadExpenseForEdit(ExpenseFormProvider prov) async {
     try {
-      final expensesProvider = context.read<ExpensesProvider>();
+      final expensesProvider = provider.Provider.of<ExpensesProvider>(context, listen: false);
       // Primeiro garantir que os dados foram carregados
       await expensesProvider.loadExpenses();
       
       final expense = expensesProvider.getExpenseById(widget.editExpenseId!);
-      
+
       if (expense != null) {
-        await provider.initializeWithExpense(expense);
+        await prov.initializeWithExpense(expense);
       } else {
         throw Exception('Registro de despesa não encontrado');
       }
@@ -106,7 +107,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ExpenseFormProvider>(
+    return provider.Consumer<ExpenseFormProvider>(
       builder: (context, formProvider, child) {
         // Generate subtitle based on vehicle information
         String subtitle = 'Registre uma despesa do seu veículo';
@@ -177,7 +178,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     });
 
     final formProvider = _formProvider;
-    final expensesProvider = Provider.of<ExpensesProvider>(context, listen: false);
+    final expensesProvider = provider.Provider.of<ExpensesProvider>(context, listen: false);
 
     try {
       // Setup timeout protection

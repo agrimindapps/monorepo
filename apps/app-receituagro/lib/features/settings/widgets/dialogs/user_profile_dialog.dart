@@ -147,7 +147,7 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
         Positioned(
           bottom: -2,
           right: -2,
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               shape: BoxShape.circle,
@@ -347,7 +347,7 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
 
   /// Change avatar
   void _changeAvatar() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Alterar Avatar'),
@@ -414,7 +414,7 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
 
   /// Show error dialog
   void _showErrorDialog(String message) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Erro'),

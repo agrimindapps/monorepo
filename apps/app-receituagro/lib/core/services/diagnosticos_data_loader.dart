@@ -37,9 +37,10 @@ class DiagnosticosDataLoader {
               jsonData.cast<Map<String, dynamic>>().toList();
 
           allDiagnosticos.addAll(diagnosticos);
-
-
         } catch (e) {
+          if (kDebugMode) {
+            debugPrint('⚠️ DiagnosticosDataLoader: Error loading file TBDIAGNOSTICO$i.json - $e');
+          }
         }
       }
 

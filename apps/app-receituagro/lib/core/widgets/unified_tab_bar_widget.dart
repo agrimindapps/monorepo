@@ -10,10 +10,11 @@
 /// - Animações fluidas e responsivas
 /// - Configuração flexível para diferentes contextos
 /// - Acessibilidade total (screen readers, keyboard navigation)
-library unified_tab_bar;
+library;
 
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
 import '../design/spacing_tokens.dart';
 
 /// Dados de configuração para cada tab

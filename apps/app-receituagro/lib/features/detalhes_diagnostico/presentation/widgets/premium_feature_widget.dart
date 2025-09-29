@@ -178,7 +178,7 @@ class PremiumFeatureWidget extends StatelessWidget {
   }
   
   void _showPreview(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(

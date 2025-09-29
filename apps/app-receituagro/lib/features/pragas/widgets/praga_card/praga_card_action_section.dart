@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'praga_card_helpers.dart';
 import 'praga_card_main.dart';
 
 /// Widget especializado para renderizar as ações do card

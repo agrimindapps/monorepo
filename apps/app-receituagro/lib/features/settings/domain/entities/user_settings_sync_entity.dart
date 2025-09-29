@@ -14,7 +14,7 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
   final int frequenciaSyncMinutos;
 
   const UserSettingsSyncEntity({
-    required String id,
+    required super.id,
     required this.tema,
     required this.idioma,
     required this.notificacoesPush,
@@ -24,25 +24,15 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     required this.preferenciasVisualizacao,
     required this.syncAutomatico,
     required this.frequenciaSyncMinutos,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSyncAt,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastSyncAt: lastSyncAt,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+  });
 
   @override
   Map<String, dynamic> toFirebaseMap() {
@@ -142,12 +132,12 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       notificacoesPush: true,
       notificacoesEmail: false,
       modoProdutorRural: false,
-      configuracoesBusca: {
+      configuracoesBusca: const {
         'filtrosPadraoAtivos': true,
         'exibirResultadosDetalhados': true,
         'ordenacaoPadrao': 'relevancia',
       },
-      preferenciasVisualizacao: {
+      preferenciasVisualizacao: const {
         'exibirImagens': true,
         'tamanhoPadrao': 'medio',
         'visualizacaoPadrao': 'lista',

@@ -42,7 +42,7 @@ class DataExportProvider extends ChangeNotifier {
       );
     } catch (e) {
       _setError('Erro ao verificar disponibilidade: ${e.toString()}');
-      _availabilityResult = ExportAvailabilityResult.unavailable(
+      _availabilityResult = const ExportAvailabilityResult.unavailable(
         reason: 'Erro interno do sistema',
       );
     } finally {
@@ -157,7 +157,7 @@ class DataExportProvider extends ChangeNotifier {
         ExportRequest(
           id: '1',
           userId: userId,
-          dataTypes: {DataType.userProfile, DataType.favorites},
+          dataTypes: const {DataType.userProfile, DataType.favorites},
           format: ExportFormat.json,
           requestDate: DateTime.now().subtract(const Duration(days: 2)),
           completionDate: DateTime.now().subtract(const Duration(days: 2, hours: 1)),

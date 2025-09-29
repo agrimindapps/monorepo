@@ -1,8 +1,9 @@
 import 'dart:developer' as developer;
-import '../services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
+
+import '../services/diagnosticos_data_loader.dart';
 import '../services/fitossanitarios_data_loader.dart';
 import '../services/pragas_data_loader.dart';
-import '../services/diagnosticos_data_loader.dart';
+import '../services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 
 /// Configuração e inicialização dos dados estáticos do ReceitaAgro
 class ReceitaAgroDataSetup {
@@ -16,7 +17,7 @@ class ReceitaAgroDataSetup {
       bool hiveReady = false;
       try {
         // Tenta verificar se existe uma box padrão aberta
-        final testBox = await ReceitaAgroHiveService.getCulturas();
+        final testBox = ReceitaAgroHiveService.getCulturas();
         hiveReady = testBox.isNotEmpty;
         developer.log('✅ [SETUP] Hive já inicializado pelo AppDataManager com ${testBox.length} culturas', name: 'ReceitaAgroDataSetup');
       } catch (e) {

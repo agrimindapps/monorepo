@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
-import 'package:core/core.dart';
 
 import '../../../../core/providers/theme_provider.dart';
 import '../../constants/settings_design_tokens.dart';
@@ -77,7 +76,7 @@ class ThemeSelectionDialog extends StatelessWidget {
   }
 
   Widget _buildThemeOptions(BuildContext context, ThemeData theme, ThemeProvider themeProvider) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.2),

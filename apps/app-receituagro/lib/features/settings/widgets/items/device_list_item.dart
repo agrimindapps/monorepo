@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../constants/settings_design_tokens.dart';
+
 import '../../../../core/services/device_identity_service.dart';
 
 /// Individual device list item component

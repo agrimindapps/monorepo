@@ -9,25 +9,27 @@ class DiagnosticosDebug {
   static Future<void> checkStatus() async {
     try {
       debugPrint('🔍 [DEBUG] ===== VERIFICAÇÃO DE DIAGNÓSTICOS =====');
-      
+
       // 1. Verificar repository
       final repository = di.sl<DiagnosticoHiveRepository>();
       final allDiagnosticosResult = await repository.getAll();
-      
+
       await allDiagnosticosResult.fold(
         (error) async {
           debugPrint('❌ [DEBUG] Erro ao acessar repository: $error');
           await _debugLoadingProcess();
         },
         (allDiagnosticos) async {
-          debugPrint('📊 [DEBUG] Diagnósticos no repository: ${allDiagnosticos.length}');
-          
+          debugPrint(
+            '📊 [DEBUG] Diagnósticos no repository: ${allDiagnosticos.length}',
+          );
+
           if (allDiagnosticos.isEmpty) {
             debugPrint('⚠️ [DEBUG] Box vazia! Tentando forçar carregamento...');
-            
+
             // 2. Tentar carregar
             await DiagnosticosDataLoader.forceReload();
-            
+
             // 3. Verificar novamente
             final newResult = await repository.getAll();
             await newResult.fold(
@@ -36,8 +38,10 @@ class DiagnosticosDebug {
                 await _debugLoadingProcess();
               },
               (newDiagnosticos) async {
-                debugPrint('📊 [DEBUG] Após reload: ${newDiagnosticos.length} diagnósticos');
-                
+                debugPrint(
+                  '📊 [DEBUG] Após reload: ${newDiagnosticos.length} diagnósticos',
+                );
+
                 if (newDiagnosticos.isNotEmpty) {
                   debugPrint('✅ [DEBUG] Sucesso! Carregamento funcionou');
                   await _showSample(repository);
@@ -53,13 +57,13 @@ class DiagnosticosDebug {
           }
         },
       );
-      
+
       debugPrint('🔍 [DEBUG] ===== FIM DA VERIFICAÇÃO =====');
     } catch (e) {
       debugPrint('❌ [DEBUG] Erro: $e');
     }
   }
-  
+
   /// Mostra sample dos dados
   static Future<void> _showSample(DiagnosticoHiveRepository repository) async {
     final result = await repository.getAll();
@@ -80,30 +84,29 @@ class DiagnosticosDebug {
       },
     );
   }
-  
+
   /// Debug do processo de carregamento
   static Future<void> _debugLoadingProcess() async {
     try {
       debugPrint('🔧 [DEBUG] Debugando processo de carregamento...');
-      
+
       // Verificar stats do loader
       final stats = await DiagnosticosDataLoader.getStats();
       debugPrint('📊 [DEBUG] Stats do loader: $stats');
-      
+
       // Verificar se loader pensa que está carregado
       final isLoaded = DiagnosticosDataLoader.isLoaded;
       debugPrint('🔍 [DEBUG] Loader isLoaded: $isLoaded');
-      
+
       // Tentar verificar dados
       final hasData = await DiagnosticosDataLoader.isDataLoaded();
       debugPrint('🔍 [DEBUG] isDataLoaded(): $hasData');
-      
+
       debugPrint('🚨 [DEBUG] POSSÍVEIS PROBLEMAS:');
       debugPrint('  - Arquivos JSON não encontrados');
       debugPrint('  - Erro na leitura dos assets');
       debugPrint('  - Problema no Hive repository');
       debugPrint('  - DI não configurado corretamente');
-      
     } catch (e) {
       debugPrint('❌ [DEBUG] Erro no debug: $e');
     }

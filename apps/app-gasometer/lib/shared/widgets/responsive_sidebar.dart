@@ -9,8 +9,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/responsive_constants.dart';
+import '../../core/providers/auth_provider.dart';
 import '../../core/theme/design_tokens.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
 class ResponsiveSidebar extends StatelessWidget {

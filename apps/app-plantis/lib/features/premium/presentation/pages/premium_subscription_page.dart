@@ -1,12 +1,18 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/premium_provider.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
 import '../widgets/subscription_plans_widget.dart';
+
+/// Riverpod Provider for PremiumProvider using DI
+final premiumProviderRiverpod = ChangeNotifierProvider<PremiumProvider>((ref) {
+  return sl<PremiumProvider>();
+});
 
 /// Página de subscription premium para Plantis - Inspirada no ReceitaAgro
 ///
@@ -22,15 +28,15 @@ import '../widgets/subscription_plans_widget.dart';
 /// - View ativa: Status da subscription
 /// - View planos: Seleção de planos + Benefícios + Ações
 /// - Design inspirado no app-receituagro com cores do Plantis
-class PremiumSubscriptionPage extends StatefulWidget {
+class PremiumSubscriptionPage extends ConsumerStatefulWidget {
   const PremiumSubscriptionPage({super.key});
 
   @override
-  State<PremiumSubscriptionPage> createState() =>
+  ConsumerState<PremiumSubscriptionPage> createState() =>
       _PremiumSubscriptionPageState();
 }
 
-class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage>
+class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPage>
     with LoadingPageMixin {
   String? _selectedPlanId;
 
@@ -43,48 +49,46 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, provider, child) {
-        // Mostrar mensagens se existirem
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _showMessages(context, provider);
-        });
+    final provider = ref.watch(premiumProviderRiverpod);
 
-        return Scaffold(
-          backgroundColor: PlantisColors.primary,
-          body: DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  PlantisColors.primary, // Verde Plantis principal
-                  PlantisColors.primaryDark, // Verde escuro
-                  PlantisColors.leaf, // Verde folha
-                ],
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  // Header com título e botão de fechar
-                  _buildHeader(context),
+    // Mostrar mensagens se existirem
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showMessages(context, provider);
+    });
 
-                  // Conteúdo principal
-                  Expanded(
-                    child:
-                        provider.isLoading
-                            ? _buildLoadingView()
-                            : provider.isPremium
-                            ? _buildActiveSubscriptionView(provider)
-                            : _buildPlansView(provider),
-                  ),
-                ],
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: PlantisColors.primary,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              PlantisColors.primary, // Verde Plantis principal
+              PlantisColors.primaryDark, // Verde escuro
+              PlantisColors.leaf, // Verde folha
+            ],
           ),
-        );
-      },
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header com título e botão de fechar
+              _buildHeader(context),
+
+              // Conteúdo principal
+              Expanded(
+                child:
+                    provider.isLoading
+                        ? _buildLoadingView()
+                        : provider.isPremium
+                        ? _buildActiveSubscriptionView(provider)
+                        : _buildPlansView(provider),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

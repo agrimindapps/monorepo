@@ -227,7 +227,7 @@ class LoginFormWidget extends ConsumerWidget {
   }
 
   Widget _buildAnonymousLoginButton(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+    final authState = ref.watch(authNotifierProvider);
     final formNotifier = ref.watch(loginFormProvider.notifier);
 
     return SizedBox(

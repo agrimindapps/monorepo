@@ -89,22 +89,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
     // });
   }
 
-  /// Retorna mensagem adequada baseada no status do sync
-  String _getSyncMessage(SyncStatus status) {
-    switch (status) {
-      case SyncStatus.syncing:
-        return 'Sincronizando dados automotivos...';
-      case SyncStatus.synced:
-        return 'Dados sincronizados com sucesso!';
-      case SyncStatus.error:
-        return 'Erro na sincronização';
-      case SyncStatus.offline:
-        return 'Modo offline - dados salvos localmente';
-      default:
-        return widget.message;
-    }
-  }
-
   /// Fecha automaticamente o loading
   void _autoClose() {
     _syncSubscription?.cancel();

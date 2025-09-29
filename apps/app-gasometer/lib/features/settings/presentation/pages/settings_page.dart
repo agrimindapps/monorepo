@@ -1,20 +1,9 @@
-// ✅ REFACTORED IMPORTS: Cleaner, organized imports
-import 'package:core/core.dart' hide AuthProvider;
-// ✅ ThemeProvider now used from core package
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-// TODO: Replace with Riverpod providers
-// import 'package:provider/provider.dart' as provider;
 
-// ThemeProvider now imported from core package (line 2)
-import '../../../../core/theme/design_tokens.dart';
-// TODO: Replace with Riverpod providers
-// import '../providers/settings_provider.dart';
-import '../widgets/account_section_widget.dart';
-// Keep existing widgets for now to avoid breaking changes
-import '../widgets/settings_item.dart';
-import '../widgets/settings_section.dart';
-import 'database_inspector_page.dart';
+import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/providers/vehicles_provider.dart';
+import '../providers/settings_notifier.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -24,26 +13,19 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-
   @override
   Widget build(BuildContext context) {
+    final vehiclesState = ref.watch(vehiclesProvider);
+    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final themeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
             Expanded(
-              child: SingleChildScrollView(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
-                    child: Padding(
-                      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingPagePadding),
-                      child: _buildContent(context),
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildContent(context),
             ),
           ],
         ),
@@ -58,11 +40,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -71,15 +53,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Semantics(
-                label: 'Seção de configurações',
-                hint: 'Página principal para gerenciar preferências',
+            Semantics(
+              label: 'Seção de configurações',
+              hint: 'Página principal para gerenciar preferências',
+              child: Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(9),
+                ),
                 child: const Icon(
                   Icons.settings,
                   color: Colors.white,
@@ -93,7 +75,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  SemanticText.heading(
                     'Configurações',
                     style: TextStyle(
                       color: Colors.white,
@@ -101,11 +83,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 3),
-                  Text(
+                  SemanticText.subtitle(
                     'Gerencie suas preferências',
                     style: TextStyle(
                       color: Colors.white70,
@@ -118,250 +98,215 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
             ),
-            // TODO: Replace with Riverpod ThemeProvider
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Semantics(
-                label: 'Alterar tema',
-                hint: 'Abre diálogo para escolher entre tema claro, escuro ou automático',
-                button: true,
-                onTap: () => _showThemeDialog(context),
-                child: IconButton(
-                  onPressed: () => _showThemeDialog(context),
-                  icon: const Icon(
-                    Icons.brightness_auto, // Placeholder default
-                    color: Colors.white,
-                    size: 19,
-                  ),
-                ),
-              ),
-            ),
+            _buildThemeToggle(),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildThemeToggle() {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: IconButton(
+        onPressed: () => _showThemeDialog(context),
+        icon: const Icon(
+          Icons.brightness_auto,
+          color: Colors.white,
+          size: 19,
+        ),
+        tooltip: 'Alterar tema',
+      ),
+    );
+  }
+
   Widget _buildContent(BuildContext context) {
-    return Column(
-      children: [
-        _buildAccountContentWithoutCard(context),
-        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildNotificationSection(context),
-        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildDevelopmentSection(context),
-        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildSupportSection(context),
-        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildInformationSection(context),
-      ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildAccountSection(),
+          const SizedBox(height: 24),
+          _buildNotificationSection(),
+          const SizedBox(height: 24),
+          _buildAppSection(),
+          const SizedBox(height: 24),
+          _buildSupportSection(),
+          const SizedBox(height: 24),
+          _buildAboutSection(),
+        ],
+      ),
     );
   }
 
-  /// Build account content without card wrapper
-  Widget _buildAccountContentWithoutCard(BuildContext context) {
-    return const AccountSectionWidget();
-  }
-
-
-  Widget _buildPremiumFeature(BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Row(
+  Widget _buildAccountSection() {
+    return _buildSection(
+      title: 'Conta',
+      icon: Icons.person,
       children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: GasometerDesignTokens.getPremiumBackgroundWithOpacity(0.1),
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusSm),
-          ),
-          child: Icon(
-            icon,
-            color: GasometerDesignTokens.colorPremiumAccent,
-            size: GasometerDesignTokens.iconSizeXs,
-          ),
+        _buildSettingItem(
+          icon: Icons.account_circle,
+          title: 'Perfil',
+          subtitle: 'Gerenciar informações da conta',
+          onTap: () {
+            _showSnackBar('Funcionalidade em desenvolvimento');
+          },
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-                ),
-              ),
-            ],
-          ),
+        _buildSettingItem(
+          icon: Icons.logout,
+          title: 'Sair',
+          subtitle: 'Fazer logout da conta',
+          onTap: () {
+            _showLogoutDialog();
+          },
         ),
       ],
     );
   }
 
+  Widget _buildNotificationSection() {
+    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final notificationsEnabled = settingsAsync.valueOrNull?.notificationsEnabled ?? true;
+    final fuelAlertsEnabled = settingsAsync.valueOrNull?.fuelAlertsEnabled ?? true;
 
-  Widget _buildNotificationSection(BuildContext context) {
-    return SettingsSection(
+    return _buildSection(
       title: 'Notificações',
       icon: Icons.notifications,
       children: [
-        // TODO: Replace with Riverpod SettingsProvider
-        SettingsItem(
+        _buildSettingItem(
           icon: Icons.notifications_active,
-          title: 'Notificações',
-          subtitle: 'Receba lembretes e alertas do aplicativo',
-          trailing: Semantics(
-            label: 'Notificações',
-            hint: 'Interruptor para ativar ou desativar todas as notificações',
-            child: Switch(
-              value: true, // Placeholder value
-              onChanged: (value) {
-                // TODO: Implement with Riverpod provider
-                _showSnackBar(context, 'Funcionalidade sendo migrada para Riverpod');
-              },
-            ),
+          title: 'Notificações Push',
+          subtitle: 'Receber alertas e lembretes',
+          trailing: Switch(
+            value: notificationsEnabled,
+            onChanged: settingsAsync.isLoading
+                ? null
+                : (value) {
+                    ref.read(settingsNotifierProvider.notifier).toggleNotifications(value);
+                  },
+          ),
+        ),
+        _buildSettingItem(
+          icon: Icons.local_gas_station,
+          title: 'Alertas de Combustível',
+          subtitle: 'Notificações sobre abastecimento',
+          trailing: Switch(
+            value: fuelAlertsEnabled,
+            onChanged: settingsAsync.isLoading
+                ? null
+                : (value) {
+                    ref.read(settingsNotifierProvider.notifier).toggleFuelAlerts(value);
+                  },
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDevelopmentSection(BuildContext context) {
-    return SettingsSection(
-      title: 'Desenvolvimento',
-      icon: Icons.developer_mode,
+  Widget _buildAppSection() {
+    return _buildSection(
+      title: 'Aplicativo',
+      icon: Icons.apps,
       children: [
-        SettingsItem(
-          icon: Icons.storage,
-          title: 'Inspetor de Banco',
-          subtitle: 'Visualizar dados do Hive\nSharedPreferences',
+        _buildSettingItem(
+          icon: Icons.palette,
+          title: 'Tema',
+          subtitle: 'Escolher aparência do aplicativo',
+          onTap: () => _showThemeDialog(context),
+        ),
+        _buildSettingItem(
+          icon: Icons.language,
+          title: 'Idioma',
+          subtitle: 'Português (Brasil)',
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const DatabaseInspectorPage(),
-              ),
-            );
+            _showSnackBar('Funcionalidade em desenvolvimento');
           },
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
+        ),
+        _buildSettingItem(
+          icon: Icons.storage,
+          title: 'Armazenamento',
+          subtitle: 'Gerenciar dados locais',
+          onTap: () {
+            _showSnackBar('Funcionalidade em desenvolvimento');
+          },
         ),
       ],
     );
   }
 
-  Widget _buildSupportSection(BuildContext context) {
-    return SettingsSection(
+  Widget _buildSupportSection() {
+    return _buildSection(
       title: 'Suporte',
       icon: Icons.help,
       children: [
-        SettingsItem(
+        _buildSettingItem(
           icon: Icons.help_outline,
           title: 'Central de Ajuda',
-          subtitle: 'Perguntas frequentes e tutoriais',
+          subtitle: 'Perguntas frequentes',
           onTap: () {
-            // Help center navigation pending
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
+            _showSnackBar('Funcionalidade em desenvolvimento');
           },
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-          isFirst: true,
         ),
-        SettingsItem(
+        _buildSettingItem(
           icon: Icons.email,
           title: 'Contato',
           subtitle: 'Entre em contato conosco',
           onTap: () {
-            // Contact form implementation pending
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
+            _showSnackBar('Funcionalidade em desenvolvimento');
           },
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
         ),
-        SettingsItem(
-          icon: Icons.bug_report,
-          title: 'Reportar Bug',
-          subtitle: 'Relatar problemas ou sugestões',
-          onTap: () {
-            // Bug report form implementation pending
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
-          },
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        SettingsItem(
+        _buildSettingItem(
           icon: Icons.star_rate,
           title: 'Avaliar o App',
-          subtitle: 'Deixe sua avaliação na loja',
-          onTap: () => _showRateAppDialog(context),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-          isLast: true,
+          subtitle: 'Deixe sua avaliação',
+          onTap: () => _showRateAppDialog(),
         ),
       ],
     );
   }
 
-  Widget _buildInformationSection(BuildContext context) {
+  Widget _buildAboutSection() {
     return _buildSection(
-      context,
-      title: 'Informações',
+      title: 'Sobre',
       icon: Icons.info,
       children: [
-        _buildSettingsItem(
-          context,
+        _buildSettingItem(
           icon: Icons.info_outline,
-          title: 'Sobre o App',
-          subtitle: 'Versão 1.0.0',
+          title: 'Versão do App',
+          subtitle: '1.0.0',
           onTap: () {
-            // App info dialog implementation pending
-            _showSnackBar(context, 'Funcionalidade em desenvolvimento');
+            _showSnackBar('GasOMeter v1.0.0');
           },
-          trailing: Icon(
-            Icons.chevron_right,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
-          ),
+        ),
+        _buildSettingItem(
+          icon: Icons.description,
+          title: 'Termos de Uso',
+          subtitle: 'Leia os termos de uso',
+          onTap: () {
+            _showSnackBar('Funcionalidade em desenvolvimento');
+          },
+        ),
+        _buildSettingItem(
+          icon: Icons.privacy_tip,
+          title: 'Política de Privacidade',
+          subtitle: 'Como tratamos seus dados',
+          onTap: () {
+            _showSnackBar('Funcionalidade em desenvolvimento');
+          },
         ),
       ],
     );
   }
 
-
-  Widget _buildSection(
-    BuildContext context, {
+  Widget _buildSection({
     required String title,
     required IconData icon,
     required List<Widget> children,
   }) {
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
-      ),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -372,27 +317,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: GasometerDesignTokens.iconSizeButton,
+                    color: Theme.of(context).primaryColor,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 18,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             ...children,
           ],
         ),
@@ -400,86 +343,60 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSettingsItem(
-    BuildContext context, {
+  Widget _buildSettingItem({
     required IconData icon,
     required String title,
     required String subtitle,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
-    return InkWell(
-      onTap: onTap != null ? () {
-        HapticFeedback.lightImpact();
-        onTap();
-      } : null,
-      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-              size: GasometerDesignTokens.iconSizeListItem,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (trailing != null) ...[
-              const SizedBox(width: 12),
-              trailing,
-            ],
-          ],
-        ),
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: Theme.of(context).textTheme.bodyMedium?.color,
       ),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: trailing ?? const Icon(Icons.chevron_right),
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
-  String _getThemeDescription(ThemeMode themeMode) {
-    switch (themeMode) {
-      case ThemeMode.light:
-        return 'Claro';
-      case ThemeMode.dark:
-        return 'Escuro';
-      case ThemeMode.system:
-        return 'Automático (Sistema)';
-    }
-  }
-
   void _showThemeDialog(BuildContext context) {
-    // TODO: Implement with Riverpod ThemeProvider
+    final currentThemeMode = ref.read(themeModeProvider);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Escolher Tema'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Funcionalidade sendo migrada para Riverpod'),
-            SizedBox(height: 16),
-            Text('Em breve você poderá alterar o tema novamente.'),
+            _buildThemeOption(
+              'Automático (Sistema)',
+              'Segue a configuração do sistema',
+              Icons.brightness_auto,
+              ThemeMode.system,
+              currentThemeMode == ThemeMode.system,
+              () => _changeTheme(ThemeMode.system),
+            ),
+            _buildThemeOption(
+              'Claro',
+              'Tema claro sempre ativo',
+              Icons.brightness_high,
+              ThemeMode.light,
+              currentThemeMode == ThemeMode.light,
+              () => _changeTheme(ThemeMode.light),
+            ),
+            _buildThemeOption(
+              'Escuro',
+              'Tema escuro sempre ativo',
+              Icons.brightness_2,
+              ThemeMode.dark,
+              currentThemeMode == ThemeMode.dark,
+              () => _changeTheme(ThemeMode.dark),
+            ),
           ],
         ),
         actions: [
@@ -492,185 +409,159 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  // TODO: Implement with Riverpod ThemeProvider
-  // Widget _buildThemeOption(
-  //   BuildContext context,
-  //   ThemeProvider themeProvider,
-  //   ThemeMode mode,
-  //   String title,
-  //   String subtitle,
-  //   IconData icon,
-  // ) {
-  //   final isSelected = themeProvider.themeMode == mode;
-    
-  //   return InkWell(
-  //     onTap: () {
-  //       themeProvider.setThemeMode(mode);
-  //       Navigator.of(context).pop();
-  //     },
-  //     borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-  //     child: Padding(
-  //       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-  //       child: Row(
-  //         children: [
-  //           Icon(
-  //             icon,
-  //             color: isSelected 
-  //               ? Theme.of(context).colorScheme.primary
-  //               : Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-  //           ),
-  //           const SizedBox(width: 16),
-  //           Expanded(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(
-  //                   title,
-  //                   style: TextStyle(
-  //                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-  //                     color: isSelected 
-  //                       ? Theme.of(context).colorScheme.primary
-  //                       : Theme.of(context).colorScheme.onSurface,
-  //                   ),
-  //                 ),
-  //                 Text(
-  //                   subtitle,
-  //                   style: TextStyle(
-  //                     fontSize: 12,
-  //                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           if (isSelected)
-  //             Icon(
-  //               Icons.check,
-  //               color: Theme.of(context).colorScheme.primary,
-  //               size: 20,
-  //             ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+  void _changeTheme(ThemeMode mode) {
+    ref.read(settingsNotifierProvider.notifier).changeTheme(mode);
+    Navigator.of(context).pop();
+  }
 
-
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+  Widget _buildThemeOption(
+    String title,
+    String subtitle,
+    IconData icon,
+    ThemeMode mode,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: () {
+        onTap();
+        Navigator.of(context).pop();
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check,
+                color: Theme.of(context).primaryColor,
+              ),
+          ],
+        ),
       ),
     );
   }
 
-
-  void _showRateAppDialog(BuildContext context) {
-    showDialog<void>(
+  void _showLogoutDialog() {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(
-              Icons.star_rate,
-              color: Colors.orange,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Avaliar o App',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Você está gostando do GasOMeter? Sua avaliação é muito importante para nós!',
-              style: TextStyle(
-                fontSize: 16,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            
-            // Star rating visual
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(
-                  Icons.star,
-                  color: Colors.orange,
-                  size: 32,
-                ),
-              )),
-            ),
-            
-            const SizedBox(height: 20),
-            Text(
-              'Avalie na loja de aplicativos e ajude outros usuários a descobrir o GasOMeter!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Sair da conta'),
+        content: const Text('Tem certeza que deseja fazer logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Talvez mais tarde',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
+            child: const Text('Cancelar'),
           ),
-          ElevatedButton.icon(
-            onPressed: () async {
+          ElevatedButton(
+            onPressed: () {
               Navigator.of(context).pop();
-              await _handleRateApp(context);
+              _showSnackBar('Logout realizado com sucesso');
             },
-            icon: const Icon(Icons.star, size: 18),
-            label: const Text('Avaliar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
-            ),
+            child: const Text('Sair'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _handleRateApp(BuildContext context) async {
-    // TODO: Replace with Riverpod SettingsProvider
-    try {
-      // final settingsProvider = ref.read(settingsProviderNotifier);
-      // final success = await settingsProvider.handleAppRating(context);
+  Future<void> _showRateAppDialog() async {
+    final notifier = ref.read(settingsNotifierProvider.notifier);
+    final canShow = await notifier.canShowRating();
 
-      // Placeholder implementation
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      
-      if (mounted) {
-        _showSnackBar(context, 'Funcionalidade sendo migrada para Riverpod');
-      }
-    } catch (e) {
-      if (mounted) {
-        _showSnackBar(context, 'Erro ao abrir a loja: $e');
-      }
+    if (!canShow) {
+      _showSnackBar('Avaliação já foi feita recentemente');
+      return;
     }
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.star_rate, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Avaliar o App'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Você está gostando do GasOMeter? Sua avaliação é muito importante!',
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Talvez mais tarde'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              final success = await notifier.handleAppRating(context);
+              if (mounted) {
+                _showSnackBar(
+                  success ? 'Obrigado pelo feedback!' : 'Não foi possível abrir a avaliação',
+                );
+              }
+            },
+            icon: const Icon(Icons.star),
+            label: const Text('Avaliar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
   }
 }
-

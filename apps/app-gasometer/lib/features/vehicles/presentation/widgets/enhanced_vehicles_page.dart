@@ -2,8 +2,8 @@
 /// Demonstrates the new responsive layout system with desktop/mobile adaptations
 library;
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
@@ -12,26 +12,20 @@ import '../../../../core/presentation/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../pages/add_vehicle_page.dart';
-import '../providers/vehicles_provider.dart';
+import '../providers/vehicles_notifier.dart';
 
 /// Enhanced responsive vehicles page
-class EnhancedVehiclesPage extends StatefulWidget {
+class EnhancedVehiclesPage extends ConsumerStatefulWidget {
   const EnhancedVehiclesPage({super.key});
 
   @override
-  State<EnhancedVehiclesPage> createState() => _EnhancedVehiclesPageState();
+  ConsumerState<EnhancedVehiclesPage> createState() => _EnhancedVehiclesPageState();
 }
 
-class _EnhancedVehiclesPageState extends State<EnhancedVehiclesPage> {
-  late final VehiclesProvider _vehiclesProvider;
-  
+class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
   @override
   void initState() {
     super.initState();
-    _vehiclesProvider = context.read<VehiclesProvider>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _vehiclesProvider.initialize();
-    });
   }
 
   @override
@@ -83,9 +77,9 @@ class _EnhancedVehiclesPageState extends State<EnhancedVehiclesPage> {
       context: context,
       builder: (context) => const AddVehiclePage(),
     );
-    
+
     if (result == true && mounted) {
-      await _vehiclesProvider.loadVehicles();
+      await ref.read(vehiclesNotifierProvider.notifier).refresh();
     }
   }
 }
@@ -155,11 +149,11 @@ class _MobileHeader extends StatelessWidget {
 }
 
 /// Add vehicle button for desktop header
-class _AddVehicleButton extends StatelessWidget {
+class _AddVehicleButton extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton.icon(
-      onPressed: () => _addVehicle(context),
+      onPressed: () => _addVehicle(context, ref),
       icon: const Icon(Icons.add),
       label: const Text('Novo Veículo'),
       style: ElevatedButton.styleFrom(
@@ -172,75 +166,59 @@ class _AddVehicleButton extends StatelessWidget {
       ),
     );
   }
-  
-  void _addVehicle(BuildContext context) async {
+
+  void _addVehicle(BuildContext context, WidgetRef ref) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => const AddVehiclePage(),
     );
-    
+
     if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
+      await ref.read(vehiclesNotifierProvider.notifier).refresh();
     }
   }
 }
 
 /// Responsive vehicles list with adaptive grid
-class _ResponsiveVehiclesList extends StatelessWidget {
+class _ResponsiveVehiclesList extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return Selector<VehiclesProvider, Map<String, dynamic>>(
-      selector: (context, provider) => {
-        'isLoading': provider.isLoading,
-        'isInitialized': provider.isInitialized,
-        'vehicles': provider.vehicles,
-        'errorMessage': provider.errorMessage,
-      },
-      builder: (context, data, child) {
-        final isLoading = data['isLoading'] as bool;
-        final isInitialized = data['isInitialized'] as bool;
-        final vehicles = data['vehicles'] as List<VehicleEntity>;
-        final errorMessage = data['errorMessage'] as String?;
-        
-        if (!isInitialized) {
-          return StandardLoadingView.initial(
-            message: 'Carregando veículos...',
-            height: 300,
-          );
-        }
-        
-        if (errorMessage != null) {
-          return _ErrorState(errorMessage: errorMessage);
-        }
-        
-        if (isLoading && vehicles.isEmpty) {
-          return StandardLoadingView.refresh(message: 'Carregando...');
-        }
-        
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+
+    return vehiclesAsync.when(
+      data: (vehicles) {
         if (vehicles.isEmpty) {
           return EnhancedEmptyState.generic(
             icon: Icons.directions_car_outlined,
             title: 'Nenhum veículo cadastrado',
             description: 'Cadastre seu primeiro veículo para começar a controlar seus gastos',
             actionLabel: 'Cadastrar Veículo',
-            onAction: () => _addVehicle(context),
+            onAction: () => _addVehicle(context, ref),
             height: MediaQuery.of(context).size.height - 300,
           );
         }
-        
+
         return _ResponsiveVehiclesGrid(vehicles: vehicles);
       },
+      loading: () => StandardLoadingView.initial(
+        message: 'Carregando veículos...',
+        height: 300,
+      ),
+      error: (error, stack) => _ErrorState(
+        errorMessage: error.toString(),
+        onRetry: () => ref.read(vehiclesNotifierProvider.notifier).refresh(),
+      ),
     );
   }
-  
-  void _addVehicle(BuildContext context) async {
+
+  void _addVehicle(BuildContext context, WidgetRef ref) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => const AddVehiclePage(),
     );
-    
+
     if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
+      await ref.read(vehiclesNotifierProvider.notifier).refresh();
     }
   }
 }
@@ -289,18 +267,18 @@ class _ResponsiveVehiclesGrid extends StatelessWidget {
 }
 
 /// Enhanced vehicle card with responsive design
-class _ResponsiveVehicleCard extends StatelessWidget {
-  
+class _ResponsiveVehicleCard extends ConsumerWidget {
+
   const _ResponsiveVehicleCard({
-    super.key, 
+    super.key,
     required this.vehicle,
   });
   final VehicleEntity vehicle;
   
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDesktop = ResponsiveLayout.isDesktop(context);
-    
+
     return ResponsiveCard(
       padding: EdgeInsets.all(AdaptiveSpacing.md(context)),
       child: Column(
@@ -380,7 +358,7 @@ class _ResponsiveVehicleCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     TextButton.icon(
-                      onPressed: () => _editVehicle(context, vehicle),
+                      onPressed: () => _editVehicle(context, ref, vehicle),
                       icon: const Icon(Icons.edit, size: 16),
                       label: const Text('Editar'),
                       style: TextButton.styleFrom(
@@ -391,7 +369,7 @@ class _ResponsiveVehicleCard extends StatelessWidget {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: () => _deleteVehicle(context, vehicle),
+                      onPressed: () => _deleteVehicle(context, ref, vehicle),
                       icon: const Icon(Icons.delete, size: 16),
                       label: const Text('Excluir'),
                       style: TextButton.styleFrom(
@@ -418,18 +396,18 @@ class _ResponsiveVehicleCard extends StatelessWidget {
     );
   }
   
-  void _editVehicle(BuildContext context, VehicleEntity vehicle) async {
+  void _editVehicle(BuildContext context, WidgetRef ref, VehicleEntity vehicle) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AddVehiclePage(vehicle: vehicle),
     );
-    
+
     if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
+      await ref.read(vehiclesNotifierProvider.notifier).refresh();
     }
   }
-  
-  void _deleteVehicle(BuildContext context, VehicleEntity vehicle) {
+
+  void _deleteVehicle(BuildContext context, WidgetRef ref, VehicleEntity vehicle) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -443,14 +421,25 @@ class _ResponsiveVehicleCard extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              final success = await context.read<VehiclesProvider>().deleteVehicle(vehicle.id);
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Veículo excluído com sucesso'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+              try {
+                await ref.read(vehiclesNotifierProvider.notifier).deleteVehicle(vehicle.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Veículo excluído com sucesso'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro ao excluir veículo: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
@@ -507,10 +496,14 @@ class _InfoRow extends StatelessWidget {
 
 /// Error state widget
 class _ErrorState extends StatelessWidget {
-  
-  const _ErrorState({required this.errorMessage});
+
+  const _ErrorState({
+    required this.errorMessage,
+    required this.onRetry,
+  });
   final String errorMessage;
-  
+  final VoidCallback onRetry;
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -540,7 +533,7 @@ class _ErrorState extends StatelessWidget {
           ),
           SizedBox(height: AdaptiveSpacing.lg(context)),
           ElevatedButton.icon(
-            onPressed: () => context.read<VehiclesProvider>().loadVehicles(),
+            onPressed: onRetry,
             icon: const Icon(Icons.refresh),
             label: const Text('Tentar novamente'),
           ),

@@ -1,18 +1,18 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/avatar_service.dart';
 
 /// Dialog for avatar selection with camera, gallery and remove options
-class AvatarSelectionDialog extends StatefulWidget {
+class AvatarSelectionDialog extends ConsumerStatefulWidget {
   const AvatarSelectionDialog({super.key});
 
   @override
-  State<AvatarSelectionDialog> createState() => _AvatarSelectionDialogState();
+  ConsumerState<AvatarSelectionDialog> createState() => _AvatarSelectionDialogState();
 }
 
-class _AvatarSelectionDialogState extends State<AvatarSelectionDialog> {
+class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
   final AvatarService _avatarService = AvatarService();
   bool _isProcessing = false;
   AvatarResult? _previewResult;
@@ -154,10 +154,11 @@ class _AvatarSelectionDialogState extends State<AvatarSelectionDialog> {
         ),
         
         // Remove button (only if user has avatar)
-        Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            final hasAvatar = authProvider.currentUser?.hasLocalAvatar == true ||
-                authProvider.currentUser?.hasProfilePhoto == true;
+        Consumer(
+          builder: (context, ref, _) {
+            final currentUser = ref.watch(currentUserProvider);
+            final hasAvatar = currentUser?.hasLocalAvatar == true ||
+                currentUser?.hasProfilePhoto == true;
             
             if (!hasAvatar) return const SizedBox.shrink();
             
@@ -227,8 +228,8 @@ class _AvatarSelectionDialogState extends State<AvatarSelectionDialog> {
     if (_previewResult?.base64Data == null) return;
 
     try {
-      final authProvider = context.read<AuthProvider>();
-      final success = await authProvider.updateAvatar(_previewResult!.base64Data!);
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      final success = await authNotifier.updateAvatar(_previewResult!.base64Data!);
       
       if (success) {
         if (mounted) {
@@ -250,8 +251,8 @@ class _AvatarSelectionDialogState extends State<AvatarSelectionDialog> {
 
   Future<void> _removeAvatar() async {
     try {
-      final authProvider = context.read<AuthProvider>();
-      final success = await authProvider.removeAvatar();
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      final success = await authNotifier.removeAvatar();
       
       if (success) {
         if (mounted) {

@@ -67,7 +67,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
   late AnimationController _iconController;
   late AnimationController _progressController;
   late Animation<double> _iconAnimation;
-  late Animation<double> _progressAnimation;
   Timer? _stepTimer;
   bool _completed = false;
 
@@ -103,10 +102,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
     _progressController = AnimationController(
       duration: LoadingDesignTokens.slowDuration,
       vsync: this,
-    );
-    _progressAnimation = CurvedAnimation(
-      parent: _progressController,
-      curve: LoadingDesignTokens.standardCurve,
     );
 
     // Iniciar primeira etapa

@@ -1,14 +1,14 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../features/auth/domain/entities/user_entity.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as gasometer_auth;
+import '../../features/auth/domain/entities/user_entity.dart' as gasometer_entities;
+import '../providers/auth_provider.dart';
 import '../services/avatar_service.dart';
 import 'avatar_selection_dialog.dart';
 
 /// Customizable user avatar widget with support for local and remote images
-class UserAvatarWidget extends StatelessWidget {
-  
+class UserAvatarWidget extends ConsumerWidget {
+
   const UserAvatarWidget({
     super.key,
     this.user,
@@ -19,7 +19,7 @@ class UserAvatarWidget extends StatelessWidget {
     this.onTap,
     this.placeholderText,
   });
-  final UserEntity? user;
+  final gasometer_entities.UserEntity? user;
   final double size;
   final bool showBorder;
   final Color? borderColor;
@@ -28,8 +28,8 @@ class UserAvatarWidget extends StatelessWidget {
   final String? placeholderText;
 
   @override
-  Widget build(BuildContext context) {
-    final currentUser = user ?? context.watch<gasometer_auth.AuthProvider>().currentUser;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = user ?? ref.watch(currentUserProvider);
     final theme = Theme.of(context);
     final avatarService = AvatarService();
 
@@ -84,7 +84,7 @@ class UserAvatarWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatarContent(UserEntity? user, AvatarService avatarService, ThemeData theme) {
+  Widget _buildAvatarContent(gasometer_entities.UserEntity? user, AvatarService avatarService, ThemeData theme) {
     // Priority: local avatar > remote photo > placeholder
     if (user?.hasLocalAvatar == true) {
       final bytes = avatarService.decodeAvatarBytes(user!.avatarBase64);
@@ -124,7 +124,7 @@ class UserAvatarWidget extends StatelessWidget {
     return _buildPlaceholder(user, theme);
   }
 
-  Widget _buildPlaceholder(UserEntity? user, ThemeData theme) {
+  Widget _buildPlaceholder(gasometer_entities.UserEntity? user, ThemeData theme) {
     final displayText = _getPlaceholderText(user);
     
     return Container(
@@ -147,7 +147,7 @@ class UserAvatarWidget extends StatelessWidget {
     );
   }
 
-  String _getPlaceholderText(UserEntity? user) {
+  String _getPlaceholderText(gasometer_entities.UserEntity? user) {
     if (placeholderText != null) {
       return placeholderText!;
     }
@@ -185,7 +185,7 @@ class UserAvatarSmall extends StatelessWidget {
     this.size = 32.0,
     this.onTap,
   });
-  final UserEntity? user;
+  final gasometer_entities.UserEntity? user;
   final double size;
   final VoidCallback? onTap;
 
@@ -210,7 +210,7 @@ class UserAvatarLarge extends StatelessWidget {
     this.size = 120.0,
     this.showEditIcon = true,
   });
-  final UserEntity? user;
+  final gasometer_entities.UserEntity? user;
   final double size;
   final bool showEditIcon;
 

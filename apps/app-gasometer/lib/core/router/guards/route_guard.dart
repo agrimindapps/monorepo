@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/platform_service.dart';
 
 /// Guard de rotas centralizado para gerenciar redirecionamentos baseados em autenticação
@@ -9,8 +9,8 @@ import '../../services/platform_service.dart';
 /// melhorando legibilidade, testabilidade e manutenibilidade.
 class RouteGuard {
 
-  const RouteGuard(this._authProvider, this._platformService);
-  final AuthProvider? _authProvider;
+  const RouteGuard(this._authNotifier, this._platformService);
+  final AuthNotifier? _authNotifier;
   final PlatformService _platformService;
 
   /// Determina se deve redirecionar baseado no estado atual da rota e autenticação
@@ -18,15 +18,15 @@ class RouteGuard {
   /// Retorna null se a navegação deve continuar, ou uma string com a rota de destino
   /// se deve redirecionar.
   String? handleRedirect(String currentLocation) {
-    // If AuthProvider is not available or not initialized yet, allow navigation to continue
+    // If AuthNotifier is not available or not initialized yet, allow navigation to continue
     // This prevents race conditions during app initialization
-    if (_authProvider == null || !_authProvider.isInitialized) {
+    if (_authNotifier == null || !_authNotifier.state.isInitialized) {
       return null;
     }
-    
-    final isAuthenticated = _authProvider.isAuthenticated;
-    final hasAuthError = _authProvider.errorMessage != null;
-    final isLoading = _authProvider.isLoading;
+
+    final isAuthenticated = _authNotifier.state.isAuthenticated;
+    final hasAuthError = _authNotifier.state.errorMessage != null;
+    final isLoading = _authNotifier.state.isLoading;
     final routeType = _getRouteType(currentLocation);
 
     // SECURITY + UX FIX: If there's an authentication error and we're on login page,

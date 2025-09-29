@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
 import 'injectable_config.config.dart';
 

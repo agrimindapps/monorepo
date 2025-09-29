@@ -17,9 +17,6 @@ dependencies:
   # Core Package - Serviços compartilhados (Firebase, Riverpod, Hive, GetIt, Injectable, Provider, dartz, equatable, etc.)
   core:
     path: ../../packages/core
-  
-  # Dependências específicas não disponíveis via core
-  flutter_staggered_grid_view: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,75 +1,32 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
-import '../models/stat_data.dart';
-import '../providers/reports_provider.dart';
-import 'optimized_reports_widgets.dart';
+import '../../../../core/providers/vehicles_provider.dart';
 
-class ReportsPage extends StatefulWidget {
+class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
 
   @override
-  State<ReportsPage> createState() => _ReportsPageState();
+  ConsumerState<ReportsPage> createState() => _ReportsPageState();
 }
 
-class _ReportsPageState extends State<ReportsPage> {
+class _ReportsPageState extends ConsumerState<ReportsPage> {
   String? _selectedVehicleId;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Verificar se o widget ainda está montado antes de acessar o context
-      if (!mounted) return;
-      
-      final vehiclesProvider = Provider.of<VehiclesProvider>(context, listen: false);
-      final reportsProvider = Provider.of<ReportsProvider>(context, listen: false);
-      
-      if (vehiclesProvider.vehicles.isNotEmpty) {
-        final vehicleId = vehiclesProvider.vehicles.first.id;
-        
-        // Verificar novamente se ainda está montado antes do setState
-        if (mounted) {
-          setState(() {
-            _selectedVehicleId = vehicleId;
-          });
-          
-          // Load reports data for the selected vehicle
-          reportsProvider.loadAllReportsForVehicle(vehicleId);
-        }
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final vehiclesState = ref.watch(vehiclesProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
+            _buildVehicleSelector(context),
             Expanded(
-              child: SingleChildScrollView(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: OptimizedReportsContent(
-                        selectedVehicleId: _selectedVehicleId,
-                        onVehicleChanged: (String? vehicleId) {
-                          setState(() {
-                            _selectedVehicleId = vehicleId;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildContent(context),
             ),
           ],
         ),
@@ -84,23 +41,23 @@ class _ReportsPageState extends State<ReportsPage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
             ),
           ],
         ),
-        child: Semantics(
-          label: 'Seção de relatórios',
-          hint: 'Página principal para visualizar estatísticas e gráficos',
-          child: Row(
-            children: [
-              Container(
+        child: Row(
+          children: [
+            Semantics(
+              label: 'Seção de relatórios',
+              hint: 'Página principal para visualizar estatísticas e gráficos',
+              child: Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
@@ -112,360 +69,205 @@ class _ReportsPageState extends State<ReportsPage> {
                   size: 19,
                 ),
               ),
-              const SizedBox(width: 13),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Estatísticas',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 13),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SemanticText.heading(
+                    'Relatórios',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
                     ),
-                    SizedBox(height: 3),
-                    Text(
-                      'Acompanhe o desempenho dos seus veículos',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        height: 1.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 3),
+                  SemanticText.subtitle(
+                    'Acompanhe o desempenho dos seus veículos',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
                     ),
-                  ],
-                ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-
-  Widget _buildFuelSection(BuildContext context) {
-    return Consumer<ReportsProvider>(
-      builder: (context, reportsProvider, child) {
-        final currentMonthStats = reportsProvider.getCurrentMonthStats();
-        final currentYearStats = reportsProvider.getCurrentYearStats();
-        final monthlyComparisons = reportsProvider.getMonthlyComparisons();
-        final yearlyComparisons = reportsProvider.getYearlyComparisons();
-        
-        return _buildStatSection(
-          context,
-          title: 'Abastecimento',
-          icon: Icons.local_gas_station,
-          iconColor: GasometerDesignTokens.colorAnalyticsBlue,
-          stats: [
-            StatData(
-              label: 'Este Ano',
-              value: currentYearStats['fuel_spent'] ?? 'R\$ 0,00',
-              comparison: 'Ano Anterior',
-              comparisonValue: yearlyComparisons['fuel_spent'] ?? 'R\$ 0,00',
-              percentage: yearlyComparisons['fuel_spent_growth'] != '0%' ? yearlyComparisons['fuel_spent_growth'] : null,
-              isPositive: _isPositiveGrowth(yearlyComparisons['fuel_spent_growth']),
+  Widget _buildVehicleSelector(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.directions_car,
+              color: Theme.of(context).primaryColor,
+              size: 20,
             ),
-            StatData(
-              label: 'Este Mês',
-              value: currentMonthStats['fuel_spent'] ?? 'R\$ 0,00',
-              comparison: 'Mês Anterior',
-              comparisonValue: monthlyComparisons['fuel_spent'] ?? 'R\$ 0,00',
-              percentage: monthlyComparisons['fuel_spent_growth'] != '0%' ? monthlyComparisons['fuel_spent_growth'] : null,
-              isPositive: _isPositiveGrowth(monthlyComparisons['fuel_spent_growth']),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Seletor de veículo será implementado',
+                style: TextStyle(fontSize: 14),
+              ),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget _buildConsumptionSection(BuildContext context) {
-    return Consumer<ReportsProvider>(
-      builder: (context, reportsProvider, child) {
-        final currentMonthStats = reportsProvider.getCurrentMonthStats();
-        final currentYearStats = reportsProvider.getCurrentYearStats();
-        final monthlyComparisons = reportsProvider.getMonthlyComparisons();
-        final yearlyComparisons = reportsProvider.getYearlyComparisons();
-        
-        return _buildStatSection(
-          context,
-          title: 'Combustível',
-          icon: Icons.local_gas_station,
-          iconColor: GasometerDesignTokens.colorAnalyticsGreen,
-          stats: [
-            StatData(
-              label: 'Este Ano',
-              value: currentYearStats['fuel_liters'] ?? '0,0L',
-              comparison: 'Ano Anterior',
-              comparisonValue: yearlyComparisons['fuel_liters'] ?? '0,0L',
-            ),
-            StatData(
-              label: 'Este Mês',
-              value: currentMonthStats['fuel_liters'] ?? '0,0L',
-              comparison: 'Mês Anterior',
-              comparisonValue: monthlyComparisons['fuel_liters'] ?? '0,0L',
-            ),
-          ],
-        );
-      },
-    );
+  Widget _buildContent(BuildContext context) {
+    if (_selectedVehicleId == null) {
+      return EnhancedEmptyState(
+        title: 'Selecione um veículo',
+        description: 'Escolha um veículo para visualizar os relatórios e estatísticas.',
+        icon: Icons.directions_car_outlined,
+        actionLabel: 'Selecionar veículo',
+        onAction: () {
+          // TODO: Implementar seleção de veículo
+        },
+      );
+    }
+
+    return _buildReportsContent();
   }
 
-  Widget _buildDistanceSection(BuildContext context) {
-    return Consumer<ReportsProvider>(
-      builder: (context, reportsProvider, child) {
-        final currentMonthStats = reportsProvider.getCurrentMonthStats();
-        final currentYearStats = reportsProvider.getCurrentYearStats();
-        final monthlyComparisons = reportsProvider.getMonthlyComparisons();
-        final yearlyComparisons = reportsProvider.getYearlyComparisons();
-        
-        return _buildStatSection(
-          context,
-          title: 'Distância',
-          icon: Icons.speed,
-          iconColor: GasometerDesignTokens.colorAnalyticsPurple,
-          stats: [
-            StatData(
-              label: 'Este Ano',
-              value: currentYearStats['distance'] ?? '0 km',
-              comparison: 'Ano Anterior',
-              comparisonValue: yearlyComparisons['distance'] ?? '0 km',
-              percentage: yearlyComparisons['distance_growth'] != '0%' ? yearlyComparisons['distance_growth'] : null,
-              isPositive: _isPositiveGrowth(yearlyComparisons['distance_growth']),
-            ),
-            StatData(
-              label: 'Este Mês',
-              value: currentMonthStats['distance'] ?? '0 km',
-              comparison: 'Mês Anterior',
-              comparisonValue: monthlyComparisons['distance'] ?? '0 km',
-              percentage: monthlyComparisons['distance_growth'] != '0%' ? monthlyComparisons['distance_growth'] : null,
-              isPositive: _isPositiveGrowth(monthlyComparisons['distance_growth']),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildStatSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required List<StatData> stats,
-  }) {
-    return SemanticCard(
-      semanticLabel: 'Seção de estatísticas: $title',
-      semanticHint: 'Contém dados estatísticos sobre $title do veículo selecionado',
+  Widget _buildReportsContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Semantics(
-                label: 'Ícone da categoria $title',
-                hint: 'Indicador visual para estatísticas de $title',
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              SemanticText.heading(
-                title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ...stats.map((stat) => _buildStatRow(context, stat)),
+          _buildStatisticsSection(),
+          const SizedBox(height: 24),
+          _buildChartsSection(),
         ],
       ),
     );
   }
 
-  Widget _buildStatRow(BuildContext context, StatData stat) {
-    final semanticLabel = '${stat.label}: ${stat.value}. ${stat.comparison}: ${stat.comparisonValue}';
-    final growthDescription = stat.percentage != null 
-        ? ', ${stat.isPositive! ? 'crescimento' : 'decréscimo'} de ${stat.percentage}'
-        : '';
-    
-    return Semantics(
-      label: semanticLabel + growthDescription,
+  Widget _buildStatisticsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Estatísticas',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: 'Gasto Total',
+                value: 'R\$ 0,00',
+                icon: Icons.attach_money,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                title: 'Km Rodados',
+                value: '0 km',
+                icon: Icons.speed,
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: 'Abastecimentos',
+                value: '0',
+                icon: Icons.local_gas_station,
+                color: Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                title: 'Consumo Médio',
+                value: '0,0 km/l',
+                icon: Icons.trending_up,
+                color: Colors.purple,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Card(
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SemanticText.label(
-                      stat.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        SemanticText(
-                          stat.value,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        if (stat.percentage != null) ...[
-                          const SizedBox(width: 8),
-                          SemanticStatusIndicator(
-                            status: stat.isPositive! ? 'Crescimento' : 'Decréscimo',
-                            description: '${stat.isPositive! ? 'Aumento' : 'Diminuição'} de ${stat.percentage}',
-                            isSuccess: stat.isPositive!,
-                            isError: !stat.isPositive!,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: stat.isPositive! 
-                                  ? Colors.green.withValues(alpha: 0.1)
-                                  : Colors.red.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    stat.isPositive! 
-                                      ? Icons.arrow_upward
-                                      : Icons.arrow_downward,
-                                    size: 12,
-                                    color: stat.isPositive! 
-                                      ? Colors.green
-                                      : Colors.red,
-                                  ),
-                                  const SizedBox(width: 2),
-                                  SemanticText(
-                                    stat.percentage!,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: stat.isPositive! 
-                                        ? Colors.green
-                                        : Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 20,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SemanticText.label(
-                      stat.comparison,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SemanticText(
-                      stat.comparisonValue,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  bool? _isPositiveGrowth(String? percentage) {
-    if (percentage == null || percentage == '0%') return null;
-    final cleanPercentage = percentage.replaceAll('%', '').replaceAll('+', '');
-    final growth = double.tryParse(cleanPercentage);
-    return growth != null ? growth > 0 : null;
-  }
-
-  Widget _buildErrorState(String error, VoidCallback onRetry) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(48.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Semantics(
-              label: 'Erro de carregamento',
-              hint: 'Ícone indicando erro no carregamento das estatísticas',
-              child: Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SemanticText.heading(
-              'Erro ao carregar estatísticas',
-              style: TextStyle(
-                fontSize: 18,
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: color,
               ),
-            ),
-            const SizedBox(height: 8),
-            SemanticText(
-              error,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            SemanticButton(
-              semanticLabel: 'Tentar carregar estatísticas novamente',
-              semanticHint: 'Tenta recarregar os dados das estatísticas após o erro',
-              type: ButtonType.elevated,
-              onPressed: onRetry,
-              child: const Text('Tentar novamente'),
             ),
           ],
         ),
@@ -473,5 +275,69 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
+  Widget _buildChartsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Gráficos',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.show_chart,
+                      color: Theme.of(context).primaryColor,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Gráficos em desenvolvimento',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.bar_chart,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Gráficos serão implementados',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
-

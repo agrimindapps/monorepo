@@ -1,134 +1,34 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/widgets.dart';
-import '../../../../core/providers/base_provider.dart';
-import '../../../../core/services/receipt_image_service.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
-import '../../domain/entities/maintenance_entity.dart';
-import '../providers/maintenance_form_provider.dart';
-import '../providers/maintenance_provider.dart';
-import 'add_maintenance_page.dart';
+import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
+import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/providers/vehicles_provider.dart';
 
-class MaintenancePage extends StatefulWidget {
+class MaintenancePage extends ConsumerStatefulWidget {
   const MaintenancePage({super.key});
 
   @override
-  State<MaintenancePage> createState() => _MaintenancePageState();
+  ConsumerState<MaintenancePage> createState() => _MaintenancePageState();
 }
 
-class _MaintenancePageState extends State<MaintenancePage> {
+class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   String? _selectedVehicleId;
-  int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
-
-  // ✅ PERFORMANCE FIX: Cached providers
-  late final MaintenanceProvider _maintenanceProvider;
-  late final VehiclesProvider _vehiclesProvider;
-
-  // Generate month list dynamically
-  List<String> get _months {
-    final now = DateTime.now();
-    final currentYear = now.year;
-    final monthNames = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
-    ];
-
-    return monthNames
-        .asMap()
-        .entries
-        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
-        .toList();
-  }
-  
-  // ✅ PERFORMANCE FIX: Memoize filtered records
-  List<MaintenanceEntity>? _cachedFilteredRecords;
-  String? _lastVehicleId;
-  List<MaintenanceEntity>? _lastMaintenanceRecords;
-  int? _lastMonthIndex;
-  
-  @override
-  void initState() {
-    super.initState();
-    // ✅ PERFORMANCE FIX: Cache providers once in initState
-    _maintenanceProvider = context.read<MaintenanceProvider>();
-    _vehiclesProvider = context.read<VehiclesProvider>();
-    
-    // Inicializar providers de forma lazy
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      
-      _maintenanceProvider.loadAllMaintenanceRecords();
-      _vehiclesProvider.initialize();
-    });
-  }
-
-  // ✅ PERFORMANCE FIX: Memoized filtered records with caching
-  List<MaintenanceEntity> get _filteredRecords {
-    final currentRecords = _maintenanceProvider.maintenanceRecords;
-
-    // Check if cache is still valid
-    if (_cachedFilteredRecords != null &&
-        _lastVehicleId == _selectedVehicleId &&
-        _lastMaintenanceRecords == currentRecords &&
-        _lastMonthIndex == _currentMonthIndex) {
-      return _cachedFilteredRecords!;
-    }
-
-    // Rebuild cache
-    var filtered = List<MaintenanceEntity>.from(currentRecords);
-
-    // Apply vehicle filter
-    if (_selectedVehicleId != null) {
-      filtered = filtered.where((r) => r.vehicleId == _selectedVehicleId).toList();
-    }
-
-    // Apply month filter
-    final selectedMonth = _currentMonthIndex + 1; // Convert index to month (1-12)
-    final currentYear = DateTime.now().year;
-    filtered = filtered.where((r) {
-      return r.serviceDate.month == selectedMonth &&
-             r.serviceDate.year == currentYear;
-    }).toList();
-
-    // Sort by date (most recent first)
-    filtered.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
-
-    // Update cache
-    _cachedFilteredRecords = filtered;
-    _lastVehicleId = _selectedVehicleId;
-    _lastMaintenanceRecords = currentRecords;
-    _lastMonthIndex = _currentMonthIndex;
-
-    return filtered;
-  }
+  int _currentMonthIndex = DateTime.now().month - 1;
 
   @override
   Widget build(BuildContext context) {
+    final vehiclesState = ref.watch(vehiclesProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            _buildVehicleSelector(),
+            _buildVehicleSelector(context),
             _buildMonthSelector(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildContentWithoutVehicleSelector(context),
-                    ),
-                  ),
-                ),
-              ),
+              child: _buildContent(context),
             ),
           ],
         ),
@@ -144,23 +44,23 @@ class _MaintenancePageState extends State<MaintenancePage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
             ),
           ],
         ),
-        child: Semantics(
-          label: 'Seção de manutenções',
-          hint: 'Página principal para gerenciar manutenções',
-          child: Row(
-            children: [
-              Container(
+        child: Row(
+          children: [
+            Semantics(
+              label: 'Seção de manutenções',
+              hint: 'Página principal para gerenciar manutenções',
+              child: Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
@@ -172,89 +72,115 @@ class _MaintenancePageState extends State<MaintenancePage> {
                   size: 19,
                 ),
               ),
-              const SizedBox(width: 13),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Manutenções',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 13),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SemanticText.heading(
+                    'Manutenções',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
                     ),
-                    SizedBox(height: 3),
-                    Text(
-                      'Histórico de manutenções dos seus veículos',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        height: 1.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 3),
+                  SemanticText.subtitle(
+                    'Histórico de manutenções dos seus veículos',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.3,
                     ),
-                  ],
-                ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVehicleSelector(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
           ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.directions_car,
+              color: Theme.of(context).primaryColor,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Seletor de veículo será implementado',
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildMonthSelector() {
+    final months = _getMonths();
+
     return Container(
-      height: 40,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      height: 50,
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _months.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: months.length,
         itemBuilder: (context, index) {
           final isSelected = index == _currentMonthIndex;
-          return Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _currentMonthIndex = index;
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
-                onTap: () {
-                  setState(() {
-                    _currentMonthIndex = index;
-                    _cachedFilteredRecords = null; // Invalidate cache
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  months[index],
+                  style: TextStyle(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _months[index],
-                      style: TextStyle(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurface,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        fontSize: 13,
-                      ),
-                    ),
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -265,630 +191,41 @@ class _MaintenancePageState extends State<MaintenancePage> {
     );
   }
 
-
-  Widget _buildVehicleSelector() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(8.0),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Consumer<VehiclesProvider>(
-            builder: (context, vehiclesProvider, child) {
-              return EnhancedVehicleSelector(
-                selectedVehicleId: _selectedVehicleId,
-                onVehicleChanged: (String? vehicleId) {
-                  setState(() {
-                    _selectedVehicleId = vehicleId;
-                    // ✅ PERFORMANCE FIX: Invalidate cache when vehicle changes
-                    _cachedFilteredRecords = null;
-                  });
-                },
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContentWithoutVehicleSelector(BuildContext context) {
-    return Consumer<MaintenanceProvider>(
-      builder: (context, maintenanceProvider, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (maintenanceProvider.isLoading)
-              StandardLoadingView.initial(
-                message: 'Carregando manutenções...',
-                height: 400,
-              )
-            else if (maintenanceProvider.state == ProviderState.error)
-              _buildErrorState(maintenanceProvider.errorMessage!, () => maintenanceProvider.loadAllMaintenanceRecords())
-            else if (_filteredRecords.isEmpty)
-              _buildEmptyState()
-            else ...[
-              _buildStatistics(),
-              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-              _buildUpcomingMaintenances(),
-              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-              _buildRecordsList(),
-            ],
-          ],
-        );
+  Widget _buildContent(BuildContext context) {
+    return EnhancedEmptyState(
+      title: 'Nenhuma manutenção',
+      description: 'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
+      icon: Icons.build_outlined,
+      actionLabel: 'Adicionar manutenção',
+      onAction: () {
+        // TODO: Implementar navegação para adicionar manutenção
       },
     );
   }
 
-  Widget _buildStatistics() {
-    // Use cached statistics from provider instead of calculating in build method
-    final statistics = _maintenanceProvider.statistics;
-
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            'Gasto Total',
-            'R\$ ${statistics.totalCost.toStringAsFixed(2)}',
-            Icons.attach_money,
-            Colors.green,
-          ),
-        ),
-        const SizedBox(width: GasometerDesignTokens.spacingLg),
-        Expanded(
-          child: _buildStatCard(
-            'Preventivas',
-            statistics.preventiveCount.toString(),
-            Icons.schedule,
-            Colors.blue,
-          ),
-        ),
-        const SizedBox(width: GasometerDesignTokens.spacingLg),
-        Expanded(
-          child: _buildStatCard(
-            'Corretivas',
-            statistics.correctiveCount.toString(),
-            Icons.build_circle,
-            Colors.orange,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return SemanticCard(
-      semanticLabel: 'Estatística de $title: $value',
-      semanticHint: 'Informação sobre $title das manutenções',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingSm),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: GasometerDesignTokens.spacingMd),
-              SemanticText.label(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: GasometerDesignTokens.spacingMd),
-          SemanticText(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUpcomingMaintenances() {
-    final upcomingServices = _filteredRecords
-        .where((r) => r.nextServiceDate != null)
-        .where((r) => r.nextServiceDate!.isAfter(DateTime.now()))
-        .toList();
-
-    if (upcomingServices.isEmpty) return const SizedBox.shrink();
-
-    upcomingServices.sort((a, b) => 
-      a.nextServiceDate!.compareTo(b.nextServiceDate!));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.notification_important, color: Theme.of(context).colorScheme.primary, size: 20),
-            const SizedBox(width: GasometerDesignTokens.spacingSm),
-            SemanticText.heading(
-              'Próximas Manutenções',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingMd),
-        ...upcomingServices.take(2).map((service) {
-          final daysUntil = service.nextServiceDate!
-              .difference(DateTime.now())
-              .inDays;
-          final urgencyDescription = daysUntil <= 7 ? 'urgente' : daysUntil <= 30 ? 'próxima' : 'futura';
-          
-          return Semantics(
-            label: 'Manutenção $urgencyDescription: ${service.title} do veículo ${service.vehicleId} em $daysUntil dias',
-            hint: 'Lembrete de manutenção programada',
-            child: Card(
-              elevation: 0,
-              margin: const EdgeInsets.only(bottom: 8),
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-              shape: RoundedRectangleBorder(
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-                side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
-              ),
-              child: Padding(
-                padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
-                child: Row(
-                  children: [
-                    Semantics(
-                      label: 'Ícone de lembrete',
-                      child: Container(
-                        padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingSm),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                          borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
-                        ),
-                        child: Icon(
-                          Icons.access_time,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: GasometerDesignTokens.spacingMd),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SemanticText.heading(
-                            '${service.vehicleId} - ${service.title}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          SemanticText.label(
-                            'Em $daysUntil dias',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildRecordsList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SemanticText.heading(
-          'Histórico de Manutenções',
-          style: TextStyle(
-            fontSize: GasometerDesignTokens.fontSizeXl,
-            fontWeight: GasometerDesignTokens.fontWeightBold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingLg),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _filteredRecords.length,
-          itemBuilder: (context, index) {
-            return _OptimizedMaintenanceCard(
-              key: ValueKey(_filteredRecords[index].id),
-              record: _filteredRecords[index],
-              onTap: () => _showRecordDetails(_filteredRecords[index]),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: EnhancedEmptyState.maintenances(),
-      ),
-    );
-  }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    final hasSelectedVehicle = _selectedVehicleId != null;
-    
     return FloatingActionButton(
-      onPressed: hasSelectedVehicle ? _showAddMaintenanceDialog : _showSelectVehicleMessage,
-      backgroundColor: hasSelectedVehicle 
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).disabledColor,
-      foregroundColor: hasSelectedVehicle 
-          ? Theme.of(context).colorScheme.onPrimary
-          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      tooltip: hasSelectedVehicle 
-          ? 'Adicionar registro de manutenção' 
-          : 'Selecione um veículo primeiro',
+      onPressed: () {
+        // TODO: Implementar navegação para adicionar manutenção
+      },
+      tooltip: 'Adicionar manutenção',
       child: const Icon(Icons.add),
     );
   }
 
-  void _showSelectVehicleMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Selecione um veículo primeiro'),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusInput,
-          ),
-        ),
-      ),
-    );
-  }
+  List<String> _getMonths() {
+    final now = DateTime.now();
+    final currentYear = now.year;
+    const monthNames = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
 
-  Future<void> _showAddVehicleDialog(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => const AddVehiclePage(),
-    );
-    
-    // Se resultado for true, recarregar veículos
-    if (result == true && context.mounted) {
-      await _vehiclesProvider.initialize();
-    }
-  }
-
-  /// Clear filter cache to force recalculation
-  void _clearFilterCache() {
-    _cachedFilteredRecords = null;
-    _lastVehicleId = null;
-    _lastMaintenanceRecords = null;
-  }
-
-  Future<void> _showAddMaintenanceDialog() async {
-    try {
-      // Get providers before opening dialog to avoid context issues
-      final authProvider = context.read<AuthProvider>();
-      
-      final result = await showDialog<Map<String, dynamic>>(
-        context: context,
-        builder: (dialogContext) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider(
-              receiptImageService: context.read<ReceiptImageService>(),
-            )),
-            ChangeNotifierProvider.value(value: _vehiclesProvider),
-            ChangeNotifierProvider.value(value: authProvider),
-          ],
-          builder: (context, child) => AddMaintenancePage(vehicleId: _selectedVehicleId),
-        ),
-      );
-      
-      if (result?['success'] == true && mounted) {
-        // Recarregar dados após adicionar manutenção
-        await _maintenanceProvider.loadAllMaintenanceRecords();
-        _clearFilterCache();
-        
-        // Data reloaded successfully
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao abrir formulário: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _showEditMaintenanceDialog(MaintenanceEntity maintenance) async {
-    try {
-      // Get providers before opening dialog to avoid context issues
-      final authProvider = context.read<AuthProvider>();
-      
-      final result = await showDialog<Map<String, dynamic>>(
-        context: context,
-        builder: (dialogContext) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => MaintenanceFormProvider(
-              receiptImageService: context.read<ReceiptImageService>(),
-            )),
-            ChangeNotifierProvider.value(value: _vehiclesProvider),
-            ChangeNotifierProvider.value(value: authProvider),
-          ],
-          builder: (context, child) => AddMaintenancePage(
-            maintenanceToEdit: maintenance,
-            vehicleId: _selectedVehicleId,
-          ),
-        ),
-      );
-      
-      if (result?['success'] == true && mounted) {
-        // Recarregar dados após editar manutenção
-        await _maintenanceProvider.loadAllMaintenanceRecords();
-        _clearFilterCache();
-        
-        // Data reloaded successfully
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao abrir formulário: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  void _showRecordDetails(MaintenanceEntity record) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              record.type == MaintenanceType.preventive ? Icons.schedule : Icons.build_circle,
-              color: record.type == MaintenanceType.preventive ? Colors.blue : Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: GasometerDesignTokens.spacingSm),
-            Expanded(
-              child: Text(
-                record.title,
-                style: const TextStyle(fontSize: 18),
-              ),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDetailRow('Veículo', record.vehicleId),
-              _buildDetailRow('Oficina', record.workshopName ?? 'Não informado'),
-              _buildDetailRow('Data', _formatDate(record.serviceDate)),
-              _buildDetailRow('Odômetro', '${record.odometer} km'),
-              _buildDetailRow('Custo', 'R\$ ${record.cost.toStringAsFixed(2)}'),
-              _buildDetailRow('Categoria', 
-                record.type == MaintenanceType.preventive ? 'Preventiva' : 'Corretiva'),
-              const SizedBox(height: GasometerDesignTokens.spacingMd),
-              const Text(
-                'Descrição:',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: GasometerDesignTokens.spacingXs),
-              Text(
-                record.description ?? 'Sem descrição',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
-              ),
-              if (record.nextServiceDate != null) ...[
-                const SizedBox(height: GasometerDesignTokens.spacingMd),
-                Container(
-                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.notification_important,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: GasometerDesignTokens.spacingSm),
-                      Expanded(
-                        child: Text(
-                          'Próxima manutenção: ${_formatDate(record.nextServiceDate!)}',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          SemanticButton(
-            semanticLabel: 'Editar manutenção',
-            semanticHint: 'Abre o formulário para editar esta manutenção',
-            type: ButtonType.text,
-            onPressed: () => _editMaintenance(record),
-            child: const Text('Editar'),
-          ),
-          SemanticButton(
-            semanticLabel: 'Fechar detalhes da manutenção',
-            semanticHint: 'Fecha a janela de detalhes da manutenção',
-            type: ButtonType.text,
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _editMaintenance(MaintenanceEntity maintenance) async {
-    // Fechar o dialog de detalhes primeiro
-    Navigator.of(context).pop();
-    
-    // Usar função padronizada para editar manutenção
-    await _showEditMaintenanceDialog(maintenance);
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
-  Widget _buildErrorState(String error, VoidCallback onRetry) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(48.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Semantics(
-              label: 'Erro de carregamento',
-              hint: 'Ícone indicando erro no carregamento das manutenções',
-              child: Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SemanticText.heading(
-              'Erro ao carregar dados',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SemanticText(
-              error,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            SemanticButton(
-              semanticLabel: 'Tentar carregar manutenções novamente',
-              semanticHint: 'Tenta recarregar os dados das manutenções após o erro',
-              type: ButtonType.elevated,
-              onPressed: onRetry,
-              child: const Text('Tentar novamente'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Widget otimizado para card de manutenção
-class _OptimizedMaintenanceCard extends StatelessWidget {
-
-  const _OptimizedMaintenanceCard({
-    super.key,
-    required this.record,
-    required this.onTap,
-  });
-  final MaintenanceEntity record;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isPreventive = record.type == MaintenanceType.preventive;
-    final typeDescription = isPreventive ? 'preventiva' : 'corretiva';
-    final semanticLabel = 'Manutenção $typeDescription ${record.title} em ${_formatDate(record.serviceDate)}, custo R\$ ${record.cost.toStringAsFixed(2)}, odômetro ${record.odometer} km';
-
-    return Semantics(
-      label: semanticLabel,
-      hint: 'Toque para ver detalhes completos da manutenção',
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: StandardListItemCard.maintenance(
-          date: record.serviceDate,
-          maintenanceType: record.title,
-          cost: record.cost,
-          odometer: record.odometer,
-          description: record.description,
-          location: record.workshopName,
-          onTap: onTap,
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    return monthNames
+        .asMap()
+        .entries
+        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
+        .toList();
   }
 }

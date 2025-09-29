@@ -1,482 +1,133 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../domain/entities/vehicle_entity.dart';
-import '../providers/vehicles_provider.dart';
+import '../providers/vehicles_notifier.dart';
 import '../widgets/vehicle_card.dart';
-import 'add_vehicle_page.dart';
 
-class VehiclesPage extends StatefulWidget {
+class VehiclesPage extends ConsumerStatefulWidget {
   const VehiclesPage({super.key});
 
   @override
-  State<VehiclesPage> createState() => _VehiclesPageState();
+  ConsumerState<VehiclesPage> createState() => _VehiclesPageState();
 }
 
-class _VehiclesPageState extends State<VehiclesPage> {
-  // ✅ PERFORMANCE FIX: Cached provider
-  late final VehiclesProvider _vehiclesProvider;
-  bool _isFirstAccess = false;
-  bool _hasInitialized = false;
-  
+class _VehiclesPageState extends ConsumerState<VehiclesPage> {
   @override
   void initState() {
     super.initState();
-    // ✅ PERFORMANCE FIX: Cache provider once in initState
-    _vehiclesProvider = context.read<VehiclesProvider>();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    
-    // Executar apenas uma vez para evitar inicializações múltiplas
-    if (!_hasInitialized) {
-      _hasInitialized = true;
-      
-      // Verificar se é primeiro acesso (usando inherited widget)
-      _checkFirstAccess();
-      
-      // Inicializar provider de forma lazy
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Verificar se o widget ainda está montado antes de inicializar
-        if (mounted) {
-          _vehiclesProvider.initialize();
-          
-          // Mostrar mensagem de boas-vindas se for primeiro acesso
-          if (_isFirstAccess) {
-            _showWelcomeMessage();
-          }
-        }
-      });
-    }
-  }
-
-  void _checkFirstAccess() {
-    final routerState = GoRouterState.of(context);
-    _isFirstAccess = routerState.uri.queryParameters['first_access'] == 'true';
-  }
-
-  void _showWelcomeMessage() {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.celebration, color: Colors.white),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Bem-vindo ao GasOMeter! Adicione seu primeiro veículo para começar.',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade600,
-            duration: const Duration(seconds: 4),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header fixo otimizado
-            _OptimizedHeader(),
-            
-            // ✅ PERFORMANCE FIX: Use CustomScrollView for better virtualization
-            Expanded(
-              child: _OptimizedVehiclesContent(
-                onEditVehicle: _editVehicle,
-                onDeleteVehicle: _deleteVehicle,
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: _OptimizedFloatingActionButton(),
-    );
-  }
-  
-  void _editVehicle(BuildContext context, VehicleEntity vehicle) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AddVehiclePage(vehicle: vehicle),
-    );
-    
-    // Se resultado for true, atualizar lista
-    if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
-    }
-  }
-  
-  void _deleteVehicle(BuildContext context, VehicleEntity vehicle) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar exclusão'),
-        content: Text(
-          'Tem certeza que deseja excluir o veículo ${vehicle.brand} ${vehicle.model}?',
-        ),
+      appBar: AppBar(
+        title: const Text('Meus Veículos'),
+        elevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         actions: [
-          SemanticButton(
-            semanticLabel: 'Cancelar exclusão',
-            semanticHint: 'Fecha a confirmação sem excluir o veículo',
-            type: ButtonType.text,
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
-          ),
-          SemanticButton(
-            semanticLabel: 'Confirmar exclusão do veículo',
-            semanticHint: 'Exclui permanentemente o veículo e todos os seus dados',
-            type: ButtonType.text,
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              final success = await context.read<VehiclesProvider>().deleteVehicle(vehicle.id);
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Veículo excluído com sucesso'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            child: const Text('Excluir'),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _navigateToAddVehicle,
+            tooltip: 'Adicionar veículo',
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Header otimizado com Selector para performance
-class _OptimizedHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
-              blurRadius: 9,
-              offset: const Offset(0, 3),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Semantics(
-          label: 'Seção de veículos',
-          hint: 'Página principal para gerenciar veículos',
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(
-                  Icons.directions_car,
-                  color: Colors.white,
-                  size: 19,
-                ),
-              ),
-              const SizedBox(width: 13),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Veículos',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 3),
-                    Text(
-                      'Gerencie sua frota de veículos',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        height: 1.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+      body: const _OptimizedVehiclesContent(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddVehicle,
+        tooltip: 'Adicionar veículo',
+        child: const Icon(Icons.add),
       ),
     );
   }
+
+  void _navigateToAddVehicle() {
+    context.push('/vehicles/add');
+  }
 }
 
-/// Conteúdo principal otimizado com Selector
-class _OptimizedVehiclesContent extends StatelessWidget {
-  
-  const _OptimizedVehiclesContent({
-    required this.onEditVehicle,
-    required this.onDeleteVehicle,
-  });
-  final void Function(BuildContext, VehicleEntity) onEditVehicle;
-  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
-  
+class _OptimizedVehiclesContent extends ConsumerWidget {
+  const _OptimizedVehiclesContent();
 
   @override
-  Widget build(BuildContext context) {
-    return Selector<VehiclesProvider, Map<String, dynamic>>(
-      selector: (context, provider) => {
-        'isLoading': provider.isLoading,
-        'isInitialized': provider.isInitialized,
-        'vehicles': provider.vehicles,
-        'errorMessage': provider.errorMessage,
-      },
-      builder: (context, data, child) {
-        final isLoading = data['isLoading'] as bool;
-        final isInitialized = data['isInitialized'] as bool;
-        final vehicles = data['vehicles'] as List<VehicleEntity>;
-        final errorMessage = data['errorMessage'] as String?;
-        
-        // Mostrar loading apenas se não inicializou ainda
-        if (!isInitialized) {
-          return StandardLoadingView.initial(
-            message: 'Carregando veículos...',
-            height: 300,
-          );
-        }
-        
-        // Mostrar erro se houver
-        if (errorMessage != null) {
-          return _ErrorState(errorMessage: errorMessage);
-        }
-        
-        // Se ainda está carregando mas já inicializou, mostrar loading compacto
-        if (isLoading) {
-          return Column(
-            children: [
-              if (vehicles.isNotEmpty) _OptimizedVehiclesGrid(
-                vehicles: vehicles,
-                onEditVehicle: onEditVehicle,
-                onDeleteVehicle: onDeleteVehicle,
-              ),
-              StandardLoadingView.refresh(
-                message: 'Atualizando...',
-              ),
-            ],
-          );
-        }
-        
-        // Mostrar empty state se não houver veículos
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+
+    return vehiclesAsync.when(
+      data: (vehicles) {
         if (vehicles.isEmpty) {
-          return EnhancedEmptyState.generic(
-            icon: Icons.directions_car_outlined,
-            title: 'Nenhum veículo cadastrado',
-            description: 'Use o botão + para cadastrar seu primeiro veículo e começar a controlar seus gastos com combustível e manutenção',
-            height: MediaQuery.of(context).size.height - 200,
-          );
+          return _buildEmptyState(context, ref);
         }
-        
-        return _OptimizedVehiclesGrid(
-          vehicles: vehicles,
-          onEditVehicle: onEditVehicle,
-          onDeleteVehicle: onDeleteVehicle,
-        );
+        return _buildVehiclesList(context, ref, vehicles);
       },
-    );
-  }
-}
-
-
-/// Estado de erro otimizado
-class _ErrorState extends StatelessWidget {
-  
-  const _ErrorState({required this.errorMessage});
-  final String errorMessage;
-  
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Semantics(
-              label: 'Erro de carregamento',
-              hint: 'Ícone indicando erro no carregamento dos veículos',
-              child: Icon(
-                Icons.error_outline,
-                color: Theme.of(context).colorScheme.error,
-                size: 64,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SemanticText.heading(
-              'Erro ao carregar veículos',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SemanticText(
-              errorMessage,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            SemanticButton(
-              semanticLabel: 'Tentar carregar veículos novamente',
-              semanticHint: 'Tenta recarregar a lista de veículos após o erro',
-              type: ButtonType.elevated,
-              onPressed: () => context.read<VehiclesProvider>().loadVehicles(),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.refresh),
-                  SizedBox(width: 8),
-                  Text('Tentar novamente'),
-                ],
-              ),
-            ),
-          ],
-        ),
+      loading: () => const StandardLoadingView(
+        message: 'Carregando seus veículos...',
+        showProgress: true,
+      ),
+      error: (error, stack) => EnhancedEmptyState(
+        title: 'Ops! Algo deu errado',
+        description: error.toString(),
+        icon: Icons.error_outline,
+        actionLabel: 'Tentar novamente',
+        onAction: () {
+          ref.read(vehiclesNotifierProvider.notifier).refresh();
+        },
       ),
     );
   }
-}
 
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+    return EnhancedEmptyState(
+      title: 'Nenhum veículo cadastrado',
+      description: 'Adicione seu primeiro veículo para começar a controlar seus gastos e manutenções.',
+      icon: Icons.directions_car_outlined,
+      actionLabel: 'Adicionar veículo',
+      onAction: () => context.push('/vehicles/add'),
+    );
+  }
 
-/// ✅ PERFORMANCE FIX: Grid com CustomScrollView e SliverGrid para virtualização
-/// ✅ LAYOUT FIX: Conteúdo limitado a 1120px centralizado dentro da área total
-class _OptimizedVehiclesGrid extends StatelessWidget {
-  
-  const _OptimizedVehiclesGrid({
-    required this.vehicles,
-    required this.onEditVehicle,
-    required this.onDeleteVehicle,
-  });
-  final List<VehicleEntity> vehicles;
-  final void Function(BuildContext, VehicleEntity) onEditVehicle;
-  final void Function(BuildContext, VehicleEntity) onDeleteVehicle;
-  
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Center(
-        child: ConstrainedBox(
-          // Limitar conteúdo a 1120px mas centralizado
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Determinar número de colunas baseado na largura limitada (1120px max)
-                int crossAxisCount = 1;
-                final double availableWidth = constraints.maxWidth;
-                const double spacing = 16.0;
-                
-                // Calcular colunas baseado na largura do conteúdo limitado
-                // Para telas pequenas (< 500px), sempre usar 1 coluna
-                if (availableWidth > 900) {
-                  crossAxisCount = 4;
-                } else if (availableWidth > 600) {
-                  crossAxisCount = 3;
-                } else if (availableWidth > 500) {
-                  crossAxisCount = 2;
-                }
-                // crossAxisCount permanece 1 para larguras <= 500px
-                
-                return AlignedGridView.count(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: spacing,
-                  crossAxisSpacing: spacing,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: vehicles.length,
-                  itemBuilder: (context, index) {
-                    return VehicleCard(
-                      key: ValueKey(vehicles[index].id),
-                      vehicle: vehicles[index],
-                      onEdit: () => onEditVehicle(context, vehicles[index]),
-                      onDelete: () => onDeleteVehicle(context, vehicles[index]),
-                    );
-                  },
-                );
-              },
+  Widget _buildVehiclesList(BuildContext context, WidgetRef ref, List<VehicleEntity> vehicles) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(vehiclesNotifierProvider.notifier).refresh();
+      },
+      child: _buildStaggeredGrid(vehicles),
+    );
+  }
+
+  Widget _buildStaggeredGrid(List<VehicleEntity> vehicles) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: StaggeredGrid.count(
+        crossAxisCount: _calculateCrossAxisCount(),
+        mainAxisSpacing: 16.0,
+        crossAxisSpacing: 16.0,
+        children: vehicles.map((vehicle) {
+          return StaggeredGridTile.count(
+            crossAxisCellCount: 1,
+            mainAxisCellCount: 1,
+            child: VehicleCard(
+              vehicle: vehicle,
+              onTap: () => _navigateToVehicleDetails(vehicle),
             ),
-          ),
-        ),
+          );
+        }).toList(),
       ),
     );
   }
-}
 
-
-/// FloatingActionButton otimizado
-class _OptimizedFloatingActionButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () => _addVehicle(context),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      tooltip: 'Cadastrar novo veículo',
-      child: const Icon(Icons.add),
-    );
+  int _calculateCrossAxisCount() {
+    // Responsividade básica baseada na largura da tela
+    return 2; // Para mobile sempre 2 colunas
   }
-  
-  void _addVehicle(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => const AddVehiclePage(),
-    );
-    
-    // Se resultado for true, atualizar lista
-    if (result == true && context.mounted) {
-      await context.read<VehiclesProvider>().loadVehicles();
-    }
+
+  void _navigateToVehicleDetails(VehicleEntity vehicle) {
+    // TODO: Implementar navegação para detalhes do veículo
+    // context.push('/vehicles/${vehicle.id}');
   }
 }

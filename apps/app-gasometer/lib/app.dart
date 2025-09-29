@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 
-import 'core/di/injection_container.dart' as di;
 import 'core/router/app_router.dart';
 import 'core/theme/gasometer_theme.dart';
 // TODO: Replace with Riverpod providers

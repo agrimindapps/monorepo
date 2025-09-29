@@ -84,3 +84,17 @@ final updateFuelRecordProvider = Provider<UpdateFuelRecord>((ref) {
 final deleteFuelRecordProvider = Provider<DeleteFuelRecord>((ref) {
   return GetIt.instance<DeleteFuelRecord>();
 });
+
+// SharedPreferences Provider (renomeado para evitar conflito com core)
+final gasometerSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  return GetIt.instance<SharedPreferences>();
+});
+
+// App Rating Repository Provider
+final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
+  try {
+    return GetIt.instance<IAppRatingRepository>();
+  } catch (e) {
+    throw Exception('IAppRatingRepository not registered in GetIt. Please register it in your dependency injection setup.');
+  }
+});

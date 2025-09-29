@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -166,13 +165,16 @@ class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
       );
     }
 
-    return AlignedGridView.count(
+    return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.zero,
-      crossAxisCount: _getCrossAxisCount(context),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _getCrossAxisCount(context),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.75, // Ajuste conforme necessário
+      ),
       itemCount: plants.length,
       itemBuilder: (context, index) {
         final plant = plants[index];

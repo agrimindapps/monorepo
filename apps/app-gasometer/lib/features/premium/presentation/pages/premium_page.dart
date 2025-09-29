@@ -1,18 +1,18 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../features/auth/presentation/providers/auth_provider.dart';
+import '../providers/premium_notifier.dart';
 
-class PremiumPage extends StatefulWidget {
+class PremiumPage extends ConsumerStatefulWidget {
   const PremiumPage({super.key});
 
   @override
-  State<PremiumPage> createState() => _PremiumPageState();
+  ConsumerState<PremiumPage> createState() => _PremiumPageState();
 }
 
-class _PremiumPageState extends State<PremiumPage>
+class _PremiumPageState extends ConsumerState<PremiumPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _animationController;
@@ -53,53 +53,56 @@ class _PremiumPageState extends State<PremiumPage>
 
   @override
   Widget build(BuildContext context) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final bool isPremiumValue = premiumAsync.when(
+      data: (premiumState) => premiumState.isPremium,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
     return Scaffold(
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: CustomScrollView(
-                slivers: [
-                  _buildSliverAppBar(context, authProvider),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          _buildStatusCard(context, authProvider),
-                          const SizedBox(height: 24),
-                          _buildFeatureTabs(context),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 450,
-                            child: TabBarView(
-                              controller: _tabController,
-                              children: [
-                                _buildEssentialFeatures(context, authProvider),
-                                _buildAdvancedFeatures(context, authProvider),
-                                _buildExclusiveFeatures(context, authProvider),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          if (!authProvider.isPremium) _buildPricingSection(context),
-                          const SizedBox(height: 32),
-                        ],
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context, isPremiumValue),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      _buildStatusCard(context, isPremiumValue),
+                      const SizedBox(height: 24),
+                      _buildFeatureTabs(context),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 450,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildEssentialFeatures(context, isPremiumValue),
+                            _buildAdvancedFeatures(context, isPremiumValue),
+                            _buildExclusiveFeatures(context, isPremiumValue),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      if (!isPremiumValue) _buildPricingSection(context),
+                      const SizedBox(height: 32),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, AuthProvider authProvider) {
+  Widget _buildSliverAppBar(BuildContext context, bool isPremium) {
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
@@ -153,7 +156,7 @@ class _PremiumPageState extends State<PremiumPage>
                 child: Container(
                   padding: const EdgeInsets.only(top: 40),
                   child: Icon(
-                    authProvider.isPremium ? Icons.verified : Icons.workspace_premium,
+                    isPremium ? Icons.verified : Icons.workspace_premium,
                     size: 80,
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
@@ -170,8 +173,7 @@ class _PremiumPageState extends State<PremiumPage>
     );
   }
 
-  Widget _buildStatusCard(BuildContext context, AuthProvider authProvider) {
-    final isPremium = authProvider.isPremium;
+  Widget _buildStatusCard(BuildContext context, bool isPremium) {
 
     return Container(
       width: double.infinity,
@@ -302,75 +304,75 @@ class _PremiumPageState extends State<PremiumPage>
     );
   }
 
-  Widget _buildEssentialFeatures(BuildContext context, AuthProvider authProvider) {
+  Widget _buildEssentialFeatures(BuildContext context, bool isPremium) {
     final features = [
       _PremiumFeature(
         icon: Icons.directions_car,
         title: 'Veículos Ilimitados',
         description: 'Adicione quantos veículos quiser ao seu perfil',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
       _PremiumFeature(
         icon: Icons.analytics,
         title: 'Relatórios Avançados',
         description: 'Análises detalhadas de consumo e gastos',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
       _PremiumFeature(
         icon: Icons.cloud_sync,
         title: 'Sincronização em Nuvem',
         description: 'Seus dados sempre seguros e sincronizados',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
     ];
 
     return _buildFeatureList(context, features);
   }
 
-  Widget _buildAdvancedFeatures(BuildContext context, AuthProvider authProvider) {
+  Widget _buildAdvancedFeatures(BuildContext context, bool isPremium) {
     final features = [
       _PremiumFeature(
         icon: Icons.insights,
         title: 'Análises Inteligentes',
         description: 'IA para otimizar seus gastos com combustível',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
       _PremiumFeature(
         icon: Icons.notifications_active,
         title: 'Alertas Personalizados',
         description: 'Notificações sobre manutenções e abastecimentos',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
       _PremiumFeature(
         icon: Icons.file_download,
         title: 'Exportação de Dados',
         description: 'Exporte relatórios em CSV, PDF e Excel',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
     ];
 
     return _buildFeatureList(context, features);
   }
 
-  Widget _buildExclusiveFeatures(BuildContext context, AuthProvider authProvider) {
+  Widget _buildExclusiveFeatures(BuildContext context, bool isPremium) {
     final features = [
       _PremiumFeature(
         icon: Icons.support_agent,
         title: 'Suporte Prioritário',
         description: 'Atendimento exclusivo e prioritário 24/7',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
       _PremiumFeature(
         icon: Icons.auto_awesome,
         title: 'Recursos Beta',
         description: 'Acesso antecipado a novas funcionalidades',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
       _PremiumFeature(
         icon: Icons.security,
         title: 'Backup Automático',
         description: 'Backup automático de todos os seus dados',
-        isEnabled: authProvider.isPremium,
+        isEnabled: isPremium,
       ),
     ];
 

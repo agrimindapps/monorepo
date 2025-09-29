@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
@@ -266,23 +265,6 @@ class SyncProgressController {
   //       updateState(SyncProgressState.preparing, message: 'Preparando sincronização...');
   //   }
   // }
-
-  /// Atualiza progresso das etapas baseado nas informações de debug do UnifiedSync
-  void _updateStepsFromDebugInfo(Map<String, dynamic> debugInfo) {
-    final syncedItems = debugInfo['synced_items_count'] as int? ?? 0;
-    final totalItems = debugInfo['local_items_count'] as int? ?? 0;
-
-    // Simular progresso das etapas baseado nos itens sincronizados
-    if (totalItems > 0) {
-      final progress = (syncedItems / totalItems).clamp(0.0, 1.0);
-
-      // Distribuir progresso entre as etapas
-      for (int i = 0; i < _steps.length; i++) {
-        final stepProgress = ((i + 1) / _steps.length * progress).clamp(0.0, 1.0);
-        updateStepProgress(_steps[i].id, stepProgress);
-      }
-    }
-  }
 
   /// Agenda auto-hide após completar
   void _scheduleAutoHide() {

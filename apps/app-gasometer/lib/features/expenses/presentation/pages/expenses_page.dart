@@ -1,151 +1,40 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
 import '../../../../core/presentation/widgets/semantic_widgets.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
-import '../../../../core/services/receipt_image_service.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../../../shared/widgets/design_system/base/standard_list_item_card.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../vehicles/presentation/pages/add_vehicle_page.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
-import '../../domain/entities/expense_entity.dart';
-import '../pages/add_expense_page.dart';
-import '../providers/expense_form_provider.dart';
-import '../providers/expenses_provider.dart';
-import '../widgets/expenses_empty_state.dart';
-import '../widgets/expenses_error_state.dart';
-import '../widgets/expenses_statistics_row.dart';
+import '../../../../core/providers/vehicles_provider.dart';
 
-class ExpensesPage extends StatefulWidget {
+class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
 
   @override
-  State<ExpensesPage> createState() => _ExpensesPageState();
+  ConsumerState<ExpensesPage> createState() => _ExpensesPageState();
 }
 
-class _ExpensesPageState extends State<ExpensesPage> {
+class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   String? _selectedVehicleId;
-  int _currentMonthIndex = DateTime.now().month - 1; // Initialize to current month
-
-  // Performance fix: Cached providers
-  late final ExpensesProvider _expensesProvider;
-  late final VehiclesProvider _vehiclesProvider;
-
-  // Generate month list dynamically
-  List<String> get _months {
-    final now = DateTime.now();
-    final currentYear = now.year;
-    final monthNames = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
-    ];
-
-    return monthNames
-        .asMap()
-        .entries
-        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
-        .toList();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Performance fix: Cache providers once in initState
-    _expensesProvider = context.read<ExpensesProvider>();
-    _vehiclesProvider = context.read<VehiclesProvider>();
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Verificar se o widget ainda está montado antes de carregar dados
-      if (mounted) {
-        _loadData();
-      }
-    });
-  }
-
-  void _loadData() {
-    // Performance fix: Use cached providers
-    _vehiclesProvider.initialize().then((_) {
-      if (_selectedVehicleId?.isNotEmpty == true) {
-        _expensesProvider.loadExpensesByVehicle(_selectedVehicleId!);
-      } else {
-        _expensesProvider.loadExpenses();
-      }
-    });
-  }
-
-
-  // Performance fix: Use cached provider instead of context.read()
-  String _getVehicleName(String vehicleId) {
-    final vehicle = _vehiclesProvider.vehicles.where((v) => v.id == vehicleId).firstOrNull;
-    return vehicle?.displayName ?? 'Veículo desconhecido';
-  }
-
-  // Get filtered expenses by vehicle and month
-  List<ExpenseEntity> _getFilteredExpenses(List<ExpenseEntity> expenses) {
-    List<ExpenseEntity> filtered = expenses;
-
-    // First filter by vehicle if selected
-    if (_selectedVehicleId != null) {
-      filtered = filtered.where((expense) => expense.vehicleId == _selectedVehicleId).toList();
-    }
-
-    // Then filter by selected month
-    final selectedMonth = _currentMonthIndex + 1; // Convert index to month (1-12)
-    final currentYear = DateTime.now().year;
-
-    return filtered.where((expense) {
-      return expense.date.month == selectedMonth &&
-             expense.date.year == currentYear;
-    }).toList();
-  }
+  int _currentMonthIndex = DateTime.now().month - 1;
 
   @override
   Widget build(BuildContext context) {
-    // Performance fix: Use Selector2 instead of Consumer2 to prevent unnecessary rebuilds
-    return Selector2<ExpensesProvider, VehiclesProvider, Map<String, dynamic>>(
-      selector: (context, expensesProvider, vehiclesProvider) => {
-        'isLoading': expensesProvider.isLoading,
-        'hasError': expensesProvider.hasError,
-        'expenses': expensesProvider.expenses,
-        'expensesError': expensesProvider.error?.displayMessage,
-        'vehiclesError': vehiclesProvider.errorMessage,
-      },
-      builder: (context, data, child) {
-        final isLoading = data['isLoading'] as bool;
-        final hasError = data['hasError'] as bool;
-        final allExpenses = data['expenses'] as List<ExpenseEntity>;
-        final expenses = _getFilteredExpenses(allExpenses);
-        final expensesError = data['expensesError'] as String?;
-        final vehiclesError = data['vehiclesError'] as String?;
+    final vehiclesState = ref.watch(vehiclesProvider);
 
-        return Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                _buildVehicleSelector(),
-                _buildMonthSelector(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1120),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildContentOptimizedWithoutVehicleSelector(context, isLoading, hasError, expenses, expensesError),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            _buildVehicleSelector(context),
+            _buildMonthSelector(),
+            Expanded(
+              child: _buildContent(context),
             ),
-          ),
-          floatingActionButton: _buildFloatingActionButton(context),
-        );
-      },
+          ],
+        ),
+      ),
+      floatingActionButton: _buildFloatingActionButton(context),
     );
   }
 
@@ -156,11 +45,11 @@ class _ExpensesPageState extends State<ExpensesPage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: GasometerDesignTokens.colorHeaderBackground,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -220,502 +109,80 @@ class _ExpensesPageState extends State<ExpensesPage> {
     );
   }
 
-  Widget _buildVehicleSelector() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(8.0),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Consumer<VehiclesProvider>(
-            builder: (context, vehiclesProvider, child) {
-              return EnhancedVehicleSelector(
-                selectedVehicleId: _selectedVehicleId,
-                onVehicleChanged: (String? vehicleId) {
-                  setState(() {
-                    _selectedVehicleId = vehicleId;
-                  });
-
-                  if (_expensesProvider.searchQuery.isNotEmpty) {
-                    _expensesProvider.search('');
-                  }
-
-                  if (vehicleId?.isNotEmpty == true) {
-                    _expensesProvider.loadExpensesByVehicle(vehicleId!);
-                  } else {
-                    _expensesProvider.loadExpenses();
-                  }
-                },
-              );
-            }
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Performance fix: Optimized content builder without vehicle selector
-  Widget _buildContentOptimizedWithoutVehicleSelector(BuildContext context, bool isLoading, bool hasError, List<ExpenseEntity> expenses, String? errorMessage) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Show error state
-        if (hasError && errorMessage != null)
-          _buildErrorState(errorMessage, () => _loadData())
-        else if (isLoading)
-          StandardLoadingView.initial(
-            message: 'Carregando despesas...',
-            height: 400,
-          )
-        else if (expenses.isEmpty)
-          _buildEmptyState()
-        else ...[
-          // Statistics with Consumer for live updates
-          Consumer<ExpensesProvider>(
-            builder: (context, expensesProvider, child) => _buildStatistics(expensesProvider),
-          ),
-          const SizedBox(height: 24),
-          _buildVirtualizedRecordsList(expenses),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStatistics(ExpensesProvider expensesProvider) {
-    // Use cached statistics from provider instead of calculating in build method
-    final statistics = expensesProvider.stats;
-    return ExpensesStatisticsRow(statistics: statistics);
-  }
-
-  // Performance fix: Virtualized list that can handle 1000+ records efficiently
-  Widget _buildVirtualizedRecordsList(List<ExpenseEntity> records) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SemanticText.heading(
-          'Histórico de Despesas',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Performance fix: Properly virtualized list with fixed height
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6, // Dynamic height based on screen
-          child: ListView.builder(
-            // Remove shrinkWrap and NeverScrollableScrollPhysics for proper virtualization
-            itemCount: records.length,
-            // Removed itemExtent to allow dynamic height based on content
-            itemBuilder: (context, index) {
-              return Consumer<VehiclesProvider>(
-                builder: (context, vehiclesProvider, child) {
-                  return _OptimizedExpenseRecordCard(
-                    key: ValueKey(records[index].id),
-                    record: records[index],
-                    vehiclesProvider: vehiclesProvider,
-                    onLongPress: () => _showRecordMenu(records[index]),
-                    onTap: () => _showRecordDetails(records[index], vehiclesProvider),
-                    getVehicleName: _getVehicleName,
-                  );
-                }
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: const ExpensesEmptyState(),
-      ),
-    );
-  }
-
-  Widget _buildFloatingActionButton(BuildContext context) {
-    final hasSelectedVehicle = _selectedVehicleId != null;
-    
-    return FloatingActionButton(
-      onPressed: hasSelectedVehicle ? _showAddExpenseDialog : _showSelectVehicleMessage,
-      backgroundColor: hasSelectedVehicle 
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).disabledColor,
-      foregroundColor: hasSelectedVehicle 
-          ? Theme.of(context).colorScheme.onPrimary
-          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      tooltip: hasSelectedVehicle 
-          ? 'Adicionar registro de despesa' 
-          : 'Selecione um veículo primeiro',
-      child: const Icon(Icons.add),
-    );
-  }
-
-  void _showSelectVehicleMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Selecione um veículo primeiro'),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(
-            GasometerDesignTokens.radiusInput,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showAddVehicleDialog(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => const AddVehiclePage(),
-    );
-    
-    if (result == true && context.mounted) {
-      await _vehiclesProvider.initialize();
-    }
-  }
-
-  Future<void> _showAddExpenseDialog() async {
-    try {
-      // Get providers before opening dialog to avoid context issues
-      final authProvider = context.read<AuthProvider>();
-      final userId = authProvider.currentUser?.uid;
-      
-      if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário não autenticado')),
-        );
-        return;
-      }
-      
-      final result = await showDialog<dynamic>(
-        context: context,
-        builder: (dialogContext) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => ExpenseFormProvider(
-              initialVehicleId: _selectedVehicleId,
-              userId: userId,
-              receiptImageService: context.read<ReceiptImageService>(),
-            )),
-            ChangeNotifierProvider.value(value: _vehiclesProvider),
-            ChangeNotifierProvider.value(value: authProvider),
-          ],
-          builder: (context, child) => AddExpensePage(
-            vehicleId: _selectedVehicleId,
-          ),
-        ),
-      );
-      
-      // Handle dialog result
-      if (result != null && mounted) {
-        if (result is Map<String, dynamic> && result['success'] == true) {
-          // Recarregar dados após adicionar despesa
-          _loadData();
-          
-          // Data reloaded successfully
-        } else if (result == true) {
-          // Fallback for old boolean return
-          _loadData();
-        }
-      }
-    } catch (e) {
-      debugPrint('Error opening add expense dialog: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao abrir formulário de despesa')),
-        );
-      }
-    }
-  }
-
-  Future<void> _showEditExpenseDialog(String expenseId, String vehicleId) async {
-    // Get providers before opening dialog to avoid context issues
-    final authProvider = context.read<AuthProvider>();
-    final userId = authProvider.currentUser?.uid;
-    
-    if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuário não autenticado')),
-      );
-      return;
-    }
-    
-    // Get the expense to edit
-    final expenseToEdit = _expensesProvider.getExpenseById(expenseId);
-    if (expenseToEdit == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Despesa não encontrada')),
-      );
-      return;
-    }
-    
-    final result = await showDialog<dynamic>(
-      context: context,
-      builder: (dialogContext) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => ExpenseFormProvider(
-            initialVehicleId: vehicleId,
-            userId: userId,
-            receiptImageService: context.read<ReceiptImageService>(),
-          )),
-          ChangeNotifierProvider.value(value: _vehiclesProvider),
-          ChangeNotifierProvider.value(value: authProvider),
-        ],
-        builder: (context, child) => AddExpensePage(
-          vehicleId: vehicleId,
-          editExpenseId: expenseToEdit.id,
-        ),
-      ),
-    );
-    
-    // Handle dialog result
-    if (result != null && mounted) {
-      if (result is Map<String, dynamic> && result['success'] == true) {
-        // Recarregar dados após editar despesa
-        _loadData();
-        
-        // Data reloaded successfully
-      } else if (result == true) {
-        // Fallback for old boolean return
-        _loadData();
-      }
-    }
-  }
-
-  void _showRecordDetails(ExpenseEntity record, VehiclesProvider vehiclesProvider) {
-    final vehicleName = _getVehicleName(record.vehicleId);
-    final formattedDate = '${record.date.day}/${record.date.month}/${record.date.year}';
-    
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Semantics(
-              label: 'Ícone de despesa',
-              child: Icon(record.type.icon, color: record.type.color),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: SemanticText.heading(vehicleName),
-            ),
-          ],
-        ),
-        content: Semantics(
-          label: 'Detalhes da despesa de $vehicleName em $formattedDate',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDetailRow('Tipo', record.type.displayName),
-              _buildDetailRow('Descrição', record.description),
-              _buildDetailRow('Valor', record.formattedAmount),
-              _buildDetailRow('Odômetro', record.formattedOdometer),
-              _buildDetailRow('Data', formattedDate),
-              if (record.hasLocation)
-                _buildDetailRow('Local', record.location!),
-              if (record.hasNotes)
-                _buildDetailRow('Observações', record.notes!),
-            ],
-          ),
-        ),
-        actions: [
-          SemanticButton(
-            semanticLabel: 'Fechar detalhes',
-            semanticHint: 'Fecha a janela de detalhes da despesa',
-            type: ButtonType.text,
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRecordMenu(ExpenseEntity record) {
-    final vehicleName = _getVehicleName(record.vehicleId);
-    final formattedDate = '${record.date.day}/${record.date.month}/${record.date.year}';
-    final recordDescription = 'despesa de $vehicleName em $formattedDate';
-    
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Semantics(
-          label: 'Menu de opções para $recordDescription',
-          child: Wrap(
-            children: [
-              Semantics(
-                label: 'Editar $recordDescription',
-                hint: 'Abre formulário de edição para modificar os dados desta despesa',
-                button: true,
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditExpenseDialog(record.id, record.vehicleId);
-                },
-                child: ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('Editar'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showEditExpenseDialog(record.id, record.vehicleId);
-                  },
-                ),
-              ),
-              Semantics(
-                label: 'Excluir $recordDescription',
-                hint: 'Remove permanentemente este registro de despesa',
-                button: true,
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDeleteRecord(record);
-                },
-                child: ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('Excluir', style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _confirmDeleteRecord(record);
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmDeleteRecord(ExpenseEntity record) {
-    final vehicleName = _getVehicleName(record.vehicleId);
-    final recordDescription = 'despesa de $vehicleName realizada em ${record.date.day}/${record.date.month}/${record.date.year}';
-    
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const SemanticText.heading('Confirmar exclusão'),
-        content: const SemanticText(
-          'Tem certeza que deseja excluir este registro de despesa?\n\nEsta ação não pode ser desfeita.',
-        ),
-        actions: [
-          SemanticButton(
-            semanticLabel: 'Cancelar exclusão',
-            semanticHint: 'Fecha a confirmação sem excluir o registro de despesa',
-            type: ButtonType.text,
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          SemanticButton(
-            semanticLabel: 'Confirmar exclusão do registro',
-            semanticHint: 'Remove permanentemente esta $recordDescription',
-            type: ButtonType.elevated,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () async {
-              Navigator.pop(context);
-              
-              final success = await _expensesProvider.removeExpense(record.id);
-              
-              if (mounted) {
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                final message = success 
-                  ? 'Registro excluído com sucesso!'
-                  : _expensesProvider.error?.displayMessage ?? 'Erro ao excluir registro';
-                final backgroundColor = success ? Colors.green : Colors.red;
-                
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: Text(message),
-                    backgroundColor: backgroundColor,
-                  ),
-                );
-              }
-            },
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String error, VoidCallback onRetry) {
-    return ExpensesErrorState(
-      error: error,
-      onRetry: onRetry,
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildVehicleSelector(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              fontSize: 14,
-            ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.directions_car,
+              color: Theme.of(context).primaryColor,
+              size: 20,
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Seletor de veículo será implementado',
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMonthSelector() {
+    final months = _getMonths();
+
     return Container(
       height: 50,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _months.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: months.length,
         itemBuilder: (context, index) {
           final isSelected = index == _currentMonthIndex;
+
           return GestureDetector(
-            onTap: () => setState(() => _currentMonthIndex = index),
+            onTap: () {
+              setState(() {
+                _currentMonthIndex = index;
+              });
+            },
             child: Container(
-              margin: const EdgeInsets.only(right: 8),
+              margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surface,
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
-              child: Text(
-                _months[index],
-                style: TextStyle(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.7),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+              child: Center(
+                child: Text(
+                  months[index],
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ),
             ),
@@ -724,50 +191,42 @@ class _ExpensesPageState extends State<ExpensesPage> {
       ),
     );
   }
-}
 
-/// Widget otimizado para card de despesa
-class _OptimizedExpenseRecordCard extends StatelessWidget {
-
-  const _OptimizedExpenseRecordCard({
-    super.key,
-    required this.record,
-    required this.vehiclesProvider,
-    required this.onLongPress,
-    required this.onTap,
-    required this.getVehicleName,
-  });
-  final ExpenseEntity record;
-  final VehiclesProvider vehiclesProvider;
-  final VoidCallback onLongPress;
-  final VoidCallback onTap;
-  final String Function(String) getVehicleName;
-
-  @override
-  Widget build(BuildContext context) {
-    final vehicleName = getVehicleName(record.vehicleId);
-    final semanticLabel = 'Despesa $vehicleName em ${_formatDate(record.date)}, ${record.type.displayName}, ${record.formattedAmount}${record.hasLocation ? ', ${record.location}' : ''}';
-
-    return Semantics(
-      label: semanticLabel,
-      hint: 'Toque para ver detalhes completos, mantenha pressionado para editar ou excluir',
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 4.0),
-        child: StandardListItemCard.expense(
-          date: record.date,
-          expenseType: record.type.displayName,
-          amount: record.amount,
-          odometer: record.odometer,
-          description: record.description,
-          location: record.hasLocation ? record.location : null,
-          onTap: onTap,
-          onLongPress: onLongPress,
-        ),
-      ),
+  Widget _buildContent(BuildContext context) {
+    return EnhancedEmptyState(
+      title: 'Nenhuma despesa',
+      description: 'Adicione sua primeira despesa para começar a acompanhar seus gastos.',
+      icon: Icons.attach_money_outlined,
+      actionLabel: 'Adicionar despesa',
+      onAction: () {
+        // TODO: Implementar navegação para adicionar despesa
+      },
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        // TODO: Implementar navegação para adicionar despesa
+      },
+      tooltip: 'Adicionar despesa',
+      child: const Icon(Icons.add),
+    );
+  }
+
+  List<String> _getMonths() {
+    final now = DateTime.now();
+    final currentYear = now.year;
+    const monthNames = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    return monthNames
+        .asMap()
+        .entries
+        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
+        .toList();
   }
 }

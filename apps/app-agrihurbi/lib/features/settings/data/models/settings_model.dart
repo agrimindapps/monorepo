@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
+import 'package:core/core.dart' hide NotificationSettings, PrivacySettings, DataSettings, DisplaySettings, SecuritySettings, BackupSettings;
 
 part 'settings_model.g.dart';
 
@@ -46,16 +47,16 @@ class SettingsModel extends SettingsEntity {
   final DateTime lastUpdated;
 
   const SettingsModel({
-    required userId,
-    theme = AppTheme.system,
-    language = 'pt_BR',
-    notifications = const NotificationSettingsModel(),
-    dataSettings = const DataSettingsModel(),
-    privacy = const PrivacySettingsModel(),
-    display = const DisplaySettingsModel(),
-    security = const SecuritySettingsModel(),
-    backup = const BackupSettingsModel(),
-    required lastUpdated,
+    required this.userId,
+    this.theme = AppTheme.system,
+    this.language = 'pt_BR',
+    this.notifications = const NotificationSettingsModel(),
+    this.dataSettings = const DataSettingsModel(),
+    this.privacy = const PrivacySettingsModel(),
+    this.display = const DisplaySettingsModel(),
+    this.security = const SecuritySettingsModel(),
+    this.backup = const BackupSettingsModel(),
+    required this.lastUpdated,
   }) : super(
           userId: userId,
           theme: theme,
@@ -176,14 +177,14 @@ class NotificationSettingsModel extends NotificationSettings {
   final String quietHoursEnd;
 
   const NotificationSettingsModel({
-    pushNotifications = true,
-    newsNotifications = true,
-    marketAlerts = true,
-    weatherAlerts = true,
-    animalReminders = true,
-    calculatorReminders = false,
-    quietHoursStart = '22:00',
-    quietHoursEnd = '07:00',
+    this.pushNotifications = true,
+    this.newsNotifications = true,
+    this.marketAlerts = true,
+    this.weatherAlerts = true,
+    this.animalReminders = true,
+    this.calculatorReminders = false,
+    this.quietHoursStart = '22:00',
+    this.quietHoursEnd = '07:00',
   }) : super(
           pushNotifications: pushNotifications,
           newsNotifications: newsNotifications,
@@ -263,12 +264,12 @@ class DataSettingsModel extends DataSettings {
   final DataExportFormat exportFormat;
 
   const DataSettingsModel({
-    autoSync = true,
-    wifiOnlySync = true,
-    cacheImages = true,
-    cacheRetentionDays = 30,
-    compressBackups = true,
-    exportFormat = DataExportFormat.json,
+    this.autoSync = true,
+    this.wifiOnlySync = true,
+    this.cacheImages = true,
+    this.cacheRetentionDays = 30,
+    this.compressBackups = true,
+    this.exportFormat = DataExportFormat.json,
   }) : super(
           autoSync: autoSync,
           wifiOnlySync: wifiOnlySync,
@@ -340,11 +341,11 @@ class PrivacySettingsModel extends PrivacySettings {
   final bool locationTracking;
 
   const PrivacySettingsModel({
-    analyticsEnabled = true,
-    crashReportingEnabled = true,
-    shareUsageData = false,
-    personalizedAds = false,
-    locationTracking = false,
+    this.analyticsEnabled = true,
+    this.crashReportingEnabled = true,
+    this.shareUsageData = false,
+    this.personalizedAds = false,
+    this.locationTracking = false,
   }) : super(
           analyticsEnabled: analyticsEnabled,
           crashReportingEnabled: crashReportingEnabled,

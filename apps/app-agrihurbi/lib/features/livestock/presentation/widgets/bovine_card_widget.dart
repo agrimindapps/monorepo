@@ -16,11 +16,11 @@ class BovineCardWidget extends StatelessWidget {
 
   const BovineCardWidget({
     super.key,
-    required bovine,
-    onTap,
-    onEdit,
-    onDelete,
-    showActions = true,
+    required this.bovine,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+    this.showActions = true,
   });
 
   @override
@@ -373,8 +373,8 @@ class CompactBovineCardWidget extends StatelessWidget {
 
   const CompactBovineCardWidget({
     super.key,
-    required bovine,
-    onTap,
+    required this.bovine,
+    this.onTap,
   });
 
   @override

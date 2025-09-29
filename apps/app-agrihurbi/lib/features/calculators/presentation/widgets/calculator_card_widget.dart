@@ -18,11 +18,11 @@ class CalculatorCardWidget extends StatelessWidget {
 
   const CalculatorCardWidget({
     super.key,
-    required calculator,
-    required isFavorite,
-    required onTap,
-    required onFavoriteToggle,
-    showCategory = true,
+    required this.calculator,
+    required this.isFavorite,
+    required this.onTap,
+    required this.onFavoriteToggle,
+    this.showCategory = true,
   });
 
   @override

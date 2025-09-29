@@ -14,7 +14,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   final DioClient _dioClient;
   static const String _baseEndpoint = '/weather';
   
-  WeatherRemoteDataSourceImpl(_dioClient);
+  WeatherRemoteDataSourceImpl(this._dioClient);
   
   // ============================================================================
   // WEATHER MEASUREMENTS

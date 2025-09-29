@@ -16,7 +16,7 @@ class CalculatorFavoritesService {
   
   final SharedPreferences _prefs;
   
-  CalculatorFavoritesService(_prefs);
+  CalculatorFavoritesService(this._prefs);
 
   /// Obtém lista de IDs das calculadoras favoritas
   Future<List<String>> getFavoriteIds() async {
@@ -357,9 +357,9 @@ class FavoritesStats {
   final bool hasBackup;
 
   const FavoritesStats({
-    required totalFavorites,
-    lastSync,
-    required hasBackup,
+    required this.totalFavorites,
+    this.lastSync,
+    required this.hasBackup,
   });
 }
 

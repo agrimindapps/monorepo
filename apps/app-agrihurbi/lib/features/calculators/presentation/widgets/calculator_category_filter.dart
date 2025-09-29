@@ -13,9 +13,9 @@ class CalculatorCategoryFilter extends StatelessWidget {
 
   const CalculatorCategoryFilter({
     super.key,
-    required selectedCategory,
-    required onCategoryChanged,
-    required onClearFilters,
+    required this.selectedCategory,
+    required this.onCategoryChanged,
+    required this.onClearFilters,
   });
 
   @override

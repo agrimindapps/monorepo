@@ -17,7 +17,7 @@ class MarketDetailPage extends StatefulWidget {
 
   const MarketDetailPage({
     super.key,
-    required marketId,
+    required this.marketId,
   });
 
   @override

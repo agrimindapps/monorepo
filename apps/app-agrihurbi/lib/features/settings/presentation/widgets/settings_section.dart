@@ -11,10 +11,10 @@ class SettingsSection extends StatelessWidget {
 
   const SettingsSection({
     super.key,
-    required title,
-    required icon,
-    required children,
-    isExpanded = true,
+    required this.title,
+    required this.icon,
+    required this.children,
+    this.isExpanded = true,
   });
 
   @override

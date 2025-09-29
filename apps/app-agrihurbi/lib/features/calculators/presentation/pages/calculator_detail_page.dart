@@ -21,7 +21,7 @@ class CalculatorDetailPage extends StatefulWidget {
 
   const CalculatorDetailPage({
     super.key,
-    required calculatorId,
+    required this.calculatorId,
   });
 
   @override

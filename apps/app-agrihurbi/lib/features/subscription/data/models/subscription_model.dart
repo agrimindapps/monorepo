@@ -1,5 +1,5 @@
 import 'package:app_agrihurbi/features/subscription/domain/entities/subscription_entity.dart';
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' hide SubscriptionEntity, SubscriptionTier, PremiumFeature, SubscriptionStatus;
 
 part 'subscription_model.g.dart';
 
@@ -48,19 +48,19 @@ class SubscriptionModel {
   final bool autoRenew;
 
   const SubscriptionModel({
-    required id,
-    required userId,
-    required tier,
-    required status,
-    required startDate,
-    endDate,
-    nextBillingDate,
-    required price,
-    required currency,
-    required billingPeriod,
-    required features,
-    paymentMethod,
-    autoRenew = true,
+    required this.id,
+    required this.userId,
+    required this.tier,
+    required this.status,
+    required this.startDate,
+    this.endDate,
+    this.nextBillingDate,
+    required this.price,
+    required this.currency,
+    required this.billingPeriod,
+    required this.features,
+    this.paymentMethod,
+    this.autoRenew = true,
   });
   
   /// Convert to domain entity
@@ -454,12 +454,12 @@ class PaymentMethodModel {
   final bool isDefault;
 
   const PaymentMethodModel({
-    required id,
-    required type,
-    required lastFourDigits,
-    required brand,
-    required expiryDate,
-    isDefault = false,
+    required this.id,
+    required this.type,
+    required this.lastFourDigits,
+    required this.brand,
+    required this.expiryDate,
+    this.isDefault = false,
   });
   
   /// Convert to domain entity

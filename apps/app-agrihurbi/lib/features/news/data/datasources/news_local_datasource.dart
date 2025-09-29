@@ -2,8 +2,7 @@ import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
 /// News Local Data Source
 /// 

@@ -22,9 +22,9 @@ class MarketRepositoryImpl implements MarketRepository {
   final NetworkInfo _networkInfo;
 
   MarketRepositoryImpl(
-    _remoteDataSource,
-    _localDataSource,
-    _networkInfo,
+    this._remoteDataSource,
+    this._localDataSource,
+    this._networkInfo,
   );
 
   @override

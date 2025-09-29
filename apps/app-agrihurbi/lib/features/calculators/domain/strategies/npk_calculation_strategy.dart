@@ -546,8 +546,8 @@ class NPKNeeds {
   final double potassium;
 
   const NPKNeeds({
-    required nitrogen,
-    required phosphorus,
-    required potassium,
+    required this.nitrogen,
+    required this.phosphorus,
+    required this.potassium,
   });
 }

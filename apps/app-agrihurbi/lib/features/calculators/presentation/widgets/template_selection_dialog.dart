@@ -14,9 +14,9 @@ class TemplateSelectionDialog extends StatefulWidget {
 
   const TemplateSelectionDialog({
     super.key,
-    required calculatorId,
-    required templateService,
-    required onTemplateSelected,
+    required this.calculatorId,
+    required this.templateService,
+    required this.onTemplateSelected,
   });
 
   @override
@@ -411,17 +411,17 @@ Future<CalculationTemplate?> showTemplateSelectionDialog({
   required CalculatorTemplateService templateService,
 }) async {
   CalculationTemplate? selectedTemplate;
-  
+
   await showDialog<void>(
     context: context,
     builder: (context) => TemplateSelectionDialog(
       calculatorId: calculatorId,
       templateService: templateService,
-      onTemplateSelected: (template) {
+      onTemplateSelected: (CalculationTemplate template) {
         selectedTemplate = template;
       },
     ),
   );
-  
+
   return selectedTemplate;
 }

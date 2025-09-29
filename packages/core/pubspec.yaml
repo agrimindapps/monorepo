@@ -106,7 +106,7 @@ dependencies:
   json_annotation: ^4.9.0
 
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
-  flutter_lints: ^6.0.0
+  flutter_lints: ^5.0.0
   
 dev_dependencies:
   flutter_test:

@@ -9,7 +9,7 @@ import '../repositories/weather_repository.dart';
 class CreateWeatherMeasurement {
   final WeatherRepository _repository;
 
-  const CreateWeatherMeasurement(_repository);
+  const CreateWeatherMeasurement(this._repository);
 
   /// Create a new weather measurement
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> call(

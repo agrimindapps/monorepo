@@ -17,13 +17,13 @@ class LivestockSearchWidget extends StatefulWidget {
 
   const LivestockSearchWidget({
     super.key,
-    required controller,
-    onChanged,
-    onClear,
-    hintText = 'Buscar...',
-    debounceDuration = const Duration(milliseconds: 500),
-    showClearButton = true,
-    searchIcon = Icons.search,
+    required this.controller,
+    this.onChanged,
+    this.onClear,
+    this.hintText = 'Buscar...',
+    this.debounceDuration = const Duration(milliseconds: 500),
+    this.showClearButton = true,
+    this.searchIcon = Icons.search,
   });
 
   @override
@@ -125,11 +125,11 @@ class AdvancedLivestockSearchWidget extends StatefulWidget {
 
   const AdvancedLivestockSearchWidget({
     super.key,
-    required controller,
-    onChanged,
-    suggestions = const [],
-    hintText = 'Buscar...',
-    maxSuggestions = 5,
+    required this.controller,
+    this.onChanged,
+    this.suggestions = const [],
+    this.hintText = 'Buscar...',
+    this.maxSuggestions = 5,
   });
 
   @override
@@ -266,8 +266,8 @@ class QuickSearchWidget extends StatelessWidget {
 
   const QuickSearchWidget({
     super.key,
-    onQuickSearch,
-    quickFilters = const [
+    this.onQuickSearch,
+    this.quickFilters = const [
       'Leiteira',
       'Corte',
       'Brasil',
@@ -317,10 +317,10 @@ class SearchResultsCounter extends StatelessWidget {
 
   const SearchResultsCounter({
     super.key,
-    required totalResults,
-    required filteredResults,
-    searchQuery = '',
-    hasActiveFilters = false,
+    required this.totalResults,
+    required this.filteredResults,
+    this.searchQuery = '',
+    this.hasActiveFilters = false,
   });
 
   @override

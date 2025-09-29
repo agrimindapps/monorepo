@@ -13,7 +13,7 @@ import '../providers/equines_provider.dart';
 class EquineFormPage extends StatefulWidget {
   const EquineFormPage({
     super.key,
-    equineId,
+    this.equineId,
   });
 
   /// ID do equino para edição (null para criação)

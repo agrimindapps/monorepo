@@ -475,7 +475,7 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   void _showFilterDialog() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => Padding(

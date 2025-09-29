@@ -8,7 +8,7 @@ class WeatherStatisticsCard extends StatelessWidget {
 
   const WeatherStatisticsCard({
     super.key,
-    required statistics,
+    required this.statistics,
   });
 
   @override

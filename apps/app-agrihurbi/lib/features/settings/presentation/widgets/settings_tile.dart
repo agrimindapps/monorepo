@@ -13,12 +13,12 @@ class SettingsTile extends StatelessWidget {
 
   const SettingsTile({
     super.key,
-    required title,
-    subtitle,
-    leading,
-    trailing,
-    onTap,
-    enabled = true,
+    required this.title,
+    this.subtitle,
+    this.leading,
+    this.trailing,
+    this.onTap,
+    this.enabled = true,
   });
 
   /// Switch tile for boolean settings
@@ -168,13 +168,13 @@ class _SliderSettingsTile extends SettingsTile {
     required super.title,
     super.subtitle,
     super.leading,
-    required value,
-    required min,
-    required max,
-    divisions,
-    required onChanged,
+    required this.value,
+    required this.min,
+    required this.max,
+    this.divisions,
+    required this.onChanged,
     super.enabled,
-    valueFormatter,
+    this.valueFormatter,
   });
 
   @override

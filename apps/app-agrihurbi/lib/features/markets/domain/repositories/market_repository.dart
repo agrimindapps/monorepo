@@ -111,14 +111,14 @@ class MarketAlert {
   final DateTime? lastTriggered;
 
   const MarketAlert({
-    required id,
-    required marketId,
-    required marketName,
-    required type,
-    required threshold,
-    required isActive,
-    required createdAt,
-    lastTriggered,
+    required this.id,
+    required this.marketId,
+    required this.marketName,
+    required this.type,
+    required this.threshold,
+    required this.isActive,
+    required this.createdAt,
+    this.lastTriggered,
   });
 }
 
@@ -130,7 +130,7 @@ enum AlertType {
   changeBelow('Variação Abaixo'),
   volumeAbove('Volume Acima');
 
-  const AlertType(displayName);
+  const AlertType(this.displayName);
   final String displayName;
 }
 
@@ -142,10 +142,10 @@ class MarketTypeInfo {
   final String iconName;
 
   const MarketTypeInfo({
-    required type,
-    required description,
-    required marketCount,
-    required iconName,
+    required this.type,
+    required this.description,
+    required this.marketCount,
+    required this.iconName,
   });
 }
 
@@ -161,14 +161,14 @@ class MarketNews {
   final MarketNewsImpact impact;
 
   const MarketNews({
-    required id,
-    required title,
-    required summary,
-    imageUrl,
-    required publishedAt,
-    required source,
-    required relatedMarkets,
-    required impact,
+    required this.id,
+    required this.title,
+    required this.summary,
+    this.imageUrl,
+    required this.publishedAt,
+    required this.source,
+    required this.relatedMarkets,
+    required this.impact,
   });
 }
 
@@ -178,6 +178,6 @@ enum MarketNewsImpact {
   negative('Negativo'),
   neutral('Neutro');
 
-  const MarketNewsImpact(displayName);
+  const MarketNewsImpact(this.displayName);
   final String displayName;
 }

@@ -13,7 +13,7 @@ import '../providers/equines_provider.dart';
 class EquineDetailPage extends StatefulWidget {
   const EquineDetailPage({
     super.key,
-    required equineId,
+    required this.equineId,
   });
 
   /// ID do equino a ser exibido

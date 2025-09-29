@@ -125,12 +125,12 @@ class PriceAlert {
   final bool isActive;
 
   const PriceAlert({
-    required id,
-    required commodityId,
-    required commodityName,
-    required targetPrice,
-    required isAbove,
-    required createdAt,
-    isActive = true,
+    required this.id,
+    required this.commodityId,
+    required this.commodityName,
+    required this.targetPrice,
+    required this.isAbove,
+    required this.createdAt,
+    this.isActive = true,
   });
 }

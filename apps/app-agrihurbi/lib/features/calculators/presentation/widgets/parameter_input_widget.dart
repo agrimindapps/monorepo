@@ -14,9 +14,9 @@ class ParameterInputWidget extends StatefulWidget {
 
   const ParameterInputWidget({
     super.key,
-    required parameter,
-    required value,
-    required onChanged,
+    required this.parameter,
+    required this.value,
+    required this.onChanged,
   });
 
   @override

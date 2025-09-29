@@ -482,7 +482,7 @@ class LivestockProvider extends ChangeNotifier {
 class BovinesProvider extends ChangeNotifier {
   final LivestockRepository _repository;
 
-  BovinesProvider(_repository);
+  BovinesProvider(this._repository);
 
   List<BovineEntity> _bovines = [];
   bool _isLoading = false;
@@ -515,7 +515,7 @@ class BovinesProvider extends ChangeNotifier {
 class EquinesProvider extends ChangeNotifier {
   final LivestockRepository _repository;
 
-  EquinesProvider(_repository);
+  EquinesProvider(this._repository);
 
   List<EquineEntity> _equines = [];
   bool _isLoading = false;

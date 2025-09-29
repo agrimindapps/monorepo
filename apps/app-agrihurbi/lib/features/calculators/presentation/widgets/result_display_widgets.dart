@@ -10,8 +10,8 @@ class PrimaryResultWidget extends StatelessWidget {
 
   const PrimaryResultWidget({
     super.key,
-    required result,
-    onTap,
+    required this.result,
+    this.onTap,
   });
 
   @override
@@ -154,8 +154,8 @@ class SecondaryResultWidget extends StatelessWidget {
 
   const SecondaryResultWidget({
     super.key,
-    required result,
-    onTap,
+    required this.result,
+    this.onTap,
   });
 
   @override
@@ -254,8 +254,8 @@ class DataTableWidget extends StatelessWidget {
 
   const DataTableWidget({
     super.key,
-    required data,
-    required title,
+    required this.data,
+    required this.title,
   });
 
   @override
@@ -345,11 +345,11 @@ class QualityIndicatorWidget extends StatelessWidget {
 
   const QualityIndicatorWidget({
     super.key,
-    required label,
-    required value,
-    required maxValue,
-    unit = '',
-    color,
+    required this.label,
+    required this.value,
+    required this.maxValue,
+    this.unit = '',
+    this.color,
   });
 
   @override
@@ -425,8 +425,8 @@ class RecommendationsWidget extends StatelessWidget {
 
   const RecommendationsWidget({
     super.key,
-    required recommendations,
-    title = 'Recomendações',
+    required this.recommendations,
+    this.title = 'Recomendações',
   });
 
   @override

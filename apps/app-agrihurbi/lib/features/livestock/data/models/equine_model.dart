@@ -1,4 +1,6 @@
 
+import 'package:core/core.dart';
+
 import '../../domain/entities/equine_entity.dart';
 
 part 'equine_model.g.dart';
@@ -228,22 +230,22 @@ class EquineModel extends EquineEntity {
     String? weight,
   }) {
     return EquineModel(
-      id: id ?? id,
-      createdAt: createdAt ?? createdAt,
-      updatedAt: updatedAt ?? updatedAt,
-      isActive: isActive ?? isActive,
-      registrationId: registrationId ?? registrationId,
-      commonName: commonName ?? commonName,
-      originCountry: originCountry ?? originCountry,
-      imageUrls: imageUrls ?? imageUrls,
-      thumbnailUrl: thumbnailUrl ?? thumbnailUrl,
-      history: history ?? history,
-      temperament: temperament ?? temperament,
-      coat: coat ?? coat,
-      primaryUse: primaryUse ?? primaryUse,
-      geneticInfluences: geneticInfluences ?? geneticInfluences,
-      height: height ?? height,
-      weight: weight ?? weight,
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
+      registrationId: registrationId ?? this.registrationId,
+      commonName: commonName ?? this.commonName,
+      originCountry: originCountry ?? this.originCountry,
+      imageUrls: imageUrls ?? this.imageUrls,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      history: history ?? this.history,
+      temperament: temperament ?? this.temperament,
+      coat: coat ?? this.coat,
+      primaryUse: primaryUse ?? this.primaryUse,
+      geneticInfluences: geneticInfluences ?? this.geneticInfluences,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
     );
   }
 
@@ -255,7 +257,7 @@ class EquineModel extends EquineEntity {
       registrationId: '',
       commonName: '',
       originCountry: '',
-      imageUrls: [],
+      imageUrls: <String>[],
       history: '',
       temperament: EquineTemperament.calm,
       coat: CoatColor.bay,

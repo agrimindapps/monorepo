@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/utils/performance_benchmark.dart';
-import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../providers/calculator_provider.dart';
 import 'calculator_card_widget.dart';
@@ -24,12 +23,12 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
 
   const CalculatorSearchResultsWidget({
     super.key,
-    required searchResults,
-    required isSearching,
-    showCategory = true,
-    scrollController,
-    onClearFilters,
-    searchCallCount = 0,
+    required this.searchResults,
+    required this.isSearching,
+    this.showCategory = true,
+    this.scrollController,
+    this.onClearFilters,
+    this.searchCallCount = 0,
   });
 
   @override

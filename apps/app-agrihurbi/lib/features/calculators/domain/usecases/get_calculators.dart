@@ -17,7 +17,7 @@ class GetCalculators {
 class GetCalculatorsByCategory {
   final CalculatorRepository repository;
 
-  GetCalculatorsByCategory(repository);
+  GetCalculatorsByCategory(this.repository);
 
   Future<Either<Failure, List<CalculatorEntity>>> call(
     CalculatorCategory category,
@@ -29,7 +29,7 @@ class GetCalculatorsByCategory {
 class GetCalculatorById {
   final CalculatorRepository repository;
 
-  GetCalculatorById(repository);
+  GetCalculatorById(this.repository);
 
   Future<Either<Failure, CalculatorEntity>> call(String id) async {
     return repository.getCalculatorById(id);
@@ -39,7 +39,7 @@ class GetCalculatorById {
 class SearchCalculators {
   final CalculatorRepository repository;
 
-  SearchCalculators(repository);
+  SearchCalculators(this.repository);
 
   Future<Either<Failure, List<CalculatorEntity>>> call(
     String searchTerm,

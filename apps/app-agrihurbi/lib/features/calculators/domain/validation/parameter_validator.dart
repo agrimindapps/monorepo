@@ -404,10 +404,10 @@ class ValidationResult {
   final String? warningMessage;
 
   const ValidationResult._({
-    required parameterId,
-    required isValid,
-    errorMessage,
-    warningMessage,
+    required this.parameterId,
+    required this.isValid,
+    this.errorMessage,
+    this.warningMessage,
   });
 
   factory ValidationResult.success(String parameterId) {
@@ -443,9 +443,9 @@ class ValidationBatchResult {
   final Map<String, String> warnings;
 
   const ValidationBatchResult({
-    required isValid,
-    required errors,
-    required warnings,
+    required this.isValid,
+    required this.errors,
+    required this.warnings,
   });
 
   bool get hasWarnings => warnings.isNotEmpty;

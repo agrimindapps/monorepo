@@ -128,7 +128,7 @@ class RainGaugeSaveFailure extends WeatherFailure {
 class RainGaugeNotFoundFailure extends WeatherFailure {
   final String gaugeId;
   
-  const RainGaugeNotFoundFailure(gaugeId);
+  const RainGaugeNotFoundFailure(this.gaugeId);
 
   @override
   List<Object> get props => [gaugeId];
@@ -142,7 +142,7 @@ class RainGaugeDeviceFailure extends WeatherFailure {
   final String deviceId;
   final String message;
   
-  const RainGaugeDeviceFailure(deviceId, [message = 'Device communication failed']);
+  const RainGaugeDeviceFailure(this.deviceId, [this.message = 'Device communication failed']);
 
   @override
   List<Object> get props => [deviceId, message];
@@ -156,7 +156,7 @@ class RainGaugeCalibrationFailure extends WeatherFailure {
   final String gaugeId;
   final String message;
   
-  const RainGaugeCalibrationFailure(gaugeId, [message = 'Calibration failed']);
+  const RainGaugeCalibrationFailure(this.gaugeId, [this.message = 'Calibration failed']);
 
   @override
   List<Object> get props => [gaugeId, message];
@@ -173,7 +173,7 @@ class RainGaugeCalibrationFailure extends WeatherFailure {
 class WeatherStatisticsFailure extends WeatherFailure {
   final String message;
   
-  const WeatherStatisticsFailure([message = 'Weather statistics operation failed']);
+  const WeatherStatisticsFailure([this.message = 'Weather statistics operation failed']);
 
   @override
   List<Object> get props => [message];
@@ -188,8 +188,8 @@ class WeatherStatisticsCalculationFailure extends WeatherFailure {
   final String? period;
   
   const WeatherStatisticsCalculationFailure(
-    message, 
-    [period]
+    this.message,
+    [this.period]
   );
 
   @override
@@ -206,9 +206,9 @@ class InsufficientWeatherDataFailure extends WeatherFailure {
   final int requiredRecords;
   
   const InsufficientWeatherDataFailure(
-    period,
-    availableRecords,
-    requiredRecords,
+    this.period,
+    this.availableRecords,
+    this.requiredRecords,
   );
 
   @override
@@ -227,7 +227,7 @@ class InsufficientWeatherDataFailure extends WeatherFailure {
 class WeatherNetworkFailure extends WeatherFailure {
   final String message;
   
-  const WeatherNetworkFailure([message = 'Network connection failed']);
+  const WeatherNetworkFailure([this.message = 'Network connection failed']);
 
   @override
   List<Object> get props => [message];
@@ -243,9 +243,9 @@ class WeatherApiFailure extends WeatherFailure {
   final String message;
   
   const WeatherApiFailure(
-    service,
-    statusCode,
-    [message = 'API service failed']
+    this.service,
+    this.statusCode,
+    [this.message = 'API service failed']
   );
 
   @override
@@ -260,7 +260,7 @@ class WeatherApiRateLimitFailure extends WeatherFailure {
   final String service;
   final DateTime retryAfter;
   
-  const WeatherApiRateLimitFailure(service, retryAfter);
+  const WeatherApiRateLimitFailure(this.service, this.retryAfter);
 
   @override
   List<Object> get props => [service, retryAfter];
@@ -274,7 +274,7 @@ class WeatherApiAuthFailure extends WeatherFailure {
   final String service;
   final String message;
   
-  const WeatherApiAuthFailure(service, [message = 'Authentication failed']);
+  const WeatherApiAuthFailure(this.service, [this.message = 'Authentication failed']);
 
   @override
   List<Object> get props => [service, message];
@@ -292,7 +292,7 @@ class WeatherLocalStorageFailure extends WeatherFailure {
   final String operation;
   final String message;
   
-  const WeatherLocalStorageFailure(operation, [message = 'Local storage operation failed']);
+  const WeatherLocalStorageFailure(this.operation, [this.message = 'Local storage operation failed']);
 
   @override
   List<Object> get props => [operation, message];
@@ -305,7 +305,7 @@ class WeatherLocalStorageFailure extends WeatherFailure {
 class WeatherCacheFailure extends WeatherFailure {
   final String message;
   
-  const WeatherCacheFailure([message = 'Cache operation failed']);
+  const WeatherCacheFailure([this.message = 'Cache operation failed']);
 
   @override
   List<Object> get props => [message];
@@ -319,7 +319,7 @@ class WeatherSyncFailure extends WeatherFailure {
   final String message;
   final int pendingRecords;
   
-  const WeatherSyncFailure(message, [pendingRecords = 0]);
+  const WeatherSyncFailure(this.message, [this.pendingRecords = 0]);
 
   @override
   List<Object> get props => [message, pendingRecords];
@@ -336,7 +336,7 @@ class WeatherSyncFailure extends WeatherFailure {
 class WeatherLocationPermissionFailure extends WeatherFailure {
   final String message;
   
-  const WeatherLocationPermissionFailure([message = 'Location permission denied']);
+  const WeatherLocationPermissionFailure([this.message = 'Location permission denied']);
 
   @override
   List<Object> get props => [message];
@@ -350,7 +350,7 @@ class InvalidLocationFailure extends WeatherFailure {
   final double latitude;
   final double longitude;
   
-  const InvalidLocationFailure(latitude, longitude);
+  const InvalidLocationFailure(this.latitude, this.longitude);
 
   @override
   List<Object> get props => [latitude, longitude];
@@ -366,9 +366,9 @@ class InvalidDateRangeFailure extends WeatherFailure {
   final String message;
   
   const InvalidDateRangeFailure(
-    startDate, 
-    endDate, 
-    [message = 'Invalid date range']
+    this.startDate,
+    this.endDate,
+    [this.message = 'Invalid date range']
   );
 
   @override
@@ -389,9 +389,9 @@ class WeatherSensorFailure extends WeatherFailure {
   final String message;
   
   const WeatherSensorFailure(
-    sensorType,
-    deviceId, 
-    [message = 'Sensor malfunction']
+    this.sensorType,
+    this.deviceId,
+    [this.message = 'Sensor malfunction']
   );
 
   @override
@@ -406,7 +406,7 @@ class WeatherDeviceBatteryFailure extends WeatherFailure {
   final String deviceId;
   final double batteryLevel;
   
-  const WeatherDeviceBatteryFailure(deviceId, batteryLevel);
+  const WeatherDeviceBatteryFailure(this.deviceId, this.batteryLevel);
 
   @override
   List<Object> get props => [deviceId, batteryLevel];
@@ -420,7 +420,7 @@ class WeatherDeviceOfflineFailure extends WeatherFailure {
   final String deviceId;
   final DateTime lastContact;
   
-  const WeatherDeviceOfflineFailure(deviceId, lastContact);
+  const WeatherDeviceOfflineFailure(this.deviceId, this.lastContact);
 
   @override
   List<Object> get props => [deviceId, lastContact];

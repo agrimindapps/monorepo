@@ -12,10 +12,10 @@ import '../../../../core/widgets/design_system_components.dart';
 class BovineStatusSection extends StatelessWidget {
   const BovineStatusSection({
     super.key,
-    required isActive,
-    required onActiveChanged,
-    enabled = true,
-    showDetails = true,
+    required this.isActive,
+    required this.onActiveChanged,
+    this.enabled = true,
+    this.showDetails = true,
   });
 
   final bool isActive;
@@ -274,9 +274,9 @@ class BovineStatusSection extends StatelessWidget {
 class BovineStatusBadge extends StatelessWidget {
   const BovineStatusBadge({
     super.key,
-    required isActive,
-    showLabel = true,
-    size = BovineStatusBadgeSize.normal,
+    required this.isActive,
+    this.showLabel = true,
+    this.size = BovineStatusBadgeSize.normal,
   });
 
   final bool isActive;

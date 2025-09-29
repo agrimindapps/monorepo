@@ -12,11 +12,11 @@ class WeatherMeasurementsList extends StatelessWidget {
 
   const WeatherMeasurementsList({
     super.key,
-    required measurements,
-    isLoading = false,
-    hasMore = false,
-    onLoadMore,
-    onRefresh,
+    required this.measurements,
+    this.isLoading = false,
+    this.hasMore = false,
+    this.onLoadMore,
+    this.onRefresh,
   });
 
   @override

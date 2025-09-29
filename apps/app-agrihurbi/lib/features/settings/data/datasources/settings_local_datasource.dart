@@ -1,9 +1,7 @@
 import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:app_agrihurbi/features/settings/data/models/settings_model.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 
 /// Settings Local Data Source
 @injectable
@@ -11,7 +9,7 @@ class SettingsLocalDataSource {
   static const String _settingsBoxName = 'app_settings';
   final SharedPreferences _prefs;
 
-  const SettingsLocalDataSource(_prefs);
+  const SettingsLocalDataSource(this._prefs);
 
   Box<SettingsModel> get _settingsBox => Hive.box<SettingsModel>(_settingsBoxName);
 

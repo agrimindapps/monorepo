@@ -19,9 +19,9 @@ class WeatherRepositoryImpl implements WeatherRepository {
   final Connectivity _connectivity;
 
   WeatherRepositoryImpl(
-    _localDataSource,
-    _remoteDataSource,
-    _connectivity,
+    this._localDataSource,
+    this._remoteDataSource,
+    this._connectivity,
   );
 
   /// Check if device is online

@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 import '../../domain/entities/bovine_entity.dart';
 
 part 'bovine_model.g.dart';
@@ -193,24 +195,24 @@ class BovineModel extends BovineEntity {
     String? notes,
   }) {
     return BovineModel(
-      id: id ?? id,
-      createdAt: createdAt ?? createdAt,
-      updatedAt: updatedAt ?? updatedAt,
-      isActive: isActive ?? isActive,
-      registrationId: registrationId ?? registrationId,
-      commonName: commonName ?? commonName,
-      originCountry: originCountry ?? originCountry,
-      imageUrls: imageUrls ?? imageUrls,
-      thumbnailUrl: thumbnailUrl ?? thumbnailUrl,
-      animalType: animalType ?? animalType,
-      origin: origin ?? origin,
-      characteristics: characteristics ?? characteristics,
-      breed: breed ?? breed,
-      aptitude: aptitude ?? aptitude,
-      tags: tags ?? tags,
-      breedingSystem: breedingSystem ?? breedingSystem,
-      purpose: purpose ?? purpose,
-      notes: notes ?? notes,
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
+      registrationId: registrationId ?? this.registrationId,
+      commonName: commonName ?? this.commonName,
+      originCountry: originCountry ?? this.originCountry,
+      imageUrls: imageUrls ?? this.imageUrls,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      animalType: animalType ?? this.animalType,
+      origin: origin ?? this.origin,
+      characteristics: characteristics ?? this.characteristics,
+      breed: breed ?? this.breed,
+      aptitude: aptitude ?? this.aptitude,
+      tags: tags ?? this.tags,
+      breedingSystem: breedingSystem ?? this.breedingSystem,
+      purpose: purpose ?? this.purpose,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -222,13 +224,13 @@ class BovineModel extends BovineEntity {
       registrationId: '',
       commonName: '',
       originCountry: '',
-      imageUrls: [],
+      imageUrls: <String>[],
       animalType: '',
       origin: '',
       characteristics: '',
       breed: '',
       aptitude: BovineAptitude.mixed,
-      tags: [],
+      tags: <String>[],
       breedingSystem: BreedingSystem.extensive,
       purpose: '',
     );

@@ -10,7 +10,7 @@ import 'package:injectable/injectable.dart';
 class GetNews {
   final NewsRepository _repository;
 
-  const GetNews(_repository);
+  const GetNews(this._repository);
 
   /// Execute news fetching with optional filters
   ResultFuture<List<NewsArticleEntity>> call({
@@ -31,7 +31,7 @@ class GetNews {
 class GetArticleById {
   final NewsRepository _repository;
 
-  const GetArticleById(_repository);
+  const GetArticleById(this._repository);
 
   ResultFuture<NewsArticleEntity> call(String articleId) async {
     return await _repository.getArticleById(articleId);
@@ -43,7 +43,7 @@ class GetArticleById {
 class SearchArticles {
   final NewsRepository _repository;
 
-  const SearchArticles(_repository);
+  const SearchArticles(this._repository);
 
   ResultFuture<List<NewsArticleEntity>> call({
     required String query,
@@ -63,7 +63,7 @@ class SearchArticles {
 class GetPremiumArticles {
   final NewsRepository _repository;
 
-  const GetPremiumArticles(_repository);
+  const GetPremiumArticles(this._repository);
 
   ResultFuture<List<NewsArticleEntity>> call({
     int limit = 10,
@@ -81,7 +81,7 @@ class GetPremiumArticles {
 class ManageFavorites {
   final NewsRepository _repository;
 
-  const ManageFavorites(_repository);
+  const ManageFavorites(this._repository);
 
   /// Add article to favorites
   ResultVoid addToFavorites(String articleId) async {
@@ -109,7 +109,7 @@ class ManageFavorites {
 class RefreshRSSFeeds {
   final NewsRepository _repository;
 
-  const RefreshRSSFeeds(_repository);
+  const RefreshRSSFeeds(this._repository);
 
   ResultVoid call() async {
     return await _repository.refreshRSSFeeds();

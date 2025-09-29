@@ -12,7 +12,7 @@ import '../repositories/calculator_data_repository.dart';
 class CalculatorValidationService {
   final ICalculatorDataRepository _dataRepository;
 
-  CalculatorValidationService(_dataRepository);
+  CalculatorValidationService(this._dataRepository);
 
   /// Valida parâmetros usando estratégia específica
   Future<ValidationResult> validateWithStrategy(
@@ -387,10 +387,10 @@ class ParameterValidationResult {
   final Map<String, dynamic> sanitizedInputs;
 
   const ParameterValidationResult({
-    required isValid,
-    required errors,
-    required warnings,
-    required sanitizedInputs,
+    required this.isValid,
+    required this.errors,
+    required this.warnings,
+    required this.sanitizedInputs,
   });
 }
 
@@ -401,10 +401,10 @@ class SingleParameterValidationResult {
   final dynamic sanitizedValue;
 
   const SingleParameterValidationResult({
-    required isValid,
-    errorMessage,
-    warningMessage,
-    sanitizedValue,
+    required this.isValid,
+    this.errorMessage,
+    this.warningMessage,
+    this.sanitizedValue,
   });
 
   bool get hasError => errorMessage != null;
@@ -419,11 +419,11 @@ class RangeValidationResult {
   final double? sanitizedValue;
 
   const RangeValidationResult({
-    required isValid,
-    required isInOptimalRange,
-    errorMessage,
-    warningMessage,
-    sanitizedValue,
+    required this.isValid,
+    required this.isInOptimalRange,
+    this.errorMessage,
+    this.warningMessage,
+    this.sanitizedValue,
   });
 }
 
@@ -432,8 +432,8 @@ class CompatibilityValidationResult {
   final List<String> warnings;
 
   const CompatibilityValidationResult({
-    required isCompatible,
-    required warnings,
+    required this.isCompatible,
+    required this.warnings,
   });
 }
 
@@ -443,9 +443,9 @@ class NutrientValidationResult {
   final List<String> warnings;
 
   const NutrientValidationResult({
-    required isBalanced,
-    required errors,
-    required warnings,
+    required this.isBalanced,
+    required this.errors,
+    required this.warnings,
   });
 }
 
@@ -454,8 +454,8 @@ class ValidationRequiredResult {
   final List<String> missingFields;
 
   const ValidationRequiredResult({
-    required allRequiredPresent,
-    required missingFields,
+    required this.allRequiredPresent,
+    required this.missingFields,
   });
 }
 
@@ -464,7 +464,7 @@ class CrossValidationResult {
   final Map<String, String> warnings;
 
   const CrossValidationResult({
-    required errors,
-    required warnings,
+    required this.errors,
+    required this.warnings,
   });
 }

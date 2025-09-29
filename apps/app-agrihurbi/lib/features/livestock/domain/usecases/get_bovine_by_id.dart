@@ -5,7 +5,7 @@ import '../repositories/livestock_repository.dart';
 
 /// Parâmetros para obter bovino por ID
 class GetBovineByIdParams extends Equatable {
-  const GetBovineByIdParams({required bovineId});
+  const GetBovineByIdParams({required this.bovineId});
 
   final String bovineId;
 
@@ -21,7 +21,7 @@ class GetBovineByIdParams extends Equatable {
 /// 3. Salva automaticamente no cache para consultas futuras
 @lazySingleton
 class GetBovineByIdUseCase implements UseCase<BovineEntity, GetBovineByIdParams> {
-  const GetBovineByIdUseCase(_repository);
+  const GetBovineByIdUseCase(this._repository);
 
   final LivestockRepository _repository;
 

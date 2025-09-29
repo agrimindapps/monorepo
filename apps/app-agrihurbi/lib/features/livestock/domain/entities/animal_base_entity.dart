@@ -7,12 +7,12 @@ abstract class AnimalBaseEntity extends BaseEntity {
     required super.id,
     super.createdAt,
     super.updatedAt,
-    required isActive,
-    required registrationId,
-    required commonName,
-    required originCountry,
-    required imageUrls,
-    thumbnailUrl,
+    required this.isActive,
+    required this.registrationId,
+    required this.commonName,
+    required this.originCountry,
+    required this.imageUrls,
+    this.thumbnailUrl,
   });
 
   /// Status ativo/inativo do animal

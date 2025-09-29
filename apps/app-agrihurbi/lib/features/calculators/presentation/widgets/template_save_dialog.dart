@@ -16,11 +16,11 @@ class TemplateSaveDialog extends StatefulWidget {
 
   const TemplateSaveDialog({
     super.key,
-    required calculatorId,
-    required calculatorName,
-    required currentInputs,
-    required templateService,
-    onTemplateSaved,
+    required this.calculatorId,
+    required this.calculatorName,
+    required this.currentInputs,
+    required this.templateService,
+    this.onTemplateSaved,
   });
 
   @override

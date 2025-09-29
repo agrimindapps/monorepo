@@ -7,13 +7,13 @@ import '../entities/equine_entity.dart';
 /// Parâmetros para busca avançada de animais
 class SearchAnimalsParams {
   const SearchAnimalsParams({
-    query,
-    breed,
-    originCountry,
-    tags,
-    isActive,
-    limit = 20,
-    offset = 0,
+    this.query,
+    this.breed,
+    this.originCountry,
+    this.tags,
+    this.isActive,
+    this.limit = 20,
+    this.offset = 0,
   });
 
   final String? query; // Busca por nome/id/características
@@ -35,9 +35,9 @@ class BovineSearchParams extends SearchAnimalsParams {
     super.isActive,
     super.limit,
     super.offset,
-    aptitude,
-    breedingSystem,
-    purpose,
+    this.aptitude,
+    this.breedingSystem,
+    this.purpose,
   });
 
   final BovineAptitude? aptitude;
@@ -55,9 +55,9 @@ class EquineSearchParams extends SearchAnimalsParams {
     super.isActive,
     super.limit,
     super.offset,
-    temperament,
-    coat,
-    primaryUse,
+    this.temperament,
+    this.coat,
+    this.primaryUse,
   });
 
   final EquineTemperament? temperament;
@@ -68,7 +68,7 @@ class EquineSearchParams extends SearchAnimalsParams {
 /// Interface do repositório de livestock seguindo Clean Architecture
 /// 
 /// Define os contratos para operações com bovinos e equinos
-/// Usa Either<Failure, Success> para error handling funcional
+/// Usa Either&lt;Failure, Success&gt; para error handling funcional
 /// Baseada na análise do projeto original com Supabase + arquitetura avançada
 abstract class LivestockRepository {
   // === OPERAÇÕES BOVINOS ===

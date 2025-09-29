@@ -8,7 +8,7 @@ import 'package:injectable/injectable.dart';
 class SubscriptionRemoteDataSource {
   final DioClient _client;
 
-  const SubscriptionRemoteDataSource(_client);
+  const SubscriptionRemoteDataSource(this._client);
 
   /// Get current subscription
   Future<SubscriptionModel?> getCurrentSubscription(String userId) async {

@@ -263,9 +263,9 @@ class ValidationResult {
   final List<String> missingInputs;
 
   const ValidationResult({
-    required isValid,
-    required errors,
-    required missingInputs,
+    required this.isValid,
+    required this.errors,
+    required this.missingInputs,
   });
 
   bool get hasErrors => errors.isNotEmpty;

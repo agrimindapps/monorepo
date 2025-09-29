@@ -1,17 +1,16 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../controllers/login_controller.dart';
-import '../providers/auth_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
+import '../providers/login_form_provider.dart';
 import 'auth_button_widget.dart';
 import 'auth_text_field_widget.dart';
 import 'social_login_buttons_widget.dart';
 
 /// Widget responsável apenas pelo formulário de login
 /// Segue o princípio da Responsabilidade Única
-class LoginFormWidget extends StatelessWidget {
+class LoginFormWidget extends ConsumerWidget {
 
   const LoginFormWidget({
     super.key,
@@ -20,190 +19,172 @@ class LoginFormWidget extends StatelessWidget {
   final VoidCallback? onLoginSuccess;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<LoginController>(
-      builder: (context, controller, child) {
-        return Form(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formState = ref.watch(loginFormProvider);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
+
+    return Form(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Acesse sua conta para gerenciar seu consumo',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Campo de email
+          AuthTextFieldWidget(
+            controller: formState.emailController!,
+            label: 'Email',
+            hint: 'Insira seu email',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            validator: formNotifier.validateEmail,
+            onFieldSubmitted: (_) {
+              // Focar no próximo campo
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Campo de senha
+          AuthTextFieldWidget(
+            controller: formState.passwordController!,
+            label: 'Senha',
+            hint: 'Insira sua senha',
+            prefixIcon: Icons.lock_outline,
+            obscureText: formState.obscurePassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                formState.obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              onPressed: formNotifier.togglePasswordVisibility,
+              tooltip: formState.obscurePassword
+                  ? 'Mostrar senha'
+                  : 'Ocultar senha',
+            ),
+            validator: formNotifier.validatePassword,
+            onFieldSubmitted: (_) => _handleLogin(context, ref),
+          ),
+          const SizedBox(height: 12),
+
+          // Lembrar-me e Esqueceu senha
+          _buildRememberMeAndForgotPassword(context, ref),
+
+          // Mensagem de erro
+          if (formState.errorMessage != null) ...[
+            const SizedBox(height: 16),
+            _buildErrorMessage(context, ref, formState.errorMessage!),
+          ],
+          const SizedBox(height: 20),
+
+          // Botão de login
+          AuthButtonWidget(
+            text: 'Entrar',
+            isLoading: formState.isLoading,
+            onPressed: () => _handleLogin(context, ref),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Divider
+          const Row(
             children: [
-              Text(
-                'Acesse sua conta para gerenciar seu consumo',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Campo de email
-              AuthTextFieldWidget(
-                controller: controller.emailController,
-                label: 'Email',
-                hint: 'Insira seu email',
-                prefixIcon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                validator: controller.validateEmail,
-                onFieldSubmitted: (_) {
-                  // Focar no próximo campo
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Campo de senha
-              AuthTextFieldWidget(
-                controller: controller.passwordController,
-                label: 'Senha',
-                hint: 'Insira sua senha',
-                prefixIcon: Icons.lock_outline,
-                obscureText: controller.obscurePassword,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    controller.obscurePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                  ),
-                  onPressed: controller.togglePasswordVisibility,
-                  tooltip: controller.obscurePassword
-                      ? 'Mostrar senha'
-                      : 'Ocultar senha',
-                ),
-                validator: controller.validatePassword,
-                onFieldSubmitted: (_) => _handleLogin(context),
-              ),
-              const SizedBox(height: 12),
-
-              // Lembrar-me e Esqueceu senha
-              _buildRememberMeAndForgotPassword(context),
-
-              // Mensagem de erro
-              if (controller.errorMessage != null) ...[
-                const SizedBox(height: 16),
-                _buildErrorMessage(context, controller.errorMessage!),
-              ] else if (kDebugMode && controller.authError != null) ...[
-                // Debug: Mostrar erro do AuthProvider se não há erro no controller
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: Text(
-                    'DEBUG - AuthProvider Error: ${controller.authError}',
-                    style: TextStyle(
-                      color: Colors.orange.shade700,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 20),
-
-              // Botão de login
-              AuthButtonWidget(
-                text: 'Entrar',
-                isLoading: controller.isLoading,
-                onPressed: () => _handleLogin(context),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Divider
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'ou continue com',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Botões de login social
-              const SocialLoginButtonsWidget(),
-              const SizedBox(height: 16),
-
-              // Nota sobre login social
-              Center(
+              Expanded(child: Divider()),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  '* Opções de login social estarão disponíveis em breve',
+                  'ou continue com',
                   style: TextStyle(
+                    color: Colors.grey,
                     fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              // Botão de modo anônimo
-              _buildAnonymousLoginButton(context),
+              Expanded(child: Divider()),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 16),
+
+          // Botões de login social
+          const SocialLoginButtonsWidget(),
+          const SizedBox(height: 16),
+
+          // Nota sobre login social
+          Center(
+            child: Text(
+              '* Opções de login social estarão disponíveis em breve',
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Botão de modo anônimo
+          _buildAnonymousLoginButton(context, ref),
+        ],
+      ),
     );
   }
 
-  Widget _buildRememberMeAndForgotPassword(BuildContext context) {
-    return Consumer<LoginController>(
-      builder: (context, controller, child) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildRememberMeAndForgotPassword(BuildContext context, WidgetRef ref) {
+    final formState = ref.watch(loginFormProvider);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: Checkbox(
-                    value: controller.rememberMe,
-                    activeColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    onChanged: (_) => controller.toggleRememberMe(),
-                  ),
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Checkbox(
+                value: formState.rememberMe,
+                activeColor: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Lembrar-me',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ],
+                onChanged: (_) => formNotifier.toggleRememberMe(),
+              ),
             ),
-            GestureDetector(
-              onTap: controller.showRecoveryForm,
-              child: Text(
-                'Esqueceu sua senha?',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.w500,
-                ),
+            const SizedBox(width: 8),
+            Text(
+              'Lembrar-me',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
               ),
             ),
           ],
-        );
-      },
+        ),
+        GestureDetector(
+          onTap: formNotifier.showRecoveryForm,
+          child: Text(
+            'Esqueceu sua senha?',
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildErrorMessage(BuildContext context, String message) {
+  Widget _buildErrorMessage(BuildContext context, WidgetRef ref, String message) {
+    final formNotifier = ref.watch(loginFormProvider.notifier);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -230,10 +211,7 @@ class LoginFormWidget extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () {
-              final controller = context.read<LoginController>();
-              controller.clearError();
-            },
+            onTap: formNotifier.clearError,
             child: Container(
               padding: const EdgeInsets.all(4),
               child: Icon(
@@ -248,77 +226,78 @@ class LoginFormWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildAnonymousLoginButton(BuildContext context) {
-    final authProvider = di.getIt<AuthProvider>();
-    
+  Widget _buildAnonymousLoginButton(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
+
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: OutlinedButton(
-        onPressed: authProvider.isLoading
+        onPressed: authState.isLoading
             ? null
             : () async {
-                await authProvider.signInAnonymously();
-                if (context.mounted && authProvider.isAuthenticated && onLoginSuccess != null) {
+                final success = await formNotifier.signInAnonymously();
+                if (context.mounted && success && onLoginSuccess != null) {
                   onLoginSuccess!();
                 }
               },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Theme.of(context).primaryColor,
-              side: BorderSide(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: authProvider.isLoading
-                ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.person_outline,
-                        size: 20,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Continuar sem conta',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Theme.of(context).primaryColor,
+          side: BorderSide(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      );
+        child: authState.isLoading
+            ? SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    size: 20,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Continuar sem conta',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
   }
 
-  void _handleLogin(BuildContext context) async {
+  void _handleLogin(BuildContext context, WidgetRef ref) async {
     if (kDebugMode) {
-      print('🎯 LoginFormWidget: Chamando login simplificado - padrão app-plantis');
+      print('🎯 LoginFormWidget: Chamando login com Riverpod');
     }
-    
-    final controller = context.read<LoginController>();
-    await controller.signInWithEmailAndSync();
-    
+
+    final formNotifier = ref.watch(loginFormProvider.notifier);
+    final success = await formNotifier.signInWithEmail();
+
     if (kDebugMode) {
-      print('🎯 LoginFormWidget: Após login - autenticado: ${controller.isAuthenticated}, erro controller: ${controller.errorMessage}, erro auth: ${controller.authError}');
+      print('🎯 LoginFormWidget: Após login - sucesso: $success');
     }
-    
-    if (controller.isAuthenticated && onLoginSuccess != null) {
+
+    if (success && onLoginSuccess != null) {
       onLoginSuccess!();
     }
   }

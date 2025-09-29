@@ -165,14 +165,14 @@ class Invoice {
   final String downloadUrl;
 
   const Invoice({
-    required id,
-    required subscriptionId,
-    required amount,
-    required currency,
-    required invoiceDate,
-    paidAt,
-    required status,
-    required downloadUrl,
+    required this.id,
+    required this.subscriptionId,
+    required this.amount,
+    required this.currency,
+    required this.invoiceDate,
+    this.paidAt,
+    required this.status,
+    required this.downloadUrl,
   });
 }
 
@@ -192,10 +192,10 @@ class FeatureUsage {
   final DateTime resetDate;
 
   const FeatureUsage({
-    required feature,
-    required currentUsage,
-    required limit,
-    required resetDate,
+    required this.feature,
+    required this.currentUsage,
+    required this.limit,
+    required this.resetDate,
   });
 
   bool get isLimitReached => currentUsage >= limit;
@@ -214,14 +214,14 @@ class SubscriptionPlan {
   final bool isPopular;
 
   const SubscriptionPlan({
-    required tier,
-    required name,
-    required description,
-    required monthlyPrice,
-    required yearlyPrice,
-    required features,
-    required benefits,
-    isPopular = false,
+    required this.tier,
+    required this.name,
+    required this.description,
+    required this.monthlyPrice,
+    required this.yearlyPrice,
+    required this.features,
+    required this.benefits,
+    this.isPopular = false,
   });
 }
 
@@ -232,9 +232,9 @@ class PlanComparison {
   final Map<SubscriptionTier, String?> limits;
 
   const PlanComparison({
-    required feature,
-    required availability,
-    required limits,
+    required this.feature,
+    required this.availability,
+    required this.limits,
   });
 }
 
@@ -247,11 +247,11 @@ class TrialStatus {
   final bool isActive;
 
   const TrialStatus({
-    required tier,
-    required startDate,
-    required endDate,
-    required daysRemaining,
-    required isActive,
+    required this.tier,
+    required this.startDate,
+    required this.endDate,
+    required this.daysRemaining,
+    required this.isActive,
   });
 }
 
@@ -265,12 +265,12 @@ class PromoCodeResult {
   final String? errorMessage;
 
   const PromoCodeResult({
-    required code,
-    required discountPercent,
-    required discountAmount,
-    required expiresAt,
-    required isValid,
-    errorMessage,
+    required this.code,
+    required this.discountPercent,
+    required this.discountAmount,
+    required this.expiresAt,
+    required this.isValid,
+    this.errorMessage,
   });
 }
 
@@ -283,11 +283,11 @@ class Discount {
   final List<SubscriptionTier> applicableTiers;
 
   const Discount({
-    required id,
-    required name,
-    required discountPercent,
-    required validUntil,
-    required applicableTiers,
+    required this.id,
+    required this.name,
+    required this.discountPercent,
+    required this.validUntil,
+    required this.applicableTiers,
   });
 }
 
@@ -301,12 +301,12 @@ class SubscriptionNotification {
   final bool isRead;
 
   const SubscriptionNotification({
-    required id,
-    required title,
-    required message,
-    required type,
-    required createdAt,
-    isRead = false,
+    required this.id,
+    required this.title,
+    required this.message,
+    required this.type,
+    required this.createdAt,
+    this.isRead = false,
   });
 }
 

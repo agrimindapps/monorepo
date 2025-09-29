@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/design_system_components.dart';
-import '../providers/bovines_provider.dart';
+import '../providers/livestock_provider.dart';
 
 /// Seção de botões de ação do formulário de bovino
 /// 
@@ -15,12 +15,12 @@ import '../providers/bovines_provider.dart';
 class BovineFormActionButtons extends StatelessWidget {
   const BovineFormActionButtons({
     super.key,
-    required onCancel,
-    required onSave,
-    required isEditing,
-    onDelete,
-    hasUnsavedChanges = false,
-    enabled = true,
+    required this.onCancel,
+    required this.onSave,
+    required this.isEditing,
+    this.onDelete,
+    this.hasUnsavedChanges = false,
+    this.enabled = true,
   });
 
   final VoidCallback onCancel;
@@ -32,7 +32,7 @@ class BovineFormActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BovinesProvider>(
+    return Consumer<LivestockProvider>(
       builder: (context, provider, child) {
         final isLoading = provider.isCreating || 
                          provider.isUpdating || 
@@ -134,7 +134,7 @@ class BovineFormActionButtons extends StatelessWidget {
     );
   }
 
-  Widget _buildSaveButton(BuildContext context, BovinesProvider provider, bool isLoading) {
+  Widget _buildSaveButton(BuildContext context, LivestockProvider provider, bool isLoading) {
     String buttonText = isEditing ? 'Salvar' : 'Criar';
     IconData buttonIcon = isEditing ? Icons.save : Icons.add;
     
@@ -154,7 +154,7 @@ class BovineFormActionButtons extends StatelessWidget {
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context, BovinesProvider provider, bool isLoading) {
+  Widget _buildDeleteButton(BuildContext context, LivestockProvider provider, bool isLoading) {
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -357,11 +357,11 @@ class BovineFormActionButtons extends StatelessWidget {
 class BovineFormSimpleActions extends StatelessWidget {
   const BovineFormSimpleActions({
     super.key,
-    required onSave,
-    required onCancel,
-    required isEditing,
-    isLoading = false,
-    enabled = true,
+    required this.onSave,
+    required this.onCancel,
+    required this.isEditing,
+    this.isLoading = false,
+    this.enabled = true,
   });
 
   final VoidCallback onSave;

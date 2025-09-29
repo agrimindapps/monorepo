@@ -310,11 +310,11 @@ class HistoryStatistics {
   final DateTime? newestCalculation;
 
   const HistoryStatistics({
-    required totalCalculations,
-    required uniqueCalculators,
-    required mostUsedCalculator,
-    required mostUsedCalculatorCount,
-    required oldestCalculation,
-    required newestCalculation,
+    required this.totalCalculations,
+    required this.uniqueCalculators,
+    required this.mostUsedCalculator,
+    required this.mostUsedCalculatorCount,
+    required this.oldestCalculation,
+    required this.newestCalculation,
   });
 }

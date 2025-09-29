@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Settings Entity for App Configuration Management
 /// 
@@ -16,16 +16,16 @@ class SettingsEntity extends Equatable {
   final DateTime lastUpdated;
 
   const SettingsEntity({
-    required userId,
-    theme = AppTheme.system,
-    language = 'pt_BR',
-    notifications = const NotificationSettings(),
-    dataSettings = const DataSettings(),
-    privacy = const PrivacySettings(),
-    display = const DisplaySettings(),
-    security = const SecuritySettings(),
-    backup = const BackupSettings(),
-    required lastUpdated,
+    required this.userId,
+    this.theme = AppTheme.system,
+    this.language = 'pt_BR',
+    this.notifications = const NotificationSettings(),
+    this.dataSettings = const DataSettings(),
+    this.privacy = const PrivacySettings(),
+    this.display = const DisplaySettings(),
+    this.security = const SecuritySettings(),
+    this.backup = const BackupSettings(),
+    required this.lastUpdated,
   });
 
   SettingsEntity copyWith({
@@ -41,16 +41,16 @@ class SettingsEntity extends Equatable {
     DateTime? lastUpdated,
   }) {
     return SettingsEntity(
-      userId: userId ?? userId,
-      theme: theme ?? theme,
-      language: language ?? language,
-      notifications: notifications ?? notifications,
-      dataSettings: dataSettings ?? dataSettings,
-      privacy: privacy ?? privacy,
-      display: display ?? display,
-      security: security ?? security,
-      backup: backup ?? backup,
-      lastUpdated: lastUpdated ?? lastUpdated,
+      userId: userId ?? this.userId,
+      theme: theme ?? this.theme,
+      language: language ?? this.language,
+      notifications: notifications ?? this.notifications,
+      dataSettings: dataSettings ?? this.dataSettings,
+      privacy: privacy ?? this.privacy,
+      display: display ?? this.display,
+      security: security ?? this.security,
+      backup: backup ?? this.backup,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }
 
@@ -75,7 +75,7 @@ enum AppTheme {
   dark('Escuro'),
   system('Sistema');
 
-  const AppTheme(displayName);
+  const AppTheme(this.displayName);
   final String displayName;
 }
 
@@ -91,14 +91,14 @@ class NotificationSettings extends Equatable {
   final String quietHoursEnd;
 
   const NotificationSettings({
-    pushNotifications = true,
-    newsNotifications = true,
-    marketAlerts = true,
-    weatherAlerts = true,
-    animalReminders = true,
-    calculatorReminders = false,
-    quietHoursStart = '22:00',
-    quietHoursEnd = '07:00',
+    this.pushNotifications = true,
+    this.newsNotifications = true,
+    this.marketAlerts = true,
+    this.weatherAlerts = true,
+    this.animalReminders = true,
+    this.calculatorReminders = false,
+    this.quietHoursStart = '22:00',
+    this.quietHoursEnd = '07:00',
   });
 
   NotificationSettings copyWith({
@@ -112,14 +112,14 @@ class NotificationSettings extends Equatable {
     String? quietHoursEnd,
   }) {
     return NotificationSettings(
-      pushNotifications: pushNotifications ?? pushNotifications,
-      newsNotifications: newsNotifications ?? newsNotifications,
-      marketAlerts: marketAlerts ?? marketAlerts,
-      weatherAlerts: weatherAlerts ?? weatherAlerts,
-      animalReminders: animalReminders ?? animalReminders,
-      calculatorReminders: calculatorReminders ?? calculatorReminders,
-      quietHoursStart: quietHoursStart ?? quietHoursStart,
-      quietHoursEnd: quietHoursEnd ?? quietHoursEnd,
+      pushNotifications: pushNotifications ?? this.pushNotifications,
+      newsNotifications: newsNotifications ?? this.newsNotifications,
+      marketAlerts: marketAlerts ?? this.marketAlerts,
+      weatherAlerts: weatherAlerts ?? this.weatherAlerts,
+      animalReminders: animalReminders ?? this.animalReminders,
+      calculatorReminders: calculatorReminders ?? this.calculatorReminders,
+      quietHoursStart: quietHoursStart ?? this.quietHoursStart,
+      quietHoursEnd: quietHoursEnd ?? this.quietHoursEnd,
     );
   }
 
@@ -146,12 +146,12 @@ class DataSettings extends Equatable {
   final DataExportFormat exportFormat;
 
   const DataSettings({
-    autoSync = true,
-    wifiOnlySync = true,
-    cacheImages = true,
-    cacheRetentionDays = 30,
-    compressBackups = true,
-    exportFormat = DataExportFormat.json,
+    this.autoSync = true,
+    this.wifiOnlySync = true,
+    this.cacheImages = true,
+    this.cacheRetentionDays = 30,
+    this.compressBackups = true,
+    this.exportFormat = DataExportFormat.json,
   });
 
   DataSettings copyWith({
@@ -163,12 +163,12 @@ class DataSettings extends Equatable {
     DataExportFormat? exportFormat,
   }) {
     return DataSettings(
-      autoSync: autoSync ?? autoSync,
-      wifiOnlySync: wifiOnlySync ?? wifiOnlySync,
-      cacheImages: cacheImages ?? cacheImages,
-      cacheRetentionDays: cacheRetentionDays ?? cacheRetentionDays,
-      compressBackups: compressBackups ?? compressBackups,
-      exportFormat: exportFormat ?? exportFormat,
+      autoSync: autoSync ?? this.autoSync,
+      wifiOnlySync: wifiOnlySync ?? this.wifiOnlySync,
+      cacheImages: cacheImages ?? this.cacheImages,
+      cacheRetentionDays: cacheRetentionDays ?? this.cacheRetentionDays,
+      compressBackups: compressBackups ?? this.compressBackups,
+      exportFormat: exportFormat ?? this.exportFormat,
     );
   }
 
@@ -192,11 +192,11 @@ class PrivacySettings extends Equatable {
   final bool locationTracking;
 
   const PrivacySettings({
-    analyticsEnabled = true,
-    crashReportingEnabled = true,
-    shareUsageData = false,
-    personalizedAds = false,
-    locationTracking = false,
+    this.analyticsEnabled = true,
+    this.crashReportingEnabled = true,
+    this.shareUsageData = false,
+    this.personalizedAds = false,
+    this.locationTracking = false,
   });
 
   PrivacySettings copyWith({
@@ -207,11 +207,11 @@ class PrivacySettings extends Equatable {
     bool? locationTracking,
   }) {
     return PrivacySettings(
-      analyticsEnabled: analyticsEnabled ?? analyticsEnabled,
-      crashReportingEnabled: crashReportingEnabled ?? crashReportingEnabled,
-      shareUsageData: shareUsageData ?? shareUsageData,
-      personalizedAds: personalizedAds ?? personalizedAds,
-      locationTracking: locationTracking ?? locationTracking,
+      analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
+      crashReportingEnabled: crashReportingEnabled ?? this.crashReportingEnabled,
+      shareUsageData: shareUsageData ?? this.shareUsageData,
+      personalizedAds: personalizedAds ?? this.personalizedAds,
+      locationTracking: locationTracking ?? this.locationTracking,
     );
   }
 
@@ -237,14 +237,14 @@ class DisplaySettings extends Equatable {
   final String unitSystem;
 
   const DisplaySettings({
-    fontSize = 1.0,
-    highContrast = false,
-    animations = true,
-    showTutorials = true,
-    dateFormat = 'dd/MM/yyyy',
-    timeFormat = 'HH:mm',
-    currency = 'BRL',
-    unitSystem = 'metric',
+    this.fontSize = 1.0,
+    this.highContrast = false,
+    this.animations = true,
+    this.showTutorials = true,
+    this.dateFormat = 'dd/MM/yyyy',
+    this.timeFormat = 'HH:mm',
+    this.currency = 'BRL',
+    this.unitSystem = 'metric',
   });
 
   DisplaySettings copyWith({
@@ -258,14 +258,14 @@ class DisplaySettings extends Equatable {
     String? unitSystem,
   }) {
     return DisplaySettings(
-      fontSize: fontSize ?? fontSize,
-      highContrast: highContrast ?? highContrast,
-      animations: animations ?? animations,
-      showTutorials: showTutorials ?? showTutorials,
-      dateFormat: dateFormat ?? dateFormat,
-      timeFormat: timeFormat ?? timeFormat,
-      currency: currency ?? currency,
-      unitSystem: unitSystem ?? unitSystem,
+      fontSize: fontSize ?? this.fontSize,
+      highContrast: highContrast ?? this.highContrast,
+      animations: animations ?? this.animations,
+      showTutorials: showTutorials ?? this.showTutorials,
+      dateFormat: dateFormat ?? this.dateFormat,
+      timeFormat: timeFormat ?? this.timeFormat,
+      currency: currency ?? this.currency,
+      unitSystem: unitSystem ?? this.unitSystem,
     );
   }
 
@@ -291,11 +291,11 @@ class SecuritySettings extends Equatable {
   final bool encryptBackups;
 
   const SecuritySettings({
-    biometricAuth = false,
-    requireAuthOnOpen = false,
-    autoLockMinutes = 5,
-    hideDataInRecents = false,
-    encryptBackups = true,
+    this.biometricAuth = false,
+    this.requireAuthOnOpen = false,
+    this.autoLockMinutes = 5,
+    this.hideDataInRecents = false,
+    this.encryptBackups = true,
   });
 
   SecuritySettings copyWith({
@@ -306,11 +306,11 @@ class SecuritySettings extends Equatable {
     bool? encryptBackups,
   }) {
     return SecuritySettings(
-      biometricAuth: biometricAuth ?? biometricAuth,
-      requireAuthOnOpen: requireAuthOnOpen ?? requireAuthOnOpen,
-      autoLockMinutes: autoLockMinutes ?? autoLockMinutes,
-      hideDataInRecents: hideDataInRecents ?? hideDataInRecents,
-      encryptBackups: encryptBackups ?? encryptBackups,
+      biometricAuth: biometricAuth ?? this.biometricAuth,
+      requireAuthOnOpen: requireAuthOnOpen ?? this.requireAuthOnOpen,
+      autoLockMinutes: autoLockMinutes ?? this.autoLockMinutes,
+      hideDataInRecents: hideDataInRecents ?? this.hideDataInRecents,
+      encryptBackups: encryptBackups ?? this.encryptBackups,
     );
   }
 
@@ -333,11 +333,11 @@ class BackupSettings extends Equatable {
   final BackupStorage storage;
 
   const BackupSettings({
-    autoBackup = true,
-    frequency = BackupFrequency.weekly,
-    includeImages = false,
-    lastBackupDate,
-    storage = BackupStorage.cloud,
+    this.autoBackup = true,
+    this.frequency = BackupFrequency.weekly,
+    this.includeImages = false,
+    this.lastBackupDate,
+    this.storage = BackupStorage.cloud,
   });
 
   BackupSettings copyWith({
@@ -348,11 +348,11 @@ class BackupSettings extends Equatable {
     BackupStorage? storage,
   }) {
     return BackupSettings(
-      autoBackup: autoBackup ?? autoBackup,
-      frequency: frequency ?? frequency,
-      includeImages: includeImages ?? includeImages,
-      lastBackupDate: lastBackupDate ?? lastBackupDate,
-      storage: storage ?? storage,
+      autoBackup: autoBackup ?? this.autoBackup,
+      frequency: frequency ?? this.frequency,
+      includeImages: includeImages ?? this.includeImages,
+      lastBackupDate: lastBackupDate ?? this.lastBackupDate,
+      storage: storage ?? this.storage,
     );
   }
 
@@ -372,7 +372,7 @@ enum DataExportFormat {
   csv('CSV'),
   excel('Excel');
 
-  const DataExportFormat(displayName);
+  const DataExportFormat(this.displayName);
   final String displayName;
 }
 
@@ -382,7 +382,7 @@ enum BackupFrequency {
   weekly('Semanal'),
   monthly('Mensal');
 
-  const BackupFrequency(displayName);
+  const BackupFrequency(this.displayName);
   final String displayName;
 }
 
@@ -391,6 +391,6 @@ enum BackupStorage {
   local('Local'),
   cloud('Nuvem');
 
-  const BackupStorage(displayName);
+  const BackupStorage(this.displayName);
   final String displayName;
 }

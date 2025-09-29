@@ -213,16 +213,16 @@ class LivestockMetrics {
   final DateTime lastCalculated;
 
   const LivestockMetrics({
-    required totalAnimals,
-    required totalBovines,
-    required totalEquines,
-    required activeBovines,
-    required activeEquines,
-    required inactiveBovines,
-    required inactiveEquines,
-    required bovinesPercentage,
-    required equinesPercentage,
-    required lastCalculated,
+    required this.totalAnimals,
+    required this.totalBovines,
+    required this.totalEquines,
+    required this.activeBovines,
+    required this.activeEquines,
+    required this.inactiveBovines,
+    required this.inactiveEquines,
+    required this.bovinesPercentage,
+    required this.equinesPercentage,
+    required this.lastCalculated,
   });
 }
 
@@ -234,11 +234,11 @@ class GrowthMetrics {
   final double quarterlyGrowthRate;
 
   const GrowthMetrics({
-    required totalAnimals,
-    required newThisMonth,
-    required newLast3Months,
-    required monthlyGrowthRate,
-    required quarterlyGrowthRate,
+    required this.totalAnimals,
+    required this.newThisMonth,
+    required this.newLast3Months,
+    required this.monthlyGrowthRate,
+    required this.quarterlyGrowthRate,
   });
 }
 
@@ -251,12 +251,12 @@ class AgeMetrics {
   final int animalsOver5Years;
 
   const AgeMetrics({
-    required averageAgeMonths,
-    required youngestAgeMonths,
-    required oldestAgeMonths,
-    required animalsUnder1Year,
-    required animals1to5Years,
-    required animalsOver5Years,
+    required this.averageAgeMonths,
+    required this.youngestAgeMonths,
+    required this.oldestAgeMonths,
+    required this.animalsUnder1Year,
+    required this.animals1to5Years,
+    required this.animalsOver5Years,
   });
 }
 
@@ -269,11 +269,11 @@ class HealthReport {
   final DateTime generatedAt;
 
   const HealthReport({
-    required totalAnimals,
-    required activeAnimals,
-    required inactiveAnimals,
-    required healthScore,
-    required recommendations,
-    required generatedAt,
+    required this.totalAnimals,
+    required this.activeAnimals,
+    required this.inactiveAnimals,
+    required this.healthScore,
+    required this.recommendations,
+    required this.generatedAt,
   });
 }

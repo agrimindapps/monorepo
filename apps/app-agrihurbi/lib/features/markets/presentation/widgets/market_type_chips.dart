@@ -10,7 +10,7 @@ class MarketTypeChips extends StatelessWidget {
 
   const MarketTypeChips({
     super.key,
-    required onTypeSelected,
+    required this.onTypeSelected,
   });
 
   @override

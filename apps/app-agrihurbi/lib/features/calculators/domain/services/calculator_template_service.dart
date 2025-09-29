@@ -17,7 +17,7 @@ class CalculatorTemplateService {
   final SharedPreferences _prefs;
   final Random _random = Random();
   
-  CalculatorTemplateService(_prefs);
+  CalculatorTemplateService(this._prefs);
 
   /// Gera ID único para template
   String _generateUniqueId() {
@@ -341,10 +341,10 @@ class TemplateStats {
   final bool hasBackup;
 
   const TemplateStats({
-    required totalTemplates,
-    required recentlyUsed,
-    required publicTemplates,
-    lastSync,
-    required hasBackup,
+    required this.totalTemplates,
+    required this.recentlyUsed,
+    required this.publicTemplates,
+    this.lastSync,
+    required this.hasBackup,
   });
 }

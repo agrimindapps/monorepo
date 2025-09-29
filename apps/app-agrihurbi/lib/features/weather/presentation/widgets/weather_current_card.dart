@@ -9,8 +9,8 @@ class WeatherCurrentCard extends StatelessWidget {
 
   const WeatherCurrentCard({
     super.key,
-    measurement,
-    isLoading = false,
+    this.measurement,
+    this.isLoading = false,
   });
 
   @override

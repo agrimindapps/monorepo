@@ -1,9 +1,4 @@
-import 'package:app_agrihurbi/core/error/failures.dart';
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/utils/typedef.dart';
+import 'package:core/core.dart';
 import '../repositories/livestock_repository.dart';
 
 /// Use case para deletar um bovino com validação e regras de negócio
@@ -11,15 +6,16 @@ import '../repositories/livestock_repository.dart';
 /// Implementa UseCase com soft delete por padrão
 /// Inclui verificações de confirmação e operações em cascata
 @lazySingleton
-class DeleteBovineUseCase {
+class DeleteBovineUseCase implements UseCase<void, DeleteBovineParams> {
   final LivestockRepository repository;
   
-  const DeleteBovineUseCase(repository);
+  const DeleteBovineUseCase(this.repository);
   
-  ResultVoid call(DeleteBovineParams params) async {
+  @override
+  Future<Either<Failure, void>> call(DeleteBovineParams params) async {
     // Validação básica do ID
     if (params.bovineId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do bovino é obrigatório para exclusão'));
+      return const Left(ValidationFailure('ID do bovino é obrigatório para exclusão'));
     }
     
     // Verificar se o bovino existe
@@ -28,7 +24,7 @@ class DeleteBovineUseCase {
       return Left(
         existingBovineResult.fold(
           (failure) => failure is NotFoundFailure 
-            ? const NotFoundFailure(message: 'Bovino não encontrado')
+            ? const NotFoundFailure('Bovino não encontrado')
             : failure,
           (r) => throw UnimplementedError(),
         ),
@@ -39,7 +35,7 @@ class DeleteBovineUseCase {
     
     // Validar confirmação se necessária
     if (params.requireConfirmation && !params.confirmed) {
-      return const Left(ValidationFailure(message: 'Confirmação é obrigatória para exclusão'));
+      return const Left(ValidationFailure('Confirmação é obrigatória para exclusão'));
     }
     
     // Validar regras de negócio específicas
@@ -76,7 +72,7 @@ class DeleteBovineUseCase {
   Future<Failure?> _validateBusinessRules(dynamic existingBovine, DeleteBovineParams params) async {
     // Verificar se bovino está inativo (já foi "deletado" anteriormente)
     if (existingBovine.isActive == false && !params.forceDelete) {
-      return const ValidationFailure(message: 'Bovino já foi removido anteriormente');
+      return const ValidationFailure('Bovino já foi removido anteriormente');
     }
     
     // Outras validações de business rules podem ser adicionadas aqui
@@ -86,7 +82,7 @@ class DeleteBovineUseCase {
   }
   
   /// Executa operações em cascata relacionadas
-  ResultVoid _performCascadeOperations(String bovineId) async {
+  Future<Either<Failure, void>> _performCascadeOperations(String bovineId) async {
     // Implementar operações em cascata quando o sistema estiver completo
     // Ex: remover registros de vacinas, histórico médico, registros de reprodução, etc.
     
@@ -98,13 +94,13 @@ class DeleteBovineUseCase {
 /// Parâmetros para exclusão de bovino
 class DeleteBovineParams extends Equatable {
   const DeleteBovineParams({
-    required bovineId,
-    requireConfirmation = true,
-    confirmed = false,
-    deleteImages = false,
-    deleteRelatedData = false,
-    forceDelete = false,
-    reason,
+    required this.bovineId,
+    this.requireConfirmation = true,
+    this.confirmed = false,
+    this.deleteImages = false,
+    this.deleteRelatedData = false,
+    this.forceDelete = false,
+    this.reason,
   });
 
   /// ID do bovino a ser deletado
@@ -142,12 +138,13 @@ class DeleteBovineParams extends Equatable {
 
 /// Use case especializado para exclusão rápida sem confirmações
 @lazySingleton
-class QuickDeleteBovineUseCase {
+class QuickDeleteBovineUseCase implements UseCase<void, String> {
   final DeleteBovineUseCase _deleteUseCase;
   
-  const QuickDeleteBovineUseCase(_deleteUseCase);
+  const QuickDeleteBovineUseCase(this._deleteUseCase);
   
-  ResultVoid call(String bovineId) async {
+  @override
+  Future<Either<Failure, void>> call(String bovineId) async {
     return await _deleteUseCase.call(
       DeleteBovineParams(
         bovineId: bovineId,

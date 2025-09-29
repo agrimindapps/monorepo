@@ -371,10 +371,10 @@ class QualityRange {
   final String recommendation;
 
   const QualityRange({
-    required min,
-    required max,
-    required quality,
-    required recommendation,
+    required this.min,
+    required this.max,
+    required this.quality,
+    required this.recommendation,
   });
 }
 
@@ -386,9 +386,9 @@ class FormattedQualifiedResult {
   final String recommendation;
 
   const FormattedQualifiedResult({
-    required formattedValue,
-    required quality,
-    required color,
-    required recommendation,
+    required this.formattedValue,
+    required this.quality,
+    required this.color,
+    required this.recommendation,
   });
 }

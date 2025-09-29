@@ -15,10 +15,10 @@ class MarketCard extends StatelessWidget {
 
   const MarketCard({
     super.key,
-    required market,
-    required onTap,
-    required onFavoriteToggle,
-    isFavorite = false,
+    required this.market,
+    required this.onTap,
+    required this.onFavoriteToggle,
+    this.isFavorite = false,
   });
 
   @override

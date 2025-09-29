@@ -13,7 +13,7 @@ import '../providers/bovines_provider.dart';
 class BovineFormPage extends StatefulWidget {
   const BovineFormPage({
     super.key,
-    bovineId,
+    this.bovineId,
   });
 
   /// ID do bovino para edição (null para criação)
@@ -594,7 +594,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
       breedingSystem: _selectedBreedingSystem ?? BreedingSystem.extensive,
       imageUrls: widget.isEditing 
           ? (provider.selectedBovine?.imageUrls ?? [])
-          : [],
+          : <String>[],
       isActive: _isActive,
       createdAt: widget.isEditing 
           ? (provider.selectedBovine?.createdAt ?? now)

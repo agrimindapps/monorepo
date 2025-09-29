@@ -8,7 +8,7 @@ enum EquineTemperament {
   energetic('Energético'),
   docile('Manso');
 
-  const EquineTemperament(displayName);
+  const EquineTemperament(this.displayName);
   final String displayName;
 }
 
@@ -22,7 +22,7 @@ enum CoatColor {
   pinto('Pampa'),
   roan('Rosilho');
 
-  const CoatColor(displayName);
+  const CoatColor(this.displayName);
   final String displayName;
 }
 
@@ -34,7 +34,7 @@ enum EquinePrimaryUse {
   breeding('Reprodução'),
   leisure('Lazer');
 
-  const EquinePrimaryUse(displayName);
+  const EquinePrimaryUse(this.displayName);
   final String displayName;
 }
 
@@ -52,13 +52,13 @@ class EquineEntity extends AnimalBaseEntity {
     required super.originCountry,
     required super.imageUrls,
     super.thumbnailUrl,
-    required history,
-    required temperament,
-    required coat,
-    required primaryUse,
-    required geneticInfluences,
-    required height,
-    required weight,
+    required this.history,
+    required this.temperament,
+    required this.coat,
+    required this.primaryUse,
+    required this.geneticInfluences,
+    required this.height,
+    required this.weight,
   });
 
   /// História da raça equina
@@ -115,22 +115,22 @@ class EquineEntity extends AnimalBaseEntity {
     String? weight,
   }) {
     return EquineEntity(
-      id: id ?? id,
-      createdAt: createdAt ?? createdAt,
-      updatedAt: updatedAt ?? updatedAt,
-      isActive: isActive ?? isActive,
-      registrationId: registrationId ?? registrationId,
-      commonName: commonName ?? commonName,
-      originCountry: originCountry ?? originCountry,
-      imageUrls: imageUrls ?? imageUrls,
-      thumbnailUrl: thumbnailUrl ?? thumbnailUrl,
-      history: history ?? history,
-      temperament: temperament ?? temperament,
-      coat: coat ?? coat,
-      primaryUse: primaryUse ?? primaryUse,
-      geneticInfluences: geneticInfluences ?? geneticInfluences,
-      height: height ?? height,
-      weight: weight ?? weight,
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
+      registrationId: registrationId ?? this.registrationId,
+      commonName: commonName ?? this.commonName,
+      originCountry: originCountry ?? this.originCountry,
+      imageUrls: imageUrls ?? this.imageUrls,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      history: history ?? this.history,
+      temperament: temperament ?? this.temperament,
+      coat: coat ?? this.coat,
+      primaryUse: primaryUse ?? this.primaryUse,
+      geneticInfluences: geneticInfluences ?? this.geneticInfluences,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
     );
   }
 
@@ -142,7 +142,7 @@ class EquineEntity extends AnimalBaseEntity {
       registrationId: '',
       commonName: '',
       originCountry: '',
-      imageUrls: [],
+      imageUrls: <String>[],
       history: '',
       temperament: EquineTemperament.calm,
       coat: CoatColor.bay,

@@ -26,19 +26,19 @@ class CalculatorSearchFiltersWidget extends StatefulWidget {
 
   const CalculatorSearchFiltersWidget({
     super.key,
-    selectedCategory,
-    selectedComplexity,
-    required selectedTags,
-    required sortOrder,
-    required showOnlyFavorites,
-    required availableTags,
-    required onCategoryChanged,
-    required onComplexityChanged,
-    required onTagsChanged,
-    required onSortOrderChanged,
-    required onFavoritesFilterChanged,
-    required onClearFilters,
-    required onApplyFilters,
+    this.selectedCategory,
+    this.selectedComplexity,
+    required this.selectedTags,
+    required this.sortOrder,
+    required this.showOnlyFavorites,
+    required this.availableTags,
+    required this.onCategoryChanged,
+    required this.onComplexityChanged,
+    required this.onTagsChanged,
+    required this.onSortOrderChanged,
+    required this.onFavoritesFilterChanged,
+    required this.onClearFilters,
+    required this.onApplyFilters,
   });
 
   @override

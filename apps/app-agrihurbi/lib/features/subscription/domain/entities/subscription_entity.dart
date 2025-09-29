@@ -19,19 +19,19 @@ class SubscriptionEntity extends Equatable {
   final bool autoRenew;
 
   const SubscriptionEntity({
-    required id,
-    required userId,
-    required tier,
-    required status,
-    required startDate,
-    endDate,
-    nextBillingDate,
-    required price,
-    required currency,
-    required billingPeriod,
-    required features,
-    paymentMethod,
-    autoRenew = true,
+    required this.id,
+    required this.userId,
+    required this.tier,
+    required this.status,
+    required this.startDate,
+    this.endDate,
+    this.nextBillingDate,
+    required this.price,
+    required this.currency,
+    required this.billingPeriod,
+    required this.features,
+    this.paymentMethod,
+    this.autoRenew = true,
   });
 
   /// Check if subscription is currently active
@@ -79,7 +79,7 @@ enum SubscriptionTier {
   premium('Premium', 19.99),
   professional('Professional', 39.99);
 
-  const SubscriptionTier(displayName, monthlyPrice);
+  const SubscriptionTier(this.displayName, this.monthlyPrice);
   final String displayName;
   final double monthlyPrice;
 }
@@ -93,7 +93,7 @@ enum SubscriptionStatus {
   canceled('Cancelado'),
   suspended('Suspenso');
 
-  const SubscriptionStatus(displayName);
+  const SubscriptionStatus(this.displayName);
   final String displayName;
 }
 
@@ -103,7 +103,7 @@ enum BillingPeriod {
   quarterly('Trimestral', 3),
   yearly('Anual', 12);
 
-  const BillingPeriod(displayName, months);
+  const BillingPeriod(this.displayName, this.months);
   final String displayName;
   final int months;
 }
@@ -119,7 +119,7 @@ enum PremiumFeature {
   apiAccess('Acesso à API'),
   unlimitedAnimals('Animais Ilimitados');
 
-  const PremiumFeature(displayName);
+  const PremiumFeature(this.displayName);
   final String displayName;
 }
 
@@ -133,12 +133,12 @@ class PaymentMethod extends Equatable {
   final bool isDefault;
 
   const PaymentMethod({
-    required id,
-    required type,
-    required lastFourDigits,
-    required brand,
-    required expiryDate,
-    isDefault = false,
+    required this.id,
+    required this.type,
+    required this.lastFourDigits,
+    required this.brand,
+    required this.expiryDate,
+    this.isDefault = false,
   });
 
   @override
@@ -161,7 +161,7 @@ enum PaymentType {
   applePay('Apple Pay'),
   googlePay('Google Pay');
 
-  const PaymentType(displayName);
+  const PaymentType(this.displayName);
   final String displayName;
 }
 

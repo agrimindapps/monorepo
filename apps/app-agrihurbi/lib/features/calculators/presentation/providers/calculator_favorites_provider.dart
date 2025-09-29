@@ -252,8 +252,8 @@ class FavoritesStatistics {
   final List<String> favoriteIds;
 
   const FavoritesStatistics({
-    required totalFavorites,
-    required favoriteIds,
+    required this.totalFavorites,
+    required this.favoriteIds,
   });
 
   bool get hasFavorites => totalFavorites > 0;

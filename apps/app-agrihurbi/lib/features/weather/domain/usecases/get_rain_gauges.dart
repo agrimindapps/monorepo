@@ -9,7 +9,7 @@ import '../repositories/weather_repository.dart';
 class GetRainGauges {
   final WeatherRepository _repository;
 
-  const GetRainGauges(_repository);
+  const GetRainGauges(this._repository);
 
   /// Get all rain gauges
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> call() async {

@@ -14,7 +14,7 @@ import 'livestock_validation_service.dart';
 class BovineFormService {
   final LivestockValidationService _validationService;
 
-  BovineFormService(_validationService);
+  BovineFormService(this._validationService);
 
   // =====================================================================
   // VALIDATION METHODS
@@ -308,18 +308,18 @@ class BovineFormData {
   final bool? isActive;
 
   const BovineFormData({
-    commonName,
-    registrationId,
-    breed,
-    originCountry,
-    animalType,
-    origin,
-    characteristics,
-    purpose,
-    tagsString,
-    aptitude,
-    breedingSystem,
-    isActive,
+    this.commonName,
+    this.registrationId,
+    this.breed,
+    this.originCountry,
+    this.animalType,
+    this.origin,
+    this.characteristics,
+    this.purpose,
+    this.tagsString,
+    this.aptitude,
+    this.breedingSystem,
+    this.isActive,
   });
 
   BovineFormData copyWith({
@@ -360,9 +360,9 @@ class FormValidationResult {
   final List<String> generalErrors;
 
   const FormValidationResult({
-    required isValid,
-    fieldErrors = const {},
-    generalErrors = const [],
+    required this.isValid,
+    this.fieldErrors = const {},
+    this.generalErrors = const [],
   });
 
   bool hasFieldError(String fieldName) => fieldErrors.containsKey(fieldName);

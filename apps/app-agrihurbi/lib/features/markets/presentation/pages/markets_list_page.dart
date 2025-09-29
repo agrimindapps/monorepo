@@ -407,9 +407,9 @@ class _EmptyStateCard extends StatelessWidget {
   final IconData icon;
 
   const _EmptyStateCard({
-    required message,
-    subtitle,
-    required icon,
+    required this.message,
+    this.subtitle,
+    required this.icon,
   });
 
   @override
@@ -454,8 +454,8 @@ class _ShimmerContainer extends StatelessWidget {
   final double height;
 
   const _ShimmerContainer({
-    required width,
-    required height,
+    required this.width,
+    required this.height,
   });
 
   @override

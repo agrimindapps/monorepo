@@ -13,7 +13,7 @@ import 'package:xml/xml.dart';
 class NewsRemoteDataSource {
   final DioClient _client;
 
-  const NewsRemoteDataSource(_client);
+  const NewsRemoteDataSource(this._client);
 
   /// Default RSS feeds for agriculture news
   static const List<String> _defaultRSSFeeds = [
@@ -300,9 +300,9 @@ class RSSFeedConfig {
   final bool isActive;
 
   const RSSFeedConfig({
-    required name,
-    required url,
-    required defaultCategory,
-    isActive = true,
+    required this.name,
+    required this.url,
+    required this.defaultCategory,
+    this.isActive = true,
   });
 }

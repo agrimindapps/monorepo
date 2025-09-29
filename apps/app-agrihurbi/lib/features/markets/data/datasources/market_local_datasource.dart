@@ -1,8 +1,7 @@
 import 'package:app_agrihurbi/features/markets/data/models/market_model.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
 /// Abstract Market Local DataSource
 abstract class MarketLocalDataSource {

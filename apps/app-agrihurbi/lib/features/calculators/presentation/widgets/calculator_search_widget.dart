@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/design_system_components.dart';
-
 /// Widget de busca para calculadoras
 /// 
 /// Reutiliza o padrão estabelecido no sistema livestock
 /// Implementa busca em tempo real com debounce
 class CalculatorSearchWidget extends StatefulWidget {
   final TextEditingController controller;
-  final Function(String) onChanged;
+  final void Function(String) onChanged;
   final String hintText;
 
   const CalculatorSearchWidget({
     super.key,
-    required controller,
-    required onChanged,
-    hintText = 'Buscar...',
+    required this.controller,
+    required this.onChanged,
+    this.hintText = 'Buscar...',
   });
 
   @override

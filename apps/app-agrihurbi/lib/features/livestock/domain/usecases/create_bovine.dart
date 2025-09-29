@@ -11,7 +11,7 @@ import '../repositories/livestock_repository.dart';
 class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
   final LivestockRepository repository;
   
-  const CreateBovineUseCase(repository);
+  const CreateBovineUseCase(this.repository);
   
   @override
   Future<Either<Failure, BovineEntity>> call(CreateBovineParams params) async {
@@ -90,9 +90,9 @@ class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
 /// Parâmetros para criação de bovino
 class CreateBovineParams extends Equatable {
   const CreateBovineParams({
-    required bovine,
-    validateImages = true,
-    autoGenerateId = true,
+    required this.bovine,
+    this.validateImages = true,
+    this.autoGenerateId = true,
   });
 
   /// Entidade do bovino a ser criada

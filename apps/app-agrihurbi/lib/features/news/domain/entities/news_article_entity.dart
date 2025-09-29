@@ -19,18 +19,18 @@ class NewsArticleEntity extends Equatable {
   final int readTimeMinutes;
 
   const NewsArticleEntity({
-    required id,
-    required title,
-    required description,
-    required content,
-    required author,
-    required sourceUrl,
-    required imageUrl,
-    required publishedAt,
-    required category,
-    required tags,
-    isPremium = false,
-    readTimeMinutes = 3,
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.content,
+    required this.author,
+    required this.sourceUrl,
+    required this.imageUrl,
+    required this.publishedAt,
+    required this.category,
+    required this.tags,
+    this.isPremium = false,
+    this.readTimeMinutes = 3,
   });
 
   @override
@@ -61,7 +61,7 @@ enum NewsCategory {
   government('Políticas'),
   research('Pesquisa');
 
-  const NewsCategory(displayName);
+  const NewsCategory(this.displayName);
   final String displayName;
 }
 
@@ -74,11 +74,11 @@ class NewsFilter extends Equatable {
   final String? searchQuery;
 
   const NewsFilter({
-    categories = const [],
-    showOnlyPremium = false,
-    fromDate,
-    toDate,
-    searchQuery,
+    this.categories = const [],
+    this.showOnlyPremium = false,
+    this.fromDate,
+    this.toDate,
+    this.searchQuery,
   });
 
   NewsFilter copyWith({
@@ -89,11 +89,11 @@ class NewsFilter extends Equatable {
     String? searchQuery,
   }) {
     return NewsFilter(
-      categories: categories ?? categories,
-      showOnlyPremium: showOnlyPremium ?? showOnlyPremium,
-      fromDate: fromDate ?? fromDate,
-      toDate: toDate ?? toDate,
-      searchQuery: searchQuery ?? searchQuery,
+      categories: categories ?? this.categories,
+      showOnlyPremium: showOnlyPremium ?? this.showOnlyPremium,
+      fromDate: fromDate ?? this.fromDate,
+      toDate: toDate ?? this.toDate,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 

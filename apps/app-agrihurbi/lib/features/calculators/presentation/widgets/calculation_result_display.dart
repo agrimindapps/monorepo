@@ -11,7 +11,7 @@ class CalculationResultDisplay extends StatelessWidget {
 
   const CalculationResultDisplay({
     super.key,
-    required result,
+    required this.result,
   });
 
   @override

@@ -19,7 +19,7 @@ import '../widgets/calculator_search_widget.dart';
 class CalculatorsListPage extends StatefulWidget {
   final String? category;
   
-  const CalculatorsListPage({super.key, category});
+  const CalculatorsListPage({super.key, this.category});
 
   @override
   State<CalculatorsListPage> createState() => _CalculatorsListPageState();
@@ -242,8 +242,8 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
     return CalculatorHistoryListWidget(
       history: history,
       scrollController: _scrollController,
-      onReapply: (historyItem) => _navigateToCalculatorWithHistory(historyItem, provider),
-      onDelete: (historyItem) => provider.removeFromHistory(historyItem.id),
+      onReapply: (CalculationHistory historyItem) => _navigateToCalculatorWithHistory(historyItem, provider),
+      onDelete: (CalculationHistory historyItem) => provider.removeFromHistory(historyItem.id),
     );
   }
 

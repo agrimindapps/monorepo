@@ -321,11 +321,11 @@ class CalculationEngineResult {
   final CalculatorError? error;
 
   const CalculationEngineResult._({
-    required isSuccess,
-    result,
-    validation,
-    session,
-    error,
+    required this.isSuccess,
+    this.result,
+    this.validation,
+    this.session,
+    this.error,
   });
 
   factory CalculationEngineResult.success(
@@ -378,9 +378,9 @@ class CalculationSession {
   List<String> errors = [];
 
   CalculationSession({
-    required calculatorId,
-    required parameters,
-    required startTime,
+    required this.calculatorId,
+    required this.parameters,
+    required this.startTime,
   });
 
   void complete({
@@ -412,12 +412,12 @@ class FormattedCalculationResult {
   final DateTime timestamp;
 
   const FormattedCalculationResult({
-    required calculatorId,
-    required calculatorName,
-    required results,
-    required recommendations,
-    required additionalData,
-    required timestamp,
+    required this.calculatorId,
+    required this.calculatorName,
+    required this.results,
+    required this.recommendations,
+    required this.additionalData,
+    required this.timestamp,
   });
 }
 
@@ -430,11 +430,11 @@ class FormattedResultValue {
   final String description;
 
   const FormattedResultValue({
-    required label,
-    required formattedValue,
-    required originalValue,
-    required unit,
-    required description,
+    required this.label,
+    required this.formattedValue,
+    required this.originalValue,
+    required this.unit,
+    required this.description,
   });
 }
 
@@ -445,8 +445,8 @@ class CalculatorEngineStats {
   final Map<CalculatorCategory, int> categoryStats;
 
   const CalculatorEngineStats({
-    required totalCalculators,
-    required activeSessions,
-    required categoryStats,
+    required this.totalCalculators,
+    required this.activeSessions,
+    required this.categoryStats,
   });
 }

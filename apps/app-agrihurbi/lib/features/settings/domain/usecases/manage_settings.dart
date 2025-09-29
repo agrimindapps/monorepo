@@ -12,7 +12,7 @@ import 'package:injectable/injectable.dart';
 class ManageSettings {
   final SettingsRepository _repository;
 
-  const ManageSettings(_repository);
+  const ManageSettings(this._repository);
 
   /// Get current settings
   ResultFuture<SettingsEntity> getSettings() async {
@@ -298,7 +298,7 @@ class ManageSettings {
 class ManageThemeSettings {
   final SettingsRepository _repository;
 
-  const ManageThemeSettings(_repository);
+  const ManageThemeSettings(this._repository);
 
   /// Update app theme
   ResultVoid updateTheme(AppTheme theme) async {
@@ -326,7 +326,7 @@ class ManageThemeSettings {
 class ManageLanguageSettings {
   final SettingsRepository _repository;
 
-  const ManageLanguageSettings(_repository);
+  const ManageLanguageSettings(this._repository);
 
   /// Update app language
   ResultVoid updateLanguage(String languageCode) async {
@@ -349,7 +349,7 @@ class ManageLanguageSettings {
 class ManageNotificationSettings {
   final SettingsRepository _repository;
 
-  const ManageNotificationSettings(_repository);
+  const ManageNotificationSettings(this._repository);
 
   /// Update notification settings
   ResultVoid updateNotifications(NotificationSettings notifications) async {
@@ -372,7 +372,7 @@ class ManageNotificationSettings {
 class ManageSecuritySettings {
   final SettingsRepository _repository;
 
-  const ManageSecuritySettings(_repository);
+  const ManageSecuritySettings(this._repository);
 
   /// Update security settings
   ResultVoid updateSecurity(SecuritySettings security) async {
@@ -405,7 +405,7 @@ class ManageSecuritySettings {
 class ManageBackupSettings {
   final SettingsRepository _repository;
 
-  const ManageBackupSettings(_repository);
+  const ManageBackupSettings(this._repository);
 
   /// Update backup settings
   ResultVoid updateBackup(BackupSettings backup) async {
@@ -445,7 +445,7 @@ class ManageBackupSettings {
 class ExportData {
   final SettingsRepository _repository;
 
-  const ExportData(_repository);
+  const ExportData(this._repository);
 
   /// Export all data
   ResultFuture<ExportResult> exportAllData({
@@ -482,7 +482,7 @@ class ExportData {
 class ManageCache {
   final SettingsRepository _repository;
 
-  const ManageCache(_repository);
+  const ManageCache(this._repository);
 
   /// Get cache information
   ResultFuture<CacheInfo> getCacheInfo() async {
@@ -505,7 +505,7 @@ class ManageCache {
 class GetAppInfo {
   final SettingsRepository _repository;
 
-  const GetAppInfo(_repository);
+  const GetAppInfo(this._repository);
 
   /// Get app version info
   ResultFuture<AppVersionInfo> getAppVersion() async {
@@ -539,7 +539,7 @@ class GetAppInfo {
 class ValidateSettings {
   final SettingsRepository _repository;
 
-  const ValidateSettings(_repository);
+  const ValidateSettings(this._repository);
 
   /// Validate settings integrity
   ResultFuture<SettingsValidationResult> validateSettings() async {

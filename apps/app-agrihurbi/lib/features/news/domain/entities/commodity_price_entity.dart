@@ -18,17 +18,17 @@ class CommodityPriceEntity extends Equatable {
   final List<HistoricalPrice> history;
 
   const CommodityPriceEntity({
-    required id,
-    required commodityName,
-    required type,
-    required currentPrice,
-    required previousPrice,
-    required changePercent,
-    required currency,
-    required unit,
-    required market,
-    required lastUpdated,
-    history = const [],
+    required this.id,
+    required this.commodityName,
+    required this.type,
+    required this.currentPrice,
+    required this.previousPrice,
+    required this.changePercent,
+    required this.currency,
+    required this.unit,
+    required this.market,
+    required this.lastUpdated,
+    this.history = const [],
   });
 
   /// Check if price is trending up
@@ -74,7 +74,7 @@ enum CommodityType {
   cotton('Algodão'),
   fertilizer('Fertilizantes');
 
-  const CommodityType(displayName);
+  const CommodityType(this.displayName);
   final String displayName;
 }
 
@@ -85,9 +85,9 @@ class HistoricalPrice extends Equatable {
   final double volume;
 
   const HistoricalPrice({
-    required date,
-    required price,
-    volume = 0.0,
+    required this.date,
+    required this.price,
+    this.volume = 0.0,
   });
 
   @override
@@ -104,12 +104,12 @@ class MarketSummaryEntity extends Equatable {
   final double marketIndexChange;
 
   const MarketSummaryEntity({
-    required marketName,
-    required lastUpdated,
-    required topGainers,
-    required topLosers,
-    required marketIndex,
-    required marketIndexChange,
+    required this.marketName,
+    required this.lastUpdated,
+    required this.topGainers,
+    required this.topLosers,
+    required this.marketIndex,
+    required this.marketIndexChange,
   });
 
   @override

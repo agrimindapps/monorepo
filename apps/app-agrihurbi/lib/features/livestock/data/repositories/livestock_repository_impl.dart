@@ -25,9 +25,9 @@ class LivestockRepositoryImpl implements LivestockRepository {
   final Connectivity _connectivity;
   
   LivestockRepositoryImpl(
-    _localDataSource,
-    _remoteDataSource,
-    _connectivity,
+    this._localDataSource,
+    this._remoteDataSource,
+    this._connectivity,
   );
   
   // === OPERAÇÕES BOVINOS ===

@@ -11,7 +11,7 @@ import '../repositories/livestock_repository.dart';
 class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
   final LivestockRepository repository;
   
-  const UpdateBovineUseCase(repository);
+  const UpdateBovineUseCase(this.repository);
   
   @override
   Future<Either<Failure, BovineEntity>> call(UpdateBovineParams params) async {
@@ -109,11 +109,11 @@ class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
 /// Parâmetros para atualização de bovino
 class UpdateBovineParams extends Equatable {
   const UpdateBovineParams({
-    required bovine,
-    enableOptimisticLocking = false,
-    lastUpdatedAt,
-    validateImages = true,
-    partialUpdate = false,
+    required this.bovine,
+    this.enableOptimisticLocking = false,
+    this.lastUpdatedAt,
+    this.validateImages = true,
+    this.partialUpdate = false,
   });
 
   /// Entidade do bovino a ser atualizada

@@ -12,13 +12,13 @@ class SearchCriteria {
   final bool showOnlyFavorites;
 
   const SearchCriteria({
-    query,
-    category,
-    complexity,
-    tags = const [],
-    sortOrder = CalculatorSortOrder.nameAsc,
-    favoriteIds = const [],
-    showOnlyFavorites = false,
+    this.query,
+    this.category,
+    this.complexity,
+    this.tags = const [],
+    this.sortOrder = CalculatorSortOrder.nameAsc,
+    this.favoriteIds = const [],
+    this.showOnlyFavorites = false,
   });
 }
 

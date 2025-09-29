@@ -9,8 +9,8 @@ class RainGaugesSummary extends StatelessWidget {
 
   const RainGaugesSummary({
     super.key,
-    required rainGauges,
-    isLoading = false,
+    required this.rainGauges,
+    this.isLoading = false,
   });
 
   @override

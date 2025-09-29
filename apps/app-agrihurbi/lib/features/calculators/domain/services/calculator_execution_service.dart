@@ -271,10 +271,10 @@ class CalculationExecutionResult {
   final ValidationError? validationError;
 
   const CalculationExecutionResult._({
-    required isSuccess,
-    success,
-    error,
-    validationError,
+    required this.isSuccess,
+    this.success,
+    this.error,
+    this.validationError,
   });
 
   factory CalculationExecutionResult.success(ExecutionSuccess success) {
@@ -306,10 +306,10 @@ class ExecutionSuccess {
   final Map<String, dynamic> inputsUsed;
 
   const ExecutionSuccess({
-    required result,
-    required strategyId,
-    required executionTime,
-    required inputsUsed,
+    required this.result,
+    required this.strategyId,
+    required this.executionTime,
+    required this.inputsUsed,
   });
 }
 
@@ -321,11 +321,11 @@ class ExecutionError {
   final Object? exception;
 
   const ExecutionError({
-    required type,
-    required message,
-    strategyId,
-    inputs,
-    exception,
+    required this.type,
+    required this.message,
+    this.strategyId,
+    this.inputs,
+    this.exception,
   });
 }
 
@@ -338,8 +338,8 @@ class ValidationError extends ExecutionError {
     required super.message,
     super.strategyId,
     super.inputs,
-    required validationErrors,
-    required validationWarnings,
+    required this.validationErrors,
+    required this.validationWarnings,
   });
 }
 
@@ -359,10 +359,10 @@ class BatchCalculationRequest {
   final bool skipValidation;
 
   const BatchCalculationRequest({
-    required id,
-    required strategyId,
-    required inputs,
-    skipValidation = false,
+    required this.id,
+    required this.strategyId,
+    required this.inputs,
+    this.skipValidation = false,
   });
 }
 
@@ -375,12 +375,12 @@ class BatchExecutionResult {
   final DateTime executedAt;
 
   const BatchExecutionResult({
-    required totalRequests,
-    required successCount,
-    required errorCount,
-    required results,
-    required errors,
-    required executedAt,
+    required this.totalRequests,
+    required this.successCount,
+    required this.errorCount,
+    required this.results,
+    required this.errors,
+    required this.executedAt,
   });
 
   double get successRate => totalRequests > 0 ? successCount / totalRequests : 0.0;
@@ -395,10 +395,10 @@ class StrategyCompatibilityResult {
   final List<String>? validationWarnings;
 
   const StrategyCompatibilityResult({
-    required isCompatible,
-    required strategyId,
-    required reason,
-    validationWarnings,
+    required this.isCompatible,
+    required this.strategyId,
+    required this.reason,
+    this.validationWarnings,
   });
 }
 
@@ -410,11 +410,11 @@ class StrategyInfo {
   final StrategyMetadata metadata;
 
   const StrategyInfo({
-    required id,
-    required name,
-    required description,
-    required parameters,
-    required metadata,
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.parameters,
+    required this.metadata,
   });
 }
 
@@ -424,8 +424,8 @@ class ExecutionStatistics {
   final bool registryInitialized;
 
   const ExecutionStatistics({
-    required totalStrategiesAvailable,
-    required strategyTypes,
-    required registryInitialized,
+    required this.totalStrategiesAvailable,
+    required this.strategyTypes,
+    required this.registryInitialized,
   });
 }

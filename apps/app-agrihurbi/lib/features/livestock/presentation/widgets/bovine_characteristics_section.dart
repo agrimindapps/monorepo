@@ -14,13 +14,13 @@ import '../../domain/services/bovine_form_service.dart';
 class BovineCharacteristicsSection extends StatelessWidget {
   const BovineCharacteristicsSection({
     super.key,
-    required purposeController,
-    required formService,
-    required selectedAptitude,
-    required selectedBreedingSystem,
-    required onAptitudeChanged,
-    required onBreedingSystemChanged,
-    enabled = true,
+    required this.purposeController,
+    required this.formService,
+    required this.selectedAptitude,
+    required this.selectedBreedingSystem,
+    required this.onAptitudeChanged,
+    required this.onBreedingSystemChanged,
+    this.enabled = true,
   });
 
   final TextEditingController purposeController;

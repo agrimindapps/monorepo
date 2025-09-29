@@ -1,12 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/debounced_search_manager.dart';
 import '../../../../core/utils/performance_benchmark.dart';
-import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
@@ -104,31 +101,31 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
                 sortOrder: _sortOrder,
                 showOnlyFavorites: _showOnlyFavorites,
                 availableTags: _availableTags,
-                onCategoryChanged: (category) {
+                onCategoryChanged: (CalculatorCategory? category) {
                   setState(() {
                     _selectedCategory = category;
                   });
                   _updateSearchResults();
                 },
-                onComplexityChanged: (complexity) {
+                onComplexityChanged: (CalculatorComplexity? complexity) {
                   setState(() {
                     _selectedComplexity = complexity;
                   });
                   _updateSearchResults();
                 },
-                onTagsChanged: (tags) {
+                onTagsChanged: (List<String> tags) {
                   setState(() {
                     _selectedTags = tags;
                   });
                   _updateSearchResults();
                 },
-                onSortOrderChanged: (order) {
+                onSortOrderChanged: (search_service.CalculatorSortOrder order) {
                   setState(() {
                     _sortOrder = order;
                   });
                   _updateSearchResults();
                 },
-                onFavoritesFilterChanged: (showFavorites) {
+                onFavoritesFilterChanged: (bool showFavorites) {
                   setState(() {
                     _showOnlyFavorites = showFavorites;
                   });

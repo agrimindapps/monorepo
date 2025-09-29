@@ -11,7 +11,7 @@ import 'package:injectable/injectable.dart';
 class GetMarkets {
   final MarketRepository _repository;
 
-  GetMarkets(_repository);
+  GetMarkets(this._repository);
 
   /// Execute the use case
   ResultFuture<List<MarketEntity>> call({
@@ -32,7 +32,7 @@ class GetMarkets {
 class GetMarketsByType {
   final MarketRepository _repository;
 
-  GetMarketsByType(_repository);
+  GetMarketsByType(this._repository);
 
   /// Execute the use case
   ResultFuture<List<MarketEntity>> call({
@@ -51,7 +51,7 @@ class GetMarketsByType {
 class SearchMarkets {
   final MarketRepository _repository;
 
-  SearchMarkets(_repository);
+  SearchMarkets(this._repository);
 
   /// Execute the use case
   ResultFuture<List<MarketEntity>> call({

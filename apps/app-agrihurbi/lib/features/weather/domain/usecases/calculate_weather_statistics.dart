@@ -12,7 +12,7 @@ import '../repositories/weather_repository.dart';
 class CalculateWeatherStatistics {
   final WeatherRepository _repository;
 
-  const CalculateWeatherStatistics(_repository);
+  const CalculateWeatherStatistics(this._repository);
 
   /// Calculate weather statistics for a specific period
   Future<Either<WeatherFailure, WeatherStatisticsEntity>> call({
@@ -620,5 +620,5 @@ class DateRange {
   final DateTime start;
   final DateTime end;
 
-  const DateRange({required start, required end});
+  const DateRange({required this.start, required this.end});
 }

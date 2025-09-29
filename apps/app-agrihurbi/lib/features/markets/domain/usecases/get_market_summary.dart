@@ -10,7 +10,7 @@ import 'package:injectable/injectable.dart';
 class GetMarketSummary {
   final MarketRepository _repository;
 
-  GetMarketSummary(_repository);
+  GetMarketSummary(this._repository);
 
   /// Execute the use case
   ResultFuture<MarketSummary> call() async {
@@ -23,7 +23,7 @@ class GetMarketSummary {
 class GetTopGainers {
   final MarketRepository _repository;
 
-  GetTopGainers(_repository);
+  GetTopGainers(this._repository);
 
   /// Execute the use case
   ResultFuture<List<MarketEntity>> call({
@@ -42,7 +42,7 @@ class GetTopGainers {
 class GetTopLosers {
   final MarketRepository _repository;
 
-  GetTopLosers(_repository);
+  GetTopLosers(this._repository);
 
   /// Execute the use case
   ResultFuture<List<MarketEntity>> call({
@@ -61,7 +61,7 @@ class GetTopLosers {
 class GetMostActive {
   final MarketRepository _repository;
 
-  GetMostActive(_repository);
+  GetMostActive(this._repository);
 
   /// Execute the use case
   ResultFuture<List<MarketEntity>> call({

@@ -437,9 +437,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         debugPrint('🔐 Validando dispositivo após login...');
       }
 
-      final result = await _validateDeviceUseCase();
+      final result = await _validateDeviceUseCase?.call();
 
-      result.fold(
+      result?.fold(
         (failure) {
           if (kDebugMode) {
             debugPrint('❌ Device validation falhou: ${failure.message}');
@@ -723,7 +723,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     try {
       final currentDevice = await DeviceModel.fromCurrentDevice();
-      final revokeResult = await _revokeDeviceUseCase(
+      final revokeResult = await _revokeDeviceUseCase?.call(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
           preventSelfRevoke: false,
@@ -731,7 +731,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         ),
       );
 
-      revokeResult.fold(
+      revokeResult?.fold(
         (failure) {
           _analytics?.logEvent('device_cleanup_failed', {
             'context': 'logout',

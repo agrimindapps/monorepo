@@ -1,54 +1,51 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../controllers/login_controller.dart';
 
 /// Widget para tabs de autenticação (Login/Cadastro)
-class AuthTabsWidget extends StatelessWidget {
+class AuthTabsWidget extends ConsumerWidget {
   const AuthTabsWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<LoginController>(
-      builder: (context, controller, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final primaryColor = Theme.of(context).primaryColor;
+  Widget build(BuildContext context, WidgetRef ref) {
+    // State provider for auth mode
+    final isSignUpMode = ref.watch(_authModeProvider);
 
-        return Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Tab Login
-              _buildTab(
-                context: context,
-                title: 'Entrar',
-                isActive: !controller.isSignUpMode,
-                onTap: () {
-                  if (controller.isSignUpMode) {
-                    controller.toggleAuthMode();
-                  }
-                },
-                isDark: isDark,
-                primaryColor: primaryColor,
-              ),
-              const SizedBox(width: 40),
-              // Tab Cadastro
-              _buildTab(
-                context: context,
-                title: 'Cadastrar',
-                isActive: controller.isSignUpMode,
-                onTap: () {
-                  if (!controller.isSignUpMode) {
-                    controller.toggleAuthMode();
-                  }
-                },
-                isDark: isDark,
-                primaryColor: primaryColor,
-              ),
-            ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Tab Login
+          _buildTab(
+            context: context,
+            title: 'Entrar',
+            isActive: !isSignUpMode,
+            onTap: () {
+              if (isSignUpMode) {
+                ref.read(_authModeProvider.notifier).state = false;
+              }
+            },
+            isDark: isDark,
+            primaryColor: primaryColor,
           ),
-        );
-      },
+          const SizedBox(width: 40),
+          // Tab Cadastro
+          _buildTab(
+            context: context,
+            title: 'Cadastrar',
+            isActive: isSignUpMode,
+            onTap: () {
+              if (!isSignUpMode) {
+                ref.read(_authModeProvider.notifier).state = true;
+              }
+            },
+            isDark: isDark,
+            primaryColor: primaryColor,
+          ),
+        ],
+      ),
     );
   }
 
@@ -92,3 +89,6 @@ class AuthTabsWidget extends StatelessWidget {
     );
   }
 }
+
+/// Provider para gerenciar o estado do modo de autenticação (login/cadastro)
+final _authModeProvider = StateProvider<bool>((ref) => false); // false = login, true = signup

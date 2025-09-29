@@ -11,7 +11,7 @@ class MarketStatsGrid extends StatelessWidget {
 
   const MarketStatsGrid({
     super.key,
-    required market,
+    required this.market,
   });
 
   @override

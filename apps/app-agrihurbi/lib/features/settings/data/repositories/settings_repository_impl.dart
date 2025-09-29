@@ -13,7 +13,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _localDataSource;
   final AuthProvider _authProvider;
 
-  const SettingsRepositoryImpl(_localDataSource, _authProvider);
+  const SettingsRepositoryImpl(this._localDataSource, this._authProvider);
 
   /// Get current user ID from auth provider
   String _getCurrentUserId() {

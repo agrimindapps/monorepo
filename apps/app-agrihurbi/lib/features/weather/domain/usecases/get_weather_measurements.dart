@@ -9,7 +9,7 @@ import '../repositories/weather_repository.dart';
 class GetWeatherMeasurements {
   final WeatherRepository _repository;
 
-  const GetWeatherMeasurements(_repository);
+  const GetWeatherMeasurements(this._repository);
 
   /// Get all weather measurements with optional filters
   Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> call({

@@ -70,28 +70,28 @@ class WeatherMeasurementEntity extends Equatable {
   final DateTime updatedAt;
 
   const WeatherMeasurementEntity({
-    required id,
-    required locationId,
-    required locationName,
-    required timestamp,
-    required temperature,
-    required humidity,
-    required pressure,
-    required windSpeed,
-    required windDirection,
-    required rainfall,
-    required uvIndex,
-    required visibility,
-    required weatherCondition,
-    required description,
-    required latitude,
-    required longitude,
-    required source,
-    required qualityScore,
-    required isRealTime,
-    notes,
-    required createdAt,
-    required updatedAt,
+    required this.id,
+    required this.locationId,
+    required this.locationName,
+    required this.timestamp,
+    required this.temperature,
+    required this.humidity,
+    required this.pressure,
+    required this.windSpeed,
+    required this.windDirection,
+    required this.rainfall,
+    required this.uvIndex,
+    required this.visibility,
+    required this.weatherCondition,
+    required this.description,
+    required this.latitude,
+    required this.longitude,
+    required this.source,
+    required this.qualityScore,
+    required this.isRealTime,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   /// Creates empty weather measurement for initialization
@@ -150,7 +150,7 @@ class WeatherMeasurementEntity extends Equatable {
     const a = 17.27;
     const b = 237.7;
     
-    final alpha = ((a * T) / (b + T)) + math.log(RH / 100.0);
+    final alpha = ((a * T) / (b + T)) + math.log(relativeHumidity / 100.0);
     final dewPoint = (b * alpha) / (a - alpha);
     
     return double.parse(dewPoint.toStringAsFixed(1));
@@ -229,28 +229,28 @@ class WeatherMeasurementEntity extends Equatable {
     DateTime? updatedAt,
   }) {
     return WeatherMeasurementEntity(
-      id: id ?? id,
-      locationId: locationId ?? locationId,
-      locationName: locationName ?? locationName,
-      timestamp: timestamp ?? timestamp,
-      temperature: temperature ?? temperature,
-      humidity: humidity ?? humidity,
-      pressure: pressure ?? pressure,
-      windSpeed: windSpeed ?? windSpeed,
-      windDirection: windDirection ?? windDirection,
-      rainfall: rainfall ?? rainfall,
-      uvIndex: uvIndex ?? uvIndex,
-      visibility: visibility ?? visibility,
-      weatherCondition: weatherCondition ?? weatherCondition,
-      description: description ?? description,
-      latitude: latitude ?? latitude,
-      longitude: longitude ?? longitude,
-      source: source ?? source,
-      qualityScore: qualityScore ?? qualityScore,
-      isRealTime: isRealTime ?? isRealTime,
-      notes: notes ?? notes,
-      createdAt: createdAt ?? createdAt,
-      updatedAt: updatedAt ?? updatedAt,
+      id: id ?? this.id,
+      locationId: locationId ?? this.locationId,
+      locationName: locationName ?? this.locationName,
+      timestamp: timestamp ?? this.timestamp,
+      temperature: temperature ?? this.temperature,
+      humidity: humidity ?? this.humidity,
+      pressure: pressure ?? this.pressure,
+      windSpeed: windSpeed ?? this.windSpeed,
+      windDirection: windDirection ?? this.windDirection,
+      rainfall: rainfall ?? this.rainfall,
+      uvIndex: uvIndex ?? this.uvIndex,
+      visibility: visibility ?? this.visibility,
+      weatherCondition: weatherCondition ?? this.weatherCondition,
+      description: description ?? this.description,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      source: source ?? this.source,
+      qualityScore: qualityScore ?? this.qualityScore,
+      isRealTime: isRealTime ?? this.isRealTime,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

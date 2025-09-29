@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 import '../models/bovine_model.dart';
 import '../models/equine_model.dart';
@@ -289,9 +288,9 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
 /// Exceção específica para problemas de cache local
 class CacheException implements Exception {
   final String message;
-  
-  const CacheException(message);
-  
+
+  const CacheException(this.message);
+
   @override
   String toString() => 'CacheException: $message';
 }

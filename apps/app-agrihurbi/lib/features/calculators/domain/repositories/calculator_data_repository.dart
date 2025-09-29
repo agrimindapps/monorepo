@@ -75,14 +75,14 @@ class CropRequirementsData {
   final double totalPotassium;
   
   const CropRequirementsData({
-    required cropType,
-    required yieldTarget,
-    required nitrogenPerTon,
-    required phosphorusPerTon,
-    required potassiumPerTon,
-    required totalNitrogen,
-    required totalPhosphorus,
-    required totalPotassium,
+    required this.cropType,
+    required this.yieldTarget,
+    required this.nitrogenPerTon,
+    required this.phosphorusPerTon,
+    required this.potassiumPerTon,
+    required this.totalNitrogen,
+    required this.totalPhosphorus,
+    required this.totalPotassium,
   });
 }
 
@@ -97,13 +97,13 @@ class SoilTextureData {
   final double organicMatterFactor;
   
   const SoilTextureData({
-    required textureClass,
-    required retentionFactor,
-    required nitrogenEfficiency,
-    required phosphorusEfficiency,
-    required potassiumEfficiency,
-    required infiltrationRate,
-    required organicMatterFactor,
+    required this.textureClass,
+    required this.retentionFactor,
+    required this.nitrogenEfficiency,
+    required this.phosphorusEfficiency,
+    required this.potassiumEfficiency,
+    required this.infiltrationRate,
+    required this.organicMatterFactor,
   });
 }
 
@@ -117,12 +117,12 @@ class FertilizerProduct {
   final String notes;
   
   const FertilizerProduct({
-    required name,
-    required nutrientContent,
-    required unit,
-    required pricePerKg,
-    required applicationMethods,
-    required notes,
+    required this.name,
+    required this.nutrientContent,
+    required this.unit,
+    required this.pricePerKg,
+    required this.applicationMethods,
+    required this.notes,
   });
 }
 
@@ -135,11 +135,11 @@ class ApplicationSchedule {
   final String instructions;
   
   const ApplicationSchedule({
-    required period,
-    required nitrogenPercentage,
-    required phosphorusPercentage,
-    required potassiumPercentage,
-    required instructions,
+    required this.period,
+    required this.nitrogenPercentage,
+    required this.phosphorusPercentage,
+    required this.potassiumPercentage,
+    required this.instructions,
   });
 }
 
@@ -151,10 +151,10 @@ class PreviousCropEffect {
   final String description;
   
   const PreviousCropEffect({
-    required cropType,
-    required nitrogenContribution,
-    required organicMatterContribution,
-    required description,
+    required this.cropType,
+    required this.nitrogenContribution,
+    required this.organicMatterContribution,
+    required this.description,
   });
 }
 
@@ -167,10 +167,10 @@ class ValidationRanges {
   final String unit;
   
   const ValidationRanges({
-    required minValue,
-    required maxValue,
-    required optimalMin,
-    required optimalMax,
-    required unit,
+    required this.minValue,
+    required this.maxValue,
+    required this.optimalMin,
+    required this.optimalMax,
+    required this.unit,
   });
 }

@@ -13,7 +13,7 @@ import '../providers/bovines_provider.dart';
 class BovineDetailPage extends StatefulWidget {
   const BovineDetailPage({
     super.key,
-    required bovineId,
+    required this.bovineId,
   });
 
   /// ID do bovino a ser exibido

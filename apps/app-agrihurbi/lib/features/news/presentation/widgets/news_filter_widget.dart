@@ -11,9 +11,9 @@ class NewsFilterWidget extends StatefulWidget {
 
   const NewsFilterWidget({
     super.key,
-    currentFilter,
-    required onApply,
-    required onClear,
+    this.currentFilter,
+    required this.onApply,
+    required this.onClear,
   });
 
   @override

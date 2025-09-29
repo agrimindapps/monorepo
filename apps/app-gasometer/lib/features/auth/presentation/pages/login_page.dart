@@ -321,15 +321,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildAuthContent() {
-    // TODO: Replace Consumer<LoginController> with Riverpod Consumer
-    // For now, return a simplified version without provider dependencies
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         const AuthTabsWidget(),
         const SizedBox(height: 24),
-        // TODO: Implement tab switching with Riverpod state management
         LoginFormWidget(
           onLoginSuccess: _handleAuthSuccess,
         ),
@@ -339,47 +336,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   void _handleAuthSuccess() {
     if (!mounted) return;
-    
-    // TODO: Replace with Riverpod auth provider
-    // final authProvider = ref.read(authProviderNotifier);
+
     final router = GoRouter.of(context);
-    
-    // Placeholder: navigate directly without checking sync status
     router.go('/vehicles');
-    
-    // TODO: Implement sync status checking with Riverpod
-    // if (authProvider.isSyncInProgress) {
-    //   _showSimpleSyncLoading(authProvider, router);
-    // } else {
-    //   router.go('/vehicles');
-    // }
   }
-  
-  /// TODO: Implement with Riverpod auth provider
-  // void _showSimpleSyncLoading(AuthProvider authProvider, GoRouter router) {
-  //   SimpleSyncLoading.show(
-  //     context,
-  //     message: authProvider.syncMessage,
-  //   );
-  //   
-  //   _navigateAfterSync(authProvider, router);
-  // }
-  
-  /// TODO: Implement with Riverpod auth provider
-  // void _navigateAfterSync(AuthProvider authProvider, GoRouter router) {
-  //   late StreamSubscription<void> subscription;
-  //   
-  //   subscription = Stream<void>.periodic(const Duration(milliseconds: 500))
-  //       .listen((_) {
-  //     if (!authProvider.isSyncInProgress) {
-  //       subscription.cancel();
-  //       
-  //       Future.delayed(const Duration(milliseconds: 100), () {
-  //         if (mounted) {
-  //           router.go('/vehicles');
-  //         }
-  //       });
-  //     }
-  //   });
-  // }
 }

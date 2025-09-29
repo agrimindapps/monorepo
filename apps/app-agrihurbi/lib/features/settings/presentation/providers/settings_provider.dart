@@ -11,7 +11,7 @@ import 'package:injectable/injectable.dart';
 class SettingsProvider with ChangeNotifier {
   final ManageSettings _manageSettings;
 
-  SettingsProvider(_manageSettings);
+  SettingsProvider(this._manageSettings);
 
   // === STATE VARIABLES ===
 

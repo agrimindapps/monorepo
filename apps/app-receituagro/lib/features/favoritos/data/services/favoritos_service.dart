@@ -1,10 +1,15 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
+import 'package:get_it/get_it.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/repositories/cultura_hive_repository.dart';
+import '../../../../core/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/entities/favorito_sync_entity.dart';
@@ -20,22 +25,12 @@ class FavoritosService {
   final Map<String, dynamic> _memoryCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
   
-  // Constantes para chaves de storage
-  static const Map<String, String> _storageKeys = {
-    'defensivo': 'defensivos',
-    'praga': 'pragas',
-    'diagnostico': 'diagnosticos',
-    'cultura': 'culturas',
-  };
-
   // ========== STORAGE OPERATIONS ==========
 
   Future<List<String>> getFavoriteIds(String tipo) async {
     try {
-      final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) return [];
-
-      final favoritos = await _repository.getFavoritosByTipoAsync(tipoKey);
+      // Usa tipo direto (singular) sem conversão
+      final favoritos = await _repository.getFavoritosByTipoAsync(tipo);
       return favoritos.map((f) => f.itemId).toList();
     } catch (e) {
       throw FavoritosException('Erro ao buscar IDs favoritos: $e', tipo: tipo);
@@ -44,15 +39,15 @@ class FavoritosService {
 
   Future<bool> addFavoriteId(String tipo, String id) async {
     developer.log('🔄 SYNC: Iniciando adição de favorito - tipo=$tipo, id=$id', name: 'FavoritosService');
-    
+
     try {
-      final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) {
+      // Validação de tipo
+      if (!TipoFavorito.isValid(tipo)) {
         developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
       }
-      
-      developer.log('✅ SYNC: Tipo válido encontrado - tipoKey=$tipoKey', name: 'FavoritosService');
+
+      developer.log('✅ SYNC: Tipo válido encontrado - tipo=$tipo', name: 'FavoritosService');
 
       // Valida antes de adicionar
       developer.log('🔍 SYNC: Validando se pode adicionar favorito...', name: 'FavoritosService');
@@ -68,9 +63,9 @@ class FavoritosService {
         'tipo': tipo,
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
-      
+
       developer.log('💾 SYNC: Salvando favorito localmente...', name: 'FavoritosService');
-      final result = await _repository.addFavorito(tipoKey, id, itemData);
+      final result = await _repository.addFavorito(tipo, id, itemData);
       developer.log('💾 SYNC: Resultado do salvamento local: $result', name: 'FavoritosService');
       
       // Limpa cache após mudança
@@ -101,18 +96,18 @@ class FavoritosService {
 
   Future<bool> removeFavoriteId(String tipo, String id) async {
     developer.log('🔄 SYNC: Iniciando remoção de favorito - tipo=$tipo, id=$id', name: 'FavoritosService');
-    
+
     try {
-      final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) {
+      // Validação de tipo
+      if (!TipoFavorito.isValid(tipo)) {
         developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
       }
-      
-      developer.log('✅ SYNC: Tipo válido encontrado - tipoKey=$tipoKey', name: 'FavoritosService');
+
+      developer.log('✅ SYNC: Tipo válido encontrado - tipo=$tipo', name: 'FavoritosService');
 
       developer.log('💾 SYNC: Removendo favorito localmente...', name: 'FavoritosService');
-      final result = await _repository.removeFavorito(tipoKey, id);
+      final result = await _repository.removeFavorito(tipo, id);
       developer.log('💾 SYNC: Resultado da remoção local: $result', name: 'FavoritosService');
       
       // Limpa cache após mudança
@@ -143,10 +138,10 @@ class FavoritosService {
 
   Future<bool> isFavoriteId(String tipo, String id) async {
     try {
-      final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) return false;
+      // Usa tipo direto (singular) sem conversão
+      if (!TipoFavorito.isValid(tipo)) return false;
 
-      return await _repository.isFavorito(tipoKey, id);
+      return await _repository.isFavorito(tipo, id);
     } catch (e) {
       throw FavoritosException('Erro ao verificar favorito: $e', tipo: tipo, id: id);
     }
@@ -154,10 +149,10 @@ class FavoritosService {
 
   Future<void> clearFavorites(String tipo) async {
     try {
-      final tipoKey = _storageKeys[tipo];
-      if (tipoKey == null) return;
+      // Usa tipo direto (singular) sem conversão
+      if (!TipoFavorito.isValid(tipo)) return;
 
-      await _repository.clearFavoritosByTipo(tipoKey);
+      await _repository.clearFavoritosByTipo(tipo);
       await _clearCacheForTipo(tipo);
     } catch (e) {
       throw FavoritosException('Erro ao limpar favoritos: $e', tipo: tipo);
@@ -229,93 +224,171 @@ class FavoritosService {
 
   Future<Map<String, dynamic>?> _resolveDefensivo(String id) async {
     try {
-      final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(id);
-      if (defensivo != null) {
+      developer.log('🔍 RESOLVE_DEFENSIVO: Buscando defensivo com id=$id', name: 'FavoritosService');
+
+      // Usa repository direto em vez do serviço depreciado
+      final fitossanitarioRepo = GetIt.instance<FitossanitarioHiveRepository>();
+      final result = await fitossanitarioRepo.getAll();
+
+      if (result.isError) {
+        developer.log('❌ RESOLVE_DEFENSIVO: Erro ao buscar defensivos: ${result.error}', name: 'FavoritosService');
         return {
-          'nomeComum': defensivo.nomeComum,
-          'ingredienteAtivo': defensivo.ingredienteAtivo ?? '',
-          'fabricante': defensivo.fabricante ?? '',
-          'classeAgron': defensivo.classeAgronomica ?? '',
-          'modoAcao': defensivo.modoAcao ?? '',
+          'nomeComum': 'Defensivo $id',
+          'ingredienteAtivo': 'Erro ao carregar',
+          'fabricante': 'Erro ao carregar',
         };
       }
-      
+
+      // Busca por idReg ou objectId
+      final defensivo = result.data!.firstWhere(
+        (d) => d.idReg == id || d.objectId == id,
+        orElse: () => throw Exception('Defensivo não encontrado'),
+      );
+
+      developer.log('✅ RESOLVE_DEFENSIVO: Encontrado: ${defensivo.nomeComum}', name: 'FavoritosService');
+
+      return {
+        'nomeComum': defensivo.nomeComum,
+        'ingredienteAtivo': defensivo.ingredienteAtivo ?? '',
+        'fabricante': defensivo.fabricante ?? '',
+        'classeAgron': defensivo.classeAgronomica ?? '',
+        'modoAcao': defensivo.modoAcao ?? '',
+      };
+    } catch (e) {
+      developer.log('❌ RESOLVE_DEFENSIVO: Erro ao resolver: $e', name: 'FavoritosService', error: e);
       return {
         'nomeComum': 'Defensivo $id',
         'ingredienteAtivo': 'Não disponível',
         'fabricante': 'Não disponível',
       };
-    } catch (e) {
-      return null;
     }
   }
 
   Future<Map<String, dynamic>?> _resolvePraga(String id) async {
     try {
-      final praga = await ReceitaAgroHiveService.getPragaById(id);
-      if (praga != null) {
+      developer.log('🔍 RESOLVE_PRAGA: Buscando praga com id=$id', name: 'FavoritosService');
+
+      // Usa repository direto em vez do serviço depreciado
+      final pragasRepo = GetIt.instance<PragasHiveRepository>();
+      final result = await pragasRepo.getAll();
+
+      if (result.isError) {
+        developer.log('❌ RESOLVE_PRAGA: Erro ao buscar pragas: ${result.error}', name: 'FavoritosService');
         return {
-          'nomeComum': praga.nomeComum,
-          'nomeCientifico': praga.nomeCientifico,
-          'tipoPraga': praga.tipoPraga,
-          'dominio': praga.dominio ?? '',
-          'reino': praga.reino ?? '',
-          'familia': praga.familia ?? '',
+          'nomeComum': 'Praga $id',
+          'nomeCientifico': 'Erro ao carregar',
+          'tipoPraga': '1',
         };
       }
-      
+
+      // Busca por idReg ou objectId
+      final praga = result.data!.firstWhere(
+        (p) => p.idReg == id || p.objectId == id,
+        orElse: () => throw Exception('Praga não encontrada'),
+      );
+
+      developer.log('✅ RESOLVE_PRAGA: Encontrada: ${praga.nomeComum}', name: 'FavoritosService');
+
+      return {
+        'nomeComum': praga.nomeComum,
+        'nomeCientifico': praga.nomeCientifico,
+        'tipoPraga': praga.tipoPraga,
+        'dominio': praga.dominio ?? '',
+        'reino': praga.reino ?? '',
+        'familia': praga.familia ?? '',
+      };
+    } catch (e) {
+      developer.log('❌ RESOLVE_PRAGA: Erro ao resolver: $e', name: 'FavoritosService', error: e);
       return {
         'nomeComum': 'Praga $id',
         'nomeCientifico': 'Não disponível',
         'tipoPraga': '1',
       };
-    } catch (e) {
-      return null;
     }
   }
 
   Future<Map<String, dynamic>?> _resolveDiagnostico(String id) async {
     try {
-      final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(id);
-      if (diagnostico != null) {
+      developer.log('🔍 RESOLVE_DIAGNOSTICO: Buscando diagnóstico com id=$id', name: 'FavoritosService');
+
+      // Usa repository direto em vez do serviço depreciado
+      final diagnosticoRepo = GetIt.instance<DiagnosticoHiveRepository>();
+      final result = await diagnosticoRepo.getAll();
+
+      if (result.isError) {
+        developer.log('❌ RESOLVE_DIAGNOSTICO: Erro ao buscar diagnósticos: ${result.error}', name: 'FavoritosService');
         return {
-          'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
-          'nomeDefensivo': diagnostico.nomeDefensivo ?? 'Defensivo não encontrado',
-          'cultura': diagnostico.nomeCultura ?? 'Cultura não encontrada',
-          'dosagem': '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
-          'fabricante': '', // Campo não disponível no DiagnosticoHive
-          'modoAcao': '', // Campo não disponível no DiagnosticoHive
+          'nomePraga': 'Diagnóstico $id',
+          'nomeDefensivo': 'Erro ao carregar',
+          'cultura': 'Erro ao carregar',
+          'dosagem': 'Erro ao carregar',
         };
       }
-      
+
+      // Busca por idReg ou objectId
+      final diagnostico = result.data!.firstWhere(
+        (d) => d.idReg == id || d.objectId == id,
+        orElse: () => throw Exception('Diagnóstico não encontrado'),
+      );
+
+      developer.log('✅ RESOLVE_DIAGNOSTICO: Encontrado: ${diagnostico.nomeDefensivo} - ${diagnostico.nomePraga}', name: 'FavoritosService');
+
       return {
-        'nomePraga': 'Praga $id',
-        'nomeDefensivo': 'Defensivo não encontrado',
-        'cultura': 'Cultura não encontrada',
-        'dosagem': 'Não especificada',
+        'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
+        'nomeDefensivo': diagnostico.nomeDefensivo ?? 'Defensivo não encontrado',
+        'cultura': diagnostico.nomeCultura ?? 'Cultura não encontrada',
+        'dosagem': '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
+        'fabricante': '', // Campo não disponível no DiagnosticoHive
+        'modoAcao': '', // Campo não disponível no DiagnosticoHive
       };
     } catch (e) {
-      return null;
+      developer.log('❌ RESOLVE_DIAGNOSTICO: Erro ao resolver: $e', name: 'FavoritosService', error: e);
+      return {
+        'nomePraga': 'Diagnóstico $id',
+        'nomeDefensivo': 'Não disponível',
+        'cultura': 'Não disponível',
+        'dosagem': 'Não especificada',
+      };
     }
   }
 
   Future<Map<String, dynamic>?> _resolveCultura(String id) async {
     try {
-      final cultura = await ReceitaAgroHiveService.getCulturaById(id);
-      if (cultura != null) {
+      developer.log('🔍 RESOLVE_CULTURA: Buscando cultura com id=$id', name: 'FavoritosService');
+
+      // Usa repository direto em vez do serviço depreciado
+      final culturaRepo = GetIt.instance<CulturaHiveRepository>();
+      final result = await culturaRepo.getAll();
+
+      if (result.isError) {
+        developer.log('❌ RESOLVE_CULTURA: Erro ao buscar culturas: ${result.error}', name: 'FavoritosService');
         return {
-          'nomeCultura': cultura.cultura,
-          'descricao': cultura.cultura, // Não há campo descricao separado
-          'nomeComum': cultura.nomeComum,
+          'nomeCultura': 'Cultura $id',
+          'descricao': 'Erro ao carregar',
+          'nomeComum': 'Erro ao carregar',
         };
       }
-      
+
+      // Busca por idReg ou objectId
+      final cultura = result.data!.firstWhere(
+        (c) => c.idReg == id || c.objectId == id,
+        orElse: () => throw Exception('Cultura não encontrada'),
+      );
+
+      developer.log('✅ RESOLVE_CULTURA: Encontrada: ${cultura.cultura}', name: 'FavoritosService');
+
       return {
-        'nomeCultura': 'Cultura $id',
-        'descricao': 'Descrição não disponível',
+        'nomeCultura': cultura.cultura,
+        'descricao': cultura.cultura, // Não há campo descricao separado
+        'nomeComum': cultura.nomeComum,
       };
     } catch (e) {
-      return null;
+      developer.log('❌ RESOLVE_CULTURA: Erro ao resolver: $e', name: 'FavoritosService', error: e);
+      return {
+        'nomeCultura': 'Cultura $id',
+        'descricao': 'Não disponível',
+        'nomeComum': 'Não disponível',
+      };
     }
   }
 
@@ -372,23 +445,63 @@ class FavoritosService {
 
   Future<bool> existsInData(String tipo, String id) async {
     try {
+      developer.log('🔍 SYNC: Verificando existência - tipo=$tipo, id=$id', name: 'FavoritosService');
+
       switch (tipo) {
         case TipoFavorito.defensivo:
-          final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(id);
-          return defensivo != null;
+          // Usa repository direto em vez do serviço depreciado
+          final fitossanitarioRepo = GetIt.instance<FitossanitarioHiveRepository>();
+          final result = await fitossanitarioRepo.getAll();
+          if (result.isError) {
+            developer.log('❌ SYNC: Erro ao buscar defensivos: ${result.error}', name: 'FavoritosService');
+            return false;
+          }
+          final exists = result.data!.any((d) => d.idReg == id || d.objectId == id);
+          developer.log('${exists ? '✅' : '❌'} SYNC: Defensivo ${exists ? 'encontrado' : 'não encontrado'}', name: 'FavoritosService');
+          return exists;
+
         case TipoFavorito.praga:
-          final praga = await ReceitaAgroHiveService.getPragaById(id);
-          return praga != null;
+          // Usa repository direto em vez do serviço depreciado
+          final pragasRepo = GetIt.instance<PragasHiveRepository>();
+          final result = await pragasRepo.getAll();
+          if (result.isError) {
+            developer.log('❌ SYNC: Erro ao buscar pragas: ${result.error}', name: 'FavoritosService');
+            return false;
+          }
+          final exists = result.data!.any((p) => p.idReg == id || p.objectId == id);
+          developer.log('${exists ? '✅' : '❌'} SYNC: Praga ${exists ? 'encontrada' : 'não encontrada'}', name: 'FavoritosService');
+          return exists;
+
         case TipoFavorito.diagnostico:
-          final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(id);
-          return diagnostico != null;
+          // Usa repository direto em vez do serviço depreciado
+          final diagnosticoRepo = GetIt.instance<DiagnosticoHiveRepository>();
+          final result = await diagnosticoRepo.getAll();
+          if (result.isError) {
+            developer.log('❌ SYNC: Erro ao buscar diagnósticos: ${result.error}', name: 'FavoritosService');
+            return false;
+          }
+          final exists = result.data!.any((d) => d.idReg == id || d.objectId == id);
+          developer.log('${exists ? '✅' : '❌'} SYNC: Diagnóstico ${exists ? 'encontrado' : 'não encontrado'}', name: 'FavoritosService');
+          return exists;
+
         case TipoFavorito.cultura:
-          final cultura = await ReceitaAgroHiveService.getCulturaById(id);
-          return cultura != null;
+          // Usa repository direto em vez do serviço depreciado
+          final culturaRepo = GetIt.instance<CulturaHiveRepository>();
+          final result = await culturaRepo.getAll();
+          if (result.isError) {
+            developer.log('❌ SYNC: Erro ao buscar culturas: ${result.error}', name: 'FavoritosService');
+            return false;
+          }
+          final exists = result.data!.any((c) => c.idReg == id || c.objectId == id);
+          developer.log('${exists ? '✅' : '❌'} SYNC: Cultura ${exists ? 'encontrada' : 'não encontrada'}', name: 'FavoritosService');
+          return exists;
+
         default:
+          developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
           return false;
       }
     } catch (e) {
+      developer.log('❌ SYNC: Erro ao verificar existência: $e', name: 'FavoritosService', error: e);
       return false;
     }
   }

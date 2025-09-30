@@ -58,21 +58,32 @@ class FavoritosPragasTabWidget extends StatelessWidget {
             await provider.loadAllFavoritos();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(8),
             child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListView.separated(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                ),
+              ),
+              child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: items.length,
-                separatorBuilder: (context, index) => Divider(
-                  height: 1,
-                  indent: 72,
-                  endIndent: 16,
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                ),
                 itemBuilder: (context, index) {
-                  return itemBuilder(items[index]);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      itemBuilder(items[index]),
+                      if (index < items.length - 1)
+                        Divider(
+                          height: 1,
+                          indent: 72,
+                          endIndent: 16,
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                    ],
+                  );
                 },
               ),
             ),
@@ -85,12 +96,10 @@ class FavoritosPragasTabWidget extends StatelessWidget {
   }
 
   Widget _buildPragaItem(
-    BuildContext context, 
-    FavoritoPragaEntity praga, 
+    BuildContext context,
+    FavoritoPragaEntity praga,
     FavoritosProviderSimplified provider
   ) {
-    final theme = Theme.of(context);
-    
     return Dismissible(
       key: Key('favorito_praga_${praga.id}'),
       direction: DismissDirection.endToStart,
@@ -101,63 +110,38 @@ class FavoritosPragasTabWidget extends StatelessWidget {
       onDismissed: (direction) async {
         await _removeFavorito(context, provider, praga);
       },
-      child: InkWell(
+      child: ListTile(
         onTap: () => _navigateToPragaDetails(context, praga),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: PragaImageWidget(
-                    nomeCientifico: praga.nomeCientifico,
-                    width: 48,
-                    height: 48,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      praga.nomeComum,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (praga.nomeCientifico.isNotEmpty == true) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        praga.nomeCientifico,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                          fontStyle: FontStyle.italic,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+        leading: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: PragaImageWidget(
+              nomeCientifico: praga.nomeCientifico,
+              width: 48,
+              height: 48,
+            ),
           ),
         ),
+        title: Text(
+          praga.nomeComum,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: praga.nomeCientifico.isNotEmpty
+          ? Text(
+              praga.nomeCientifico,
+              style: const TextStyle(fontStyle: FontStyle.italic),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }

@@ -91,8 +91,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   void _setupListeners() {
-    _emailController.addListener(_validateEmail);
-    _passwordController.addListener(_checkPasswordStrength);
+    // Email and password listeners removed - validation logic not implemented
   }
 
   @override
@@ -285,94 +284,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  // Email validation
-  void _validateEmail() {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      setState(() {
-        _isEmailValid = false;
-        _emailExists = false;
-      });
-      return;
-    }
-    
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    final isValid = emailRegex.hasMatch(email);
-    
-    setState(() {
-      _isEmailValid = isValid;
-    });
-    
-    if (isValid && !_isLoginMode) {
-      _checkEmailExists(email);
-    }
-  }
-  
-  Future<void> _checkEmailExists(String email) async {
-    setState(() => _isEmailChecking = true);
-    
-    await Future<void>.delayed(const Duration(milliseconds: 800));
-    
-    final exists = email.contains('test') || email.contains('admin');
-    
-    setState(() {
-      _isEmailChecking = false;
-      _emailExists = exists;
-    });
-  }
-  
-  // Password strength checker
-  void _checkPasswordStrength() {
-    final password = _passwordController.text;
-    double strength = 0;
-    String strengthText = '';
-    Color strengthColor = Colors.grey;
-    
-    if (password.isEmpty) {
-      strength = 0;
-      strengthText = '';
-    } else if (password.length < 6) {
-      strength = 0.2;
-      strengthText = 'Muito fraca';
-      strengthColor = Colors.red;
-    } else {
-      strength = 0.4;
-      strengthText = 'Fraca';
-      strengthColor = Colors.orange;
-      
-      if (password.length >= 8) {
-        strength = 0.6;
-        strengthText = 'Moderada';
-        strengthColor = Colors.yellow[700]!;
-      }
-      
-      if (RegExp(r'[A-Z]').hasMatch(password)) {
-        strength += 0.1;
-      }
-      
-      if (RegExp(r'[0-9]').hasMatch(password)) {
-        strength += 0.1;
-      }
-      
-      if (RegExp(r'[!@#\$%^&*(),.?\":{}|<>]').hasMatch(password)) {
-        strength += 0.2;
-      }
-      
-      if (strength >= 0.8) {
-        strengthText = 'Forte';
-        strengthColor = Colors.green;
-      } else if (strength >= 0.6) {
-        strengthText = 'Boa';
-        strengthColor = Colors.lightGreen;
-      }
-    }
-    
-    setState(() {
-      _passwordStrength = strength;
-      _passwordStrengthText = strengthText;
-      _passwordStrengthColor = strengthColor;
-    });
-  }
 
   // Auth handlers
   Future<void> _handleLogin() async {
@@ -389,7 +300,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       );
       
       if (success && mounted) {
-        HapticFeedback.lightImpact(); // Fire-and-forget
+        unawaited(HapticFeedback.lightImpact());
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Login realizado com sucesso!'),
@@ -399,7 +310,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       }
     } catch (e) {
       if (mounted) {
-        HapticFeedback.vibrate(); // Fire-and-forget
+        unawaited(HapticFeedback.vibrate());
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro no login: $e'),
@@ -497,17 +408,20 @@ class _LoginPageState extends ConsumerState<LoginPage>
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop();
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
+              navigator.pop();
               setState(() => _isLoading = true);
-              
+
               final success = await ref.read(authProvider.notifier).signInAnonymously();
-              
+
               if (mounted) {
                 setState(() => _isLoading = false);
-                
-                if (success && mounted) {
-                  HapticFeedback.lightImpact();
-                  ScaffoldMessenger.of(context).showSnackBar(
+
+                if (success) {
+                  unawaited(HapticFeedback.lightImpact());
+                  messenger.showSnackBar(
                     const SnackBar(
                       content: Text('Acesso anônimo realizado!'),
                       backgroundColor: Colors.green,

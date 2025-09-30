@@ -605,7 +605,8 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           },
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             decoration: BoxDecoration(
               border: Border.all(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2),

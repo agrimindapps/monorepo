@@ -65,21 +65,32 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
             await provider.loadAllFavoritos();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(8),
             child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListView.separated(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                ),
+              ),
+              child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: items.length,
-                separatorBuilder: (context, index) => Divider(
-                  height: 1,
-                  indent: 64,
-                  endIndent: 16,
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                ),
                 itemBuilder: (context, index) {
-                  return itemBuilder(items[index]);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      itemBuilder(items[index]),
+                      if (index < items.length - 1)
+                        Divider(
+                          height: 1,
+                          indent: 64,
+                          endIndent: 16,
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                    ],
+                  );
                 },
               ),
             ),
@@ -92,12 +103,10 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
   }
 
   Widget _buildDiagnosticoItem(
-    BuildContext context, 
-    FavoritoDiagnosticoEntity diagnostico, 
+    BuildContext context,
+    FavoritoDiagnosticoEntity diagnostico,
     FavoritosProviderSimplified provider
   ) {
-    final theme = Theme.of(context);
-    
     return Dismissible(
       key: Key('favorito_diagnostico_${diagnostico.id}'),
       direction: DismissDirection.endToStart,
@@ -108,71 +117,36 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
       onDismissed: (direction) async {
         await _removeFavorito(context, provider, diagnostico);
       },
-      child: InkWell(
+      child: ListTile(
         onTap: () => _navigateToDiagnosticoDetails(context, diagnostico),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  FontAwesomeIcons.magnifyingGlass,
-                  color: Color(0xFF4CAF50),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${diagnostico.nomeDefensivo} → ${diagnostico.nomePraga}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (diagnostico.cultura.isNotEmpty == true) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Cultura: ${diagnostico.cultura}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (diagnostico.dosagem.isNotEmpty == true) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Dosagem: ${diagnostico.dosagem}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            FontAwesomeIcons.magnifyingGlass,
+            color: Color(0xFF4CAF50),
+            size: 20,
           ),
         ),
+        title: Text(
+          '${diagnostico.nomeDefensivo} → ${diagnostico.nomePraga}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: diagnostico.cultura.isNotEmpty || diagnostico.dosagem.isNotEmpty
+          ? Text(
+              [
+                if (diagnostico.cultura.isNotEmpty) 'Cultura: ${diagnostico.cultura}',
+                if (diagnostico.dosagem.isNotEmpty) 'Dosagem: ${diagnostico.dosagem}',
+              ].join(' • '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }

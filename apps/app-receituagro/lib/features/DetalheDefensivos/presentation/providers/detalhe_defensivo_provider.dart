@@ -112,11 +112,11 @@ class DetalheDefensivoProvider extends ChangeNotifier {
     try {
       _isFavorited = await _favoritosProvider.isFavorito('defensivo', itemId);
     } catch (e) {
-      // Fallback para repository direto em caso de erro
+      // Fallback para repository direto em caso de erro - usando tipo singular
       try {
-        _isFavorited = await _favoritosRepository.isFavoritoAsync('defensivos', itemId);
+        _isFavorited = await _favoritosRepository.isFavoritoAsync('defensivo', itemId);
       } catch (fallbackError) {
-        _isFavorited = await _favoritosRepository.isFavorito('defensivos', itemId);
+        _isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
       }
     }
     notifyListeners();
@@ -187,24 +187,36 @@ class DetalheDefensivoProvider extends ChangeNotifier {
     final wasAlreadyFavorited = _isFavorited;
     final itemId = _defensivoData?.idReg ?? defensivoName;
 
+    debugPrint('🔄 [DEFENSIVO-FAV] Iniciando toggle favorito');
+    debugPrint('🔄 [DEFENSIVO-FAV] wasAlreadyFavorited: $wasAlreadyFavorited');
+    debugPrint('🔄 [DEFENSIVO-FAV] itemId: $itemId');
+    debugPrint('🔄 [DEFENSIVO-FAV] defensivoName: $defensivoName');
+
     // Otimistic update
     _isFavorited = !wasAlreadyFavorited;
     notifyListeners();
 
     try {
       // Usa o sistema simplificado de favoritos
+      debugPrint('🔄 [DEFENSIVO-FAV] Chamando favoritosProvider.toggleFavorito...');
       final success = await _favoritosProvider.toggleFavorito('defensivo', itemId);
+      debugPrint('🔄 [DEFENSIVO-FAV] Resultado do provider: $success');
 
       if (!success) {
         // Revert on failure
+        debugPrint('❌ [DEFENSIVO-FAV] Provider falhou, revertendo estado');
         _isFavorited = wasAlreadyFavorited;
+        _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
         notifyListeners();
         return false;
       }
 
+      debugPrint('✅ [DEFENSIVO-FAV] Provider teve sucesso');
       return true;
     } catch (e) {
+      debugPrint('❌ [DEFENSIVO-FAV] Provider falhou com exceção: $e');
       // Fallback para sistema antigo em caso de erro
+      debugPrint('🔄 [DEFENSIVO-FAV] Tentando fallback repository...');
       try {
         final itemData = {
           'nome': _defensivoData?.nomeComum ?? defensivoName,
@@ -212,22 +224,28 @@ class DetalheDefensivoProvider extends ChangeNotifier {
           'idReg': itemId,
         };
 
+        debugPrint('🔄 [DEFENSIVO-FAV] Chamando repository direto...');
         final success = wasAlreadyFavorited
-            ? await _favoritosRepository.removeFavorito('defensivos', itemId)
-            : await _favoritosRepository.addFavorito('defensivos', itemId, itemData);
+            ? await _favoritosRepository.removeFavorito('defensivo', itemId)
+            : await _favoritosRepository.addFavorito('defensivo', itemId, itemData);
+        debugPrint('🔄 [DEFENSIVO-FAV] Resultado do repository: $success');
 
         if (!success) {
+          debugPrint('❌ [DEFENSIVO-FAV] Repository também falhou, revertendo estado');
           _isFavorited = wasAlreadyFavorited;
+          _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito';
           notifyListeners();
           return false;
         }
 
+        debugPrint('✅ [DEFENSIVO-FAV] Repository teve sucesso');
         return true;
       } catch (fallbackError) {
         // Revert on error
+        debugPrint('❌ [DEFENSIVO-FAV] Fallback repository também falhou: $fallbackError');
         _isFavorited = wasAlreadyFavorited;
+        _errorMessage = 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${fallbackError.toString()}';
         notifyListeners();
-        // Erro silencioso para não poluir logs em produção
         return false;
       }
     }

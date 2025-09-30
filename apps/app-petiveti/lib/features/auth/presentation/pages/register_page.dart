@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 
-import '../providers/auth_provider.dart';
 import '../widgets/register_action_buttons.dart';
 import '../widgets/register_form_fields.dart';
 import '../widgets/register_page_coordinator.dart';
@@ -238,8 +237,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   /// - Ensures accessibility with semantic labels
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
     // Setup authentication state listener
     RegisterPageCoordinator.setupAuthListener(ref: ref, context: context);
 

@@ -1,9 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/riverpod_providers/solid_providers.dart';
-import 'plant_form_dialog.dart';
-
 class PlantsFab extends ConsumerWidget {
   final VoidCallback onScrollToTop;
   final ScrollController scrollController;
@@ -15,14 +12,8 @@ class PlantsFab extends ConsumerWidget {
   });
 
   Future<void> _onAddPlant(BuildContext context, WidgetRef ref) async {
-    // Inicializar o formulário para adição de nova planta
-    final formManager = ref.read(solidPlantFormStateManagerProvider);
-    formManager.initializeForNewPlant();
-
-    // Mostrar dialog
-    await PlantFormDialog.show(context);
-
-    // O cleanup é automático com Riverpod
+    // Navegar para página de formulário ao invés de mostrar dialog
+    await context.push('/plants/add');
   }
 
   @override

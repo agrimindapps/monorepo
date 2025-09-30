@@ -58,26 +58,32 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
             await provider.loadAllFavoritos();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            padding: const EdgeInsets.all(8),
             child: Card(
-              elevation: 2,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                ),
               ),
-              child: ListView.separated(
+              child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: items.length,
-                separatorBuilder:
-                    (context, index) => Divider(
-                      height: 1,
-                      indent: 64,
-                      endIndent: 16,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withValues(alpha: 0.4),
-                    ),
                 itemBuilder: (context, index) {
-                  return itemBuilder(items[index]);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      itemBuilder(items[index]),
+                      if (index < items.length - 1)
+                        Divider(
+                          height: 1,
+                          indent: 64,
+                          endIndent: 16,
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                    ],
+                  );
                 },
               ),
             ),
@@ -94,8 +100,6 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
     FavoritoDefensivoEntity defensivo,
     FavoritosProviderSimplified provider,
   ) {
-    final theme = Theme.of(context);
-
     return Dismissible(
       key: Key('favorito_defensivo_${defensivo.id}'),
       direction: DismissDirection.endToStart,
@@ -106,75 +110,36 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
       onDismissed: (direction) async {
         await _removeFavorito(context, provider, defensivo);
       },
-      child: InkWell(
+      child: ListTile(
         onTap: () => _navigateToDefensivoDetails(context, defensivo),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  FontAwesomeIcons.shield,
-                  color: Color(0xFF4CAF50),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      defensivo.nomeComum,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (defensivo.ingredienteAtivo.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        defensivo.ingredienteAtivo,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.7,
-                          ),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (defensivo.fabricante?.isNotEmpty == true) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        defensivo.fabricante!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.5,
-                          ),
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            FontAwesomeIcons.shield,
+            color: Color(0xFF4CAF50),
+            size: 20,
           ),
         ),
+        title: Text(
+          defensivo.nomeComum,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: defensivo.ingredienteAtivo.isNotEmpty || defensivo.fabricante?.isNotEmpty == true
+          ? Text(
+              [
+                if (defensivo.ingredienteAtivo.isNotEmpty) defensivo.ingredienteAtivo,
+                if (defensivo.fabricante?.isNotEmpty == true) defensivo.fabricante!,
+              ].join(' • '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }

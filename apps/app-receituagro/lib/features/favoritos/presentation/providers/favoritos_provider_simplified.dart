@@ -110,9 +110,12 @@ class FavoritosProviderSimplified extends ChangeNotifier {
   /// Verifica se um item é favorito usando repository diretamente
   Future<bool> isFavorito(String tipo, String id) async {
     try {
-      return await _repository.isFavorito(tipo, id);
+      debugPrint('🔍 [PROVIDER-SIMPLIFIED] Verificando se é favorito - tipo: $tipo, id: $id');
+      final result = await _repository.isFavorito(tipo, id);
+      debugPrint('🔍 [PROVIDER-SIMPLIFIED] Resultado: $result');
+      return result;
     } catch (e) {
-      debugPrint('Erro ao verificar favorito: $e');
+      debugPrint('❌ [PROVIDER-SIMPLIFIED] Erro ao verificar favorito: $e');
       return false;
     }
   }
@@ -120,17 +123,27 @@ class FavoritosProviderSimplified extends ChangeNotifier {
   /// Alterna favorito usando repository diretamente
   Future<bool> toggleFavorito(String tipo, String id) async {
     try {
+      debugPrint('🔄 [PROVIDER-SIMPLIFIED] Iniciando toggleFavorito');
+      debugPrint('🔄 [PROVIDER-SIMPLIFIED] tipo: $tipo, id: $id');
+
       _setLoading(true);
-      
+
       final result = await _repository.toggleFavorito(tipo, id);
-      
+      debugPrint('🔄 [PROVIDER-SIMPLIFIED] Resultado repository: $result');
+
       if (result) {
         // Recarrega os dados após mudança
+        debugPrint('🔄 [PROVIDER-SIMPLIFIED] Recarregando dados após toggle...');
         await _reloadAfterToggle(tipo);
+        debugPrint('✅ [PROVIDER-SIMPLIFIED] Toggle completado com sucesso');
+      } else {
+        debugPrint('❌ [PROVIDER-SIMPLIFIED] Repository retornou false');
       }
-      
+
       return result;
     } catch (e) {
+      debugPrint('❌ [PROVIDER-SIMPLIFIED] Erro ao alterar favorito: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
       _setError('Erro ao alterar favorito: $e');
       return false;
     } finally {

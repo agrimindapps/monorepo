@@ -75,13 +75,14 @@ final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
 });
 
 /// Provider para PlantFormStateManager (SOLID-compliant)
-final solidPlantFormStateManagerProvider = Provider<PlantFormStateManager>((ref) {
+/// Usa ChangeNotifierProvider para observar mudanças no estado
+final solidPlantFormStateManagerProvider = ChangeNotifierProvider<PlantFormStateManager>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
-  
+
   // Usar DI puro em vez de Service Locator
   final validationService = ref.read(formValidationServiceProvider);
   final imageService = ref.read(imageManagementServiceProvider);
-  
+
   return factory.createPlantFormStateManager(
     validationService: validationService,
     imageService: imageService,

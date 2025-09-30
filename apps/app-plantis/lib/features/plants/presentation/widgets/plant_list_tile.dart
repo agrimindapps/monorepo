@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/plant.dart';
 import 'plant_tasks_helper.dart';
 
-class PlantListTile extends StatelessWidget {
+class PlantListTile extends ConsumerWidget {
   final Plant plant;
   final VoidCallback? onTap;
 
   const PlantListTile({super.key, required this.plant, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -145,7 +145,7 @@ class PlantListTile extends StatelessWidget {
 
                       // Badge de cuidados pendentes
                       PlantTasksHelper.buildTaskBadge(
-                        context,
+                        ref,
                         plant.id,
                         hideWhenEmpty: true,
                       ),

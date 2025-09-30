@@ -1,21 +1,21 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../core/data/models/comentario_model.dart';
+import '../../../../../core/riverpod_providers/comments_providers.dart';
 import '../../../domain/entities/plant.dart';
-import '../../providers/plant_comments_provider.dart';
 
 /// Widget responsável por exibir e gerenciar os comentários/observações da planta
-class PlantNotesSection extends StatefulWidget {
+class PlantNotesSection extends ConsumerStatefulWidget {
   final Plant plant;
 
   const PlantNotesSection({super.key, required this.plant});
 
   @override
-  State<PlantNotesSection> createState() => _PlantNotesSectionState();
+  ConsumerState<PlantNotesSection> createState() => _PlantNotesSectionState();
 }
 
-class _PlantNotesSectionState extends State<PlantNotesSection> {
+class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
   final TextEditingController _commentController = TextEditingController();
 
   @override
@@ -24,7 +24,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     // Load comments when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<PlantCommentsProvider>().loadComments(widget.plant.id);
+        ref.read(commentsProvider.notifier).loadComments(widget.plant.id);
       }
     });
   }
@@ -37,8 +37,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PlantCommentsProvider>(
-      builder: (context, provider, child) {
+    final commentsState = ref.watch(commentsProvider);
+
+    return commentsState.when(
+      data: (state) {
         return GestureDetector(
           onTap: () {
             // Remove o foco do campo de comentário quando tocar em outros lugares
@@ -47,26 +49,30 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAddCommentSection(context, provider),
+              _buildAddCommentSection(context, state),
               const SizedBox(height: 24),
-              if (provider.isLoading && !provider.hasComments)
+              if (state.isLoading && !state.hasComments)
                 _buildLoadingState(context)
-              else if (provider.hasComments)
-                _buildCommentsList(context, provider)
+              else if (state.hasComments)
+                _buildCommentsList(context, state)
               else
                 _buildEmptyState(context),
-              if (provider.errorMessage != null)
-                _buildErrorMessage(context, provider),
+              if (state.errorMessage != null)
+                _buildErrorMessage(context, state),
             ],
           ),
         );
       },
+      loading: () => _buildLoadingState(context),
+      error: (error, stack) => Center(
+        child: Text('Erro ao carregar comentários: $error'),
+      ),
     );
   }
 
   Widget _buildAddCommentSection(
     BuildContext context,
-    PlantCommentsProvider provider,
+    CommentsState state,
   ) {
     final theme = Theme.of(context);
 
@@ -166,8 +172,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
-                onPressed:
-                    provider.isLoading ? null : () => _addComment(provider),
+                onPressed: state.isLoading ? null : _addComment,
                 icon: const Icon(Icons.send, size: 18),
                 label: const Text('Adicionar'),
                 style: ElevatedButton.styleFrom(
@@ -186,10 +191,10 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
 
   Widget _buildCommentsList(
     BuildContext context,
-    PlantCommentsProvider provider,
+    CommentsState state,
   ) {
     final theme = Theme.of(context);
-    final comments = provider.comments;
+    final comments = state.comments;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +231,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
           separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final comment = comments[index];
-            return _buildCommentCard(context, comment, provider);
+            return _buildCommentCard(context, comment);
           },
         ),
       ],
@@ -236,7 +241,6 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
   Widget _buildCommentCard(
     BuildContext context,
     ComentarioModel comment,
-    PlantCommentsProvider provider,
   ) {
     final theme = Theme.of(context);
 
@@ -288,8 +292,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
                   color: theme.colorScheme.onSurfaceVariant,
                   size: 18,
                 ),
-                onSelected:
-                    (action) => _handleCommentAction(action, comment, provider),
+                onSelected: (action) => _handleCommentAction(action, comment),
                 itemBuilder:
                     (context) => [
                       const PopupMenuItem(
@@ -347,11 +350,12 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     );
   }
 
-  Future<void> _addComment(PlantCommentsProvider provider) async {
+  Future<void> _addComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
 
-    final success = await provider.addComment(widget.plant.id, text);
+    final success =
+        await ref.read(commentsProvider.notifier).addComment(widget.plant.id, text);
 
     if (success) {
       _commentController.clear();
@@ -372,19 +376,18 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
   void _handleCommentAction(
     String action,
     ComentarioModel comment,
-    PlantCommentsProvider provider,
   ) {
     switch (action) {
       case 'edit':
-        _editComment(comment, provider);
+        _editComment(comment);
         break;
       case 'delete':
-        _confirmDeleteComment(comment, provider);
+        _confirmDeleteComment(comment);
         break;
     }
   }
 
-  void _editComment(ComentarioModel comment, PlantCommentsProvider provider) {
+  void _editComment(ComentarioModel comment) {
     final editController = TextEditingController(text: comment.conteudo);
 
     showDialog<void>(
@@ -412,10 +415,9 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
                 onPressed: () async {
                   final newText = editController.text.trim();
                   if (newText.isNotEmpty && newText != comment.conteudo) {
-                    final success = await provider.updateComment(
-                      comment.id,
-                      newText,
-                    );
+                    final success = await ref
+                        .read(commentsProvider.notifier)
+                        .updateComment(comment.id, newText);
 
                     if (success) {
                       if (mounted) Navigator.of(context).pop();
@@ -440,10 +442,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
     );
   }
 
-  void _confirmDeleteComment(
-    ComentarioModel comment,
-    PlantCommentsProvider provider,
-  ) {
+  void _confirmDeleteComment(ComentarioModel comment) {
     showDialog<void>(
       context: context,
       builder:
@@ -459,7 +458,8 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
               ),
               TextButton(
                 onPressed: () async {
-                  final success = await provider.deleteComment(comment.id);
+                  final success =
+                      await ref.read(commentsProvider.notifier).deleteComment(comment.id);
 
                   if (success) {
                     if (mounted) Navigator.of(context).pop();
@@ -546,7 +546,7 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
 
   Widget _buildErrorMessage(
     BuildContext context,
-    PlantCommentsProvider provider,
+    CommentsState state,
   ) {
     final theme = Theme.of(context);
 
@@ -566,14 +566,14 @@ class _PlantNotesSectionState extends State<PlantNotesSection> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              provider.errorMessage!,
+              state.errorMessage!,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.error,
               ),
             ),
           ),
           TextButton(
-            onPressed: () => provider.clearError(),
+            onPressed: () => ref.read(commentsProvider.notifier).clearError(),
             child: const Text('OK'),
           ),
         ],

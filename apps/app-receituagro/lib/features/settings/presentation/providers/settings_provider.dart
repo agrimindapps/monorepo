@@ -26,7 +26,7 @@ class SettingsProvider extends ChangeNotifier {
   late final IAppRatingRepository _appRatingRepository;
   late final DeviceIdentityService _deviceIdentityService;
   late final FeatureFlagsProvider _featureFlagsProvider;
-  late final DeviceManagementService _deviceManagementService;
+  DeviceManagementService? _deviceManagementService;
   
   SettingsProvider({
     required GetUserSettingsUseCase getUserSettingsUseCase,
@@ -109,9 +109,17 @@ class SettingsProvider extends ChangeNotifier {
       _appRatingRepository = di.sl<IAppRatingRepository>();
       _deviceIdentityService = di.sl<DeviceIdentityService>();
       _featureFlagsProvider = di.sl<FeatureFlagsProvider>();
-      _deviceManagementService = di.sl<DeviceManagementService>();
+
+      // DeviceManagementService may not be available on Web
+      if (di.sl.isRegistered<DeviceManagementService>()) {
+        _deviceManagementService = di.sl<DeviceManagementService>();
+      } else {
+        debugPrint('⚠️  DeviceManagementService not available (Web platform)');
+      }
     } catch (e) {
       debugPrint('Error initializing services: $e');
+      debugPrint('Stack trace:');
+      debugPrint(StackTrace.current.toString());
     }
   }
 
@@ -454,8 +462,14 @@ class SettingsProvider extends ChangeNotifier {
         isActive: deviceInfo.isActive,
       );
 
-      // Get all devices from backend via DeviceManagementService
-      final devicesResult = await _deviceManagementService.getUserDevices();
+      // Get all devices from backend via DeviceManagementService (if available)
+      if (_deviceManagementService == null) {
+        debugPrint('⚠️  DeviceManagementService not available - using only current device');
+        _connectedDevices = [_currentDevice!];
+        return;
+      }
+
+      final devicesResult = await _deviceManagementService!.getUserDevices();
       
       devicesResult.fold(
         (failure) {
@@ -496,8 +510,13 @@ class SettingsProvider extends ChangeNotifier {
         return;
       }
 
+      if (_deviceManagementService == null) {
+        _setError('Serviço de gerenciamento de dispositivos não disponível');
+        return;
+      }
+
       // Call real DeviceManagementService
-      final result = await _deviceManagementService.revokeDevice(deviceUuid);
+      final result = await _deviceManagementService!.revokeDevice(deviceUuid);
       
       result.fold(
         (failure) {
@@ -530,8 +549,13 @@ class SettingsProvider extends ChangeNotifier {
         return false;
       }
 
+      if (_deviceManagementService == null) {
+        _setError('Serviço de gerenciamento de dispositivos não disponível');
+        return false;
+      }
+
       // Check if user can add more devices via DeviceManagementService
-      final canAddResult = await _deviceManagementService.canAddMoreDevices();
+      final canAddResult = await _deviceManagementService!.canAddMoreDevices();
       
       return await canAddResult.fold(
         (failure) async {
@@ -546,7 +570,7 @@ class SettingsProvider extends ChangeNotifier {
           }
 
           // Validate and add device via DeviceManagementService
-          final validateResult = await _deviceManagementService.validateDevice(device);
+          final validateResult = await _deviceManagementService!.validateDevice(device);
           
           return validateResult.fold(
             (failure) {
@@ -583,7 +607,13 @@ class SettingsProvider extends ChangeNotifier {
         return false;
       }
 
-      final result = await _deviceManagementService.canAddMoreDevices();
+      if (_deviceManagementService == null) {
+        debugPrint('⚠️  DeviceManagementService not available - using local fallback');
+        // Fallback: allow if less than 3 devices locally
+        return _connectedDevices.length < 3;
+      }
+
+      final result = await _deviceManagementService!.canAddMoreDevices();
       return result.fold(
         (failure) {
           debugPrint('Error checking if can add more devices: $failure');

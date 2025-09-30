@@ -6,14 +6,14 @@ import '../../domain/entities/plant.dart';
 import 'optimized_plant_image_widget.dart';
 import 'plant_tasks_helper.dart';
 
-class PlantCard extends StatelessWidget {
+class PlantCard extends ConsumerWidget {
   final Plant plant;
   final VoidCallback? onTap;
 
   const PlantCard({super.key, required this.plant, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -101,7 +101,7 @@ class PlantCard extends StatelessWidget {
 
                 // Badge de cuidados pendentes
                 Center(
-                  child: PlantTasksHelper.buildTaskBadge(context, plant.id),
+                  child: PlantTasksHelper.buildTaskBadge(ref, plant.id),
                 ),
               ],
             ),

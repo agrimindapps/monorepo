@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -204,12 +206,17 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
           );
         }
 
-        // Atualizar lista de plantas via Riverpod
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
+        // Atualizar lista de plantas IMEDIATAMENTE via Riverpod
+        // Não esperar postFrameCallback para garantir que a lista seja atualizada
+        if (mounted) {
+          if (kDebugMode) {
+            print('🔄 PlantFormPage._savePlant() - Chamando refreshPlants()');
           }
-        });
+          unawaited(ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants());
+          if (kDebugMode) {
+            print('✅ PlantFormPage._savePlant() - refreshPlants() chamado com sucesso');
+          }
+        }
 
         if (kDebugMode) {
           print(
@@ -289,52 +296,66 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
 
   Future<void> _handleBackPressed(BuildContext context) async {
     final formState = ref.read(solidPlantFormStateProvider);
+    final isEditing = widget.plantId != null;
 
-    // Use comprehensive change detection instead of just checking name
-    final hasChanges = _hasUnsavedChanges(formState);
+    if (kDebugMode) {
+      print('🔙 PlantFormPage._handleBackPressed - isEditing: $isEditing, plantId: ${widget.plantId}');
+    }
 
-    if (hasChanges) {
-      final shouldDiscard = await showDialog<bool>(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: const Text('Descartar alterações?'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Você tem alterações não salvas que serão perdidas:',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 12),
-                  ..._buildChangesList(formState),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Deseja realmente sair sem salvar?',
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancelar'),
+    // Only check for changes if in edit mode
+    // In insert mode, allow user to cancel without confirmation
+    final hasChanges = isEditing && _hasUnsavedChanges(formState);
+
+    if (kDebugMode) {
+      print('🔙 PlantFormPage._handleBackPressed - hasChanges: $hasChanges');
+    }
+
+    if (!hasChanges) {
+      if (mounted) context.pop();
+      return;
+    }
+
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+    final shouldDiscard = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Descartar alterações?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Você tem alterações não salvas que serão perdidas:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: const Text('Descartar'),
+                const SizedBox(height: 12),
+                ..._buildChangesList(formState),
+                const SizedBox(height: 16),
+                const Text(
+                  'Deseja realmente sair sem salvar?',
+                  style: TextStyle(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
-      );
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Descartar'),
+              ),
+            ],
+          ),
+    );
 
-      if (shouldDiscard == true && mounted) {
-        context.pop();
-      }
-    } else {
-      context.pop();
+    if (shouldDiscard == true && mounted) {
+      navigator.pop();
     }
   }
 

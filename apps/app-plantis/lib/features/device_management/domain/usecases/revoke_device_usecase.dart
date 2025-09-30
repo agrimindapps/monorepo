@@ -196,7 +196,7 @@ class RevokeAllOtherDevicesUseCase {
 
       final revokeResult = await _deviceRepository.revokeAllOtherDevices(
         userId: userId,
-        currentDeviceUuid: currentDeviceUuid,
+        currentDeviceUuid: currentDeviceUuid!,
       );
 
       return revokeResult.fold(

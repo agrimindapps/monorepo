@@ -169,7 +169,13 @@ class PlantFormState {
   bool get hasError => errorMessage != null;
   bool get isEditMode => originalPlant != null;
   bool get hasChanges => _hasChanges();
-  bool get canSave => isFormValid && hasChanges && !isSaving;
+  bool get canSave {
+    final result = isFormValid && hasChanges && !isSaving;
+    if (kDebugMode) {
+      print('🔍 PlantFormState.canSave - isFormValid: $isFormValid, hasChanges: $hasChanges, isSaving: $isSaving, result: $result');
+    }
+    return result;
+  }
   
   bool _hasChanges() {
     if (originalPlant == null) return true; // Novo plant sempre tem mudanças
@@ -234,6 +240,9 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Atualiza o estado e notifica listeners
   void _updateState(PlantFormState newState) {
+    if (kDebugMode) {
+      print('📝 PlantFormStateManager._updateState - name: "${newState.name}", isFormValid: ${newState.isFormValid}, canSave: ${newState.canSave}');
+    }
     _state = newState;
     notifyListeners();
   }
@@ -304,8 +313,14 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Atualiza campo nome
   void setName(String name) {
+    if (kDebugMode) {
+      print('🔄 PlantFormStateManager.setName - name: "$name"');
+    }
     _updateState(_state.copyWith(name: name));
     _validateForm();
+    if (kDebugMode) {
+      print('✅ PlantFormStateManager.setName - isFormValid: ${_state.isFormValid}, canSave: ${_state.canSave}');
+    }
   }
   
   /// Atualiza campo espécie
@@ -636,6 +651,10 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Valida formulário completo
   void _validateForm() {
+    if (kDebugMode) {
+      print('🔍 PlantFormStateManager._validateForm - name: "${_state.name}", species: "${_state.species}"');
+    }
+
     final validation = _validationService.validatePlantForm(
       name: _state.name,
       species: _state.species,
@@ -647,7 +666,11 @@ class PlantFormStateManager extends ChangeNotifier {
       fertilizingIntervalDays: _state.fertilizingIntervalDays,
       waterAmount: _state.waterAmount,
     );
-    
+
+    if (kDebugMode) {
+      print('🔍 PlantFormStateManager._validateForm - validation.isValid: ${validation.isValid}, errors: ${validation.errors}');
+    }
+
     _updateState(_state.copyWith(
       fieldErrors: validation.errors,
       isFormValid: validation.isValid,

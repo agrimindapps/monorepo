@@ -1,8 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/riverpod_providers/tasks_providers.dart';
 import '../../../tasks/domain/entities/task.dart' as task_entity;
-import '../../../tasks/presentation/providers/tasks_provider.dart';
 
 /// Helper unificado para calcular e exibir informações de tarefas pendentes
 /// tanto no PlantCard quanto no PlantListTile.
@@ -14,13 +14,18 @@ import '../../../tasks/presentation/providers/tasks_provider.dart';
 /// - Geração de texto apropriado
 class PlantTasksHelper {
   /// Calcula o número de tarefas pendentes para uma planta específica
-  static int getPendingTasksCount(BuildContext context, String plantId) {
+  static int getPendingTasksCount(WidgetRef ref, String plantId) {
     try {
-      final tasksProvider = context.read<TasksProvider>();
+      final tasksAsync = ref.read(tasksProvider);
+
+      // Se ainda está carregando ou tem erro, retorna 0
+      if (!tasksAsync.hasValue) return 0;
+
+      final tasksState = tasksAsync.value!;
 
       // Busca todas as tarefas da planta
       final plantTasks =
-          tasksProvider.allTasks
+          tasksState.allTasks
               .where((task) => task.plantId == plantId)
               .toList();
 
@@ -32,20 +37,25 @@ class PlantTasksHelper {
 
       return pendingTasks;
     } catch (e) {
-      // Se ocorrer erro (ex: TasksProvider não encontrado), retorna 0
+      // Se ocorrer erro, retorna 0
       debugPrint('Erro ao buscar tarefas pendentes para planta $plantId: $e');
       return 0;
     }
   }
 
   /// Calcula o número de tarefas atrasadas para uma planta específica
-  static int getOverdueTasksCount(BuildContext context, String plantId) {
+  static int getOverdueTasksCount(WidgetRef ref, String plantId) {
     try {
-      final tasksProvider = context.read<TasksProvider>();
+      final tasksAsync = ref.read(tasksProvider);
+
+      // Se ainda está carregando ou tem erro, retorna 0
+      if (!tasksAsync.hasValue) return 0;
+
+      final tasksState = tasksAsync.value!;
 
       // Busca tarefas da planta que estão atrasadas
       final overdueTasks =
-          tasksProvider.allTasks
+          tasksState.allTasks
               .where(
                 (task) =>
                     task.plantId == plantId &&
@@ -62,9 +72,9 @@ class PlantTasksHelper {
   }
 
   /// Obtém informações de status das tarefas para exibição no badge
-  static TaskBadgeInfo getTaskBadgeInfo(BuildContext context, String plantId) {
-    final pendingCount = getPendingTasksCount(context, plantId);
-    final overdueCount = getOverdueTasksCount(context, plantId);
+  static TaskBadgeInfo getTaskBadgeInfo(WidgetRef ref, String plantId) {
+    final pendingCount = getPendingTasksCount(ref, plantId);
+    final overdueCount = getOverdueTasksCount(ref, plantId);
 
     if (pendingCount == 0) {
       return TaskBadgeInfo(
@@ -106,11 +116,11 @@ class PlantTasksHelper {
 
   /// Verifica se deve mostrar o badge (oculta quando tem 0 tarefas)
   static bool shouldShowBadge(
-    BuildContext context,
+    WidgetRef ref,
     String plantId, {
     bool hideWhenEmpty = false,
   }) {
-    final pendingCount = getPendingTasksCount(context, plantId);
+    final pendingCount = getPendingTasksCount(ref, plantId);
 
     if (hideWhenEmpty) {
       return pendingCount > 0;
@@ -121,15 +131,15 @@ class PlantTasksHelper {
 
   /// Widget builder para o badge unificado
   static Widget buildTaskBadge(
-    BuildContext context,
+    WidgetRef ref,
     String plantId, {
     bool hideWhenEmpty = false,
   }) {
-    if (!shouldShowBadge(context, plantId, hideWhenEmpty: hideWhenEmpty)) {
+    if (!shouldShowBadge(ref, plantId, hideWhenEmpty: hideWhenEmpty)) {
       return const SizedBox.shrink();
     }
 
-    final badgeInfo = getTaskBadgeInfo(context, plantId);
+    final badgeInfo = getTaskBadgeInfo(ref, plantId);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

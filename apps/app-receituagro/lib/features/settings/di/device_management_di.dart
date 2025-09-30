@@ -74,25 +74,39 @@ class DeviceManagementDI {
     );
 
     // === HIGH-LEVEL SERVICES ===
-    
-    // Device Management Service (Web-safe registration)  
-    sl.registerLazySingleton<DeviceManagementService>(
-      () {
-        try {
-          return DeviceManagementService(
+
+    // Device Management Service (Web-safe registration)
+    // Only register if all required services are available
+    try {
+      if (sl.isRegistered<FirebaseDeviceService>() &&
+          sl.isRegistered<FirebaseAuthService>() &&
+          sl.isRegistered<FirebaseAnalyticsService>()) {
+        sl.registerLazySingleton<DeviceManagementService>(
+          () => DeviceManagementService(
             firebaseDeviceService: sl<FirebaseDeviceService>(),
             authService: sl<FirebaseAuthService>(),
             analyticsService: sl<FirebaseAnalyticsService>(),
             deviceRepository: sl<IDeviceRepository>(),
-          );
-        } catch (e) {
-          // For Web compatibility, register a stub FirebaseDeviceService first
-          print('⚠️  FirebaseDeviceService not available, DeviceManagementService skipped: $e');
-          // Return a simplified service that won't be used
-          rethrow; // Let this fail gracefully - service won't be available
+          ),
+        );
+      } else {
+        print('⚠️  DeviceManagementService: Required Firebase services not available (Web platform)');
+        print('   Missing services:');
+        if (!sl.isRegistered<FirebaseDeviceService>()) {
+          print('   - FirebaseDeviceService');
         }
-      },
-    );
+        if (!sl.isRegistered<FirebaseAuthService>()) {
+          print('   - FirebaseAuthService');
+        }
+        if (!sl.isRegistered<FirebaseAnalyticsService>()) {
+          print('   - FirebaseAnalyticsService');
+        }
+      }
+    } catch (e, stackTrace) {
+      print('⚠️  Error checking DeviceManagementService dependencies: $e');
+      print('Stack trace:');
+      print(stackTrace);
+    }
 
     _isRegistered = true;
   }

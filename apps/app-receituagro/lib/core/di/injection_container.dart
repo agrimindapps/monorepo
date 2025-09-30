@@ -47,7 +47,6 @@ import '../services/promotional_notification_manager.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
-import '../sync/receituagro_sync_config.dart';
 import 'core_package_integration.dart';
 import 'repositories_di.dart';
 
@@ -115,19 +114,9 @@ Future<void> init() async {
   sl.registerLazySingleton<core.UnifiedSyncManager>(
     () => core.UnifiedSyncManager.instance,
   );
-  
-  // Initialize ReceitaAgro sync configuration
-  if (kDebugMode) print('🚀 DI_CONTAINER: Iniciando configuração de sync do ReceitaAgro...');
-  
-  // Execute sync initialization synchronously during DI setup
-  unawaited(ReceitaAgroSyncConfig.configure().then((_) {
-    if (kDebugMode) print('✅ DI_CONTAINER: ReceitaAgro sync inicializado com sucesso!');
-  }).catchError((Object error) {
-    if (kDebugMode) print('❌ DI_CONTAINER: ReceitaAgro sync initialization failed: $error');
-  }));
-  
-  // Also ensure sync is called during app startup
-  if (kDebugMode) print('🔄 DI_CONTAINER: Sync initialization triggered');
+
+  // NOTE: ReceitaAgroSyncConfig.configure() is now called in main.dart
+  // to avoid race conditions and ensure proper initialization order
   
   // Providers for state management
   sl.registerLazySingleton<RemoteConfigProvider>(

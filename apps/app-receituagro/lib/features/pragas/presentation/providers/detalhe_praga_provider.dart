@@ -178,8 +178,8 @@ class DetalhePragaProvider extends ChangeNotifier {
     try {
       _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
     } catch (e) {
-      // Fallback para repository direto em caso de erro - usando mesmo tipo
-      _isFavorited = await _favoritosRepository.isFavorito('pragas', itemId);
+      // Fallback para repository direto em caso de erro - usando tipo singular
+      _isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
     }
     
     notifyListeners();
@@ -220,8 +220,8 @@ class DetalhePragaProvider extends ChangeNotifier {
     try {
       _isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
     } catch (e) {
-      // Fallback para repository direto em caso de erro - usando mesmo tipo
-      _isFavorited = await _favoritosRepository.isFavorito('pragas', itemId);
+      // Fallback para repository direto em caso de erro - usando tipo singular
+      _isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
     }
     
     notifyListeners();
@@ -404,8 +404,8 @@ class DetalhePragaProvider extends ChangeNotifier {
 
         debugPrint('🔄 [FAVORITO] Chamando repository direto...');
         final success = wasAlreadyFavorited
-            ? await _favoritosRepository.removeFavorito('pragas', itemId)
-            : await _favoritosRepository.addFavorito('pragas', itemId, itemData);
+            ? await _favoritosRepository.removeFavorito('praga', itemId)
+            : await _favoritosRepository.addFavorito('praga', itemId, itemData);
         debugPrint('🔄 [FAVORITO] Resultado do repository: $success');
 
         if (!success) {

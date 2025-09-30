@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/riverpod_providers/auth_providers.dart';
@@ -564,6 +565,15 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
         return plantsAsync.when(
           data: (plantsState) {
+            if (kDebugMode) {
+              print('🔍 PlantsListPage._buildPlantsContent:');
+              print('   - allPlants: ${plantsState.allPlants.length}');
+              print('   - searchQuery: "${plantsState.searchQuery}"');
+              print('   - searchResults: ${plantsState.searchResults.length}');
+              print('   - filteredPlants: ${plantsState.filteredPlants.length}');
+              print('   - filterBySpace: ${plantsState.filterBySpace}');
+            }
+
             final displayData = PlantsDisplayData(
               plants:
                   plantsState.searchQuery.isNotEmpty
@@ -572,6 +582,10 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
               isSearching: plantsState.searchQuery.isNotEmpty,
               searchQuery: plantsState.searchQuery,
             );
+
+            if (kDebugMode) {
+              print('   - displayData.plants: ${displayData.plants.length}');
+            }
 
             // Estado vazio
             if (displayData.plants.isEmpty) {

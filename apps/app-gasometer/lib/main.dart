@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/gasometer_sync_config.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -33,6 +34,15 @@ Future<void> main() async {
 
     // Initialize dependency injection (includes Hive initialization)
     await di.init();
+
+    // Initialize UnifiedSyncManager with Gasometer configuration
+    if (kDebugMode) {
+      print('🔄 Initializing GasometerSyncConfig (development mode)...');
+      await GasometerSyncConfig.configureDevelopment();
+      print('✅ GasometerSyncConfig initialized successfully');
+    } else {
+      await GasometerSyncConfig.configure();
+    }
 
     runApp(const ProviderScope(child: GasOMeterApp()));
   } catch (error) {

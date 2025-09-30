@@ -419,18 +419,35 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Future<void> _handleFavoriteToggle(DetalheDefensivoProvider provider) async {
     // Adicionar haptic feedback inicial
     unawaited(HapticFeedback.lightImpact());
-    
+
+    debugPrint('🔄 [UI] Usuário clicou em favorito - defensivo: ${widget.defensivoName}');
 
     final success =
         await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
 
     if (!mounted) return;
 
-    // Feedback haptic apenas (sem SnackBar)
+    // Feedback com SnackBar para melhor UX
     if (success) {
       unawaited(HapticFeedback.selectionClick());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.isFavorited
+              ? 'Adicionado aos favoritos'
+              : 'Removido dos favoritos'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     } else {
       unawaited(HapticFeedback.heavyImpact());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.errorMessage ?? 'Erro ao alterar favorito'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 }

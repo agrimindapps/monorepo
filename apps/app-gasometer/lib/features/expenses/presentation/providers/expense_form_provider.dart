@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/error/app_error.dart';

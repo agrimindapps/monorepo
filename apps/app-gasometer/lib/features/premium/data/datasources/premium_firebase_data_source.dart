@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:core/core.dart';
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../models/maintenance_model.dart';
 

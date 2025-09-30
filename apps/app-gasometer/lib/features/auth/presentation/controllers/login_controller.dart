@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/providers/auth_provider.dart';
 import 'package:gasometer/core/services/gasometer_analytics_service.dart';

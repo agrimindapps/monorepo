@@ -1,6 +1,4 @@
 import 'package:core/core.dart' as core;
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
@@ -22,12 +20,12 @@ class CoreModule implements DIModule {
     // This allows gradual migration without breaking existing code
 
     // Direct Firebase services (existing code compatibility)
-    getIt.registerLazySingleton<FirebaseAnalytics>(
-      () => FirebaseAnalytics.instance,
+    getIt.registerLazySingleton<core.FirebaseAnalytics>(
+      () => core.FirebaseAnalytics.instance,
     );
 
-    getIt.registerLazySingleton<FirebaseCrashlytics>(
-      () => FirebaseCrashlytics.instance,
+    getIt.registerLazySingleton<core.FirebaseCrashlytics>(
+      () => core.FirebaseCrashlytics.instance,
     );
 
     // NOTE: FirebaseFirestore and FirebaseAuth are now registered by injectable

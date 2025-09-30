@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' hide LogEntry, LogLevel;
 import 'package:uuid/uuid.dart';
 
 part 'log_entry.g.dart';

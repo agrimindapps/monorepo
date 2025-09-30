@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:core/core.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/forms/base_form_page.dart';

@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
 part 'category_model.g.dart';

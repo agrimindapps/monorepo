@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart' hide Connectivity, ConnectivityResult;
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' hide Connectivity, ConnectivityResult;
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/cache/cache_manager.dart';

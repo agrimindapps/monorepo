@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
-// Import Hive adapters - these include the generated adapters from .g.dart files
+
 import 'core/data/models/comentario_model.dart';
 import 'core/data/models/espaco_model.dart';
-// import 'core/data/models/tarefa_model.dart'; // DEPRECATED: Migrado para TaskModel em inglês
+
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/plantis_sync_config.dart';
@@ -20,7 +20,9 @@ import 'firebase_options.dart';
 
 // Provider local para SharedPreferences do app-plantis
 final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('SharedPreferences must be overridden at app startup');
+  throw UnimplementedError(
+    'SharedPreferences must be overridden at app startup',
+  );
 });
 
 void main() async {
@@ -88,8 +90,7 @@ void main() async {
   AppDataInspectorInitializer.initialize();
 
   // Initialize unified subscription services (NEW - Simplified)
-  final simpleSubscriptionSyncService =
-      di.sl<SimpleSubscriptionSyncService>();
+  final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
 
   // Initialize notifications

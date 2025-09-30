@@ -106,6 +106,11 @@ class _PlantTasksSectionState extends State<PlantTasksSection>
             .toList();
     final completedTasks = tasks.where((task) => task.isCompleted).toList();
 
+    // Ordenar tarefas por data de vencimento (mais próxima primeiro)
+    overdueTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    upcomingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    pendingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+
     // Ordenar tarefas concluídas por data de conclusão (mais recente primeiro)
     completedTasks.sort(
       (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
@@ -322,8 +327,8 @@ class _PlantTasksSectionState extends State<PlantTasksSection>
   Color _getTaskColor(PlantTask task) {
     if (task.isCompleted) return Colors.green;
     if (task.isOverdue) return Colors.red;
-    if (task.isDueToday) return Colors.orange;
-    if (task.isDueSoon) return Colors.amber;
+    if (task.isDueToday) return Colors.amber; // Amarelo para hoje
+    if (task.isDueSoon) return Colors.orange;
     return PlantisColors.primary;
   }
 
@@ -345,20 +350,11 @@ class _PlantTasksSectionState extends State<PlantTasksSection>
   }
 
   String _formatDueDate(DateTime dueDate) {
-    final now = DateTime.now();
-    final difference = dueDate.difference(now).inDays;
-
-    if (difference < 0) {
-      return '${-difference} dia${-difference != 1 ? 's' : ''} em atraso';
-    } else if (difference == 0) {
-      return 'Hoje';
-    } else if (difference == 1) {
-      return 'Amanhã';
-    } else if (difference <= 7) {
-      return 'Em $difference dias';
-    } else {
-      return '${dueDate.day}/${dueDate.month}/${dueDate.year}';
-    }
+    // Formato sempre dd/MM/yyyy
+    final day = dueDate.day.toString().padLeft(2, '0');
+    final month = dueDate.month.toString().padLeft(2, '0');
+    final year = dueDate.year.toString();
+    return '$day/$month/$year';
   }
 
   /// Seção de tarefas concluídas agrupadas por data com opção de carregar todas
@@ -932,15 +928,13 @@ class _PlantTasksSectionState extends State<PlantTasksSection>
   ) async {
     try {
       // Converter PlantTask para Task usando o adaptador
-      final taskEntity = PlantTaskAdapter.plantTaskToTask(
-        plantTask,
-        widget.plant.name,
-      );
+      final taskEntity = PlantTaskAdapter.plantTaskToTask(plantTask);
 
       // Exibir dialog de conclusão
       final result = await TaskCompletionDialog.show(
         context: context,
         task: taskEntity,
+        plantName: widget.plant.name,
       );
 
       // Processar resultado se o usuário confirmou

@@ -97,6 +97,15 @@ class UnifiedSyncManager {
   ) async {
     // CORREÇÃO P0: Usar string key ao invés de Type para evitar problemas de lookup
     final entityTypeKey = registration.entityType.toString();
+
+    developer.log(
+      '📝 Registering entity:\n'
+      '   Type Key: $entityTypeKey\n'
+      '   App: $appName\n'
+      '   Collection: ${registration.collectionName}',
+      name: 'UnifiedSync',
+    );
+
     _entityRegistrations[appName]![entityTypeKey] = registration;
 
     // Criar e inicializar repositório de sync com tipo correto
@@ -107,7 +116,7 @@ class UnifiedSyncManager {
     _syncRepositories[appName]![entityTypeKey] = syncRepo;
 
     developer.log(
-      'Entity $entityTypeKey registered for $appName',
+      '✅ Entity $entityTypeKey registered successfully for $appName',
       name: 'UnifiedSync',
     );
   }
@@ -198,8 +207,24 @@ class UnifiedSyncManager {
     T entity,
   ) async {
     try {
+      // DEBUG: Log detalhado do lookup
+      final entityTypeKey = T.toString();
+      developer.log(
+        '🔍 CREATE - Looking for repository:\n'
+        '   Type: $entityTypeKey\n'
+        '   App: $appName\n'
+        '   Available repos: ${_syncRepositories[appName]?.keys.toList()}',
+        name: 'UnifiedSync',
+      );
+
       final repository = _getSyncRepository<T>(appName);
       if (repository == null) {
+        developer.log(
+          '❌ Repository not found!\n'
+          '   Requested: $entityTypeKey\n'
+          '   Available: ${_syncRepositories[appName]?.keys.join(", ")}',
+          name: 'UnifiedSync',
+        );
         return Left(
           NotFoundFailure(
             'No sync repository found for ${T.toString()} in $appName',

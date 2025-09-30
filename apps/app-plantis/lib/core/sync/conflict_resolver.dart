@@ -100,10 +100,7 @@ class ConflictResolver {
           title:
               localTask.title.isNotEmpty ? localTask.title : remoteTask.title,
           description: localTask.description ?? remoteTask.description,
-          plantName:
-              localTask.plantName.isNotEmpty
-                  ? localTask.plantName
-                  : remoteTask.plantName,
+          plantId: localTask.plantId, // plantId não muda em conflitos
           status:
               localTask.status.index > remoteTask.status.index
                   ? localTask.status

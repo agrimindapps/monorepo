@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
 class PromoNavigationBar extends StatelessWidget {
@@ -100,7 +101,7 @@ class PromoNavigationBar extends StatelessWidget {
   }
 
   void _navigateToLogin(BuildContext context) {
-    context.go('/login');
+    context.go(AppRouter.login);
   }
 
   void _navigateToSection(GlobalKey? key) {

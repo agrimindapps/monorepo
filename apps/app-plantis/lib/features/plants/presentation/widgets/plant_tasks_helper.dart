@@ -16,7 +16,8 @@ class PlantTasksHelper {
   /// Calcula o número de tarefas pendentes para uma planta específica
   static int getPendingTasksCount(WidgetRef ref, String plantId) {
     try {
-      final tasksAsync = ref.read(tasksProvider);
+      // BUGFIX: Usar watch() em vez de read() para observar mudanças
+      final tasksAsync = ref.watch(tasksProvider);
 
       // Se ainda está carregando ou tem erro, retorna 0
       if (!tasksAsync.hasValue) return 0;
@@ -46,7 +47,8 @@ class PlantTasksHelper {
   /// Calcula o número de tarefas atrasadas para uma planta específica
   static int getOverdueTasksCount(WidgetRef ref, String plantId) {
     try {
-      final tasksAsync = ref.read(tasksProvider);
+      // BUGFIX: Usar watch() em vez de read() para observar mudanças
+      final tasksAsync = ref.watch(tasksProvider);
 
       // Se ainda está carregando ou tem erro, retorna 0
       if (!tasksAsync.hasValue) return 0;

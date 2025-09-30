@@ -49,7 +49,17 @@ class PlantTask extends Equatable {
 
   bool get isOverdue {
     if (status == TaskStatus.completed) return false;
-    return DateTime.now().isAfter(scheduledDate);
+
+    // Comparar apenas a data (sem hora) para evitar falsos positivos
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final taskDate = DateTime(
+      scheduledDate.year,
+      scheduledDate.month,
+      scheduledDate.day,
+    );
+
+    return taskDate.isBefore(today); // Atrasada se a data é anterior a hoje
   }
 
   bool get isDueToday {

@@ -343,7 +343,8 @@ class TaskNotificationService {
       }
 
       const String title = AppStrings.taskOverdue;
-      final String body = '${task.title} para ${task.plantName} está atrasada';
+      // TODO: Fetch plant name from plantId for better notification message
+      final String body = '${task.title} está atrasada';
       final String payload = _createNotificationPayload(
         task,
         PlantisNotificationType.overdueTask,
@@ -545,7 +546,8 @@ class TaskNotificationService {
         break;
     }
 
-    return '${task.title} - ${task.plantName}$priorityEmoji';
+    // TODO: Fetch plant name from plantId for better notification title
+    return '${task.title}$priorityEmoji';
   }
 
   /// Gerar corpo do resumo diário
@@ -718,7 +720,6 @@ class TaskNotificationService {
             updatedAt: DateTime.now(),
             title: (data['title'] as String?) ?? 'Tarefa',
             plantId: (data['plantId'] as String?) ?? '',
-            plantName: (data['plantName'] as String?) ?? 'Planta',
             type: task_entity.TaskType.custom,
             priority: task_entity.TaskPriority.medium,
             dueDate: snoozeTime,

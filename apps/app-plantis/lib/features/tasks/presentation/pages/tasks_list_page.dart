@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/riverpod_providers/plants_providers.dart';
 import '../../../../core/riverpod_providers/tasks_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/plantis_colors.dart';
@@ -282,8 +283,82 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            // Filtro de tarefas atrasadas - aparece PRIMEIRO e apenas se houver tarefas atrasadas
+            if (tasksState.overdueTasks > 0) ...[
+              FilterChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Atrasadas'),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${tasksState.overdueTasks}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                selected: tasksState.currentFilter == TasksFilterType.overdue,
+                onSelected: (selected) {
+                  ref
+                      .read(tasksProvider.notifier)
+                      .filterTasks(TasksFilterType.overdue);
+                },
+                selectedColor: Colors.red.withValues(alpha: 0.2),
+                checkmarkColor: Colors.red,
+                backgroundColor: Colors.red.withValues(alpha: 0.1),
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                labelStyle: TextStyle(
+                  color:
+                      tasksState.currentFilter == TasksFilterType.overdue
+                          ? Colors.red[700]
+                          : Colors.grey[700],
+                  fontSize: 16,
+                  fontWeight:
+                      tasksState.currentFilter == TasksFilterType.overdue
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            // Filtro "Hoje"
             FilterChip(
-              label: const Text('Hoje'),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Hoje'),
+                  if (tasksState.todayTasks > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${tasksState.todayTasks}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
               selected: tasksState.currentFilter == TasksFilterType.today,
               onSelected: (selected) {
                 ref
@@ -308,22 +383,21 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               ),
             ),
             const SizedBox(width: 12),
-            // BUGFIX: Adicionar filtro de tarefas atrasadas
             FilterChip(
               label: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Atrasadas'),
-                  if (tasksState.overdueTasks > 0) ...[
+                  const Text('Próxima'),
+                  if (tasksState.upcomingTasksCount > 0) ...[
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: PlantisColors.primary,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        '${tasksState.overdueTasks}',
+                        '${tasksState.upcomingTasksCount}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -334,32 +408,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   ],
                 ],
               ),
-              selected: tasksState.currentFilter == TasksFilterType.overdue,
-              onSelected: (selected) {
-                ref
-                    .read(tasksProvider.notifier)
-                    .filterTasks(TasksFilterType.overdue);
-              },
-              selectedColor: Colors.red.withValues(alpha: 0.2),
-              checkmarkColor: Colors.red,
-              backgroundColor: Colors.red.withValues(alpha: 0.1),
-              side: BorderSide.none,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              labelStyle: TextStyle(
-                color:
-                    tasksState.currentFilter == TasksFilterType.overdue
-                        ? Colors.red[700]
-                        : Colors.grey[700],
-                fontSize: 16,
-                fontWeight:
-                    tasksState.currentFilter == TasksFilterType.overdue
-                        ? FontWeight.w600
-                        : FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 12),
-            FilterChip(
-              label: const Text('Próxima'),
               selected: tasksState.currentFilter == TasksFilterType.upcoming,
               onSelected: (selected) {
                 ref
@@ -385,7 +433,30 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ),
             const SizedBox(width: 12),
             FilterChip(
-              label: const Text('Futuras'),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Futuras'),
+                  if (tasksState.allFutureTasksCount > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: PlantisColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${tasksState.allFutureTasksCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
               selected: tasksState.currentFilter == TasksFilterType.allFuture,
               onSelected: (selected) {
                 ref
@@ -549,17 +620,40 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               state.individualTaskOperations.containsKey(task.id),
       orElse: () => false,
     );
-    return _buildTaskCardContent(task, isLoading, theme, ref);
+
+    // Buscar a planta completa pelo plantId (nome e imagem)
+    final plantsAsync = ref.watch(plantsProvider);
+    String plantName = 'Carregando...';
+    String? plantImageUrl;
+
+    plantsAsync.maybeWhen(
+      data: (PlantsState plantsState) {
+        try {
+          final plant = plantsState.allPlants.firstWhere(
+            (p) => p.id == task.plantId,
+          );
+          plantName = plant.name;
+          plantImageUrl = plant.imageUrls.isNotEmpty ? plant.imageUrls.first : null;
+        } catch (e) {
+          plantName = 'Planta não encontrada';
+        }
+      },
+      orElse: () {},
+    );
+
+    return _buildTaskCardContent(task, plantName, plantImageUrl, isLoading, theme, ref);
   }
 
   Widget _buildTaskCardContent(
     task_entity.Task task,
+    String plantName,
+    String? plantImageUrl,
     bool isLoading,
     ThemeData theme,
     WidgetRef ref,
   ) {
     return Semantics(
-      label: 'Tarefa: ${task.title} para ${task.plantName}',
+      label: 'Tarefa: ${task.title} para $plantName',
       hint:
           isLoading
               ? 'Tarefa sendo processada'
@@ -569,7 +663,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       onTap:
           isLoading
               ? null
-              : () => _showTaskCompletionDialog(context, task, ref),
+              : () => _showTaskCompletionDialog(context, task, plantName, ref),
       child: PlantisCard(
         key: ValueKey(task.id),
         margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
@@ -579,39 +673,45 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 ? null
                 : () {
                   AccessibilityTokens.performHapticFeedback('light');
-                  _showTaskCompletionDialog(context, task, ref);
+                  _showTaskCompletionDialog(context, task, plantName, ref);
                 },
         child: Row(
           children: [
-            // Check button (moved to left)
-            GestureDetector(
-              onTap:
-                  isLoading
-                      ? null
-                      : () => _showTaskCompletionDialog(context, task, ref),
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child:
-                    isLoading
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              PlantisColors.primary,
-                            ),
-                          ),
-                        )
-                        : const Icon(
-                          Icons.check_circle,
-                          color: PlantisColors.primary,
-                          size: 32,
-                        ),
+            // Imagem da planta (esquerda)
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: PlantisColors.primary.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: PlantisColors.primary.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: ClipOval(
+                child: plantImageUrl != null
+                    ? Image.network(
+                        plantImageUrl,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.local_florist,
+                            color: PlantisColors.primary.withValues(alpha: 0.6),
+                            size: 24,
+                          );
+                        },
+                      )
+                    : Icon(
+                        Icons.local_florist,
+                        color: PlantisColors.primary.withValues(alpha: 0.6),
+                        size: 24,
+                      ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             // Task information
             Expanded(
               child: Column(
@@ -629,7 +729,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    task.plantName,
+                    plantName,
                     style: TextStyle(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       fontSize: 14,
@@ -651,18 +751,33 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 ],
               ),
             ),
-            // Ícone da tarefa (moved to right)
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: PlantisColors.primary.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getTaskIcon(task.type),
-                color: PlantisColors.primary,
-                size: 18,
+            // Check button pequeno (direita) - círculo vazio para pendente
+            GestureDetector(
+              onTap:
+                  isLoading
+                      ? null
+                      : () => _showTaskCompletionDialog(context, task, plantName, ref),
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: PlantisColors.primary,
+                    width: 2,
+                  ),
+                ),
+                child: isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            PlantisColors.primary,
+                          ),
+                        ),
+                      )
+                    : const SizedBox(), // Círculo vazio = tarefa pendente
               ),
             ),
           ],
@@ -674,11 +789,13 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   Future<void> _showTaskCompletionDialog(
     BuildContext context,
     task_entity.Task task,
+    String plantName,
     WidgetRef ref,
   ) async {
     final result = await TaskCompletionDialog.show(
       context: context,
       task: task,
+      plantName: plantName,
     );
 
     if (result != null && context.mounted) {

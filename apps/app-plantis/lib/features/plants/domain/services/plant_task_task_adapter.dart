@@ -8,7 +8,7 @@ import '../entities/plant_task.dart';
 /// Elimina duplicação e mantém compatibilidade entre os dois sistemas
 class PlantTaskTaskAdapter {
   /// Converte PlantTask para Task (sistema principal)
-  static task_entity.Task plantTaskToTask(PlantTask plantTask, Plant? plant) {
+  static task_entity.Task plantTaskToTask(PlantTask plantTask) {
     // Mapear tipos de PlantTask para tipos de Task
     final taskType = _mapPlantTaskTypeToTaskType(plantTask.type);
     final taskStatus = _mapPlantTaskStatusToTaskStatus(plantTask.status);
@@ -21,7 +21,6 @@ class PlantTaskTaskAdapter {
       title: plantTask.title,
       description: plantTask.description ?? plantTask.type.description,
       plantId: plantTask.plantId,
-      plantName: plant?.name ?? 'Planta não encontrada',
       type: taskType,
       status: taskStatus,
       priority: priority,
@@ -176,15 +175,8 @@ class PlantTaskTaskAdapter {
 
     // Converter PlantTasks para Tasks e adicionar/atualizar
     for (final plantTask in plantTasks) {
-      final plant = plantsById[plantTask.plantId];
-      final task = plantTaskToTask(plantTask, plant);
+      final task = plantTaskToTask(plantTask);
       mergedTasks[task.id] = task;
-
-      if (kDebugMode && plant == null) {
-        print(
-          '⚠️ PlantTaskTaskAdapter: Planta ${plantTask.plantId} não encontrada para PlantTask ${plantTask.id}',
-        );
-      }
     }
 
     final result = mergedTasks.values.toList();
@@ -214,7 +206,7 @@ class PlantTaskTaskAdapter {
       if (isTaskFromPlantTask(task) && plantTaskIds.contains(task.id)) {
         // Verifica se há diferenças significativas
         final plantTask = plantTasks.firstWhere((pt) => pt.id == task.id);
-        final convertedTask = plantTaskToTask(plantTask, null);
+        final convertedTask = plantTaskToTask(plantTask);
 
         if (_hasSignificantDifferences(task, convertedTask)) {
           conflicts.add(task.id);

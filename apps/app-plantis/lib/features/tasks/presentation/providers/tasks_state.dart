@@ -230,6 +230,20 @@ class TasksState extends Equatable {
         .length;
   }
 
+  /// Get count of all future tasks (beyond upcoming window)
+  int get allFutureTasksCount {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    return allTasks
+        .where(
+          (t) =>
+              t.status == task_entity.TaskStatus.pending &&
+              t.dueDate.isAfter(today),
+        )
+        .length;
+  }
+
   /// Get tasks filtered by plant ID
   List<task_entity.Task> getTasksForPlant(String plantId) {
     return allTasks.where((task) => task.plantId == plantId).toList();

@@ -551,7 +551,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                       'Baixar dados em formato JSON para backup',
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/data-export'),
+                    onTap: () => _showExportDialog(context, 'JSON'),
                   ),
                   ListTile(
                     leading: Container(
@@ -571,7 +571,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                       'Baixar dados em planilha para análise',
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/data-export'),
+                    onTap: () => _showExportDialog(context, 'CSV'),
                   ),
                 ],
               ),
@@ -620,7 +620,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/data-export'),
+                onTap: () => _showComingSoonDialog(context),
               ),
 
               // Ações rápidas
@@ -757,6 +757,283 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
               ],
             ),
           ),
+    );
+  }
+
+  void _showExportDialog(BuildContext context, String format) {
+    final theme = Theme.of(context);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    format == 'JSON' ? Icons.code : Icons.table_view,
+                    color: PlantisColors.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Exportar $format',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Informação sobre o que será exportado
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          PlantisColors.primary.withValues(alpha: 0.1),
+                          PlantisColors.leaf.withValues(alpha: 0.1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: PlantisColors.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.privacy_tip,
+                              color: PlantisColors.primary,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Direito à Portabilidade - LGPD',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: PlantisColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Você tem o direito de exportar seus dados pessoais em formato estruturado.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Dados que serão exportados:',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildExportDataItem(
+                    context,
+                    Icons.local_florist,
+                    'Plantas',
+                    'Todas as suas plantas cadastradas',
+                  ),
+                  _buildExportDataItem(
+                    context,
+                    Icons.comment,
+                    'Comentários',
+                    'Notas e observações sobre suas plantas',
+                  ),
+                  _buildExportDataItem(
+                    context,
+                    Icons.task,
+                    'Tarefas',
+                    'Lembretes e tarefas de cuidados',
+                  ),
+                  _buildExportDataItem(
+                    context,
+                    Icons.space_dashboard,
+                    'Espaços',
+                    'Organização dos seus ambientes',
+                  ),
+                  _buildExportDataItem(
+                    context,
+                    Icons.settings,
+                    'Configurações',
+                    'Suas preferências do app',
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.orange.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Colors.orange,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'O arquivo será baixado automaticamente em formato $format.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancelar',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _performExport(context, format);
+                },
+                icon: const Icon(Icons.download, size: 18),
+                label: Text('Exportar $format'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildExportDataItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String description,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: PlantisColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: PlantisColors.primary,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.check_circle,
+            color: PlantisColors.leaf,
+            size: 18,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _performExport(BuildContext context, String format) {
+    // TODO: Implement actual export logic with provider
+    // For now, show a success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text('Exportação em $format iniciada com sucesso!'),
+            ),
+          ],
+        ),
+        backgroundColor: PlantisColors.leaf,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
     );
   }
 

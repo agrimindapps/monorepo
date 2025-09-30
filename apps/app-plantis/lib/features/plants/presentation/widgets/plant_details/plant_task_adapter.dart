@@ -14,7 +14,6 @@ mixin PlantTaskAdapter {
   /// Mapeia campos compatíveis e define valores padrão para campos específicos da Task.
   static task_entity.Task plantTaskToTask(
     plant_task.PlantTask plantTask,
-    String plantName,
   ) {
     return task_entity.Task(
       id: plantTask.id,
@@ -23,7 +22,6 @@ mixin PlantTaskAdapter {
       title: plantTask.title,
       description: plantTask.description,
       plantId: plantTask.plantId,
-      plantName: plantName,
       type: _mapTaskType(plantTask.type),
       status: _mapTaskStatus(plantTask.status),
       priority: _mapTaskPriority(plantTask.type),

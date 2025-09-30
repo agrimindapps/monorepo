@@ -11,6 +11,7 @@ import '../../domain/entities/task.dart';
 /// - Validações de UX (data não pode ser muito no futuro)
 class TaskCompletionDialog extends StatefulWidget {
   final Task task;
+  final String plantName;
   final DateTime? nextTaskDate;
   final String? nextTaskDescription;
   final VoidCallback? onCancel;
@@ -19,6 +20,7 @@ class TaskCompletionDialog extends StatefulWidget {
   const TaskCompletionDialog({
     super.key,
     required this.task,
+    required this.plantName,
     this.nextTaskDate,
     this.nextTaskDescription,
     this.onCancel,
@@ -29,6 +31,7 @@ class TaskCompletionDialog extends StatefulWidget {
   static Future<TaskCompletionResult?> show({
     required BuildContext context,
     required Task task,
+    required String plantName,
     DateTime? nextTaskDate,
     String? nextTaskDescription,
   }) async {
@@ -38,6 +41,7 @@ class TaskCompletionDialog extends StatefulWidget {
       builder: (BuildContext context) {
         return TaskCompletionDialog(
           task: task,
+          plantName: plantName,
           nextTaskDate: nextTaskDate,
           nextTaskDescription: nextTaskDescription,
         );
@@ -196,7 +200,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
                 ),
               ),
               Text(
-                widget.task.plantName,
+                widget.plantName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
@@ -336,29 +340,23 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   }
 
   String _formatDateDescription(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final targetDate = DateTime(date.year, date.month, date.day);
-    final difference = targetDate.difference(today).inDays;
-
-    if (difference == 0) {
-      return 'Hoje';
-    } else if (difference == 1) {
-      return 'Em 1 dia';
-    } else if (difference > 1) {
-      return 'Em $difference dias';
-    } else if (difference == -1) {
-      return 'Era ontem';
-    } else {
-      return 'Era há ${-difference} dias';
-    }
+    // Formato: dd/MM/yyyy
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$day/$month/$year';
   }
 
   String _getNextDueDescription() {
-    // Simula um intervalo baseado no tipo de tarefa
+    // Calcula o próximo vencimento baseado no intervalo da tarefa
     final interval = _getTaskInterval();
     final nextDate = _completionDate.add(Duration(days: interval));
-    return _formatDateDescription(nextDate);
+
+    // Formato: dd/MM/yyyy
+    final day = nextDate.day.toString().padLeft(2, '0');
+    final month = nextDate.month.toString().padLeft(2, '0');
+    final year = nextDate.year.toString();
+    return '$day/$month/$year';
   }
 
   String _getIntervalDescription() {

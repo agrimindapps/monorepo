@@ -46,7 +46,6 @@ class BackupDataTransformerService {
         'title': task.title,
         'description': task.description,
         'plantId': task.plantId,
-        'plantName': task.plantName,
         'userId': task.userId,
         'type': task.type.name,
         'priority': task.priority.name,
@@ -126,7 +125,7 @@ class BackupDataTransformerService {
         title: data['title'] as String,
         description: data['description'] as String?,
         plantId: data['plantId'] as String,
-        plantName: data['plantName'] as String,
+        // plantName removed from Task entity - will be resolved dynamically from plantId
         userId: userId,
         type: _parseTaskType(data['type'] as String?),
         priority: _parseTaskPriority(data['priority'] as String?),

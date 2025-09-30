@@ -683,7 +683,6 @@ class TasksRepositoryImpl implements TasksRepository {
         title: completedTask.title,
         description: completedTask.description,
         plantId: completedTask.plantId,
-        plantName: completedTask.plantName,
         type: completedTask.type,
         status: TaskStatus.pending,
         priority: completedTask.priority,

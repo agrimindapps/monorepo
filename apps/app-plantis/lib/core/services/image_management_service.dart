@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:core/core.dart';
+import 'package:mime/mime.dart';
 
 /// Interface para abstração do ImageService
 /// Resolve violação DIP - dependência de implementação concreta
@@ -21,12 +23,22 @@ class ImageServiceAdapter implements IImageService {
   Future<Either<Failure, String>> pickFromCamera() async {
     try {
       final result = await _imageService.pickImageFromCamera();
-      return result.fold(
-        (error) => Left(CacheFailure(error.message)),
-        (file) {
-          // Converter File para base64 string aqui se necessário
-          // Por simplicidade, retornando o path como string
-          return Right(file.path);
+      return await result.fold(
+        (error) async => Left(CacheFailure(error.message)),
+        (file) async {
+          // Converter File para base64 string
+          try {
+            final bytes = await file.readAsBytes();
+            final base64String = base64Encode(bytes);
+
+            // Detectar MIME type da imagem
+            final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
+
+            // Retornar data URL completo
+            return Right('data:$mimeType;base64,$base64String');
+          } catch (e) {
+            return Left(CacheFailure('Erro ao processar imagem: $e'));
+          }
         },
       );
     } catch (e) {
@@ -38,12 +50,22 @@ class ImageServiceAdapter implements IImageService {
   Future<Either<Failure, String>> pickFromGallery() async {
     try {
       final result = await _imageService.pickImageFromGallery();
-      return result.fold(
-        (error) => Left(CacheFailure(error.message)),
-        (file) {
-          // Converter File para base64 string aqui se necessário
-          // Por simplicidade, retornando o path como string
-          return Right(file.path);
+      return await result.fold(
+        (error) async => Left(CacheFailure(error.message)),
+        (file) async {
+          // Converter File para base64 string
+          try {
+            final bytes = await file.readAsBytes();
+            final base64String = base64Encode(bytes);
+
+            // Detectar MIME type da imagem
+            final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
+
+            // Retornar data URL completo
+            return Right('data:$mimeType;base64,$base64String');
+          } catch (e) {
+            return Left(CacheFailure('Erro ao processar imagem: $e'));
+          }
         },
       );
     } catch (e) {

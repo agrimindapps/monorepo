@@ -34,7 +34,6 @@ class TasksFab extends StatelessWidget {
         title: result.title,
         description: result.description,
         plantId: result.plantId,
-        plantName: result.plantName,
         type: result.type,
         priority: result.priority,
         dueDate: result.dueDate,

@@ -263,7 +263,7 @@ class PlantFormStateManager extends ChangeNotifier {
         },
         (plants) {
           final plant = plants.where((p) => p.id == plantId).firstOrNull;
-          
+
           if (plant == null) {
             _updateState(_state.copyWith(
               isLoading: false,
@@ -271,7 +271,19 @@ class PlantFormStateManager extends ChangeNotifier {
             ));
             return;
           }
-          
+
+          // DEBUG: Log dos valores sendo carregados
+          if (kDebugMode) {
+            print('🌱 loadPlant - Carregando planta: ${plant.name}');
+            print('   🔧 plant.config existe? ${plant.config != null}');
+            print('   💧 enableWateringCare: ${plant.config?.enableWateringCare}');
+            print('   💧 wateringIntervalDays: ${plant.config?.wateringIntervalDays}');
+            print('   💧 lastWateringDate: ${plant.config?.lastWateringDate}');
+            print('   🌿 enableFertilizerCare: ${plant.config?.enableFertilizerCare}');
+            print('   🌿 fertilizingIntervalDays: ${plant.config?.fertilizingIntervalDays}');
+            print('   🌿 lastFertilizerDate: ${plant.config?.lastFertilizerDate}');
+          }
+
           _updateState(_state.copyWith(
             isLoading: false,
             originalPlant: plant,
@@ -293,7 +305,18 @@ class PlantFormStateManager extends ChangeNotifier {
             lastFertilizerDate: plant.config?.lastFertilizerDate,
             clearError: true,
           ));
-          
+
+          // DEBUG: Log do estado após atualização
+          if (kDebugMode) {
+            print('✅ loadPlant - Estado atualizado:');
+            print('   💧 _state.enableWateringCare: ${_state.enableWateringCare}');
+            print('   💧 _state.wateringIntervalDays: ${_state.wateringIntervalDays}');
+            print('   💧 _state.lastWateringDate: ${_state.lastWateringDate}');
+            print('   🌿 _state.enableFertilizerCare: ${_state.enableFertilizerCare}');
+            print('   🌿 _state.fertilizingIntervalDays: ${_state.fertilizingIntervalDays}');
+            print('   🌿 _state.lastFertilizerDate: ${_state.lastFertilizerDate}');
+          }
+
           _validateForm();
         },
       );

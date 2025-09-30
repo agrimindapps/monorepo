@@ -6,7 +6,6 @@ class TaskHistory extends Equatable {
   final String taskId;
   final String originalTaskTitle;
   final String plantId;
-  final String plantName;
   final task_entity.TaskType taskType;
   final task_entity.TaskPriority priority;
   final DateTime originalDueDate;
@@ -24,7 +23,6 @@ class TaskHistory extends Equatable {
     required this.taskId,
     required this.originalTaskTitle,
     required this.plantId,
-    required this.plantName,
     required this.taskType,
     required this.priority,
     required this.originalDueDate,
@@ -44,7 +42,6 @@ class TaskHistory extends Equatable {
     taskId,
     originalTaskTitle,
     plantId,
-    plantName,
     taskType,
     priority,
     originalDueDate,
@@ -64,7 +61,6 @@ class TaskHistory extends Equatable {
       'taskId': taskId,
       'originalTaskTitle': originalTaskTitle,
       'plantId': plantId,
-      'plantName': plantName,
       'taskType': taskType.key,
       'priority': priority.key,
       'originalDueDate': originalDueDate.millisecondsSinceEpoch,
@@ -85,7 +81,6 @@ class TaskHistory extends Equatable {
       'taskId': taskId,
       'originalTaskTitle': originalTaskTitle,
       'plantId': plantId,
-      'plantName': plantName,
       'taskType': taskType.key,
       'priority': priority.key,
       'originalDueDate': originalDueDate.millisecondsSinceEpoch,
@@ -106,7 +101,6 @@ class TaskHistory extends Equatable {
       taskId: (map['taskId'] as String?) ?? '',
       originalTaskTitle: (map['originalTaskTitle'] as String?) ?? '',
       plantId: (map['plantId'] as String?) ?? '',
-      plantName: (map['plantName'] as String?) ?? '',
       taskType: task_entity.TaskType.values.firstWhere(
         (type) => type.key == map['taskType'],
         orElse: () => task_entity.TaskType.custom,
@@ -149,7 +143,6 @@ class TaskHistory extends Equatable {
       taskId: (map['taskId'] as String?) ?? '',
       originalTaskTitle: (map['originalTaskTitle'] as String?) ?? '',
       plantId: (map['plantId'] as String?) ?? '',
-      plantName: (map['plantName'] as String?) ?? '',
       taskType: task_entity.TaskType.values.firstWhere(
         (type) => type.key == map['taskType'],
         orElse: () => task_entity.TaskType.custom,
@@ -199,7 +192,6 @@ class TaskHistory extends Equatable {
       taskId: task.id,
       originalTaskTitle: task.title,
       plantId: task.plantId,
-      plantName: task.plantName,
       taskType: task.type,
       priority: task.priority,
       originalDueDate: task.dueDate,
@@ -259,7 +251,6 @@ class TaskHistory extends Equatable {
     String? taskId,
     String? originalTaskTitle,
     String? plantId,
-    String? plantName,
     task_entity.TaskType? taskType,
     task_entity.TaskPriority? priority,
     DateTime? originalDueDate,
@@ -277,7 +268,6 @@ class TaskHistory extends Equatable {
       taskId: taskId ?? this.taskId,
       originalTaskTitle: originalTaskTitle ?? this.originalTaskTitle,
       plantId: plantId ?? this.plantId,
-      plantName: plantName ?? this.plantName,
       taskType: taskType ?? this.taskType,
       priority: priority ?? this.priority,
       originalDueDate: originalDueDate ?? this.originalDueDate,

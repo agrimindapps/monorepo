@@ -42,8 +42,7 @@ enum TaskPriority {
 class Task extends BaseSyncEntity {
   final String title;
   final String? description;
-  final String plantId;
-  final String plantName;
+  final String plantId; // Apenas o ID da planta - relação com Plant
   final TaskType type;
   final TaskStatus status;
   final TaskPriority priority;
@@ -61,7 +60,6 @@ class Task extends BaseSyncEntity {
     required this.title,
     this.description,
     required this.plantId,
-    required this.plantName,
     required this.type,
     this.status = TaskStatus.pending,
     this.priority = TaskPriority.medium,
@@ -104,7 +102,6 @@ class Task extends BaseSyncEntity {
       title: title,
       description: description,
       plantId: plantId,
-      plantName: plantName,
       type: type,
       status: status,
       priority: priority,
@@ -121,7 +118,6 @@ class Task extends BaseSyncEntity {
     String? title,
     String? description,
     String? plantId,
-    String? plantName,
     TaskType? type,
     TaskStatus? status,
     TaskPriority? priority,
@@ -145,7 +141,6 @@ class Task extends BaseSyncEntity {
       title: title ?? this.title,
       description: description ?? this.description,
       plantId: plantId ?? this.plantId,
-      plantName: plantName ?? this.plantName,
       type: type ?? this.type,
       status: status ?? this.status,
       priority: priority ?? this.priority,
@@ -167,7 +162,6 @@ class Task extends BaseSyncEntity {
     title,
     description,
     plantId,
-    plantName,
     type,
     status,
     priority,
@@ -181,8 +175,16 @@ class Task extends BaseSyncEntity {
     needsSync,
   ];
 
-  bool get isOverdue =>
-      status == TaskStatus.pending && DateTime.now().isAfter(dueDate);
+  bool get isOverdue {
+    if (status != TaskStatus.pending) return false;
+
+    // Comparar apenas a data (sem hora) para evitar falsos positivos
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final taskDate = DateTime(dueDate.year, dueDate.month, dueDate.day);
+
+    return taskDate.isBefore(today); // Atrasada se a data é anterior a hoje
+  }
 
   bool get isDueToday {
     final today = DateTime.now();
@@ -202,7 +204,7 @@ class Task extends BaseSyncEntity {
 
   @override
   String toString() {
-    return 'Task{id: $id, title: $title, plantName: $plantName, type: ${type.displayName}, status: ${status.displayName}, dueDate: $dueDate}';
+    return 'Task{id: $id, title: $title, plantId: $plantId, type: ${type.displayName}, status: ${status.displayName}, dueDate: $dueDate}';
   }
 
   // Implementação dos métodos abstratos do BaseSyncEntity
@@ -213,7 +215,6 @@ class Task extends BaseSyncEntity {
       'title': title,
       'description': description,
       'plant_id': plantId,
-      'plant_name': plantName,
       'type': type.key,
       'status': status.key,
       'priority': priority.key,
@@ -265,7 +266,7 @@ class Task extends BaseSyncEntity {
   }
 
   /// Cria uma Task entity a partir de um TarefaModel
-  static Task fromModel(dynamic tarefaModel, {String? plantName}) {
+  static Task fromModel(dynamic tarefaModel) {
     // Mapeia tipos de cuidado para TaskType
     TaskType mapCareType(String tipoCuidado) {
       switch (tipoCuidado) {
@@ -321,7 +322,6 @@ class Task extends BaseSyncEntity {
       title: taskType.displayName,
       description: _getTaskDescription(tarefaModel.tipoCuidado as String),
       plantId: tarefaModel.plantaId as String,
-      plantName: plantName ?? 'Planta',
       type: taskType,
       status:
           ((tarefaModel.concluida as bool?) ?? false)
@@ -362,7 +362,6 @@ class Task extends BaseSyncEntity {
       'title': title,
       'description': description,
       'plantId': plantId,
-      'plantName': plantName,
       'type': type.key,
       'status': status.key,
       'priority': priority.key,
@@ -390,7 +389,6 @@ class Task extends BaseSyncEntity {
       title: json['title'] as String,
       description: json['description'] as String?,
       plantId: json['plantId'] as String,
-      plantName: json['plantName'] as String,
       type: TaskType.values.firstWhere(
         (e) => e.key == json['type'],
         orElse: () => TaskType.custom,
@@ -444,7 +442,6 @@ class Task extends BaseSyncEntity {
       title: map['title'] as String,
       description: map['description'] as String?,
       plantId: map['plant_id'] as String,
-      plantName: map['plant_name'] as String,
       type: TaskType.values.firstWhere(
         (e) => e.key == map['type'],
         orElse: () => TaskType.custom,

@@ -46,6 +46,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: any
+  injectable_generator: any
 
 # The following section is specific to Flutter packages.
 flutter:

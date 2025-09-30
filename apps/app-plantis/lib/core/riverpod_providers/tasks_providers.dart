@@ -850,7 +850,8 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
       tasks =
           tasks.where((task) {
             return task.title.toLowerCase().contains(searchQuery) ||
-                task.plantName.toLowerCase().contains(searchQuery) ||
+                // TODO: Search by plant name requires fetching plant data
+                // task.plantName.toLowerCase().contains(searchQuery) ||
                 (task.description?.toLowerCase().contains(searchQuery) ??
                     false);
           }).toList();

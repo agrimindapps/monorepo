@@ -137,7 +137,8 @@ class TaskListItem extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            '${task.plantName} • ${task.type.displayName}',
+                            // TODO: Resolve plant name from plantId - this file appears unused
+                            '${task.type.displayName}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withValues(
                                 alpha: 0.7,

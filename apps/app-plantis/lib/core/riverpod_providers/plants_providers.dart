@@ -376,7 +376,30 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       _realtimeDataSubscription?.cancel();
     });
 
-    // Start with empty state
+    // BUGFIX: Carrega dados iniciais se usuário já está autenticado
+    // Isso resolve o problema de plantas não aparecerem ao abrir a página
+    if (_authStateNotifier.isInitialized &&
+        _authStateNotifier.currentUser != null) {
+      debugPrint('🌱 PlantsNotifier: Usuário já autenticado, carregando plantas...');
+      // Load initial data immediately
+      final result = await _getPlantsUseCase.call(NoParams());
+      return result.fold(
+        (failure) {
+          debugPrint('❌ Erro ao carregar plantas iniciais: ${failure.message}');
+          return PlantsState(error: failure.message);
+        },
+        (plants) {
+          debugPrint('✅ ${plants.length} plantas carregadas inicialmente');
+          final sortedPlants = _sortPlants(plants, SortBy.newest);
+          return PlantsState(
+            allPlants: sortedPlants,
+            filteredPlants: sortedPlants,
+          );
+        },
+      );
+    }
+
+    // Start with empty state if not authenticated
     return const PlantsState();
   }
 

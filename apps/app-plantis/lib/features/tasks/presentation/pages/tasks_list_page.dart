@@ -278,86 +278,139 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   Widget _buildFiltersContent(TasksState tasksState, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(8),
-      child: Row(
-        children: [
-          FilterChip(
-            label: const Text('Hoje'),
-            selected: tasksState.currentFilter == TasksFilterType.today,
-            onSelected: (selected) {
-              ref
-                  .read(tasksProvider.notifier)
-                  .filterTasks(TasksFilterType.today);
-            },
-            selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
-            checkmarkColor: PlantisColors.primary,
-            backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-            side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            labelStyle: TextStyle(
-              color:
-                  tasksState.currentFilter == TasksFilterType.today
-                      ? PlantisColors.primary
-                      : Colors.grey[700],
-              fontSize: 16,
-              fontWeight:
-                  tasksState.currentFilter == TasksFilterType.today
-                      ? FontWeight.w600
-                      : FontWeight.w500,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            FilterChip(
+              label: const Text('Hoje'),
+              selected: tasksState.currentFilter == TasksFilterType.today,
+              onSelected: (selected) {
+                ref
+                    .read(tasksProvider.notifier)
+                    .filterTasks(TasksFilterType.today);
+              },
+              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+              checkmarkColor: PlantisColors.primary,
+              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+              side: BorderSide.none,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              labelStyle: TextStyle(
+                color:
+                    tasksState.currentFilter == TasksFilterType.today
+                        ? PlantisColors.primary
+                        : Colors.grey[700],
+                fontSize: 16,
+                fontWeight:
+                    tasksState.currentFilter == TasksFilterType.today
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          FilterChip(
-            label: const Text('Próxima'),
-            selected: tasksState.currentFilter == TasksFilterType.upcoming,
-            onSelected: (selected) {
-              ref
-                  .read(tasksProvider.notifier)
-                  .filterTasks(TasksFilterType.upcoming);
-            },
-            selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
-            checkmarkColor: PlantisColors.primary,
-            backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-            side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            labelStyle: TextStyle(
-              color:
-                  tasksState.currentFilter == TasksFilterType.upcoming
-                      ? PlantisColors.primary
-                      : Colors.grey[700],
-              fontSize: 16,
-              fontWeight:
-                  tasksState.currentFilter == TasksFilterType.upcoming
-                      ? FontWeight.w600
-                      : FontWeight.w500,
+            const SizedBox(width: 12),
+            // BUGFIX: Adicionar filtro de tarefas atrasadas
+            FilterChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Atrasadas'),
+                  if (tasksState.overdueTasks > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${tasksState.overdueTasks}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              selected: tasksState.currentFilter == TasksFilterType.overdue,
+              onSelected: (selected) {
+                ref
+                    .read(tasksProvider.notifier)
+                    .filterTasks(TasksFilterType.overdue);
+              },
+              selectedColor: Colors.red.withValues(alpha: 0.2),
+              checkmarkColor: Colors.red,
+              backgroundColor: Colors.red.withValues(alpha: 0.1),
+              side: BorderSide.none,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              labelStyle: TextStyle(
+                color:
+                    tasksState.currentFilter == TasksFilterType.overdue
+                        ? Colors.red[700]
+                        : Colors.grey[700],
+                fontSize: 16,
+                fontWeight:
+                    tasksState.currentFilter == TasksFilterType.overdue
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          FilterChip(
-            label: const Text('Futuras'),
-            selected: tasksState.currentFilter == TasksFilterType.allFuture,
-            onSelected: (selected) {
-              ref
-                  .read(tasksProvider.notifier)
-                  .filterTasks(TasksFilterType.allFuture);
-            },
-            selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
-            checkmarkColor: PlantisColors.primary,
-            backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
-            side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            labelStyle: TextStyle(
-              color:
-                  tasksState.currentFilter == TasksFilterType.allFuture
-                      ? PlantisColors.primary
-                      : Colors.grey[700],
-              fontSize: 16,
-              fontWeight:
-                  tasksState.currentFilter == TasksFilterType.allFuture
-                      ? FontWeight.w600
-                      : FontWeight.w500,
+            const SizedBox(width: 12),
+            FilterChip(
+              label: const Text('Próxima'),
+              selected: tasksState.currentFilter == TasksFilterType.upcoming,
+              onSelected: (selected) {
+                ref
+                    .read(tasksProvider.notifier)
+                    .filterTasks(TasksFilterType.upcoming);
+              },
+              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+              checkmarkColor: PlantisColors.primary,
+              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+              side: BorderSide.none,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              labelStyle: TextStyle(
+                color:
+                    tasksState.currentFilter == TasksFilterType.upcoming
+                        ? PlantisColors.primary
+                        : Colors.grey[700],
+                fontSize: 16,
+                fontWeight:
+                    tasksState.currentFilter == TasksFilterType.upcoming
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            FilterChip(
+              label: const Text('Futuras'),
+              selected: tasksState.currentFilter == TasksFilterType.allFuture,
+              onSelected: (selected) {
+                ref
+                    .read(tasksProvider.notifier)
+                    .filterTasks(TasksFilterType.allFuture);
+              },
+              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+              checkmarkColor: PlantisColors.primary,
+              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+              side: BorderSide.none,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              labelStyle: TextStyle(
+                color:
+                    tasksState.currentFilter == TasksFilterType.allFuture
+                        ? PlantisColors.primary
+                        : Colors.grey[700],
+                fontSize: 16,
+                fontWeight:
+                    tasksState.currentFilter == TasksFilterType.allFuture
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

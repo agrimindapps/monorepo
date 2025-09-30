@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/data/models/comentario_model.dart';
@@ -354,19 +355,67 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
 
-    final success =
-        await ref.read(commentsProvider.notifier).addComment(widget.plant.id, text);
+    // BUGFIX: Adicionar logs detalhados para debug
+    if (kDebugMode) {
+      print('🔍 Tentando adicionar comentário:');
+      print('   Plant ID: ${widget.plant.id}');
+      print('   Plant Name: ${widget.plant.displayName}');
+      print('   Content Length: ${text.length}');
+      print('   Content: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
+    }
 
-    if (success) {
-      _commentController.clear();
+    try {
+      final success =
+          await ref.read(commentsProvider.notifier).addComment(widget.plant.id, text);
 
-      // Mostrar confirmação
+      if (kDebugMode) {
+        print('   Result: ${success ? "✅ Sucesso" : "❌ Falhou"}');
+      }
+
+      if (success) {
+        _commentController.clear();
+
+        // Mostrar confirmação
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Observação adicionada com sucesso'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // BUGFIX: Mostrar mensagem de erro específica se falhou
+        if (mounted) {
+          final commentsState = ref.read(commentsProvider).valueOrNull;
+          final errorMsg = commentsState?.errorMessage ?? 'Erro desconhecido ao adicionar observação';
+
+          if (kDebugMode) {
+            print('   Error Message: $errorMsg');
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro: $errorMsg'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    } catch (e, stack) {
+      if (kDebugMode) {
+        print('❌ Exception ao adicionar comentário: $e');
+        print('   Stack: $stack');
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Observação adicionada com sucesso'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text('Erro inesperado: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }

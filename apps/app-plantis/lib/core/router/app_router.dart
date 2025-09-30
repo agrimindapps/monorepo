@@ -11,6 +11,7 @@ import '../../features/device_management/presentation/providers/device_managemen
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
+import '../../features/legal/presentation/pages/promotional_page_new.dart';
 import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/license/pages/license_status_page.dart';
 import '../../features/plants/presentation/pages/plant_details_page.dart';
@@ -56,7 +57,7 @@ class AppRouter {
   static GoRouter router(WidgetRef ref) {
     final authState = ref.watch(authProvider);
 
-    // Web mostra promotional first, mobile vai direto para login
+    // BUGFIX: Web deve sempre iniciar em promotional, mobile vai direto para login
     const initialLocation = kIsWeb ? promotional : login;
 
     return GoRouter(
@@ -103,37 +104,37 @@ class AppRouter {
           return null;
         }
 
+        // BUGFIX: Na web, permitir que promotional seja acessado mesmo autenticado
+        // Isso permite visualizar a landing page antes de entrar no app
+        if (kIsWeb && isOnPromotional) {
+          return null; // Não redireciona, permite ficar na promotional
+        }
+
         // Se realmente autenticado e não está no app, redireciona para plantas
-        // Mas permite que usuários anônimos vejam a página promocional na web
         if (isReallyAuthenticated &&
             (isLoggingIn || isRegistering || isOnLanding)) {
           return plants;
         }
 
-        // Se realmente autenticado e está na promotional, vai para plantas
-        if (isReallyAuthenticated && isOnPromotional) {
-          return plants;
-        }
-
         // Se não realmente autenticado e tentando acessar rota protegida
         if (!isReallyAuthenticated && isAccessingProtectedRoute) {
-          return login;
+          // BUGFIX: Na web, volta para promotional. No mobile, vai para login
+          return kIsWeb ? promotional : login;
         }
 
-        // Se não realmente autenticado e tentando acessar outras rotas não protegidas, vai para landing
-        // Mas permite acesso direto à página promocional na web
-        if (!isReallyAuthenticated &&
+        // Mobile: Se não autenticado e não está em página pública, vai para landing
+        if (!kIsWeb &&
+            !isReallyAuthenticated &&
             !isLoggingIn &&
             !isRegistering &&
             !isOnLanding &&
-            !isOnPromotional &&
-            !kIsWeb) {
+            !isOnPromotional) {
           return landing;
         }
 
-        // Na web, usuários não autenticados podem acessar promotional ou landing
-        if (!isReallyAuthenticated &&
-            kIsWeb &&
+        // Web: Se não autenticado e não está em página pública, vai para promotional
+        if (kIsWeb &&
+            !isReallyAuthenticated &&
             !isLoggingIn &&
             !isRegistering &&
             !isOnLanding &&
@@ -155,14 +156,14 @@ class AppRouter {
         GoRoute(
           path: home,
           name: 'home',
-          builder: (context, state) => const PromotionalPage(),
+          builder: (context, state) => const PromotionalPageNew(),
         ),
 
         // Promotional Page Route (outside of shell for web landing)
         GoRoute(
           path: promotional,
           name: 'promotional',
-          builder: (context, state) => const PromotionalPage(),
+          builder: (context, state) => const PromotionalPageNew(),
         ),
 
         // Auth Routes - Unified Auth Page

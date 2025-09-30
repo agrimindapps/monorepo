@@ -89,11 +89,19 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     String content,
   ) async {
     try {
+      // BUGFIX: Adicionar logs detalhados para debug
+      print('📝 PlantCommentsRepository.addComment:');
+      print('   Plant ID: $plantId');
+      print('   Content: $content');
+
       // Create new comment with plant association
       final comment = ComentarioModel.create(
         conteudo: content,
         plantId: plantId,
       );
+
+      print('   Created Comment ID: ${comment.id}');
+      print('   Created Comment Date: ${comment.dataCriacao}');
 
       final result = await UnifiedSyncManager.instance.create<ComentarioModel>(
         _appName,
@@ -101,21 +109,36 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
       );
 
       return result.fold((failure) async {
+        print('   ❌ Create failed: ${failure.message}');
+
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
+          print('   🔄 Sync not initialized, initializing...');
           await _ensureSyncInitialized();
           // Try again after initialization
+          print('   🔄 Retrying create...');
           final retryResult = await UnifiedSyncManager.instance
               .create<ComentarioModel>(_appName, comment);
           return retryResult.fold(
-            (retryFailure) => Left(retryFailure),
-            (commentId) => Right(comment),
+            (retryFailure) {
+              print('   ❌ Retry failed: ${retryFailure.message}');
+              return Left(retryFailure);
+            },
+            (commentId) {
+              print('   ✅ Retry succeeded, comment ID: $commentId');
+              return Right(comment);
+            },
           );
         }
         return Left(failure);
-      }, (commentId) => Right(comment));
-    } catch (e) {
+      }, (commentId) {
+        print('   ✅ Comment created successfully, ID: $commentId');
+        return Right(comment);
+      });
+    } catch (e, stack) {
+      print('   ❌ Exception in addComment: $e');
+      print('   Stack: $stack');
       return Left(CacheFailure('Failed to add comment: $e'));
     }
   }

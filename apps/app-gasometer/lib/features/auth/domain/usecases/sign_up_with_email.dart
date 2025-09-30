@@ -30,7 +30,7 @@ class SignUpWithEmail implements UseCase<UserEntity, SignUpWithEmailParams> {
   }
 }
 
-class SignUpWithEmailParams extends UseCaseParams {
+class SignUpWithEmailParams {
 
   const SignUpWithEmailParams({
     required this.email,
@@ -40,7 +40,4 @@ class SignUpWithEmailParams extends UseCaseParams {
   final String email;
   final String password;
   final String? displayName;
-
-  @override
-  List<Object?> get props => [email, password, displayName];
 }

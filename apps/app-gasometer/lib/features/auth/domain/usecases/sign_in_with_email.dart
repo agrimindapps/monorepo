@@ -29,7 +29,7 @@ class SignInWithEmail implements UseCase<UserEntity, SignInWithEmailParams> {
   }
 }
 
-class SignInWithEmailParams extends UseCaseParams {
+class SignInWithEmailParams {
 
   const SignInWithEmailParams({
     required this.email,
@@ -37,7 +37,4 @@ class SignInWithEmailParams extends UseCaseParams {
   });
   final String email;
   final String password;
-
-  @override
-  List<Object> get props => [email, password];
 }

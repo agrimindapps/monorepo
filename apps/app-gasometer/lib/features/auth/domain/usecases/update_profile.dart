@@ -17,7 +17,7 @@ class UpdateProfile implements UseCase<UserEntity, UpdateProfileParams> {
   }
 }
 
-class UpdateProfileParams extends UseCaseParams {
+class UpdateProfileParams {
 
   const UpdateProfileParams({
     this.displayName,
@@ -25,7 +25,4 @@ class UpdateProfileParams extends UseCaseParams {
   });
   final String? displayName;
   final String? photoUrl;
-
-  @override
-  List<Object?> get props => [displayName, photoUrl];
 }

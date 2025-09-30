@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Failure, NoParamsUseCase;
+import 'package:core/core.dart';
 
 import '../repositories/auth_repository.dart';
 

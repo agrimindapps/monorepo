@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Failure, AuthenticationFailure, ServerFailure, CacheFailure, NetworkFailure, ValidationFailure, UnexpectedFailure, NetworkException;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart' as local_exceptions;
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
@@ -39,7 +38,7 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       
       return const Right(null);
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       // Try local cache on server error
       try {
         final cachedUser = await localDataSource.getCachedUser();
@@ -47,9 +46,9 @@ class AuthRepositoryImpl implements AuthRepository {
           return Right(cachedUser);
         }
       } catch (_) {}
-      
+
       return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -68,10 +67,10 @@ class AuthRepositoryImpl implements AuthRepository {
         
         // Cache the user locally
         localDataSource.cacheUser(userModel).catchError((_) {});
-        
+
         return Right(userModel);
       }).handleError((Object error) {
-        if (error is ServerException) {
+        if (error is local_exceptions.ServerException) {
           return Left(ServerFailure(error.message));
         }
         return Left(UnexpectedFailure(error.toString()));
@@ -91,14 +90,12 @@ class AuthRepositoryImpl implements AuthRepository {
       
       // Cache user locally
       await localDataSource.cacheUser(userModel);
-      
+
       return Right(userModel);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
     }
@@ -110,11 +107,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await remoteDataSource.signInAnonymously();
       
       // Don't cache anonymous users
-      
+
       return Right(userModel);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -136,11 +133,11 @@ class AuthRepositoryImpl implements AuthRepository {
       
       // Cache user locally
       await localDataSource.cacheUser(userModel);
-      
+
       return Right(userModel);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -157,11 +154,11 @@ class AuthRepositoryImpl implements AuthRepository {
       
       // Update cached user
       await localDataSource.cacheUser(userModel);
-      
+
       return Right(userModel);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -173,9 +170,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.updateEmail(newEmail);
       return const Right(unit);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -187,9 +184,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.updatePassword(newPassword);
       return const Right(unit);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -201,9 +198,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.sendEmailVerification();
       return const Right(unit);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -215,9 +212,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.sendPasswordResetEmail(email);
       return const Right(unit);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -232,7 +229,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // This would need to be implemented in the remote data source
       // For now, return not implemented
-      return const Left(UnexpectedFailure('Password reset confirmation not implemented'));
+      return Left(UnexpectedFailure('Password reset confirmation not implemented'));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
     }
@@ -245,14 +242,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       final userModel = await remoteDataSource.linkAnonymousWithEmail(email, password);
-      
+
       // Cache the converted user
       await localDataSource.cacheUser(userModel);
-      
+
       return Right(userModel);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -262,13 +259,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> signInWithGoogle() async {
     // Not implemented without Google Sign-In package
-    return const Left(UnexpectedFailure('Google Sign-In not implemented'));
+    return Left(UnexpectedFailure('Google Sign-In not implemented'));
   }
 
   @override
   Future<Either<Failure, UserEntity>> linkAnonymousWithGoogle() async {
     // Not implemented without Google Sign-In package
-    return const Left(UnexpectedFailure('Google Sign-In linking not implemented'));
+    return Left(UnexpectedFailure('Google Sign-In linking not implemented'));
   }
 
   @override
@@ -279,9 +276,9 @@ class AuthRepositoryImpl implements AuthRepository {
       // SECURITY + UX FIX: Clear password but preserve email for better UX
       await localDataSource.clearCachedCredentialsPreservingEmail();
       return const Right(unit);
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -293,19 +290,19 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // 1. Delete account from remote (Firebase)
       await remoteDataSource.deleteAccount();
-      
+
       // 2. Clear cached user data
       await localDataSource.clearCachedUser();
-      
+
       // 3. Clear all local gasometer data (vehicles, fuel records, etc.)
       await _clearGasometerLocalData();
-      
+
       return const Right(unit);
-    } on AuthenticationException catch (e) {
+    } on local_exceptions.AuthenticationException catch (e) {
       return Left(AuthenticationFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -350,27 +347,27 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Either<Failure, Unit> validateEmail(String email) {
     if (email.isEmpty) {
-      return const Left(ValidationFailure('Email não pode estar vazio'));
+      return Left(ValidationFailure('Email não pode estar vazio'));
     }
-    
+
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
-      return const Left(ValidationFailure('Email inválido'));
+      return Left(ValidationFailure('Email inválido'));
     }
-    
+
     return const Right(unit);
   }
 
   @override
   Either<Failure, Unit> validatePassword(String password) {
     if (password.isEmpty) {
-      return const Left(ValidationFailure('Senha não pode estar vazia'));
+      return Left(ValidationFailure('Senha não pode estar vazia'));
     }
-    
+
     if (password.length < 6) {
-      return const Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
+      return Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
     }
-    
+
     return const Right(unit);
   }
 }

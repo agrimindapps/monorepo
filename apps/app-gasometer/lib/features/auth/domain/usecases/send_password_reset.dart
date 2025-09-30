@@ -19,11 +19,8 @@ class SendPasswordReset implements UseCase<Unit, SendPasswordResetParams> {
   }
 }
 
-class SendPasswordResetParams extends UseCaseParams {
+class SendPasswordResetParams {
 
   const SendPasswordResetParams({required this.email});
   final String email;
-
-  @override
-  List<Object> get props => [email];
 }

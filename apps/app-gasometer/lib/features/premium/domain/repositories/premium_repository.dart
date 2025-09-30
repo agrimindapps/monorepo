@@ -10,68 +10,68 @@ abstract class PremiumRepository {
   Stream<PremiumStatus> get premiumStatus;
 
   /// Verifica se o usuário tem premium ativo
-  Future<Either<core.Failure, bool>> hasActivePremium();
+  Future<core.Either<core.Failure, bool>> hasActivePremium();
 
   /// Obtém o status premium completo
-  Future<Either<core.Failure, PremiumStatus>> getPremiumStatus();
+  Future<core.Either<core.Failure, PremiumStatus>> getPremiumStatus();
 
   /// Obtém os produtos disponíveis para compra
-  Future<Either<core.Failure, List<core.ProductInfo>>> getAvailableProducts();
+  Future<core.Either<core.Failure, List<core.ProductInfo>>> getAvailableProducts();
 
   /// Inicia o processo de compra
-  Future<Either<core.Failure, core.SubscriptionEntity>> purchasePremium({
+  Future<core.Either<core.Failure, core.SubscriptionEntity>> purchasePremium({
     required String productId,
   });
 
   /// Restaura compras anteriores
-  Future<Either<core.Failure, bool>> restorePurchases();
+  Future<core.Either<core.Failure, bool>> restorePurchases();
 
   /// Inicia trial gratuito (se elegível)
-  Future<Either<core.Failure, bool>> startFreeTrial();
+  Future<core.Either<core.Failure, bool>> startFreeTrial();
 
   /// Verifica elegibilidade para trial
-  Future<Either<core.Failure, bool>> isEligibleForTrial();
+  Future<core.Either<core.Failure, bool>> isEligibleForTrial();
 
   /// Define usuário no sistema de assinatura
-  Future<Either<core.Failure, void>> setUser({
+  Future<core.Either<core.Failure, void>> setUser({
     required String userId,
     Map<String, String>? attributes,
   });
 
   /// Obtém URL para gerenciar assinatura
-  Future<Either<core.Failure, String?>> getManagementUrl();
+  Future<core.Either<core.Failure, String?>> getManagementUrl();
 
   /// Verifica se pode usar uma feature específica
-  Future<Either<core.Failure, bool>> canUseFeature(String featureId);
+  Future<core.Either<core.Failure, bool>> canUseFeature(String featureId);
 
   /// Verifica limites de uso
-  Future<Either<core.Failure, bool>> canAddVehicle(int currentCount);
-  Future<Either<core.Failure, bool>> canAddFuelRecord(int currentCount);
-  Future<Either<core.Failure, bool>> canAddMaintenanceRecord(int currentCount);
+  Future<core.Either<core.Failure, bool>> canAddVehicle(int currentCount);
+  Future<core.Either<core.Failure, bool>> canAddFuelRecord(int currentCount);
+  Future<core.Either<core.Failure, bool>> canAddMaintenanceRecord(int currentCount);
 
   /// Métodos para desenvolvimento
 
   /// Gera licença local para desenvolvimento
-  Future<Either<core.Failure, void>> generateLocalLicense({
+  Future<core.Either<core.Failure, void>> generateLocalLicense({
     int days = 30,
   });
 
   /// Revoga licença local
-  Future<Either<core.Failure, void>> revokeLocalLicense();
+  Future<core.Either<core.Failure, void>> revokeLocalLicense();
 
   /// Verifica se tem licença local ativa
-  Future<Either<core.Failure, bool>> hasActiveLocalLicense();
+  Future<core.Either<core.Failure, bool>> hasActiveLocalLicense();
 
   /// Métodos de sincronização avançada
 
   /// Força sincronização imediata do status premium
-  Future<Either<core.Failure, void>> forceSyncPremiumStatus();
+  Future<core.Either<core.Failure, void>> forceSyncPremiumStatus();
 
   /// Stream de eventos de sincronização
   Stream<PremiumSyncEvent> get syncEvents;
 
   /// Processa webhook do RevenueCat
-  Future<Either<core.Failure, void>> processWebhook({
+  Future<core.Either<core.Failure, void>> processWebhook({
     required Map<String, dynamic> payload,
     String? signature,
     String? secret,

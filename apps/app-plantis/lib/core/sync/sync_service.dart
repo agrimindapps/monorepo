@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../data/models/base_sync_model.dart';
 import './sync_operations.dart';
@@ -8,7 +7,7 @@ import 'interfaces/i_conflict_resolver.dart';
 import 'interfaces/i_sync_repository.dart';
 
 /// Service responsible for synchronization operations
-@singleton
+/// Note: This is a generic service, register specific implementations manually
 class SyncService<T extends BaseSyncModel> {
   final ISyncRepository<T> _repository;
   final IConflictResolver<T> _conflictResolver;

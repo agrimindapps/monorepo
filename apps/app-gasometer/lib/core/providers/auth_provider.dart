@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Failure, AuthenticationFailure, NetworkFailure, ServerFailure, ValidationFailure;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +16,6 @@ import '../../features/auth/domain/usecases/sign_up_with_email.dart';
 import '../../features/auth/domain/usecases/update_profile.dart';
 import '../../features/auth/domain/usecases/watch_auth_state.dart';
 import '../di/injection_container_modular.dart';
-import '../error/failures.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/platform_service.dart';

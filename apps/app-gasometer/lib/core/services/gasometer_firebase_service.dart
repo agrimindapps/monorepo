@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Project imports:
-import 'analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 
 /// Service para integração Firebase específica do Gasometer com Analytics
 class GasometerFirebaseService {

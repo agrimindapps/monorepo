@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import '../../services/analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 import '../entities/log_entry.dart';
 import '../repositories/log_repository.dart';
 
@@ -15,7 +15,7 @@ class LoggingService {
     this._analyticsService,
   );
   final LogRepository _logRepository;
-  final AnalyticsService _analyticsService;
+  final GasometerAnalyticsService _analyticsService;
 
   String? _currentUserId;
   final Map<String, DateTime> _operationStartTimes = {};

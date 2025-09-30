@@ -51,6 +51,18 @@ class CoreModule implements DIModule {
         () => core.FirebaseCrashlyticsService(),
       );
 
+      // Register EnhancedAnalyticsService with app-specific configuration
+      getIt.registerLazySingleton<core.EnhancedAnalyticsService>(
+        () => core.EnhancedAnalyticsService(
+          analytics: getIt<core.IAnalyticsRepository>(),
+          crashlytics: getIt<core.ICrashlyticsRepository>(),
+          config: core.AnalyticsConfig.forApp(
+            appId: 'gasometer',
+            version: '1.0.0', // TODO: Get from package_info_plus
+          ),
+        ),
+      );
+
       debugPrint('✅ Core package repositories registered successfully');
     } catch (e) {
       debugPrint('⚠️ Warning: Could not register core repositories: $e');

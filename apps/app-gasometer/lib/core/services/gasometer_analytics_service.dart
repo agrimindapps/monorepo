@@ -1,85 +1,32 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
-/// Serviço centralizado para Analytics e Crashlytics do Gasometer
+/// Gasometer-specific Analytics Service built on top of EnhancedAnalyticsService
+///
+/// Provides:
+/// - All core analytics functionality via EnhancedAnalyticsService
+/// - Gasometer-specific business events (fuel, maintenance, expenses)
+/// - LGPD compliance analytics (data export tracking)
+/// - Consistent error handling and environment awareness
 @singleton
-class AnalyticsService {
-  AnalyticsService();
+class GasometerAnalyticsService {
+  GasometerAnalyticsService(this._enhanced);
 
-  late final FirebaseAnalytics _analytics;
-  late final FirebaseCrashlytics _crashlytics;
+  final EnhancedAnalyticsService _enhanced;
 
-  /// Verifica se analytics está habilitado (desabilitado em debug)
-  bool get _isAnalyticsEnabled => !kDebugMode;
+  // ===== DELEGATE CORE ANALYTICS METHODS =====
 
-  /// Inicializa o serviço
-  void initialize() {
-    _analytics = FirebaseAnalytics.instance;
-    _crashlytics = FirebaseCrashlytics.instance;
-    
-    // Configure analytics collection
-    _analytics.setAnalyticsCollectionEnabled(_isAnalyticsEnabled);
-    
-    if (kDebugMode) {
-      debugPrint('📊 Analytics Service initialized (Debug Mode - Analytics disabled)');
-    } else {
-      debugPrint('📊 Analytics Service initialized (Production Mode - Analytics enabled)');
-    }
-  }
-
-  // ===== ANALYTICS METHODS =====
-
-  /// Log de visualização de tela
-  Future<void> logScreenView(String screenName) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('📊 [DEV] Screen view: $screenName');
-      return;
-    }
-
-    try {
-      await _analytics.logScreenView(
-        screenName: screenName,
-      );
-      debugPrint('📊 Screen view logged: $screenName');
-    } catch (e, stackTrace) {
-      await _crashlytics.recordError(e, stackTrace);
-    }
-  }
-
-  /// Log de evento customizado
+  /// Logs a custom event
   Future<void> logEvent(String eventName, Map<String, Object>? parameters) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('📊 [DEV] Event: $eventName ${parameters ?? '{}'}');
-      return;
-    }
-
-    try {
-      // Filter out null values from parameters
-      Map<String, Object>? cleanParameters;
-      if (parameters != null) {
-        cleanParameters = Map.fromEntries(
-          parameters.entries.where((entry) => entry.value != null)
-        );
-        // If all values were null, set to null
-        if (cleanParameters.isEmpty) {
-          cleanParameters = null;
-        }
-      }
-
-      await _analytics.logEvent(
-        name: eventName,
-        parameters: cleanParameters,
-      );
-      debugPrint('📊 Event logged: $eventName');
-    } catch (e) {
-      debugPrint('Failed to report to Analytics: $e');
-      // Don't recursively call crashlytics if analytics fails
-    }
+    await _enhanced.logEvent(eventName, parameters?.cast<String, dynamic>());
   }
 
-  /// Log de ação do usuário
+  /// Logs screen view
+  Future<void> logScreenView(String screenName) async {
+    await _enhanced.setCurrentScreen(screenName);
+  }
+
+  /// Logs user action
   Future<void> logUserAction(String action, {Map<String, Object>? parameters}) async {
     await logEvent('user_action', {
       'action': action,
@@ -90,19 +37,11 @@ class AnalyticsService {
   // ===== AUTH EVENTS =====
 
   Future<void> logLogin(String method) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('📊 [DEV] Login: $method');
-      return;
-    }
-    await _analytics.logLogin(loginMethod: method);
+    await _enhanced.logAuthEvent('login', parameters: {'method': method});
   }
 
   Future<void> logSignUp(String method) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('📊 [DEV] SignUp: $method');
-      return;
-    }
-    await _analytics.logSignUp(signUpMethod: method);
+    await _enhanced.logAuthEvent('signup', parameters: {'method': method});
   }
 
   Future<void> logAnonymousSignIn() async {
@@ -112,9 +51,7 @@ class AnalyticsService {
   }
 
   Future<void> logLogout() async {
-    await logEvent('logout', {
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    await _enhanced.logAuthEvent('logout');
   }
 
   // ===== APP LIFECYCLE EVENTS =====
@@ -136,12 +73,15 @@ class AnalyticsService {
     required double totalCost,
     required bool fullTank,
   }) async {
-    await logEvent('fuel_refill', {
-      'fuel_type': fuelType,
-      'liters': liters,
-      'total_cost': totalCost,
-      'full_tank': fullTank,
-    });
+    await _enhanced.logAppSpecificEvent(
+      GasometerEvent.fuelRecorded,
+      additionalParameters: {
+        'fuel_type': fuelType,
+        'liters': liters,
+        'total_cost': totalCost,
+        'full_tank': fullTank,
+      },
+    );
   }
 
   /// Eventos de manutenção
@@ -150,11 +90,14 @@ class AnalyticsService {
     required double cost,
     required int odometer,
   }) async {
-    await logEvent('maintenance_logged', {
-      'maintenance_type': maintenanceType,
-      'cost': cost,
-      'odometer': odometer,
-    });
+    await _enhanced.logAppSpecificEvent(
+      GasometerEvent.maintenanceScheduled,
+      additionalParameters: {
+        'maintenance_type': maintenanceType,
+        'cost': cost,
+        'odometer': odometer,
+      },
+    );
   }
 
   /// Eventos de despesas
@@ -162,24 +105,33 @@ class AnalyticsService {
     required String expenseType,
     required double amount,
   }) async {
-    await logEvent('expense_logged', {
-      'expense_type': expenseType,
-      'amount': amount,
-    });
+    await _enhanced.logAppSpecificEvent(
+      GasometerEvent.expenseAdded,
+      additionalParameters: {
+        'expense_type': expenseType,
+        'amount': amount,
+      },
+    );
   }
 
   /// Eventos de veículo
   Future<void> logVehicleCreated(String vehicleType) async {
-    await logEvent('vehicle_created', {
-      'vehicle_type': vehicleType,
-    });
+    await _enhanced.logAppSpecificEvent(
+      GasometerEvent.vehicleCreated,
+      additionalParameters: {
+        'vehicle_type': vehicleType,
+      },
+    );
   }
 
   /// Eventos de relatórios
   Future<void> logReportViewed(String reportType) async {
-    await logEvent('report_viewed', {
-      'report_type': reportType,
-    });
+    await _enhanced.logAppSpecificEvent(
+      GasometerEvent.reportGenerated,
+      additionalParameters: {
+        'report_type': reportType,
+      },
+    );
   }
 
   /// Eventos de features premium
@@ -199,27 +151,14 @@ class AnalyticsService {
   // ===== USER PROPERTIES =====
 
   Future<void> setUserId(String userId) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('👤 [DEV] User ID configurado');
-      return;
-    }
-
-    await _analytics.setUserId(id: userId);
-    await _crashlytics.setUserIdentifier(userId);
+    await _enhanced.setUser(userId: userId);
   }
 
   Future<void> setUserProperties(Map<String, String> properties) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('👤 [DEV] User properties configuradas');
-      return;
-    }
-
-    for (final entry in properties.entries) {
-      await _analytics.setUserProperty(
-        name: entry.key,
-        value: entry.value,
-      );
-    }
+    await _enhanced.setUser(
+      userId: '', // Will be set by auth service
+      properties: properties,
+    );
   }
 
   // ===== LGPD DATA EXPORT ANALYTICS =====
@@ -317,61 +256,42 @@ class AnalyticsService {
     String? reason,
     Map<String, Object>? customKeys,
   }) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('🔥 [DEV] Error: ${error.toString()}');
-      if (reason != null) debugPrint('🔥 [DEV] Reason: $reason');
-      return;
-    }
-
-    if (customKeys != null) {
-      for (final entry in customKeys.entries) {
-        await _crashlytics.setCustomKey(entry.key, entry.value);
-      }
-    }
-
-    await _crashlytics.recordError(
+    await _enhanced.recordError(
       error,
-      stackTrace ?? StackTrace.current,
+      stackTrace,
       reason: reason,
+      customKeys: customKeys?.cast<String, dynamic>(),
     );
-
-    debugPrint('🔥 Error recorded: ${error.toString()}');
   }
 
   /// Log customizado para Crashlytics
   Future<void> log(String message) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('📝 [DEV] Log: $message');
-      return;
+    // Enhanced service doesn't have direct log method, using debug print for dev
+    if (kDebugMode) {
+      debugPrint('📝 [Gasometer] $message');
     }
-
-    await _crashlytics.log(message);
   }
 
   /// Define chave customizada
   Future<void> setCustomKey(String key, dynamic value) async {
-    if (!_isAnalyticsEnabled) {
-      debugPrint('🔑 [DEV] Custom key - $key: $value');
-      return;
+    // Custom keys are set during recordError in EnhancedAnalyticsService
+    if (kDebugMode) {
+      debugPrint('🔑 [Gasometer] Custom key - $key: $value');
     }
-
-    await _crashlytics.setCustomKey(key, value as Object);
   }
 
   // ===== TEST METHODS =====
 
   /// Força crash para teste (apenas em debug)
   Future<void> testCrash() async {
-    if (kDebugMode) {
-      throw Exception('Test crash from Gasometer Analytics Service');
-    }
+    await _enhanced.testCrash();
   }
 
   /// Testa erro não fatal (apenas em debug)
   Future<void> testNonFatalError() async {
     if (kDebugMode) {
       await recordError(
-        Exception('Test non-fatal error'),
+        Exception('Test non-fatal error from Gasometer'),
         StackTrace.current,
         reason: 'Testing non-fatal error reporting',
       );

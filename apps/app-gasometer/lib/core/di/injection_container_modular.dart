@@ -25,17 +25,17 @@ class ModularInjectionContainer {
       await HiveService.instance.init();
       print('✅ Hive initialized');
 
-      // Initialize injectable dependencies (includes SharedPreferences, Firebase services, etc.)
-      print('📦 Configuring injectable dependencies...');
-      await configureDependencies(_getIt);
-
-      // Register additional modules in dependency order
-      print('📦 Registering additional modules...');
+      // Register core modules FIRST (provides base services for injectable)
+      print('📦 Registering core modules...');
       final modules = _createModules();
-
       for (final module in modules) {
         await module.register(_getIt);
       }
+
+      // Initialize injectable dependencies AFTER core modules
+      // (now EnhancedAnalyticsService is available for GasometerAnalyticsService)
+      print('📦 Configuring injectable dependencies...');
+      await configureDependencies(_getIt);
 
       print('✅ GasOMeter dependencies initialized successfully');
     } catch (e, stackTrace) {

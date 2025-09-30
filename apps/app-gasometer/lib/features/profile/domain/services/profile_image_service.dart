@@ -6,7 +6,7 @@ import 'package:image/image.dart' as img;
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
-import '../../../../core/services/analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 
 /// Alias para Result até encontrarmos o import correto
 class Result<T> {

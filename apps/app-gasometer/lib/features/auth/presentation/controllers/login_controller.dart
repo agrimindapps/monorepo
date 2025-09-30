@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/services/analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 
 /// Controller para a página de login seguindo princípios SOLID
 /// Responsabilidade única: Gerenciar estado e lógica da tela de login

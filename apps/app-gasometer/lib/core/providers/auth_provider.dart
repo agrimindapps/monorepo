@@ -16,7 +16,7 @@ import '../../features/auth/domain/usecases/sign_up_with_email.dart';
 import '../../features/auth/domain/usecases/update_profile.dart';
 import '../../features/auth/domain/usecases/watch_auth_state.dart';
 import '../di/injection_container_modular.dart';
-import '../services/analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 import '../services/auth_rate_limiter.dart';
 import '../services/platform_service.dart';
 import '../widgets/logout_loading_dialog.dart';
@@ -136,7 +136,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required DeleteAccount deleteAccount,
     required UpdateProfile updateProfile,
     required SendPasswordReset sendPasswordReset,
-    required AnalyticsService analytics,
+    required GasometerAnalyticsService analytics,
     required PlatformService platformService,
     required AuthRateLimiter rateLimiter,
     required AuthLocalDataSource authLocalDataSource,
@@ -167,7 +167,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final DeleteAccount _deleteAccount;
   final UpdateProfile _updateProfile;
   final SendPasswordReset _sendPasswordReset;
-  final AnalyticsService _analytics;
+  final GasometerAnalyticsService _analytics;
   final PlatformService _platformService;
   final AuthRateLimiter _rateLimiter;
   final AuthLocalDataSource _authLocalDataSource;

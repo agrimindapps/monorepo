@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/services/analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 import '../../data/repositories/data_export_repository_impl.dart';
 import '../../domain/entities/export_progress.dart';
 import '../../domain/entities/export_request.dart';

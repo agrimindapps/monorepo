@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' as core;
 
-import '../services/analytics_service.dart';
+import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 import 'app_error.dart';
 
 /// Helper to check if Crashlytics is properly initialized
@@ -70,7 +71,7 @@ class _CrashlyticsHelper {
 class ErrorReporter {
 
   const ErrorReporter(this._analyticsService);
-  final AnalyticsService _analyticsService;
+  final GasometerAnalyticsService _analyticsService;
 
   /// Report error to all configured services
   Future<void> reportError(
@@ -388,7 +389,12 @@ extension AppErrorReporting on AppError {
     try {
       // This would normally use dependency injection
       // For now, we'll create a simple reporter
-      final reporter = ErrorReporter(AnalyticsService());
+      final reporter = ErrorReporter(GasometerAnalyticsService(
+        core.EnhancedAnalyticsService(
+          analytics: core.MockAnalyticsService(),
+          crashlytics: core.FirebaseCrashlyticsService(),
+        ),
+      ));
       await reporter.reportError(
         this,
         stackTrace: stackTrace,

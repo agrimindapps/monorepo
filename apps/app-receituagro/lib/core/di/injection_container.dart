@@ -424,25 +424,37 @@ Future<void> init() async {
   
   // ===== FINAL REGISTRATION - SERVICES WITH COMPLEX DEPENDENCIES =====
   // Premium Service (New Architecture) - Register at the end when all dependencies are available
+  // Updated to use Constructor Injection instead of Singleton pattern
   try {
     sl.registerLazySingleton<ReceitaAgroPremiumService>(
       () {
-        final service = ReceitaAgroPremiumService.instance;
-        // Only set dependencies if analytics service is available
-        if (sl.isRegistered<ReceitaAgroAnalyticsService>()) {
-          service.setDependencies(
-            analytics: sl<ReceitaAgroAnalyticsService>(),
-            cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
-            remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
-          );
-        } else {
-          if (kDebugMode) print('⚠️ ReceitaAgroAnalyticsService not available for ReceitaAgroPremiumService');
+        // Verify all required dependencies are available
+        if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {
+          throw StateError('ReceitaAgroAnalyticsService must be registered before ReceitaAgroPremiumService');
         }
+        if (!sl.isRegistered<ReceitaAgroCloudFunctionsService>()) {
+          throw StateError('ReceitaAgroCloudFunctionsService must be registered before ReceitaAgroPremiumService');
+        }
+        if (!sl.isRegistered<ReceitaAgroRemoteConfigService>()) {
+          throw StateError('ReceitaAgroRemoteConfigService must be registered before ReceitaAgroPremiumService');
+        }
+
+        // Create instance with constructor injection (NEW ARCHITECTURE)
+        final service = ReceitaAgroPremiumService(
+          analytics: sl<ReceitaAgroAnalyticsService>(),
+          cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
+          remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
+        );
+
+        // Set deprecated singleton instance for backward compatibility
+        ReceitaAgroPremiumService.setInstance(service);
+
         return service;
       },
     );
-    if (kDebugMode) print('✅ ReceitaAgroPremiumService registered successfully');
+    if (kDebugMode) print('✅ ReceitaAgroPremiumService registered successfully with constructor injection');
   } catch (e) {
     if (kDebugMode) print('❌ ReceitaAgroPremiumService registration failed: $e');
+    rethrow;
   }
 }

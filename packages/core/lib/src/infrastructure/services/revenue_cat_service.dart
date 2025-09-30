@@ -9,6 +9,7 @@ import '../../domain/entities/subscription_entity.dart' as core_entities;
 import '../../domain/repositories/i_subscription_repository.dart';
 import '../../shared/config/environment_config.dart';
 import '../../shared/utils/failure.dart';
+import '../../shared/utils/subscription_failures.dart';
 
 /// Implementação concreta do repositório de assinaturas usando RevenueCat
 /// 
@@ -20,6 +21,7 @@ class RevenueCatService implements ISubscriptionRepository {
 
   bool _isInitialized = false;
   bool _isDisabled = false; // For web/dev environments
+  bool _isDisposed = false; // Track disposal state
 
   /// Construtor do RevenueCat service
   /// 
@@ -37,16 +39,24 @@ class RevenueCatService implements ISubscriptionRepository {
     if (_isInitialized) return;
 
     try {
-      final apiKey = EnvironmentConfig.getApiKey('REVENUE_CAT_API_KEY', fallback: 'rcat_dev_dummy_key');
-      
-      // Skip RevenueCat initialization in web/dev with dummy key
-      if (kIsWeb || apiKey == 'rcat_dev_dummy_key') {
+      // Skip RevenueCat initialization in web environment
+      if (kIsWeb) {
         if (kDebugMode) {
-          debugPrint('[RevenueCat] Skipped - Web environment or dummy key detected');
+          debugPrint('[RevenueCat] Skipped - Web environment detected');
         }
         _isDisabled = true;
-        _isInitialized = true; // Mark as initialized to avoid retries
+        _isInitialized = true;
         return;
+      }
+
+      // Get API key without fallback - fail fast if missing
+      final apiKey = EnvironmentConfig.getApiKey('REVENUE_CAT_API_KEY');
+
+      if (apiKey.isEmpty) {
+        throw PlatformException(
+          code: 'MISSING_API_KEY',
+          message: 'RevenueCat API key not configured. Please set REVENUE_CAT_API_KEY in environment.',
+        );
       }
 
       await Purchases.setLogLevel(
@@ -78,16 +88,16 @@ class RevenueCatService implements ISubscriptionRepository {
   Future<Either<Failure, bool>> hasActiveSubscription() async {
     try {
       await _ensureInitialized();
-      
+
       final customerInfo = await Purchases.getCustomerInfo();
       final hasActive = customerInfo.activeSubscriptions.isNotEmpty ||
           customerInfo.nonSubscriptionTransactions.isNotEmpty;
 
       return Right(hasActive);
     } on PlatformException catch (e) {
-      return Left(RevenueCatFailure(_mapRevenueCatError(e)));
+      return Left(e.code.toSubscriptionFailure(e.message));
     } catch (e) {
-      return Left(RevenueCatFailure('Erro ao verificar assinatura: $e'));
+      return Left(SubscriptionUnknownFailure('Erro ao verificar assinatura: $e'));
     }
   }
 
@@ -95,15 +105,15 @@ class RevenueCatService implements ISubscriptionRepository {
   Future<Either<Failure, core_entities.SubscriptionEntity?>> getCurrentSubscription() async {
     try {
       await _ensureInitialized();
-      
+
       final customerInfo = await Purchases.getCustomerInfo();
       final subscription = _mapCustomerInfoToSubscription(customerInfo);
 
       return Right(subscription);
     } on PlatformException catch (e) {
-      return Left(RevenueCatFailure(_mapRevenueCatError(e)));
+      return Left(e.code.toSubscriptionFailure(e.message));
     } catch (e) {
-      return Left(RevenueCatFailure('Erro ao obter assinatura: $e'));
+      return Left(SubscriptionUnknownFailure('Erro ao obter assinatura: $e'));
     }
   }
 
@@ -178,7 +188,7 @@ class RevenueCatService implements ISubscriptionRepository {
   }) async {
     try {
       await _ensureInitialized();
-      
+
       final offerings = await Purchases.getOfferings();
       Package? targetPackage;
 
@@ -194,13 +204,13 @@ class RevenueCatService implements ISubscriptionRepository {
       }
 
       if (targetPackage == null) {
-        return Left(RevenueCatFailure('Produto não encontrado: $productId'));
+        return Left(SubscriptionPaymentFailure.productUnavailable());
       }
 
       final purchaseResult = await Purchases.purchasePackage(targetPackage);
-      
+
       if (purchaseResult.customerInfo.activeSubscriptions.isEmpty) {
-        return const Left(RevenueCatFailure('Compra não foi processada corretamente'));
+        return const Left(SubscriptionPaymentFailure('Compra não foi processada corretamente'));
       }
 
       final subscription = _mapCustomerInfoToSubscription(
@@ -208,14 +218,14 @@ class RevenueCatService implements ISubscriptionRepository {
       );
 
       if (subscription == null) {
-        return const Left(RevenueCatFailure('Erro ao processar compra'));
+        return const Left(SubscriptionPaymentFailure('Erro ao processar compra'));
       }
 
       return Right(subscription);
     } on PlatformException catch (e) {
-      return Left(RevenueCatFailure(_mapRevenueCatError(e)));
+      return Left(e.code.toSubscriptionFailure(e.message));
     } catch (e) {
-      return Left(RevenueCatFailure('Erro na compra: $e'));
+      return Left(SubscriptionUnknownFailure('Erro na compra: $e'));
     }
   }
 
@@ -544,9 +554,29 @@ class RevenueCatService implements ISubscriptionRepository {
   }
 
   /// Limpa recursos do serviço
-  /// 
+  ///
   /// Deve ser chamado quando o serviço não for mais utilizado para evitar memory leaks
   void dispose() {
+    if (_isDisposed) return;
+
+    _isDisposed = true;
+
+    // Remove listener do RevenueCat para evitar memory leak
+    try {
+      if (_isInitialized && !_isDisabled) {
+        Purchases.removeCustomerInfoUpdateListener(_onCustomerInfoUpdated);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[RevenueCat] Error removing listener: $e');
+      }
+    }
+
+    // Close stream controller
     _subscriptionController.close();
+
+    if (kDebugMode) {
+      debugPrint('[RevenueCat] Service disposed successfully');
+    }
   }
 }

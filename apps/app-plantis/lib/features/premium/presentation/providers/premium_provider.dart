@@ -290,9 +290,20 @@ class PremiumProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    // Cancel all stream subscriptions to prevent memory leaks
     _subscriptionStream?.cancel();
-    _syncSubscriptionStream?.cancel(); // NOVO
+    _subscriptionStream = null;
+
+    _syncSubscriptionStream?.cancel();
+    _syncSubscriptionStream = null;
+
     _authStream?.cancel();
+    _authStream = null;
+
+    if (kDebugMode) {
+      debugPrint('[PremiumProvider] Disposed successfully');
+    }
+
     super.dispose();
   }
 }

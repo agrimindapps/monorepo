@@ -543,11 +543,26 @@ class PremiumProviderImproved extends ChangeNotifier {
 
   @override
   void dispose() {
+    // Stop auto sync first
     _syncService.stopAutoSync();
-    _syncService.dispose();
+
+    // Cancel all stream subscriptions to prevent memory leaks
     _subscriptionStream?.cancel();
+    _subscriptionStream = null;
+
     _authStream?.cancel();
+    _authStream = null;
+
     _syncEventsStream?.cancel();
+    _syncEventsStream = null;
+
+    // Dispose sync service last
+    _syncService.dispose();
+
+    if (kDebugMode) {
+      debugPrint('[PremiumProviderImproved] Disposed successfully');
+    }
+
     super.dispose();
   }
 }

@@ -197,12 +197,22 @@ class SimpleSubscriptionSyncService {
             print('⚠️ SimpleSubscriptionSyncService: Failed to load from cache: ${failure.message}');
           }
         },
-        (cached) {
-          if (cached != null) {
-            // TODO: Implementar deserialização quando necessário
-            // Por agora, apenas notifica que tem cache
-            if (kDebugMode) {
-              print('📱 SimpleSubscriptionSyncService: Found cached subscription');
+        (jsonString) {
+          if (jsonString != null && jsonString.isNotEmpty) {
+            try {
+              final Map<String, dynamic> json = _decodeJson(jsonString);
+              _cachedSubscription = _deserializeSubscription(json);
+
+              // Emitir subscription no stream
+              _subscriptionStreamController.add(_cachedSubscription);
+
+              if (kDebugMode) {
+                print('📱 SimpleSubscriptionSyncService: Loaded cached subscription (${_cachedSubscription?.productId})');
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('⚠️ SimpleSubscriptionSyncService: Failed to deserialize cache: $e');
+              }
             }
           }
         },
@@ -218,9 +228,10 @@ class SimpleSubscriptionSyncService {
   Future<void> _saveToCache(SubscriptionEntity? subscription) async {
     try {
       if (subscription != null) {
-        // TODO: Implementar serialização quando necessário
-        // Por agora, apenas armazena uma flag
-        await _localStorage.save<String>(key: _storageKey, data: 'has_subscription');
+        final Map<String, dynamic> json = _serializeSubscription(subscription);
+        final String jsonString = _encodeJson(json);
+
+        await _localStorage.save<String>(key: _storageKey, data: jsonString);
       } else {
         await _localStorage.remove(key: _storageKey);
       }
@@ -228,13 +239,140 @@ class SimpleSubscriptionSyncService {
       _cachedSubscription = subscription;
 
       if (kDebugMode) {
-        print('📱 SimpleSubscriptionSyncService: Saved subscription to cache');
+        print('📱 SimpleSubscriptionSyncService: Saved subscription to cache (${subscription?.productId})');
       }
     } catch (e) {
       if (kDebugMode) {
         print('⚠️ SimpleSubscriptionSyncService: Failed to save to cache: $e');
       }
     }
+  }
+
+  /// Serializa SubscriptionEntity para Map
+  Map<String, dynamic> _serializeSubscription(SubscriptionEntity subscription) {
+    return {
+      'id': subscription.id,
+      'userId': subscription.userId,
+      'productId': subscription.productId,
+      'status': subscription.status.name,
+      'tier': subscription.tier.name,
+      'expirationDate': subscription.expirationDate?.millisecondsSinceEpoch,
+      'purchaseDate': subscription.purchaseDate?.millisecondsSinceEpoch,
+      'originalPurchaseDate': subscription.originalPurchaseDate?.millisecondsSinceEpoch,
+      'store': subscription.store.name,
+      'isInTrial': subscription.isInTrial,
+      'isSandbox': subscription.isSandbox,
+      'createdAt': subscription.createdAt?.millisecondsSinceEpoch,
+      'updatedAt': subscription.updatedAt?.millisecondsSinceEpoch,
+    };
+  }
+
+  /// Deserializa Map para SubscriptionEntity
+  SubscriptionEntity _deserializeSubscription(Map<String, dynamic> json) {
+    return SubscriptionEntity(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      productId: json['productId'] as String,
+      status: SubscriptionStatus.values.firstWhere(
+        (e) => e.name == json['status'],
+        orElse: () => SubscriptionStatus.unknown,
+      ),
+      tier: SubscriptionTier.values.firstWhere(
+        (e) => e.name == json['tier'],
+        orElse: () => SubscriptionTier.free,
+      ),
+      expirationDate: json['expirationDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['expirationDate'] as int)
+          : null,
+      purchaseDate: json['purchaseDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['purchaseDate'] as int)
+          : null,
+      originalPurchaseDate: json['originalPurchaseDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['originalPurchaseDate'] as int)
+          : null,
+      store: Store.values.firstWhere(
+        (e) => e.name == json['store'],
+        orElse: () => Store.unknown,
+      ),
+      isInTrial: json['isInTrial'] as bool? ?? false,
+      isSandbox: json['isSandbox'] as bool? ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int)
+          : DateTime.now(),
+    );
+  }
+
+  /// Encode Map to JSON string (simple implementation)
+  String _encodeJson(Map<String, dynamic> map) {
+    // Simple JSON encoding - can be replaced with dart:convert if available
+    final buffer = StringBuffer('{');
+    final entries = map.entries.toList();
+
+    for (var i = 0; i < entries.length; i++) {
+      final entry = entries[i];
+      final value = entry.value;
+
+      buffer.write('"${entry.key}":');
+
+      if (value == null) {
+        buffer.write('null');
+      } else if (value is String) {
+        buffer.write('"$value"');
+      } else if (value is bool || value is num) {
+        buffer.write(value.toString());
+      } else {
+        buffer.write('"$value"');
+      }
+
+      if (i < entries.length - 1) {
+        buffer.write(',');
+      }
+    }
+
+    buffer.write('}');
+    return buffer.toString();
+  }
+
+  /// Decode JSON string to Map (simple implementation)
+  Map<String, dynamic> _decodeJson(String jsonString) {
+    // Simple JSON decoding - can be replaced with dart:convert if available
+    final map = <String, dynamic>{};
+
+    // Remove outer braces
+    var content = jsonString.trim();
+    if (content.startsWith('{')) content = content.substring(1);
+    if (content.endsWith('}')) content = content.substring(0, content.length - 1);
+
+    // Split by comma (simplified - doesn't handle nested objects)
+    final pairs = content.split(',');
+
+    for (final pair in pairs) {
+      final parts = pair.split(':');
+      if (parts.length == 2) {
+        var key = parts[0].trim().replaceAll('"', '');
+        var value = parts[1].trim();
+
+        // Parse value
+        if (value == 'null') {
+          map[key] = null;
+        } else if (value == 'true') {
+          map[key] = true;
+        } else if (value == 'false') {
+          map[key] = false;
+        } else if (value.startsWith('"') && value.endsWith('"')) {
+          map[key] = value.substring(1, value.length - 1);
+        } else {
+          // Try to parse as number
+          final numValue = int.tryParse(value);
+          map[key] = numValue ?? value;
+        }
+      }
+    }
+
+    return map;
   }
 
   /// Verifica se a subscription mudou comparando com cache

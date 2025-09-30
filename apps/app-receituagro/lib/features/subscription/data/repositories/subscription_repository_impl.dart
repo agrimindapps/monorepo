@@ -62,7 +62,7 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
         (sub) => Right(sub?.isTrialActive ?? false),
       );
     } catch (e) {
-      return Left(CacheFailure('Erro ao verificar trial: ${e.toString()}'));
+      return Left(SubscriptionUnknownFailure('Erro ao verificar trial: ${e.toString()}'));
     }
   }
 

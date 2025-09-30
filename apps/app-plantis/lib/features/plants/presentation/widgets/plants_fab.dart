@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import 'plant_form_dialog.dart';
+
 class PlantsFab extends ConsumerWidget {
   final VoidCallback onScrollToTop;
   final ScrollController scrollController;
@@ -12,8 +14,8 @@ class PlantsFab extends ConsumerWidget {
   });
 
   Future<void> _onAddPlant(BuildContext context, WidgetRef ref) async {
-    // Navegar para página de formulário ao invés de mostrar dialog
-    await context.push('/plants/add');
+    // Mostrar dialog modal para cadastro de planta
+    await PlantFormDialog.show(context);
   }
 
   @override

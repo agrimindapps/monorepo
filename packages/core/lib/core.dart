@@ -168,6 +168,7 @@ export 'src/shared/services/version_manager_service.dart';
 export 'src/shared/utils/app_error.dart';
 export 'src/shared/utils/error_adapter.dart' hide ErrorHandlingMixin;
 export 'src/shared/utils/failure.dart';
+export 'src/shared/utils/subscription_failures.dart';
 export 'src/shared/utils/result.dart';
 
 // ========== SYNC SYSTEM ==========

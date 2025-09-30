@@ -332,9 +332,9 @@ class SubscriptionProvider with ChangeNotifier {
         (p) => p.productId == planId,
         orElse: () => throw Exception('Product not found: $planId'),
       );
-      
+
       final result = await _purchaseProductUseCase(PurchaseProductUseCaseParams(productId: planId));
-      
+
       result.fold(
         (failure) => _setErrorMessage('Erro na compra: ${failure.message}'),
         (success) {
@@ -347,5 +347,18 @@ class SubscriptionProvider with ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up any resources if needed
+    // For now, just clear state to prevent memory leaks
+    _availableProducts.clear();
+    _currentSubscription = null;
+    _errorMessage = null;
+    _successMessage = null;
+    _infoMessage = null;
+
+    super.dispose();
   }
 }

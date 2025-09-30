@@ -376,9 +376,13 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
+    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 7 dias
+    final effectiveIntervalDays = intervalDays ??
+        (enabled == true && _state.wateringIntervalDays == null ? 7 : _state.wateringIntervalDays);
+
     _updateState(_state.copyWith(
       enableWateringCare: enabled ?? _state.enableWateringCare,
-      wateringIntervalDays: intervalDays ?? _state.wateringIntervalDays,
+      wateringIntervalDays: effectiveIntervalDays,
       lastWateringDate: lastDate ?? _state.lastWateringDate,
     ));
     _validateForm();
@@ -390,9 +394,13 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
+    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 30 dias
+    final effectiveIntervalDays = intervalDays ??
+        (enabled == true && _state.fertilizingIntervalDays == null ? 30 : _state.fertilizingIntervalDays);
+
     _updateState(_state.copyWith(
       enableFertilizerCare: enabled ?? _state.enableFertilizerCare,
-      fertilizingIntervalDays: intervalDays ?? _state.fertilizingIntervalDays,
+      fertilizingIntervalDays: effectiveIntervalDays,
       lastFertilizerDate: lastDate ?? _state.lastFertilizerDate,
     ));
     _validateForm();
@@ -567,6 +575,17 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Constrói parâmetros para adicionar planta
   AddPlantParams _buildAddParams() {
+    // DEBUG: Log dos valores antes de criar PlantConfig
+    if (kDebugMode) {
+      print('🆕 _buildAddParams - Criando nova planta:');
+      print('   💧 _state.enableWateringCare: ${_state.enableWateringCare}');
+      print('   💧 _state.wateringIntervalDays: ${_state.wateringIntervalDays}');
+      print('   💧 _state.lastWateringDate: ${_state.lastWateringDate}');
+      print('   🌿 _state.enableFertilizerCare: ${_state.enableFertilizerCare}');
+      print('   🌿 _state.fertilizingIntervalDays: ${_state.fertilizingIntervalDays}');
+      print('   🌿 _state.lastFertilizerDate: ${_state.lastFertilizerDate}');
+    }
+
     final config = PlantConfig(
       wateringIntervalDays: _state.wateringIntervalDays,
       fertilizingIntervalDays: _state.fertilizingIntervalDays,
@@ -592,6 +611,17 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Constrói parâmetros para atualizar planta
   UpdatePlantParams _buildUpdateParams() {
+    // DEBUG: Log dos valores antes de atualizar PlantConfig
+    if (kDebugMode) {
+      print('🔄 _buildUpdateParams - Atualizando planta:');
+      print('   💧 _state.enableWateringCare: ${_state.enableWateringCare}');
+      print('   💧 _state.wateringIntervalDays: ${_state.wateringIntervalDays}');
+      print('   💧 _state.lastWateringDate: ${_state.lastWateringDate}');
+      print('   🌿 _state.enableFertilizerCare: ${_state.enableFertilizerCare}');
+      print('   🌿 _state.fertilizingIntervalDays: ${_state.fertilizingIntervalDays}');
+      print('   🌿 _state.lastFertilizerDate: ${_state.lastFertilizerDate}');
+    }
+
     final config = PlantConfig(
       wateringIntervalDays: _state.wateringIntervalDays,
       fertilizingIntervalDays: _state.fertilizingIntervalDays,
@@ -622,9 +652,13 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
+    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 7 dias
+    final effectiveIntervalDays = intervalDays ??
+        (enabled == true && _state.sunlightIntervalDays == null ? 7 : _state.sunlightIntervalDays);
+
     _updateState(_state.copyWith(
       enableSunlightCare: enabled ?? _state.enableSunlightCare,
-      sunlightIntervalDays: intervalDays ?? _state.sunlightIntervalDays,
+      sunlightIntervalDays: effectiveIntervalDays,
       lastSunlightDate: lastDate ?? _state.lastSunlightDate,
     ));
     _validateForm();
@@ -636,9 +670,13 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
+    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 14 dias
+    final effectiveIntervalDays = intervalDays ??
+        (enabled == true && _state.pestInspectionIntervalDays == null ? 14 : _state.pestInspectionIntervalDays);
+
     _updateState(_state.copyWith(
       enablePestInspection: enabled ?? _state.enablePestInspection,
-      pestInspectionIntervalDays: intervalDays ?? _state.pestInspectionIntervalDays,
+      pestInspectionIntervalDays: effectiveIntervalDays,
       lastPestInspectionDate: lastDate ?? _state.lastPestInspectionDate,
     ));
     _validateForm();
@@ -650,9 +688,13 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
+    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 30 dias
+    final effectiveIntervalDays = intervalDays ??
+        (enabled == true && _state.pruningIntervalDays == null ? 30 : _state.pruningIntervalDays);
+
     _updateState(_state.copyWith(
       enablePruning: enabled ?? _state.enablePruning,
-      pruningIntervalDays: intervalDays ?? _state.pruningIntervalDays,
+      pruningIntervalDays: effectiveIntervalDays,
       lastPruningDate: lastDate ?? _state.lastPruningDate,
     ));
     _validateForm();
@@ -664,9 +706,13 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
+    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 180 dias (6 meses)
+    final effectiveIntervalDays = intervalDays ??
+        (enabled == true && _state.replantingIntervalDays == null ? 180 : _state.replantingIntervalDays);
+
     _updateState(_state.copyWith(
       enableReplanting: enabled ?? _state.enableReplanting,
-      replantingIntervalDays: intervalDays ?? _state.replantingIntervalDays,
+      replantingIntervalDays: effectiveIntervalDays,
       lastReplantingDate: lastDate ?? _state.lastReplantingDate,
     ));
     _validateForm();

@@ -2,7 +2,7 @@ import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart' as core;
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
@@ -14,7 +14,7 @@ class PurchasePremium implements UseCase<core.SubscriptionEntity, PurchasePremiu
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, core.SubscriptionEntity>> call(PurchasePremiumParams params) async {
+  Future<Either<core.Failure, core.SubscriptionEntity>> call(PurchasePremiumParams params) async {
     return await repository.purchasePremium(productId: params.productId);
   }
 }
@@ -27,7 +27,7 @@ class StartFreeTrial implements UseCase<bool, NoParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, bool>> call(NoParams params) async {
+  Future<Either<core.Failure, bool>> call(NoParams params) async {
     return await repository.startFreeTrial();
   }
 }
@@ -40,7 +40,7 @@ class IsEligibleForTrial implements UseCase<bool, NoParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, bool>> call(NoParams params) async {
+  Future<Either<core.Failure, bool>> call(NoParams params) async {
     return await repository.isEligibleForTrial();
   }
 }
@@ -53,7 +53,7 @@ class GetManagementUrl implements UseCase<String?, NoParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, String?>> call(NoParams params) async {
+  Future<Either<core.Failure, String?>> call(NoParams params) async {
     return await repository.getManagementUrl();
   }
 }

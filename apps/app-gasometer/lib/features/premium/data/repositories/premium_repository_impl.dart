@@ -4,7 +4,6 @@ import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/failures.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/repositories/premium_repository.dart';
 import '../datasources/premium_local_data_source.dart';
@@ -27,7 +26,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
   Stream<PremiumStatus> get premiumStatus => _syncService.premiumStatusStream;
 
   @override
-  Future<Either<Failure, bool>> hasActivePremium() async {
+  Future<Either<core.Failure, bool>> hasActivePremium() async {
     try {
       final status = await getPremiumStatus();
       return status.fold(
@@ -35,56 +34,64 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (premiumStatus) => Right(premiumStatus.isPremium),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionUnknownFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, PremiumStatus>> getPremiumStatus() async {
+  Future<Either<core.Failure, PremiumStatus>> getPremiumStatus() async {
     try {
       // Usa o status do sync service que já consolida todas as fontes
       final status = _syncService.currentStatus;
       return Right(status);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionUnknownFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, List<core.ProductInfo>>> getAvailableProducts() async {
+  Future<Either<core.Failure, List<core.ProductInfo>>> getAvailableProducts() async {
     try {
-      return await remoteDataSource.getAvailableProducts();
+      final result = await remoteDataSource.getAvailableProducts();
+      return result.fold(
+        (failure) => Left(_mapFailure(failure)),
+        (products) => Right(products),
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(core.SubscriptionUnknownFailure());
     }
   }
 
   @override
-  Future<Either<Failure, core.SubscriptionEntity>> purchasePremium({
+  Future<Either<core.Failure, core.SubscriptionEntity>> purchasePremium({
     required String productId,
   }) async {
     try {
-      return await remoteDataSource.purchaseProduct(productId: productId);
+      final result = await remoteDataSource.purchaseProduct(productId: productId);
+      return result.fold(
+        (failure) => Left(_mapFailure(failure)),
+        (subscription) => Right(subscription),
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(core.SubscriptionPaymentFailure());
     }
   }
 
   @override
-  Future<Either<Failure, bool>> restorePurchases() async {
+  Future<Either<core.Failure, bool>> restorePurchases() async {
     try {
       final result = await remoteDataSource.restorePurchases();
       return result.fold(
-        (failure) => Left(failure),
+        (failure) => Left(_mapFailure(failure)),
         (subscriptions) => Right(subscriptions.isNotEmpty),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(core.SubscriptionUnknownFailure());
     }
   }
 
   @override
-  Future<Either<Failure, bool>> startFreeTrial() async {
+  Future<Either<core.Failure, bool>> startFreeTrial() async {
     try {
       // Para desenvolvimento, usar licença local
       final result = await generateLocalLicense(days: 7);
@@ -93,12 +100,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (_) => const Right(true),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionValidationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, bool>> isEligibleForTrial() async {
+  Future<Either<core.Failure, bool>> isEligibleForTrial() async {
     try {
       // Elegível se não tem premium ativo
       final hasActive = await hasActivePremium();
@@ -107,36 +114,44 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (isPremium) => Right(!isPremium),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionValidationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> setUser({
+  Future<Either<core.Failure, void>> setUser({
     required String userId,
     Map<String, String>? attributes,
   }) async {
     try {
-      return await remoteDataSource.setUser(
+      final result = await remoteDataSource.setUser(
         userId: userId,
         attributes: attributes,
       );
+      return result.fold(
+        (failure) => Left(_mapFailure(failure)),
+        (success) => const Right(null),
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(core.SubscriptionAuthFailure());
     }
   }
 
   @override
-  Future<Either<Failure, String?>> getManagementUrl() async {
+  Future<Either<core.Failure, String?>> getManagementUrl() async {
     try {
-      return await remoteDataSource.getManagementUrl();
+      final result = await remoteDataSource.getManagementUrl();
+      return result.fold(
+        (failure) => Left(_mapFailure(failure)),
+        (url) => Right(url),
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(core.SubscriptionUnknownFailure());
     }
   }
 
   @override
-  Future<Either<Failure, bool>> canUseFeature(String featureId) async {
+  Future<Either<core.Failure, bool>> canUseFeature(String featureId) async {
     try {
       final statusResult = await getPremiumStatus();
       return statusResult.fold(
@@ -144,12 +159,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (status) => Right(status.canUseFeature(featureId)),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionValidationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, bool>> canAddVehicle(int currentCount) async {
+  Future<Either<core.Failure, bool>> canAddVehicle(int currentCount) async {
     try {
       final statusResult = await getPremiumStatus();
       return statusResult.fold(
@@ -157,12 +172,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (status) => Right(status.canAddVehicle(currentCount)),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionValidationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, bool>> canAddFuelRecord(int currentCount) async {
+  Future<Either<core.Failure, bool>> canAddFuelRecord(int currentCount) async {
     try {
       final statusResult = await getPremiumStatus();
       return statusResult.fold(
@@ -170,12 +185,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (status) => Right(status.canAddFuelRecord(currentCount)),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionValidationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, bool>> canAddMaintenanceRecord(int currentCount) async {
+  Future<Either<core.Failure, bool>> canAddMaintenanceRecord(int currentCount) async {
     try {
       final statusResult = await getPremiumStatus();
       return statusResult.fold(
@@ -183,12 +198,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
         (status) => Right(status.canAddMaintenanceRecord(currentCount)),
       );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionValidationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> generateLocalLicense({int days = 30}) async {
+  Future<Either<core.Failure, void>> generateLocalLicense({int days = 30}) async {
     try {
       await localDataSource.generateLocalLicense(days: days);
 
@@ -197,12 +212,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionUnknownFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> revokeLocalLicense() async {
+  Future<Either<core.Failure, void>> revokeLocalLicense() async {
     try {
       await localDataSource.revokeLocalLicense();
 
@@ -211,27 +226,31 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionUnknownFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, bool>> hasActiveLocalLicense() async {
+  Future<Either<core.Failure, bool>> hasActiveLocalLicense() async {
     try {
       final hasLicense = await localDataSource.hasActiveLocalLicense();
       return Right(hasLicense);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(core.SubscriptionUnknownFailure(e.toString()));
     }
   }
 
   /// Força sincronização imediata do status premium
   @override
-  Future<Either<Failure, void>> forceSyncPremiumStatus() async {
+  Future<Either<core.Failure, void>> forceSyncPremiumStatus() async {
     try {
-      return await _syncService.forceSync();
+      final result = await _syncService.forceSync();
+      return result.fold(
+        (failure) => Left(_mapFailure(failure)),
+        (_) => const Right(null),
+      );
     } catch (e) {
-      return Left(ServerFailure('Erro na sincronização forçada: ${e.toString()}'));
+      return const Left(core.SubscriptionSyncFailure());
     }
   }
 
@@ -241,7 +260,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
   /// Processa webhook do RevenueCat
   @override
-  Future<Either<Failure, void>> processWebhook({
+  Future<Either<core.Failure, void>> processWebhook({
     required Map<String, dynamic> payload,
     String? signature,
     String? secret,
@@ -251,7 +270,35 @@ class PremiumRepositoryImpl implements PremiumRepository {
       // Este método é uma interface conveniente no repository
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure('Erro ao processar webhook: ${e.toString()}'));
+      return const Left(core.SubscriptionServerFailure());
+    }
+  }
+
+  /// Maps local Failure types to core.Failure types
+  core.Failure _mapFailure(dynamic failure) {
+    // The local datasources return local Failure types,
+    // but the domain needs core.Failure types
+    String? message;
+    try {
+      message = (failure as dynamic).message?.toString();
+    } catch (_) {
+      message = failure.toString();
+    }
+
+    // Map based on failure type name
+    final typeName = failure.runtimeType.toString();
+    if (typeName.contains('Network')) {
+      return core.SubscriptionNetworkFailure(message);
+    } else if (typeName.contains('Auth')) {
+      return core.SubscriptionAuthFailure(message);
+    } else if (typeName.contains('Server')) {
+      return core.SubscriptionServerFailure(message);
+    } else if (typeName.contains('Validation')) {
+      return core.SubscriptionValidationFailure(message);
+    } else if (typeName.contains('Sync')) {
+      return core.SubscriptionSyncFailure(message);
+    } else {
+      return core.SubscriptionUnknownFailure(message);
     }
   }
 

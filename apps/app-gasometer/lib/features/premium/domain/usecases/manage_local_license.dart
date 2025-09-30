@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart' as core;
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
@@ -12,7 +12,7 @@ class GenerateLocalLicense implements UseCase<void, GenerateLocalLicenseParams> 
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, void>> call(GenerateLocalLicenseParams params) async {
+  Future<Either<core.Failure, void>> call(GenerateLocalLicenseParams params) async {
     return await repository.generateLocalLicense(days: params.days);
   }
 }
@@ -26,7 +26,7 @@ class RevokeLocalLicense implements UseCase<void, NoParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, void>> call(NoParams params) async {
+  Future<Either<core.Failure, void>> call(NoParams params) async {
     return await repository.revokeLocalLicense();
   }
 }
@@ -39,7 +39,7 @@ class HasActiveLocalLicense implements UseCase<bool, NoParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, bool>> call(NoParams params) async {
+  Future<Either<core.Failure, bool>> call(NoParams params) async {
     return await repository.hasActiveLocalLicense();
   }
 }

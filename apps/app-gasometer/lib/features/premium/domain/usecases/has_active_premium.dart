@@ -1,6 +1,6 @@
+import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
@@ -12,7 +12,7 @@ class HasActivePremium implements UseCase<bool, NoParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, bool>> call(NoParams params) async {
-    return await repository.hasActivePremium();
+  Future<Either<core.Failure, bool>> call(NoParams params) async {
+    return repository.hasActivePremium();
   }
 }

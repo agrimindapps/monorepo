@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart' as core;
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
@@ -12,7 +12,7 @@ class CanUseFeature implements UseCase<bool, CanUseFeatureParams> {
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, bool>> call(CanUseFeatureParams params) async {
+  Future<Either<core.Failure, bool>> call(CanUseFeatureParams params) async {
     return await repository.canUseFeature(params.featureId);
   }
 }

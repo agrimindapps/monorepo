@@ -1,19 +1,19 @@
+import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../constants/ui_constants.dart';
-import '../error/failures.dart';
 
 /// Base class for all use cases
-/// 
+///
 /// [Type] is the return type
 /// [Params] is the input parameters type
 abstract class UseCase<Type, Params> {
-  Future<Either<Failure, Type>> call(Params params);
+  Future<Either<core.Failure, Type>> call(Params params);
 }
 
 /// Use case for operations that don't require parameters
 abstract class NoParamsUseCase<Type> {
-  Future<Either<Failure, Type>> call();
+  Future<Either<core.Failure, Type>> call();
 }
 
 /// Base class for use case parameters

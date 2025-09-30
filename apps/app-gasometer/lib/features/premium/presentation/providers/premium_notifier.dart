@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
@@ -107,6 +109,9 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   RevokeLocalLicense? _revokeLocalLicense;
   PremiumRepository? _premiumRepository;
 
+  // Stream subscription para cleanup
+  StreamSubscription<PremiumStatus>? _statusSubscription;
+
   @override
   Future<PremiumNotifierState> build() async {
     // Obtém dependências do GetIt via providers
@@ -129,9 +134,15 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       (status) => status,
     );
 
-    // Escuta mudanças no stream do repository
-    _premiumRepository!.premiumStatus.listen((status) {
+    // Escuta mudanças no stream do repository e armazena subscription
+    _statusSubscription = _premiumRepository!.premiumStatus.listen((status) {
       state = core.AsyncValue.data(state.valueOrNull?.copyWith(premiumStatus: status) ?? PremiumNotifierState(premiumStatus: status));
+    });
+
+    // Registra cleanup quando o provider for disposed
+    ref.onDispose(() {
+      _statusSubscription?.cancel();
+      _statusSubscription = null;
     });
 
     return PremiumNotifierState(premiumStatus: premiumStatus);

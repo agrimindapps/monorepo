@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart' as core;
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
@@ -12,7 +12,7 @@ class CanAddMaintenanceRecord implements UseCase<bool, CanAddMaintenanceRecordPa
   final PremiumRepository repository;
 
   @override
-  Future<Either<Failure, bool>> call(CanAddMaintenanceRecordParams params) async {
+  Future<Either<core.Failure, bool>> call(CanAddMaintenanceRecordParams params) async {
     return await repository.canAddMaintenanceRecord(params.currentCount);
   }
 }

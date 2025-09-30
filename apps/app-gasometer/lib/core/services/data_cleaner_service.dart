@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'database_inspector_service.dart';
 
 /// Serviço para limpeza de dados do GasOMeter

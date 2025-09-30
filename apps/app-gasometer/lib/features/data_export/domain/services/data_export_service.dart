@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/services/database_inspector_service.dart';
 import '../entities/export_metadata.dart';

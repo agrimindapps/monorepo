@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/ui_constants.dart';
 import '../../features/vehicles/domain/entities/vehicle_entity.dart';

@@ -2,7 +2,7 @@
 import 'dart:io';
 
 // Package imports:
-import 'package:core/core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Project imports:
 import 'package:gasometer/core/services/gasometer_analytics_service.dart';

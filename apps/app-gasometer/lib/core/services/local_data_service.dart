@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Serviço responsável por gerenciar dados locais
 /// Usado especialmente para o modo anônimo onde os dados não são sincronizados com o Firebase

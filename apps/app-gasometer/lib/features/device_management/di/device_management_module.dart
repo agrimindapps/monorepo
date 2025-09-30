@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 import '../core/device_integration_service.dart';
 import '../presentation/providers/vehicle_device_provider.dart';

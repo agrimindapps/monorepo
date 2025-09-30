@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide LogEntry;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../entities/log_entry.dart';

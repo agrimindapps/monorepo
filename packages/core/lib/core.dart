@@ -284,9 +284,3 @@ export 'package:share_plus/share_plus.dart';
 
 // Subscriptions
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
-
-// Image Picker
-export 'package:image_picker/image_picker.dart';
-
-// Device Info
-export 'package:device_info_plus/device_info_plus.dart';

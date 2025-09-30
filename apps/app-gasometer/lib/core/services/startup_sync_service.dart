@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/fuel/domain/repositories/fuel_repository.dart';

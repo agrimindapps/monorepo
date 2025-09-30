@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:core/core.dart' hide LogEntry, LogLevel, Failure, CacheFailure, UnexpectedFailure, NetworkFailure;
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';

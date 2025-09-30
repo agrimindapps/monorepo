@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 
 /// Base model class for all Hive models in the GasOMeter app
 /// Provides common fields for sync and versioning

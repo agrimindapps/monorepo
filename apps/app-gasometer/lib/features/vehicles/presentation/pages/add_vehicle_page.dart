@@ -4,7 +4,7 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/presentation/widgets/form_section_header.dart';

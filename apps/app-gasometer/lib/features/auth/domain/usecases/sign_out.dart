@@ -1,11 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../repositories/auth_repository.dart';
 
-@lazySingleton
+@injectable
 class SignOut implements NoParamsUseCase<Unit> {
 
   SignOut(this.repository);

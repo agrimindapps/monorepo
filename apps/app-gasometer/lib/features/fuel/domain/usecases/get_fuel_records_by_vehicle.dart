@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/fuel_record_entity.dart';
 import '../repositories/fuel_repository.dart';
 
-@lazySingleton
+@injectable
 class GetFuelRecordsByVehicle implements UseCase<List<FuelRecordEntity>, GetFuelRecordsByVehicleParams> {
 
   GetFuelRecordsByVehicle(this.repository);
@@ -14,11 +10,11 @@ class GetFuelRecordsByVehicle implements UseCase<List<FuelRecordEntity>, GetFuel
 
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> call(GetFuelRecordsByVehicleParams params) async {
-    return await repository.getFuelRecordsByVehicle(params.vehicleId);
+    return repository.getFuelRecordsByVehicle(params.vehicleId);
   }
 }
 
-class GetFuelRecordsByVehicleParams extends UseCaseParams {
+class GetFuelRecordsByVehicleParams with EquatableMixin {
 
   const GetFuelRecordsByVehicleParams({required this.vehicleId});
   final String vehicleId;

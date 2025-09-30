@@ -1,11 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../repositories/fuel_repository.dart';
 
-@lazySingleton
+@injectable
 class DeleteFuelRecord implements UseCase<Unit, DeleteFuelRecordParams> {
 
   DeleteFuelRecord(this.repository);
@@ -14,14 +10,14 @@ class DeleteFuelRecord implements UseCase<Unit, DeleteFuelRecordParams> {
   @override
   Future<Either<Failure, Unit>> call(DeleteFuelRecordParams params) async {
     if (params.id.isEmpty) {
-      return const Left(InvalidFuelDataFailure('ID do registro é obrigatório'));
+      return const Left(ValidationFailure('ID do registro é obrigatório'));
     }
 
-    return await repository.deleteFuelRecord(params.id);
+    return repository.deleteFuelRecord(params.id);
   }
 }
 
-class DeleteFuelRecordParams extends UseCaseParams {
+class DeleteFuelRecordParams with EquatableMixin {
 
   const DeleteFuelRecordParams({required this.id});
   final String id;

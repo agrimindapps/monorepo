@@ -1,7 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
 import '../../domain/entities/report_comparison_entity.dart';
 import '../../domain/entities/report_summary_entity.dart';
 import '../../domain/usecases/compare_reports.dart';
@@ -484,28 +482,10 @@ class ReportsProvider extends ChangeNotifier {
     // Authentication failures
     else if (failure is AuthenticationFailure) {
       return 'Erro de autenticação. Faça login novamente.';
-    } else if (failure is AuthorizationFailure) {
-      return 'Acesso negado. Verifique suas permissões.';
     }
-    // Vehicle specific failures
-    else if (failure is VehicleNotFoundFailure) {
-      return 'Veículo não encontrado.';
-    } else if (failure is DuplicateVehicleFailure) {
-      return 'Veículo duplicado encontrado.';
-    }
-    // Fuel specific failures
-    else if (failure is InvalidFuelDataFailure) {
-      return 'Dados de combustível inválidos.';
-    }
-    // Maintenance specific failures
-    else if (failure is MaintenanceNotFoundFailure) {
-      return 'Manutenção não encontrada.';
-    }
-    // Sync failures
-    else if (failure is SyncFailure) {
-      return 'Erro de sincronização. Tente novamente.';
-    } else if (failure is OfflineFailure) {
-      return 'Sem conexão. Algumas funcionalidades podem não estar disponíveis.';
+    // Validation failures (covers vehicle not found, invalid data, etc)
+    else if (failure is ValidationFailure) {
+      return failure.message;
     }
     // Default case
     else {

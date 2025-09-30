@@ -48,11 +48,16 @@ import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
 import 'core_package_integration.dart';
+import 'injection.dart' as injectable;
 import 'repositories_di.dart';
 
 final sl = core.GetIt.instance;
 
 Future<void> init() async {
+  // ===== INJECTABLE AUTO-WIRING =====
+  // Configure Injectable dependencies first (automatic DI)
+  await injectable.configureDependencies();
+
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
   // Configure all Clean Architecture dependencies first
   configureAllRepositoriesDependencies();

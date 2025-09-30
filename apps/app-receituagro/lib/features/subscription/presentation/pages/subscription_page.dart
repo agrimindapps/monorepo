@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
 import '../providers/subscription_provider.dart';
@@ -32,7 +33,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return provider_lib.ChangeNotifierProvider(
-      create: (_) => SubscriptionProvider()..loadSubscriptionData(),
+      create: (_) => GetIt.instance<SubscriptionProvider>()..loadSubscriptionData(),
       child: provider_lib.Consumer<SubscriptionProvider>(
         builder: (context, provider, child) {
           // Mostrar mensagens se existirem

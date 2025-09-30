@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/fuel_record_entity.dart';
 import '../repositories/fuel_repository.dart';
 
-@lazySingleton
+@injectable
 class GetAverageConsumption implements UseCase<double, GetAverageConsumptionParams> {
 
   GetAverageConsumption(this.repository);
@@ -18,11 +14,11 @@ class GetAverageConsumption implements UseCase<double, GetAverageConsumptionPara
       return const Left(ValidationFailure('ID do veículo é obrigatório'));
     }
 
-    return await repository.getAverageConsumption(params.vehicleId);
+    return repository.getAverageConsumption(params.vehicleId);
   }
 }
 
-class GetAverageConsumptionParams extends UseCaseParams {
+class GetAverageConsumptionParams with EquatableMixin {
 
   const GetAverageConsumptionParams({required this.vehicleId});
   final String vehicleId;
@@ -31,7 +27,7 @@ class GetAverageConsumptionParams extends UseCaseParams {
   List<Object> get props => [vehicleId];
 }
 
-@lazySingleton
+@injectable
 class GetTotalSpent implements UseCase<double, GetTotalSpentParams> {
 
   GetTotalSpent(this.repository);
@@ -43,7 +39,7 @@ class GetTotalSpent implements UseCase<double, GetTotalSpentParams> {
       return const Left(ValidationFailure('ID do veículo é obrigatório'));
     }
 
-    return await repository.getTotalSpent(
+    return repository.getTotalSpent(
       params.vehicleId,
       startDate: params.startDate,
       endDate: params.endDate,
@@ -51,7 +47,7 @@ class GetTotalSpent implements UseCase<double, GetTotalSpentParams> {
   }
 }
 
-class GetTotalSpentParams extends UseCaseParams {
+class GetTotalSpentParams with EquatableMixin {
 
   const GetTotalSpentParams({
     required this.vehicleId,
@@ -66,7 +62,7 @@ class GetTotalSpentParams extends UseCaseParams {
   List<Object?> get props => [vehicleId, startDate, endDate];
 }
 
-@lazySingleton
+@injectable
 class GetRecentFuelRecords implements UseCase<List<FuelRecordEntity>, GetRecentFuelRecordsParams> {
 
   GetRecentFuelRecords(this.repository);
@@ -78,11 +74,11 @@ class GetRecentFuelRecords implements UseCase<List<FuelRecordEntity>, GetRecentF
       return const Left(ValidationFailure('ID do veículo é obrigatório'));
     }
 
-    return await repository.getRecentFuelRecords(params.vehicleId, limit: params.limit);
+    return repository.getRecentFuelRecords(params.vehicleId, limit: params.limit);
   }
 }
 
-class GetRecentFuelRecordsParams extends UseCaseParams {
+class GetRecentFuelRecordsParams with EquatableMixin {
 
   const GetRecentFuelRecordsParams({
     required this.vehicleId,

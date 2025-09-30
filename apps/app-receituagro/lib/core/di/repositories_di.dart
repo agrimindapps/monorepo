@@ -6,8 +6,6 @@ import '../../features/busca_avancada/di/busca_di.dart';
 import '../../features/culturas/di/culturas_di.dart';
 // Defensivos
 import '../../features/defensivos/di/defensivos_di.dart';
-// Subscription (será criado)
-import '../../features/subscription/di/subscription_di.dart';
 
 /// Configuração centralizada de todos os repositories
 /// Segue padrão Clean Architecture + GetIt para DI
@@ -16,15 +14,14 @@ import '../../features/subscription/di/subscription_di.dart';
 void configureAllRepositoriesDependencies() {
   // Configurar dependências de culturas
   configureCulturasDependencies();
-  
+
   // Configurar dependências de defensivos
   configureDefensivosDependencies();
-  
+
   // Configurar dependências de busca avançada
   configureBuscaDependencies();
-  
-  // Configurar dependências de subscription
-  configureSubscriptionDependencies();
+
+  // Subscription agora usa Injectable - configurado automaticamente
 }
 
 /// Função para limpar todas as dependências (útil para testes)

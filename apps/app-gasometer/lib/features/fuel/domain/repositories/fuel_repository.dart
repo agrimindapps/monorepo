@@ -1,6 +1,5 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/error/failures.dart';
 import '../entities/fuel_record_entity.dart';
 
 abstract class FuelRepository {

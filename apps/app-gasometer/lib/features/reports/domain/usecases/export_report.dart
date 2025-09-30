@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@lazySingleton
+@injectable
 class ExportReportToCSV implements UseCase<String, ExportReportToCSVParams> {
 
   ExportReportToCSV(this.repository);
@@ -14,11 +10,11 @@ class ExportReportToCSV implements UseCase<String, ExportReportToCSVParams> {
 
   @override
   Future<Either<Failure, String>> call(ExportReportToCSVParams params) async {
-    return await repository.exportReportToCSV(params.report);
+    return repository.exportReportToCSV(params.report);
   }
 }
 
-@lazySingleton
+@injectable
 class ExportReportToPDF implements UseCase<String, ExportReportToPDFParams> {
 
   ExportReportToPDF(this.repository);
@@ -26,11 +22,11 @@ class ExportReportToPDF implements UseCase<String, ExportReportToPDFParams> {
 
   @override
   Future<Either<Failure, String>> call(ExportReportToPDFParams params) async {
-    return await repository.exportReportToPDF(params.report);
+    return repository.exportReportToPDF(params.report);
   }
 }
 
-class ExportReportToCSVParams extends UseCaseParams {
+class ExportReportToCSVParams with EquatableMixin {
 
   const ExportReportToCSVParams({required this.report});
   final ReportSummaryEntity report;
@@ -39,7 +35,7 @@ class ExportReportToCSVParams extends UseCaseParams {
   List<Object> get props => [report];
 }
 
-class ExportReportToPDFParams extends UseCaseParams {
+class ExportReportToPDFParams with EquatableMixin {
 
   const ExportReportToPDFParams({required this.report});
   final ReportSummaryEntity report;
@@ -47,4 +43,3 @@ class ExportReportToPDFParams extends UseCaseParams {
   @override
   List<Object> get props => [report];
 }
-

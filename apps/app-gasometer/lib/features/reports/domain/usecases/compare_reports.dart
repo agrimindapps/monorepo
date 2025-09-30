@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/report_comparison_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@lazySingleton
+@injectable
 class CompareMonthlyReports implements UseCase<ReportComparisonEntity, CompareMonthlyReportsParams> {
 
   CompareMonthlyReports(this.repository);
@@ -18,7 +14,7 @@ class CompareMonthlyReports implements UseCase<ReportComparisonEntity, CompareMo
       return const Left(ValidationFailure('ID do veículo é obrigatório'));
     }
 
-    return await repository.compareMonthlyReports(
+    return repository.compareMonthlyReports(
       params.vehicleId, 
       params.currentMonth, 
       params.previousMonth,
@@ -26,7 +22,7 @@ class CompareMonthlyReports implements UseCase<ReportComparisonEntity, CompareMo
   }
 }
 
-class CompareMonthlyReportsParams extends UseCaseParams {
+class CompareMonthlyReportsParams with EquatableMixin {
 
   const CompareMonthlyReportsParams({
     required this.vehicleId,
@@ -41,7 +37,7 @@ class CompareMonthlyReportsParams extends UseCaseParams {
   List<Object> get props => [vehicleId, currentMonth, previousMonth];
 }
 
-@lazySingleton
+@injectable
 class CompareYearlyReports implements UseCase<ReportComparisonEntity, CompareYearlyReportsParams> {
 
   CompareYearlyReports(this.repository);
@@ -57,7 +53,7 @@ class CompareYearlyReports implements UseCase<ReportComparisonEntity, CompareYea
       return const Left(ValidationFailure('Anos inválidos'));
     }
 
-    return await repository.compareYearlyReports(
+    return repository.compareYearlyReports(
       params.vehicleId, 
       params.currentYear, 
       params.previousYear,
@@ -65,7 +61,7 @@ class CompareYearlyReports implements UseCase<ReportComparisonEntity, CompareYea
   }
 }
 
-class CompareYearlyReportsParams extends UseCaseParams {
+class CompareYearlyReportsParams with EquatableMixin {
 
   const CompareYearlyReportsParams({
     required this.vehicleId,

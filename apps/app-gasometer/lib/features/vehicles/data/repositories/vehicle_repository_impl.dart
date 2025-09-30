@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart' as local_exceptions;
 import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/logging/services/logging_service.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
@@ -57,7 +54,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
       return Right(localEntities);
       
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -105,9 +102,9 @@ class VehicleRepositoryImpl implements VehicleRepository {
         return Right(localVehicle.toEntity());
       }
       
-      return const Left(VehicleNotFoundFailure('Vehicle not found'));
+      return const Left(ValidationFailure('Vehicle not found'));
       
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
@@ -261,7 +258,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
 
       return Right(vehicleModel.toEntity());
       
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.create,
@@ -270,7 +267,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': vehicle.id},
       );
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.create,
@@ -279,7 +276,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': vehicle.id},
       );
       return Left(ServerFailure(e.message));
-    } on ValidationException catch (e) {
+    } on local_exceptions.ValidationException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.create,
@@ -369,7 +366,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
 
       return Right(vehicleModel.toEntity());
       
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.update,
@@ -378,7 +375,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': vehicle.id},
       );
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.update,
@@ -387,7 +384,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': vehicle.id},
       );
       return Left(ServerFailure(e.message));
-    } on ValidationException catch (e) {
+    } on local_exceptions.ValidationException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.update,
@@ -396,7 +393,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': vehicle.id},
       );
       return Left(ValidationFailure(e.message));
-    } on VehicleNotFoundException catch (e) {
+    } on local_exceptions.VehicleNotFoundException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.update,
@@ -404,7 +401,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         error: e,
         metadata: {'vehicle_id': vehicle.id},
       );
-      return Left(VehicleNotFoundFailure(e.message));
+      return Left(ValidationFailure(e.message));
     } catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
@@ -481,7 +478,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
 
       return const Right(unit);
       
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.delete,
@@ -490,7 +487,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': id},
       );
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.delete,
@@ -499,7 +496,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         metadata: {'vehicle_id': id},
       );
       return Left(ServerFailure(e.message));
-    } on VehicleNotFoundException catch (e) {
+    } on local_exceptions.VehicleNotFoundException catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
         operation: LogOperation.delete,
@@ -507,7 +504,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         error: e,
         metadata: {'vehicle_id': id},
       );
-      return Left(VehicleNotFoundFailure(e.message));
+      return Left(ValidationFailure(e.message));
     } catch (e) {
       await loggingService.logOperationError(
         category: LogCategory.vehicles,
@@ -541,11 +538,11 @@ class VehicleRepositoryImpl implements VehicleRepository {
       
       return const Right(unit);
       
-    } on NetworkException catch (e) {
+    } on local_exceptions.NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
-    } on SyncException catch (e) {
+    } on local_exceptions.SyncException catch (e) {
       return Left(SyncFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));

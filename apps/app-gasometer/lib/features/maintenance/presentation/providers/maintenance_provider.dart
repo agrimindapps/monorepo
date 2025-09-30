@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/providers/base_provider.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/usecases/add_maintenance_record.dart';
 import '../../domain/usecases/delete_maintenance_record.dart';

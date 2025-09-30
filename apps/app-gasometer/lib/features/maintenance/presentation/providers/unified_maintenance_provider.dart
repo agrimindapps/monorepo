@@ -1,9 +1,7 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_filter_service.dart';
 import '../../domain/usecases/add_maintenance_record.dart';

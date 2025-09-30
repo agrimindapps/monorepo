@@ -1,10 +1,15 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/usecases/subscription_usecase.dart';
+import '../../domain/usecases/get_available_products.dart';
+import '../../domain/usecases/get_user_premium_status.dart';
+import '../../domain/usecases/manage_subscription.dart';
+import '../../domain/usecases/purchase_product.dart';
+import '../../domain/usecases/refresh_subscription_status.dart';
+import '../../domain/usecases/restore_purchases.dart';
 
 /// Provider responsável por gerenciar o estado e lógica de negócio de subscription
-/// 
+///
 /// Funcionalidades:
 /// - Verificação de assinatura ativa
 /// - Carregamento de produtos disponíveis
@@ -12,15 +17,30 @@ import '../../domain/usecases/subscription_usecase.dart';
 /// - Restauração de purchases
 /// - Gerenciamento de URLs de subscription
 /// - Estados de loading e erro
+@injectable
 class SubscriptionProvider with ChangeNotifier {
-  // Dependencies - carregados via GetIt
-  late final GetUserPremiumStatusUseCase _getUserPremiumStatusUseCase;
-  late final GetAvailableProductsUseCase _getAvailableProductsUseCase;
-  late final PurchaseProductUseCase _purchaseProductUseCase;
-  late final RestorePurchasesUseCase _restorePurchasesUseCase;
-  late final RefreshSubscriptionStatusUseCase _refreshSubscriptionStatusUseCase;
-  late final ManageSubscriptionUseCase _manageSubscriptionUseCase;
-  
+  SubscriptionProvider({
+    required GetUserPremiumStatusUseCase getUserPremiumStatusUseCase,
+    required GetAvailableProductsUseCase getAvailableProductsUseCase,
+    required PurchaseProductUseCase purchaseProductUseCase,
+    required RestorePurchasesUseCase restorePurchasesUseCase,
+    required RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase,
+    required ManageSubscriptionUseCase manageSubscriptionUseCase,
+  })  : _getUserPremiumStatusUseCase = getUserPremiumStatusUseCase,
+        _getAvailableProductsUseCase = getAvailableProductsUseCase,
+        _purchaseProductUseCase = purchaseProductUseCase,
+        _restorePurchasesUseCase = restorePurchasesUseCase,
+        _refreshSubscriptionStatusUseCase = refreshSubscriptionStatusUseCase,
+        _manageSubscriptionUseCase = manageSubscriptionUseCase;
+
+  // Dependencies - injected via constructor
+  final GetUserPremiumStatusUseCase _getUserPremiumStatusUseCase;
+  final GetAvailableProductsUseCase _getAvailableProductsUseCase;
+  final PurchaseProductUseCase _purchaseProductUseCase;
+  final RestorePurchasesUseCase _restorePurchasesUseCase;
+  final RefreshSubscriptionStatusUseCase _refreshSubscriptionStatusUseCase;
+  final ManageSubscriptionUseCase _manageSubscriptionUseCase;
+
   // State management
   bool _isLoading = false;
   bool _hasActiveSubscription = false;
@@ -30,20 +50,6 @@ class SubscriptionProvider with ChangeNotifier {
   String? _errorMessage;
   String? _successMessage;
   String? _infoMessage;
-  
-  SubscriptionProvider() {
-    _initializeDependencies();
-  }
-  
-  void _initializeDependencies() {
-    final getIt = GetIt.instance;
-    _getUserPremiumStatusUseCase = getIt<GetUserPremiumStatusUseCase>();
-    _getAvailableProductsUseCase = getIt<GetAvailableProductsUseCase>();
-    _purchaseProductUseCase = getIt<PurchaseProductUseCase>();
-    _restorePurchasesUseCase = getIt<RestorePurchasesUseCase>();
-    _refreshSubscriptionStatusUseCase = getIt<RefreshSubscriptionStatusUseCase>();
-    _manageSubscriptionUseCase = getIt<ManageSubscriptionUseCase>();
-  }
 
   // Getters
   bool get isLoading => _isLoading;

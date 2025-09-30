@@ -73,18 +73,19 @@ class TaskGenerationResult {
   }
 }
 
+@injectable
 class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
-  final PlantsRepository repository;
-  final GenerateInitialTasksUseCase? generateInitialTasksUseCase;
-  final PlantTaskGenerator plantTaskGenerator;
-  final PlantTasksRepository? plantTasksRepository;
-
   AddPlantUseCase(
     this.repository, {
     this.generateInitialTasksUseCase,
     PlantTaskGenerator? plantTaskGenerator,
     this.plantTasksRepository,
   }) : plantTaskGenerator = plantTaskGenerator ?? PlantTaskGenerator();
+
+  final PlantsRepository repository;
+  final GenerateInitialTasksUseCase? generateInitialTasksUseCase;
+  final PlantTaskGenerator plantTaskGenerator;
+  final PlantTasksRepository? plantTasksRepository;
 
   @override
   Future<Either<Failure, Plant>> call(AddPlantParams params) async {

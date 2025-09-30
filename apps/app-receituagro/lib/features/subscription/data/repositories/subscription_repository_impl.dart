@@ -4,13 +4,14 @@ import '../../domain/repositories/i_subscription_repository.dart';
 
 /// Implementação do repositório de subscription específico do ReceitaAgro
 /// Utiliza o core ISubscriptionRepository e adiciona funcionalidades específicas do app
+@LazySingleton(as: IAppSubscriptionRepository)
 class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
+  SubscriptionRepositoryImpl(this._coreRepository, this._localStorageRepository);
+
   final ISubscriptionRepository _coreRepository;
   final ILocalStorageRepository _localStorageRepository;
 
   static const String _cacheKey = 'receituagro_premium_status';
-
-  SubscriptionRepositoryImpl(this._coreRepository, this._localStorageRepository);
 
   @override
   Future<Either<Failure, bool>> hasReceitaAgroSubscription() async {

@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/usecases/add_vehicle.dart';
@@ -132,8 +129,8 @@ class VehiclesProvider extends ChangeNotifier {
       return 'Erro de conexão. Verifique sua internet.';
     } else if (failure is CacheFailure) {
       return 'Erro de cache local.';
-    } else if (failure is VehicleNotFoundFailure) {
-      return 'Veículo não encontrado.';
+    } else if (failure is ValidationFailure) {
+      return failure.message;
     } else {
       return 'Erro inesperado. Tente novamente.';
     }

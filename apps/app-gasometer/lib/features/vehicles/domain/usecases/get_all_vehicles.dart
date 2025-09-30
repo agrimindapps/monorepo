@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/vehicle_entity.dart';
 import '../repositories/vehicle_repository.dart';
 
-@lazySingleton
+@injectable
 class GetAllVehicles implements NoParamsUseCase<List<VehicleEntity>> {
 
   GetAllVehicles(this.repository);
@@ -14,6 +10,6 @@ class GetAllVehicles implements NoParamsUseCase<List<VehicleEntity>> {
 
   @override
   Future<Either<Failure, List<VehicleEntity>>> call() async {
-    return await repository.getAllVehicles();
+    return repository.getAllVehicles();
   }
 }

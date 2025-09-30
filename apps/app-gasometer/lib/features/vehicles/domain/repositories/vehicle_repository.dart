@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart';
+
 import '../entities/vehicle_entity.dart';
 
 abstract class VehicleRepository {

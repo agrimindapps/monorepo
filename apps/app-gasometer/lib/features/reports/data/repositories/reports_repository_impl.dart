@@ -1,8 +1,6 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart' as local_exceptions;
 import '../../domain/entities/report_comparison_entity.dart';
 import '../../domain/entities/report_summary_entity.dart';
 import '../../domain/repositories/reports_repository.dart';
@@ -26,9 +24,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       final report = await _dataSource.generateReport(vehicleId, startDate, endDate, 'month');
       return Right(report);
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro ao gerar relatório mensal: ${e.toString()}'));
@@ -51,9 +49,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       final report = await _dataSource.generateReport(vehicleId, startDate, endDate, 'year');
       return Right(report);
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro ao gerar relatório anual: ${e.toString()}'));
@@ -77,9 +75,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       final report = await _dataSource.generateReport(vehicleId, startDate, endDate, 'custom');
       return Right(report);
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro ao gerar relatório personalizado: ${e.toString()}'));
@@ -181,9 +179,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       final trends = await _dataSource.getFuelEfficiencyTrends(vehicleId, months);
       return Right(trends);
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro ao calcular tendências: ${e.toString()}'));
@@ -203,9 +201,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       final analysis = await _dataSource.getCostAnalysis(vehicleId, startDate, endDate);
       return Right(analysis);
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro ao analisar custos: ${e.toString()}'));
@@ -225,9 +223,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       final patterns = await _dataSource.getUsagePatterns(vehicleId, months);
       return Right(patterns);
-    } on CacheException catch (e) {
+    } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
-    } on ServerException catch (e) {
+    } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(UnexpectedFailure('Erro ao analisar padrões de uso: ${e.toString()}'));

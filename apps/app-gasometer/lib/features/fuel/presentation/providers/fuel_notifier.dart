@@ -4,7 +4,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/error/failures.dart' as app_failures;
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/usecases/add_fuel_record.dart';
 import '../../domain/usecases/delete_fuel_record.dart';
@@ -800,16 +799,14 @@ class FuelNotifier extends StateNotifier<FuelState> {
     );
   }
 
-  String _mapFailureToMessage(app_failures.Failure failure) {
-    if (failure is app_failures.InvalidFuelDataFailure) {
+  String _mapFailureToMessage(Failure failure) {
+    if (failure is ValidationFailure) {
       return failure.message;
-    } else if (failure is app_failures.ValidationFailure) {
-      return failure.message;
-    } else if (failure is app_failures.NetworkFailure) {
+    } else if (failure is NetworkFailure) {
       return 'Erro de conexão. Verifique sua internet.';
-    } else if (failure is app_failures.ServerFailure) {
+    } else if (failure is ServerFailure) {
       return 'Erro do servidor. Tente novamente mais tarde.';
-    } else if (failure is app_failures.CacheFailure) {
+    } else if (failure is CacheFailure) {
       return 'Erro no armazenamento local. Tente reiniciar o app.';
     } else {
       return 'Erro inesperado. Tente novamente.';

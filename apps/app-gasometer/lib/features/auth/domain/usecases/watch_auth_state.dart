@@ -1,9 +1,8 @@
 import 'package:core/core.dart' hide Failure;
 
-import '../../../../core/error/failures.dart';
 import '../repositories/auth_repository.dart';
 
-@lazySingleton
+@injectable
 class WatchAuthState {
 
   WatchAuthState(this.repository);

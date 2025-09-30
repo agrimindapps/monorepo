@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@lazySingleton
+@injectable
 class GenerateCustomReport implements UseCase<ReportSummaryEntity, GenerateCustomReportParams> {
 
   GenerateCustomReport(this.repository);
@@ -26,11 +22,11 @@ class GenerateCustomReport implements UseCase<ReportSummaryEntity, GenerateCusto
       return const Left(ValidationFailure('Data final não pode ser no futuro'));
     }
 
-    return await repository.generateCustomReport(params.vehicleId, params.startDate, params.endDate);
+    return repository.generateCustomReport(params.vehicleId, params.startDate, params.endDate);
   }
 }
 
-class GenerateCustomReportParams extends UseCaseParams {
+class GenerateCustomReportParams with EquatableMixin {
 
   const GenerateCustomReportParams({
     required this.vehicleId,

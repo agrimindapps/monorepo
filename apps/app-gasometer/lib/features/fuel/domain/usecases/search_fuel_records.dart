@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/fuel_record_entity.dart';
 import '../repositories/fuel_repository.dart';
 
-@lazySingleton
+@injectable
 class SearchFuelRecords implements UseCase<List<FuelRecordEntity>, SearchFuelRecordsParams> {
 
   SearchFuelRecords(this.repository);
@@ -22,11 +18,11 @@ class SearchFuelRecords implements UseCase<List<FuelRecordEntity>, SearchFuelRec
       return const Left(ValidationFailure('Termo de busca deve ter pelo menos 2 caracteres'));
     }
 
-    return await repository.searchFuelRecords(params.query.trim());
+    return repository.searchFuelRecords(params.query.trim());
   }
 }
 
-class SearchFuelRecordsParams extends UseCaseParams {
+class SearchFuelRecordsParams with EquatableMixin {
 
   const SearchFuelRecordsParams({required this.query});
   final String query;

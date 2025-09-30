@@ -64,6 +64,7 @@ import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
+import 'injection.dart' as injectable;
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/tasks_module.dart';
@@ -71,6 +72,10 @@ import 'modules/tasks_module.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // ===== INJECTABLE AUTO-WIRING =====
+  // Configure Injectable dependencies first (automatic DI)
+  await injectable.configureDependencies();
+
   // External dependencies
   await _initExternal();
 

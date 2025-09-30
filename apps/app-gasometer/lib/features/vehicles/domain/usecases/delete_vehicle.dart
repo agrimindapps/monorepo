@@ -1,11 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../repositories/vehicle_repository.dart';
 
-@lazySingleton
+@injectable
 class DeleteVehicle implements UseCase<Unit, DeleteVehicleParams> {
 
   DeleteVehicle(this.repository);
@@ -13,11 +9,11 @@ class DeleteVehicle implements UseCase<Unit, DeleteVehicleParams> {
 
   @override
   Future<Either<Failure, Unit>> call(DeleteVehicleParams params) async {
-    return await repository.deleteVehicle(params.vehicleId);
+    return repository.deleteVehicle(params.vehicleId);
   }
 }
 
-class DeleteVehicleParams extends UseCaseParams {
+class DeleteVehicleParams with EquatableMixin {
 
   const DeleteVehicleParams({required this.vehicleId});
   final String vehicleId;

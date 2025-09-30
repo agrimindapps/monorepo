@@ -11,16 +11,8 @@ import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
 import '../models/plant_model.dart';
 
+@LazySingleton(as: PlantsRepository)
 class PlantsRepositoryImpl implements PlantsRepository {
-  final PlantsLocalDatasource localDatasource;
-  final PlantsRemoteDatasource remoteDatasource;
-  final NetworkInfo networkInfo;
-  final IAuthRepository authService;
-
-  // ENHANCED FEATURE: Real-time connectivity monitoring
-  StreamSubscription<bool>? _connectivitySubscription;
-  bool _isMonitoringConnectivity = false;
-
   PlantsRepositoryImpl({
     required this.localDatasource,
     required this.remoteDatasource,
@@ -30,6 +22,15 @@ class PlantsRepositoryImpl implements PlantsRepository {
     // ENHANCED FEATURE: Start real-time connectivity monitoring
     _initializeConnectivityMonitoring();
   }
+
+  final PlantsLocalDatasource localDatasource;
+  final PlantsRemoteDatasource remoteDatasource;
+  final NetworkInfo networkInfo;
+  final IAuthRepository authService;
+
+  // ENHANCED FEATURE: Real-time connectivity monitoring
+  StreamSubscription<bool>? _connectivitySubscription;
+  bool _isMonitoringConnectivity = false;
 
   Future<String?> get _currentUserId async {
     return await _getCurrentUserIdWithRetry();

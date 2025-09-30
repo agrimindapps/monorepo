@@ -16,8 +16,6 @@ class GenerateLocalLicense implements UseCase<void, GenerateLocalLicenseParams> 
     return await repository.generateLocalLicense(days: params.days);
   }
 }
-
-
 /// Use case para revogar licença local
 @injectable
 class RevokeLocalLicense implements UseCase<void, NoParams> {

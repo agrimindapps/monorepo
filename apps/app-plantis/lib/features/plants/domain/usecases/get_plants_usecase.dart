@@ -3,10 +3,11 @@ import 'package:core/core.dart';
 import '../entities/plant.dart';
 import '../repositories/plants_repository.dart';
 
+@injectable
 class GetPlantsUseCase implements UseCase<List<Plant>, NoParams> {
-  final PlantsRepository repository;
+  const GetPlantsUseCase(this.repository);
 
-  GetPlantsUseCase(this.repository);
+  final PlantsRepository repository;
 
   @override
   Future<Either<Failure, List<Plant>>> call(NoParams params) {
@@ -14,10 +15,11 @@ class GetPlantsUseCase implements UseCase<List<Plant>, NoParams> {
   }
 }
 
+@injectable
 class GetPlantByIdUseCase implements UseCase<Plant, String> {
-  final PlantsRepository repository;
+  const GetPlantByIdUseCase(this.repository);
 
-  GetPlantByIdUseCase(this.repository);
+  final PlantsRepository repository;
 
   @override
   Future<Either<Failure, Plant>> call(String id) {
@@ -30,10 +32,11 @@ class GetPlantByIdUseCase implements UseCase<Plant, String> {
   }
 }
 
+@injectable
 class SearchPlantsUseCase implements UseCase<List<Plant>, SearchPlantsParams> {
-  final PlantsRepository repository;
+  const SearchPlantsUseCase(this.repository);
 
-  SearchPlantsUseCase(this.repository);
+  final PlantsRepository repository;
 
   @override
   Future<Either<Failure, List<Plant>>> call(SearchPlantsParams params) {

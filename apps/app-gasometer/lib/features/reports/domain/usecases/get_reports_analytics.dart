@@ -1,11 +1,7 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../repositories/reports_repository.dart';
 
-@lazySingleton
+@injectable
 class GetFuelEfficiencyTrends implements UseCase<Map<String, dynamic>, GetFuelEfficiencyTrendsParams> {
 
   GetFuelEfficiencyTrends(this.repository);
@@ -21,11 +17,11 @@ class GetFuelEfficiencyTrends implements UseCase<Map<String, dynamic>, GetFuelEf
       return const Left(ValidationFailure('Número de meses deve ser entre 1 e 24'));
     }
 
-    return await repository.getFuelEfficiencyTrends(params.vehicleId, params.months);
+    return repository.getFuelEfficiencyTrends(params.vehicleId, params.months);
   }
 }
 
-class GetFuelEfficiencyTrendsParams extends UseCaseParams {
+class GetFuelEfficiencyTrendsParams with EquatableMixin {
 
   const GetFuelEfficiencyTrendsParams({
     required this.vehicleId,
@@ -38,7 +34,7 @@ class GetFuelEfficiencyTrendsParams extends UseCaseParams {
   List<Object> get props => [vehicleId, months];
 }
 
-@lazySingleton
+@injectable
 class GetCostAnalysis implements UseCase<Map<String, dynamic>, GetCostAnalysisParams> {
 
   GetCostAnalysis(this.repository);
@@ -54,11 +50,11 @@ class GetCostAnalysis implements UseCase<Map<String, dynamic>, GetCostAnalysisPa
       return const Left(ValidationFailure('Data inicial não pode ser posterior à data final'));
     }
 
-    return await repository.getCostAnalysis(params.vehicleId, params.startDate, params.endDate);
+    return repository.getCostAnalysis(params.vehicleId, params.startDate, params.endDate);
   }
 }
 
-class GetCostAnalysisParams extends UseCaseParams {
+class GetCostAnalysisParams with EquatableMixin {
 
   const GetCostAnalysisParams({
     required this.vehicleId,
@@ -73,7 +69,7 @@ class GetCostAnalysisParams extends UseCaseParams {
   List<Object> get props => [vehicleId, startDate, endDate];
 }
 
-@lazySingleton
+@injectable
 class GetUsagePatterns implements UseCase<Map<String, dynamic>, GetUsagePatternsParams> {
 
   GetUsagePatterns(this.repository);
@@ -89,11 +85,11 @@ class GetUsagePatterns implements UseCase<Map<String, dynamic>, GetUsagePatterns
       return const Left(ValidationFailure('Número de meses deve ser entre 1 e 24'));
     }
 
-    return await repository.getUsagePatterns(params.vehicleId, params.months);
+    return repository.getUsagePatterns(params.vehicleId, params.months);
   }
 }
 
-class GetUsagePatternsParams extends UseCaseParams {
+class GetUsagePatternsParams with EquatableMixin {
 
   const GetUsagePatternsParams({
     required this.vehicleId,

@@ -1,6 +1,4 @@
-import 'package:core/core.dart' hide Failure;
-
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart';
 
 abstract class AuthRepository {
   // Auth State

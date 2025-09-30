@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@lazySingleton
+@injectable
 class GenerateMonthlyReport implements UseCase<ReportSummaryEntity, GenerateMonthlyReportParams> {
 
   GenerateMonthlyReport(this.repository);
@@ -18,11 +14,11 @@ class GenerateMonthlyReport implements UseCase<ReportSummaryEntity, GenerateMont
       return const Left(ValidationFailure('ID do veículo é obrigatório'));
     }
 
-    return await repository.generateMonthlyReport(params.vehicleId, params.month);
+    return repository.generateMonthlyReport(params.vehicleId, params.month);
   }
 }
 
-class GenerateMonthlyReportParams extends UseCaseParams {
+class GenerateMonthlyReportParams with EquatableMixin {
 
   const GenerateMonthlyReportParams({
     required this.vehicleId,

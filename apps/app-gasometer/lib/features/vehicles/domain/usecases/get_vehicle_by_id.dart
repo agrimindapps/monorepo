@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/vehicle_entity.dart';
 import '../repositories/vehicle_repository.dart';
 
-@lazySingleton
+@injectable
 class GetVehicleById implements UseCase<VehicleEntity, GetVehicleByIdParams> {
 
   GetVehicleById(this.repository);
@@ -14,11 +10,11 @@ class GetVehicleById implements UseCase<VehicleEntity, GetVehicleByIdParams> {
 
   @override
   Future<Either<Failure, VehicleEntity>> call(GetVehicleByIdParams params) async {
-    return await repository.getVehicleById(params.vehicleId);
+    return repository.getVehicleById(params.vehicleId);
   }
 }
 
-class GetVehicleByIdParams extends UseCaseParams {
+class GetVehicleByIdParams with EquatableMixin {
 
   const GetVehicleByIdParams({required this.vehicleId});
   final String vehicleId;

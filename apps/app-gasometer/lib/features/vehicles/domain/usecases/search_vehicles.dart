@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/vehicle_entity.dart';
 import '../repositories/vehicle_repository.dart';
 
-@lazySingleton
+@injectable
 class SearchVehicles implements UseCase<List<VehicleEntity>, SearchVehiclesParams> {
 
   SearchVehicles(this.repository);
@@ -14,11 +10,11 @@ class SearchVehicles implements UseCase<List<VehicleEntity>, SearchVehiclesParam
 
   @override
   Future<Either<Failure, List<VehicleEntity>>> call(SearchVehiclesParams params) async {
-    return await repository.searchVehicles(params.query);
+    return repository.searchVehicles(params.query);
   }
 }
 
-class SearchVehiclesParams extends UseCaseParams {
+class SearchVehiclesParams with EquatableMixin {
 
   const SearchVehiclesParams({required this.query});
   final String query;

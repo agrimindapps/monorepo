@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/fuel_record_entity.dart';
 import '../repositories/fuel_repository.dart';
 
-@lazySingleton
+@injectable
 class UpdateFuelRecord implements UseCase<FuelRecordEntity, UpdateFuelRecordParams> {
 
   UpdateFuelRecord(this.repository);
@@ -20,32 +16,32 @@ class UpdateFuelRecord implements UseCase<FuelRecordEntity, UpdateFuelRecordPara
       return validationResult.fold((failure) => Left(failure), (_) => throw Exception());
     }
 
-    return await repository.updateFuelRecord(params.fuelRecord);
+    return repository.updateFuelRecord(params.fuelRecord);
   }
 
   Either<Failure, Unit> _validateFuelRecord(FuelRecordEntity fuelRecord) {
     if (fuelRecord.id.isEmpty) {
-      return const Left(InvalidFuelDataFailure('ID do registro é obrigatório'));
+      return const Left(ValidationFailure('ID do registro é obrigatório'));
     }
 
     if (fuelRecord.vehicleId.isEmpty) {
-      return const Left(InvalidFuelDataFailure('ID do veículo é obrigatório'));
+      return const Left(ValidationFailure('ID do veículo é obrigatório'));
     }
 
     if (fuelRecord.liters <= 0) {
-      return const Left(InvalidFuelDataFailure('Quantidade de litros deve ser maior que zero'));
+      return const Left(ValidationFailure('Quantidade de litros deve ser maior que zero'));
     }
 
     if (fuelRecord.pricePerLiter <= 0) {
-      return const Left(InvalidFuelDataFailure('Preço por litro deve ser maior que zero'));
+      return const Left(ValidationFailure('Preço por litro deve ser maior que zero'));
     }
 
     if (fuelRecord.totalPrice <= 0) {
-      return const Left(InvalidFuelDataFailure('Valor total deve ser maior que zero'));
+      return const Left(ValidationFailure('Valor total deve ser maior que zero'));
     }
 
     if (fuelRecord.odometer <= 0) {
-      return const Left(InvalidFuelDataFailure('Odômetro deve ser maior que zero'));
+      return const Left(ValidationFailure('Odômetro deve ser maior que zero'));
     }
 
     // Validate price consistency
@@ -54,14 +50,14 @@ class UpdateFuelRecord implements UseCase<FuelRecordEntity, UpdateFuelRecordPara
     final tolerance = calculatedTotal * 0.05; // 5% tolerance
 
     if (difference > tolerance) {
-      return const Left(InvalidFuelDataFailure('Valor total não confere com litros × preço por litro'));
+      return const Left(ValidationFailure('Valor total não confere com litros × preço por litro'));
     }
 
     return const Right(unit);
   }
 }
 
-class UpdateFuelRecordParams extends UseCaseParams {
+class UpdateFuelRecordParams with EquatableMixin {
 
   const UpdateFuelRecordParams({required this.fuelRecord});
   final FuelRecordEntity fuelRecord;

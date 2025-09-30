@@ -3,10 +3,11 @@ import 'package:core/core.dart';
 import '../entities/plant.dart';
 import '../repositories/plants_repository.dart';
 
+@injectable
 class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
-  final PlantsRepository repository;
+  const UpdatePlantUseCase(this.repository);
 
-  UpdatePlantUseCase(this.repository);
+  final PlantsRepository repository;
 
   @override
   Future<Either<Failure, Plant>> call(UpdatePlantParams params) async {

@@ -1,6 +1,7 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/error/failures.dart';
+
+
 import '../entities/maintenance_entity.dart';
 
 abstract class MaintenanceRepository {

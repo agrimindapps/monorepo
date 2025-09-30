@@ -1,12 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@lazySingleton
+@injectable
 class GenerateYearlyReport implements UseCase<ReportSummaryEntity, GenerateYearlyReportParams> {
 
   GenerateYearlyReport(this.repository);
@@ -22,11 +18,11 @@ class GenerateYearlyReport implements UseCase<ReportSummaryEntity, GenerateYearl
       return const Left(ValidationFailure('Ano inválido'));
     }
 
-    return await repository.generateYearlyReport(params.vehicleId, params.year);
+    return repository.generateYearlyReport(params.vehicleId, params.year);
   }
 }
 
-class GenerateYearlyReportParams extends UseCaseParams {
+class GenerateYearlyReportParams with EquatableMixin {
 
   const GenerateYearlyReportParams({
     required this.vehicleId,

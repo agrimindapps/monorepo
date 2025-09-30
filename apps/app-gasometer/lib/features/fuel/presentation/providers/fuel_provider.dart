@@ -7,7 +7,6 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/error/error_handler.dart';
 import '../../../../core/error/error_reporter.dart';
-import '../../../../core/error/failures.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/usecases/add_fuel_record.dart';
 import '../../domain/usecases/delete_fuel_record.dart';
@@ -424,7 +423,7 @@ class FuelProvider extends ChangeNotifier {
   }
 
   void _handleError(dynamic error) {
-    if (error is Failure) {
+    if (error is core.Failure) {
       _errorMessage = _mapFailureToMessage(error);
     } else if (error is AppError) {
       _errorMessage = error.displayMessage;
@@ -441,22 +440,22 @@ class FuelProvider extends ChangeNotifier {
     } else {
       _errorMessage = 'Erro inesperado: ${error.toString()}';
     }
-    
+
     debugPrint('🚗 Erro no FuelProvider: $_errorMessage');
     notifyListeners();
   }
 
-  AppError _convertFailureToError(Failure failure) {
-    if (failure is NetworkFailure) {
+  AppError _convertFailureToError(core.Failure failure) {
+    if (failure is core.NetworkFailure) {
       return const NetworkError(
         message: 'Erro de conexão ao carregar dados de combustível',
       );
-    } else if (failure is ServerFailure) {
+    } else if (failure is core.ServerFailure) {
       return const ServerError(
         message: 'Erro do servidor ao processar dados de combustível',
         statusCode: 500,
       );
-    } else if (failure is ValidationFailure) {
+    } else if (failure is core.ValidationFailure) {
       return ValidationError(
         message: failure.message,
       );
@@ -467,16 +466,14 @@ class FuelProvider extends ChangeNotifier {
     }
   }
 
-  String _mapFailureToMessage(Failure failure) {
-    if (failure is InvalidFuelDataFailure) {
+  String _mapFailureToMessage(core.Failure failure) {
+    if (failure is core.ValidationFailure) {
       return failure.message;
-    } else if (failure is ValidationFailure) {
-      return failure.message;
-    } else if (failure is NetworkFailure) {
+    } else if (failure is core.NetworkFailure) {
       return 'Erro de conexão. Verifique sua internet.';
-    } else if (failure is ServerFailure) {
+    } else if (failure is core.ServerFailure) {
       return 'Erro do servidor. Tente novamente mais tarde.';
-    } else if (failure is CacheFailure) {
+    } else if (failure is core.CacheFailure) {
       return 'Erro no armazenamento local. Tente reiniciar o app.';
     } else {
       return 'Erro inesperado. Tente novamente.';

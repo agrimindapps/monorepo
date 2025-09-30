@@ -1,9 +1,5 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../repositories/maintenance_repository.dart';
 
 class DeleteMaintenanceRecordParams extends Equatable {
@@ -23,6 +19,6 @@ class DeleteMaintenanceRecord implements UseCase<Unit, DeleteMaintenanceRecordPa
 
   @override
   Future<Either<Failure, Unit>> call(DeleteMaintenanceRecordParams params) async {
-    return await repository.deleteMaintenanceRecord(params.id);
+    return repository.deleteMaintenanceRecord(params.id);
   }
 }

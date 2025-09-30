@@ -2,10 +2,11 @@ import 'package:core/core.dart';
 
 import '../repositories/plants_repository.dart';
 
+@injectable
 class DeletePlantUseCase implements UseCase<void, String> {
-  final PlantsRepository repository;
+  const DeletePlantUseCase(this.repository);
 
-  DeletePlantUseCase(this.repository);
+  final PlantsRepository repository;
 
   @override
   Future<Either<Failure, void>> call(String id) async {

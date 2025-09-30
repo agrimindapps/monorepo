@@ -1,10 +1,8 @@
-import 'package:core/core.dart' hide Failure, UseCase;
+import 'package:core/core.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../repositories/auth_repository.dart';
 
-@lazySingleton
+@injectable
 class SignInWithEmail implements UseCase<UserEntity, SignInWithEmailParams> {
 
   SignInWithEmail(this.repository);

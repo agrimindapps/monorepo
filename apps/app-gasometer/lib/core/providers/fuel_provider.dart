@@ -1,6 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/error/failures.dart';
 import '../../features/fuel/domain/entities/fuel_record_entity.dart';
 import '../../features/fuel/domain/usecases/add_fuel_record.dart';
 import '../../features/fuel/domain/usecases/delete_fuel_record.dart';

@@ -1,6 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/error/failures.dart';
 import '../../features/vehicles/domain/entities/vehicle_entity.dart';
 import '../../features/vehicles/domain/usecases/add_vehicle.dart';
 import '../../features/vehicles/domain/usecases/delete_vehicle.dart';

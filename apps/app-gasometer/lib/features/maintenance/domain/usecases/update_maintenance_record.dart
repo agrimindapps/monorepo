@@ -1,9 +1,5 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../entities/maintenance_entity.dart';
 import '../repositories/maintenance_repository.dart';
 
@@ -24,6 +20,6 @@ class UpdateMaintenanceRecord implements UseCase<MaintenanceEntity, UpdateMainte
 
   @override
   Future<Either<Failure, MaintenanceEntity>> call(UpdateMaintenanceRecordParams params) async {
-    return await repository.updateMaintenanceRecord(params.maintenance);
+    return repository.updateMaintenanceRecord(params.maintenance);
   }
 }

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/animals_constants.dart';
 import '../../domain/entities/animal_enums.dart';
@@ -35,7 +35,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
           ? _buildSearchField()
           : Row(
               children: [
-                Text(AnimalsConstants.myPets),
+                const Text(AnimalsConstants.myPets),
                 if (hasActiveFilters) ...[
                   const SizedBox(width: 8),
                   Semantics(
@@ -161,8 +161,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                   label: AnimalsConstants.syncPets,
                   hint: AnimalsConstants.syncPetsHint,
                   button: true,
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Icon(Icons.sync),
                       SizedBox(width: 8),
                       Text(AnimalsConstants.synchronize),
@@ -177,8 +177,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                     label: AnimalsConstants.clearAllFilters,
                     hint: AnimalsConstants.clearAllFiltersHint,
                     button: true,
-                    child: Row(
-                      children: const [
+                    child: const Row(
+                      children: [
                         Icon(Icons.clear_all),
                         SizedBox(width: 8),
                         Text(AnimalsConstants.clearFilters),
@@ -192,8 +192,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                   label: AnimalsConstants.settingsLabel,
                   hint: AnimalsConstants.settingsHint,
                   button: true,
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Icon(Icons.settings),
                       SizedBox(width: 8),
                       Text(AnimalsConstants.settings),
@@ -298,9 +298,9 @@ class _AnimalsFilterBottomSheetState
         children: [
           Row(
             children: [
-              Text(
+              const Text(
                 AnimalsConstants.filters,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: AnimalsConstants.filterHeaderFontSize,
                   fontWeight: FontWeight.bold,
                 ),
@@ -316,7 +316,7 @@ class _AnimalsFilterBottomSheetState
                       _tempFilter = const AnimalsFilter();
                     });
                   },
-                  child: Text(AnimalsConstants.clearAll),
+                  child: const Text(AnimalsConstants.clearAll),
                 ),
               ),
               const SizedBox(width: 8),
@@ -329,7 +329,7 @@ class _AnimalsFilterBottomSheetState
                     _applyFilters();
                     Navigator.of(context).pop();
                   },
-                  child: Text(AnimalsConstants.apply),
+                  child: const Text(AnimalsConstants.apply),
                 ),
               ),
             ],

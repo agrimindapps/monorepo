@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
 import '../../domain/calculators/exercise_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
@@ -506,9 +506,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ),
             ],
             
-            if (result.recommendations?.isNotEmpty == true) ...[
+            if (result.recommendations.isNotEmpty == true) ...[
               const SizedBox(height: 16),
-              _buildRecommendationsSection(result.recommendations!),
+              _buildRecommendationsSection(result.recommendations),
             ],
           ],
         ),
@@ -600,7 +600,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.security, color: Colors.orange, size: 20),
+                    const Icon(Icons.security, color: Colors.orange, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Alertas de Segurança',

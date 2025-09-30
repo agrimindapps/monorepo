@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
+import '../../../../shared/constants/reminders_constants.dart';
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_provider.dart';
-import '../../../../shared/constants/reminders_constants.dart';
 
 class RemindersPage extends ConsumerStatefulWidget {
   final String userId;

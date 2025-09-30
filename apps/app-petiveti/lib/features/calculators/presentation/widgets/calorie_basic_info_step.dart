@@ -12,7 +12,7 @@ class CalorieBasicInfoStep extends StatefulWidget {
 
   final CalorieInput input;
   final List<String> validationErrors;
-  final Function(CalorieInput) onInputChanged;
+  final void Function(CalorieInput) onInputChanged;
 
   @override
   State<CalorieBasicInfoStep> createState() => _CalorieBasicInfoStepState();

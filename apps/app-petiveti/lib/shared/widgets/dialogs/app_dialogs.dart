@@ -361,7 +361,7 @@ class AppDialogs {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.favorite,
                         color: Colors.red,
                         size: 20,

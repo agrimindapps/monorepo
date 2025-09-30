@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
 import '../../../../core/design/spacing_tokens.dart';
+import '../providers/detalhe_praga_provider.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 import 'cultura_section_mockup_widget.dart';
 import 'diagnostico_dialog_widget.dart';
@@ -78,9 +79,20 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
 
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(BuildContext context) {
-    final provider =
+    final diagnosticosProvider =
         provider_lib.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
-    provider.clearError();
+    final pragaProvider =
+        provider_lib.Provider.of<DetalhePragaProvider>(context, listen: false);
+
+    diagnosticosProvider.clearError();
+
+    // Recarregar diagnósticos se temos os dados da praga
+    if (pragaProvider.pragaData != null && pragaProvider.pragaData!.idReg.isNotEmpty) {
+      diagnosticosProvider.loadDiagnosticos(
+        pragaProvider.pragaData!.idReg,
+        pragaName: pragaName,
+      );
+    }
   }
 
   /// Constrói lista de diagnósticos agrupados por cultura usando widgets mockup

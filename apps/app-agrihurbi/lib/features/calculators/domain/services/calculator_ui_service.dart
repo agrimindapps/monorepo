@@ -6,11 +6,12 @@ import '../entities/calculator_category.dart';
 import '../entities/calculator_entity.dart';
 
 /// Serviço para helpers de UI das calculadoras
-/// 
+///
 /// Centraliza lógica comum de formatação, navegação e utilitários
 /// Reduz duplicação de código entre as páginas
 class CalculatorUIService {
-  
+  CalculatorUIService._();
+
   // =====================================================================
   // NAVIGATION HELPERS
   // =====================================================================

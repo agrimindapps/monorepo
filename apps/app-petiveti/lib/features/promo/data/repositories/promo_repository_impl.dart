@@ -31,7 +31,7 @@ class PromoRepositoryImpl implements PromoRepository {
       // For now, just simulate success. In a real implementation,
       // this would send the email to a backend service
       if (email.isEmpty || !email.contains('@')) {
-        return Left(ValidationFailure(message: 'E-mail inválido'));
+        return const Left(ValidationFailure(message: 'E-mail inválido'));
       }
       
       return const Right(null);

@@ -1,6 +1,7 @@
+// ignore_for_file: only_throw_errors
+
 import 'package:core/core.dart';
 
-import '../../../../core/network/dio_client.dart';
 import '../models/bovine_model.dart';
 import '../models/equine_model.dart';
 
@@ -30,7 +31,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
   
   // Endpoints da API
   
-  LivestockRemoteDataSourceImpl(_dioClient);
+  LivestockRemoteDataSourceImpl(dioClient);
   
   // === BOVINOS ===
   

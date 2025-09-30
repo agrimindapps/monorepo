@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
+import '../../../../shared/constants/medications_constants.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
-import '../../../../shared/constants/medications_constants.dart';
 import '../widgets/empty_medications_state.dart';
 import '../widgets/medication_card.dart';
 import '../widgets/medication_filters.dart';

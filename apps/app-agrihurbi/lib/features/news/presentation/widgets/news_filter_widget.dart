@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// Provides filtering options for news articles
 class NewsFilterWidget extends StatefulWidget {
   final NewsFilter? currentFilter;
-  final Function(NewsFilter) onApply;
+  final void Function(NewsFilter) onApply;
   final VoidCallback onClear;
 
   const NewsFilterWidget({

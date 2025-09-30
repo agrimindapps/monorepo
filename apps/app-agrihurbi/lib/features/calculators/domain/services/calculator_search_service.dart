@@ -23,11 +23,12 @@ class SearchCriteria {
 }
 
 /// Serviço otimizado de busca com algoritmo single-pass O(n)
-/// 
+///
 /// Substitui múltiplos filtros sequenciais por um único pass através dos dados,
 /// reduzindo complexidade de O(n²) para O(n) + O(n log n) para ordenação.
 class CalculatorSearchService {
-  
+  CalculatorSearchService._();
+
   /// Executa busca otimizada em single-pass
   /// 
   /// Combina todos os filtros em uma única iteração para melhor performance.

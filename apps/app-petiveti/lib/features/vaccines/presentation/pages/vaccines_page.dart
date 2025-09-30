@@ -1,16 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';
 import '../widgets/add_vaccine_form.dart';
+import '../widgets/vaccine_calendar_widget.dart';
 import '../widgets/vaccine_card.dart';
 import '../widgets/vaccine_dashboard_cards.dart';
-import '../widgets/vaccine_calendar_widget.dart';
-import '../widgets/vaccine_quick_actions.dart';
-import '../widgets/vaccine_scheduling_interface.dart';
 import '../widgets/vaccine_history_visualization.dart';
 import '../widgets/vaccine_reminder_management.dart';
+import '../widgets/vaccine_scheduling_interface.dart';
 
 class VaccinesPage extends ConsumerStatefulWidget {
   const VaccinesPage({super.key});
@@ -145,8 +144,8 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
       body: _buildBody(context, vaccinesState),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddVaccine(context),
-        child: const Icon(Icons.add),
         tooltip: 'Adicionar Vacina',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -211,15 +210,15 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   }
 
   Widget _buildDashboardTab(BuildContext context, VaccinesState state) {
-    return SingleChildScrollView(
+    return const SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-          const VaccineDashboardCards(),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
+          VaccineDashboardCards(),
+          SizedBox(height: 8),
           VaccineTimeline(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
         ],
       ),
     );
@@ -289,7 +288,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   }
 
   void _showSearchDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Buscar Vacinas'),
@@ -352,7 +351,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
         initialChildSize: 0.7,
         maxChildSize: 0.95,
         minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
+        builder: (context, scrollController) => DecoratedBox(
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius: const BorderRadius.vertical(
@@ -397,7 +396,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   }
 
   void _deleteVaccine(BuildContext context, String vaccineId) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Vacina'),

@@ -42,12 +42,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, DiagnosticoEntity?>> getById(String id) async {
     try {
-      final result = await _hiveRepository.getByKey(id);
-      if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar diagnóstico por ID: ${result.error?.message}'));
-      }
+      // Tenta buscar por idReg ou objectId
+      final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(id);
 
-      final diagnosticoHive = result.data;
       if (diagnosticoHive == null) {
         return const Right(null);
       }

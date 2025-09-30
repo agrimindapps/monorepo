@@ -60,7 +60,7 @@ class PromoFeaturesSection extends StatelessWidget {
             'Tudo o que você precisa para cuidar da saúde e bem-estar do seu animal de estimação em um único aplicativo.',
             style: TextStyle(
               fontSize: isMobile ? 16 : 18,
-              color: SplashColors.textColor.withOpacity(0.7),
+              color: SplashColors.textColor.withValues(alpha: 0.7),
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -136,7 +136,7 @@ class PromoFeaturesSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 5),
@@ -150,7 +150,7 @@ class PromoFeaturesSection extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: feature.color.withOpacity(0.1),
+              color: feature.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -182,7 +182,7 @@ class PromoFeaturesSection extends StatelessWidget {
               feature.description,
               style: TextStyle(
                 fontSize: 15,
-                color: SplashColors.textColor.withOpacity(0.7),
+                color: SplashColors.textColor.withValues(alpha: 0.7),
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -195,37 +195,37 @@ class PromoFeaturesSection extends StatelessWidget {
 
   List<_FeatureData> _getFeatures() {
     return [
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.pets,
         title: 'Perfis de Pet',
         description: 'Crie perfis detalhados para todos os seus animais de estimação com raça, idade, peso e muito mais.',
         color: SplashColors.petProfilesColor,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.vaccines,
         title: 'Vacinas',
         description: 'Acompanhe o calendário de vacinação e receba notificações para nunca perder uma data importante.',
         color: SplashColors.vaccinesColor,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.medication,
         title: 'Medicamentos',
         description: 'Gerencie os medicamentos, doses e horários para garantir tratamentos eficazes.',
         color: SplashColors.medicationsColor,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.monitor_weight,
         title: 'Controle de Peso',
         description: 'Acompanhe a evolução do peso do seu animal com gráficos intuitivos.',
         color: SplashColors.weightControlColor,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.calendar_today,
         title: 'Histórico de Consultas',
         description: 'Mantenha um registro completo de todas as consultas veterinárias, diagnósticos e recomendações.',
         color: SplashColors.appointmentsColor,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.access_time,
         title: 'Lembretes',
         description: 'Configure alertas personalizados para consultas, medicamentos e outros cuidados importantes.',

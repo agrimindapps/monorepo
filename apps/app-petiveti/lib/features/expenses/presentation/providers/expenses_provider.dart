@@ -5,7 +5,6 @@ import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../../domain/usecases/expense_usecases.dart';
-import '../../../../shared/models/date_range.dart';
 
 // State classes
 class ExpensesState {

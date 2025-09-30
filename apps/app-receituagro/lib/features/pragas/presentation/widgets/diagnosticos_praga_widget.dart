@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as flutter_provider;
 
 import '../../../../core/design/spacing_tokens.dart';
+import '../providers/detalhe_praga_provider.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 import 'diagnostico_dialog_widget.dart';
 import 'diagnostico_filter_widget.dart';
@@ -62,10 +63,18 @@ class DiagnosticosPragaWidget extends StatelessWidget {
 
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(BuildContext context) {
-    // Implementação depende de como o provider é inicializado
-    // Por enquanto, limpa o erro para permitir nova tentativa
-    final provider = flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
-    provider.clearError();
+    final diagnosticosProvider = flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
+    final pragaProvider = flutter_provider.Provider.of<DetalhePragaProvider>(context, listen: false);
+
+    diagnosticosProvider.clearError();
+
+    // Recarregar diagnósticos se temos os dados da praga
+    if (pragaProvider.pragaData != null && pragaProvider.pragaData!.idReg.isNotEmpty) {
+      diagnosticosProvider.loadDiagnosticos(
+        pragaProvider.pragaData!.idReg,
+        pragaName: pragaName,
+      );
+    }
   }
 
   /// Constrói lista de diagnósticos agrupados por cultura

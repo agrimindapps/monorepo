@@ -68,7 +68,7 @@ class PromoHeroSection extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -80,7 +80,7 @@ class PromoHeroSection extends StatelessWidget {
               height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -176,7 +176,7 @@ class PromoHeroSection extends StatelessWidget {
           style: TextStyle(
             fontSize: isMobile ? 20 : 24,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             height: 1.4,
           ),
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
@@ -190,9 +190,9 @@ class PromoHeroSection extends StatelessWidget {
             color: SplashColors.accentColor,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Text(
+          child: const Text(
             SplashConstants.launchStatus,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -209,7 +209,7 @@ class PromoHeroSection extends StatelessWidget {
             appDescription,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               height: 1.5,
             ),
             textAlign: isMobile ? TextAlign.center : TextAlign.start,
@@ -223,9 +223,9 @@ class PromoHeroSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,14 +235,14 @@ class PromoHeroSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               letterSpacing: 1,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             SplashConstants.launchDateFormatted,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -272,7 +272,7 @@ class PromoHeroSection extends StatelessWidget {
           'Faltam apenas $days dias',
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -365,7 +365,7 @@ class PromoHeroSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -408,7 +408,7 @@ class PromoHeroSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             spreadRadius: 2,
             blurRadius: 20,
             offset: const Offset(0, 10),
@@ -425,7 +425,7 @@ class PromoHeroSection extends StatelessWidget {
             return Container(
               width: imageSize,
               height: imageSize,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               child: const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -437,7 +437,7 @@ class PromoHeroSection extends StatelessWidget {
             return Container(
               width: imageSize,
               height: imageSize,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               child: const Icon(
                 Icons.pets,
                 size: 100,

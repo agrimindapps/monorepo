@@ -499,15 +499,15 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
   }
 
   void _shareBovine() {
-    final text = '''
-Bovino: ${_bovine!.commonName}
-Raça: ${_bovine!.breed}
-Aptidão: ${_bovine!.aptitude.displayName}
-Sistema de Criação: ${_bovine!.breedingSystem.displayName}
-País de Origem: ${_bovine!.originCountry}
-
-Compartilhado via AgriHurbi
-''';
+    // final text = '''
+    // Bovino: ${_bovine!.commonName}
+    // Raça: ${_bovine!.breed}
+    // Aptidão: ${_bovine!.aptitude.displayName}
+    // Sistema de Criação: ${_bovine!.breedingSystem.displayName}
+    // País de Origem: ${_bovine!.originCountry}
+    //
+    // Compartilhado via AgriHurbi
+    // ''';
 
     // Note: Implement actual sharing functionality
     ScaffoldMessenger.of(context).showSnackBar(

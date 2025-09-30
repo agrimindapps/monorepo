@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
-import '../providers/auth_provider.dart';
 import '../../../../shared/constants/splash_constants.dart';
+import '../providers/auth_provider.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -65,7 +65,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
         }
       } catch (e) {
         // Se authProvider ainda não está pronto, aguardar mais um pouco
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
         if (!mounted) return;
         
         try {

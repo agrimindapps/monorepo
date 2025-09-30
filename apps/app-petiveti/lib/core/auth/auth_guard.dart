@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 /// Base abstract class for all authentication guards
 abstract class AuthGuard {

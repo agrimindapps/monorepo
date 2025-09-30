@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/riverpod_providers/solid_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';

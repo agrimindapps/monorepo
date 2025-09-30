@@ -182,7 +182,7 @@ class UIComponents {
         child,
         if (isLoading)
           Positioned.fill(
-            child: Container(
+            child: ColoredBox(
               color: backgroundColor ?? AppColors.dialogBarrier,
               child: Center(
                 child: Semantics(
@@ -496,13 +496,13 @@ class UIComponents {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: onSecondaryAction,
-                    child: Text(secondaryActionLabel),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,
                       ),
                     ),
+                    child: Text(secondaryActionLabel),
                   ),
                 ),
               ],

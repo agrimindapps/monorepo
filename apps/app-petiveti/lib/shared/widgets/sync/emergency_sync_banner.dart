@@ -6,11 +6,11 @@ import '../../../core/sync/petiveti_sync_service.dart';
 /// Aparece quando há dados médicos críticos que precisam ser sincronizados
 class EmergencySyncBanner extends StatefulWidget {
   const EmergencySyncBanner({
-    Key? key,
+    super.key,
     this.onDismiss,
     this.onEmergencySync,
     this.persistentMode = false,
-  }) : super(key: key);
+  });
 
   /// Callback quando banner é descartado
   final VoidCallback? onDismiss;
@@ -160,7 +160,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.red.withOpacity(0.3),
+                    color: Colors.red.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -175,7 +175,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -306,7 +306,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
         children: [
           Icon(
             icon,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -314,7 +314,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
             child: Text(
               text,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 12,
               ),
             ),
@@ -342,7 +342,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
   /// Manipula sincronização de emergência
   Future<void> _handleEmergencySync() async {
     // Mostrar indicador de carregamento
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const AlertDialog(
@@ -410,7 +410,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
 
   /// Mostra detalhes da emergência
   void _showEmergencyDetails() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -514,9 +514,9 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
 /// Widget para mostrar status de emergência de forma persistente
 class EmergencyStatusWidget extends StatelessWidget {
   const EmergencyStatusWidget({
-    Key? key,
+    super.key,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   final bool compact;
 

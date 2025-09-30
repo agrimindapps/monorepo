@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../animals/presentation/providers/animals_provider.dart';
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
 import '../widgets/add_weight_form.dart';
+import '../widgets/body_condition_correlation.dart';
 import '../widgets/weight_card.dart';
 import '../widgets/weight_chart_visualization.dart';
 import '../widgets/weight_goal_management.dart';
-import '../widgets/body_condition_correlation.dart';
 
 class WeightPage extends ConsumerStatefulWidget {
   const WeightPage({super.key});
@@ -156,8 +156,8 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       body: _buildBody(context, weightsState, animalsState),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddWeight(context),
-        child: const Icon(Icons.add),
         tooltip: 'Adicionar Registro de Peso',
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -126,6 +126,6 @@ final pregnancyIsFavoriteProvider = FutureProvider<bool>((ref) async {
 
 /// Provider para cálculos rápidos de gestação (sem persistir histórico)
 final quickPregnancyCalculationProvider = FutureProvider.family<CalculationResult, Map<String, dynamic>>((ref, inputs) async {
-  final calculator = const PregnancyGestacaoCalculator();
+  const calculator = PregnancyGestacaoCalculator();
   return calculator.calculate(inputs);
 });

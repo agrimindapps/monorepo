@@ -72,7 +72,7 @@ class PromoFaqSection extends StatelessWidget {
   }
 
   Widget _buildFaqItem(ThemeData theme, FAQ faq) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),

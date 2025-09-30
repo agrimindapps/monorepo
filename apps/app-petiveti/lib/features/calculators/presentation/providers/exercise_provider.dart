@@ -133,7 +133,7 @@ final exerciseIsFavoriteProvider = FutureProvider<bool>((ref) async {
 
 /// Provider para cálculos rápidos de exercício (sem persistir histórico)
 final quickExerciseCalculationProvider = FutureProvider.family<CalculationResult, Map<String, dynamic>>((ref, inputs) async {
-  final calculator = const ExerciseCalculator();
+  const calculator = ExerciseCalculator();
   return calculator.calculate(inputs);
 });
 

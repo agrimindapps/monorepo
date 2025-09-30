@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';

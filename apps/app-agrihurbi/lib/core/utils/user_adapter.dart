@@ -3,6 +3,8 @@ import 'package:core/core.dart' as core_lib;
 
 /// Adapter para converter entre UserEntity local e do core
 class UserAdapter {
+  UserAdapter._();
+
   /// Converte UserEntity local para core UserEntity
   static core_lib.UserEntity localToCore(local.UserEntity localUser) {
     return core_lib.UserEntity(

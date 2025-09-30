@@ -8,7 +8,7 @@ import '../../domain/entities/calculator_category.dart';
 /// Permite filtrar calculadoras por tipo/área de aplicação
 class CalculatorCategoryFilter extends StatelessWidget {
   final CalculatorCategory? selectedCategory;
-  final Function(CalculatorCategory?) onCategoryChanged;
+  final void Function(CalculatorCategory?) onCategoryChanged;
   final VoidCallback onClearFilters;
 
   const CalculatorCategoryFilter({

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/sync/petiveti_sync_service.dart';
 
@@ -7,12 +7,12 @@ import '../../../core/sync/petiveti_sync_service.dart';
 /// Mostra status de sync com informações relevantes para cuidados de pets
 class PetCareSyncIndicator extends StatefulWidget {
   const PetCareSyncIndicator({
-    Key? key,
+    super.key,
     this.showEmergencyStatus = true,
     this.compactMode = false,
     this.onEmergencyTap,
     this.onSyncTap,
-  }) : super(key: key);
+  });
 
   /// Se deve mostrar status de emergência
   final bool showEmergencyStatus;
@@ -188,10 +188,10 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: _getSyncColor(context).withOpacity(0.1),
+        color: _getSyncColor(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _getSyncColor(context).withOpacity(0.3),
+          color: _getSyncColor(context).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -239,11 +239,11 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
               onTap: widget.onEmergencyTap,
               child: Container(
                 padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.red,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.medical_services,
                   color: Colors.white,
                   size: 12,
@@ -328,7 +328,7 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
 
 /// Widget para mostrar detalhes de sincronização
 class PetCareSyncDetailsSheet extends StatelessWidget {
-  const PetCareSyncDetailsSheet({Key? key}) : super(key: key);
+  const PetCareSyncDetailsSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -449,9 +449,9 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -546,7 +546,7 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
               ),
             ),
           ] else ...[
-            Icon(
+            const Icon(
               Icons.check_circle,
               color: Colors.green,
               size: 16,

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/animals/domain/entities/animal.dart';
@@ -139,7 +139,7 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
   }
 
   Widget _buildErrorState(String error) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.error),
         borderRadius: BorderRadius.circular(8),
@@ -158,7 +158,7 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
   }
 
   Widget _buildEmptyState() {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),

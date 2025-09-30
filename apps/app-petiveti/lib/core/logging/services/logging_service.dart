@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
+import '../../utils/uuid_generator.dart';
 import '../entities/log_entry.dart';
 import '../repositories/log_repository.dart';
-import '../../utils/uuid_generator.dart';
 
 /// Centralized logging service that handles all application logging
 class LoggingService {

@@ -193,7 +193,7 @@ class PlantsProvider extends ChangeNotifier {
 
             if (kDebugMode) {
               debugPrint(
-                '✅ PlantsProvider: UI atualizada - ${oldCount} → ${_plants.length} plantas',
+                '✅ PlantsProvider: UI atualizada - $oldCount → ${_plants.length} plantas',
               );
             }
           } else {

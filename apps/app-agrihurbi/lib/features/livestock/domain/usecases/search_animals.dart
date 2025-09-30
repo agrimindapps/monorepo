@@ -1,8 +1,5 @@
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:core/core.dart' hide Failure, ValidationFailure;
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';

@@ -1,6 +1,7 @@
+// ignore_for_file: overridden_fields
+
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:core/core.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'market_model.g.dart';
 
@@ -10,68 +11,68 @@ part 'market_model.g.dart';
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 5) // Ensure unique typeId across the app
 class MarketModel extends MarketEntity {
-  @HiveField(0)
   @override
+  @HiveField(0)
   final String id;
 
-  @HiveField(1)
   @override
+  @HiveField(1)
   final String name;
 
-  @HiveField(2)
   @override
+  @HiveField(2)
   final String symbol;
 
-  @HiveField(3)
   @override
+  @HiveField(3)
   final MarketType type;
 
-  @HiveField(4)
   @override
+  @HiveField(4)
   final double currentPrice;
 
-  @HiveField(5)
   @override
+  @HiveField(5)
   final double previousPrice;
 
-  @HiveField(6)
   @override
+  @HiveField(6)
   final double changePercent;
 
-  @HiveField(7)
   @override
+  @HiveField(7)
   final double volume;
 
-  @HiveField(8)
   @override
+  @HiveField(8)
   final String currency;
 
-  @HiveField(9)
   @override
+  @HiveField(9)
   final String unit;
 
-  @HiveField(10)
   @override
+  @HiveField(10)
   final String exchange;
 
-  @HiveField(11)
   @override
+  @HiveField(11)
   final DateTime lastUpdated;
 
-  @HiveField(12)
   @override
+  @HiveField(12)
   final MarketStatus status;
 
-  @HiveField(13)
   @override
+  @HiveField(13)
   final List<PriceHistoryModel> history;
 
-  @HiveField(14)
   @override
+  @HiveField(14)
   final String? description;
 
-  @HiveField(15)
   @override
+  @HiveField(15)
   final String? imageUrl;
 
   const MarketModel({
@@ -207,32 +208,32 @@ class MarketModel extends MarketEntity {
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 6)
 class PriceHistoryModel extends PriceHistory {
-  @HiveField(0)
   @override
+  @HiveField(0)
   final DateTime date;
 
-  @HiveField(1)
   @override
+  @HiveField(1)
   final double price;
 
-  @HiveField(2)
   @override
+  @HiveField(2)
   final double volume;
 
-  @HiveField(3)
   @override
+  @HiveField(3)
   final double high;
 
-  @HiveField(4)
   @override
+  @HiveField(4)
   final double low;
 
-  @HiveField(5)
   @override
+  @HiveField(5)
   final double open;
 
-  @HiveField(6)
   @override
+  @HiveField(6)
   final double close;
 
   const PriceHistoryModel({

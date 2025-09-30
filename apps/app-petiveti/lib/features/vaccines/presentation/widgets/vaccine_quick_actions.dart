@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';
@@ -122,7 +122,7 @@ class VaccineQuickActions extends ConsumerWidget {
       return;
     }
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Marcar como Aplicada'),
@@ -160,7 +160,7 @@ class VaccineQuickActions extends ConsumerWidget {
   void _scheduleReminder(BuildContext context, WidgetRef ref) {
     if (vaccine.nextDueDate == null) return;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _ReminderDatePicker(
         vaccine: vaccine,
@@ -184,7 +184,7 @@ class VaccineQuickActions extends ConsumerWidget {
   }
 
   void _rescheduleVaccine(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _RescheduleDatePicker(
         vaccine: vaccine,

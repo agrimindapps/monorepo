@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/error/failures.dart' as app_failures;
@@ -311,9 +309,7 @@ class FuelNotifier extends StateNotifier<FuelState> {
 
   Future<void> _saveOfflineQueue() async {
     try {
-      if (_offlineQueueBox == null) {
-        _offlineQueueBox = await Hive.openBox('fuel_offline_queue');
-      }
+      _offlineQueueBox ??= await Hive.openBox('fuel_offline_queue');
 
       final data = state.pendingRecords.map((r) => r.toFirebaseMap()).toList();
       await _offlineQueueBox?.put('pending_records', data);

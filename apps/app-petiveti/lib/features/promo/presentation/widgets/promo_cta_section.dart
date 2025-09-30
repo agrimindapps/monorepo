@@ -68,7 +68,7 @@ class PromoCTASection extends StatelessWidget {
             'Seja um dos primeiros a usar o PetiVeti e transforme a forma como você cuida do seu melhor amigo.',
             style: TextStyle(
               fontSize: isMobile ? 16 : 18,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -81,22 +81,22 @@ class PromoCTASection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           ),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.schedule,
                 size: 20,
                 color: Colors.white,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 'Lançamento: ${SplashConstants.launchDateFormatted}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -171,7 +171,7 @@ class PromoCTASection extends StatelessWidget {
           'Baixe quando disponível:',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -210,7 +210,7 @@ class PromoCTASection extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

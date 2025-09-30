@@ -1,3 +1,5 @@
+// ignore_for_file: only_throw_errors
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/dio_client.dart';
@@ -574,7 +576,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   ) async {
     try {
       final dio = Dio();
-      final response = await dio.get(
+      final response = await dio.get<Map<String, dynamic>>(
         'https://api.openweathermap.org/data/2.5/weather',
         queryParameters: {
           'lat': latitude,
@@ -584,10 +586,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
+      final data = response.data ?? <String, dynamic>{};
       return WeatherMeasurementModel.fromOpenWeatherMapApi(
-        response.data as Map<String, dynamic>,
+        data,
         'external_${latitude}_$longitude',
-        (response.data['name'] as String?) ?? 'Unknown Location',
+        (data['name'] as String?) ?? 'Unknown Location',
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -607,7 +610,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     try {
       // First, get location key
       final locationDio = Dio();
-      final locationResponse = await locationDio.get(
+      final locationResponse = await locationDio.get<Map<String, dynamic>>(
         'https://dataservice.accuweather.com/locations/v1/cities/geoposition/search',
         queryParameters: {
           'apikey': _accuWeatherApiKey,
@@ -615,11 +618,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
-      final locationKey = locationResponse.data['Key'];
+      final locationData = locationResponse.data ?? <String, dynamic>{};
+      final locationKey = locationData['Key'];
 
       // Then get current conditions
       final weatherDio = Dio();
-      final weatherResponse = await weatherDio.get(
+      final weatherResponse = await weatherDio.get<List<dynamic>>(
         'https://dataservice.accuweather.com/currentconditions/v1/$locationKey',
         queryParameters: {
           'apikey': _accuWeatherApiKey,
@@ -627,12 +631,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
-      final weatherData = weatherResponse.data[0];
-      
+      final weatherList = weatherResponse.data ?? <dynamic>[];
+      final weatherData = weatherList.isNotEmpty ? weatherList[0] : <String, dynamic>{};
+
       return WeatherMeasurementModel.fromAccuWeatherApi(
         weatherData as Map<String, dynamic>,
         'external_${latitude}_$longitude',
-        (locationResponse.data['LocalizedName'] as String?) ?? 'Unknown Location',
+        (locationData['LocalizedName'] as String?) ?? 'Unknown Location',
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -652,7 +657,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   ) async {
     try {
       final dio = Dio();
-      final response = await dio.get(
+      final response = await dio.get<Map<String, dynamic>>(
         'https://api.openweathermap.org/data/2.5/forecast',
         queryParameters: {
           'lat': latitude,
@@ -663,8 +668,9 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
-      final List<dynamic> forecastList = (response.data['list'] as List?) ?? [];
-      final cityName = response.data['city']?['name'] ?? 'Unknown Location';
+      final data = response.data ?? <String, dynamic>{};
+      final List<dynamic> forecastList = (data['list'] as List?) ?? [];
+      final cityName = data['city']?['name'] ?? 'Unknown Location';
       
       return forecastList
           .map((forecast) => WeatherMeasurementModel.fromOpenWeatherMapApi(

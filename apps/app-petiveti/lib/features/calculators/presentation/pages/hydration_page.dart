@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
 import '../../domain/calculators/hydration_calculator.dart';
 import '../providers/hydration_provider.dart';

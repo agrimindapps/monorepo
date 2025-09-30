@@ -1,9 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart' as core;
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
-import 'package:core/core.dart' as core;
 
 import '../../cache/cache_service.dart';
 import '../../logging/datasources/log_local_datasource.dart';

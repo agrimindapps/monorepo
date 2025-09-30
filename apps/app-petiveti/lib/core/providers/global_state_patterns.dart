@@ -121,7 +121,7 @@ abstract class BaseAsyncNotifier<T> extends StateNotifier<AsyncState<T>> {
 
   void _logError(dynamic error, StackTrace stackTrace) {
     // In production, send to crash reporting service
-    print('Error in ${runtimeType}: $error');
+    print('Error in $runtimeType: $error');
     print('StackTrace: $stackTrace');
   }
 }

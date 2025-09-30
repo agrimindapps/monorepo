@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
-import '../../detalhe_praga_page.dart';
+import '../pages/detalhe_praga_page.dart';
 import '../providers/home_pragas_provider.dart';
 
 /// Widget para exibir seção de sugestões com carrossel na home de pragas

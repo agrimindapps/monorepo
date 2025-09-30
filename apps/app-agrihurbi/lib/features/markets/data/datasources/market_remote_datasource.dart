@@ -378,7 +378,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int offset = 0,
   }) async {
     // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     var markets = _generateMockMarkets();
     
@@ -405,7 +405,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
 
   @override
   Future<MarketModel> getMarketById(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     
     final markets = _generateMockMarkets();
     final market = markets.firstWhere((m) => m.id == id);
@@ -418,7 +418,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     MarketFilter? filter,
     int limit = 20,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     
     return getMarkets(
       filter: filter?.copyWith(searchQuery: query),
@@ -431,7 +431,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     required MarketType type,
     int limit = 20,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 350));
+    await Future<void>.delayed(const Duration(milliseconds: 350));
     
     final markets = _generateMockMarkets();
     return markets.where((m) => m.type == type).take(limit).toList();
@@ -439,7 +439,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
 
   @override
   Future<MarketSummaryModel> getMarketSummary() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     
     final markets = _generateMockMarkets();
     final gainers = markets.where((m) => m.isUp).toList();
@@ -465,7 +465,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int limit = 10,
     MarketType? type,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     
     var markets = _generateMockMarkets();
     markets = markets.where((m) => m.isUp).toList();
@@ -483,7 +483,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int limit = 10,
     MarketType? type,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     
     var markets = _generateMockMarkets();
     markets = markets.where((m) => m.isDown).toList();
@@ -501,7 +501,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int limit = 10,
     MarketType? type,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     
     var markets = _generateMockMarkets();
     
@@ -520,7 +520,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     required DateTime endDate,
     String interval = '1d',
   }) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     // Generate mock history data
     final history = <PriceHistoryModel>[];

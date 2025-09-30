@@ -187,6 +187,8 @@ class CalculatorFavoritesService {
 
 /// Serviço de busca e filtros para calculadoras
 class CalculatorSearchService {
+  CalculatorSearchService._();
+
   /// Busca calculadoras por termo
   static List<CalculatorEntity> searchCalculators(
     List<CalculatorEntity> calculators,

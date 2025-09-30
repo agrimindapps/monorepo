@@ -613,6 +613,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final data = await provider.exportSettings();
     if (data != null) {
       // Implement file export logic here
+      if (!context.mounted) return;
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Configurações exportadas com sucesso')),
       );

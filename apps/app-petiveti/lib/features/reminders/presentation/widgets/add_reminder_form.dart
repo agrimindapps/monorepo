@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
+import '../../../../features/animals/domain/entities/animal.dart';
+import '../../../../features/animals/presentation/providers/animals_provider.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_provider.dart';
-import '../../../../features/animals/presentation/providers/animals_provider.dart';
-import '../../../../features/animals/domain/entities/animal.dart';
 
 class AddReminderForm extends ConsumerStatefulWidget {
   final Reminder? reminder;

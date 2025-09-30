@@ -12,7 +12,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
 
   final CalorieInput input;
   final List<String> validationErrors;
-  final Function(CalorieInput) onInputChanged;
+  final void Function(CalorieInput) onInputChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -498,7 +498,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
   }
 
   void _showBcsGuide(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Guia de Condição Corporal (BCS)'),

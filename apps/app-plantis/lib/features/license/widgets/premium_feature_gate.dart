@@ -92,7 +92,7 @@ class PremiumFeatureGate extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.workspace_premium,
             color: PlantisColors.primary,
             size: 32,
@@ -218,7 +218,7 @@ class LicenseExpirationWarning extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.warning, color: Colors.orange),
+          const Icon(Icons.warning, color: Colors.orange),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

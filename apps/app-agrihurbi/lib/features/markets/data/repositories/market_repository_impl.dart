@@ -3,7 +3,6 @@ import 'package:app_agrihurbi/core/network/network_info.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/markets/data/datasources/market_local_datasource.dart';
 import 'package:app_agrihurbi/features/markets/data/datasources/market_remote_datasource.dart';
-import 'package:app_agrihurbi/features/markets/data/models/market_model.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/failures/market_failures.dart';

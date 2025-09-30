@@ -368,6 +368,8 @@ class PasswordValidator {
 
 /// Logging utility for security validation events
 class SecurityLogger {
+  SecurityLogger._();
+
   static void logValidationAttempt(String type, bool success) {
     if (!success) {
       developer.log(

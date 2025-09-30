@@ -2,15 +2,14 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
-import 'petiveti_sync_config.dart';
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';
-import '../../features/medications/domain/entities/sync/medication_sync_entity.dart';
 import '../../features/appointments/domain/entities/sync/appointment_sync_entity.dart';
-import '../../features/weight/domain/entities/sync/weight_sync_entity.dart';
+import '../../features/medications/domain/entities/sync/medication_sync_entity.dart';
 import '../../features/settings/domain/entities/sync/user_settings_sync_entity.dart';
+import '../../features/weight/domain/entities/sync/weight_sync_entity.dart';
+import 'petiveti_sync_config.dart';
 
 /// Serviço principal de sincronização para Petiveti
 /// Integra com UnifiedSyncManager e gerencia funcionalidades específicas de pet care
@@ -109,7 +108,7 @@ class PetivetiSyncService {
           _handleStatusChange(petivetiStatus);
         }
       },
-      onError: (error) {
+      onError: (Object error) {
         developer.log('Error in status stream: $error', name: 'PetivetiSync');
       },
     );
@@ -121,7 +120,7 @@ class PetivetiSyncService {
           _handleSyncEvent(event);
         }
       },
-      onError: (error) {
+      onError: (Object error) {
         developer.log('Error in event stream: $error', name: 'PetivetiSync');
       },
     );
@@ -304,7 +303,7 @@ class PetivetiSyncService {
   /// Força sync de dados de emergência
   Future<Either<Failure, void>> forceEmergencySync() async {
     if (!_isInitialized) {
-      return Left(InitializationFailure('Sync service not initialized'));
+      return const Left(InitializationFailure('Sync service not initialized'));
     }
 
     developer.log('Forcing emergency sync', name: 'PetivetiSync');

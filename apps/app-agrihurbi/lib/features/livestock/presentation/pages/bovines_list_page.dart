@@ -253,8 +253,8 @@ class _BovinesListPageState extends State<BovinesListPage> {
   }
 
   void _handleMenuAction(String action) {
-    final provider = context.read<LivestockProvider>();
-    
+    // final provider = context.read<LivestockProvider>();
+
     switch (action) {
       case 'sync':
         _performSync();

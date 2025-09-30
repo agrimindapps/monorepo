@@ -1,3 +1,5 @@
+// ignore_for_file: only_throw_errors
+
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
@@ -283,8 +285,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-  
-  @override
+
   Future<List<RainGaugeModel>> syncRainGauges(List<RainGaugeModel> localGauges) async {
     try {
       final response = await _dioClient.post(
@@ -357,8 +358,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-  
-  @override
+
   Future<WeatherStatisticsModel> getStatisticsById(String id) async {
     try {
       final response = await _dioClient.get('$_baseEndpoint/statistics/$id');
@@ -380,8 +380,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   Future<List<WeatherStatisticsModel>> getStatisticsByPeriod(String period) async {
     return getStatistics(period: period);
   }
-  
-  @override
+
   Future<WeatherStatisticsModel> generateStatistics({
     required String locationId,
     required String period,
@@ -406,8 +405,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-  
-  @override
+
   Future<WeatherStatisticsModel> updateStatistics(WeatherStatisticsModel statistics) async {
     try {
       final response = await _dioClient.put(
@@ -425,8 +423,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-  
-  @override
+
   Future<void> deleteStatistics(String id) async {
     try {
       await _dioClient.delete('$_baseEndpoint/statistics/$id');

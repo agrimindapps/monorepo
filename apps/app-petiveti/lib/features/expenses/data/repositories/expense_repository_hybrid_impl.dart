@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';

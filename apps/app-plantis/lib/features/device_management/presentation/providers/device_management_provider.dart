@@ -157,6 +157,16 @@ class DeviceManagementProvider extends ChangeNotifier {
 
       _currentDevice = await DeviceModel.fromCurrentDevice();
 
+      // CRITICAL: Verificar se é null (plataforma não suportada)
+      if (_currentDevice == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '🚫 DeviceProvider: Current platform not supported for device management',
+          );
+        }
+        return;
+      }
+
       if (kDebugMode) {
         debugPrint(
           '📱 DeviceProvider: Current device identified: ${_currentDevice!.name}',

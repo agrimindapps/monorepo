@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/anesthesia_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
-import '../../../../core/di/injection_container.dart' as di;
 
 /// Estado da calculadora de anestesia
 class AnesthesiaState {

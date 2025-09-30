@@ -15,7 +15,7 @@ class PlantisApp extends ConsumerWidget {
     final router = AppRouter.router(ref);
     
     // Tema simplificado - será migrado para Riverpod posteriormente
-    final currentThemeMode = ThemeMode.system;
+    const currentThemeMode = ThemeMode.system;
 
     return DesktopKeyboardShortcuts(
       child: MaterialApp.router(

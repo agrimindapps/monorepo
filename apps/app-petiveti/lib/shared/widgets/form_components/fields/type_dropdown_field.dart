@@ -204,7 +204,7 @@ class TypeDropdownField<T> extends StatelessWidget {
 
   IconData _getPrefixIcon() {
     if (value != null) {
-      final icon = getIcon?.call(value!);
+      final icon = getIcon?.call(value as T);
       if (icon != null) return icon;
     }
     return defaultIcon ?? Icons.category;

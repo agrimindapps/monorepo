@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../providers/calculator_provider.dart';
 import 'calculator_card_widget.dart';

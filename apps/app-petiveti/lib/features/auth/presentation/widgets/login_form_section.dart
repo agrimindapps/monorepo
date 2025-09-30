@@ -102,13 +102,13 @@ class LoginFormSection extends StatelessWidget {
         keyboardType: TextInputType.emailAddress,
         autocorrect: false,
         textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Email',
           hintText: 'Digite seu email',
-          prefixIcon: const Icon(Icons.email),
-          border: const OutlineInputBorder(),
+          prefixIcon: Icon(Icons.email),
+          border: OutlineInputBorder(),
           helperText: 'Exemplo: usuario@email.com',
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
           ),
@@ -178,7 +178,7 @@ class LoginFormSection extends StatelessWidget {
       hint: rememberMe 
           ? 'Ativado: credenciais serão salvas para próximo acesso'
           : 'Desativado: credenciais não serão salvas',
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(8),

@@ -55,44 +55,28 @@
 ///
 /// @author PetiVeti Development Team
 /// @since 1.0.0
-library form_components;
+library;
 
 import 'package:flutter/material.dart';
+
 import 'fields/animal_selector_field.dart';
 import 'fields/date_time_picker_field.dart';
 import 'fields/notes_field.dart';
 import 'fields/type_dropdown_field.dart';
 import 'sections/form_submit_section.dart';
 
-// ==========================================================================
-// FORM FIELDS - Campos de Formulário
-// ==========================================================================
-
-/// Seleção de animais com interface rica
-export 'fields/animal_selector_field.dart';
-
-/// Pickers de data/hora unificados
-export 'fields/date_time_picker_field.dart';
-
-/// Campos de observações padronizados
-export 'fields/notes_field.dart';
-
-/// Dropdowns com ícones e cores
-export 'fields/type_dropdown_field.dart';
-
-// ==========================================================================
-// FORM SECTIONS - Seções de Formulário
-// ==========================================================================
-
-/// Seções de submit/cancel consistentes
-export 'sections/form_submit_section.dart';
-
-// ==========================================================================
-// FORM COMPONENTS ORIGINAIS - Mantidos para compatibilidade
-// ==========================================================================
-
 /// Componentes originais do FormComponents
 export '../form_components.dart';
+/// Seleção de animais com interface rica
+export 'fields/animal_selector_field.dart';
+/// Pickers de data/hora unificados
+export 'fields/date_time_picker_field.dart';
+/// Campos de observações padronizados
+export 'fields/notes_field.dart';
+/// Dropdowns com ícones e cores
+export 'fields/type_dropdown_field.dart';
+/// Seções de submit/cancel consistentes
+export 'sections/form_submit_section.dart';
 
 // ==========================================================================
 // CLASSES DE CONVENIÊNCIA

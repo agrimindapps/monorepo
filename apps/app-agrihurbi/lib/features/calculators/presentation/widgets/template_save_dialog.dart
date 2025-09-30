@@ -33,7 +33,7 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
   final _descriptionController = TextEditingController();
   final _tagController = TextEditingController();
   
-  List<String> _tags = [];
+  final List<String> _tags = [];
   bool _isLoading = false;
   bool _isPublic = false;
 

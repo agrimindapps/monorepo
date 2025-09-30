@@ -79,6 +79,8 @@ class CalculatorEngine {
 
 /// Utilitários matemáticos para cálculos
 class CalculatorMath {
+  CalculatorMath._();
+
   /// Converte graus para radianos
   static double degreesToRadians(double degrees) {
     return degrees * math.pi / 180;

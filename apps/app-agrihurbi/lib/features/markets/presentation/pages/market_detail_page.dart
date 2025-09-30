@@ -440,14 +440,14 @@ class _MarketDetailPageState extends State<MarketDetailPage>
   void _shareMarket() {
     if (_market == null) return;
 
-    final shareText = '''
-${_market!.name} (${_market!.symbol})
-Preço atual: ${_market!.formattedPrice}
-Variação: ${_market!.formattedChange}
-Bolsa: ${_market!.exchange}
-
-Via AgriHurbi
-''';
+    // final shareText = '''
+    // ${_market!.name} (${_market!.symbol})
+    // Preço atual: ${_market!.formattedPrice}
+    // Variação: ${_market!.formattedChange}
+    // Bolsa: ${_market!.exchange}
+    //
+    // Via AgriHurbi
+    // ''';
 
     // TODO: Implement share functionality
     ScaffoldMessenger.of(context).showSnackBar(

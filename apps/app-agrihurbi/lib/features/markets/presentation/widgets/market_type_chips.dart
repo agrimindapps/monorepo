@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// 
 /// Displays market types as selectable chips for filtering
 class MarketTypeChips extends StatelessWidget {
-  final Function(MarketType) onTypeSelected;
+  final void Function(MarketType) onTypeSelected;
 
   const MarketTypeChips({
     super.key,

@@ -109,9 +109,7 @@ class AccessibilityUtils {
     
     // Add sub-items hint
     if (hasSubItems) {
-      semanticHint = (semanticHint ?? '') + 
-          (semanticHint?.isNotEmpty == true ? '. ' : '') +
-          'Possui sub-itens. Toque duas vezes para expandir.';
+      semanticHint = '${semanticHint ?? ''}${semanticHint?.isNotEmpty == true ? '. ' : ''}Possui sub-itens. Toque duas vezes para expandir.';
     }
     
     return Semantics(

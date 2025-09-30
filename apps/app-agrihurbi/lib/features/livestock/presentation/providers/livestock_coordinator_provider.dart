@@ -123,7 +123,7 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
   }
 
   /// Sincronização completa com callback de progresso
-  Future<bool> performCompleteSync({Function(double)? onProgress}) async {
+  Future<bool> performCompleteSync({void Function(double)? onProgress}) async {
     debugPrint('LivestockCoordinatorProvider: Iniciando sincronização completa');
     
     // Executa sincronização

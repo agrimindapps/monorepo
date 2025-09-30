@@ -17,12 +17,12 @@ import '../widgets/praga_info_widget.dart';
 
 /// Página refatorada seguindo Clean Architecture
 /// Responsabilidade única: coordenar providers e widgets especializados
-class DetalhePragaCleanPage extends StatefulWidget {
+class DetalhePragaPage extends StatefulWidget {
   final String pragaName;
   final String? pragaId;
   final String pragaScientificName;
 
-  const DetalhePragaCleanPage({
+  const DetalhePragaPage({
     super.key,
     required this.pragaName,
     this.pragaId,
@@ -30,10 +30,10 @@ class DetalhePragaCleanPage extends StatefulWidget {
   });
 
   @override
-  State<DetalhePragaCleanPage> createState() => _DetalhePragaCleanPageState();
+  State<DetalhePragaPage> createState() => _DetalhePragaPageState();
 }
 
-class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
+class _DetalhePragaPageState extends State<DetalhePragaPage>
     with TickerProviderStateMixin, PremiumStatusListener {
   late TabController _tabController;
   late DetalhePragaProvider _pragaProvider;
@@ -81,7 +81,10 @@ class _DetalhePragaCleanPageState extends State<DetalhePragaCleanPage>
 
       // Se praga carregada com sucesso, carregar diagnósticos por ID
       if (_pragaProvider.pragaData != null && _pragaProvider.pragaData!.idReg.isNotEmpty) {
-        await _diagnosticosProvider.loadDiagnosticos(_pragaProvider.pragaData!.idReg);
+        await _diagnosticosProvider.loadDiagnosticos(
+          _pragaProvider.pragaData!.idReg,
+          pragaName: widget.pragaName,
+        );
       } else {
         // Diagnósticos só podem ser carregados com idReg válido
       }

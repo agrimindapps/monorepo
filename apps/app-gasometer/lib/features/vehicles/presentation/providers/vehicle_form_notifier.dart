@@ -6,7 +6,6 @@ import 'package:flutter/material.dart' hide FormState;
 
 import '../../../../core/error/app_error.dart' as local_error;
 import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/providers/base_notifier.dart';
 import '../../../../core/services/input_sanitizer.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
@@ -14,12 +13,6 @@ import 'vehicles_notifier.dart';
 
 /// Estado do formulário de veículo
 class VehicleFormState {
-  final VehicleEntity? editingVehicle;
-  final bool isLoading;
-  final local_error.AppError? error;
-  final bool hasChanges;
-  final String selectedFuelType;
-  final File? vehicleImage;
 
   const VehicleFormState({
     this.editingVehicle,
@@ -31,6 +24,12 @@ class VehicleFormState {
   });
 
   const VehicleFormState.initial() : this();
+  final VehicleEntity? editingVehicle;
+  final bool isLoading;
+  final local_error.AppError? error;
+  final bool hasChanges;
+  final String selectedFuelType;
+  final File? vehicleImage;
 
   VehicleFormState copyWith({
     VehicleEntity? editingVehicle,
@@ -169,7 +168,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
           );
         } else {
           state = state.copyWith(
-            error: local_error.PermissionError(
+            error: const local_error.PermissionError(
               permission: 'delete_image',
               message: 'Tentativa de exclusão não autorizada detectada',
             ),
@@ -286,7 +285,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
     // Validar usando FormKey
     if (!formKey.currentState!.validate()) {
       state = state.copyWith(
-        error: local_error.ValidationError(
+        error: const local_error.ValidationError(
           message: 'Por favor, corrija os erros no formulário',
         ),
       );
@@ -300,7 +299,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   VehicleEntity buildVehicleEntity() {
     final currentUser = ref.read(currentUserProvider);
     if (currentUser == null) {
-      throw local_error.AuthenticationError(
+      throw const local_error.AuthenticationError(
         message: 'Usuário não autenticado',
       );
     }

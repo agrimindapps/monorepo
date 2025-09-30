@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as flutter_provider;
 
 import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
+import '../../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
+import '../../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_provider.dart';
 import '../providers/diagnosticos_praga_provider.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
@@ -342,11 +343,14 @@ class _DiagnosticoButton extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => DetalheDiagnosticoPage(
-              diagnosticoId: diagnostico.id,
-              nomeDefensivo: diagnostico.nome,
-              nomePraga: pragaName,
-              cultura: diagnostico.cultura,
+            builder: (context) => flutter_provider.ChangeNotifierProvider(
+              create: (_) => DetalheDiagnosticoProvider(),
+              child: DetalheDiagnosticoPage(
+                diagnosticoId: diagnostico.id,
+                nomeDefensivo: diagnostico.nome,
+                nomePraga: pragaName,
+                cultura: diagnostico.cultura,
+              ),
             ),
           ),
         );

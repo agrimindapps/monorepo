@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Bottom sheet for filtering markets by various criteria
 class MarketFilterSheet extends StatefulWidget {
   final MarketFilter currentFilter;
-  final Function(MarketFilter) onFilterApplied;
+  final void Function(MarketFilter) onFilterApplied;
 
   const MarketFilterSheet({
     super.key,

@@ -64,7 +64,7 @@ class PasswordRecoveryWidget extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: SplashColors.primaryColor),
+          borderSide: const BorderSide(color: SplashColors.primaryColor),
         ),
       ),
     );

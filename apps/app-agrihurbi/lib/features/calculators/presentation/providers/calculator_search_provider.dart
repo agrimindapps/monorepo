@@ -108,7 +108,7 @@ class CalculatorSearchProvider extends ChangeNotifier {
     notifyListeners();
 
     // Simula um pequeno delay para UX
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
 
     applyFilters(allCalculators);
 
@@ -177,8 +177,8 @@ class CalculatorSearchProvider extends ChangeNotifier {
     List<CalculatorEntity> calculators,
     {int daysBack = 30}
   ) {
-    final cutoffDate = DateTime.now().subtract(Duration(days: daysBack));
-    
+    // final cutoffDate = DateTime.now().subtract(Duration(days: daysBack));
+
     return calculators.where((calc) {
       // Assumindo que existe um campo de data de criação ou atualização
       // return calc.createdAt?.isAfter(cutoffDate) ?? false;

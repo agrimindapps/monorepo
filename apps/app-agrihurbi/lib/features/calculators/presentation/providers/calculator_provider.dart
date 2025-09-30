@@ -17,9 +17,7 @@ import '../../domain/usecases/save_calculation_to_history.dart';
 /// Gerencia calculadoras, cálculos, histórico e favoritos
 class CalculatorProvider extends ChangeNotifier {
   final GetCalculators _getCalculators;
-  final GetCalculatorsByCategory _getCalculatorsByCategory;
   final GetCalculatorById _getCalculatorById;
-  final SearchCalculators _searchCalculators;
   final ExecuteCalculation _executeCalculation;
   final GetCalculationHistory _getCalculationHistory;
   final SaveCalculationToHistory _saveCalculationToHistory;
@@ -27,17 +25,13 @@ class CalculatorProvider extends ChangeNotifier {
 
   CalculatorProvider({
     required GetCalculators getCalculators,
-    required GetCalculatorsByCategory getCalculatorsByCategory,
     required GetCalculatorById getCalculatorById,
-    required SearchCalculators searchCalculators,
     required ExecuteCalculation executeCalculation,
     required GetCalculationHistory getCalculationHistory,
     required SaveCalculationToHistory saveCalculationToHistory,
     required ManageFavorites manageFavorites,
   })  : _getCalculators = getCalculators,
-        _getCalculatorsByCategory = getCalculatorsByCategory,
         _getCalculatorById = getCalculatorById,
-        _searchCalculators = searchCalculators,
         _executeCalculation = executeCalculation,
         _getCalculationHistory = getCalculationHistory,
         _saveCalculationToHistory = saveCalculationToHistory,

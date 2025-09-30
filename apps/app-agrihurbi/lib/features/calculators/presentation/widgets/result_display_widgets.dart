@@ -282,7 +282,8 @@ class DataTableWidget extends StatelessWidget {
               child: DataTable(
                 columnSpacing: 16,
                 headingRowHeight: 40,
-                dataRowHeight: 36,
+                dataRowMinHeight: 36,
+                dataRowMaxHeight: 36,
                 columns: headers.map((header) {
                   return DataColumn(
                     label: Text(

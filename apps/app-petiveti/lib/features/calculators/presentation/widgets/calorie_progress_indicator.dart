@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../providers/calorie_provider.dart';
+
 import '../../../../shared/constants/calorie_constants.dart';
+import '../providers/calorie_provider.dart';
 import 'calorie_step_indicator.dart';
 
 /// **Calorie Progress Indicator Widget**

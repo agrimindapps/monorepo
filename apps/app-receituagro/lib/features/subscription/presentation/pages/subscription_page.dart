@@ -21,14 +21,14 @@ import '../widgets/subscription_status_widget.dart';
 /// - View ativa: SubscriptionStatusWidget
 /// - View planos: SubscriptionPlansWidget + SubscriptionBenefitsWidget
 /// - Footer com ações: PaymentActionsWidget
-class SubscriptionCleanPage extends StatefulWidget {
-  const SubscriptionCleanPage({super.key});
+class SubscriptionPage extends StatefulWidget {
+  const SubscriptionPage({super.key});
 
   @override
-  State<SubscriptionCleanPage> createState() => _SubscriptionCleanPageState();
+  State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
-class _SubscriptionCleanPageState extends State<SubscriptionCleanPage> {
+class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return provider_lib.ChangeNotifierProvider(

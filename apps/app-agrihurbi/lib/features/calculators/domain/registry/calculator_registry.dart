@@ -218,6 +218,8 @@ class CalculatorRegistry {
 
 /// Configurador para integração com sistema de DI
 class CalculatorDependencyConfigurator {
+  CalculatorDependencyConfigurator._();
+
   /// Configura todas as dependências das calculadoras
   static void configure() {
     // Inicializar registry

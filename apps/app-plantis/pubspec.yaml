@@ -17,6 +17,21 @@ dependencies:
   # Core Package - Serviços compartilhados (Firebase, Riverpod, Hive, GetIt, Injectable, Provider, dartz, equatable, etc.)
   core:
     path: ../../packages/core
+  hive: any
+  injectable: any
+  uuid: any
+  dartz: any
+  connectivity_plus: any
+  shared_preferences: any
+  path_provider: any
+  flutter_secure_storage: any
+  url_launcher: any
+  provider: any
+  device_info_plus: any
+  intl: any
+  equatable: any
+  cloud_firestore: any
+  flutter_riverpod: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

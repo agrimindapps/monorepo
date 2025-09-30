@@ -16,11 +16,11 @@ class CalculatorSearchFiltersWidget extends StatefulWidget {
   final search_service.CalculatorSortOrder sortOrder;
   final bool showOnlyFavorites;
   final List<String> availableTags;
-  final Function(CalculatorCategory?) onCategoryChanged;
-  final Function(CalculatorComplexity?) onComplexityChanged;
-  final Function(List<String>) onTagsChanged;
-  final Function(search_service.CalculatorSortOrder) onSortOrderChanged;
-  final Function(bool) onFavoritesFilterChanged;
+  final void Function(CalculatorCategory?) onCategoryChanged;
+  final void Function(CalculatorComplexity?) onComplexityChanged;
+  final void Function(List<String>) onTagsChanged;
+  final void Function(search_service.CalculatorSortOrder) onSortOrderChanged;
+  final void Function(bool) onFavoritesFilterChanged;
   final VoidCallback onClearFilters;
   final VoidCallback onApplyFilters;
 

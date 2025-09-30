@@ -6,9 +6,6 @@ import '../error/error_logger.dart' as local_logger;
 /// Base state para todos os Riverpod notifiers
 /// Encapsula data, loading e error state de forma consistente
 class BaseNotifierState<T> {
-  final T? data;
-  final bool isLoading;
-  final local_error.AppError? error;
 
   const BaseNotifierState({
     this.data,
@@ -26,6 +23,9 @@ class BaseNotifierState<T> {
 
   const BaseNotifierState.failure(local_error.AppError error)
       : this(data: null, isLoading: false, error: error);
+  final T? data;
+  final bool isLoading;
+  final local_error.AppError? error;
 
   BaseNotifierState<T> copyWith({
     T? data,

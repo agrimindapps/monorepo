@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
 import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/pages/login_page.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../pages/profile_page.dart';
 
@@ -90,7 +91,7 @@ class AuthSection extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _navigateToUserProfile(context),
+          onTap: () => _navigateToLogin(context),
           borderRadius: BorderRadius.circular(
             SettingsDesignTokens.cardBorderRadius,
           ),
@@ -211,7 +212,10 @@ class AuthSection extends StatelessWidget {
             SettingsDesignTokens.cardBorderRadius,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 20.0,
+              horizontal: 16.0,
+            ),
             child: Column(
               children: [
                 Row(
@@ -339,6 +343,13 @@ class AuthSection extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (context) => const LoginPage()),
     );
   }
 

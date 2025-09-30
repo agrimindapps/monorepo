@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
@@ -396,7 +396,7 @@ class WeightResponsiveDashboard extends ConsumerWidget {
                 leading: CircleAvatar(
                   backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
                   child: Text(
-                    '${weight.weight.toStringAsFixed(1)}',
+                    weight.weight.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,

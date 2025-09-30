@@ -1,10 +1,12 @@
 import 'dart:developer' as developer;
 
 /// Serviço centralizado de tratamento de erros para calculadoras
-/// 
+///
 /// Implementa handling robusto com categorização, logging e recovery
 /// para garantir experiência estável mesmo com falhas
 class CalculatorErrorHandler {
+  CalculatorErrorHandler._();
+
   static const String _loggerName = 'CalculatorErrorHandler';
 
   /// Trata erro de cálculo com contexto

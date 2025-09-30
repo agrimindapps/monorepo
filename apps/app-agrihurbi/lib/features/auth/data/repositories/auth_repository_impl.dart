@@ -1,8 +1,5 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' hide UserEntity;
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/user_entity.dart';
 import '../../domain/failures/auth_failures.dart';

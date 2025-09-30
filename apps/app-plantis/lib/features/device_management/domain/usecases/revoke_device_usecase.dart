@@ -63,7 +63,9 @@ class RevokeDeviceUseCase {
         // Verifica se é o dispositivo atual (se deve impedir)
         if (params.preventSelfRevoke) {
           final currentDevice = await DeviceModel.fromCurrentDevice();
-          if (device.uuid == currentDevice.uuid) {
+
+          // CRITICAL: Skip check if platform not supported
+          if (currentDevice != null && device.uuid == currentDevice.uuid) {
             if (kDebugMode) {
               debugPrint('❌ RevokeDevice: Cannot revoke current device');
             }
@@ -141,11 +143,27 @@ class RevokeAllOtherDevicesUseCase {
       final userId = currentUser.id;
 
       // Obtém UUID do dispositivo atual
-      String currentDeviceUuid;
+      String? currentDeviceUuid;
       if (params?.currentDeviceUuid != null) {
-        currentDeviceUuid = params!.currentDeviceUuid!;
+        currentDeviceUuid = params!.currentDeviceUuid;
       } else {
         final currentDevice = await DeviceModel.fromCurrentDevice();
+
+        // CRITICAL: Check if platform is supported
+        if (currentDevice == null) {
+          if (kDebugMode) {
+            debugPrint(
+              '🚫 RevokeAllOther: Platform not supported, skipping operation',
+            );
+          }
+          return const Left(
+            ValidationFailure(
+              'Gerenciamento de dispositivos disponível apenas para Android e iOS',
+              code: 'UNSUPPORTED_PLATFORM',
+            ),
+          );
+        }
+
         currentDeviceUuid = currentDevice.uuid;
       }
 

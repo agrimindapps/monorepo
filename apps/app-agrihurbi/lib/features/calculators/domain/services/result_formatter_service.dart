@@ -3,10 +3,11 @@ import 'dart:math' as math;
 import '../entities/calculation_result.dart';
 
 /// Serviço de formatação de resultados de calculadoras
-/// 
+///
 /// Implementa formatação contextual, cultural e responsiva para diferentes
 /// tipos de resultados agrícolas com precisão adequada
 class ResultFormatterService {
+  ResultFormatterService._();
 
   /// Formata resultado principal com precisão adequada
   static String formatPrimaryResult(

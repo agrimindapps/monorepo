@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/body_condition_output.dart';
 import '../providers/body_condition_provider.dart';
@@ -426,7 +425,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref, int index) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir do Histórico'),

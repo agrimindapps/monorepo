@@ -328,16 +328,6 @@ class CalculationResultDisplay extends StatelessWidget {
     return value.toString();
   }
 
-  String _formatLabel(String key) {
-    // Converte snake_case ou camelCase para formato legível
-    return key
-        .replaceAllMapped(RegExp(r'[_-]'), (match) => ' ')
-        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (match) => '${match.group(1)} ${match.group(2)}')
-        .split(' ')
-        .map((word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1).toLowerCase())
-        .join(' ');
-  }
-
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);

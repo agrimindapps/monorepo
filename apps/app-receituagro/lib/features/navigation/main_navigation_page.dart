@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../comentarios/comentarios_page.dart';
 import '../defensivos/home_defensivos_page.dart';
 import '../favoritos/favoritos_page.dart';
-import '../pragas/pragas_page.dart';
+import '../pragas/presentation/pages/home_pragas_page.dart';
 import '../settings/settings_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
@@ -90,7 +90,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       case 0:
         return const HomeDefensivosPage();
       case 1:
-        return const PragasPage();
+        return const HomePragasPage();
       case 2:
         return const FavoritosPage();
       case 3:

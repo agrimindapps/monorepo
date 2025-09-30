@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/di/injection_container.dart' as di;

@@ -7,10 +7,6 @@ import '../../../../core/providers/dependency_providers.dart';
 /// State para Settings
 @immutable
 class SettingsState {
-  final bool globalErrorBoundaryEnabled;
-  final bool notificationsEnabled;
-  final bool fuelAlertsEnabled;
-  final ThemeMode themeMode;
 
   const SettingsState({
     this.globalErrorBoundaryEnabled = true,
@@ -18,6 +14,10 @@ class SettingsState {
     this.fuelAlertsEnabled = true,
     this.themeMode = ThemeMode.system,
   });
+  final bool globalErrorBoundaryEnabled;
+  final bool notificationsEnabled;
+  final bool fuelAlertsEnabled;
+  final ThemeMode themeMode;
 
   SettingsState copyWith({
     bool? globalErrorBoundaryEnabled,

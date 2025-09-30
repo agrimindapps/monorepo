@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
+
 import '../providers/auth_provider.dart';
+import '../widgets/register_action_buttons.dart';
+import '../widgets/register_form_fields.dart';
 import '../widgets/register_page_coordinator.dart';
 import '../widgets/register_page_header.dart';
-import '../widgets/register_form_fields.dart';
 import '../widgets/register_social_auth.dart';
-import '../widgets/register_action_buttons.dart';
 
 /// **User Registration Page - Secure Authentication Interface**
 /// 

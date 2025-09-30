@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../providers/expenses_provider.dart';
+
 import '../../domain/entities/expense.dart';
+import '../providers/expenses_provider.dart';
 import 'expenses_constants.dart';
 
 /// **Expense List Tab**

@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide User, AuthState, AuthStatus;
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../auth/domain/entities/user.dart';
+import 'package:flutter/material.dart';
+
 import '../../../../shared/constants/profile_constants.dart';
 import '../../../../shared/widgets/dialogs/app_dialogs.dart';
+import '../../../auth/domain/entities/user.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/profile_state_handlers.dart';
 
 class ProfilePage extends ConsumerWidget {

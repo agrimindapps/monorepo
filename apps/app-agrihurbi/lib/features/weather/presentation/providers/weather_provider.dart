@@ -99,6 +99,7 @@ class WeatherProvider with ChangeNotifier {
   bool get hasRainGauges => _rainGauges.isNotEmpty;
   bool get hasStatistics => _statistics.isNotEmpty;
   bool get hasMoreMeasurements => _hasMoreMeasurements;
+  int get currentPage => _currentPage;
 
   // Rain gauge computed states
   List<RainGaugeEntity> get activeRainGauges =>

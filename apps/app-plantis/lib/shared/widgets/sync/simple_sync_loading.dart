@@ -1,11 +1,8 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/plantis_colors.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart'
-    as local_auth;
 
 /// Loading simples para sincronização que aparece e some automaticamente
 class SimpleSyncLoading extends StatefulWidget {

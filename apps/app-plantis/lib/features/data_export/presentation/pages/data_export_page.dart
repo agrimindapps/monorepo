@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../domain/entities/export_request.dart';
-import '../providers/data_export_provider.dart';
 import '../widgets/data_type_selector.dart';
 import '../widgets/export_availability_widget.dart';
 import '../widgets/export_format_selector.dart';
@@ -298,7 +297,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                             ),
                           )
                           : const Icon(Icons.download),
-                  label: Text(
+                  label: const Text(
                     isLoading ? 'Processando...' : 'Exportar Dados',
                   ),
                   style: ElevatedButton.styleFrom(

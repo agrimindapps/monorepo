@@ -68,7 +68,7 @@ class BovineStatusSection extends StatelessWidget {
   }
 
   Widget _buildStatusSwitch(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),

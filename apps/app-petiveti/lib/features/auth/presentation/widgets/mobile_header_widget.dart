@@ -22,14 +22,14 @@ class MobileHeaderWidget extends StatelessWidget {
                 color: SplashColors.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.pets,
                 color: SplashColors.primaryColor,
                 size: 24,
               ),
             ),
             const SizedBox(width: 12),
-            Text(
+            const Text(
               SplashConstants.appName,
               style: TextStyle(
                 fontSize: 24,

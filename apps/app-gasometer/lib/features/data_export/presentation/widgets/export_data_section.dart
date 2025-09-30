@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../providers/data_export_provider.dart';
 
 /// Seção de exportação de dados para a ProfilePage

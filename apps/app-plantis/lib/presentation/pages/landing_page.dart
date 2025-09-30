@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/riverpod_providers/auth_providers.dart' as local;
 import '../../core/theme/accessibility_tokens.dart';
 import '../../core/theme/colors.dart';
-import '../../core/riverpod_providers/auth_providers.dart' as local;
 
 class LandingPage extends ConsumerStatefulWidget {
   const LandingPage({super.key});

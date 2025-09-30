@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
-import '../providers/body_condition_provider.dart';
 import '../../domain/entities/body_condition_output.dart';
+import '../providers/body_condition_provider.dart';
 
 /// Enhanced visual feedback widget for BCS calculations with animations
 class BcsCalculationFeedback extends ConsumerStatefulWidget {

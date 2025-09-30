@@ -436,15 +436,15 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   }
 
   Widget _buildMemoryLeaksCard() {
-    return Card(
+    return const Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Memory Leaks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            const Text('No memory leaks detected'),
+            Text('Memory Leaks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 16),
+            Text('No memory leaks detected'),
           ],
         ),
       ),

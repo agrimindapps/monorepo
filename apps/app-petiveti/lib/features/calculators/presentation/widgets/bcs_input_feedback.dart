@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/body_condition_input.dart';
 import '../providers/body_condition_provider.dart';
@@ -73,7 +73,7 @@ class BcsInputFeedback extends ConsumerWidget {
   }
 
   Widget _buildCompletionProgress(ThemeData theme, BodyConditionState state) {
-    final totalFields = 5; // Weight, age, species, breed, gender
+    const totalFields = 5; // Weight, age, species, breed, gender
     final completedFields = _countCompletedFields(state);
     final progress = completedFields / totalFields;
 
@@ -138,7 +138,7 @@ class BcsInputFeedback extends ConsumerWidget {
         icon: Icons.calendar_today,
         hint: 'Idade em meses',
       ),
-      _ValidationItem(
+      const _ValidationItem(
         label: 'Espécie',
         isValid: true, // species sempre tem um valor enum default
         isRequired: true,
@@ -152,7 +152,7 @@ class BcsInputFeedback extends ConsumerWidget {
         icon: Icons.category,
         hint: 'Opcional, mas melhora a precisão',
       ),
-      _ValidationItem(
+      const _ValidationItem(
         label: 'Gênero',
         isValid: true, // usando isNeutered que sempre tem valor bool
         isRequired: true,

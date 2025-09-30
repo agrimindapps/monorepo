@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide SubscriptionState;
+import 'package:flutter/material.dart';
+
 import '../../domain/entities/subscription_plan.dart';
 import '../providers/subscription_provider.dart';
 import 'subscription_page_coordinator.dart';
@@ -67,7 +68,7 @@ class SubscriptionPlanCard extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(8),
             bottomRight: Radius.circular(8),
           ),

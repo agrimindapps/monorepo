@@ -53,7 +53,7 @@ class PromoScreenshotsSection extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -65,7 +65,7 @@ class PromoScreenshotsSection extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -112,7 +112,7 @@ class PromoScreenshotsSection extends StatelessWidget {
               'Descubra como é fácil cuidar do seu pet com nossa interface intuitiva',
               style: TextStyle(
                 fontSize: isMobile ? 16 : 18,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -126,7 +126,7 @@ class PromoScreenshotsSection extends StatelessWidget {
   Widget _buildScreenshotsCarousel(BuildContext context, bool isMobile) {
     final screenshots = _getPlaceholderScreenshots();
     
-    return Container(
+    return SizedBox(
       height: isMobile ? 280 : 350,
       child: PageView.builder(
         onPageChanged: onScreenshotChanged,
@@ -151,7 +151,7 @@ class PromoScreenshotsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             spreadRadius: 2,
             blurRadius: 15,
             offset: const Offset(0, 8),
@@ -168,7 +168,7 @@ class PromoScreenshotsSection extends StatelessWidget {
                 color: SplashColors.backgroundColor,
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(
-                  color: SplashColors.primaryColor.withOpacity(0.2),
+                  color: SplashColors.primaryColor.withValues(alpha: 0.2),
                   width: 2,
                 ),
               ),
@@ -203,7 +203,7 @@ class PromoScreenshotsSection extends StatelessWidget {
               screenshot.description,
               style: TextStyle(
                 fontSize: 14,
-                color: SplashColors.textColor.withOpacity(0.7),
+                color: SplashColors.textColor.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -227,7 +227,7 @@ class PromoScreenshotsSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive 
                 ? Colors.white 
-                : Colors.white.withOpacity(0.4),
+                : Colors.white.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -237,22 +237,22 @@ class PromoScreenshotsSection extends StatelessWidget {
 
   List<_ScreenshotData> _getPlaceholderScreenshots() {
     return [
-      _ScreenshotData(
+      const _ScreenshotData(
         icon: Icons.pets,
         title: 'Perfis de Pets',
         description: 'Gerencie todos os seus animais em um só lugar',
       ),
-      _ScreenshotData(
+      const _ScreenshotData(
         icon: Icons.vaccines,
         title: 'Calendário de Vacinas',
         description: 'Nunca perca uma data importante de vacinação',
       ),
-      _ScreenshotData(
+      const _ScreenshotData(
         icon: Icons.medication,
         title: 'Controle de Medicamentos',
         description: 'Organize horários e dosagens com facilidade',
       ),
-      _ScreenshotData(
+      const _ScreenshotData(
         icon: Icons.monitor_weight,
         title: 'Acompanhamento do Peso',
         description: 'Monitore a saúde com gráficos detalhados',

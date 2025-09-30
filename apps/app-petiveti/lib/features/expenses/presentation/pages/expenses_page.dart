@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../providers/expenses_provider.dart';
-import '../widgets/expense_list_tab.dart';
 import '../widgets/expense_categories_tab.dart';
+import '../widgets/expense_list_tab.dart';
 import '../widgets/expense_summary_tab.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {

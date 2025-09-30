@@ -16,6 +16,20 @@ dependencies:
   core:
     path: ../../packages/core
 
+  connectivity_plus: any
+  dio: any
+  flutter_secure_storage: any
+  get_it: any
+  injectable: any
+  shared_preferences: any
+  dartz: any
+  flutter_riverpod: any
+  provider: any
+  go_router: any
+  equatable: any
+  intl: any
+  xml: any
+  firebase_core: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/design_system_components.dart';
 
 /// Widget para barra de busca de calculadoras
 /// 
@@ -8,7 +7,7 @@ import '../../../../core/widgets/design_system_components.dart';
 /// Centraliza lógica de busca em componente reutilizável
 class CalculatorSearchBarWidget extends StatelessWidget {
   final TextEditingController controller;
-  final Function(String) onChanged;
+  final void Function(String) onChanged;
   final String hintText;
   final bool isLoading;
 

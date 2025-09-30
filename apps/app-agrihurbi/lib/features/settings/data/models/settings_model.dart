@@ -1,5 +1,7 @@
+// ignore_for_file: overridden_fields
+
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
-import 'package:core/core.dart' hide NotificationSettings, PrivacySettings, DataSettings, DisplaySettings, SecuritySettings, BackupSettings;
+import 'package:core/core.dart' hide NotificationSettings, PrivacySettings;
 
 part 'settings_model.g.dart';
 

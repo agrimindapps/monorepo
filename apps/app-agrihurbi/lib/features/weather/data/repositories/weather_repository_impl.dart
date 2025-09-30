@@ -28,7 +28,7 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<bool> get _isOnline async {
     try {
       final result = await _connectivity.checkConnectivity();
-      return result != ConnectivityResult.none;
+      return result.isNotEmpty && !result.contains(ConnectivityResult.none);
     } catch (e) {
       return false; // Assume offline if check fails
     }

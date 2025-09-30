@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../providers/home_provider.dart';
 import '../widgets/home_app_bar.dart';
-import '../widgets/home_stats_section.dart';
-import '../widgets/home_quick_info.dart';
 import '../widgets/home_feature_grid.dart';
+import '../widgets/home_quick_info.dart';
+import '../widgets/home_stats_section.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

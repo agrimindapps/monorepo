@@ -33,12 +33,14 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   static const String _statsBoxName = 'calculator_usage_stats';
 
   /// Salva item no histórico
+  @override
   Future<void> saveCalculationHistory(CalculationHistoryModel history) async {
     final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
     await box.put(history.id, history);
   }
 
   /// Obtém histórico com filtros
+  @override
   Future<List<CalculationHistoryModel>> getCalculationHistory({
     String? calculatorId,
     String? animalId,
@@ -84,6 +86,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   }
 
   /// Limpa todo o histórico
+  @override
   Future<void> clearCalculationHistory() async {
     final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
     await box.clear();
@@ -136,43 +139,51 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   }
 
   /// Incrementa contador de uso da calculadora
+  @override
   Future<void> incrementCalculatorUsage(String calculatorId) async {
     await recordCalculatorUsage(calculatorId);
   }
 
   /// Obtém item específico do histórico por ID
+  @override
   Future<CalculationHistoryModel?> getCalculationHistoryById(String id) async {
     final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
     return box.get(id);
   }
 
   /// Remove item do histórico (alias para compatibilidade)
+  @override
   Future<void> deleteCalculationHistory(String id) async {
     await removeCalculationHistory(id);
   }
 
   /// Obtém lista de IDs das calculadoras favoritas
+  @override
   Future<List<String>> getFavoriteCalculatorIds() async {
     return await getFavoriteCalculators();
   }
 
   /// Adiciona calculadora aos favoritos (alias para compatibilidade)
+  @override
   Future<void> addFavoriteCalculator(String calculatorId) async {
     await addToFavorites(calculatorId);
   }
 
   /// Remove calculadora dos favoritos (alias para compatibilidade)
+  @override
   Future<void> removeFavoriteCalculator(String calculatorId) async {
     await removeFromFavorites(calculatorId);
   }
 
   /// Verifica se calculadora é favorita
+  @override
   Future<bool> isFavoriteCalculator(String calculatorId) async {
     final favorites = await getFavoriteCalculators();
     return favorites.contains(calculatorId);
   }
 
   /// Obtém estatísticas de uso de todas as calculadoras
+  @override
   Future<Map<String, int>> getCalculatorUsageStats() async {
     final box = await _hiveService.getBox<Map>(_statsBoxName);
     final stats = <String, int>{};

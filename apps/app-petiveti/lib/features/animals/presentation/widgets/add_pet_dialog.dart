@@ -1,11 +1,11 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart' hide FormState;
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/dialogs/pet_form_dialog.dart';
-import '../../../../shared/widgets/sections/form_section_widget.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
+import '../../../../shared/widgets/sections/form_section_widget.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../providers/animals_provider.dart';

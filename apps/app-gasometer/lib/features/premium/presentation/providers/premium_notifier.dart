@@ -18,11 +18,6 @@ import '../../domain/usecases/restore_purchases.dart';
 /// State para Premium com loading separado para operações
 @immutable
 class PremiumNotifierState {
-  final PremiumStatus premiumStatus;
-  final List<core.ProductInfo> availableProducts;
-  final bool isLoadingProducts;
-  final bool isProcessingPurchase;
-  final String? errorMessage;
 
   const PremiumNotifierState({
     this.premiumStatus = PremiumStatus.free,
@@ -31,6 +26,11 @@ class PremiumNotifierState {
     this.isProcessingPurchase = false,
     this.errorMessage,
   });
+  final PremiumStatus premiumStatus;
+  final List<core.ProductInfo> availableProducts;
+  final bool isLoadingProducts;
+  final bool isProcessingPurchase;
+  final String? errorMessage;
 
   PremiumNotifierState copyWith({
     PremiumStatus? premiumStatus,

@@ -1,6 +1,6 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart' hide FormState;
 
 import '../../../../core/utils/uuid_generator.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';

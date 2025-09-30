@@ -38,13 +38,13 @@ class _HealthStatusCard extends StatelessWidget {
     final statusIcon = stats.hasUrgentTasks ? Icons.warning : Icons.check_circle;
 
     return Card(
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
             colors: [
-              statusColor.withOpacity(0.1),
-              statusColor.withOpacity(0.05),
+              statusColor.withValues(alpha: 0.1),
+              statusColor.withValues(alpha: 0.05),
             ],
           ),
         ),
@@ -55,7 +55,7 @@ class _HealthStatusCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.2),
+                  color: statusColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(statusIcon, color: statusColor, size: 24),

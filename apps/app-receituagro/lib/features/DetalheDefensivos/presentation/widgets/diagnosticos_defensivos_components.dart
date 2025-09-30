@@ -11,7 +11,8 @@ import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../../core/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
-import '../../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
+import '../../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
+import '../../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_provider.dart';
 import '../providers/diagnosticos_provider.dart';
 
 /// Componentes modulares para exibição de diagnósticos em páginas de defensivos
@@ -1032,11 +1033,14 @@ class _DiagnosticoDefensivoDialogWidgetState
     if (diagnosticoId != null) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (context) => DetalheDiagnosticoPage(
-            diagnosticoId: diagnosticoId,
-            nomeDefensivo: widget.defensivoName,
-            nomePraga: nomePraga,
-            cultura: cultura,
+          builder: (context) => provider.ChangeNotifierProvider(
+            create: (_) => DetalheDiagnosticoProvider(),
+            child: DetalheDiagnosticoPage(
+              diagnosticoId: diagnosticoId,
+              nomeDefensivo: widget.defensivoName,
+              nomePraga: nomePraga,
+              cultura: cultura,
+            ),
           ),
         ),
       );

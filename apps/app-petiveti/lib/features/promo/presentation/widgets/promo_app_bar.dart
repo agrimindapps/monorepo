@@ -21,7 +21,7 @@ class PromoAppBar extends StatefulWidget {
 }
 
 class _PromoAppBarState extends State<PromoAppBar> {
-  bool _isVisible = true;
+  final bool _isVisible = true;
   
   @override
   Widget build(BuildContext context) {

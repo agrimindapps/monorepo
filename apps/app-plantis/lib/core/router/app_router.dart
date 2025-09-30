@@ -1,11 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/data_export/presentation/pages/data_export_page.dart';
-import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
@@ -16,14 +16,10 @@ import '../../features/license/pages/license_status_page.dart';
 import '../../features/plants/presentation/pages/plant_details_page.dart';
 import '../../features/plants/presentation/pages/plant_form_page.dart';
 import '../../features/plants/presentation/pages/plants_list_page.dart';
-import '../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../features/premium/presentation/pages/premium_subscription_page.dart';
 import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
-import '../../features/settings/presentation/providers/backup_settings_provider.dart';
-import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
-import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../presentation/pages/landing_page.dart';
 import '../../presentation/pages/settings_page.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
@@ -289,7 +285,11 @@ class AppRouter {
               path: deviceManagement,
               name: 'device-management',
               builder: (context, state) {
-                return const DeviceManagementPage();
+                // CRITICAL: Provide DeviceManagementProvider for the page
+                return provider.ChangeNotifierProvider<DeviceManagementProvider>(
+                  create: (_) => sl<DeviceManagementProvider>(),
+                  child: const DeviceManagementPage(),
+                );
               },
             ),
             GoRoute(

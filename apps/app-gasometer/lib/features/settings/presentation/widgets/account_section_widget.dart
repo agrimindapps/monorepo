@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/components/user_avatar_widget.dart';
 import '../../../../core/presentation/widgets/standard_loading_view.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../auth/domain/entities/user_entity.dart' as gasometer_entities;
 
 class AccountSectionWidget extends ConsumerWidget {

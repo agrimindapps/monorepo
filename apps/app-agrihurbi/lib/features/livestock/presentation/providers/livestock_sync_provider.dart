@@ -55,7 +55,7 @@ class LivestockSyncProvider extends ChangeNotifier {
 
   /// Força sincronização manual
   Future<bool> forceSyncNow({
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
     bool showProgress = true,
   }) async {
     if (_isSyncing) {
@@ -73,7 +73,7 @@ class LivestockSyncProvider extends ChangeNotifier {
       // Simula progresso se callback fornecido
       if (showProgress && onProgress != null) {
         _updateProgress(0.1, onProgress);
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
       }
 
       final result = await _repository.syncLivestockData();
@@ -155,7 +155,7 @@ class LivestockSyncProvider extends ChangeNotifier {
 
   // === PRIVATE METHODS ===
 
-  void _updateProgress(double progress, Function(double) onProgress) {
+  void _updateProgress(double progress, void Function(double) onProgress) {
     _syncProgress = progress;
     onProgress(progress);
     notifyListeners();

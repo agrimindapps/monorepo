@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
-import '../providers/calculator_provider.dart';
 
 /// Widget para lista do histórico de cálculos
 /// 
@@ -13,8 +11,8 @@ import '../providers/calculator_provider.dart';
 class CalculatorHistoryListWidget extends StatelessWidget {
   final List<CalculationHistory> history;
   final ScrollController? scrollController;
-  final Function(CalculationHistory) onReapply;
-  final Function(CalculationHistory) onDelete;
+  final void Function(CalculationHistory) onReapply;
+  final void Function(CalculationHistory) onDelete;
 
   const CalculatorHistoryListWidget({
     super.key,

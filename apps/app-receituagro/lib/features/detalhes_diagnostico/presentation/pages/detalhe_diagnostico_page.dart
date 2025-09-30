@@ -3,22 +3,19 @@ import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/mixins/premium_status_listener.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
-import '../../../../core/widgets/premium_test_controls_widget.dart';
 import '../../../navigation/bottom_nav_wrapper.dart';
 import '../providers/detalhe_diagnostico_provider.dart';
 import '../widgets/aplicacao_instrucoes_widget.dart';
 import '../widgets/diagnostico_detalhes_widget.dart';
 import '../widgets/diagnostico_info_widget.dart';
-import '../widgets/premium_feature_widget.dart';
-import '../widgets/share_bottom_sheet_widget.dart';
 
-class DetalheDiagnosticoCleanPage extends StatefulWidget {
+class DetalheDiagnosticoPage extends StatefulWidget {
   final String diagnosticoId;
   final String nomeDefensivo;
   final String nomePraga;
   final String cultura;
 
-  const DetalheDiagnosticoCleanPage({
+  const DetalheDiagnosticoPage({
     super.key,
     required this.diagnosticoId,
     required this.nomeDefensivo,
@@ -27,10 +24,10 @@ class DetalheDiagnosticoCleanPage extends StatefulWidget {
   });
 
   @override
-  State<DetalheDiagnosticoCleanPage> createState() => _DetalheDiagnosticoCleanPageState();
+  State<DetalheDiagnosticoPage> createState() => _DetalheDiagnosticoPageState();
 }
 
-class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPage>
+class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
     with PremiumStatusListener {
   
   @override
@@ -95,15 +92,9 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
       rightIcon: provider.isFavorited ? Icons.favorite : Icons.favorite_border,
       isDark: isDark,
       showBackButton: true,
-      showActions: provider.isPremium,
+      showActions: true,
       onBackPressed: () => Navigator.of(context).pop(),
       onRightIconPressed: () => _toggleFavorito(provider),
-      additionalActions: provider.isPremium ? [
-        IconButton(
-          icon: const Icon(Icons.share, color: Colors.white),
-          onPressed: () => _compartilhar(provider),
-        ),
-      ] : null,
     );
   }
 
@@ -236,78 +227,6 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
     );
   }
 
-  Widget _buildPremiumGate() {
-    final theme = Theme.of(context);
-    
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(8.0),
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withValues(alpha: 0.1),
-              spreadRadius: 1,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.amber.shade300, Colors.amber.shade600],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.diamond,
-                size: 40,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Conteúdo Premium',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Este diagnóstico está disponível apenas para usuários premium',
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _showPremiumDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber.shade600,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              ),
-              child: const Text('Assinar Premium'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildContent(DetalheDiagnosticoProvider provider) {
     return SingleChildScrollView(
@@ -315,11 +234,7 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Widget de teste para desenvolvimento (removido automaticamente em produção)
-          const PremiumTestControlsWidget(),
-          const SizedBox(height: 8),
-          
-          // Seção de Informações e Imagem (sempre visível)
+          // Seção de Informações e Imagem
           DiagnosticoInfoWidget(
             nomePraga: widget.nomePraga,
             nomeDefensivo: widget.nomeDefensivo,
@@ -350,94 +265,10 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
   }
   
   Widget _buildPremiumFeatures(DetalheDiagnosticoProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Seção de Compartilhamento Premium
-        PremiumFeatureWidget(
-          isPremium: provider.isPremium,
-          title: 'Compartilhamento Avançado',
-          description: 'Compartilhe diagnósticos com formatação profissional',
-          icon: Icons.share_outlined,
-          onPremiumAction: () => _compartilhar(provider),
-          onUpgradeRequested: _showPremiumDialog,
-        ),
-        const SizedBox(height: 16),
-        
-        // Seção de Comentários Premium (placeholder para futuro)
-        PremiumFeatureWidget(
-          isPremium: provider.isPremium,
-          title: 'Comentários Ilimitados',
-          description: 'Adicione comentários e notas pessoais aos diagnósticos',
-          icon: Icons.comment_outlined,
-          onPremiumAction: () => _showComingSoon('Comentários'),
-          onUpgradeRequested: _showPremiumDialog,
-        ),
-        const SizedBox(height: 16),
-        
-        // Indicador de Status Premium
-        _buildPremiumStatusIndicator(provider),
-      ],
-    );
+    // Removido - sem seções premium visíveis
+    return const SizedBox.shrink();
   }
   
-  Widget _buildPremiumStatusIndicator(DetalheDiagnosticoProvider provider) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: provider.isPremium 
-            ? Colors.green.withOpacity(0.1)
-            : Colors.orange.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: provider.isPremium ? Colors.green : Colors.orange,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            provider.isPremium ? Icons.diamond : Icons.lock_outline,
-            color: provider.isPremium ? Colors.green : Colors.orange,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  provider.isPremium ? 'Usuário Premium Ativo' : 'Recursos Premium Limitados',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  provider.isPremium 
-                      ? 'Você tem acesso completo a todos os recursos'
-                      : 'Assine Premium para acesso completo aos recursos',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (!provider.isPremium)
-            TextButton(
-              onPressed: _showPremiumDialog,
-              child: const Text('Assinar'),
-            ),
-        ],
-      ),
-    );
-  }
 
   void _toggleFavorito(DetalheDiagnosticoProvider provider) async {
     final itemData = {
@@ -460,102 +291,6 @@ class _DetalheDiagnosticoCleanPageState extends State<DetalheDiagnosticoCleanPag
     }
   }
 
-  void _compartilhar(DetalheDiagnosticoProvider provider) {
-    if (provider.diagnostico == null || provider.diagnosticoData.isEmpty) {
-      _showErrorSnackBar('Nenhum diagnóstico para compartilhar');
-      return;
-    }
-
-    try {
-      final shareText = provider.buildShareText(
-        widget.diagnosticoId,
-        widget.nomeDefensivo,
-        widget.nomePraga,
-        widget.cultura,
-      );
-      
-      showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        builder: (context) => ShareBottomSheetWidget(
-          shareText: shareText,
-          onSuccess: () => _showSuccessSnackBar('Diagnóstico compartilhado com sucesso'),
-          onError: (message) => _showErrorSnackBar(message),
-        ),
-      );
-    } catch (e) {
-      _showErrorSnackBar('Erro ao preparar compartilhamento');
-    }
-  }
-
-  void _showPremiumDialog() {
-    final theme = Theme.of(context);
-    
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
-        title: Text(
-          'Funcionalidade Premium',
-          style: TextStyle(color: theme.colorScheme.onSurface),
-        ),
-        content: Text(
-          'Este recurso está disponível apenas para usuários premium. '
-          'Assine agora para ter acesso completo a todos os recursos.',
-          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amber.shade600,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Assinar'),
-          ),
-        ],
-      ),
-    );
-  }
   
-  void _showComingSoon(String featureName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$featureName - Em breve para usuários Premium!'),
-        backgroundColor: Colors.blue,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
 
-  void _showSuccessSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 }

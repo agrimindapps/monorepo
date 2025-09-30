@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/riverpod_providers/solid_providers.dart';
 import 'plant_form_dialog.dart';

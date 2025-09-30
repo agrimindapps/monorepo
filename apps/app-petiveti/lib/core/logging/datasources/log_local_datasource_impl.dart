@@ -4,7 +4,7 @@ import 'log_local_datasource.dart';
 
 class LogLocalDataSourceImpl implements LogLocalDataSource {
   static const String _boxName = 'logs';
-  Box? _logsBox;
+  Box<dynamic>? _logsBox;
 
   LogLocalDataSourceImpl() {
     try {

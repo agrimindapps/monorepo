@@ -221,7 +221,6 @@ class WeatherMeasurementModel extends Equatable {
     final weather = json['weather']?[0] ?? <String, dynamic>{};
     final wind = json['wind'] ?? <String, dynamic>{};
     final rain = json['rain'] ?? <String, dynamic>{};
-    final sys = json['sys'] ?? <String, dynamic>{};
     
     return WeatherMeasurementModel(
       id: 'owm_${DateTime.now().millisecondsSinceEpoch}',

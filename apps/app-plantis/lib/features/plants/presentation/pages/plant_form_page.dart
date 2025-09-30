@@ -1,7 +1,6 @@
-import 'package:core/core.dart' hide Provider, Consumer;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
 
 import '../../../../core/riverpod_providers/plants_providers.dart'
     as riverpod_plants;

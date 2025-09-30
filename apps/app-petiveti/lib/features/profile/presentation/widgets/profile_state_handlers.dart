@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../auth/domain/entities/user.dart';
+
 import '../../../../shared/constants/profile_constants.dart';
+import '../../../auth/domain/entities/user.dart';
 
 /// **Profile State Handler Widgets**
 /// 
@@ -330,7 +331,7 @@ abstract class ProfileStateHandlers {
         ),
         const SizedBox(height: 12),
         // Menu items skeleton
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(12),

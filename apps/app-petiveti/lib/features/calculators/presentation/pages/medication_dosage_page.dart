@@ -672,7 +672,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
     
     switch (action) {
       case 'clear':
-        showDialog(
+        showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Limpar Todos os Dados'),
@@ -704,7 +704,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
   }
 
   void _showHelpDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajuda - Calculadora de Dosagem'),

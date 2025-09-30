@@ -1,6 +1,5 @@
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:core/core.dart' hide Failure, ValidationFailure;
-import 'package:dartz/dartz.dart';
 
 import '../entities/calculation_history.dart';
 import '../entities/calculation_result.dart';

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide SubscriptionState, subscriptionProvider;
+import 'package:flutter/material.dart';
+
 import '../../domain/entities/subscription_plan.dart';
 import '../providers/subscription_provider.dart';
 

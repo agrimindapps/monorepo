@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:core/core.dart' as core;
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/riverpod_providers/auth_providers.dart';
 // Plants providers now imported from Riverpod - using plants_providers.dart

@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/appointment.dart';
 import '../providers/appointments_provider.dart';
@@ -335,7 +334,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                       boxShadow: isBeingDeleted
                           ? [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -358,9 +357,9 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                         ),
                         if (isBeingDeleted)
                           Positioned.fill(
-                            child: Container(
+                            child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(

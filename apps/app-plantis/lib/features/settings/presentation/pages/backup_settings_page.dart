@@ -35,7 +35,7 @@ class BackupSettingsPage extends ConsumerWidget {
         child: Consumer(
           builder: (context, ref, child) {
             // Verificação de Premium simplificada por enquanto
-            final isPremium = false; // TODO: Implementar verificação de premium
+            const isPremium = false; // TODO: Implementar verificação de premium
 
             if (!isPremium) {
               return _buildPremiumRequired(context, theme);
@@ -55,7 +55,7 @@ class BackupSettingsPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.workspace_premium,
               size: 64,
               color: PlantisColors.primary,
@@ -172,13 +172,13 @@ class BackupSettingsPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ListTile(
+                const ListTile(
                   leading: Icon(
                     Icons.check_circle,
                     color: Colors.green,
                   ),
-                  title: const Text('Último Backup'),
-                  subtitle: const Text('Nunca realizado'),
+                  title: Text('Último Backup'),
+                  subtitle: Text('Nunca realizado'),
                 ),
                 ListTile(
                   leading: Icon(

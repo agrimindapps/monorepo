@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:core/core.dart' hide AuthState, FormState;
 // import 'package:flutter/foundation.dart'; // TODO: Use for debug features
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart' hide AuthState, FormState;
 
 import '../../../../shared/constants/splash_constants.dart';
 import '../../../../shared/widgets/sync/simple_sync_loading.dart';
@@ -46,30 +46,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
   late Animation<Offset> _slideAnimation;
   
   // State management
-  int _currentStep = 0;
   bool _isLoginMode = true;
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _showRecoveryForm = false;
   bool _rememberMe = false;
-  
-  // Email validation
-  bool _isEmailValid = false;
-  bool _isEmailChecking = false;
-  bool _emailExists = false;
-  
-  // Password strength
-  double _passwordStrength = 0.0;
-  String _passwordStrengthText = '';
-  Color _passwordStrengthColor = Colors.grey;
-  
-  // Signup steps
-  final List<String> _signupSteps = [
-    'Informações Básicas',
-    'Configurar Senha',
-    'Finalizar Cadastro',
-  ];
 
   @override
   void initState() {
@@ -138,7 +119,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: DecoratedBox(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

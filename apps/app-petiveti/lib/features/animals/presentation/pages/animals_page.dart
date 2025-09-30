@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/animals_constants.dart';
 import '../widgets/animals_app_bar.dart';

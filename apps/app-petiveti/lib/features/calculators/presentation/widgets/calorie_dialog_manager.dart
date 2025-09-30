@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/calorie_output.dart';
 import '../providers/calorie_provider.dart';
@@ -48,7 +48,7 @@ class CalorieDialogManager {
 
   /// Show reset confirmation dialog
   void showResetDialog({VoidCallback? onReset}) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resetar Calculadora'),
@@ -77,7 +77,7 @@ class CalorieDialogManager {
   void showHistoryDialog({VoidCallback? onHistoryItemSelected}) {
     final history = ref.read(calorieHistoryProvider);
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Histórico de Cálculos'),
@@ -103,7 +103,7 @@ class CalorieDialogManager {
     final output = ref.read(calorieOutputProvider);
     if (output == null) return;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exportar Resultado'),
@@ -136,7 +136,7 @@ class CalorieDialogManager {
 
   /// Show calorie guide dialog
   void showCalorieGuide() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Guia de Cálculo Calórico'),
@@ -213,7 +213,7 @@ class CalorieDialogManager {
   }
 
   void _showFormattedResultDialog(String text) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resultado para Compartilhar'),

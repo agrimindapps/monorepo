@@ -96,7 +96,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
             onTap: widget.onToggleAuth,
             child: Column(
               children: [
-                Text(
+                const Text(
                   'Entrar',
                   style: TextStyle(
                     fontSize: 16,
@@ -156,7 +156,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: SplashColors.primaryColor),
+          borderSide: const BorderSide(color: SplashColors.primaryColor),
         ),
       ),
       validator: (value) {
@@ -190,7 +190,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: SplashColors.primaryColor),
+          borderSide: const BorderSide(color: SplashColors.primaryColor),
         ),
       ),
       validator: (value) {
@@ -217,7 +217,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
         const Spacer(),
         GestureDetector(
           onTap: widget.onForgotPassword,
-          child: Text(
+          child: const Text(
             'Esqueceu a senha?',
             style: TextStyle(
               color: SplashColors.primaryColor,

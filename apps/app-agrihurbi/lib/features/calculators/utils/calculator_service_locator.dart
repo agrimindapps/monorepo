@@ -14,10 +14,12 @@ import '../domain/validation/parameter_validator.dart';
 import '../presentation/providers/calculator_provider_simple.dart';
 
 /// Service Locator para facilitar acesso aos serviços de calculadoras
-/// 
+///
 /// Fornece interface simplificada para acessar todos os serviços
 /// relacionados ao sistema de calculadoras
 class CalculatorServiceLocator {
+  CalculatorServiceLocator._();
+
   static final GetIt _getIt = GetIt.instance;
 
   /// Obtém instância do motor de cálculo

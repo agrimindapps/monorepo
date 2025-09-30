@@ -33,7 +33,7 @@ class ValidateDeviceUseCase {
       // Obtém informações do dispositivo atual ou usa fornecido
       DeviceModel? device;
       if (params?.device != null) {
-        device = params!.device!;
+        device = params!.device;
       } else {
         device = await DeviceModel.fromCurrentDevice();
       }
@@ -45,7 +45,7 @@ class ValidateDeviceUseCase {
             '🚫 ValidateDevice: Plataforma não suportada para gerenciamento de dispositivos',
           );
         }
-        return Right(
+        return const Right(
           DeviceValidationResult(
             isValid: false,
             status: DeviceValidationStatus.unsupportedPlatform,
@@ -55,13 +55,16 @@ class ValidateDeviceUseCase {
         );
       }
 
+      // CRITICAL: Device is now guaranteed non-null for the rest of the method
+      final validDevice = device;
+
       if (kDebugMode) {
-        debugPrint('🔐 ValidateDevice: Validating device ${device.uuid}');
+        debugPrint('🔐 ValidateDevice: Validating device ${validDevice.uuid}');
       }
 
       // Verifica se já existe e está ativo
       final existingResult = await _deviceRepository.getDeviceByUuid(
-        device.uuid,
+        validDevice.uuid,
       );
 
       return await existingResult.fold((failure) => Left(failure), (
@@ -77,7 +80,7 @@ class ValidateDeviceUseCase {
           // Dispositivo já válido, apenas atualiza atividade
           final updateResult = await _deviceRepository.updateLastActivity(
             userId: userId,
-            deviceUuid: device.uuid,
+            deviceUuid: validDevice.uuid,
           );
 
           return updateResult.fold(
@@ -134,7 +137,7 @@ class ValidateDeviceUseCase {
 
           final validationResult = await _deviceRepository.validateDevice(
             userId: userId,
-            device: device,
+            device: validDevice,
           );
 
           return validationResult.fold(

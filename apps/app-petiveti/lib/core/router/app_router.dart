@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/animals/presentation/pages/animals_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
@@ -8,28 +8,28 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/calculators/presentation/pages/animal_age_page.dart';
 import '../../features/calculators/presentation/pages/anesthesia_page.dart';
-import '../../features/calculators/presentation/pages/diabetes_insulin_page.dart';
-import '../../features/calculators/presentation/pages/fluid_therapy_page.dart';
-import '../../features/calculators/presentation/pages/hydration_page.dart';
+import '../../features/calculators/presentation/pages/animal_age_page.dart';
 import '../../features/calculators/presentation/pages/body_condition_page.dart';
 import '../../features/calculators/presentation/pages/calculators_main_page.dart';
 import '../../features/calculators/presentation/pages/calorie_page.dart';
+import '../../features/calculators/presentation/pages/diabetes_insulin_page.dart';
+import '../../features/calculators/presentation/pages/exercise_page.dart';
+import '../../features/calculators/presentation/pages/fluid_therapy_page.dart';
+import '../../features/calculators/presentation/pages/hydration_page.dart';
 import '../../features/calculators/presentation/pages/ideal_weight_page.dart';
 import '../../features/calculators/presentation/pages/medication_dosage_page.dart';
 import '../../features/calculators/presentation/pages/pregnancy_page.dart';
-import '../../features/calculators/presentation/pages/exercise_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/medications/domain/entities/medication.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
 import '../../features/medications/presentation/widgets/add_medication_form.dart';
-import '../../features/medications/domain/entities/medication.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
+import '../../features/reminders/domain/entities/reminder.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
 import '../../features/reminders/presentation/widgets/add_reminder_form.dart';
-import '../../features/reminders/domain/entities/reminder.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart' as local;
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
@@ -38,7 +38,7 @@ import '../navigation/bottom_navigation.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   // CORREÇÃO: Não tentar acessar authProvider imediatamente
   // Sempre começar com splash para dar tempo da inicialização DI
-  final initialRoute = '/splash';
+  const initialRoute = '/splash';
   
   return GoRouter(
     initialLocation: initialRoute,

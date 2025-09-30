@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../sync/petiveti_sync_config.dart';
 import '../sync/petiveti_sync_service.dart';
@@ -241,7 +240,7 @@ class CoreServicesIntegration {
   /// Obtém estatísticas de uso do core package
   CoreIntegrationStats getIntegrationStats() {
     if (!_isInitialized) {
-      return CoreIntegrationStats(
+      return const CoreIntegrationStats(
         totalServicesAvailable: 8,
         coreServicesInUse: 0,
         integrationPercentage: 0.0,

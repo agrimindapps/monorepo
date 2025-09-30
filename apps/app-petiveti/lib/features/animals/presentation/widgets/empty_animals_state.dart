@@ -41,7 +41,7 @@ class EmptyAnimalsState extends StatelessWidget {
   /// Provides helpful information about the animals feature
   /// for first-time users.
   static void _showWelcomeDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Row(

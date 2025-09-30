@@ -4,8 +4,8 @@
 /// do PlantFormProvider monolítico (1,034 linhas) para as novas classes SOLID.
 library;
 
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../riverpod_providers/solid_providers.dart';
 

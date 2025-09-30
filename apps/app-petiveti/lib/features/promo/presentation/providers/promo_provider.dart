@@ -39,7 +39,7 @@ class PromoNotifier extends StateNotifier<PromoState> {
     
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getPromoContent(local.NoParams());
+    final result = await _getPromoContent(const local.NoParams());
     
     result.fold(
       (failure) => state = state.copyWith(

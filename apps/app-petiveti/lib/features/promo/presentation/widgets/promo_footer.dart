@@ -26,7 +26,7 @@ class PromoFooter extends StatelessWidget {
           // Divider
           Container(
             height: 1,
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
           
           const SizedBox(height: 24),
@@ -109,7 +109,7 @@ class PromoFooter extends StatelessWidget {
           SplashConstants.appDescription,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             height: 1.5,
           ),
         ),
@@ -121,7 +121,7 @@ class PromoFooter extends StatelessWidget {
           'Contato: suporte@petiveti.com',
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -153,12 +153,12 @@ class PromoFooter extends StatelessWidget {
               link,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 decoration: TextDecoration.none,
               ),
             ),
           ),
-        )).toList(),
+        )),
       ],
     );
   }
@@ -202,13 +202,13 @@ class PromoFooter extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         child: Icon(
           icon,
-          color: Colors.white.withOpacity(0.8),
+          color: Colors.white.withValues(alpha: 0.8),
           size: 20,
         ),
       ),
@@ -222,7 +222,7 @@ class PromoFooter extends StatelessWidget {
           '© 2025 ${SplashConstants.appName}. Todos os direitos reservados.',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
           ),
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
@@ -236,7 +236,7 @@ class PromoFooter extends StatelessWidget {
               'Política de Privacidade',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -245,7 +245,7 @@ class PromoFooter extends StatelessWidget {
               ' • ',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
               ),
             ),
             
@@ -253,7 +253,7 @@ class PromoFooter extends StatelessWidget {
               'Termos de Uso',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
                 decoration: TextDecoration.underline,
               ),
             ),

@@ -1,11 +1,13 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../core/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/services/receituagro_navigation_service.dart';
-import '../../detalhes_diagnostico/detalhe_diagnostico_page.dart';
+import '../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
+import '../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_provider.dart';
 import '../models/favorito_defensivo_model.dart';
 import '../models/favorito_diagnostico_model.dart';
 import '../models/favorito_praga_model.dart';
@@ -88,14 +90,17 @@ class FavoritosNavigationService {
       final diagnosticoCompleto = await _integrationService.getDiagnosticoCompleto(diagnostico.idReg);
       
       if (diagnosticoCompleto != null) {
-        await Navigator.push(
+        await Navigator.push<void>(
           context,
-          MaterialPageRoute(
-            builder: (context) => DetalheDiagnosticoPage(
-              diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
-              nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
-              nomePraga: diagnosticoCompleto.nomePraga,
-              cultura: diagnosticoCompleto.nomeCultura,
+          MaterialPageRoute<void>(
+            builder: (context) => provider.ChangeNotifierProvider(
+              create: (_) => DetalheDiagnosticoProvider(),
+              child: DetalheDiagnosticoPage(
+                diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
+                nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
+                nomePraga: diagnosticoCompleto.nomePraga,
+                cultura: diagnosticoCompleto.nomeCultura,
+              ),
             ),
           ),
         );

@@ -533,15 +533,15 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
   }
 
   void _shareEquine() {
-    final text = '''
-Equino: ${_equine!.commonName}
-Temperamento: ${_equine!.temperament.displayName}
-Pelagem: ${_equine!.coat.displayName}
-Uso Principal: ${_equine!.primaryUse.displayName}
-País de Origem: ${_equine!.originCountry}
-
-Compartilhado via AgriHurbi
-''';
+    // final text = '''
+    // Equino: ${_equine!.commonName}
+    // Temperamento: ${_equine!.temperament.displayName}
+    // Pelagem: ${_equine!.coat.displayName}
+    // Uso Principal: ${_equine!.primaryUse.displayName}
+    // País de Origem: ${_equine!.originCountry}
+    //
+    // Compartilhado via AgriHurbi
+    // ''';
 
     // Note: Implement actual sharing functionality
     ScaffoldMessenger.of(context).showSnackBar(

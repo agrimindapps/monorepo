@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
 import '../../../animals/presentation/providers/animals_provider.dart';
 import '../providers/weights_provider.dart';
@@ -370,7 +370,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                         labelText: 'Prioridade',
                         prefixIcon: Icon(Icons.priority_high),
                       ),
-                      items: [
+                      items: const [
                         DropdownMenuItem(value: 'low', child: Text('Baixa')),
                         DropdownMenuItem(value: 'medium', child: Text('Média')),
                         DropdownMenuItem(value: 'high', child: Text('Alta')),
@@ -596,21 +596,21 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       ),
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Raça',
                     prefixIcon: Icon(Icons.pets),
                     isDense: true,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Idade (anos)',
                     prefixIcon: Icon(Icons.cake),
                     isDense: true,

@@ -6,9 +6,9 @@ import '../../features/culturas/lista_culturas_page.dart';
 import '../../features/defensivos/home_defensivos_page.dart';
 import '../../features/defensivos/presentation/pages/defensivos_unificado_page.dart';
 import '../../features/defensivos/presentation/providers/defensivos_unificado_provider.dart';
-import '../../features/pragas/detalhe_praga_page.dart';
 import '../../features/pragas/lista_pragas_page.dart';
-import '../../features/subscription/presentation/pages/subscription_clean_page.dart';
+import '../../features/pragas/presentation/pages/detalhe_praga_page.dart';
+import '../../features/subscription/presentation/pages/subscription_page.dart';
 import '../di/injection_container.dart';
 
 /// Classe responsável por gerenciar o roteamento da aplicação
@@ -83,7 +83,7 @@ class AppRouter {
 
       case '/subscription':
         return MaterialPageRoute(
-          builder: (_) => const SubscriptionCleanPage(),
+          builder: (_) => const SubscriptionPage(),
           settings: settings,
         );
 

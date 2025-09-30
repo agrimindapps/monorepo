@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/repositories/cultura_hive_repository.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
 /// Model para diagnóstico usado na UI
@@ -62,8 +63,8 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
   String get selectedCultura => _selectedCultura;
   List<String> get culturas => _culturas;
 
-  /// Carrega diagnósticos para uma praga específica por ID
-  Future<void> loadDiagnosticos(String pragaId) async {
+  /// Carrega diagnósticos para uma praga específica por ID e nome
+  Future<void> loadDiagnosticos(String pragaId, {String? pragaName}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -71,24 +72,36 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
     try {
       final result = await _diagnosticosRepository.getByPraga(pragaId);
 
-      result.fold(
-        (failure) {
+      await result.fold(
+        (failure) async {
           _errorMessage = 'Erro ao carregar diagnósticos: ${failure.toString()}';
           _diagnosticos = [];
           debugPrint('❌ $_errorMessage');
         },
-        (diagnosticosEntities) {
+        (diagnosticosEntities) async {
           // Converte entidades para o modelo usado na UI
-          _diagnosticos = diagnosticosEntities.map((entity) {
-            return DiagnosticoModel(
-              id: entity.id,
-              nome: entity.nomeDefensivo ?? 'Defensivo não especificado',
-              ingredienteAtivo: entity.idDefensivo,
-              dosagem: entity.dosagem.toString(),
-              cultura: entity.nomeCultura ?? 'Não especificado',
-              grupo: entity.nomePraga ?? '',
+          final diagnosticosList = <DiagnosticoModel>[];
+
+          for (final entity in diagnosticosEntities) {
+            // Resolver nome da cultura se não estiver disponível
+            String culturaNome = entity.nomeCultura ?? 'Não especificado';
+            if (culturaNome == 'Não especificado' && entity.idCultura.isNotEmpty) {
+              culturaNome = await _resolveCulturaNome(entity.idCultura);
+            }
+
+            diagnosticosList.add(
+              DiagnosticoModel(
+                id: entity.id,
+                nome: entity.nomeDefensivo ?? 'Defensivo não especificado',
+                ingredienteAtivo: entity.idDefensivo,
+                dosagem: entity.dosagem.displayDosagem,
+                cultura: culturaNome,
+                grupo: pragaName ?? entity.nomePraga ?? 'Praga não identificada',
+              ),
             );
-          }).toList();
+          }
+
+          _diagnosticos = diagnosticosList;
         },
       );
     } catch (e) {
@@ -99,6 +112,20 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Resolve o nome da cultura pelo ID usando o repository
+  Future<String> _resolveCulturaNome(String idCultura) async {
+    try {
+      final culturaRepository = sl<CulturaHiveRepository>();
+      final culturaData = await culturaRepository.getById(idCultura);
+      if (culturaData != null && culturaData.cultura.isNotEmpty) {
+        return culturaData.cultura;
+      }
+    } catch (e) {
+      debugPrint('⚠️ Erro ao resolver nome da cultura: $e');
+    }
+    return 'Não especificado';
   }
 
 

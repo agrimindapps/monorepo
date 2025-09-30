@@ -10,12 +10,12 @@ class DesktopBrandingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
+    return const ClipRRect(
+      borderRadius: BorderRadius.only(
         topLeft: Radius.circular(20),
         bottomLeft: Radius.circular(20),
       ),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -23,7 +23,7 @@ class DesktopBrandingWidget extends StatelessWidget {
             colors: SplashColors.heroGradient,
           ),
         ),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.all(40.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,

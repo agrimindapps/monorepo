@@ -1,6 +1,7 @@
+// ignore_for_file: overridden_fields
+
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:core/core.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'commodity_price_model.g.dart';
 
@@ -10,36 +11,46 @@ part 'commodity_price_model.g.dart';
 /// for agricultural commodities and products
 @HiveType(typeId: 12)
 class CommodityPriceModel extends CommodityPriceEntity {
+  @override
   @HiveField(0)
   final String id;
   
+  @override
   @HiveField(1)
   final String commodityName;
   
   @HiveField(2)
   final CommodityTypeModel _type;
   
+  @override
   @HiveField(3)
   final double currentPrice;
   
+  @override
   @HiveField(4)
   final double previousPrice;
   
+  @override
   @HiveField(5)
   final double changePercent;
   
+  @override
   @HiveField(6)
   final String currency;
   
+  @override
   @HiveField(7)
   final String unit;
   
+  @override
   @HiveField(8)
   final String market;
   
+  @override
   @HiveField(9)
   final DateTime lastUpdated;
   
+  @override
   @HiveField(10)
   final List<HistoricalPriceModel> history;
 
@@ -327,12 +338,15 @@ enum CommodityTypeModel {
 /// Historical Price Model with Hive Serialization
 @HiveType(typeId: 14)
 class HistoricalPriceModel extends HistoricalPrice {
+  @override
   @HiveField(0)
   final DateTime date;
   
+  @override
   @HiveField(1)
   final double price;
   
+  @override
   @HiveField(2)
   final double volume;
 
@@ -377,21 +391,27 @@ class HistoricalPriceModel extends HistoricalPrice {
 /// Market Summary Model with Hive Serialization
 @HiveType(typeId: 15)
 class MarketSummaryModel extends MarketSummaryEntity {
+  @override
   @HiveField(0)
   final String marketName;
   
+  @override
   @HiveField(1)
   final DateTime lastUpdated;
   
+  @override
   @HiveField(2)
   final List<CommodityPriceModel> topGainers;
   
+  @override
   @HiveField(3)
   final List<CommodityPriceModel> topLosers;
   
+  @override
   @HiveField(4)
   final double marketIndex;
   
+  @override
   @HiveField(5)
   final double marketIndexChange;
 

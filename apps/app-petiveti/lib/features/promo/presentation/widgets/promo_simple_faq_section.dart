@@ -69,7 +69,7 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
             'Tire suas dúvidas sobre o PetiVeti',
             style: TextStyle(
               fontSize: isMobile ? 16 : 18,
-              color: SplashColors.textColor.withOpacity(0.7),
+              color: SplashColors.textColor.withValues(alpha: 0.7),
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -100,13 +100,13 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isExpanded 
-              ? SplashColors.primaryColor.withOpacity(0.3)
+              ? SplashColors.primaryColor.withValues(alpha: 0.3)
               : Colors.transparent,
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -157,7 +157,7 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
                 faq.answer,
                 style: TextStyle(
                   fontSize: 14,
-                  color: SplashColors.textColor.withOpacity(0.8),
+                  color: SplashColors.textColor.withValues(alpha: 0.8),
                   height: 1.5,
                 ),
               ),
@@ -169,23 +169,23 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
 
   List<_FAQData> _getFAQs() {
     return [
-      _FAQData(
+      const _FAQData(
         question: 'O PetiVeti é gratuito?',
         answer: 'O PetiVeti oferece funcionalidades básicas gratuitas e um plano premium com recursos avançados. Você pode começar gratuitamente e fazer upgrade quando precisar.',
       ),
-      _FAQData(
+      const _FAQData(
         question: 'Como funciona o lembrete de vacinas?',
         answer: 'O app envia notificações automáticas baseadas no calendário de vacinação do seu pet. Você recebe alertas alguns dias antes da data marcada para não esquecer.',
       ),
-      _FAQData(
+      const _FAQData(
         question: 'Posso cadastrar mais de um pet?',
         answer: 'Sim! Você pode cadastrar quantos pets quiser, cada um com seu perfil individual, histórico médico e agenda personalizada.',
       ),
-      _FAQData(
+      const _FAQData(
         question: 'Os dados ficam seguros na nuvem?',
         answer: 'Sim, todos os dados são criptografados e armazenados com segurança. Você pode acessar as informações do seu pet em qualquer dispositivo.',
       ),
-      _FAQData(
+      const _FAQData(
         question: 'Quando o app será lançado?',
         answer: 'O PetiVeti será lançado em 1º de outubro de 2025. Faça seu pré-cadastro para ser um dos primeiros a usar!',
       ),

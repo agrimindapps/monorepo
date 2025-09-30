@@ -567,6 +567,8 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
     final success = await _favoritesService!.clearAllFavorites();
     if (success) {
       await _loadFavorites();
+      if (!context.mounted) return;
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Todos os favoritos foram removidos'),
@@ -581,6 +583,8 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
     final success = await _favoritesService!.syncFavorites();
     if (success) {
       await _loadFavorites();
+      if (!context.mounted) return;
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Favoritos sincronizados com sucesso'),
@@ -611,6 +615,8 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
     final success = await _favoritesService!.removeFromFavorites(calculator.id);
     if (success) {
       await _loadFavorites();
+      if (!context.mounted) return;
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${calculator.name} removida dos favoritos'),

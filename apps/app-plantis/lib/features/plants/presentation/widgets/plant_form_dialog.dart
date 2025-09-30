@@ -1,6 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/riverpod_providers/solid_providers.dart';

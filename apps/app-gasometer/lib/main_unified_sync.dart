@@ -22,12 +22,12 @@ class GasometerAppWithUnifiedSync extends ConsumerWidget {
     // TODO: Initialize sync provider using Riverpod
     // final syncProvider = ref.watch(unifiedSyncProvider);
     
-    return ProviderScope(
+    return const ProviderScope(
       // TODO: Override providers as needed
       // overrides: [
       //   unifiedSyncProvider.overrideWith((ref) => UnifiedSyncProvider.instance..initializeForApp('gasometer')),
       // ],
-      child: const MaterialApp(
+      child: MaterialApp(
         title: 'Gasometer - Unified Sync',
         home: GasometerHomePage(),
       ),
@@ -187,18 +187,18 @@ class _GasometerHomePageState extends ConsumerState<GasometerHomePage> {
         const status = 'idle';
         const debugInfo = 'Sync provider not implemented yet';
         
-        return Card(
-          margin: const EdgeInsets.all(8),
+        return const Card(
+          margin: EdgeInsets.all(8),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Sync Status: $status',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text('Debug: $debugInfo'),
               ],
             ),

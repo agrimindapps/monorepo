@@ -17,8 +17,8 @@ import '../widgets/home_pragas_suggestions_widget.dart';
 /// - Coordenação entre widgets especializados
 /// - Gerenciamento de estados de loading/erro
 /// - Integração com HomePragasProvider
-class HomePragasCleanPage extends StatelessWidget {
-  const HomePragasCleanPage({super.key});
+class HomePragasPage extends StatelessWidget {
+  const HomePragasPage({super.key});
 
   @override
   Widget build(BuildContext context) {

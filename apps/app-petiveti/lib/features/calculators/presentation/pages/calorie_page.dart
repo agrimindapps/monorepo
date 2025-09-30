@@ -1,21 +1,20 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
+import '../../../../shared/constants/calorie_constants.dart';
 import '../providers/calorie_provider.dart';
 import '../widgets/calorie_activity_condition_step.dart';
 import '../widgets/calorie_animation_manager.dart';
 import '../widgets/calorie_basic_info_step.dart';
 import '../widgets/calorie_dialog_manager.dart';
 import '../widgets/calorie_menu_handler.dart';
+import '../widgets/calorie_navigation_bar.dart';
 import '../widgets/calorie_navigation_handler.dart';
 import '../widgets/calorie_physiological_step.dart';
+import '../widgets/calorie_progress_indicator.dart';
 import '../widgets/calorie_result_card.dart';
 import '../widgets/calorie_review_step.dart';
 import '../widgets/calorie_special_conditions_step.dart';
-import '../widgets/calorie_step_indicator.dart';
-import '../widgets/calorie_progress_indicator.dart';
-import '../widgets/calorie_navigation_bar.dart';
-import '../../../../shared/constants/calorie_constants.dart';
 
 /// **Refactored Calorie Calculator Page - Clean Architecture Implementation**
 /// 

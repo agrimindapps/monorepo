@@ -1,6 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
-import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
 import 'package:app_agrihurbi/features/markets/presentation/providers/market_provider.dart';
 import 'package:app_agrihurbi/features/markets/presentation/widgets/market_card.dart';
 import 'package:app_agrihurbi/features/markets/presentation/widgets/market_filter_sheet.dart';
@@ -309,7 +308,7 @@ class _MarketsListPageState extends State<MarketsListPage>
 
   /// Show filter bottom sheet
   void _showFilterSheet() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (context) => MarketFilterSheet(

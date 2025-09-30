@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
 import '../../domain/calculators/pregnancy_gestacao_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
@@ -375,9 +375,9 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               ),
             ],
             
-            if (result.recommendations?.isNotEmpty == true) ...[
+            if (result.recommendations.isNotEmpty == true) ...[
               const SizedBox(height: 16),
-              _buildRecommendationsSection(result.recommendations!),
+              _buildRecommendationsSection(result.recommendations),
             ],
           ],
         ),
@@ -471,7 +471,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                    const Icon(Icons.warning_amber, color: Colors.orange, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Alertas Importantes',

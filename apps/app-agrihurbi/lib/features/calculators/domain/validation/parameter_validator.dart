@@ -1,9 +1,11 @@
 import '../entities/calculator_parameter.dart';
 
 /// Sistema de validação robusto para parâmetros de calculadoras
-/// 
+///
 /// Implementa validação por tipo, range, formato e regras de negócio específicas
 class ParameterValidator {
+  ParameterValidator._();
+
   static const Map<ParameterType, String> _typeErrorMessages = {
     ParameterType.number: 'Deve ser um número inteiro válido',
     ParameterType.decimal: 'Deve ser um número decimal válido',

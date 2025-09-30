@@ -310,7 +310,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   height: 200,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(

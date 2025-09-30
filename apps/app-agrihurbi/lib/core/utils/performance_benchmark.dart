@@ -1,9 +1,11 @@
 import 'dart:async';
 
 /// Utilitário para benchmark de performance das otimizações
-/// 
+///
 /// Mede tempos de execução, memoria usage e FPS para validar melhorias
 class PerformanceBenchmark {
+  PerformanceBenchmark._();
+
   static final List<BenchmarkResult> _results = [];
   
   /// Executa benchmark de uma operação

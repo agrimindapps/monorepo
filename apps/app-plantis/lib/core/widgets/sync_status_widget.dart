@@ -42,7 +42,7 @@ class SyncStatusWidget extends ConsumerWidget {
             ),
             if (showText && !compact) ...[
               const SizedBox(width: 6),
-              Text(
+              const Text(
                 'Sincronizado',
                 style: TextStyle(
                   fontSize: 12,

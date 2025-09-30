@@ -1,10 +1,12 @@
 import '../entities/calculator_parameter.dart';
 
 /// Serviço de conversão de unidades para calculadoras agrícolas
-/// 
+///
 /// Implementa conversões completas entre todas as unidades suportadas
 /// com precisão e validação adequadas para uso agrícola
 class UnitConversionService {
+  UnitConversionService._();
+
   // Fatores de conversão base para diferentes categorias
   
   /// Conversões de área (base: metros quadrados)
@@ -128,7 +130,6 @@ class UnitConversionService {
         return value; // Base units vary, handled separately
       case UnitCategory.none:
       case UnitCategory.percentage:
-      default:
         return value;
     }
   }
@@ -156,7 +157,6 @@ class UnitConversionService {
         return baseValue; // Base units vary, handled separately
       case UnitCategory.none:
       case UnitCategory.percentage:
-      default:
         return baseValue;
     }
   }

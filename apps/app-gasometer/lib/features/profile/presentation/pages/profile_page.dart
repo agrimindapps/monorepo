@@ -9,12 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/services/data_sanitization_service.dart';
-import '../../../../core/services/gasometer_data_cleaner_service.dart';
-import '../../../../core/theme/design_tokens.dart';
 // import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../core/services/gasometer_data_cleaner_service.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
 import '../../domain/services/profile_image_service.dart';
 import '../widgets/devices_section_widget.dart';
@@ -1285,7 +1285,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return _DataClearDialog();
+        return const _DataClearDialog();
       },
     );
   }

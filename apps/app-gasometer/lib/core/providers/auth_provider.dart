@@ -1,9 +1,10 @@
 import 'dart:async';
+
 import 'package:core/core.dart' hide Failure, AuthenticationFailure, NetworkFailure, ServerFailure, ValidationFailure;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../di/injection_container_modular.dart';
+import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/domain/entities/user_entity.dart' as gasometer_entity;
 import '../../features/auth/domain/usecases/delete_account.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
@@ -14,7 +15,7 @@ import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/sign_up_with_email.dart';
 import '../../features/auth/domain/usecases/update_profile.dart';
 import '../../features/auth/domain/usecases/watch_auth_state.dart';
-import '../../features/auth/data/datasources/auth_local_data_source.dart';
+import '../di/injection_container_modular.dart';
 import '../error/failures.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_rate_limiter.dart';
@@ -31,16 +32,6 @@ enum AuthStatus {
 
 /// Estado completo de autenticação - migrado para Riverpod
 class AuthState {
-  final gasometer_entity.UserEntity? currentUser;
-  final bool isLoading;
-  final String? errorMessage;
-  final bool isAuthenticated;
-  final bool isPremium;
-  final bool isAnonymous;
-  final AuthStatus status;
-  final bool isInitialized;
-  final bool isSyncing;
-  final String syncMessage;
 
   const AuthState({
     this.currentUser,
@@ -56,6 +47,16 @@ class AuthState {
   });
 
   const AuthState.initial() : this();
+  final gasometer_entity.UserEntity? currentUser;
+  final bool isLoading;
+  final String? errorMessage;
+  final bool isAuthenticated;
+  final bool isPremium;
+  final bool isAnonymous;
+  final AuthStatus status;
+  final bool isInitialized;
+  final bool isSyncing;
+  final String syncMessage;
 
   AuthState copyWith({
     gasometer_entity.UserEntity? currentUser,

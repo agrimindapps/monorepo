@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/ideal_weight_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../providers/ideal_weight_provider.dart';
@@ -449,7 +448,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               ),
             ],
             
-            if (result.recommendations?.isNotEmpty == true) ...[
+            if (result.recommendations.isNotEmpty == true) ...[
               const SizedBox(height: 16),
               Text(
                 'Recomendações',
@@ -458,7 +457,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...result.recommendations!.map((rec) => Padding(
+              ...result.recommendations.map((rec) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/ui_components.dart';
 import '../../domain/entities/animal.dart';
 import '../providers/animals_provider.dart';
 import '../providers/animals_ui_state_provider.dart';
-import '../../../../shared/widgets/ui_components.dart';
 import 'animal_card.dart';
 import 'empty_animals_state.dart';
 

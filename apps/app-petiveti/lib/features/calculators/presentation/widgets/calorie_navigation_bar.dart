@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+
+import '../../../../shared/constants/calorie_constants.dart';
 import '../providers/calorie_provider.dart';
 import 'calorie_navigation_handler.dart';
-import '../../../../shared/constants/calorie_constants.dart';
 
 /// **Calorie Navigation Bar Widget**
 /// 
@@ -154,10 +155,10 @@ class CalorieNavigationBar extends ConsumerWidget {
   /// Creates the appropriate icon for the next button based on state.
   Widget _buildNextButtonIcon(bool isLastStep, bool isTransitionLoading) {
     if (isTransitionLoading) {
-      return SizedBox(
+      return const SizedBox(
         width: CalorieConstants.loadingIndicatorSize,
         height: CalorieConstants.loadingIndicatorSize,
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: CalorieConstants.loadingIndicatorStrokeWidth,
           color: Colors.white,
         ),

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
 import '../providers/promo_provider.dart';
@@ -115,13 +115,13 @@ class _PromoPageState extends ConsumerState<PromoPage> {
           // Features Section (no spacing needed, handled internally)
           PromoFeaturesSection(
             key: _featuresKey,
-            features: [], // Will use hardcoded features
+            features: const [], // Will use hardcoded features
           ),
           
           // Screenshots Section
           PromoScreenshotsSection(
             key: _screenshotsKey,
-            screenshots: [], // Will use hardcoded screenshots
+            screenshots: const [], // Will use hardcoded screenshots
             currentIndex: state.currentScreenshotIndex,
             onScreenshotChanged: (index) {
               ref.read(promoProvider.notifier).changeScreenshot(index);

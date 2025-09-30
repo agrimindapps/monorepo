@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
+
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';
-import '../../features/medications/domain/entities/sync/medication_sync_entity.dart';
 import '../../features/appointments/domain/entities/sync/appointment_sync_entity.dart';
-import '../../features/weight/domain/entities/sync/weight_sync_entity.dart';
+import '../../features/medications/domain/entities/sync/medication_sync_entity.dart';
 import '../../features/settings/domain/entities/sync/user_settings_sync_entity.dart';
+import '../../features/weight/domain/entities/sync/weight_sync_entity.dart';
 import 'petiveti_sync_config.dart';
 
 /// Gerenciador de sincronização simplificado para Petiveti
@@ -62,7 +62,7 @@ class PetivetiSyncManager {
   /// Força sincronização de todos os dados
   Future<Either<Failure, void>> forceSync() async {
     if (!_isInitialized) {
-      return Left(InitializationFailure('Sync manager not initialized'));
+      return const Left(InitializationFailure('Sync manager not initialized'));
     }
 
     return await UnifiedSyncManager.instance.forceSyncApp('petiveti');
@@ -71,7 +71,7 @@ class PetivetiSyncManager {
   /// Força sincronização de dados de emergência (medications críticas)
   Future<Either<Failure, void>> forceEmergencySync() async {
     if (!_isInitialized) {
-      return Left(InitializationFailure('Sync manager not initialized'));
+      return const Left(InitializationFailure('Sync manager not initialized'));
     }
 
     // Sincronizar especificamente entidades críticas
@@ -113,7 +113,7 @@ class PetivetiSyncManager {
   /// Limpa dados locais
   Future<Either<Failure, void>> clearLocalData() async {
     if (!_isInitialized) {
-      return Left(InitializationFailure('Sync manager not initialized'));
+      return const Left(InitializationFailure('Sync manager not initialized'));
     }
 
     return await UnifiedSyncManager.instance.clearAppData('petiveti');

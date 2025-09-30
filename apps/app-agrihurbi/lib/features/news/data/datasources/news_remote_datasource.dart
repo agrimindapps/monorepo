@@ -207,7 +207,7 @@ class NewsRemoteDataSource {
   /// Parse RSS feed from URL
   Future<List<NewsArticleModel>> _parseRSSFeed(String feedUrl) async {
     try {
-      final response = await _client.dio.get(feedUrl);
+      final response = await _client.dio.get<String>(feedUrl);
       final xmlString = response.data as String;
       final document = XmlDocument.parse(xmlString);
 

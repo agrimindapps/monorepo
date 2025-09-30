@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/plantis_colors.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart' as local;
-import '../../features/tasks/domain/entities/task.dart';
-import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import 'main_scaffold.dart';
 
 /// Shell layout web otimizado com sidebar moderna para desktop
@@ -309,7 +306,7 @@ class _NavigationList extends StatelessWidget {
           Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
               // For now, show 0 pending tasks until we implement proper Riverpod providers
-              final pendingTasksCount = 0;
+              const pendingTasksCount = 0;
 
               return Column(
                 children: [
@@ -680,8 +677,8 @@ class _SidebarFooter extends StatelessWidget {
           child: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
               // For now, show guest user until we implement proper Riverpod providers
-              final user = null;
-              final isAnonymous = true;
+              const user = null;
+              const isAnonymous = true;
 
               if (!isExpanded) {
                 // Versão colapsada - apenas avatar com tooltip
@@ -714,17 +711,17 @@ class _SidebarFooter extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Center(
+                          child: const Center(
                             child:
                                 isAnonymous
-                                    ? const Icon(
+                                    ? Icon(
                                       Icons.person,
                                       color: Colors.white,
                                       size: 22,
                                     )
-                                    : const Text(
+                                    : Text(
                                       '?',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -784,17 +781,17 @@ class _SidebarFooter extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Center(
+                    child: const Center(
                       child:
                           isAnonymous
-                              ? const Icon(
+                              ? Icon(
                                 Icons.person,
                                 color: Colors.white,
                                 size: 20,
                               )
-                              : const Text(
+                              : Text(
                                 '?',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,

@@ -22,21 +22,21 @@ class BackupValidationService {
       final structureValidation = _validateBackupStructure(backup);
       structureValidation.fold(
         (error) => validationErrors.add(error),
-        (_) => {},
+        (_) => <String, dynamic>{},
       );
 
       // 2. Validação de compatibilidade
       final compatibilityValidation = _validateCompatibility(backup);
       compatibilityValidation.fold(
         (error) => validationErrors.add(error),
-        (_) => {},
+        (_) => <String, dynamic>{},
       );
 
       // 3. Validação de metadados
       final metadataValidation = _validateMetadata(backup);
       metadataValidation.fold(
         (error) => validationErrors.add(error),
-        (_) => {},
+        (_) => <String, dynamic>{},
       );
 
       // 4. Validação dos dados de plantas

@@ -527,6 +527,7 @@ class PlantisNotificationServiceV2 implements PlantisNotificationService {
   }
 
   // Internal accessor used by legacy code (if needed)
+  // ignore: unused_element
   INotificationRepository get _notificationService {
     if (_useEnhancedFramework) {
       // Return the enhanced service's underlying repository

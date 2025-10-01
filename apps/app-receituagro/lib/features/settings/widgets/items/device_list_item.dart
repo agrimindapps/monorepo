@@ -31,12 +31,12 @@ class DeviceListItem extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isPrimary 
-            ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
             : theme.colorScheme.surface,
         border: Border.all(
           color: isPrimary 
-              ? theme.colorScheme.primary.withOpacity(0.3)
-              : theme.colorScheme.outline.withOpacity(0.2),
+              ? theme.colorScheme.primary.withValues(alpha: 0.3)
+              : theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -130,7 +130,7 @@ class DeviceListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
@@ -171,7 +171,7 @@ class DeviceListItem extends StatelessWidget {
         color: theme.colorScheme.error,
       ),
       style: IconButton.styleFrom(
-        backgroundColor: theme.colorScheme.error.withOpacity(0.1),
+        backgroundColor: theme.colorScheme.error.withValues(alpha: 0.1),
         padding: const EdgeInsets.all(4),
         minimumSize: const Size(28, 28),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

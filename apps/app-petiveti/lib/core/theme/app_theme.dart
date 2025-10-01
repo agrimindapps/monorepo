@@ -209,7 +209,6 @@ class AppTheme {
 
   /// Dark theme with PetiVeti branding
   static ThemeData get dark {
-    const darkBackground = Color(0xFF121212);
     const darkSurface = Color(0xFF1E1E1E);
     const darkOnSurface = Color(0xFFE0E0E0);
     

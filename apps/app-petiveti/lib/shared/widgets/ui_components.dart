@@ -579,7 +579,6 @@ class UIComponents {
       case ErrorType.server:
         return Icons.cloud_off;
       case ErrorType.generic:
-      default:
         return Icons.error_outline;
     }
   }
@@ -595,7 +594,6 @@ class UIComponents {
       case ErrorType.server:
         return AppColors.error;
       case ErrorType.generic:
-      default:
         return AppColors.error;
     }
   }

@@ -6,7 +6,7 @@ import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_providers.dart';
 
 class TaskListWidget extends ConsumerWidget {
-  final Function(TaskEntity)? onTaskTap;
+  final void Function(TaskEntity)? onTaskTap;
   final TaskFilter taskFilter;
   final String? selectedTag;
   final bool enableReorder;

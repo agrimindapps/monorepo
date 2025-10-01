@@ -213,7 +213,7 @@ class AuthStateNotifier {
     if (!_isInitialized) {
       // Wait for initialization - in real implementation this would
       // wait for Firebase Auth to initialize
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       updateInitializationStatus(true);
     }
   }

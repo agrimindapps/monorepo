@@ -428,30 +428,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     }
   }
 
-  Future<void> _handleDemoLogin() async {
-    setState(() => _isLoading = true);
-    HapticFeedback.mediumImpact();
-    
-    try {
-      await ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
-        'demo@taskmanager.com',
-        'demo123456',
-      );
-    } catch (e) {
-      try {
-        await ref.read(authNotifierProvider.notifier).signInAnonymously();
-      } catch (e2) {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          _showAnimatedSnackBar(
-            message: 'Erro ao acessar modo demo: ${_getErrorMessage(e2)}',
-            isError: true,
-          );
-        }
-      }
-    }
-  }
-
   Future<void> _handleGoogleLogin() async {
     _showSocialLoginDialog('Google');
   }
@@ -595,16 +571,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
   
   /// Navega para HomePage quando sync terminar ou imediatamente
   void _navigateAfterSync() {
-    late StreamSubscription subscription;
-    
-    subscription = Stream.periodic(const Duration(milliseconds: 500))
+    late StreamSubscription<dynamic> subscription;
+
+    subscription = Stream<dynamic>.periodic(const Duration(milliseconds: 500))
         .listen((_) {
       final authNotifier = ref.read(authNotifierProvider.notifier);
       if (!authNotifier.isSyncInProgress) {
         subscription.cancel();
         
         // Pequeno delay para garantir que o loading foi fechado
-        Future.delayed(const Duration(milliseconds: 100), () {
+        Future<void>.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
             // Fechar dialog de loading se estiver visível
             if (Navigator.canPop(context)) {
@@ -621,7 +597,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   void _navigateToHomePage() {
     print('🚀 Navegando para HomePage...');
     Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
+      PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             const HomePage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -1300,7 +1276,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         TextButton(
           onPressed: _isLoading ? null : () {
             Navigator.of(context).push(
-              PageRouteBuilder(
+              PageRouteBuilder<dynamic>(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     const RegisterPage(),
                 transitionsBuilder: (context, animation, secondaryAnimation, child) {

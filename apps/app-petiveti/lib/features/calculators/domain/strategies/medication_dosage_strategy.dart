@@ -446,8 +446,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
       case AdministrationFrequency.fourTimes:
       case AdministrationFrequency.everySixHours:
         return '6 horas';
-      default:
-        return '12 horas';
     }
   }
 

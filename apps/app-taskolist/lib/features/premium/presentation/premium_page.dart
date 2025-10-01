@@ -125,7 +125,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<dynamic>(
                 builder: (context) => const AuthGuard(child: HomePage()),
               ),
             );
@@ -255,7 +255,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
+                        MaterialPageRoute<dynamic>(
                           builder: (context) => const AuthGuard(child: HomePage()),
                         ),
                       );
@@ -347,7 +347,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
 
 class _ProductCard extends StatelessWidget {
   final ProductInfo product;
-  final Function(String) onPurchase;
+  final void Function(String) onPurchase;
   final bool isPurchasing;
 
   const _ProductCard({

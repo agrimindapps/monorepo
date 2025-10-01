@@ -25,7 +25,7 @@ class TaskRepositoryImpl implements TaskRepository {
       
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
-        final taskId = await _remoteDataSource!.createTask(taskModel);
+        final taskId = await _remoteDataSource.createTask(taskModel);
         final updatedTask = taskModel.copyWith(id: taskId);
         await _localDataSource.cacheTask(updatedTask);
         return Right(taskId);
@@ -49,7 +49,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Se tiver remote data source, buscar remotamente
       if (_remoteDataSource != null) {
-        final remoteTask = await _remoteDataSource!.getTask(id);
+        final remoteTask = await _remoteDataSource.getTask(id);
         await _localDataSource.cacheTask(remoteTask);
         return Right(remoteTask);
       } else {
@@ -75,7 +75,7 @@ class TaskRepositoryImpl implements TaskRepository {
       // Se tiver remote data source, tentar buscar remotamente primeiro
       if (_remoteDataSource != null) {
         try {
-          final remoteTasks = await _remoteDataSource!.getTasks(
+          final remoteTasks = await _remoteDataSource.getTasks(
             listId: listId,
             userId: userId,
             status: status,
@@ -118,7 +118,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
-        await _remoteDataSource!.updateTask(taskModel);
+        await _remoteDataSource.updateTask(taskModel);
       }
 
       return const Right(null);
@@ -135,7 +135,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
-        await _remoteDataSource!.deleteTask(id);
+        await _remoteDataSource.deleteTask(id);
       }
 
       return const Right(null);
@@ -158,7 +158,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
-        await _remoteDataSource!.updateTaskStatus(id, status);
+        await _remoteDataSource.updateTaskStatus(id, status);
       }
 
       return const Right(null);
@@ -181,7 +181,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
-        await _remoteDataSource!.toggleTaskStar(id);
+        await _remoteDataSource.toggleTaskStar(id);
       }
 
       return const Right(null);
@@ -217,7 +217,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
-        await _remoteDataSource!.reorderTasks(taskIds);
+        await _remoteDataSource.reorderTasks(taskIds);
       }
 
       return const Right(null);
@@ -236,7 +236,7 @@ class TaskRepositoryImpl implements TaskRepository {
   }) {
     // Se tiver remote data source, usar stream remoto
     if (_remoteDataSource != null) {
-      return _remoteDataSource!.watchTasks(
+      return _remoteDataSource.watchTasks(
         listId: listId,
         userId: userId,
         status: status,
@@ -260,7 +260,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       // Se tiver remote data source, buscar remotamente
       if (_remoteDataSource != null) {
-        final tasks = await _remoteDataSource!.searchTasks(query);
+        final tasks = await _remoteDataSource.searchTasks(query);
         return Right(tasks);
       } else {
         // Modo offline - buscar localmente
@@ -283,7 +283,7 @@ class TaskRepositoryImpl implements TaskRepository {
       // Se tiver remote data source, buscar remotamente primeiro
       if (_remoteDataSource != null) {
         try {
-          final remoteTasks = await _remoteDataSource!.getSubtasks(parentTaskId);
+          final remoteTasks = await _remoteDataSource.getSubtasks(parentTaskId);
           await _localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks);
         } catch (e) {

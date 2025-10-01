@@ -152,6 +152,7 @@ class PremiumFeatureGate extends ConsumerWidget {
 }
 
 /// Loading state widget for feature gate
+// ignore: unused_element
 class _LoadingGate extends StatelessWidget {
   const _LoadingGate();
 
@@ -180,13 +181,13 @@ class SimplePremiumGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Simulação simples de verificação premium
-    const isPremium = false; // TODO: Implementar verificação real
+    // const isPremium = false; // TODO: Implementar verificação real
 
-    if (isPremium) {
-      return child;
-    }
+    // if (isPremium) {
+    //   return child;
+    // }
 
-    return fallback ?? 
+    return fallback ??
         PremiumFeatureGate(
           feature: PremiumFeature.cloudSync,
           child: child,
@@ -201,37 +202,37 @@ class LicenseExpirationWarning extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // TODO: Implementar verificação de expiração real
-    const shouldShowWarning = false;
-    const remainingDays = 0;
+    // const shouldShowWarning = false;
+    // const remainingDays = 0;
 
-    if (!shouldShowWarning) {
-      return const SizedBox.shrink();
-    }
+    // if (!shouldShowWarning) {
+    return const SizedBox.shrink();
+    // }
 
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.warning, color: Colors.orange),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Sua licença Premium expira em $remainingDays dias',
-              style: TextStyle(color: Colors.orange[800]),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pushNamed('/premium'),
-            child: const Text('Renovar'),
-          ),
-        ],
-      ),
-    );
+    // return Container(
+    //   margin: const EdgeInsets.all(8),
+    //   padding: const EdgeInsets.all(12),
+    //   decoration: BoxDecoration(
+    //     color: Colors.orange.withOpacity(0.1),
+    //     borderRadius: BorderRadius.circular(8),
+    //     border: Border.all(color: Colors.orange),
+    //   ),
+    //   child: Row(
+    //     children: [
+    //       const Icon(Icons.warning, color: Colors.orange),
+    //       const SizedBox(width: 8),
+    //       Expanded(
+    //         child: Text(
+    //           'Sua licença Premium expira em $remainingDays dias',
+    //           style: TextStyle(color: Colors.orange[800]),
+    //         ),
+    //       ),
+    //       TextButton(
+    //         onPressed: () => Navigator.of(context).pushNamed('/premium'),
+    //         child: const Text('Renovar'),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 }

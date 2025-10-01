@@ -143,6 +143,7 @@ class AnalyticsDashboardService {
   AnalyticsDashboardService._();
 
   late IAnalyticsRepository _analytics;
+  // ignore: unused_field
   late IStorageRepository _storage;
   bool _isInitialized = false;
   

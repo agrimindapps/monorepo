@@ -173,7 +173,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, void>> restorePurchases(String userId) async {
     try {
       // Mock restore - Replace with RevenueCat restore
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: 'Erro ao restaurar compras: ${e.toString()}'));
@@ -184,7 +184,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, bool>> validateReceipt(String receiptData) async {
     try {
       // Mock validation - Replace with actual receipt validation
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       return const Right(true);
     } catch (e) {
       return Left(ServerFailure(message: 'Erro ao validar recibo: ${e.toString()}'));

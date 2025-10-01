@@ -131,6 +131,7 @@ class PragaCardGridMode extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   Color _getTypeColor() {
     switch (properties.praga.tipoPraga) {
       case '1': // Insetos
@@ -144,6 +145,7 @@ class PragaCardGridMode extends StatelessWidget {
     }
   }
 
+  // ignore: unused_element
   IconData _getTypeIcon() {
     switch (properties.praga.tipoPraga) {
       case '1': // Insetos

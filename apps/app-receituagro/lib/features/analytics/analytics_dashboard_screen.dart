@@ -101,6 +101,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
 
   Future<void> _exportReport() async {
     try {
+      // ignore: unused_local_variable
       final report = await _analyticsService.exportAnalyticsReport(
         startDate: _startDate,
         endDate: _endDate,
@@ -193,7 +194,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
   Widget _buildDateRangeHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Theme.of(context).primaryColor.withOpacity(0.1),
+      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -405,9 +406,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: card.color.withOpacity(0.1),
+        color: card.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: card.color.withOpacity(0.3)),
+        border: Border.all(color: card.color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

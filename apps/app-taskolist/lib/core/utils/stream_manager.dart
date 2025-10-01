@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 /// Gerenciador de streams e subscriptions para prevenir memory leaks
 /// Garante que todos os streams sejam cancelados adequadamente
 class StreamManager {
-  final Map<String, StreamSubscription> _subscriptions = {};
-  final Map<String, StreamController> _controllers = {};
+  final Map<String, StreamSubscription<dynamic>> _subscriptions = {};
+  final Map<String, StreamController<dynamic>> _controllers = {};
   final Map<String, Timer> _timers = {};
-  
+
   bool _isDisposed = false;
 
   /// Registra uma subscription para ser gerenciada
-  void registerSubscription(String key, StreamSubscription subscription) {
+  void registerSubscription(String key, StreamSubscription<dynamic> subscription) {
     if (_isDisposed) {
       subscription.cancel();
       throw StateError('StreamManager already disposed');
@@ -236,7 +236,7 @@ mixin StreamManagerMixin {
   
   /// Registra uma subscription
   @protected
-  void addSubscription(String key, StreamSubscription subscription) {
+  void addSubscription(String key, StreamSubscription<dynamic> subscription) {
     _streamManager.registerSubscription(key, subscription);
   }
   
@@ -321,7 +321,7 @@ class ExampleProvider extends ManagedProvider {
   
   Stream<String> get dataStream => _dataController.stream;
   
-  Stream<String> get externalDataStream => Stream.periodic(
+  Stream<String> get externalDataStream => Stream<dynamic>.periodic(
     const Duration(seconds: 1),
     (i) => 'Data $i',
   );

@@ -211,7 +211,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<dynamic>(
                         builder: (context) => const PremiumPage(),
                       ),
                     );
@@ -314,7 +314,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                MaterialPageRoute<dynamic>(
                   builder: (context) => const NotificationSettingsPage(),
                 ),
               );
@@ -439,7 +439,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   void _showEditProfileDialog(UserEntity user) {
     _displayNameController.text = user.displayName;
     
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Editar perfil'),
@@ -481,7 +481,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showLogoutDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sair'),
@@ -599,7 +599,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showUpgradeAccountDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Criar conta permanente'),
@@ -672,7 +672,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showThemeDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Tema'),
@@ -688,7 +688,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showLanguageDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Idioma'),
@@ -704,7 +704,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showBackupDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Backup'),
@@ -720,7 +720,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showExportDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exportar dados'),
@@ -736,7 +736,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showHelpDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajuda'),
@@ -757,7 +757,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showPrivacyDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Privacidade'),

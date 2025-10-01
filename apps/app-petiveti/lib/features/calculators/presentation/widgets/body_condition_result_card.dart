@@ -152,7 +152,6 @@ class BodyConditionResultCard extends StatelessWidget {
       case ActionUrgency.monitor:
         return {'icon': Icons.monitor_heart, 'color': Colors.blue};
       case ActionUrgency.routine:
-      default:
         return {'icon': Icons.check_circle, 'color': Colors.green};
     }
   }

@@ -447,8 +447,8 @@ class TaskManagerNotificationService {
 
   /// Configura callbacks para quando notificações são tocadas
   void setupNotificationHandlers({
-    required Function(String? payload) onNotificationTap,
-    required Function(String actionId, String? payload) onNotificationAction,
+    required void Function(String? payload) onNotificationTap,
+    required void Function(String actionId, String? payload) onNotificationAction,
   }) {
     _notificationRepository.setNotificationTapCallback((payload) async {
       try {

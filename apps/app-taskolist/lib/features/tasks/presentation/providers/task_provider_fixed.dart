@@ -306,8 +306,8 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     // FIX: Memory leak - Armazenar subscription para cancelar depois
     _watchSubscription = stream.listen(
       (tasks) => state = AsyncValue.data(tasks),
-      onError: (error, stackTrace) =>
-          state = AsyncValue.error(error as Object? ?? 'Unknown error', stackTrace as StackTrace? ?? StackTrace.empty),
+      onError: (Object error, StackTrace stackTrace) =>
+          state = AsyncValue.error(error, stackTrace),
       cancelOnError: false, // FIX: Não cancelar em caso de erro
     );
   }

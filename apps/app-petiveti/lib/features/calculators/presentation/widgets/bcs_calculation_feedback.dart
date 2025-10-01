@@ -579,7 +579,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
       case ActionUrgency.monitor:
         return Icons.monitor_heart;
       case ActionUrgency.routine:
-      default:
         return Icons.check_circle;
     }
   }
@@ -593,7 +592,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
       case ActionUrgency.monitor:
         return Colors.blue;
       case ActionUrgency.routine:
-      default:
         return Colors.green;
     }
   }

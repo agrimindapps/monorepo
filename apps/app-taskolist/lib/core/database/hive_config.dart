@@ -4,8 +4,6 @@ import 'package:path_provider/path_provider.dart';
 
 import '../services/task_priority_adapter.dart';
 import '../services/task_status_adapter.dart';
-import '../../features/tasks/data/task_model.dart';
-import '../../features/auth/data/user_model.dart';
 
 class HiveConfig {
   // Type IDs para novos adapters
@@ -23,21 +21,13 @@ class HiveConfig {
       Hive.init(appDocumentDir.path);
     }
 
-    // Registrar TypeAdapters
-    if (!Hive.isAdapterRegistered(2)) {
-      Hive.registerAdapter(TaskModelAdapter());
-    }
-    
+    // Registrar TypeAdapters (sem type parameters para evitar warnings de inferência)
     if (!Hive.isAdapterRegistered(3)) {
       Hive.registerAdapter(TaskStatusAdapter());
     }
-    
+
     if (!Hive.isAdapterRegistered(4)) {
       Hive.registerAdapter(TaskPriorityAdapter());
-    }
-    
-    if (!Hive.isAdapterRegistered(5)) {
-      Hive.registerAdapter(UserModelAdapter());
     }
   }
 

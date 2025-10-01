@@ -107,12 +107,12 @@ class PetivetiDataCleaner implements IAppDataCleaner {
       // Contar pets
       if (await _hive.boxExists('pets') || await _hive.boxExists('pet_box')) {
         try {
-          final petsBox = await _hive.openBox('pets');
+          final petsBox = await _hive.openBox<dynamic>('pets');
           stats['totalPets'] = petsBox.length;
           await petsBox.close();
         } catch (e) {
           try {
-            final petsBox = await _hive.openBox('pet_box');
+            final petsBox = await _hive.openBox<dynamic>('pet_box');
             stats['totalPets'] = petsBox.length;
             await petsBox.close();
           } catch (_) {
@@ -124,7 +124,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
       // Contar reminders
       if (await _hive.boxExists('reminders')) {
         try {
-          final remindersBox = await _hive.openBox('reminders');
+          final remindersBox = await _hive.openBox<dynamic>('reminders');
           stats['totalReminders'] = remindersBox.length;
           await remindersBox.close();
         } catch (_) {
@@ -135,7 +135,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
       // Contar schedules
       if (await _hive.boxExists('schedules')) {
         try {
-          final schedulesBox = await _hive.openBox('schedules');
+          final schedulesBox = await _hive.openBox<dynamic>('schedules');
           stats['totalSchedules'] = schedulesBox.length;
           await schedulesBox.close();
         } catch (_) {
@@ -146,7 +146,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
       // Contar health_records
       if (await _hive.boxExists('health_records')) {
         try {
-          final healthRecordsBox = await _hive.openBox('health_records');
+          final healthRecordsBox = await _hive.openBox<dynamic>('health_records');
           stats['totalHealthRecords'] = healthRecordsBox.length;
           await healthRecordsBox.close();
         } catch (_) {

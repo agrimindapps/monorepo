@@ -117,6 +117,7 @@ class DefensivosStatsGrid extends StatelessWidget {
 
   Widget _buildGridLayout(double availableWidth, BuildContext context) {
     final theme = Theme.of(context);
+    // ignore: unused_local_variable
     final isMediumDevice =
         MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
     final buttonWidth = (availableWidth - 6) / 2;  // Apenas o espaço do gap entre botões

@@ -443,7 +443,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
       unawaited(HapticFeedback.heavyImpact());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(provider.errorMessage ?? 'Erro ao alterar favorito'),
+          content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Erro ao alterar favorito'),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),

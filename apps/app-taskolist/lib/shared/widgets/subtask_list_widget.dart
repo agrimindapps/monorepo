@@ -152,14 +152,14 @@ class SubtaskListWidget extends ConsumerWidget {
   }
 
   void _showCreateSubtaskDialog(BuildContext context, String parentTaskId) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => CreateSubtaskDialog(parentTaskId: parentTaskId),
     );
   }
 
   void _showEditSubtaskDialog(BuildContext context, TaskEntity subtask) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => CreateSubtaskDialog(
         parentTaskId: subtask.parentTaskId!,

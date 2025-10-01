@@ -74,19 +74,19 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
     // TODO: Replace with Riverpod provider
     // final provider = ref.read(dataExportProvider.notifier);
-    
+
     // Simulate provider behavior for now
-    const canRequestExport = true;
-    
-    if (!canRequestExport) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Aguarde alguns minutos para solicitar outro export'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
+    // const canRequestExport = true;
+
+    // if (!canRequestExport) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Aguarde alguns minutos para solicitar outro export'),
+    //       backgroundColor: Colors.orange,
+    //     ),
+    //   );
+    //   return;
+    // }
 
     // TODO: Replace with actual export request
     // final request = await provider.requestExport(
@@ -171,6 +171,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
         
         // Simulate provider state for now
         const isLoading = false;
+        // ignore: unused_local_variable
         const canRequestExport = true;
         const availabilityResult = null;
         return SingleChildScrollView(
@@ -286,18 +287,17 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                               (availabilityResult?.isAvailable != true)
                           ? null
                           : _requestExport,
-                  icon:
-                      isLoading
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                          : const Icon(Icons.download),
-                  label: const Text(
+                  icon: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.download),
+                  label: Text(
                     isLoading ? 'Processando...' : 'Exportar Dados',
                   ),
                   style: ElevatedButton.styleFrom(
@@ -314,37 +314,37 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               const SizedBox(height: 16),
 
               // Rate limiting info
-              if (!canRequestExport) ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange.withAlpha(60)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.schedule,
-                        color: Colors.orange,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Para sua segurança, é permitida apenas uma exportação por hora.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.orange.withAlpha(200),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
+              // if (!canRequestExport) ...[
+              //   Container(
+              //     width: double.infinity,
+              //     padding: const EdgeInsets.all(12),
+              //     decoration: BoxDecoration(
+              //       color: Colors.orange.withAlpha(20),
+              //       borderRadius: BorderRadius.circular(8),
+              //       border: Border.all(color: Colors.orange.withAlpha(60)),
+              //     ),
+              //     child: Row(
+              //       children: [
+              //         const Icon(
+              //           Icons.schedule,
+              //           color: Colors.orange,
+              //           size: 20,
+              //         ),
+              //         const SizedBox(width: 8),
+              //         Expanded(
+              //           child: Text(
+              //             'Para sua segurança, é permitida apenas uma exportação por hora.',
+              //             style: TextStyle(
+              //               fontSize: 13,
+              //               color: Colors.orange.withAlpha(200),
+              //             ),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              //   const SizedBox(height: 16),
+              // ],
             ],
           ),
         );
@@ -357,16 +357,16 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
       builder: (context, ref, child) {
         // TODO: Watch data export provider
         // final provider = ref.watch(dataExportProvider);
-        
+
         // Simulate provider state for now
-        const isLoading = false;
+        // const isLoading = false;
         const exportHistory = <ExportRequest>[];
-        
-        if (isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: PlantisColors.primary),
-          );
-        }
+
+        // if (isLoading) {
+        //   return const Center(
+        //     child: CircularProgressIndicator(color: PlantisColors.primary),
+        //   );
+        // }
 
         if (exportHistory.isEmpty) {
           return Center(

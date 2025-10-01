@@ -20,7 +20,6 @@ abstract class ExpenseLocalDataSource {
 }
 
 class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
-  static const String _boxName = 'expenses';
   final Map<String, ExpenseModel> _cache = {};
 
   @override

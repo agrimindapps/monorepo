@@ -524,6 +524,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
   }
 
   /// Método estático para facilitar o uso - show method
+  // ignore: unused_element
   static Future<void> show(
     BuildContext context,
     PragaPorCultura pragaPorCultura, {

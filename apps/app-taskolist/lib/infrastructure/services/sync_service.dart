@@ -5,8 +5,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/failures.dart';
-import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/domain/task_repository.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
@@ -16,7 +14,6 @@ import 'crashlytics_service.dart';
 class TaskManagerSyncService {
   final TaskManagerAnalyticsService _analyticsService;
   final TaskManagerCrashlyticsService _crashlyticsService;
-  final TaskRepository _taskRepository;
 
   // Stream controllers para progresso
   final StreamController<SyncProgress> _progressController = StreamController<SyncProgress>.broadcast();
@@ -29,7 +26,6 @@ class TaskManagerSyncService {
   TaskManagerSyncService(
     this._analyticsService,
     this._crashlyticsService,
-    this._taskRepository,
   ) {
     _initializeAutoSync();
   }
@@ -76,7 +72,7 @@ class TaskManagerSyncService {
 
       // Etapa 1: Sincronizar projetos (1.5s)
       _emitProgress(SyncProgress.inProgress(step: 1, totalSteps: 4, message: 'Sincronizando projetos...'));
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
       
       final projectsResult = await _syncProjects(userId, isUserPremium);
       if (projectsResult.isLeft()) {
@@ -85,7 +81,7 @@ class TaskManagerSyncService {
 
       // Etapa 2: Sincronizar tarefas (2.0s)
       _emitProgress(SyncProgress.inProgress(step: 2, totalSteps: 4, message: 'Sincronizando tarefas...'));
-      await Future.delayed(const Duration(milliseconds: 2000));
+      await Future<void>.delayed(const Duration(milliseconds: 2000));
       
       final tasksResult = await _syncTasks(userId, isUserPremium);
       if (tasksResult.isLeft()) {
@@ -94,7 +90,7 @@ class TaskManagerSyncService {
 
       // Etapa 3: Sincronizar configurações (1.0s)
       _emitProgress(SyncProgress.inProgress(step: 3, totalSteps: 4, message: 'Sincronizando configurações...'));
-      await Future.delayed(const Duration(milliseconds: 1000));
+      await Future<void>.delayed(const Duration(milliseconds: 1000));
       
       final settingsResult = await _syncSettings(userId, isUserPremium);
       if (settingsResult.isLeft()) {
@@ -103,7 +99,7 @@ class TaskManagerSyncService {
 
       // Etapa 4: Finalização (0.5s)
       _emitProgress(SyncProgress.inProgress(step: 4, totalSteps: 4, message: 'Finalizando...'));
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
 
       // Sucesso
       _emitProgress(SyncProgress.completed());
@@ -198,13 +194,15 @@ class TaskManagerSyncService {
 
       // Verificar se é Premium (implementar quando RevenueCat estiver configurado)
       const isUserPremium = false; // TODO: Integrar com RevenueCat
-      
+
       if (!isUserPremium) return;
 
+      // ignore: dead_code
       if (kDebugMode) {
         debugPrint('🔄 TaskManagerSyncService: Executando sync em background');
       }
 
+      // ignore: dead_code
       await syncAll(userId: currentUser.id, isUserPremium: isUserPremium);
     } catch (e) {
       // Falha silenciosa em background

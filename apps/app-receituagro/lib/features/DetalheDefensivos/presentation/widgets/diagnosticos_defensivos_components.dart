@@ -398,6 +398,7 @@ class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
 
 class _DiagnosticoDefensivoCultureSectionWidgetState
     extends State<DiagnosticoDefensivoCultureSectionWidget> {
+  // ignore: unused_field
   CulturaHive? _culturaData;
   bool _isLoadingCultura = false;
 
@@ -933,6 +934,7 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
 class _DiagnosticoDefensivoDialogWidgetState
     extends State<DiagnosticoDefensivoDialogWidget> {
   PragasHive? _pragaData;
+  // ignore: unused_field
   bool _isLoadingPraga = true;
 
   @override
@@ -1280,6 +1282,7 @@ class _DiagnosticoDefensivoDialogWidgetState
   }
 
   /// Cabeçalho do modal com título e botão de fechar
+  // ignore: unused_element
   Widget _buildHeader(BuildContext context) {
     return _buildModernHeader(context);
   }
@@ -1330,11 +1333,13 @@ class _DiagnosticoDefensivoDialogWidgetState
   }
 
   /// Conteúdo principal do modal
+  // ignore: unused_element
   Widget _buildContent(BuildContext context) {
     return _buildModernContent(context);
   }
 
   /// Constrói uma seção de informação
+  // ignore: unused_element
   Widget _buildInfoSection(String label, String value, BuildContext context) {
     final theme = Theme.of(context);
 

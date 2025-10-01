@@ -38,7 +38,7 @@ class TaskManagerPerformanceService {
       'task_list_load',
       () async {
         // Esta função será chamada pelo código que carrega a lista
-        await Future.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
       },
       attributes: {
         'feature': 'task_list',
@@ -51,7 +51,7 @@ class TaskManagerPerformanceService {
     await _performanceRepository.measureOperationTime(
       'task_search',
       () async {
-        await Future.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
       },
       attributes: {
         'feature': 'search',
@@ -65,7 +65,7 @@ class TaskManagerPerformanceService {
     await _performanceRepository.measureOperationTime(
       'data_sync',
       () async {
-        await Future.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
       },
       attributes: {
         'feature': 'sync',

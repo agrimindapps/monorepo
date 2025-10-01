@@ -124,8 +124,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
   final GetVaccinesByAnimal _getVaccinesByAnimal;
   final GetOverdueVaccines _getOverdueVaccines;
   final GetUpcomingVaccines _getUpcomingVaccines;
-  final GetVaccineCalendar _getVaccineCalendar;
-  final GetVaccineStatistics _getVaccineStatistics;
   final SearchVaccines _searchVaccines;
   final AddVaccine _addVaccine;
   final UpdateVaccine _updateVaccine;

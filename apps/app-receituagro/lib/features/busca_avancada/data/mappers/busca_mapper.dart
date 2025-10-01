@@ -38,10 +38,10 @@ class BuscaMapper {
       descricao: 'Praga identificada', // Simplified - TODO: usar propriedade correta
       metadata: {
         'nomeCientifico': praga.nomeCientifico,
-        'nomeComum': praga.nomeComum ?? '',
-        'reino': praga.reino ?? '',
-        'ordem': praga.ordem ?? '',
-        'familia': praga.familia ?? '',
+        'nomeComum': praga.nomeComum,
+        'reino': praga.reino,
+        'ordem': praga.ordem,
+        'familia': praga.familia,
       },
       relevancia: 1.0,
     );
@@ -76,7 +76,7 @@ class BuscaMapper {
   static BuscaResultEntity culturaToEntity(CulturaHive cultura) {
     // TODO: Implementar após verificar propriedades corretas do CulturaHive
     return BuscaResultEntity(
-      id: cultura.objectId ?? 'cultura_${DateTime.now().millisecondsSinceEpoch}',
+      id: cultura.objectId,
       tipo: 'cultura',
       titulo: 'Cultura', // TODO: usar propriedade correta
       subtitulo: null,
@@ -108,7 +108,7 @@ class BuscaMapper {
   /// Converte CulturaHive para DropdownItemEntity - SIMPLIFICADO
   static DropdownItemEntity culturaToDropdownItem(CulturaHive cultura) {
     return DropdownItemEntity(
-      id: cultura.objectId ?? 'cultura_${DateTime.now().millisecondsSinceEpoch}',
+      id: cultura.objectId,
       nome: 'Cultura', // TODO: usar propriedade correta
       grupo: 'Grupo não definido', // TODO: usar propriedade correta
       isActive: true,

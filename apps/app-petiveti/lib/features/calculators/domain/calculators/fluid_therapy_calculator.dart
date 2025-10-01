@@ -124,11 +124,6 @@ class FluidTherapyCalculator extends Calculator {
     final totalDaily = maintenanceNeeds + additionalLosses;
     final totalWithDeficit = totalDaily + dehydrationDeficit;
 
-    // 6. Gerar recomendações de fluidos
-    final fluidRecommendations = _generateFluidRecommendations(
-      dehydrationPercentage, vomitingFrequency, diarrheaSeverity
-    );
-
     final resultItems = [
       ResultItem(
         label: 'Necessidades de Manutenção',

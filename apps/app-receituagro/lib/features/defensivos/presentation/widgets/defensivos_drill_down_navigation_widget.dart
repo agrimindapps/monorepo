@@ -127,8 +127,9 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
   }
 
   Widget _buildLevelIndicator(BuildContext context) {
+    // ignore: unused_local_variable
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

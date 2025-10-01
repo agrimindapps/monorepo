@@ -378,7 +378,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
   }
 
   void _showReminderInfo(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sobre os Lembretes'),

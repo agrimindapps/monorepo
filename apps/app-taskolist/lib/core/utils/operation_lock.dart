@@ -333,18 +333,18 @@ class TaskService {
   
   Future<String> _performCreateTask(Task task) async {
     // Implementação real
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return 'task_id';
   }
   
   Future<void> _performUpdateTask(Task task) async {
     // Implementação real
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
   }
   
   Future<void> _deleteTask(String id) async {
     // Implementação real
-    await Future.delayed(const Duration(milliseconds: 20));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
   }
 }
 

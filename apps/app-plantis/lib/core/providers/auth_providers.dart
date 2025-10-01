@@ -109,6 +109,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   late final BackgroundSyncProvider? _backgroundSyncProvider;
   late final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
   late final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
+  // ignore: unused_field
   late final device_revocation.RevokeAllOtherDevicesUseCase?
   _revokeAllOtherDevicesUseCase;
   late final ResetPasswordUseCase _resetPasswordUseCase;

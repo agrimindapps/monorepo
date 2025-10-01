@@ -369,7 +369,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
   }
 
   void _showDeadlineAlertDialog(Duration currentDuration) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Aviso de Prazo'),
@@ -397,7 +397,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
 
   void _showWeeklyReviewTimeDialog(NotificationSettings settings) {
     // Implementar dialog para escolher dia e horário
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Horário da Revisão Semanal'),
@@ -418,7 +418,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
 
   void _showDailyProductivityTimeDialog(NotificationSettings settings) {
     // Implementar dialog para escolher horário
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Horário do Lembrete'),
@@ -438,7 +438,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
   }
 
   void _showPendingNotificationsDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Notificações Pendentes'),
@@ -488,7 +488,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
   }
 
   void _showCancelAllDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancelar Todas'),

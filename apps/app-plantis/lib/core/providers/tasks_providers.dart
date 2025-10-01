@@ -133,6 +133,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 
   // TODO: Consider using this method for better auth initialization handling
   /// Wait for authentication initialization with timeout (currently unused)
+  // ignore: unused_element
   Future<bool> _waitForAuthenticationWithTimeout({
     Duration timeout = const Duration(seconds: 10),
   }) async {

@@ -95,7 +95,7 @@ class _EnhancedDiagnosticosPragaWidgetState
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.2),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -117,7 +117,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                             ? '${stats.filtered} de ${stats.total} diagnósticos'
                             : '${stats.total} diagnósticos em ${stats.groups} culturas',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -167,9 +167,9 @@ class _EnhancedDiagnosticosPragaWidgetState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -442,10 +442,10 @@ class _EnhancedDiagnosticosPragaWidgetState
         vertical: SpacingTokens.xs,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(context).primaryColor.withOpacity(0.3),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -594,10 +594,10 @@ class _EnhancedDiagnosticosPragaWidgetState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: Color(completude.colorValue).withOpacity(0.1),
+        color: Color(completude.colorValue).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Color(completude.colorValue).withOpacity(0.3),
+          color: Color(completude.colorValue).withValues(alpha: 0.3),
         ),
       ),
       child: Text(

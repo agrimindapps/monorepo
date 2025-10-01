@@ -17,10 +17,8 @@ import 'infrastructure/services/analytics_service.dart';
 import 'infrastructure/services/crashlytics_service.dart';
 import 'infrastructure/services/notification_service.dart';
 import 'infrastructure/services/performance_service.dart';
-import 'features/tasks/presentation/home_page.dart';
 import 'features/premium/presentation/promotional_page.dart';
 import 'features/tasks/presentation/providers/theme_provider.dart';
-import 'shared/widgets/auth_guard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -135,7 +133,7 @@ Future<void> _initializeFirebaseServices() async {
 
     // Em modo debug, executar testes de notificação após 5 segundos
     if (kDebugMode && notificationInitialized) {
-      Future.delayed(const Duration(seconds: 5), () {
+      Future<void>.delayed(const Duration(seconds: 5), () {
         debugPrint('🧪 Starting notification workflow tests...');
         NotificationTestHelper.runAllTests(notificationService);
       });

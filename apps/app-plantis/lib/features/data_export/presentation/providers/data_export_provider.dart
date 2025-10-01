@@ -146,7 +146,7 @@ class DataExportProvider extends ChangeNotifier {
         notifyListeners();
 
         // Simulate processing time
-        await Future.delayed(const Duration(seconds: 3));
+        await Future<void>.delayed(const Duration(seconds: 3));
 
         // Check if request was completed or failed
         final updatedHistory = await _getHistoryUseCase(_currentUserId);

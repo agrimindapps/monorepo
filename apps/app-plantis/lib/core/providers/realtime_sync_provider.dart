@@ -179,7 +179,7 @@ class RealtimeSyncProvider with ChangeNotifier {
               notifyListeners();
             }
           },
-          onError: (error) {
+          onError: (Object error) {
             developer.log(
               'Erro no listener de global sync: $error',
               name: 'RealtimeSyncProvider',
@@ -227,7 +227,7 @@ class RealtimeSyncProvider with ChangeNotifier {
           notifyListeners();
         }
       },
-      onError: (error) {
+      onError: (Object error) {
         developer.log(
           'Erro no listener de conectividade: $error',
           name: 'RealtimeSyncProvider',

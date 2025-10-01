@@ -8,7 +8,7 @@ class CalorieQuickPresets extends StatelessWidget {
     required this.onPresetSelected,
   });
 
-  final Function(CaloriePreset) onPresetSelected;
+  final void Function(CaloriePreset) onPresetSelected;
 
   @override
   Widget build(BuildContext context) {

@@ -249,21 +249,12 @@ class DiabetesInsulinCalculator extends Calculator {
     
     // Determinar via de administração
     final route = _determineAdministrationRoute(input);
-    
-    // Calcular intervalo de monitoramento
-    final monitoringInterval = _calculateMonitoringInterval(input);
-    
-    // Definir faixa alvo de glicose
-    final targetRange = _getTargetGlucoseRange(input.diabetesType);
-    
+
     // Gerar avisos de segurança
     final warnings = _generateWarnings(input, finalDoseUnits);
-    
+
     // Calcular próxima dose
     final nextDoseTime = _calculateNextDoseTime(input.insulinType);
-    
-    // Verificar se requer supervisão veterinária
-    final requiresSupervision = _requiresVeterinarySupervision(input, finalDoseUnits);
 
     // Criar resultados
     final results = [

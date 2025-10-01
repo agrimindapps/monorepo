@@ -168,6 +168,7 @@ class TaskNotificationService {
       await _ensureInitialized();
 
       // Create notification with actions
+      // ignore: unused_local_variable
       final notification = NotificationHelper.createReminderNotification(
         appName: 'Plantis',
         id: id,

@@ -1122,6 +1122,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     );
   }
 
+  // ignore: unused_element
   Widget _buildAppBar(BuildContext context, Plant plant) {
     final theme = Theme.of(context);
 

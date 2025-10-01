@@ -148,7 +148,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   }
 
   void _openNotesDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => NotesExpansionDialog(
         initialNotes: _notesController.text,

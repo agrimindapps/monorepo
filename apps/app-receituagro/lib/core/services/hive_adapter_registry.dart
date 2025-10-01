@@ -26,7 +26,7 @@ class HiveAdapterRegistry {
     try {
       // Inicializa o Hive com Flutter
       await Hive.initFlutter();
-      // Registra adapters das classes Hive
+      // Registra adapters das classes Hive (gerados automaticamente via build_runner)
       Hive.registerAdapter(CulturaHiveAdapter());
       Hive.registerAdapter(PragasHiveAdapter());
       Hive.registerAdapter(FitossanitarioHiveAdapter());
@@ -39,7 +39,7 @@ class HiveAdapterRegistry {
       Hive.registerAdapter(FavoritoItemHiveAdapter());
 
       _isRegistered = true;
-      
+
     } catch (e) {
       throw Exception('Erro ao registrar adapters Hive: $e');
     }

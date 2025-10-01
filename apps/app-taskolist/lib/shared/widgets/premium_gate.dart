@@ -93,7 +93,7 @@ class PremiumGate extends ConsumerWidget {
   }
 
   void _showPremiumDialog(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => PremiumRequiredDialog(
         featureName: featureName,
@@ -104,7 +104,7 @@ class PremiumGate extends ConsumerWidget {
 
   void _navigateToPremium(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => const PremiumPage(),
       ),
     );
@@ -195,7 +195,7 @@ class CreationLimitGate extends ConsumerWidget {
   }
 
   void _showLimitDialog(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => LimitReachedDialog(limitType: limitType),
     );
@@ -254,7 +254,7 @@ class PremiumRequiredDialog extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
             Navigator.of(context).push(
-              MaterialPageRoute(
+              MaterialPageRoute<dynamic>(
                 builder: (context) => const PremiumPage(),
               ),
             );
@@ -389,7 +389,7 @@ class LimitReachedDialog extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
             Navigator.of(context).push(
-              MaterialPageRoute(
+              MaterialPageRoute<dynamic>(
                 builder: (context) => const PremiumPage(),
               ),
             );

@@ -15,7 +15,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   @override
   Future<UserModel> signInWithEmailPassword(String email, String password) async {
     // Simular delay de rede
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     // Validação simples para demo
     if (email.isEmpty || password.isEmpty) {
@@ -44,7 +44,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   @override
   Future<UserModel> signUpWithEmailPassword(String email, String password, String name) async {
     // Simular delay de rede
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 800));
     
     // Validação simples para demo
     if (email.isEmpty || password.isEmpty || name.isEmpty) {
@@ -76,7 +76,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
 
   @override
   Future<void> signOut() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     
     _currentUser = null;
     _authStateController.add(null);
@@ -84,13 +84,13 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     return _currentUser;
   }
 
   @override
   Future<void> resetPassword(String email) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     if (email.isEmpty || !email.contains('@')) {
       throw Exception('Email inválido');
@@ -102,7 +102,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
 
   @override
   Future<void> updateProfile(UserModel user) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     
     _currentUser = user;
     _authStateController.add(user);
@@ -110,7 +110,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
 
   @override
   Future<void> deleteAccount() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     
     if (_currentUser == null) {
       throw Exception('Nenhum usuário logado para deletar');

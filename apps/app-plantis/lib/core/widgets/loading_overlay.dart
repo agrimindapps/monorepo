@@ -130,8 +130,6 @@ class AuthLoadingOverlay extends StatelessWidget {
         return 'Enviando email...';
       case AuthOperation.deleteAccount:
         return 'Excluindo conta...';
-      default:
-        return 'Processando...';
     }
   }
 
@@ -151,8 +149,6 @@ class AuthLoadingOverlay extends StatelessWidget {
         return 'Enviando email de recuperação de senha';
       case AuthOperation.deleteAccount:
         return 'Excluindo conta permanentemente';
-      default:
-        return 'Processando operação de autenticação';
     }
   }
 }
@@ -190,8 +186,6 @@ class PurchaseLoadingOverlay extends StatelessWidget {
         return 'Restaurando compras...';
       case PurchaseOperation.loadProducts:
         return 'Carregando produtos...';
-      default:
-        return 'Processando...';
     }
   }
 
@@ -205,8 +199,6 @@ class PurchaseLoadingOverlay extends StatelessWidget {
         return 'Restaurando compras anteriores';
       case PurchaseOperation.loadProducts:
         return 'Carregando produtos disponíveis';
-      default:
-        return 'Processando operação de compra';
     }
   }
 }

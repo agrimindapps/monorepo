@@ -602,7 +602,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
       case ResultSeverity.danger:
         return theme.colorScheme.error;
       case ResultSeverity.info:
-      default:
         return theme.colorScheme.primary;
     }
   }
@@ -616,7 +615,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
       case ResultSeverity.danger:
         return Icons.error_outline;
       case ResultSeverity.info:
-      default:
         return Icons.info_outline;
     }
   }

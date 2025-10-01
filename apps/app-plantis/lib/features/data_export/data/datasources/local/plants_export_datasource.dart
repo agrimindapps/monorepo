@@ -14,8 +14,11 @@ abstract class PlantsExportDataSource {
 
 class PlantsExportLocalDataSource implements PlantsExportDataSource {
   final PlantsRepository _plantsRepository;
+  // ignore: unused_field
   final PlantCommentsRepository _commentsRepository;
+  // ignore: unused_field
   final TasksRepository _tasksRepository;
+  // ignore: unused_field
   final SpacesRepository _spacesRepository;
 
   PlantsExportLocalDataSource({

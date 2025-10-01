@@ -205,9 +205,6 @@ class FeatureFlagsProvider extends ChangeNotifier {
       // Premium features themselves
       case ReceitaAgroFeatureFlag.enablePremiumFeatures:
         return false; // This is the master toggle, not premium-gated
-      
-      default:
-        return false;
     }
   }
 

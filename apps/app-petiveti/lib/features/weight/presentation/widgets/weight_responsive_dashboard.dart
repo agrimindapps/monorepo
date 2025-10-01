@@ -18,7 +18,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
-    final screenHeight = mediaQuery.size.height;
     final isTablet = screenWidth > 600;
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     

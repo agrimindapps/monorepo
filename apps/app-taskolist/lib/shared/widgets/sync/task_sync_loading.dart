@@ -132,7 +132,7 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
     _pulseController.stop();
     
     // Delay para mostrar conclusão antes de chamar callback
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future<void>.delayed(const Duration(milliseconds: 800), () {
       widget.onComplete?.call();
     });
   }

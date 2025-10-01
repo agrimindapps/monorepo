@@ -440,6 +440,7 @@ class MultiStageSyncRefresh extends StatefulWidget {
 }
 
 class _MultiStageSyncRefreshState extends State<MultiStageSyncRefresh> {
+  // ignore: unused_field
   int _currentStageIndex = 0;
   String _currentStageMessage = '';
 

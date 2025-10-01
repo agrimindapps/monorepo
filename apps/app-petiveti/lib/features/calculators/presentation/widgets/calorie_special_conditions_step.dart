@@ -12,7 +12,7 @@ class CalorieSpecialConditionsStep extends StatefulWidget {
 
   final CalorieInput input;
   final List<String> validationErrors;
-  final Function(CalorieInput) onInputChanged;
+  final void Function(CalorieInput) onInputChanged;
 
   @override
   State<CalorieSpecialConditionsStep> createState() => _CalorieSpecialConditionsStepState();

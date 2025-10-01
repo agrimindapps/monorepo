@@ -10,7 +10,6 @@ import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
-import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/entities/favorito_sync_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';

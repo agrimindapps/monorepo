@@ -146,12 +146,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
       return input.idealWeight!;
     }
 
-    // Usar tabela de lookup para peso por raça/espécie
-    final baseIdealWeight = CalculatorLookupTables.getIdealWeight(
-      input.species.code, 
-      input.animalBreed
-    );
-
     // Se animal está no peso ideal (BCS 5), usar peso atual
     if (bcsScore == 5) {
       return input.currentWeight;

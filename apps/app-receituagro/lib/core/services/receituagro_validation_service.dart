@@ -8,6 +8,7 @@ class ReceitaAgroValidationService {
   factory ReceitaAgroValidationService() => _instance;
   ReceitaAgroValidationService._internal();
 
+  // ignore: unused_field
   late final ValidationService _coreValidationService;
   bool _isInitialized = false;
 

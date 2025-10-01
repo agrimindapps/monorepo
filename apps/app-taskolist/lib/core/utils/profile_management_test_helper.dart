@@ -25,7 +25,7 @@ class ProfileManagementTestHelper {
           (UserEntity updatedUser) {
             debugPrint('✅ Profile updated successfully');
             debugPrint('   • ID: ${updatedUser.id}');
-            debugPrint('   • Name: ${updatedUser.displayName ?? 'N/A'}');
+            debugPrint('   • Name: ${updatedUser.displayName}');
             debugPrint('   • Email: ${updatedUser.email}');
           },
         );
@@ -44,7 +44,7 @@ class ProfileManagementTestHelper {
       debugPrint('   This test will delete the current user account!');
       
       // Aguardar 3 segundos para dar tempo de cancelar se necessário
-      await Future.delayed(const Duration(seconds: 3));
+      await Future<void>.delayed(const Duration(seconds: 3));
       
       try {
         final result = await authService.deleteAccount();
@@ -85,7 +85,7 @@ class ProfileManagementTestHelper {
       await testUpdateProfile(authService);
       
       // Aguardar um pouco entre os testes
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
       
       // 3. Testar apenas o flow de delete (sem executar realmente)
       debugPrint('🔍 Delete account flow available but not executed in tests');

@@ -462,6 +462,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
   // ========================================================================
 
   /// Factory constructor for context-specific comments
+  // ignore: unused_element
   static AddComentarioDialog forContext({
     required String pkIdentificador,
     required String ferramenta,
@@ -479,6 +480,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
   }
 
   /// Factory constructor for general comments
+  // ignore: unused_element
   static AddComentarioDialog general({
     required Future<void> Function(String) onSave,
     VoidCallback? onCancel,

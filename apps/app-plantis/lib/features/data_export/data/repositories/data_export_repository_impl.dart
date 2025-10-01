@@ -198,7 +198,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
       // In a real implementation, this would handle the actual download
       // For now, we simulate a successful download
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       return true;
     } catch (e) {

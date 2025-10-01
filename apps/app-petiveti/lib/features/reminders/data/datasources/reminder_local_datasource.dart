@@ -13,7 +13,6 @@ abstract class ReminderLocalDataSource {
 }
 
 class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
-  static const String _boxName = 'reminders';
   final Map<String, ReminderModel> _cache = {};
 
   @override

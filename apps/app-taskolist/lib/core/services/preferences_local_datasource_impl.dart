@@ -9,10 +9,10 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   static const String _themeKey = 'theme_mode';
   static const String _firstLaunchKey = 'first_launch';
 
-  Box? _box;
+  Box<dynamic>? _box;
 
-  Future<Box> get _preferencesBox async {
-    _box ??= await Hive.openBox(_boxName);
+  Future<Box<dynamic>> get _preferencesBox async {
+    _box ??= await Hive.openBox<dynamic>(_boxName);
     return _box!;
   }
 

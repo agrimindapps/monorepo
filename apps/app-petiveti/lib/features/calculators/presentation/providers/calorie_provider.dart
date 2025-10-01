@@ -205,7 +205,7 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
         return state.input.weight > 0 && 
                state.input.age >= 0;
       case 1: // Estado fisiológico
-        return (!state.input.isLactating || state.input.numberOfOffspring != null);
+        return !state.input.isLactating || state.input.numberOfOffspring != null;
       case 2: // Atividade e condição corporal
         return state.input.bodyConditionScore != null;
       case 3: // Condições especiais

@@ -1952,6 +1952,7 @@ class __AccountDeletionDialogState
     );
   }
 
+  // ignore: unused_element
   void _showDeletionSuccessDialog(BuildContext context) {
     showDialog<void>(
       context: context,

@@ -20,6 +20,7 @@ import 'secure_storage_service.dart';
 /// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupServiceRefactored {
   final IBackupRepository _backupRepository;
+  // ignore: unused_field
   final BackupValidationService _validationService;
   final BackupDataTransformerService _transformerService;
   final BackupRestoreService _restoreService;

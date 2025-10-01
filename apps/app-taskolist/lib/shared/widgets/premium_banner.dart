@@ -114,7 +114,7 @@ class _PremiumActiveBanner extends ConsumerWidget {
   }
 
   void _showManagementOptions(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showModalBottomSheet<dynamic>(
       context: context,
       builder: (context) => _ManagementBottomSheet(),
     );
@@ -136,12 +136,12 @@ class _UpgradeBanner extends ConsumerWidget {
           currentTasks: stats.totalTasks,
           currentSubtasks: stats.totalSubtasks,
           currentTags: stats.totalTags,
-          completedTasks: stats.completedTasks ?? 0,
-          completedSubtasks: stats.totalCompletedSubtasks ?? 0,
+          completedTasks: stats.completedTasks,
+          completedSubtasks: stats.totalCompletedSubtasks,
         )));
 
         return userLimitsAsync.when(
-          data: (local.UserLimits? limits) => _buildUpgradeBanner(context, stats as local_stats.UsageStats, limits),
+          data: (local.UserLimits? limits) => _buildUpgradeBanner(context, stats, limits),
           loading: () => const SizedBox.shrink(),
           error: (error, stack) => const SizedBox.shrink(),
         );
@@ -208,15 +208,15 @@ class _UpgradeBanner extends ConsumerWidget {
   bool _isNearAnyLimit(local.UserLimits? limits) {
     if (limits == null) return false;
     if (limits.isPremium == true) return false;
-    
+
     const threshold = 0.8; // 80% do limite
 
-    final remainingTasks = limits.remainingTasks ?? 0;
-    final maxTasks = limits.maxTasks ?? 1;
-    final remainingSubtasks = limits.remainingSubtasks ?? 0;
-    final maxSubtasks = limits.maxSubtasks ?? 1;
-    final remainingTags = limits.remainingTags ?? 0;
-    final maxTags = limits.maxTags ?? 1;
+    final remainingTasks = limits.remainingTasks;
+    final maxTasks = limits.maxTasks;
+    final remainingSubtasks = limits.remainingSubtasks;
+    final maxSubtasks = limits.maxSubtasks;
+    final remainingTags = limits.remainingTags;
+    final maxTags = limits.maxTags;
 
     return (remainingTasks / maxTasks) <= (1 - threshold) ||
            (remainingSubtasks / maxSubtasks) <= (1 - threshold) ||
@@ -225,15 +225,15 @@ class _UpgradeBanner extends ConsumerWidget {
 
   List<Widget> _buildLimitWarnings(local.UserLimits? limits) {
     final warnings = <Widget>[];
-    
+
     if (limits == null) return warnings;
 
-    final remainingTasks = limits.remainingTasks ?? 0;
-    final maxTasks = limits.maxTasks ?? 0;
-    final remainingSubtasks = limits.remainingSubtasks ?? 0;
-    final maxSubtasks = limits.maxSubtasks ?? 0;
-    final remainingTags = limits.remainingTags ?? 0;
-    final maxTags = limits.maxTags ?? 0;
+    final remainingTasks = limits.remainingTasks;
+    final maxTasks = limits.maxTasks;
+    final remainingSubtasks = limits.remainingSubtasks;
+    final maxSubtasks = limits.maxSubtasks;
+    final remainingTags = limits.remainingTags;
+    final maxTags = limits.maxTags;
 
     if (remainingTasks <= 10 && maxTasks > 0) {
       warnings.add(_buildLimitWarning(
@@ -287,7 +287,7 @@ class _UpgradeBanner extends ConsumerWidget {
 
   void _navigateToPremium(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => const PremiumPage(),
       ),
     );

@@ -246,7 +246,7 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sair'),
@@ -286,7 +286,7 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void _showExportDialog(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exportar dados'),
@@ -302,7 +302,7 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void _showClearDataDialog(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Limpar dados'),
@@ -334,7 +334,7 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void _showHelpDialog(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajuda'),
@@ -351,7 +351,7 @@ class SettingsPage extends ConsumerWidget {
 
   void _navigateToNotificationSettings(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => const NotificationSettingsPage(),
       ),
     );
@@ -359,14 +359,14 @@ class SettingsPage extends ConsumerWidget {
 
   void _navigateToAccountPage(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => const AccountPage(),
       ),
     );
   }
 
   void _showRatingDialog(BuildContext context) {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Avaliar app'),

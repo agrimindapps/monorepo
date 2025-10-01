@@ -56,7 +56,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final auth_usecases.SendEmailVerification _sendEmailVerification;
   final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
   final auth_usecases.UpdateProfile _updateProfile;
-  final auth_usecases.DeleteAccount _deleteAccount;
   final EnhancedAccountDeletionService _enhancedDeletionService;
 
   // Rate limiting properties

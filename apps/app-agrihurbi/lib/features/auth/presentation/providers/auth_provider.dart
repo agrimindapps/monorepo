@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' show EnhancedAccountDeletionService;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -6,8 +6,8 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
-import '../../domain/usecases/login_usecase.dart';
-import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/login_usecase.dart' as local_login;
+import '../../domain/usecases/logout_usecase.dart' as local_logout;
 import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 
@@ -17,17 +17,17 @@ import '../../domain/usecases/register_usecase.dart';
 /// Utiliza use cases para todas as operações de domínio
 @singleton
 class AuthProvider extends ChangeNotifier {
-  final LoginUseCase _loginUseCase;
+  final local_login.LoginUseCase _loginUseCase;
   final RegisterUseCase _registerUseCase;
-  final LogoutUseCase _logoutUseCase;
+  final local_logout.LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final RefreshUserUseCase _refreshUserUseCase;
   final EnhancedAccountDeletionService _enhancedDeletionService;
 
   AuthProvider({
-    required LoginUseCase loginUseCase,
+    required local_login.LoginUseCase loginUseCase,
     required RegisterUseCase registerUseCase,
-    required LogoutUseCase logoutUseCase,
+    required local_logout.LogoutUseCase logoutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required RefreshUserUseCase refreshUserUseCase,
     required EnhancedAccountDeletionService enhancedAccountDeletionService,
@@ -133,7 +133,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       final result = await _loginUseCase.call(
-        LoginParams(
+        local_login.LoginParams(
           email: email,
           password: password,
           rememberMe: rememberMe,
@@ -141,15 +141,15 @@ class AuthProvider extends ChangeNotifier {
       );
 
       return result.fold(
-        (failure) {
+        (Failure failure) {
           debugPrint('AuthProvider: Falha no login - ${failure.message}');
           _setError(failure.message);
-          return Left(failure);
+          return Left<Failure, UserEntity>(failure);
         },
-        (user) {
+        (UserEntity user) {
           debugPrint('AuthProvider: Login bem-sucedido - ${user.id}');
           _setUserState(user);
-          return Right(user);
+          return Right<Failure, UserEntity>(user);
         },
       );
     } catch (e, stackTrace) {
@@ -230,24 +230,24 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       final result = await _logoutUseCase.call(
-        LogoutParams(
+        local_logout.LogoutParams(
           clearAllData: clearAllData,
           logAnalytics: logAnalytics,
         ),
       );
 
       return result.fold(
-        (failure) {
+        (Failure failure) {
           debugPrint('AuthProvider: Falha no logout - ${failure.message}');
           // Mesmo com falha, limpa estado local
           _clearUserState();
           _setError('Falha no logout, mas sessão local foi encerrada');
-          return Left(failure);
+          return Left<Failure, void>(failure);
         },
         (_) {
           debugPrint('AuthProvider: Logout bem-sucedido');
           _clearUserState();
-          return const Right(null);
+          return const Right<Failure, void>(null);
         },
       );
     } catch (e, stackTrace) {

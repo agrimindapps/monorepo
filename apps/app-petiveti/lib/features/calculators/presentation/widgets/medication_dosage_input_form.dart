@@ -551,8 +551,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
         return Colors.pink.shade600;
       case SpecialCondition.geriatric:
         return Colors.orange.shade600;
-      default:
-        return Colors.grey.shade600;
     }
   }
 }

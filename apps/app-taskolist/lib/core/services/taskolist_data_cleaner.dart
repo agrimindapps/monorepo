@@ -109,12 +109,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
       // Contar tasks
       if (await _hive.boxExists('tasks') || await _hive.boxExists('task_box')) {
         try {
-          final tasksBox = await _hive.openBox('tasks');
+          final tasksBox = await _hive.openBox<dynamic>('tasks');
           stats['totalTasks'] = tasksBox.length;
           await tasksBox.close();
         } catch (e) {
           try {
-            final tasksBox = await _hive.openBox('task_box');
+            final tasksBox = await _hive.openBox<dynamic>('task_box');
             stats['totalTasks'] = tasksBox.length;
             await tasksBox.close();
           } catch (_) {
@@ -127,12 +127,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
       if (await _hive.boxExists('categories') ||
           await _hive.boxExists('category_box')) {
         try {
-          final categoriesBox = await _hive.openBox('categories');
+          final categoriesBox = await _hive.openBox<dynamic>('categories');
           stats['totalCategories'] = categoriesBox.length;
           await categoriesBox.close();
         } catch (e) {
           try {
-            final categoriesBox = await _hive.openBox('category_box');
+            final categoriesBox = await _hive.openBox<dynamic>('category_box');
             stats['totalCategories'] = categoriesBox.length;
             await categoriesBox.close();
           } catch (_) {

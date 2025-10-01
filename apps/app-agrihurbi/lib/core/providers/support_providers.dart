@@ -647,11 +647,11 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
     final result = await _manageSubscription.getCurrentSubscription();
 
     result.fold(
-      (failure) => state = state.copyWith(
+      (dynamic failure) => state = state.copyWith(
         isLoadingSubscription: false,
         errorMessage: failure.message,
       ),
-      (subscription) => state = state.copyWith(
+      (dynamic subscription) => state = state.copyWith(
         isLoadingSubscription: false,
         currentSubscription: subscription,
       ),
@@ -674,14 +674,14 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
     );
 
     return result.fold(
-      (failure) {
+      (dynamic failure) {
         state = state.copyWith(
           isProcessingPayment: false,
           errorMessage: failure.message,
         );
         return false;
       },
-      (subscription) {
+      (dynamic subscription) {
         state = state.copyWith(
           isProcessingPayment: false,
           currentSubscription: subscription,
@@ -699,7 +699,7 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
     final result = await _manageSubscription.cancelSubscription();
 
     return result.fold(
-      (failure) {
+      (dynamic failure) {
         state = state.copyWith(
           isUpdatingSubscription: false,
           errorMessage: failure.message,

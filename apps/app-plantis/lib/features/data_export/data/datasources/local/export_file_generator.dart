@@ -478,8 +478,6 @@ class ExportFileGenerator {
         return 'application/xml';
       case ExportFormat.pdf:
         return 'application/pdf';
-      default:
-        return 'text/plain';
     }
   }
 
@@ -494,8 +492,6 @@ class ExportFileGenerator {
         return 'xml';
       case ExportFormat.pdf:
         return 'pdf';
-      default:
-        return 'txt';
     }
   }
 }

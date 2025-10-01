@@ -79,7 +79,7 @@ class FormComponents {
     TextCapitalization textCapitalization = TextCapitalization.none,
     ValidationState validationState = ValidationState.none,
     VoidCallback? onEditingComplete,
-    Function(String)? onChanged,
+    void Function(String)? onChanged,
   }) {
     final borderColor = _getValidationColor(validationState);
     final prefixIconColor = _getValidationColor(validationState, isIcon: true);
@@ -174,7 +174,7 @@ class FormComponents {
     String? helperText,
     bool showStrengthIndicator = false,
     ValidationState validationState = ValidationState.none,
-    Function(String)? onChanged,
+    void Function(String)? onChanged,
   }) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -427,7 +427,6 @@ class FormComponents {
       case ValidationState.loading:
         return AppColors.primary;
       case ValidationState.none:
-      default:
         if (isIcon) return AppColors.textSecondary;
         if (isHelper) return AppColors.textSecondary;
         return AppColors.border;
@@ -469,7 +468,6 @@ class FormComponents {
           ),
         );
       case ValidationState.none:
-      default:
         return null;
     }
   }
@@ -501,7 +499,6 @@ class FormComponents {
         message = 'Validando...';
         break;
       case ValidationState.none:
-      default:
         return const SizedBox.shrink();
     }
     

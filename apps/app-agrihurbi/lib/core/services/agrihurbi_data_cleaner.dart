@@ -109,7 +109,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       // Contar farms
       if (await _hive.boxExists('farms')) {
         try {
-          final farmsBox = await _hive.openBox('farms');
+          final farmsBox = await _hive.openBox<dynamic>('farms');
           stats['totalFarms'] = farmsBox.length;
           await farmsBox.close();
         } catch (_) {
@@ -120,7 +120,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       // Contar fields
       if (await _hive.boxExists('fields')) {
         try {
-          final fieldsBox = await _hive.openBox('fields');
+          final fieldsBox = await _hive.openBox<dynamic>('fields');
           stats['totalFields'] = fieldsBox.length;
           await fieldsBox.close();
         } catch (_) {
@@ -131,7 +131,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       // Contar crops
       if (await _hive.boxExists('crops')) {
         try {
-          final cropsBox = await _hive.openBox('crops');
+          final cropsBox = await _hive.openBox<dynamic>('crops');
           stats['totalCrops'] = cropsBox.length;
           await cropsBox.close();
         } catch (_) {
@@ -142,7 +142,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       // Contar activities
       if (await _hive.boxExists('activities')) {
         try {
-          final activitiesBox = await _hive.openBox('activities');
+          final activitiesBox = await _hive.openBox<dynamic>('activities');
           stats['totalActivities'] = activitiesBox.length;
           await activitiesBox.close();
         } catch (_) {
@@ -153,7 +153,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       // Contar harvests
       if (await _hive.boxExists('harvests')) {
         try {
-          final harvestsBox = await _hive.openBox('harvests');
+          final harvestsBox = await _hive.openBox<dynamic>('harvests');
           stats['totalHarvests'] = harvestsBox.length;
           await harvestsBox.close();
         } catch (_) {

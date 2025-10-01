@@ -215,6 +215,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   }
 
   /// Método estático para mostrar o diálogo
+  // ignore: unused_element
   static Future<bool?> show(
     BuildContext context,
     ReceitaAgroAuthProvider authProvider,

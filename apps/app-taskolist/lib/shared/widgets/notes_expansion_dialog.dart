@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class NotesExpansionDialog extends StatefulWidget {
   final String? initialNotes;
-  final Function(String?) onSave;
+  final void Function(String?) onSave;
 
   const NotesExpansionDialog({
     super.key,

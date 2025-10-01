@@ -34,7 +34,6 @@ class MedicationStats extends ConsumerWidget {
     final totalMedications = medications.length;
     final activeCount = activeMedications.length;
     final completedCount = medications.where((m) => m.status == MedicationStatus.completed).length;
-    final discontinuedCount = medications.where((m) => m.status == MedicationStatus.discontinued).length;
     final expiringCount = expiringMedications.length;
 
     // Calculate by type

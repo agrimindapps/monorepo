@@ -9,8 +9,8 @@ class SubscriptionStatus {
     _isActive = isActive,
     _expirationDate = expirationDate;
 
-  bool get isActive => _isActive && 
-    (_expirationDate == null || _expirationDate!.isAfter(DateTime.now()));
+  bool get isActive => _isActive &&
+    (_expirationDate == null || _expirationDate.isAfter(DateTime.now()));
 
   DateTime? get expirationDate => _expirationDate;
 

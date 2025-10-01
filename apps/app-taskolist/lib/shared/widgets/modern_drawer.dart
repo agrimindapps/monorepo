@@ -147,7 +147,7 @@ class ModernDrawer extends ConsumerWidget {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      MaterialPageRoute<dynamic>(
                         builder: (context) => const SettingsPage(),
                       ),
                     );

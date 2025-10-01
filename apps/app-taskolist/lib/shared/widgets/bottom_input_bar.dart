@@ -212,7 +212,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
   }
 
   void _showPrioritySelector() {
-    showModalBottomSheet(
+    showModalBottomSheet<dynamic>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(

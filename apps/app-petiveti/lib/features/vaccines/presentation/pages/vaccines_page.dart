@@ -44,7 +44,6 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final vaccinesState = ref.watch(vaccinesProvider);
 
     return Scaffold(

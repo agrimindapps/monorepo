@@ -120,7 +120,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
 
   /// Registra uso de calculadora para estatísticas
   Future<void> recordCalculatorUsage(String calculatorId) async {
-    final box = await _hiveService.getBox<Map>(_statsBoxName);
+    final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
     final existingStats = box.get(calculatorId, defaultValue: <String, dynamic>{});
     final stats = Map<String, dynamic>.from(existingStats ?? <String, dynamic>{});
     
@@ -133,7 +133,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
 
   /// Obtém estatísticas de uso
   Future<Map<String, dynamic>> getCalculatorStats(String calculatorId) async {
-    final box = await _hiveService.getBox<Map>(_statsBoxName);
+    final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
     final stats = box.get(calculatorId, defaultValue: <String, dynamic>{});
     return Map<String, dynamic>.from(stats ?? <String, dynamic>{});
   }
@@ -185,7 +185,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   /// Obtém estatísticas de uso de todas as calculadoras
   @override
   Future<Map<String, int>> getCalculatorUsageStats() async {
-    final box = await _hiveService.getBox<Map>(_statsBoxName);
+    final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
     final stats = <String, int>{};
     
     for (final key in box.keys) {

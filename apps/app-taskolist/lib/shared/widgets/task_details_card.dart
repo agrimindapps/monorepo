@@ -8,8 +8,8 @@ class TaskDetailsCard extends StatefulWidget {
   final bool isEditing;
   final TaskStatus selectedStatus;
   final TaskPriority selectedPriority;
-  final Function(TaskStatus)? onStatusChanged;
-  final Function(TaskPriority)? onPriorityChanged;
+  final void Function(TaskStatus)? onStatusChanged;
+  final void Function(TaskPriority)? onPriorityChanged;
   final VoidCallback? onDateTap;
 
   const TaskDetailsCard({
@@ -190,7 +190,7 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
   void _showStatusSelector() {
     if (widget.onStatusChanged == null) return;
     
-    showModalBottomSheet(
+    showModalBottomSheet<dynamic>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
@@ -232,7 +232,7 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
   void _showPrioritySelector() {
     if (widget.onPriorityChanged == null) return;
     
-    showModalBottomSheet(
+    showModalBottomSheet<dynamic>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(

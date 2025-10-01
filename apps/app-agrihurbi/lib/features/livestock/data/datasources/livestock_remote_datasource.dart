@@ -29,6 +29,7 @@ abstract class LivestockRemoteDataSource {
 /// Implementação do data source remoto usando HTTP API
 @LazySingleton(as: LivestockRemoteDataSource)
 class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
+  // ignore: unused_field
   final DioClient _dioClient;
 
   // Endpoints da API

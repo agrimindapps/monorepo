@@ -189,6 +189,7 @@ class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
   }
 
   /// Factory constructor for simple loading state
+  // ignore: unused_element
   static ComentariosLoadingWidget simple() {
     return const ComentariosLoadingWidget(
       itemCount: 3,
@@ -197,6 +198,7 @@ class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
   }
 
   /// Factory constructor for full page loading
+  // ignore: unused_element
   static ComentariosLoadingWidget fullPage() {
     return const ComentariosLoadingWidget(
       itemCount: 5,
@@ -205,6 +207,7 @@ class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
   }
 
   /// Factory constructor for minimal loading
+  // ignore: unused_element
   static ComentariosLoadingWidget minimal() {
     return const ComentariosLoadingWidget(
       itemCount: 2,

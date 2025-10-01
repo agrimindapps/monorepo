@@ -488,7 +488,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   }
 
   void _showDeleteDialog(BuildContext context, Appointment appointment) async {
-    final shouldDelete = await _showDeleteDialogForDismiss(context, appointment);
+    await _showDeleteDialogForDismiss(context, appointment);
     // Handle the result if needed for non-dismissible calls
   }
   

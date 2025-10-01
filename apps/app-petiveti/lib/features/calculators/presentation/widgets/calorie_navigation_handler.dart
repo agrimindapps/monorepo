@@ -32,7 +32,7 @@ class CalorieNavigationHandler {
       if (isLastStep) {
         // Show loading state for calculation
         ref.read(calorieProvider.notifier).setTransitionLoading(true);
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
         
         // Execute calculation
         ref.read(calorieProvider.notifier).calculate();

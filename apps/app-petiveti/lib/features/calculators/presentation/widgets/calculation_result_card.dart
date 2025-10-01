@@ -183,7 +183,6 @@ class CalculationResultCard extends StatelessWidget {
         return Colors.green;
       case ResultSeverity.info:
       case null:
-      default:
         return theme.colorScheme.primary;
     }
   }
@@ -198,7 +197,6 @@ class CalculationResultCard extends StatelessWidget {
         return Icons.check_circle;
       case ResultSeverity.info:
       case null:
-      default:
         return Icons.info;
     }
   }

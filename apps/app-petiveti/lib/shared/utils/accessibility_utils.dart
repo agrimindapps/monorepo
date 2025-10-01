@@ -426,9 +426,9 @@ class AccessibilityUtils {
 
   static double _calculateLuminance(Color color) {
     // Convert to sRGB
-    final r = _sRGBToLinear(color.red / 255.0);
-    final g = _sRGBToLinear(color.green / 255.0);
-    final b = _sRGBToLinear(color.blue / 255.0);
+    final r = _sRGBToLinear(color.r / 255.0);
+    final g = _sRGBToLinear(color.g / 255.0);
+    final b = _sRGBToLinear(color.b / 255.0);
     
     // Calculate luminance using WCAG formula
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;

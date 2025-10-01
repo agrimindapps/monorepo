@@ -62,7 +62,7 @@ class NavigationService {
         // Navegar para página de detalhes
         if (context.mounted) {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => TaskDetailPage(
                 task: task,
                 initialFocus: focus,
@@ -135,7 +135,7 @@ class NavigationService {
   /// Navegar para página principal
   static void _navigateToHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const HomePage()),
+      MaterialPageRoute<dynamic>(builder: (context) => const HomePage()),
       (route) => false,
     );
   }

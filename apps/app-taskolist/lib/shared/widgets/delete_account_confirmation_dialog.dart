@@ -471,7 +471,7 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
     HapticFeedback.heavyImpact();
     
     // Pequeno delay para mostrar loading
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     if (!mounted) return;
     

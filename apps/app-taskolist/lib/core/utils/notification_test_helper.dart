@@ -73,7 +73,7 @@ class NotificationTestHelper {
       await testTaskReminderNotification(notificationService);
       
       // Aguardar um pouco
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
       
       // Testar deadline (15 segundos)  
       await testTaskDeadlineNotification(notificationService);
@@ -86,7 +86,7 @@ class NotificationTestHelper {
       debugPrint('   • Extend → Should open task details');
       
       // Agendar cancelamento após 30 segundos para limpeza
-      Future.delayed(const Duration(seconds: 30), () {
+      Future<void>.delayed(const Duration(seconds: 30), () {
         testCancelNotifications(notificationService);
       });
     }

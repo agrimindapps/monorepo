@@ -9,7 +9,7 @@ import '../../features/tasks/presentation/providers/task_providers.dart';
 import '../providers/auth_providers.dart';
 
 class FilterSidePanel extends ConsumerStatefulWidget {
-  final Function(TaskFilter filter, String? selectedTag) onFilterChanged;
+  final void Function(TaskFilter filter, String? selectedTag) onFilterChanged;
   final TaskFilter currentFilter;
   final String? currentSelectedTag;
 
@@ -952,7 +952,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   }
 
   void _showHelpDialog() {
-    showDialog(
+    showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajuda e Suporte'),
@@ -999,7 +999,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     // Navegar para a página de configurações
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => const SettingsPage(),
       ),
     );

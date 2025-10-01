@@ -4,6 +4,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../services/data_cleaner_service.dart';
 import '../di_module.dart';
 
 /// Core module responsible for external services and core infrastructure
@@ -78,6 +79,43 @@ class CoreModule implements DIModule {
   Future<void> _registerCoreServices(GetIt getIt) async {
     // For gasometer, we keep it minimal and leverage the packages/core services
     // Additional gasometer-specific services can be registered here as needed
+
+    // Register core package services needed by Injectable dependencies
+    try {
+      // Services from core package needed by DeviceManagementModule
+      getIt.registerLazySingleton<core.FirebaseDeviceService>(
+        () => core.FirebaseDeviceService(),
+      );
+
+      // TODO: IDeviceRepository implementation not found in core package
+      // DeviceManagementModule expects this but no implementation exists
+      // For now, we skip registration and let it fail gracefully if needed
+
+      // FirebaseAuthService - reuse the IAuthRepository instance
+      // (IAuthRepository is implemented by FirebaseAuthService)
+      getIt.registerLazySingleton<core.FirebaseAuthService>(
+        () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
+      );
+
+      // FirebaseAnalyticsService - reuse the IAnalyticsRepository instance
+      getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
+        () => getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
+      );
+
+      // Subscription Repository from core package
+      getIt.registerLazySingleton<core.ISubscriptionRepository>(
+        () => core.RevenueCatService(),
+      );
+
+      // DataCleanerService (app-specific singleton)
+      getIt.registerLazySingleton<DataCleanerService>(
+        () => DataCleanerService.instance,
+      );
+
+      debugPrint('✅ Core package services registered for Injectable dependencies');
+    } catch (e) {
+      debugPrint('⚠️ Warning: Could not register additional core services: $e');
+    }
 
     debugPrint('✅ GasOMeter core services initialized');
   }

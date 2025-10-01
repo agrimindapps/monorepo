@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/interfaces/i_premium_service.dart';
-import '../../../../core/models/plantas_inf_hive.dart';
-import '../../../../core/models/pragas_hive.dart';
-import '../../../../core/models/pragas_inf_hive.dart';
-import '../../../../core/repositories/favoritos_hive_repository.dart';
-import '../../../../core/repositories/plantas_inf_hive_repository.dart';
-import '../../../../core/repositories/pragas_hive_repository.dart';
-import '../../../../core/repositories/pragas_inf_hive_repository.dart';
+import '../../../../core/data/models/plantas_inf_hive.dart';
+import '../../../../core/data/models/pragas_hive.dart';
+import '../../../../core/data/models/pragas_inf_hive.dart';
+import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/plantas_inf_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_inf_hive_repository.dart';
 import '../../../../core/services/premium_status_notifier.dart';
-import '../../../comentarios/models/comentario_model.dart';
-import '../../../comentarios/services/comentarios_service.dart';
+import '../../../comentarios/data/comentario_model.dart';
+import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
 import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 

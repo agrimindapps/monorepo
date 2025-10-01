@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
-import '../../core/presentation/widgets/responsive_content_area.dart';
+import '../../core/widgets/responsive_content_area.dart';
 import 'responsive_sidebar.dart';
 
 /// Main adaptive navigation shell that changes layout based on screen size

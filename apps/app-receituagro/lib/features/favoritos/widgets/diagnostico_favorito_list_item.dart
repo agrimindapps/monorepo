@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/favoritos_design_tokens.dart';
-import '../models/favorito_diagnostico_model.dart';
+import '../data/favorito_diagnostico_model.dart';
 
 class DiagnosticoFavoritoListItem extends StatelessWidget {
   final FavoritoDiagnosticoModel diagnostico;

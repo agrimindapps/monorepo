@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/theme/app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// Widget para seleção/visualização de imagem do comprovante
 class ReceiptImagePicker extends StatelessWidget {

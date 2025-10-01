@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
-import '../../../../core/design/spacing_tokens.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../providers/enhanced_diagnosticos_praga_provider.dart';

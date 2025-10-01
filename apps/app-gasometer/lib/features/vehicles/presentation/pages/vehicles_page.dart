@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
-import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/enhanced_empty_state.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicles_notifier.dart';
 import '../widgets/vehicle_card.dart';

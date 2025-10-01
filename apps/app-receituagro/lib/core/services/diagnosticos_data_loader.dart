@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
-import '../models/diagnostico_hive.dart';
-import '../repositories/diagnostico_hive_repository.dart';
+import '../data/models/diagnostico_hive.dart';
+import '../data/repositories/diagnostico_hive_repository.dart';
 
 /// Serviço para carregar dados de diagnósticos dos assets JSON
 class DiagnosticosDataLoader {

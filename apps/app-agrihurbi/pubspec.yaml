@@ -33,6 +33,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
+
+  # Code Generation
+  build_runner: any
+  injectable_generator: any
+
 flutter:
   uses-material-design: true

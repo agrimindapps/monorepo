@@ -9,7 +9,7 @@ import 'package:provider/provider.dart' as provider;
 
 // Local imports
 import 'core/di/injection_container.dart' as di;
-import 'core/inspector/receita_agro_data_inspector_initializer.dart';
+import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/auth_provider.dart';
 import 'core/providers/feature_flags_provider.dart';
@@ -24,7 +24,7 @@ import 'core/services/premium_service.dart';
 import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
-import 'core/setup/receituagro_data_setup.dart';
+import 'core/di/receituagro_data_setup.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/theme_preference_migration.dart';
@@ -116,7 +116,9 @@ void main() async {
     debugPrint('✅ [MAIN] ConnectivityService initialized successfully');
 
     // Initialize EnhancedConnectivityService for rural optimization
-    debugPrint('🌾 [MAIN] Initializing EnhancedConnectivityService for rural environments...');
+    debugPrint(
+      '🌾 [MAIN] Initializing EnhancedConnectivityService for rural environments...',
+    );
     final enhancedConnectivity = di.sl<EnhancedConnectivityService>();
     final enhancedResult = await enhancedConnectivity.initialize(
       customPingHost: '1.1.1.1', // Cloudflare DNS for better rural access
@@ -125,10 +127,13 @@ void main() async {
     );
 
     enhancedResult.fold(
-      (error) => debugPrint('❌ [MAIN] EnhancedConnectivityService initialization failed: ${error.message}'),
-      (_) => debugPrint('✅ [MAIN] EnhancedConnectivityService initialized for agricultural operations'),
+      (error) => debugPrint(
+        '❌ [MAIN] EnhancedConnectivityService initialization failed: ${error.message}',
+      ),
+      (_) => debugPrint(
+        '✅ [MAIN] EnhancedConnectivityService initialized for agricultural operations',
+      ),
     );
-
   } catch (e) {
     debugPrint('❌ [MAIN] Connectivity services initialization failed: $e');
     // Don't block app startup - connectivity will be handled gracefully
@@ -188,7 +193,8 @@ void main() async {
     final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
     await analyticsService.initialize();
   } catch (e) {
-    if (kDebugMode) print('❌ [MAIN] ReceitaAgroAnalyticsService not registered: $e');
+    if (kDebugMode)
+      print('❌ [MAIN] ReceitaAgroAnalyticsService not registered: $e');
     // Analytics service will be initialized later when properly registered
   }
 
@@ -307,12 +313,16 @@ class ReceitaAgroApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return provider.MultiProvider(
       providers: [
-        provider.ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
+        provider.ChangeNotifierProvider(
+          create: (_) => ThemeProvider()..initialize(),
+        ),
         provider.ChangeNotifierProvider(
           create: (_) => PreferencesProvider()..initialize(),
         ),
         // Auth Provider from Core Package Integration
-        provider.ChangeNotifierProvider(create: (_) => di.sl<ReceitaAgroAuthProvider>()),
+        provider.ChangeNotifierProvider(
+          create: (_) => di.sl<ReceitaAgroAuthProvider>(),
+        ),
         // Sprint 1 Providers
         provider.ChangeNotifierProvider(
           create: (_) => di.sl<RemoteConfigProvider>()..initialize(),
@@ -324,9 +334,13 @@ class ReceitaAgroApp extends StatelessWidget {
           create: (_) => di.sl<ReceitaAgroPremiumService>(),
         ),
         // Profile Provider for user profile management
-        provider.ChangeNotifierProvider(create: (_) => di.sl<ProfileProvider>()),
+        provider.ChangeNotifierProvider(
+          create: (_) => di.sl<ProfileProvider>(),
+        ),
         // Settings Provider for device management and settings
-        provider.ChangeNotifierProvider(create: (_) => di.sl<SettingsProvider>()),
+        provider.ChangeNotifierProvider(
+          create: (_) => di.sl<SettingsProvider>(),
+        ),
       ],
       child: provider.Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

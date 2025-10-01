@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/riverpod_providers/auth_providers.dart' as local;
+import '../../../../core/providers/auth_providers.dart' as local;
 
 /// Overlay que mostra o status da validação de dispositivo durante o login
 class DeviceValidationOverlay extends ConsumerWidget {

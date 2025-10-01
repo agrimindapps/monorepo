@@ -76,9 +76,14 @@ class InjectionContainer {
       );
 
       // 4. Hive Storage - Depends on IBoxRegistryService
-      getIt.registerLazySingleton<ILocalStorageRepository>(
-        () => HiveStorageService(getIt<IBoxRegistryService>()),
-      );
+      // Skip on Web platform due to Hive limitations
+      if (!kIsWeb) {
+        getIt.registerLazySingleton<ILocalStorageRepository>(
+          () => HiveStorageService(getIt<IBoxRegistryService>()),
+        );
+      } else if (kDebugMode) {
+        print('⚠️ [Core Package] ILocalStorageRepository skipped on Web platform (Hive limitations)');
+      }
 
       // 5. RevenueCat para gerenciar assinaturas
       getIt.registerLazySingleton<ISubscriptionRepository>(

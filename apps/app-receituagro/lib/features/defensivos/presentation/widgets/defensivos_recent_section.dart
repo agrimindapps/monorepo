@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../providers/home_defensivos_provider.dart';
 

@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import '../../domain/entities/task_entity.dart';
-import '../../domain/usecases/update_task.dart';
+import 'package:flutter/material.dart';
+
+import '../../features/tasks/domain/task_entity.dart';
+import '../../features/tasks/domain/update_task.dart';
 import '../providers/service_providers.dart';
 import 'navigation_service.dart' as local_nav;
 

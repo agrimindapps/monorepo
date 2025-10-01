@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
-import '../repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/fitossanitario_hive_repository.dart';
 
 /// Serviço para carregar dados de fitossanitários dos assets JSON
 class FitossanitariosDataLoader {

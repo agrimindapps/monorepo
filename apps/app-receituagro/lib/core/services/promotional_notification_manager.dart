@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/promotional_notification.dart';
+import '../data/models/promotional_notification.dart';
 import 'firebase_messaging_service.dart';
 
 /// Gerenciador de notificações promocionais do ReceitaAgro

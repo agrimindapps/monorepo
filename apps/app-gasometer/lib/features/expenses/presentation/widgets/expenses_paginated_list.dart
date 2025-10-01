@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/interfaces/i_expenses_repository.dart';
-import '../../../../core/presentation/theme/app_theme.dart';
-import '../../../../core/presentation/widgets/empty_state_widget.dart';
-import '../../../../core/presentation/widgets/error_state_widget.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/error_state_widget.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../providers/expenses_paginated_provider.dart';
 

@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
 
 /// Model for statistics data computed in background

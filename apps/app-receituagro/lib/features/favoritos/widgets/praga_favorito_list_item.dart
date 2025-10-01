@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/favoritos_design_tokens.dart';
-import '../models/favorito_praga_model.dart';
+import '../data/favorito_praga_model.dart';
 
 class PragaFavoritoListItem extends StatelessWidget {
   final FavoritoPragaModel praga;

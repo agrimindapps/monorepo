@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../adapters/plantis_image_service_adapter.dart';
+import '../data/adapters/plantis_image_service_adapter.dart';
 import '../di/injection_container.dart';
 import '../services/image_preloader_service.dart';
 

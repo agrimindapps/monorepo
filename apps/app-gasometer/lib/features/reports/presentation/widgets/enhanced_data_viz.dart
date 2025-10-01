@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
 
 /// Enhanced trend indicator with visual appeal
 class TrendIndicator extends StatelessWidget {

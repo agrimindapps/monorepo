@@ -2,10 +2,10 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
 
-import '../../core/design/design_tokens.dart';
+import '../../core/theme/design_tokens.dart';
 import '../../core/di/injection_container.dart';
-import '../../core/models/fitossanitario_hive.dart';
-import '../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../core/data/models/fitossanitario_hive.dart';
+import '../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import 'presentation/providers/home_defensivos_provider.dart';
 import 'presentation/widgets/defensivos_error_state.dart';

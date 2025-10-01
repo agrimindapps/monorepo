@@ -7,8 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'
     as riverpod
     show Consumer;
 
-import '../../core/riverpod_providers/auth_providers.dart' as local;
-import '../../core/riverpod_providers/sync_providers.dart';
+import '../../core/providers/auth_providers.dart' as local;
+import '../../core/providers/sync_providers.dart';
 import '../../core/services/data_cleaner_service.dart';
 import '../../core/services/data_sanitization_service.dart';
 import '../../core/theme/plantis_colors.dart';

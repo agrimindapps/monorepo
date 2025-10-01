@@ -7,9 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/presentation/widgets/form_section_header.dart';
-import '../../../../core/presentation/widgets/notes_form_field.dart';
-import '../../../../core/presentation/widgets/validated_form_field.dart';
+import '../../../../core/widgets/form_section_header.dart';
+import '../../../../core/widgets/notes_form_field.dart';
+import '../../../../core/widgets/validated_form_field.dart';
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/validation/form_validator.dart';

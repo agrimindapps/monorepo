@@ -8,7 +8,7 @@ import '../../features/analytics/enhanced_analytics_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../di/injection_container.dart' as di;
 import '../extensions/user_entity_receituagro_extension.dart';
-import '../models/user_session_data.dart';
+import '../data/models/user_session_data.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 // sync_orchestrator.dart removed - using UnifiedSyncManager from core package

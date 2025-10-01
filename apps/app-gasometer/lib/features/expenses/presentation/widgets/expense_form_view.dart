@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/datetime_field.dart';
-import '../../../../core/presentation/widgets/form_section_header.dart';
-import '../../../../core/presentation/widgets/form_section_widget.dart';
-import '../../../../core/presentation/widgets/money_form_field.dart';
-import '../../../../core/presentation/widgets/notes_form_field.dart';
-import '../../../../core/presentation/widgets/odometer_field.dart';
-import '../../../../core/presentation/widgets/receipt_section.dart';
+import '../../../../core/widgets/datetime_field.dart';
+import '../../../../core/widgets/form_section_header.dart';
+import '../../../../core/widgets/form_section_widget.dart';
+import '../../../../core/widgets/money_form_field.dart';
+import '../../../../core/widgets/notes_form_field.dart';
+import '../../../../core/widgets/odometer_field.dart';
+import '../../../../core/widgets/receipt_section.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../core/constants/expense_constants.dart';
 import '../providers/expense_form_provider.dart';

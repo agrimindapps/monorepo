@@ -11,8 +11,8 @@ import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 class GasometerFirebaseService {
   static const String _subscriptionsCollection = 'subscriptions';
   static const String _appId = 'gasometer';
-  
-  static final AnalyticsService _analytics = AnalyticsService();
+
+  static final GasometerAnalyticsService? _analytics = null; // TODO: Inject when needed
   
   /// Diagnóstico de conectividade Firebase
   static Future<Map<String, dynamic>> checkFirebaseConnectivity() async {
@@ -47,9 +47,9 @@ class GasometerFirebaseService {
       result['errors'].add('Firestore test failed: $e');
       
       print('❌ Firebase connectivity test failed: $e');
-      
+
       // Log analytics event
-      _analytics.logEvent('firebase_connectivity_test', {
+      _analytics?.logEvent('firebase_connectivity_test', {
         'success': false,
         'error': e.toString(),
         'app_id': _appId,
@@ -104,18 +104,18 @@ class GasometerFirebaseService {
       });
 
       // Log analytics
-      await _analytics.logFuelRefill(
+      await _analytics?.logFuelRefill(
         fuelType: fuelData['fuelType'] as String? ?? 'unknown',
         liters: (fuelData['liters'] as num?)?.toDouble() ?? 0.0,
         totalCost: (fuelData['totalCost'] as num?)?.toDouble() ?? 0.0,
         fullTank: fuelData['fullTank'] as bool? ?? false,
       );
 
-      await _analytics.log('Fuel data saved successfully');
-      await _analytics.log('Dados de abastecimento salvos no Firebase');
+      await _analytics?.log('Fuel data saved successfully');
+      await _analytics?.log('Dados de abastecimento salvos no Firebase');
     } catch (e, stackTrace) {
-      await _analytics.log('Erro ao salvar dados de abastecimento');
-      await _analytics.recordError(
+      await _analytics?.log('Erro ao salvar dados de abastecimento');
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to save fuel data',
@@ -158,17 +158,17 @@ class GasometerFirebaseService {
       });
 
       // Log analytics
-      await _analytics.logMaintenance(
+      await _analytics?.logMaintenance(
         maintenanceType: maintenanceData['type'] as String? ?? 'unknown',
         cost: (maintenanceData['cost'] as num?)?.toDouble() ?? 0.0,
         odometer: (maintenanceData['odometer'] as num?)?.toInt() ?? 0,
       );
 
-      await _analytics.log('Maintenance data saved successfully');
-      await _analytics.log('Dados de manutenção salvos no Firebase');
+      await _analytics?.log('Maintenance data saved successfully');
+      await _analytics?.log('Dados de manutenção salvos no Firebase');
     } catch (e, stackTrace) {
-      await _analytics.log('Erro ao salvar dados de manutenção');
-      await _analytics.recordError(
+      await _analytics?.log('Erro ao salvar dados de manutenção');
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to save maintenance data',
@@ -196,16 +196,16 @@ class GasometerFirebaseService {
       });
 
       // Log analytics
-      await _analytics.logExpense(
+      await _analytics?.logExpense(
         expenseType: expenseData['type'] as String? ?? 'unknown',
         amount: (expenseData['amount'] as num?)?.toDouble() ?? 0.0,
       );
 
-      await _analytics.log('Expense data saved successfully');
-      await _analytics.log('Dados de despesa salvos no Firebase');
+      await _analytics?.log('Expense data saved successfully');
+      await _analytics?.log('Dados de despesa salvos no Firebase');
     } catch (e, stackTrace) {
-      await _analytics.log('Erro ao salvar dados de despesa');
-      await _analytics.recordError(
+      await _analytics?.log('Erro ao salvar dados de despesa');
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to save expense data',
@@ -233,15 +233,15 @@ class GasometerFirebaseService {
       });
 
       // Log analytics
-      await _analytics.logVehicleCreated(
+      await _analytics?.logVehicleCreated(
         vehicleData['type'] as String? ?? 'unknown',
       );
 
-      await _analytics.log('Vehicle data saved successfully');
-      await _analytics.log('Dados de veículo salvos no Firebase');
+      await _analytics?.log('Vehicle data saved successfully');
+      await _analytics?.log('Dados de veículo salvos no Firebase');
     } catch (e, stackTrace) {
-      await _analytics.log('Erro ao salvar dados de veículo');
-      await _analytics.recordError(
+      await _analytics?.log('Erro ao salvar dados de veículo');
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to save vehicle data',
@@ -285,7 +285,7 @@ class GasometerFirebaseService {
       };
 
       // Log analytics
-      await _analytics.logEvent('user_stats_retrieved', {
+      await _analytics?.logEvent('user_stats_retrieved', {
         'fuel_records': fuelQuery.docs.length,
         'maintenance_records': maintenanceQuery.docs.length,
         'expense_records': expenseQuery.docs.length,
@@ -294,8 +294,8 @@ class GasometerFirebaseService {
 
       return stats;
     } catch (e, stackTrace) {
-      await _analytics.log('Erro ao obter estatísticas do usuário');
-      await _analytics.recordError(
+      await _analytics?.log('Erro ao obter estatísticas do usuário');
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to get user stats',
@@ -324,10 +324,10 @@ class GasometerFirebaseService {
       });
 
       // Log analytics
-      await _analytics.logUserAction(featureName, parameters: additionalData);
-      await _analytics.log('Feature usage logged: $featureName');
+      await _analytics?.logUserAction(featureName, parameters: additionalData);
+      await _analytics?.log('Feature usage logged: $featureName');
     } catch (e, stackTrace) {
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to log feature usage: $featureName',
@@ -338,17 +338,17 @@ class GasometerFirebaseService {
   /// Backup de dados
   static Future<bool> backupUserData(String userId) async {
     try {
-      await _analytics.logEvent('data_backup_started', {'user_id': userId});
+      await _analytics?.logEvent('data_backup_started', {'user_id': userId});
 
       // Aqui você implementaria a lógica de backup
       // Por exemplo, exportar dados do Hive para Firebase
 
-      await _analytics.logEvent('data_backup_completed', {'user_id': userId});
-      await _analytics.log('User data backup completed successfully');
-      
+      await _analytics?.logEvent('data_backup_completed', {'user_id': userId});
+      await _analytics?.log('User data backup completed successfully');
+
       return true;
     } catch (e, stackTrace) {
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to backup user data',
@@ -360,17 +360,17 @@ class GasometerFirebaseService {
   /// Sincronização de dados
   static Future<bool> syncUserData(String userId) async {
     try {
-      await _analytics.logEvent('data_sync_started', {'user_id': userId});
+      await _analytics?.logEvent('data_sync_started', {'user_id': userId});
 
       // Aqui você implementaria a lógica de sincronização
       // Por exemplo, sincronizar dados locais com Firebase
 
-      await _analytics.logEvent('data_sync_completed', {'user_id': userId});
-      await _analytics.log('User data sync completed successfully');
-      
+      await _analytics?.logEvent('data_sync_completed', {'user_id': userId});
+      await _analytics?.log('User data sync completed successfully');
+
       return true;
     } catch (e, stackTrace) {
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         stackTrace,
         reason: 'Failed to sync user data',
@@ -385,7 +385,7 @@ class GasometerFirebaseService {
     required String errorMessage,
     Map<String, Object>? context,
   }) async {
-    await _analytics.recordError(
+    await _analytics?.recordError(
       Exception('$errorType: $errorMessage'),
       StackTrace.current,
       reason: errorType,
@@ -398,12 +398,12 @@ class GasometerFirebaseService {
     required String userId,
     Map<String, String>? userProperties,
   }) async {
-    await _analytics.setUserId(userId);
-    
+    await _analytics?.setUserId(userId);
+
     if (userProperties != null) {
-      await _analytics.setUserProperties(userProperties);
+      await _analytics?.setUserProperties(userProperties);
     }
-    
-    await _analytics.log('Analytics user configured: $userId');
+
+    await _analytics?.log('Analytics user configured: $userId');
   }
 }

@@ -5,11 +5,11 @@ import 'package:get_it/get_it.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/repositories/cultura_hive_repository.dart';
-import '../../../../core/repositories/diagnostico_hive_repository.dart';
-import '../../../../core/repositories/favoritos_hive_repository.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
+import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/entities/favorito_sync_entity.dart';

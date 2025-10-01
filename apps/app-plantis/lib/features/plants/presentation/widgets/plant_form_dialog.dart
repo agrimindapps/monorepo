@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/riverpod_providers/solid_providers.dart';
-import '../../../../core/state/plant_form_state_manager.dart';
+import '../../../../core/providers/solid_providers.dart';
+import '../../../../core/providers/state/plant_form_state_manager.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/plant_details_provider.dart';
 import '../providers/plants_provider.dart';

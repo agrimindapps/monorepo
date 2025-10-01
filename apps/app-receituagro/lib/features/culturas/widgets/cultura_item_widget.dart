@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/cultura_hive.dart';
+import '../../../core/data/models/cultura_hive.dart';
 
 enum CulturaItemMode { list, grid }
 

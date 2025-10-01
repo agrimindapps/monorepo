@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/riverpod_providers/theme_providers.dart';
+import '../../core/providers/theme_providers.dart';
 
 /// Widget de demonstração da migração Theme Provider → Riverpod
 ///

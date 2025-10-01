@@ -1,5 +1,6 @@
 // ignore_for_file: only_throw_errors
 
+import 'package:app_agrihurbi/core/network/dio_client.dart';
 import 'package:core/core.dart';
 
 import '../models/bovine_model.dart';
@@ -28,10 +29,11 @@ abstract class LivestockRemoteDataSource {
 /// Implementação do data source remoto usando HTTP API
 @LazySingleton(as: LivestockRemoteDataSource)
 class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
-  
+  final DioClient _dioClient;
+
   // Endpoints da API
-  
-  LivestockRemoteDataSourceImpl(dioClient);
+
+  LivestockRemoteDataSourceImpl(this._dioClient);
   
   // === BOVINOS ===
   

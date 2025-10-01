@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/riverpod_providers/settings_providers.dart';
+import '../../../../core/providers/settings_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 

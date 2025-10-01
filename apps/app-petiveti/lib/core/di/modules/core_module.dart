@@ -12,7 +12,7 @@ import '../../logging/repositories/log_repository.dart';
 import '../../logging/repositories/log_repository_impl.dart';
 import '../../logging/services/logging_service.dart';
 import '../../notifications/notification_service.dart';
-import '../../optimization/lazy_loader.dart';
+import '../../performance/lazy_loader.dart';
 import '../../performance/performance_service.dart' as local_perf;
 import '../di_module.dart';
 

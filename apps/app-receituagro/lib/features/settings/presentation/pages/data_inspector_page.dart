@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../../../core/inspector/receita_agro_data_inspector_initializer.dart';
+import '../../../../core/utils/receita_agro_data_inspector_initializer.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';

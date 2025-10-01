@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/utils/typedef.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/repositories/defensivo_repository.dart';

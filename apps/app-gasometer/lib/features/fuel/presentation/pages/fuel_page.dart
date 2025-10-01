@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
-import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/enhanced_empty_state.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../providers/fuel_notifier.dart';
 

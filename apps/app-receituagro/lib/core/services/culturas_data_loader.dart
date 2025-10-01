@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
-import '../repositories/cultura_hive_repository.dart';
+import '../data/repositories/cultura_hive_repository.dart';
 
 /// Serviço para carregar dados de culturas dos assets JSON
 class CulturasDataLoader {

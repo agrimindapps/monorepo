@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../models/promotional_notification.dart';
+import '../data/models/promotional_notification.dart';
 import 'receituagro_navigation_service.dart';
 
 /// Serviço para gerenciar Firebase Cloud Messaging (Push Notifications)

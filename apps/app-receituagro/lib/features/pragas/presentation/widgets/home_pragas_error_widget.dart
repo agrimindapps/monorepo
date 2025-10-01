@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/design/design_tokens.dart';
+import '../../../../core/theme/design_tokens.dart';
 
 /// Widget para exibir estado de erro na home de pragas
 /// 

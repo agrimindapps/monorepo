@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/forms/base_form_page.dart';
+import '../../../../core/validation/base_form_page.dart';
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';

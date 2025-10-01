@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import 'fuel_record_card.dart';
 

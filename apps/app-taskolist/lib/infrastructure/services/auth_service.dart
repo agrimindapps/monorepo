@@ -1,13 +1,8 @@
 import 'dart:async';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../core/di/injection_container.dart' as di;
-import '../../domain/entities/user_entity.dart' as local_entities;
-import '../../domain/usecases/delete_account.dart';
-import '../../domain/usecases/update_profile.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 import 'subscription_service.dart';
@@ -15,25 +10,21 @@ import 'sync_service.dart';
 
 /// Wrapper para o serviço de autenticação Firebase Auth do core
 /// Adiciona funcionalidades específicas do Task Manager
+@lazySingleton
 class TaskManagerAuthService {
   final IAuthRepository _authRepository;
-  late final TaskManagerAnalyticsService _analyticsService;
-  late final TaskManagerCrashlyticsService _crashlyticsService;
-  late final TaskManagerSubscriptionService _subscriptionService;
-  late final TaskManagerSyncService _syncService;
-  late final UpdateProfile _updateProfile;
-  late final DeleteAccount _deleteAccount;
+  final TaskManagerAnalyticsService _analyticsService;
+  final TaskManagerCrashlyticsService _crashlyticsService;
+  final TaskManagerSubscriptionService _subscriptionService;
+  final TaskManagerSyncService _syncService;
 
-  TaskManagerAuthService({
-    required IAuthRepository authRepository,
-  }) : _authRepository = authRepository {
-    _analyticsService = di.sl<TaskManagerAnalyticsService>();
-    _crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
-    _subscriptionService = di.sl<TaskManagerSubscriptionService>();
-    _syncService = di.sl<TaskManagerSyncService>();
-    _updateProfile = di.sl<UpdateProfile>();
-    _deleteAccount = di.sl<DeleteAccount>();
-  }
+  TaskManagerAuthService(
+    this._authRepository,
+    this._analyticsService,
+    this._crashlyticsService,
+    this._subscriptionService,
+    this._syncService,
+  );
 
   /// Stream do usuário atual
   Stream<UserEntity?> get currentUser => _authRepository.currentUser;
@@ -313,7 +304,7 @@ class TaskManagerAuthService {
   }
 
   /// Atualizar perfil do usuário
-  Future<Either<Failure, local_entities.UserEntity>> updateProfile({
+  Future<Either<Failure, UserEntity>> updateProfile({
     String? displayName,
     String? photoURL,
   }) async {
@@ -324,19 +315,19 @@ class TaskManagerAuthService {
         return const Left(AuthFailure('Usuário não logado'));
       }
 
-      // Converter para entidade local e aplicar mudanças
-      final updatedUser = local_entities.UserEntity(
-        id: currentUserResult.id,
-        name: displayName ?? currentUserResult.displayName,
-        email: currentUserResult.email,
-        avatarUrl: photoURL,
-        createdAt: DateTime.now(), // Ajustar conforme necessário
+      // Aplicar mudanças no usuário atual
+      final updatedUser = currentUserResult.copyWith(
+        displayName: displayName,
+        photoUrl: photoURL,
         updatedAt: DateTime.now(),
       );
 
-      // Usar o use case local para atualizar
-      final result = await _updateProfile(UpdateProfileParams(user: updatedUser));
-      
+      // Usar o repositório diretamente para atualizar
+      final result = await _authRepository.updateProfile(
+        displayName: displayName,
+        photoUrl: photoURL,
+      );
+
       return result.fold(
         (failure) {
           _logAuthEvent('profile_update_failed', {
@@ -349,8 +340,8 @@ class TaskManagerAuthService {
             stackTrace: StackTrace.current,
             reason: 'Profile update failed',
           );
-          
-          return Left(AuthFailure(failure.message));
+
+          return Left(failure);
         },
         (_) {
           _logAuthEvent('profile_updated', {
@@ -363,11 +354,11 @@ class TaskManagerAuthService {
         },
       );
     } catch (e) {
-      _crashlyticsService.recordError(
+      unawaited(_crashlyticsService.recordError(
         exception: e,
         stackTrace: StackTrace.current,
         reason: 'Profile update failed',
-      );
+      ));
       return Left(AuthFailure('Erro ao atualizar perfil: $e'));
     }
   }
@@ -376,12 +367,12 @@ class TaskManagerAuthService {
   Future<Either<Failure, void>> deleteAccount() async {
     try {
       final currentUserData = await _getCurrentUserForAnalytics();
-      
+
       _logAuthEvent('account_deletion_requested', currentUserData);
-      
-      // Usar o use case local para deletar conta
-      final result = await _deleteAccount();
-      
+
+      // Usar o repositório diretamente para deletar conta
+      final result = await _authRepository.deleteAccount();
+
       return result.fold(
         (failure) {
           _logAuthEvent('account_deletion_failed', {
@@ -390,33 +381,33 @@ class TaskManagerAuthService {
             ...currentUserData,
           });
 
-          _crashlyticsService.recordError(
+          unawaited(_crashlyticsService.recordError(
             exception: failure,
             stackTrace: StackTrace.current,
             reason: 'Account deletion failed',
-          );
-          
-          return Left(AuthFailure(failure.message));
+          ));
+
+          return Left(failure);
         },
         (_) {
           _logAuthEvent('account_deleted', currentUserData);
-          
+
           // Limpar contexto do Crashlytics
           _crashlyticsService.setTaskManagerContext(
             userId: 'anonymous',
             version: '1.0.0',
             environment: 'production',
           );
-          
+
           return const Right(null);
         },
       );
     } catch (e) {
-      _crashlyticsService.recordError(
+      unawaited(_crashlyticsService.recordError(
         exception: e,
         stackTrace: StackTrace.current,
         reason: 'Account deletion failed',
-      );
+      ));
       return Left(AuthFailure('Erro ao deletar conta: $e'));
     }
   }

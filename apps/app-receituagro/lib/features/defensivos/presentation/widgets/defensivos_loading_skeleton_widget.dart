@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/view_mode.dart';
+import '../../data/view_mode.dart';
 
 class DefensivosLoadingSkeletonWidget extends StatefulWidget {
   final bool isDark;

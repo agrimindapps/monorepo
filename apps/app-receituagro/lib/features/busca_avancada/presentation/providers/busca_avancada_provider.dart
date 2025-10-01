@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/repositories/cultura_hive_repository.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/diagnostico_integration_service.dart';
 
 /// Provider especializado para gerenciar estado complexo da busca avançada

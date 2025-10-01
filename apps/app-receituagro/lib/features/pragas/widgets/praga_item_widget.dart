@@ -2,9 +2,9 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/extensions/pragas_hive_extension.dart';
-import '../../../core/models/pragas_hive.dart';
+import '../../../core/data/models/pragas_hive.dart';
 import '../../../core/widgets/optimized_praga_image_widget.dart';
-import '../models/praga_view_mode.dart';
+import '../data/praga_view_mode.dart';
 
 class PragaItemWidget extends StatelessWidget {
   final PragasHive praga;

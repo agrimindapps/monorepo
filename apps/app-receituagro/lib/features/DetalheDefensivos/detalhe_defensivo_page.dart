@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../core/di/injection_container.dart';
-import '../../core/models/diagnostico_hive.dart';
-import '../../core/models/fitossanitario_hive.dart';
-import '../../core/repositories/diagnostico_hive_repository.dart';
+import '../../core/data/models/diagnostico_hive.dart';
+import '../../core/data/models/fitossanitario_hive.dart';
+import '../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../core/services/access_history_service.dart';
 import '../../core/services/diagnosticos_data_loader.dart';
 import '../../core/services/receituagro_navigation_service.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/cultura_view_mode.dart';
+import '../data/cultura_view_mode.dart';
 
 class CulturaSearchField extends StatefulWidget {
   final TextEditingController controller;

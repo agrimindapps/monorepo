@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/riverpod_providers/plants_providers.dart'
+import '../../../../core/providers/plants_providers.dart'
     show ViewMode;
 
 class PlantsAppBar extends StatelessWidget {

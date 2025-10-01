@@ -1,4 +1,6 @@
+import 'package:core/core.dart' show UserEntity;
 import 'package:flutter/foundation.dart';
+
 import '../../infrastructure/services/auth_service.dart';
 
 /// Helper para testar workflows de gerenciamento de perfil em desenvolvimento
@@ -20,11 +22,11 @@ class ProfileManagementTestHelper {
           (failure) {
             debugPrint('❌ Profile update failed: ${failure.message}');
           },
-          (updatedUser) {
+          (UserEntity updatedUser) {
             debugPrint('✅ Profile updated successfully');
-            debugPrint('   • Name: ${updatedUser.name}');
+            debugPrint('   • ID: ${updatedUser.id}');
+            debugPrint('   • Name: ${updatedUser.displayName ?? 'N/A'}');
             debugPrint('   • Email: ${updatedUser.email}');
-            debugPrint('   • Avatar: ${updatedUser.avatarUrl ?? 'None'}');
           },
         );
       } catch (e) {

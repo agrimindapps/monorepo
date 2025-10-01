@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/adapters/network_info_adapter.dart';
+import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/repositories/tasks_repository.dart';

@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
 // Core Repository (Hive implementation)
-import '../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../core/data/repositories/fitossanitario_hive_repository.dart';
 // Data
 import '../data/repositories/defensivos_repository_impl.dart';
 // Domain

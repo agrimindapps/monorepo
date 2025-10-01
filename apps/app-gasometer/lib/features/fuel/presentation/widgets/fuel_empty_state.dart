@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
+import '../../../../core/widgets/enhanced_empty_state.dart';
 
 /// Reusable fuel empty state widget following SOLID principles
 /// 

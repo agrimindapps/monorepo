@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/design/design_tokens.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';

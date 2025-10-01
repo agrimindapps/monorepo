@@ -2,10 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide getIt;
 
 import 'core/database/hive_config.dart';
-import 'core/di/injection_container.dart' as di;
+import 'core/di/injection.dart';
 import 'core/services/navigation_service.dart' as local_nav;
 import 'core/services/notification_actions_service.dart';
 import 'core/theme/app_theme.dart';
@@ -15,10 +15,10 @@ import 'infrastructure/services/analytics_service.dart';
 import 'infrastructure/services/crashlytics_service.dart';
 import 'infrastructure/services/notification_service.dart';
 import 'infrastructure/services/performance_service.dart';
-import 'presentation/pages/home_page.dart';
-import 'presentation/pages/promotional_page.dart';
-import 'presentation/providers/theme_provider.dart';
-import 'presentation/widgets/auth_guard.dart';
+import 'features/tasks/presentation/home_page.dart';
+import 'features/premium/presentation/promotional_page.dart';
+import 'features/tasks/presentation/providers/theme_provider.dart';
+import 'shared/widgets/auth_guard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +43,7 @@ void main() async {
   await HiveConfig.initialize();
 
   // Inicializar Dependency Injection
-  await di.init();
+  await configureDependencies();
 
   // Inicializar serviços Firebase
   await _initializeFirebaseServices();
@@ -66,10 +66,10 @@ void main() async {
 Future<void> _initializeFirebaseServices() async {
   try {
     // Obter serviços do DI container
-    final analyticsService = di.sl<TaskManagerAnalyticsService>();
-    final crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
-    final performanceService = di.sl<TaskManagerPerformanceService>();
-    final notificationService = di.sl<TaskManagerNotificationService>();
+    final analyticsService = getIt<TaskManagerAnalyticsService>();
+    final crashlyticsService = getIt<TaskManagerCrashlyticsService>();
+    final performanceService = getIt<TaskManagerPerformanceService>();
+    final notificationService = getIt<TaskManagerNotificationService>();
 
     // Configurar contexto inicial do Crashlytics
     await crashlyticsService.setTaskManagerContext(

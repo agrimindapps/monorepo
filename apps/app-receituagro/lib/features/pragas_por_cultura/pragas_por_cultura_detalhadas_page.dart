@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/extensions/diagnostico_detalhado_extension.dart';
-import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/data/repositories/cultura_hive_repository.dart';
 import '../../core/services/diagnostico_integration_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas/widgets/praga_cultura_tab_bar_widget.dart';

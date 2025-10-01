@@ -5,11 +5,11 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/riverpod_providers/auth_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
 // Plants providers now imported from Riverpod - using plants_providers.dart
-import '../../../../core/riverpod_providers/plants_providers.dart'
+import '../../../../core/providers/plants_providers.dart'
     show ViewMode, SortBy;
-import '../../../../core/riverpod_providers/plants_providers.dart'
+import '../../../../core/providers/plants_providers.dart'
     as riverpod_plants;
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';

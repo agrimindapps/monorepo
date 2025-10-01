@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/validated_dropdown_field.dart';
+import '../../../../core/widgets/validated_dropdown_field.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../domain/entities/expense_entity.dart';
 

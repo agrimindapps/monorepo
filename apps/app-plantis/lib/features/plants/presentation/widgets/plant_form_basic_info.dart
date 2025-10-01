@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/riverpod_providers/solid_providers.dart';
-import '../../../../core/state/plant_form_state_manager.dart';
+import '../../../../core/providers/solid_providers.dart';
+import '../../../../core/providers/state/plant_form_state_manager.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';

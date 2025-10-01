@@ -32,7 +32,21 @@ class CorePackageIntegration {
   static Future<void> initializeAuthServices() async {
     await _registerAuthServices();
     await _registerAnalyticsServices();
+    await _registerConnectivityServices(); // Added for EnhancedConnectivityService
     await _registerReceitaAgroAuthServices();
+  }
+
+  /// Register connectivity services needed for Sprint 1
+  static Future<void> _registerConnectivityServices() async {
+    // Enhanced Connectivity Service (needed by main.dart initialization)
+    try {
+      _sl.registerLazySingleton<core.EnhancedConnectivityService>(
+        () => core.EnhancedConnectivityService(),
+      );
+      if (kDebugMode) print('✅ Core Package: Enhanced Connectivity Service registered');
+    } catch (e) {
+      if (kDebugMode) print('❌ Core Package: Enhanced Connectivity Service registration failed - $e');
+    }
   }
 
   /// Register Core Package repositories (primary integration layer)
@@ -389,28 +403,8 @@ class CorePackageIntegration {
       if (kDebugMode) print('❌ Core Package: Firebase Crashlytics Service registration failed - $e');
     }
 
-    // ReceitaAgro Enhanced Analytics Provider (this provides the ReceitaAgroAnalyticsService alias)
-    try {
-      _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
-        () => ReceitaAgroEnhancedAnalyticsProvider(
-          analyticsRepository: _sl<core.IAnalyticsRepository>(),
-          crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
-        ),
-      );
-      if (kDebugMode) print('✅ ReceitaAgro: Enhanced Analytics Provider registered');
-    } catch (e) {
-      if (kDebugMode) print('❌ ReceitaAgro: Enhanced Analytics Provider registration failed - $e');
-    }
-
-    // Register the alias for backward compatibility
-    try {
-      _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-        () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
-      );
-      if (kDebugMode) print('✅ ReceitaAgro: Analytics Service alias registered');
-    } catch (e) {
-      if (kDebugMode) print('❌ ReceitaAgro: Analytics Service alias registration failed - $e');
-    }
+    // ReceitaAgro Enhanced Analytics Provider will be registered in _registerReceitaAgroAuthServices
+    // to avoid duplicate registration
   }
 
   /// Register ReceitaAgro-specific auth services
@@ -433,8 +427,17 @@ class CorePackageIntegration {
       rethrow; // Re-throw to see the actual error
     }
 
-    // Note: ReceitaAgroAnalyticsService is now registered in _registerAnalyticsServices()
-    // No need for alias registration here
+    // Register the alias for backward compatibility
+    try {
+      if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
+        _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
+          () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
+        );
+        if (kDebugMode) print('✅ ReceitaAgro: Analytics Service alias registered');
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ ReceitaAgro: Analytics Service alias registration failed - $e');
+    }
 
     // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)
     if (!_sl.isRegistered<ReceitaAgroAuthProvider>()) {

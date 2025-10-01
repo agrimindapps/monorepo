@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../data/adapters/task_priority_adapter.dart';
-import '../../data/adapters/task_status_adapter.dart';
-import '../../data/models/task_model.dart';
-import '../../data/models/user_model.dart';
+import '../services/task_priority_adapter.dart';
+import '../services/task_status_adapter.dart';
+import '../../features/tasks/data/task_model.dart';
+import '../../features/auth/data/user_model.dart';
 
 class HiveConfig {
   // Type IDs para novos adapters

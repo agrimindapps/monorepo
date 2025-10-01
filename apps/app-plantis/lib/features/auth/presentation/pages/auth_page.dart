@@ -9,7 +9,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 
-import '../../../../core/riverpod_providers/auth_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';

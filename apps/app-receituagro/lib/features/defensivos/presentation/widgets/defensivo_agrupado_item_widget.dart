@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/defensivo_agrupado_item_model.dart';
-import '../../models/defensivos_agrupados_category.dart';
-import '../../models/defensivos_agrupados_view_mode.dart';
+import '../../data/defensivo_agrupado_item_model.dart';
+import '../../data/defensivos_agrupados_category.dart';
+import '../../data/defensivos_agrupados_view_mode.dart';
 
 class DefensivoAgrupadoItemWidget extends StatelessWidget {
   final DefensivoAgrupadoItemModel item;

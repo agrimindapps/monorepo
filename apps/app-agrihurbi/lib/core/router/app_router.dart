@@ -17,7 +17,7 @@ import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashbo
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../riverpod_providers/providers.dart';
+import '../providers/providers.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = '/login';

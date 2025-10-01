@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/praga_view_mode.dart';
+import '../data/praga_view_mode.dart';
 
 class PragaCulturaSearchFieldWidget extends StatefulWidget {
   final TextEditingController controller;

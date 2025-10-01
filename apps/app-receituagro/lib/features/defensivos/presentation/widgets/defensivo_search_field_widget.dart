@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/defensivo_view_mode.dart';
+import '../../data/defensivo_view_mode.dart';
 
 class DefensivoSearchFieldWidget extends StatefulWidget {
   final TextEditingController controller;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/defensivos_agrupados_view_mode.dart';
+import '../../data/defensivos_agrupados_view_mode.dart';
 
 class DefensivosAgrupadosLoadingSkeletonWidget extends StatefulWidget {
   final DefensivosAgrupadosViewMode viewMode;

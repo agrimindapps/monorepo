@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/forms/forms.dart';
+import '../../../../core/validation/forms.dart';
 import '../../domain/entities/vehicle_entity.dart';
 
 /// Form configuration for vehicle registration following SOLID principles

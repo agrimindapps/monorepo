@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/design/design_tokens.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../providers/home_defensivos_provider.dart';
 
 /// Error state component for Defensivos home page.

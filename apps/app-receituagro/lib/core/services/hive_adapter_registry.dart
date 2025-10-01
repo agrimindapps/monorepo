@@ -1,16 +1,16 @@
 
 import 'package:core/core.dart';
 
-import '../models/comentario_hive.dart';
-import '../models/cultura_hive.dart';
-import '../models/diagnostico_hive.dart';
-import '../models/favorito_item_hive.dart';
-import '../models/fitossanitario_hive.dart';
-import '../models/fitossanitario_info_hive.dart';
-import '../models/plantas_inf_hive.dart';
-import '../models/pragas_hive.dart';
-import '../models/pragas_inf_hive.dart';
-import '../models/premium_status_hive.dart';
+import '../data/models/comentario_hive.dart';
+import '../data/models/cultura_hive.dart';
+import '../data/models/diagnostico_hive.dart';
+import '../data/models/favorito_item_hive.dart';
+import '../data/models/fitossanitario_hive.dart';
+import '../data/models/fitossanitario_info_hive.dart';
+import '../data/models/plantas_inf_hive.dart';
+import '../data/models/pragas_hive.dart';
+import '../data/models/pragas_inf_hive.dart';
+import '../data/models/premium_status_hive.dart';
 
 /// Registry centralizado para registro de todos os adapters Hive
 /// Responsável por registrar todos os type adapters necessários

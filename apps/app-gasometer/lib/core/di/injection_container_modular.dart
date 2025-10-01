@@ -2,7 +2,7 @@ import 'package:get_it/get_it.dart';
 
 import '../storage/hive_service.dart';
 import 'di_module.dart';
-import 'injectable_config.dart';
+import 'injection.dart';
 import 'modules/core_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
@@ -35,7 +35,7 @@ class ModularInjectionContainer {
       // Initialize injectable dependencies AFTER core modules
       // (now EnhancedAnalyticsService is available for GasometerAnalyticsService)
       print('📦 Configuring injectable dependencies...');
-      await configureDependencies(_getIt);
+      await configureDependencies();
 
       print('✅ GasOMeter dependencies initialized successfully');
     } catch (e, stackTrace) {

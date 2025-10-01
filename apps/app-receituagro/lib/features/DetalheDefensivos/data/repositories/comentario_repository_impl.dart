@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 
 import '../../../../core/utils/typedef.dart';
 import '../../../comentarios/domain/entities/comentario_entity.dart';
-import '../../../comentarios/models/comentario_model.dart';
-import '../../../comentarios/services/comentarios_service.dart';
+import '../../../comentarios/data/comentario_model.dart';
+import '../../../comentarios/domain/comentarios_service.dart';
 import '../../domain/repositories/comentario_repository.dart';
 
 /// Implementação do repositório de comentários

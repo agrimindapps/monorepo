@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../core/monitoring/advanced_health_monitoring_service.dart';
+import '../../core/analytics/advanced_health_monitoring_service.dart';
 
 /// Error tracking dashboard for monitoring system health and issues
 class ErrorTrackingDashboard extends StatefulWidget {

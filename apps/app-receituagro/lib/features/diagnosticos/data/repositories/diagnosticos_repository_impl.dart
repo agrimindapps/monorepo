@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../../../core/repositories/diagnostico_hive_repository.dart';
+import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
 import '../mappers/diagnostico_mapper.dart';

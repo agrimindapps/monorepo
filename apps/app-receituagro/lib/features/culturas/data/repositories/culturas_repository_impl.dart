@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../../../core/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/repositories/i_culturas_repository.dart';
 import '../mappers/cultura_mapper.dart';

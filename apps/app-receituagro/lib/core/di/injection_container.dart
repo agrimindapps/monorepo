@@ -10,14 +10,14 @@ import 'package:flutter/foundation.dart';
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
-import '../../features/comentarios/services/comentarios_service.dart';
+import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
 import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
 import '../../features/favoritos/favoritos_di.dart';
-import '../../features/favoritos/services/favoritos_cache_service.dart';
-import '../../features/favoritos/services/favoritos_navigation_service.dart';
+import '../../features/favoritos/domain/favoritos_cache_service.dart';
+import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/pragas/di/pragas_di.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
@@ -25,16 +25,16 @@ import '../interfaces/i_premium_service.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../providers/feature_flags_provider.dart';
 import '../providers/remote_config_provider.dart';
-import '../repositories/comentarios_hive_repository.dart';
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/favoritos_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/plantas_inf_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/pragas_inf_hive_repository.dart';
-import '../repositories/premium_hive_repository.dart';
+import '../data/repositories/comentarios_hive_repository.dart';
+import '../data/repositories/cultura_hive_repository.dart';
+import '../data/repositories/diagnostico_hive_repository.dart';
+import '../data/repositories/favoritos_hive_repository.dart';
+import '../data/repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/fitossanitario_info_hive_repository.dart';
+import '../data/repositories/plantas_inf_hive_repository.dart';
+import '../data/repositories/pragas_hive_repository.dart';
+import '../data/repositories/pragas_inf_hive_repository.dart';
+import '../data/repositories/premium_hive_repository.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
 import '../services/device_identity_service.dart';
@@ -64,28 +64,36 @@ Future<void> init() async {
   
   // ===== DEVICE MANAGEMENT =====
   // Register FirebaseDeviceService first (Web-safe)
-  sl.registerLazySingleton<core.FirebaseDeviceService>(
-    () => core.FirebaseDeviceService(),
-  );
-  
+  if (!sl.isRegistered<core.FirebaseDeviceService>()) {
+    sl.registerLazySingleton<core.FirebaseDeviceService>(
+      () => core.FirebaseDeviceService(),
+    );
+  }
+
   // Configure device management dependencies
   await DeviceManagementDI.registerDependencies(sl);
-  
+
   // ===== ENHANCED NAVIGATION =====
   // Register enhanced core navigation services
-  sl.registerLazySingleton<core.NavigationConfigurationService>(
-    () => core.NavigationConfigurationService(),
-  );
+  if (!sl.isRegistered<core.NavigationConfigurationService>()) {
+    sl.registerLazySingleton<core.NavigationConfigurationService>(
+      () => core.NavigationConfigurationService(),
+    );
+  }
 
-  sl.registerLazySingleton<core.NavigationAnalyticsService>(
-    () => core.NavigationAnalyticsService(
-      sl<core.FirebaseAnalyticsService>(),
-    ),
-  );
+  if (!sl.isRegistered<core.NavigationAnalyticsService>()) {
+    sl.registerLazySingleton<core.NavigationAnalyticsService>(
+      () => core.NavigationAnalyticsService(
+        sl<core.FirebaseAnalyticsService>(),
+      ),
+    );
+  }
 
-  sl.registerLazySingleton<core.EnhancedNavigationService>(
-    () => core.EnhancedNavigationService(),
-  );
+  if (!sl.isRegistered<core.EnhancedNavigationService>()) {
+    sl.registerLazySingleton<core.EnhancedNavigationService>(
+      () => core.EnhancedNavigationService(),
+    );
+  }
   
   // ===== DEVICE IDENTITY SERVICE =====
   // Register DeviceIdentityService before Core Package Integration
@@ -116,9 +124,11 @@ Future<void> init() async {
   // Moved after auth services initialization to ensure dependencies are available
   
   // Unified Sync Manager (from core package)
-  sl.registerLazySingleton<core.UnifiedSyncManager>(
-    () => core.UnifiedSyncManager.instance,
-  );
+  if (!sl.isRegistered<core.UnifiedSyncManager>()) {
+    sl.registerLazySingleton<core.UnifiedSyncManager>(
+      () => core.UnifiedSyncManager.instance,
+    );
+  }
 
   // NOTE: ReceitaAgroSyncConfig.configure() is now called in main.dart
   // to avoid race conditions and ensure proper initialization order
@@ -136,10 +146,14 @@ Future<void> init() async {
   // Register after all dependencies are confirmed available
   
   // Box Registry Service and Core Storage Service
-  sl.registerLazySingleton<core.IBoxRegistryService>(() => core.BoxRegistryService());
-  sl.registerLazySingleton<core.HiveStorageService>(
-    () => core.HiveStorageService(sl<core.IBoxRegistryService>()),
-  );
+  if (!sl.isRegistered<core.IBoxRegistryService>()) {
+    sl.registerLazySingleton<core.IBoxRegistryService>(() => core.BoxRegistryService());
+  }
+  if (!sl.isRegistered<core.HiveStorageService>()) {
+    sl.registerLazySingleton<core.HiveStorageService>(
+      () => core.HiveStorageService(sl<core.IBoxRegistryService>()),
+    );
+  }
 
   // Analytics Repository - Now registered via Core Package Integration
   // sl.registerLazySingleton<IAnalyticsRepository>(
@@ -152,9 +166,11 @@ Future<void> init() async {
   // );
 
   // Subscription Repository (RevenueCat) - Using Core Package
-  sl.registerLazySingleton<core.ISubscriptionRepository>(
-    () => core.RevenueCatService(),
-  );
+  if (!sl.isRegistered<core.ISubscriptionRepository>()) {
+    sl.registerLazySingleton<core.ISubscriptionRepository>(
+      () => core.RevenueCatService(),
+    );
+  }
 
   // App Rating Repository - Using Core Package
   sl.registerLazySingleton<core.IAppRatingRepository>(() => core.AppRatingService(
@@ -195,18 +211,30 @@ Future<void> init() async {
   // Storage Service - Removed (using Core Package EnhancedStorageService)
   
   // Enhanced Storage Service from Core Package
-  try {
-    sl.registerLazySingleton<core.EnhancedStorageService>(
-      () => core.EnhancedStorageService(),
-    );
-  } catch (e) {
-    if (kDebugMode) print('EnhancedStorageService registration failed: $e');
+  if (!sl.isRegistered<core.EnhancedStorageService>()) {
+    try {
+      sl.registerLazySingleton<core.EnhancedStorageService>(
+        () => core.EnhancedStorageService(),
+      );
+    } catch (e) {
+      if (kDebugMode) print('EnhancedStorageService registration failed: $e');
+    }
   }
-  
+
   // Interface do core para compatibilidade
-  sl.registerLazySingleton<core.ILocalStorageRepository>(
-    () => sl<core.HiveStorageService>(),
-  );
+  // Skip on Web platform due to Hive limitations
+  if (!kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
+    try {
+      sl.registerLazySingleton<core.ILocalStorageRepository>(
+        () => sl<core.HiveStorageService>(),
+      );
+      if (kDebugMode) print('✅ ILocalStorageRepository registered successfully');
+    } catch (e) {
+      if (kDebugMode) print('⚠️ ILocalStorageRepository registration failed: $e');
+    }
+  } else if (kIsWeb && kDebugMode) {
+    print('⚠️ ILocalStorageRepository skipped on Web platform (Hive limitations)');
+  }
   
   // Navigation Service - Enhanced version via Core Package
   // Basic navigation service is already registered above as EnhancedNavigationService

@@ -1,4 +1,4 @@
-import '../../../core/patterns/observer_pattern.dart';
+import '../../../core/utils/observer_pattern.dart';
 import '../domain/entities/vaccine.dart';
 
 /// Service responsible for vaccine-related notifications following SOLID principles

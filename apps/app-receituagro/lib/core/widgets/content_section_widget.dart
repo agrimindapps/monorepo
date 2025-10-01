@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../design/design_tokens.dart';
+import '../theme/design_tokens.dart';
 
 /// Widget padronizado para seções de conteúdo nas páginas home
 ///

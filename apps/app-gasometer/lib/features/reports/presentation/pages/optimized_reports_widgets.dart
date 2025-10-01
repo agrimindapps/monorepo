@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../providers/reports_provider.dart';

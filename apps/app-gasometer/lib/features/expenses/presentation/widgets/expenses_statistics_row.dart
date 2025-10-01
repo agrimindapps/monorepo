@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
 
 /// Widget para exibir estatísticas das despesas em formato de cartões
 class ExpensesStatisticsRow extends StatelessWidget {

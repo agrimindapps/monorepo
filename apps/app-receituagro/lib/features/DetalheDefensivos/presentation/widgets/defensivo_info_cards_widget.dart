@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/design/spacing_tokens.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 
 /// Widget para cards de informações do defensivo

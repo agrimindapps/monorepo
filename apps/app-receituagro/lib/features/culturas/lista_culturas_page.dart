@@ -4,12 +4,12 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/di/injection_container.dart';
-import '../../core/models/cultura_hive.dart';
-import '../../core/repositories/cultura_hive_repository.dart';
+import '../../core/data/models/cultura_hive.dart';
+import '../../core/data/repositories/cultura_hive_repository.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
-import 'models/cultura_view_mode.dart';
+import 'data/cultura_view_mode.dart';
 import 'widgets/cultura_item_widget.dart';
 import 'widgets/cultura_search_field.dart';
 import 'widgets/loading_skeleton_widget.dart';

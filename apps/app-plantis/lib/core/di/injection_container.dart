@@ -37,9 +37,9 @@ import '../../features/settings/presentation/providers/backup_settings_provider.
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
-import '../adapters/network_info_adapter.dart';
-import '../adapters/plantis_image_service_adapter.dart';
-import '../adapters/plantis_storage_adapter.dart';
+import '../data/adapters/network_info_adapter.dart';
+import '../data/adapters/plantis_image_service_adapter.dart';
+import '../data/adapters/plantis_storage_adapter.dart';
 import '../auth/auth_state_notifier.dart';
 import '../config/security_config.dart';
 import '../data/repositories/backup_repository.dart';

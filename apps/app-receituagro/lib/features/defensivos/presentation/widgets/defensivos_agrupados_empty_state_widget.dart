@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/defensivos_agrupados_category.dart';
+import '../../data/defensivos_agrupados_category.dart';
 
 class DefensivosAgrupadosEmptyStateWidget extends StatelessWidget {
   final DefensivosAgrupadosCategory category;

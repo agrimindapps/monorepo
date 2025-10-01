@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
-import '../../domain/entities/task_entity.dart';
+
+import '../../features/tasks/domain/task_entity.dart';
 
 class SampleData {
   static const uuid = Uuid();

@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/base_sync_entity.dart';
 import '../../domain/repositories/i_local_storage_repository.dart';
@@ -82,6 +83,17 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   Future<Either<Failure, void>> initialize() async {
     try {
       if (_isInitialized) return const Right(null);
+
+      // Skip initialization on Web platform due to Hive limitations
+      if (kIsWeb) {
+        if (kDebugMode) {
+          developer.log(
+            '⚠️ SyncFirebaseService: Skipping initialization on Web platform (Hive limitations)',
+            name: 'SyncFirebaseService',
+          );
+        }
+        return Left(UnknownFailure('SyncFirebaseService not supported on Web platform'));
+      }
 
       // Inicializar dependências
       _localStorage = getIt<ILocalStorageRepository>();

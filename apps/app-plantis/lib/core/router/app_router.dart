@@ -20,12 +20,12 @@ import '../../features/premium/presentation/pages/premium_subscription_page.dart
 import '../../features/settings/presentation/pages/backup_settings_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
-import '../../presentation/pages/landing_page.dart';
-import '../../presentation/pages/settings_page.dart';
+import '../../features/home/pages/landing_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
 import '../di/injection_container.dart';
-import '../riverpod_providers/auth_providers.dart';
+import '../providers/auth_providers.dart';
 
 class AppRouter {
   static const String login = '/login';

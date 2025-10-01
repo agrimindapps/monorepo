@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/presentation/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
 
 /// Widget para estado de erro da listagem de despesas

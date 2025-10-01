@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
-import '../../presentation/pages/home_page.dart';
-import '../../presentation/pages/task_detail_page.dart';
+import '../../features/tasks/presentation/home_page.dart';
+import '../../features/tasks/presentation/task_detail_page.dart';
 import '../providers/service_providers.dart';
 
 /// Serviço de navegação para gerenciar deep linking e navegação por notificações

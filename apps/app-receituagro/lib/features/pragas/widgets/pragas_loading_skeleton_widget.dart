@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/praga_view_mode.dart';
+import '../data/praga_view_mode.dart';
 
 class PragasLoadingSkeletonWidget extends StatefulWidget {
   final PragaViewMode viewMode;

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../models/fitossanitario_hive.dart';
+import '../data/models/fitossanitario_hive.dart';
 
 /// Service for random selection and filtering logic
 /// Updated to implement proper "new items" logic based on createdAt

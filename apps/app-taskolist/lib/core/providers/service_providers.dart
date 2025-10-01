@@ -1,26 +1,26 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide getIt;
 
-import '../../domain/entities/task_entity.dart';
-import '../../domain/usecases/get_tasks.dart';
-import '../../domain/usecases/update_task.dart';
+import '../../features/tasks/domain/get_tasks.dart';
+import '../../features/tasks/domain/task_entity.dart';
+import '../../features/tasks/domain/update_task.dart';
 import '../../infrastructure/services/notification_service.dart';
-import '../di/injection_container.dart' as di;
+import '../di/injection.dart' as di;
 
 /// Provider para UpdateTask use case
 final updateTaskProvider = Provider<UpdateTask>((ref) {
-  return di.sl<UpdateTask>();
+  return di.getIt<UpdateTask>();
 });
 
-/// Provider para GetTasks use case  
-final getTasksProvider = Provider<GetTasks>((ref) {
-  return di.sl<GetTasks>();
+/// Provider para GetTasks use case
+final getTasksUseCaseProvider = Provider<GetTasks>((ref) {
+  return di.getIt<GetTasks>();
 });
 
 /// Provider simplificado para tasks (usando FutureProvider)
 final tasksProvider = FutureProvider<List<TaskEntity>>((ref) async {
-  final getTasks = ref.read(getTasksProvider);
+  final getTasks = ref.read(getTasksUseCaseProvider);
   final result = await getTasks(const GetTasksParams());
-  
+
   return result.fold(
     (failure) => throw Exception(failure.toString()),
     (tasks) => tasks,
@@ -29,5 +29,5 @@ final tasksProvider = FutureProvider<List<TaskEntity>>((ref) async {
 
 /// Provider para NotificationService
 final notificationServiceProvider = Provider<TaskManagerNotificationService>((ref) {
-  return di.sl<TaskManagerNotificationService>();
+  return di.getIt<TaskManagerNotificationService>();
 });

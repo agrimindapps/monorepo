@@ -5,7 +5,7 @@ import '../../../../core/widgets/modern_header_widget.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/entities/defensivo_group_entity.dart';
-import '../../models/defensivo_view_mode.dart';
+import '../../data/defensivo_view_mode.dart';
 import '../providers/defensivos_drill_down_provider.dart';
 import '../providers/defensivos_unificado_provider.dart';
 import '../widgets/comparacao_defensivos_widget.dart';

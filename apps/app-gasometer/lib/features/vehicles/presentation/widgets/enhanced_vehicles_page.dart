@@ -6,9 +6,9 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/responsive_constants.dart';
-import '../../../../core/presentation/widgets/enhanced_empty_state.dart';
-import '../../../../core/presentation/widgets/responsive_content_area.dart';
-import '../../../../core/presentation/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/enhanced_empty_state.dart';
+import '../../../../core/widgets/responsive_content_area.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../pages/add_vehicle_page.dart';

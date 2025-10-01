@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/i_premium_service.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
-import '../../../../core/repositories/favoritos_hive_repository.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/services/premium_status_notifier.dart';
-import '../../../comentarios/models/comentario_model.dart';
-import '../../../comentarios/services/comentarios_service.dart';
+import '../../../comentarios/data/comentario_model.dart';
+import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
 import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
 

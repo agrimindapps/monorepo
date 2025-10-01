@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 
-import '../../domain/entities/notification_stats.dart';
+import '../../features/notifications/presentation/notification_stats.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
 /// Notification service específico do app Task Manager
+@lazySingleton
 class TaskManagerNotificationService {
   final INotificationRepository _notificationRepository;
   final TaskManagerAnalyticsService _analyticsService;

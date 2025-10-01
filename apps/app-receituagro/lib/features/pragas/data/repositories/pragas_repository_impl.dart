@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../../../core/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
 import '../mappers/praga_mapper.dart';

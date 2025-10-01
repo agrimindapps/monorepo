@@ -42,7 +42,7 @@ class Result<T> {
 class GasometerProfileImageService {
 
   GasometerProfileImageService(this._analytics);
-  final AnalyticsService _analytics;
+  final GasometerAnalyticsService _analytics;
 
   /// Processa imagem e converte para base64
   Future<Result<String>> processImageToBase64(File imageFile) async {

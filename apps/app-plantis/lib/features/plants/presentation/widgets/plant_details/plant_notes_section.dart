@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/data/models/comentario_model.dart';
-import '../../../../../core/riverpod_providers/comments_providers.dart';
+import '../../../../../core/providers/comments_providers.dart';
 import '../../../domain/entities/plant.dart';
 
 /// Widget responsável por exibir e gerenciar os comentários/observações da planta

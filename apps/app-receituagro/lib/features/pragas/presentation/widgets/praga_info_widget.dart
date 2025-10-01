@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
-import '../../../../core/design/spacing_tokens.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../providers/detalhe_praga_provider.dart';
 

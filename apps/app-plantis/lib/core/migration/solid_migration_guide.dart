@@ -7,7 +7,7 @@ library;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../riverpod_providers/solid_providers.dart';
+import '../providers/solid_providers.dart';
 
 /// === EXEMPLO DE MIGRAÇÃO GRADUAL ===
 

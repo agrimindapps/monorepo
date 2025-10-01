@@ -15,7 +15,7 @@ library;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../design/spacing_tokens.dart';
+import '../theme/spacing_tokens.dart';
 
 /// Dados de configuração para cada tab
 class TabData {

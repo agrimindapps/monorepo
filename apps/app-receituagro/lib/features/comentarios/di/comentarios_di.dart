@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../../core/repositories/comentarios_hive_repository.dart';
+import '../../../core/data/repositories/comentarios_hive_repository.dart';
 import '../../../core/services/error_handler_service.dart';
 import '../data/repositories/comentarios_repository_impl.dart';
 import '../domain/repositories/i_comentarios_repository.dart';

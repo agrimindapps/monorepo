@@ -9,15 +9,15 @@ export 'domain/entities/user_settings_entity.dart';
 export 'domain/exceptions/settings_exceptions.dart';
 export 'domain/repositories/i_user_settings_repository.dart';
 // Model exports
-export 'models/settings_state.dart';
+export 'data/settings_state.dart';
 // Presentation layer
 export 'presentation/providers/settings_provider.dart';
 export 'presentation/providers/user_settings_provider.dart';
 // Services
-export 'services/device_service.dart';
-export 'services/navigation_service.dart';
-export 'services/premium_service.dart';
-export 'services/theme_service.dart';
+export 'domain/device_service.dart';
+export 'domain/navigation_service.dart';
+export 'domain/premium_service.dart';
+export 'domain/theme_service.dart';
 // Note: Use cases não são exportados para evitar duplicação de exceções
 // Importe diretamente quando necessário
 

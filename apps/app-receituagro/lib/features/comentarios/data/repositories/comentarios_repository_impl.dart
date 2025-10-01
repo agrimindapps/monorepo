@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/repositories/comentarios_hive_repository.dart';
+import '../../../../core/data/repositories/comentarios_hive_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
-import '../../models/comentario_model.dart';
+import '../../data/comentario_model.dart';
 
 /// Implementation of IComentariosRepository using Hive local storage.
 /// This is the data layer implementation that handles actual data persistence.

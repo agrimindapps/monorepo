@@ -1117,7 +1117,7 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref
     deleteAccount: sl<DeleteAccount>(),
     updateProfile: sl<UpdateProfile>(),
     sendPasswordReset: sl<SendPasswordReset>(),
-    analytics: sl<AnalyticsService>(),
+    analytics: sl<GasometerAnalyticsService>(),
     platformService: sl<PlatformService>(),
     rateLimiter: sl<AuthRateLimiter>(),
     authLocalDataSource: sl<AuthLocalDataSource>(),

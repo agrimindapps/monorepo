@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
-import '../../../../core/design/design_tokens.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/responsive_content_wrapper.dart';
 import '../providers/home_pragas_provider.dart';

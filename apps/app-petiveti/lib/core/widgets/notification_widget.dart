@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../patterns/observer_pattern.dart';
+import '../utils/observer_pattern.dart';
 
 /// Widget that displays notifications using the Observer pattern
 /// 

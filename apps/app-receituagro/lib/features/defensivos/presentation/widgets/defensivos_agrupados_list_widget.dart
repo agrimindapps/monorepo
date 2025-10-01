@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../models/defensivo_agrupado_item_model.dart';
-import '../../models/defensivos_agrupados_category.dart';
-import '../../models/defensivos_agrupados_state.dart';
-import '../../models/defensivos_agrupados_view_mode.dart';
+import '../../data/defensivo_agrupado_item_model.dart';
+import '../../data/defensivos_agrupados_category.dart';
+import '../../data/defensivos_agrupados_state.dart';
+import '../../data/defensivos_agrupados_view_mode.dart';
 import 'defensivo_agrupado_item_widget.dart';
 import 'defensivos_agrupados_empty_state_widget.dart';
 import 'defensivos_agrupados_loading_skeleton_widget.dart';

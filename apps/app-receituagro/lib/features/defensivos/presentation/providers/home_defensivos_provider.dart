@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/models/fitossanitario_hive.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import 'defensivos_history_provider.dart';
 import 'defensivos_statistics_provider.dart';
 import 'home_defensivos_ui_provider.dart';

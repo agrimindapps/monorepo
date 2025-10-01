@@ -1,4 +1,4 @@
-import '../models/pragas_hive.dart';
+import '../data/models/pragas_hive.dart';
 
 /// Extensão para PragasHive com métodos display compatíveis com PragaModel
 extension PragasHiveExtension on PragasHive {

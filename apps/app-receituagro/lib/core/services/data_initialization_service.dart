@@ -2,13 +2,13 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/plantas_inf_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/pragas_inf_hive_repository.dart';
+import '../data/repositories/cultura_hive_repository.dart';
+import '../data/repositories/diagnostico_hive_repository.dart';
+import '../data/repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/fitossanitario_info_hive_repository.dart';
+import '../data/repositories/plantas_inf_hive_repository.dart';
+import '../data/repositories/pragas_hive_repository.dart';
+import '../data/repositories/pragas_inf_hive_repository.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
 /// Orquestra o carregamento de JSONs e populacião das Hive boxes

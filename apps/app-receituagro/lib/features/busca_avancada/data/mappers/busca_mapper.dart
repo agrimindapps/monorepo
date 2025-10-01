@@ -1,7 +1,7 @@
-import '../../../../core/models/cultura_hive.dart';
-import '../../../../core/models/diagnostico_hive.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
-import '../../../../core/models/pragas_hive.dart';
+import '../../../../core/data/models/cultura_hive.dart';
+import '../../../../core/data/models/diagnostico_hive.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/models/pragas_hive.dart';
 import '../../domain/entities/busca_entity.dart';
 
 /// Mapper para conversão entre diferentes modelos e BuscaResultEntity

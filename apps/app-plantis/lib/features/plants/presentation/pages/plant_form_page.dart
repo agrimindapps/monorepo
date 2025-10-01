@@ -4,10 +4,10 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/riverpod_providers/plants_providers.dart'
+import '../../../../core/providers/plants_providers.dart'
     as riverpod_plants;
-import '../../../../core/riverpod_providers/solid_providers.dart';
-import '../../../../core/state/plant_form_state_manager.dart';
+import '../../../../core/providers/solid_providers.dart';
+import '../../../../core/providers/state/plant_form_state_manager.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';

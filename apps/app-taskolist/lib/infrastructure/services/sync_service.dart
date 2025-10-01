@@ -4,19 +4,19 @@ import 'package:core/core.dart' hide Failure;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../core/di/injection_container.dart' as di;
 import '../../core/errors/failures.dart';
-import '../../domain/entities/task_entity.dart';
-import '../../domain/repositories/task_repository.dart';
+import '../../features/tasks/domain/task_entity.dart';
+import '../../features/tasks/domain/task_repository.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
 /// Serviço de sincronização do Task Manager
 /// Integra dados locais com o Firebase para usuários Premium
+@lazySingleton
 class TaskManagerSyncService {
-  late final TaskManagerAnalyticsService _analyticsService;
-  late final TaskManagerCrashlyticsService _crashlyticsService;
-  late final TaskRepository _taskRepository;
+  final TaskManagerAnalyticsService _analyticsService;
+  final TaskManagerCrashlyticsService _crashlyticsService;
+  final TaskRepository _taskRepository;
 
   // Stream controllers para progresso
   final StreamController<SyncProgress> _progressController = StreamController<SyncProgress>.broadcast();
@@ -25,12 +25,12 @@ class TaskManagerSyncService {
   // Estado do sync
   bool _isSyncing = false;
   Timer? _autoSyncTimer;
-  
-  TaskManagerSyncService() {
-    _analyticsService = di.sl<TaskManagerAnalyticsService>();
-    _crashlyticsService = di.sl<TaskManagerCrashlyticsService>();
-    _taskRepository = di.sl<TaskRepository>();
-    
+
+  TaskManagerSyncService(
+    this._analyticsService,
+    this._crashlyticsService,
+    this._taskRepository,
+  ) {
     _initializeAutoSync();
   }
 
@@ -191,7 +191,7 @@ class TaskManagerSyncService {
   Future<void> _syncInBackground() async {
     try {
       // Verificar se usuário está logado
-      final authService = di.sl<IAuthRepository>();
+      final authService = getIt<IAuthRepository>();
       final currentUser = await authService.currentUser.first;
       
       if (currentUser == null) return;

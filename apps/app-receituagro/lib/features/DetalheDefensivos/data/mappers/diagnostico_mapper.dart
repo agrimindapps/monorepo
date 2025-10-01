@@ -1,6 +1,6 @@
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/repositories/cultura_hive_repository.dart';
-import '../../../../core/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart' as diag_entity;
 import '../../domain/entities/diagnostico_entity.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../models/comentario_edit_state.dart';
-import '../../models/comentario_model.dart';
+import '../../data/comentario_edit_state.dart';
+import '../../data/comentario_model.dart';
 import 'comentario_card.dart';
 
 class CommentsListWidget extends StatelessWidget {

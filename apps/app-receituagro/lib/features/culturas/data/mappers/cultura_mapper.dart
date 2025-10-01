@@ -1,6 +1,6 @@
-import '../../../../core/models/cultura_hive.dart';
+import '../../../../core/data/models/cultura_hive.dart';
 import '../../domain/entities/cultura_entity.dart';
-import '../../models/cultura_model.dart';
+import '../../data/cultura_model.dart';
 
 /// Mapper para conversão entre CulturaModel/CulturaHive e CulturaEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas

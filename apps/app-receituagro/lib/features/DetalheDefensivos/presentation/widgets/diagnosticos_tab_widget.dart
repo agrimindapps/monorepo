@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as flutter_provider;
 
-import '../../../../core/design/spacing_tokens.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../providers/detalhe_defensivo_provider.dart';
 import '../providers/diagnosticos_provider.dart';
 import 'diagnosticos_defensivos_components.dart';

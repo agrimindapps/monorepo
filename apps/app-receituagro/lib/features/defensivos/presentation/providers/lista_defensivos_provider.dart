@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
-import '../../models/view_mode.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../data/view_mode.dart';
 
 /// Provider following SOLID principles for Lista Defensivos functionality
 /// Implements Dependency Inversion Principle by injecting repository

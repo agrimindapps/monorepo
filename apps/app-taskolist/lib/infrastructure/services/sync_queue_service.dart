@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 /// Serviço de fila de sincronização para suporte offline
 /// Versão simplificada usando memória para armazenamento temporário
+@lazySingleton
 class TaskManagerSyncQueueService {
   final List<SyncQueueItem> _queue = [];
   

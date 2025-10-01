@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import '../interfaces/validation_result.dart';
-import '../presentation/widgets/validated_form_field.dart';
+import '../widgets/validated_form_field.dart';
 
 /// Sistema de validação centralizada para formulários
 ///

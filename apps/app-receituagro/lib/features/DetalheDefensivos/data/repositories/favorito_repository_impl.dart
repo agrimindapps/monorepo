@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 import '../../../../core/errors/failures.dart' as app_failures;
-import '../../../../core/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/utils/typedef.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/favorito_repository.dart';

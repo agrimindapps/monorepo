@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/favoritos_design_tokens.dart';
-import '../models/favorito_defensivo_model.dart';
+import '../data/favorito_defensivo_model.dart';
 
 class DefensivoFavoritoListItem extends StatelessWidget {
   final FavoritoDefensivoModel defensivo;

@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
-import '../../../../core/models/fitossanitario_hive.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
   final FitossanitarioHive defensivo;

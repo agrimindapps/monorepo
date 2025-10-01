@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/design/design_tokens.dart';
+import '../../core/theme/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import 'domain/entities/praga_entity.dart';
 import 'presentation/pages/detalhe_praga_page.dart';
 import 'domain/usecases/get_pragas_usecase.dart';
-import 'models/praga_view_mode.dart';
+import 'data/praga_view_mode.dart';
 import 'presentation/providers/pragas_provider.dart';
 import 'widgets/praga_card_widget.dart';
 import 'widgets/praga_search_field_widget.dart';

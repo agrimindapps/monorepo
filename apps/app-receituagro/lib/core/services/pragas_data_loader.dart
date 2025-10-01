@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../di/injection_container.dart' as di;
-import '../repositories/pragas_hive_repository.dart';
+import '../data/repositories/pragas_hive_repository.dart';
 
 /// Serviço para carregar dados de pragas dos assets JSON
 class PragasDataLoader {

@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/riverpod_providers/plants_providers.dart';
-import '../../../../core/riverpod_providers/tasks_providers.dart';
+import '../../../../core/providers/plants_providers.dart';
+import '../../../../core/providers/tasks_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';

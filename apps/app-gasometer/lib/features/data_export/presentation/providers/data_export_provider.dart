@@ -17,13 +17,13 @@ class DataExportProvider extends ChangeNotifier {
   DataExportProvider({
     DataExportRepository? repository,
     PlatformExportService? platformService,
-    @factoryParam AnalyticsService? analyticsService,
+    @factoryParam GasometerAnalyticsService? analyticsService,
   }) : _repository = repository ?? DataExportRepositoryImpl(),
        _platformService = platformService ?? PlatformExportServiceFactory.create(),
        _analyticsService = analyticsService;
   final DataExportRepository _repository;
   final PlatformExportService _platformService;
-  final AnalyticsService? _analyticsService;
+  final GasometerAnalyticsService? _analyticsService;
 
   // Estado da exportação
   bool _isExporting = false;

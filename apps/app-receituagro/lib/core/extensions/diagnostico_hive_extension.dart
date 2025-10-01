@@ -1,8 +1,8 @@
 import '../di/injection_container.dart' as di;
-import '../models/diagnostico_hive.dart';
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
+import '../data/models/diagnostico_hive.dart';
+import '../data/repositories/cultura_hive_repository.dart';
+import '../data/repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/pragas_hive_repository.dart';
 
 /// Extensão para DiagnosticoHive com métodos display e formatação
 extension DiagnosticoHiveExtension on DiagnosticoHive {

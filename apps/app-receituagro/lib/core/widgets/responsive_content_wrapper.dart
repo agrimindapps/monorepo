@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../design/spacing_tokens.dart';
+import '../theme/spacing_tokens.dart';
 
 /// Widget wrapper que centraliza o conteúdo e aplica largura máxima de 1120px
 /// para melhorar a experiência em telas maiores

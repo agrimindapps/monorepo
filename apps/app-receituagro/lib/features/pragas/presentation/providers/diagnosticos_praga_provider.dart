@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
 /// Model para diagnóstico usado na UI

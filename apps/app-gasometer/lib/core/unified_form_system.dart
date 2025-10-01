@@ -24,14 +24,14 @@
 library;
 
 // Core Components
-export 'components/unified_date_picker.dart';
-export 'components/unified_form_dialog.dart';
-export 'components/unified_form_field.dart';
-export 'components/unified_form_section.dart';
-export 'components/unified_loading_states.dart';
+export 'widgets/unified_date_picker.dart';
+export 'widgets/unified_form_dialog.dart';
+export 'widgets/unified_form_field.dart';
+export 'widgets/unified_form_section.dart';
+export 'widgets/unified_loading_states.dart';
 
 // Design System
-export 'design/unified_design_tokens.dart';
+export 'theme/unified_design_tokens.dart';
 
 // Mixins
 export 'mixins/rate_limited_submission.dart';

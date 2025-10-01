@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/adapters/network_info_adapter.dart';
+import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';

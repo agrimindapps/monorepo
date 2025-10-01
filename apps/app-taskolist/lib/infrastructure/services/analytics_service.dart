@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 /// Analytics service específico do app Task Manager
+@lazySingleton
 class TaskManagerAnalyticsService {
   final IAnalyticsRepository _analyticsRepository;
 

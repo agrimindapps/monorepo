@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/design/design_tokens.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/praga_image_widget.dart';
-import '../models/praga_cultura_item_model.dart';
-import '../models/praga_view_mode.dart';
+import '../data/praga_cultura_item_model.dart';
+import '../data/praga_view_mode.dart';
 
 class PragaCulturaItemWidget extends StatelessWidget {
   final PragaCulturaItemModel praga;

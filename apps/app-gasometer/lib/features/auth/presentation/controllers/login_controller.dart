@@ -12,14 +12,14 @@ class LoginController extends ChangeNotifier {
 
   LoginController({
     required WidgetRef ref,
-    AnalyticsService? analytics,
+    GasometerAnalyticsService? analytics,
   })  : _ref = ref,
-        _analytics = analytics ?? AnalyticsService() {
+        _analytics = analytics {
     _loadSavedData();
-    _analytics.logScreenView('LoginPage');
+    _analytics?.logScreenView('LoginPage');
   }
   final WidgetRef _ref;
-  final AnalyticsService _analytics;
+  final GasometerAnalyticsService? _analytics;
 
   // Helper getters to access auth state and notifier
   AuthNotifier get _authNotifier => _ref.read(authNotifierProvider.notifier);
@@ -87,7 +87,7 @@ class LoginController extends ChangeNotifier {
   void toggleAuthMode() {
     _isSignUpMode = !_isSignUpMode;
     _clearError();
-    _analytics.logUserAction('auth_mode_toggle', parameters: {
+    _analytics?.logUserAction('auth_mode_toggle', parameters: {
       'mode': _isSignUpMode ? 'signup' : 'login',
     });
     notifyListeners();
@@ -97,7 +97,7 @@ class LoginController extends ChangeNotifier {
   void showRecoveryForm() {
     _showRecoveryForm = true;
     _clearError();
-    _analytics.logUserAction('recovery_form_show');
+    _analytics?.logUserAction('recovery_form_show');
     notifyListeners();
   }
 
@@ -105,7 +105,7 @@ class LoginController extends ChangeNotifier {
   void hideRecoveryForm() {
     _showRecoveryForm = false;
     _clearError();
-    _analytics.logUserAction('recovery_form_hide');
+    _analytics?.logUserAction('recovery_form_hide');
     notifyListeners();
   }
 
@@ -124,7 +124,7 @@ class LoginController extends ChangeNotifier {
   /// Toggle lembrar-me
   void toggleRememberMe() {
     _rememberMe = !_rememberMe;
-    _analytics.logUserAction('remember_me_toggle', parameters: {
+    _analytics?.logUserAction('remember_me_toggle', parameters: {
       'enabled': _rememberMe.toString(),
     });
     notifyListeners();
@@ -149,7 +149,7 @@ class LoginController extends ChangeNotifier {
   void nextSignUpStep() {
     if (canGoToNextStep) {
       _currentSignUpStep++;
-      _analytics.logUserAction('signup_step_next', parameters: {
+      _analytics?.logUserAction('signup_step_next', parameters: {
         'step': _currentSignUpStep.toString(),
       });
       _safeNotifyListeners();
@@ -160,7 +160,7 @@ class LoginController extends ChangeNotifier {
   void previousSignUpStep() {
     if (canGoToPreviousStep) {
       _currentSignUpStep--;
-      _analytics.logUserAction('signup_step_previous', parameters: {
+      _analytics?.logUserAction('signup_step_previous', parameters: {
         'step': _currentSignUpStep.toString(),
       });
       _safeNotifyListeners();
@@ -191,19 +191,19 @@ class LoginController extends ChangeNotifier {
       final authState = _ref.read(authNotifierProvider);
       if (authState.isAuthenticated) {
         await _saveFormData();
-        _analytics.logUserAction('login_success', parameters: {
+        _analytics?.logUserAction('login_success', parameters: {
           'method': 'email',
           'remember_me': _rememberMe.toString(),
         });
       } else if (authState.errorMessage != null) {
         _errorMessage = authState.errorMessage;
-        _analytics.logUserAction('login_failed', parameters: {
+        _analytics?.logUserAction('login_failed', parameters: {
           'error': authState.errorMessage ?? 'unknown',
         });
       }
     } catch (e) {
       _errorMessage = 'Erro inesperado durante o login';
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         StackTrace.current,
         reason: 'Login error',
@@ -238,7 +238,7 @@ class LoginController extends ChangeNotifier {
 
       if (authState.isAuthenticated) {
         await _saveFormData();
-        await _analytics.logUserAction('login_with_sync_success', parameters: {
+        await _analytics?.logUserAction('login_with_sync_success', parameters: {
           'method': 'email_with_sync_simplified',
           'remember_me': _rememberMe.toString(),
         });
@@ -250,7 +250,7 @@ class LoginController extends ChangeNotifier {
         if (kDebugMode) {
           print('❌ LoginController: Login falhou - ${authState.errorMessage}');
         }
-        await _analytics.logUserAction('login_with_sync_failed', parameters: {
+        await _analytics?.logUserAction('login_with_sync_failed', parameters: {
           'error': authState.errorMessage ?? 'unknown',
         });
       } else {
@@ -263,7 +263,7 @@ class LoginController extends ChangeNotifier {
       if (kDebugMode) {
         print('💥 LoginController: Exceção durante login - $e');
       }
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         StackTrace.current,
         reason: 'Login with sync error',
@@ -291,18 +291,18 @@ class LoginController extends ChangeNotifier {
       final authState = _ref.read(authNotifierProvider);
       if (authState.isAuthenticated) {
         await _saveFormData();
-        _analytics.logUserAction('signup_success', parameters: {
+        _analytics?.logUserAction('signup_success', parameters: {
           'method': 'email',
         });
       } else if (authState.errorMessage != null) {
         _errorMessage = authState.errorMessage;
-        _analytics.logUserAction('signup_failed', parameters: {
+        _analytics?.logUserAction('signup_failed', parameters: {
           'error': authState.errorMessage ?? 'unknown',
         });
       }
     } catch (e) {
       _errorMessage = 'Erro inesperado durante o cadastro';
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         StackTrace.current,
         reason: 'Signup error',
@@ -328,7 +328,7 @@ class LoginController extends ChangeNotifier {
       if (authState.errorMessage != null) {
         _errorMessage = authState.errorMessage;
       } else {
-        await _analytics.logUserAction('password_reset_requested', parameters: {
+        await _analytics?.logUserAction('password_reset_requested', parameters: {
           'email': _emailController.text.trim(),
         });
 
@@ -339,7 +339,7 @@ class LoginController extends ChangeNotifier {
 
     } catch (e) {
       _errorMessage = 'Erro ao enviar email de recuperação';
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         StackTrace.current,
         reason: 'Password reset error',
@@ -359,11 +359,11 @@ class LoginController extends ChangeNotifier {
 
       final authState = _ref.read(authNotifierProvider);
       if (authState.isAuthenticated) {
-        await _analytics.logUserAction('anonymous_login_success');
+        await _analytics?.logUserAction('anonymous_login_success');
       }
     } catch (e) {
       _errorMessage = 'Erro durante login anônimo';
-      await _analytics.recordError(
+      await _analytics?.recordError(
         e,
         StackTrace.current,
         reason: 'Anonymous login error',
@@ -537,7 +537,7 @@ class LoginController extends ChangeNotifier {
       _rememberMe = savedRememberMe;
       
       if (_rememberMe && savedEmail != null && savedEmail.isNotEmpty) {
-        await _analytics.logUserAction('saved_data_loaded', parameters: {
+        await _analytics?.logUserAction('saved_data_loaded', parameters: {
           'has_name': (savedName != null).toString(),
           'has_email': savedEmail.isNotEmpty.toString(),
         });
@@ -568,7 +568,7 @@ class LoginController extends ChangeNotifier {
       
       await prefs.setBool('gasometer_remember_me', _rememberMe);
       
-      await _analytics.logUserAction('form_data_saved');
+      await _analytics?.logUserAction('form_data_saved');
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Erro ao salvar dados: $e');
@@ -579,6 +579,6 @@ class LoginController extends ChangeNotifier {
   /// Para sincronização em andamento
   void stopSync() {
     _authNotifier.stopSync();
-    _analytics.logUserAction('sync_stopped_by_user');
+    _analytics?.logUserAction('sync_stopped_by_user');
   }
 }

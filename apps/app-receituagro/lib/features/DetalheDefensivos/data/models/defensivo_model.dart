@@ -1,4 +1,4 @@
-import '../../../../core/models/fitossanitario_hive.dart';
+import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../domain/entities/defensivo_entity.dart';
 
 /// Modelo de dados para Defensivo

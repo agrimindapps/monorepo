@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../di/injection_container.dart';
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
+import '../data/repositories/cultura_hive_repository.dart';
+import '../data/repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/pragas_hive_repository.dart';
 
 /// Serviço avançado para validação de compatibilidade entre entidades
 /// 

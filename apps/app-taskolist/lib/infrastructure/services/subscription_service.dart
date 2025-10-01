@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 
-import '../../domain/entities/user_limits.dart';
+import '../../features/auth/domain/user_limits.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
 /// Subscription service específico do app Task Manager
+@lazySingleton
 class TaskManagerSubscriptionService {
   final ISubscriptionRepository _subscriptionRepository;
   final TaskManagerAnalyticsService _analyticsService;

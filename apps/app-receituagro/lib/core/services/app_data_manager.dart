@@ -2,13 +2,13 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../repositories/cultura_hive_repository.dart';
-import '../repositories/diagnostico_hive_repository.dart';
-import '../repositories/fitossanitario_hive_repository.dart';
-import '../repositories/fitossanitario_info_hive_repository.dart';
-import '../repositories/plantas_inf_hive_repository.dart';
-import '../repositories/pragas_hive_repository.dart';
-import '../repositories/pragas_inf_hive_repository.dart';
+import '../data/repositories/cultura_hive_repository.dart';
+import '../data/repositories/diagnostico_hive_repository.dart';
+import '../data/repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/fitossanitario_info_hive_repository.dart';
+import '../data/repositories/plantas_inf_hive_repository.dart';
+import '../data/repositories/pragas_hive_repository.dart';
+import '../data/repositories/pragas_inf_hive_repository.dart';
 // auto_version_control_service.dart - removed (unused)
 import 'data_initialization_service.dart';
 import 'hive_adapter_registry.dart';

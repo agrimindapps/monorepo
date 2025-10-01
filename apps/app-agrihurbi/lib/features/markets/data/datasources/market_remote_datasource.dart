@@ -61,6 +61,7 @@ abstract class MarketRemoteDataSource {
 
 /// Implementation of Market Remote DataSource using API
 @Injectable(as: MarketRemoteDataSource)
+@Environment('prod')
 class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
   final DioClient _dioClient;
 

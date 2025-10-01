@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/repositories/favoritos_hive_repository.dart';
-import '../../../../core/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 import '../../domain/entities/diagnostico_entity.dart';

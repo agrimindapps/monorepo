@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'core/di/injection_container.dart' as di;
-import 'core/repositories/diagnostico_hive_repository.dart';
+import 'core/data/repositories/diagnostico_hive_repository.dart';
 import 'core/services/diagnosticos_data_loader.dart';
 
 /// Script de debug para verificar status dos diagnósticos

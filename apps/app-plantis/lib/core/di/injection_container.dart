@@ -65,8 +65,10 @@ import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
 import 'injection.dart' as injectable;
+import 'modules/account_deletion_module.dart';
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
+import 'modules/sync_module.dart';
 import 'modules/tasks_module.dart';
 
 final sl = GetIt.instance;
@@ -88,6 +90,7 @@ Future<void> init() async {
   // Features
   _initAuth();
   _initAccount();
+  _initAccountDeletion(); // NEW: Account Deletion Services
   _initDeviceManagement();
   _initPlants();
   _initTasks();
@@ -97,6 +100,9 @@ Future<void> init() async {
   _initSettings();
   _initBackup(); // Remaining backup config (schedulers, providers)
   _initDataExport();
+
+  // Sync service (requires repositories from modules)
+  SyncDIModule.init(sl);
 
   // App services
   _initAppServices();
@@ -266,11 +272,11 @@ void _initAuth() {
       logoutUseCase: sl(),
       authRepository: sl(),
       resetPasswordUseCase: sl(),
+      enhancedAccountDeletionService: sl<EnhancedAccountDeletionService>(),
       subscriptionRepository: sl<ISubscriptionRepository>(),
       backgroundSyncProvider: sl<BackgroundSyncProvider>(),
       validateDeviceUseCase: sl<local.ValidateDeviceUseCase>(),
       revokeDeviceUseCase: sl<local.RevokeDeviceUseCase>(),
-      revokeAllOtherDevicesUseCase: sl<local.RevokeAllOtherDevicesUseCase>(),
     ),
   );
 
@@ -280,6 +286,11 @@ void _initAuth() {
 
 void _initAccount() {
   // Account simplificado - sem DI necessário
+}
+
+void _initAccountDeletion() {
+  // Initialize Account Deletion Module with enhanced security services
+  AccountDeletionModule.init(sl);
 }
 
 void _initDeviceManagement() {

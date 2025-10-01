@@ -9,6 +9,7 @@ import 'package:provider/provider.dart' as provider;
 
 // Local imports
 import 'core/di/injection_container.dart' as di;
+import 'core/di/modules/sync_module.dart';
 import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/auth_provider.dart';
@@ -159,6 +160,10 @@ void main() async {
     print('🔄 MAIN: Forcing sync initialization...');
     await ReceitaAgroSyncConfig.configure();
     print('✅ MAIN: Sync initialization completed successfully');
+
+    // Initialize sync service with connectivity monitoring (Phase 3)
+    SyncDIModule.init(di.sl);
+    await SyncDIModule.initializeSyncService(di.sl);
   } catch (e) {
     print('❌ MAIN: Sync initialization failed: $e');
   }

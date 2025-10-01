@@ -34,10 +34,12 @@ class LegacySyncBridge {
       );
       
       // Registrar sync services específicos por app
-      _appSyncServices['gasometer'] = GasometerSyncService();
-      _appSyncServices['plantis'] = PlantisSyncService();
-      _appSyncServices['receituagro'] = ReceitaAgroSyncService();
-      _appSyncServices['petiveti'] = PetiVetiSyncService();
+      // NOTE: Estes services precisam ser instanciados com repositories reais via DI
+      // Por ora, deixamos comentado até que a migração seja feita em cada app
+      // _appSyncServices['gasometer'] = GasometerSyncService();
+      // _appSyncServices['plantis'] = PlantisSyncService();
+      // _appSyncServices['receituagro'] = ReceitaAgroSyncService();
+      // _appSyncServices['petiveti'] = PetiVetiSyncService();
       
       // Inicializar todos os services
       for (final service in _appSyncServices.values) {
@@ -78,7 +80,7 @@ class LegacySyncBridge {
   }
   
   /// Sync usando nova arquitetura SOLID
-  Future<Either<Failure, SyncResult>> _syncWithNewArchitecture(String appName) async {
+  Future<Either<Failure, ServiceSyncResult>> _syncWithNewArchitecture(String appName) async {
     try {
       developer.log(
         'Using NEW architecture for $appName sync',

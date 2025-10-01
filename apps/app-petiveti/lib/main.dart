@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/di/modules/sync_module.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -29,6 +30,17 @@ Future<void> main() async {
 
     // Initialize dependency injection (includes Hive initialization)
     await di.init();
+
+    // ===== SYNC INITIALIZATION =====
+    // Force sync initialization after DI is ready
+    try {
+      print('🔄 MAIN: Forcing Petiveti sync initialization...');
+      PetivetiSyncDIModule.init();
+      await PetivetiSyncDIModule.initializeSyncService();
+      print('✅ MAIN: Petiveti sync initialization completed successfully');
+    } catch (e) {
+      print('❌ MAIN: Sync initialization failed: $e');
+    }
 
     runApp(const ProviderScope(child: PetiVetiApp()));
   } catch (error) {

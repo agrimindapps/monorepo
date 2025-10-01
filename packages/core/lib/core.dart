@@ -72,6 +72,10 @@ export 'src/infrastructure/models/box_configuration.dart';
 
 // Services
 export 'src/infrastructure/services/account_deletion_service.dart';
+export 'src/infrastructure/services/enhanced_account_deletion_service.dart';
+export 'src/infrastructure/services/account_deletion_rate_limiter.dart';
+export 'src/infrastructure/services/firestore_deletion_service.dart';
+export 'src/infrastructure/services/revenuecat_cancellation_service.dart';
 export 'src/infrastructure/services/anonymous_data_cleaner.dart';
 export 'src/infrastructure/services/app_rating_service.dart';
 export 'src/infrastructure/services/box_registry_service.dart';
@@ -119,6 +123,11 @@ export 'src/infrastructure/storage/hive/hive_storage.dart';
 export 'src/presentation/theme/base/base_colors.dart';
 export 'src/presentation/theme/base/base_theme.dart';
 export 'src/presentation/theme/base/base_typography.dart';
+
+// Account Deletion Widgets
+export 'src/presentation/widgets/account_deletion/account_deletion_confirmation_dialog.dart';
+export 'src/presentation/widgets/account_deletion/account_deletion_progress_dialog.dart';
+
 // export 'src/presentation/widgets/error_widget.dart';
 // export 'src/presentation/widgets/image_widgets.dart';
 // export 'src/presentation/widgets/loading_widget.dart';
@@ -176,6 +185,18 @@ export 'src/sync/app_sync_config.dart';
 export 'src/sync/conflict_resolution/conflict_resolver_factory.dart' hide SyncFailure;
 export 'src/sync/entity_sync_registration.dart' hide IConflictResolver;
 export 'src/sync/unified_sync_manager.dart';
+
+// Sync Interfaces
+export 'src/sync/interfaces/i_sync_service.dart';
+
+// App-Specific Sync Services
+export 'src/sync/services/sync_logger.dart' hide LogLevel;
+export 'src/sync/services/plantis_sync_service.dart';
+export 'src/sync/services/gasometer_sync_service.dart';
+export 'src/sync/services/receituagro_sync_service.dart';
+export 'src/sync/services/taskolist_sync_service.dart';
+export 'src/sync/services/petiveti_sync_service.dart';
+export 'src/sync/services/agrihurbi_sync_service.dart';
 
 // ========== FEATURES ==========
 export 'src/features/subscription/subscription_page.dart';
@@ -284,3 +305,5 @@ export 'package:share_plus/share_plus.dart';
 
 // Subscriptions
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
+// ========== SYNC ARCHITECTURE ==========
+export 'src/sync/sync.dart' hide NetworkInfo, ConnectionQuality, MigrationResult, LogLevel;

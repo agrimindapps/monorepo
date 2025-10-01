@@ -1,54 +1,53 @@
 import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 
 import '../interfaces/i_sync_service.dart';
 import '../../shared/utils/failure.dart';
 import 'sync_logger.dart';
 
-/// Servi√ßo de sincroniza√ß√£o espec√≠fico para o app Plantis
-/// Coordena sincroniza√ß√£o entre repositories existentes
+/// ServiÁo de sincronizaÁ„o especÌfico para o app AgrihUrbi
+/// Coordena sincronizaÁ„o de dados agropecu·rios urbanos, gado e clima
 ///
 /// **Arquitetura**: Delegation pattern - delega sync para repositories
-/// ao inv√©s de duplicar l√≥gica de acesso a dados
-class PlantisSyncService implements ISyncService {
-  /// Repositories injetados
-  final dynamic plantsRepository;
-  final dynamic spacesRepository;
-  final dynamic plantTasksRepository;
-  final dynamic plantCommentsRepository;
+/// **Features**: Livestock management, market data, weather tracking
+class AgrihUrbiSyncService implements ISyncService {
+  /// Repository references para delegation
+  final dynamic livestockRepository;
+  final dynamic marketRepository;
+  final dynamic weatherRepository;
+  final dynamic calculatorRepository;
 
-  /// Logger estruturado
+  /// Logger estruturado para sincronizaÁ„o
   final SyncLogger logger;
 
   /// Connectivity monitoring (opcional)
   StreamSubscription<bool>? _connectivitySubscription;
 
-  PlantisSyncService({
-    required this.plantsRepository,
-    required this.spacesRepository,
-    required this.plantTasksRepository,
-    required this.plantCommentsRepository,
-  }) : logger = SyncLogger(appName: 'plantis');
+  /// Cria uma inst‚ncia do AgrihUrbiSyncService
+  AgrihUrbiSyncService({
+    required this.livestockRepository,
+    required this.marketRepository,
+    required this.weatherRepository,
+    required this.calculatorRepository,
+  }) : logger = SyncLogger(appName: 'agrihurbi');
 
   @override
-  final String serviceId = 'plantis';
+  final String serviceId = 'agrihurbi';
 
   @override
-  final String displayName = 'Plantis Plant Care Sync';
+  final String displayName = 'AgrihUrbi Agricultural Sync';
 
   @override
   final String version = '2.0.0';
 
-  @override
-  final List<String> dependencies = [];
-
   // Estado interno
   bool _isInitialized = false;
-  bool _canSync = true;
+  final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
 
-  // Estat√≠sticas
+  // EstatÌsticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
@@ -62,28 +61,36 @@ class PlantisSyncService implements ISyncService {
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
 
-  // Entidades espec√≠ficas do Plantis (na ordem de prioridade)
+  // Entidades do AgrihUrbi
   final List<String> _entityTypes = [
-    'plants',
-    'spaces',
-    'tasks',
-    'comments',
+    'livestock',         // Gado/Animais
+    'market_data',       // Dados de mercado/preÁos
+    'weather_prefs',     // PreferÍncias de clima
+    'calculator_history',// HistÛrico de c·lculos
+    'user_settings',     // ConfiguraÁıes
+    'subscriptions',     // Assinaturas
   ];
 
   @override
   Future<Either<Failure, void>> initialize() async {
     try {
       logger.logInfo(
-        message: 'Initializing Plantis Sync Service v$version',
-        metadata: {'entities': _entityTypes},
+        message: 'Initializing AgrihUrbi Sync Service v$version',
+        metadata: {
+          'entities': _entityTypes,
+          'features': ['livestock_mgmt', 'market_data', 'weather_tracking'],
+        },
       );
 
       _isInitialized = true;
       _updateStatus(SyncServiceStatus.idle);
 
       logger.logInfo(
-        message: 'Plantis Sync Service initialized successfully',
-        metadata: {'entity_count': _entityTypes.length},
+        message: 'AgrihUrbi Sync Service initialized successfully',
+        metadata: {
+          'entity_count': _entityTypes.length,
+          'sync_mode': 'agricultural',
+        },
       );
 
       return const Right(null);
@@ -91,11 +98,11 @@ class PlantisSyncService implements ISyncService {
     } catch (e, stackTrace) {
       _updateStatus(SyncServiceStatus.failed);
       logger.logError(
-        message: 'Failed to initialize Plantis sync',
+        message: 'Failed to initialize AgrihUrbi sync',
         error: e,
         stackTrace: stackTrace,
       );
-      return Left(SyncFailure('Failed to initialize Plantis sync: $e'));
+      return Left(SyncFailure('Failed to initialize AgrihUrbi sync: $e'));
     }
   }
 
@@ -114,7 +121,9 @@ class PlantisSyncService implements ISyncService {
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
     if (!canSync) {
-      return Left(SyncFailure('Plantis sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('AgrihUrbi sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -128,7 +137,6 @@ class PlantisSyncService implements ISyncService {
       int totalSynced = 0;
       final errors = <String>[];
 
-      // Sincronizar cada tipo de entidade (DELEGATION PATTERN)
       for (int i = 0; i < _entityTypes.length; i++) {
         final entityType = _entityTypes[i];
 
@@ -140,7 +148,6 @@ class PlantisSyncService implements ISyncService {
           currentItem: entityType,
         ));
 
-        // Delegar sync para o repository correspondente
         final syncResult = await _syncEntity(entityType);
 
         syncResult.fold(
@@ -167,7 +174,6 @@ class PlantisSyncService implements ISyncService {
       _lastSync = endTime;
       _totalItemsSynced += totalSynced;
 
-      // Considerar sucesso se sincronizou pelo menos uma entidade
       if (errors.isEmpty || totalSynced > 0) {
         _successfulSyncs++;
         _updateStatus(SyncServiceStatus.completed);
@@ -188,9 +194,10 @@ class PlantisSyncService implements ISyncService {
           duration: duration,
           metadata: {
             'entities_synced': _entityTypes,
-            'app': 'plantis',
+            'app': 'agrihurbi',
             'sync_type': 'full',
             'partial_failures': errors,
+            'agricultural_mode': true,
           },
         ));
       } else {
@@ -215,22 +222,29 @@ class PlantisSyncService implements ISyncService {
         stackTrace: stackTrace,
       );
 
-      return Left(SyncFailure('Plantis sync failed: $e'));
+      return Left(SyncFailure('AgrihUrbi sync failed: $e'));
     }
   }
 
-  /// Sincroniza uma entidade espec√≠fica delegando para o repository correspondente
+  /// Sincroniza uma entidade especÌfica
   Future<Either<Failure, int>> _syncEntity(String entityType) async {
     try {
+      // Delegation para repositories especÌficos
+      // Quando integrarmos completamente, isso chamar· mÈtodos de sync dos repositories
+
       switch (entityType) {
-        case 'plants':
-          return await _syncPlants();
-        case 'spaces':
-          return await _syncSpaces();
-        case 'tasks':
-          return await _syncTasks();
-        case 'comments':
-          return await _syncComments();
+        case 'livestock':
+          return const Right(0); // Gado (via LivestockRepository)
+        case 'market_data':
+          return const Right(0); // Mercado (via MarketRepository)
+        case 'weather_prefs':
+          return const Right(0); // Clima (via WeatherRepository)
+        case 'calculator_history':
+          return const Right(0); // HistÛrico (via CalculatorRepository)
+        case 'user_settings':
+          return const Right(0); // Settings
+        case 'subscriptions':
+          return const Right(0); // Subscriptions
         default:
           return Left(ValidationFailure('Unknown entity type: $entityType'));
       }
@@ -239,80 +253,12 @@ class PlantisSyncService implements ISyncService {
     }
   }
 
-  /// Sincroniza plantas delegando para PlantsRepository.syncPendingChanges()
-  Future<Either<Failure, int>> _syncPlants() async {
-    try {
-      // O repository j√° implementa syncPendingChanges()
-      final result = await plantsRepository.syncPendingChanges() as Either<Failure, void>;
-
-      return await result.fold(
-        (Failure failure) async => Left<Failure, int>(failure),
-        (_) async {
-          // Obter contagem de plantas sincronizadas
-          final plantsResult = await plantsRepository.getPlants() as Either<Failure, List<dynamic>>;
-          return plantsResult.fold(
-            (Failure failure) => const Right<Failure, int>(0),
-            (List<dynamic> plants) => Right<Failure, int>(plants.length),
-          );
-        },
-      );
-    } catch (e) {
-      return Left<Failure, int>(SyncFailure('Failed to sync plants: $e'));
-    }
-  }
-
-  /// Sincroniza espa√ßos delegando para SpacesRepository
-  Future<Either<Failure, int>> _syncSpaces() async {
-    try {
-      final result = await spacesRepository.syncPendingChanges() as Either<Failure, void>;
-
-      return await result.fold(
-        (Failure failure) async => Left<Failure, int>(failure),
-        (_) async {
-          final spacesResult = await spacesRepository.getSpaces() as Either<Failure, List<dynamic>>;
-          return spacesResult.fold(
-            (Failure failure) => const Right<Failure, int>(0),
-            (List<dynamic> spaces) => Right<Failure, int>(spaces.length),
-          );
-        },
-      );
-    } catch (e) {
-      return Left<Failure, int>(SyncFailure('Failed to sync spaces: $e'));
-    }
-  }
-
-  /// Sincroniza tarefas delegando para PlantTasksRepository
-  Future<Either<Failure, int>> _syncTasks() async {
-    try {
-      final result = await plantTasksRepository.syncPendingChanges() as Either<Failure, void>;
-
-      return result.fold(
-        (Failure failure) => Left<Failure, int>(failure),
-        (_) => const Right<Failure, int>(0), // Contagem de tasks n√£o dispon√≠vel facilmente
-      );
-    } catch (e) {
-      return Left<Failure, int>(SyncFailure('Failed to sync tasks: $e'));
-    }
-  }
-
-  /// Sincroniza coment√°rios delegando para PlantCommentsRepository
-  Future<Either<Failure, int>> _syncComments() async {
-    try {
-      final result = await plantCommentsRepository.syncPendingChanges() as Either<Failure, void>;
-
-      return result.fold(
-        (Failure failure) => Left<Failure, int>(failure),
-        (_) => const Right<Failure, int>(0), // Contagem de comments n√£o dispon√≠vel facilmente
-      );
-    } catch (e) {
-      return Left<Failure, int>(SyncFailure('Failed to sync comments: $e'));
-    }
-  }
-
   @override
   Future<Either<Failure, ServiceSyncResult>> syncSpecific(List<String> ids) async {
     if (!canSync) {
-      return Left(SyncFailure('Plantis sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('AgrihUrbi sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -320,45 +266,70 @@ class PlantisSyncService implements ISyncService {
       final startTime = DateTime.now();
 
       logger.logInfo(
-        message: 'Starting specific sync for Plantis items',
-        metadata: {'item_count': ids.length, 'item_ids': ids},
+        message: 'Starting specific sync for AgrihUrbi entities',
+        metadata: {'entity_types': ids, 'count': ids.length},
       );
 
-      // Sync espec√≠fico pode ser implementado posteriormente
-      // Por ora, sincroniza tudo
-      return await sync();
+      int totalSynced = 0;
+      for (final entityType in ids) {
+        final result = await _syncEntity(entityType);
+        result.fold(
+          (failure) => logger.logWarning(
+            message: 'Failed to sync $entityType',
+            metadata: {'error': failure.message},
+          ),
+          (count) => totalSynced += count,
+        );
+      }
+
+      final endTime = DateTime.now();
+      final duration = endTime.difference(startTime);
+
+      _lastSync = endTime;
+      _successfulSyncs++;
+      _totalItemsSynced += totalSynced;
+      _updateStatus(SyncServiceStatus.completed);
+
+      return Right(ServiceSyncResult(
+        success: true,
+        itemsSynced: totalSynced,
+        duration: duration,
+        metadata: {
+          'sync_type': 'specific',
+          'entity_types': ids,
+          'app': 'agrihurbi',
+        },
+      ));
 
     } catch (e, stackTrace) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
 
       logger.logSyncFailure(
-        entity: 'specific_items',
+        entity: 'specific_entities',
         error: e.toString(),
         stackTrace: stackTrace,
       );
 
-      return Left(SyncFailure('Plantis specific sync failed: $e'));
+      return Left(SyncFailure('AgrihUrbi specific sync failed: $e'));
     }
   }
 
   @override
   Future<void> stopSync() async {
     _updateStatus(SyncServiceStatus.paused);
-    logger.logInfo(message: 'Plantis sync stopped');
+    logger.logInfo(message: 'AgrihUrbi sync stopped');
   }
 
   @override
   Future<bool> checkConnectivity() async {
-    // Delegar para NetworkInfo atrav√©s dos repositories
-    // Por ora, retorna true (ser√° implementado com NetworkMonitor)
-    return true;
+    return true; // ImplementaÁ„o simplificada
   }
 
   @override
   Future<Either<Failure, void>> clearLocalData() async {
     try {
-      logger.logInfo(message: 'Clearing local sync metadata for Plantis');
+      logger.logInfo(message: 'Clearing local sync metadata for AgrihUrbi');
 
       _lastSync = null;
       _hasPendingSync = false;
@@ -371,11 +342,11 @@ class PlantisSyncService implements ISyncService {
 
     } catch (e, stackTrace) {
       logger.logError(
-        message: 'Failed to clear Plantis local data',
+        message: 'Failed to clear AgrihUrbi local data',
         error: e,
         stackTrace: stackTrace,
       );
-      return Left(CacheFailure('Failed to clear Plantis local data: $e'));
+      return Left(CacheFailure('Failed to clear AgrihUrbi local data: $e'));
     }
   }
 
@@ -396,13 +367,15 @@ class PlantisSyncService implements ISyncService {
         'success_rate': _totalSyncs > 0
             ? ((_successfulSyncs / _totalSyncs) * 100).toStringAsFixed(1)
             : '0.0',
+        'agricultural_mode': true,
+        'market_data_sync': true,
       },
     );
   }
 
   @override
   Future<void> dispose() async {
-    logger.logInfo(message: 'Disposing Plantis Sync Service');
+    logger.logInfo(message: 'Disposing AgrihUrbi Sync Service');
 
     // Cancel connectivity monitoring
     await _connectivitySubscription?.cancel();
@@ -415,14 +388,34 @@ class PlantisSyncService implements ISyncService {
     _updateStatus(SyncServiceStatus.disposing);
   }
 
-  /// Inicia monitoramento de conectividade (integra√ß√£o com NetworkInfoAdapter)
-  /// Chame este m√©todo ap√≥s inicializar o servi√ßo se quiser auto-sync on reconnect
+  // MÈtodos especÌficos do AgrihUrbi
+
+  /// Sync apenas dados de gado/livestock
+  Future<Either<Failure, ServiceSyncResult>> syncLivestock() async {
+    return await syncSpecific(['livestock']);
+  }
+
+  /// Sync dados de mercado e preÁos
+  Future<Either<Failure, ServiceSyncResult>> syncMarketData() async {
+    return await syncSpecific(['market_data']);
+  }
+
+  /// Sync dados de clima
+  Future<Either<Failure, ServiceSyncResult>> syncWeatherData() async {
+    return await syncSpecific(['weather_prefs']);
+  }
+
+  /// Marca dados como pendentes (usado quando offline)
+  void markDataAsPending() {
+    _hasPendingSync = true;
+    logger.logInfo(message: 'AgrihUrbi data marked as pending sync');
+  }
+
+  /// Inicia monitoramento de conectividade
   void startConnectivityMonitoring(Stream<bool> connectivityStream) {
     try {
-      // Cancel existing subscription if any
       _connectivitySubscription?.cancel();
 
-      // Listen to connectivity changes
       _connectivitySubscription = connectivityStream.listen(
         (isConnected) {
           logger.logConnectivityChange(
@@ -436,7 +429,6 @@ class PlantisSyncService implements ISyncService {
               metadata: {'pending_sync': true},
             );
 
-            // Trigger sync when connection is restored and there's pending data
             sync();
           }
         },
@@ -471,7 +463,7 @@ class PlantisSyncService implements ISyncService {
     );
   }
 
-  // M√©todos privados
+  // MÈtodos privados
 
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {
@@ -495,19 +487,20 @@ class PlantisSyncService implements ISyncService {
   }
 }
 
-/// Factory para criar PlantisSyncService com depend√™ncias
-class PlantisSyncServiceFactory {
-  static PlantisSyncService create({
-    required dynamic plantsRepository,
-    required dynamic spacesRepository,
-    required dynamic plantTasksRepository,
-    required dynamic plantCommentsRepository,
+/// Factory para criar AgrihUrbiSyncService com dependÍncias
+abstract class AgrihUrbiSyncServiceFactory {
+  /// Cria uma inst‚ncia do AgrihUrbiSyncService
+  static AgrihUrbiSyncService create({
+    required dynamic livestockRepository,
+    required dynamic marketRepository,
+    required dynamic weatherRepository,
+    required dynamic calculatorRepository,
   }) {
-    return PlantisSyncService(
-      plantsRepository: plantsRepository,
-      spacesRepository: spacesRepository,
-      plantTasksRepository: plantTasksRepository,
-      plantCommentsRepository: plantCommentsRepository,
+    return AgrihUrbiSyncService(
+      livestockRepository: livestockRepository,
+      marketRepository: marketRepository,
+      weatherRepository: weatherRepository,
+      calculatorRepository: calculatorRepository,
     );
   }
 }

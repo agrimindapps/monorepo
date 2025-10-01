@@ -4,6 +4,7 @@ import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injection.dart';
 import 'modules/core_module.dart';
+import 'modules/sync_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
 ///
@@ -36,6 +37,10 @@ class ModularInjectionContainer {
       // (now EnhancedAnalyticsService is available for GasometerAnalyticsService)
       print('📦 Configuring injectable dependencies...');
       await configureDependencies();
+
+      // Initialize sync module (after repositories are registered)
+      print('📦 Initializing sync module...');
+      SyncDIModule.init(_getIt);
 
       print('✅ GasOMeter dependencies initialized successfully');
     } catch (e, stackTrace) {

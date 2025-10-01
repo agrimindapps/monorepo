@@ -33,10 +33,12 @@ class AppMigrationHelper {
       );
       
       // Registrar serviços de migração para cada app
-      _migrationServices['gasometer'] = GasometerSyncService();
-      _migrationServices['plantis'] = PlantisSyncService();
-      _migrationServices['receituagro'] = ReceitaAgroSyncService();
-      _migrationServices['petiveti'] = PetiVetiSyncService();
+      // NOTE: Estes services precisam ser instanciados com repositories reais via DI
+      // Por ora, deixamos comentado até que a migração seja feita em cada app
+      // _migrationServices['gasometer'] = GasometerSyncService();
+      // _migrationServices['plantis'] = PlantisSyncService();
+      // _migrationServices['receituagro'] = ReceitaAgroSyncService();
+      // _migrationServices['petiveti'] = PetiVetiSyncService();
       
       // Inicializar todos os serviços
       for (final entry in _migrationServices.entries) {
@@ -95,7 +97,7 @@ class AppMigrationHelper {
       final hasPending = await service.hasPendingSync;
       
       // Simular um sync de teste (apenas um item para verificar)
-      Either<Failure, SyncResult>? testSyncResult;
+      Either<Failure, ServiceSyncResult>? testSyncResult;
       try {
         testSyncResult = await service.syncSpecific(['test_migration_item']);
       } catch (e) {

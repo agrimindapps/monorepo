@@ -6,6 +6,7 @@ import 'package:core/core.dart' hide getIt;
 
 import 'core/database/hive_config.dart';
 import 'core/di/injection.dart';
+import 'core/di/modules/sync_module.dart';
 import 'core/services/navigation_service.dart' as local_nav;
 import 'core/services/notification_actions_service.dart';
 import 'core/theme/app_theme.dart';
@@ -44,6 +45,17 @@ void main() async {
 
   // Inicializar Dependency Injection
   await configureDependencies();
+
+  // ===== SYNC INITIALIZATION =====
+  // Force sync initialization after DI is ready
+  try {
+    print('🔄 MAIN: Forcing Taskolist sync initialization...');
+    TaskolistSyncDIModule.init();
+    await TaskolistSyncDIModule.initializeSyncService();
+    print('✅ MAIN: Taskolist sync initialization completed successfully');
+  } catch (e) {
+    print('❌ MAIN: Sync initialization failed: $e');
+  }
 
   // Inicializar serviços Firebase
   await _initializeFirebaseServices();

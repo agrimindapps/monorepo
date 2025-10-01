@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/di/modules/sync_module.dart';
 import 'core/gasometer_sync_config.dart';
 import 'firebase_options.dart';
 
@@ -43,6 +44,9 @@ Future<void> main() async {
     } else {
       await GasometerSyncConfig.configure();
     }
+
+    // Initialize sync service with connectivity monitoring
+    await SyncDIModule.initializeSyncService(di.sl);
 
     runApp(const ProviderScope(child: GasOMeterApp()));
   } catch (error) {

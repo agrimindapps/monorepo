@@ -26,8 +26,7 @@ class AuthProvider extends ChangeNotifier {
   final BackgroundSyncProvider? _backgroundSyncProvider;
   final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
   final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
-  final device_revocation.RevokeAllOtherDevicesUseCase?
-  _revokeAllOtherDevicesUseCase;
+  final EnhancedAccountDeletionService _enhancedDeletionService;
 
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -67,13 +66,12 @@ class AuthProvider extends ChangeNotifier {
     required LogoutUseCase logoutUseCase,
     required IAuthRepository authRepository,
     required ResetPasswordUseCase resetPasswordUseCase,
+    required EnhancedAccountDeletionService enhancedAccountDeletionService,
     ISubscriptionRepository? subscriptionRepository,
     AuthStateNotifier? authStateNotifier,
     BackgroundSyncProvider? backgroundSyncProvider,
     device_validation.ValidateDeviceUseCase? validateDeviceUseCase,
     device_revocation.RevokeDeviceUseCase? revokeDeviceUseCase,
-    device_revocation.RevokeAllOtherDevicesUseCase?
-    revokeAllOtherDevicesUseCase,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _authRepository = authRepository,
@@ -83,7 +81,7 @@ class AuthProvider extends ChangeNotifier {
        _backgroundSyncProvider = backgroundSyncProvider,
        _validateDeviceUseCase = validateDeviceUseCase,
        _revokeDeviceUseCase = revokeDeviceUseCase,
-       _revokeAllOtherDevicesUseCase = revokeAllOtherDevicesUseCase {
+       _enhancedDeletionService = enhancedAccountDeletionService {
     _initializeAuthState();
   }
 
@@ -701,7 +699,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Exclui permanentemente a conta do usuário
   ///
-  /// Este método realiza:
+  /// Este método delega para o EnhancedAccountDeletionService que realiza:
   /// 1. Re-autenticação do usuário para confirmar identidade
   /// 2. Exclusão de todos os dados pessoais do Firestore
   /// 3. Cancelamento de assinaturas ativas (RevenueCat)
@@ -714,10 +712,6 @@ class AuthProvider extends ChangeNotifier {
   /// Returns:
   /// - true: Conta excluída com sucesso
   /// - false: Erro na exclusão (verificar errorMessage)
-  ///
-  /// Throws:
-  /// - Exception se não há usuário autenticado
-  /// - Exception se a re-autenticação falhar
   Future<bool> deleteAccount({
     required String password,
     bool downloadData = false,
@@ -728,380 +722,66 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
 
-    if (isAnonymous) {
-      _errorMessage = 'Usuários anônimos não podem excluir conta';
-      notifyListeners();
-      return false;
-    }
-
     _isLoading = true;
     _errorMessage = null;
     _currentOperation = AuthOperation.deleteAccount;
     notifyListeners();
 
     try {
-      final userEmail = _currentUser!.email;
-      if (userEmail.isEmpty) {
-        throw Exception('Email do usuário não encontrado');
-      }
-
-      // 1. Re-autenticar usuário para confirmar identidade
-      if (kDebugMode) {
-        debugPrint('🔐 Iniciando re-autenticação para exclusão de conta');
-      }
-
-      final reauthResult = await _authRepository.signInWithEmailAndPassword(
-        email: userEmail,
+      // Use Enhanced Account Deletion Service
+      final result = await _enhancedDeletionService.deleteAccount(
         password: password,
+        userId: _currentUser!.id,
+        isAnonymous: isAnonymous,
       );
 
-      final reauthSuccess = reauthResult.fold((failure) {
-        _errorMessage = 'Falha na re-autenticação: ${failure.message}';
-        return false;
-      }, (user) => true);
-
-      if (!reauthSuccess) {
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-        return false;
-      }
-
-      // 2. Fazer backup dos dados (se solicitado)
-      if (downloadData) {
-        if (kDebugMode) {
-          debugPrint('📦 Fazendo backup dos dados do usuário');
-        }
-        await _exportUserData();
-      }
-
-      // 3. Cancelar assinaturas ativas no RevenueCat
-      if (_subscriptionRepository != null) {
-        if (kDebugMode) {
-          debugPrint('💳 Cancelando assinaturas ativas');
-        }
-        await _cancelActiveSubscriptions();
-      }
-
-      // 4. CRÍTICO: Limpar TODOS os dispositivos do usuário
-      if (kDebugMode) {
-        debugPrint('🔐 Removendo todos os dispositivos do usuário');
-      }
-      await _performCompleteDeviceCleanupOnAccountDeletion();
-
-      // 5. Excluir dados do Firestore
-      if (kDebugMode) {
-        debugPrint('🗑️ Excluindo dados do Firestore');
-      }
-      await _deleteUserDataFromFirestore(_currentUser!.id);
-
-      // 6. Limpar dados locais
-      if (kDebugMode) {
-        debugPrint('🧹 Limpando dados locais');
-      }
-      await _clearLocalUserData();
-
-      // 7. Excluir conta do Firebase Auth
-      if (kDebugMode) {
-        debugPrint('🔥 Excluindo conta do Firebase Auth');
-      }
-      final deleteResult = await _authRepository.deleteAccount();
-
-      final deleteSuccess = deleteResult.fold((failure) {
-        _errorMessage = 'Falha na exclusão da conta: ${failure.message}';
-        return false;
-      }, (_) => true);
-
-      if (!deleteSuccess) {
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-        return false;
-      }
-
-      // 8. Log do evento de exclusão (antes de limpar tudo)
-      await _analytics?.logEvent('account_deleted', {
-        'method': 'user_request',
-        'user_id': _currentUser!.id,
-        'data_exported': downloadData,
-      });
-
-      // 9. Limpar estado da aplicação
-      _currentUser = null;
-      _isPremium = false;
-
-      // Resetar estado de sincronização para próxima sessão
-      _syncProvider?.resetSyncState();
-
-      // Update AuthStateNotifier
-      _authStateNotifier.updateUser(null);
-      _authStateNotifier.updatePremiumStatus(false);
-
-      _isLoading = false;
-      _currentOperation = null;
-
-      if (kDebugMode) {
-        debugPrint('✅ Conta excluída com sucesso');
-      }
-
-      notifyListeners();
-      return true;
+      return result.fold(
+        (error) {
+          _errorMessage = error.message;
+          _isLoading = false;
+          _currentOperation = null;
+          notifyListeners();
+          return false;
+        },
+        (deletionResult) {
+          if (deletionResult.isSuccess) {
+            // Success - perform logout cleanup
+            _performPostDeletionCleanup();
+            return true;
+          } else {
+            _errorMessage = deletionResult.userMessage;
+            _isLoading = false;
+            _currentOperation = null;
+            notifyListeners();
+            return false;
+          }
+        },
+      );
     } catch (e) {
-      _errorMessage = 'Erro na exclusão da conta: $e';
+      _errorMessage = 'Erro inesperado: $e';
       _isLoading = false;
       _currentOperation = null;
-
-      if (kDebugMode) {
-        debugPrint(
-          '❌ Erro na exclusão da conta: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
-        );
-      }
-
-      // Log do erro
-      await _analytics?.logEvent('account_deletion_failed', {
-        'error': e.toString(),
-        'user_id': _currentUser?.id ?? 'unknown',
-      });
-
       notifyListeners();
       return false;
     }
   }
 
-  /// Realiza cleanup completo de TODOS os dispositivos durante exclusão de conta
-  ///
-  /// Este método remove todos os dispositivos do usuário do Firestore,
-  /// incluindo o dispositivo atual, garantindo que nenhum device tenha
-  /// acesso futuro aos dados do usuário.
-  ///
-  /// IMPORTANTE: Falhas neste processo devem ser logadas mas NÃO devem
-  /// bloquear a exclusão da conta, pois é um processo crítico de privacidade.
-  Future<void> _performCompleteDeviceCleanupOnAccountDeletion() async {
-    if (_revokeAllOtherDevicesUseCase == null ||
-        _revokeDeviceUseCase == null ||
-        _currentUser == null) {
-      if (kDebugMode) {
-        debugPrint('⚠️ Device cleanup: Skipped (missing dependencies)');
-      }
-      return;
-    }
+  /// Realiza cleanup do estado da aplicação após exclusão bem-sucedida
+  Future<void> _performPostDeletionCleanup() async {
+    _currentUser = null;
+    _isPremium = false;
+    _isLoading = false;
+    _errorMessage = null;
+    _currentOperation = null;
 
-    try {
-      if (kDebugMode) {
-        debugPrint(
-          '🧹 Device cleanup: Starting complete device cleanup for account deletion',
-        );
-      }
+    // Resetar estado de sincronização para próxima sessão
+    await _syncProvider?.resetSyncState();
 
-      final userId = _currentUser!.id;
-      int totalDevicesRemoved = 0;
+    // Update AuthStateNotifier
+    _authStateNotifier.updateUser(null);
+    _authStateNotifier.updatePremiumStatus(false);
 
-      // 1. Primeiro, revogar todos os OUTROS dispositivos
-      final revokeOthersResult = await _revokeAllOtherDevicesUseCase();
-
-      await revokeOthersResult.fold(
-        (failure) async {
-          if (kDebugMode) {
-            debugPrint(
-              '❌ Device cleanup: Failed to revoke other devices - ${failure.message}',
-            );
-          }
-
-          // Log erro mas continuar com device atual
-          await _analytics?.logEvent('device_cleanup_partial_failure', {
-            'context': 'account_deletion',
-            'step': 'revoke_others',
-            'error': failure.message,
-            'user_id': userId,
-          });
-        },
-        (result) async {
-          totalDevicesRemoved += result.revokedCount;
-          if (kDebugMode) {
-            debugPrint(
-              '✅ Device cleanup: ${result.revokedCount} other devices revoked',
-            );
-          }
-        },
-      );
-
-      // 2. Agora revogar o dispositivo atual
-      final currentDevice = await DeviceModel.fromCurrentDevice();
-
-      // CRITICAL: Verificar se dispositivo é válido (não-Web)
-      if (currentDevice != null) {
-        final revokeCurrentResult = await _revokeDeviceUseCase(
-          device_revocation.RevokeDeviceParams(
-            deviceUuid: currentDevice.uuid,
-            preventSelfRevoke: false, // Permitir revogação própria na exclusão
-            reason: 'Account deletion',
-          ),
-        );
-
-        revokeCurrentResult.fold(
-          (failure) {
-            if (kDebugMode) {
-              debugPrint(
-                '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
-              );
-            }
-
-            // Log erro para auditoria
-            _analytics?.logEvent('device_cleanup_current_failed', {
-              'context': 'account_deletion',
-              'error': failure.message,
-              'device_uuid': currentDevice.uuid,
-              'user_id': userId,
-            });
-          },
-          (_) {
-            totalDevicesRemoved += 1;
-            if (kDebugMode) {
-              debugPrint('✅ Device cleanup: Current device revoked successfully');
-            }
-          },
-        );
-      } else {
-        if (kDebugMode) {
-          debugPrint(
-            '⚠️ Device cleanup: Skipping current device revocation (unsupported platform)',
-          );
-        }
-      }
-
-      // 3. Log resultado final da limpeza
-      await _analytics?.logEvent('device_cleanup_completed', {
-        'context': 'account_deletion',
-        'total_devices_removed': totalDevicesRemoved,
-        'user_id': userId,
-      });
-
-      if (kDebugMode) {
-        debugPrint(
-          '✅ Device cleanup: Complete cleanup finished - $totalDevicesRemoved devices removed',
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          '❌ Device cleanup: Unexpected error during account deletion cleanup - $e',
-        );
-      }
-
-      // Log erro crítico mas não bloquear exclusão da conta
-      await _analytics?.logEvent('device_cleanup_critical_error', {
-        'context': 'account_deletion',
-        'error': e.toString(),
-        'user_id': _currentUser?.id ?? 'unknown',
-      });
-    }
+    notifyListeners();
   }
 
-  /// Exporta dados do usuário para backup
-  Future<void> _exportUserData() async {
-    try {
-      // Simular exportação de dados
-      // Em uma implementação real, isso coletaria dados de:
-      // - Perfil do usuário
-      // - Plantas cadastradas
-      // - Tarefas e histórico
-      // - Configurações
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      if (kDebugMode) {
-        debugPrint('✅ Dados exportados com sucesso');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao exportar dados: $e');
-      }
-      // Não interrompe o processo de exclusão por falha no backup
-    }
-  }
-
-  /// Cancela assinaturas ativas no RevenueCat
-  Future<void> _cancelActiveSubscriptions() async {
-    try {
-      if (_subscriptionRepository == null) return;
-
-      // Verificar se há assinaturas ativas
-      final subscriptionResult =
-          await _subscriptionRepository.subscriptionStatus.first;
-
-      if (subscriptionResult != null && subscriptionResult.isActive) {
-        // Em uma implementação real, aqui faria:
-        // - Cancelamento via RevenueCat API
-        // - Notificação ao usuário sobre cancelamento
-        // - Reembolso se aplicável
-
-        if (kDebugMode) {
-          debugPrint('✅ Assinaturas canceladas');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao cancelar assinaturas: $e');
-      }
-      // Não interrompe o processo de exclusão
-    }
-  }
-
-  /// Exclui todos os dados do usuário no Firestore
-  Future<void> _deleteUserDataFromFirestore(String userId) async {
-    try {
-      // Em uma implementação real, isso excluiria:
-      // - Documento do usuário (/users/{userId})
-      // - Plantas (/users/{userId}/plants/*)
-      // - Tarefas (/users/{userId}/tasks/*)
-      // - Configurações (/users/{userId}/settings)
-      // - Imagens do Firebase Storage
-
-      await Future<void>.delayed(const Duration(milliseconds: 1000));
-
-      if (kDebugMode) {
-        debugPrint('✅ Dados do Firestore excluídos');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao excluir dados do Firestore: $e');
-      }
-      throw Exception('Falha na exclusão dos dados: $e');
-    }
-  }
-
-  /// Limpa todos os dados locais do usuário
-  Future<void> _clearLocalUserData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      // Limpar preferências relacionadas ao usuário
-      final keysToRemove = [
-        'use_anonymous_mode',
-        'user_preferences',
-        'cached_plants',
-        'cached_tasks',
-        'last_sync_timestamp',
-        'user_settings',
-      ];
-
-      for (final key in keysToRemove) {
-        await prefs.remove(key);
-      }
-
-      // Limpar cache de imagens e outros dados locais
-      // Em uma implementação real, isso incluiria:
-      // - Cache de imagens
-      // - Banco de dados local (SQLite, Hive)
-      // - Arquivos temporários
-
-      if (kDebugMode) {
-        debugPrint('✅ Dados locais limpos');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Erro ao limpar dados locais: $e');
-      }
-      // Não interrompe o processo de exclusão
-    }
-  }
 }

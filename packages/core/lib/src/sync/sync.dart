@@ -28,6 +28,14 @@ export 'services/gasometer_sync_service.dart';
 export 'services/plantis_sync_service.dart';
 export 'services/receituagro_sync_service.dart';
 export 'services/petiveti_sync_service.dart';
+export 'services/agrihurbi_sync_service.dart';
+export 'services/taskolist_sync_service.dart';
+export 'services/sync_logger.dart';
+
+// Background Sync & Throttling - Phase 8 components
+export 'background/background_sync_manager.dart';
+export 'throttling/sync_throttler.dart';
+export 'throttling/sync_queue.dart';
 
 // Examples - Reference implementations for apps
 // export 'examples/example_sync_service.dart'; // Disabled until implementation is complete

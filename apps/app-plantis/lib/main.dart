@@ -12,6 +12,7 @@ import 'core/data/models/espaco_model.dart';
 
 import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/di/modules/sync_module.dart';
 import 'core/plantis_sync_config.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_boxes_setup.dart';
@@ -100,6 +101,9 @@ void main() async {
   // Initialize app rating tracking
   final appRatingService = di.sl<IAppRatingRepository>();
   await appRatingService.incrementUsageCount();
+
+  // Initialize sync service with connectivity monitoring
+  await SyncDIModule.initializeSyncService(di.sl);
 
   // Initialize SharedPreferences for core providers
   final prefs = await SharedPreferences.getInstance();

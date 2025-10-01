@@ -108,10 +108,10 @@ class FuelRepositoryImpl implements FuelRepository {
     try {
       // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getAllFuelRecords();
-      
-      // Sync em background TEMPORARIAMENTE DESABILITADO devido a índices Firestore ausentes
-      // unawaited(_syncAllFuelRecordsInBackground());
-      
+
+      // Sync em background (reativado com índices Firestore configurados)
+      unawaited(_syncAllFuelRecordsInBackground());
+
       return Right(localRecords);
       
     } on CacheException catch (e) {
@@ -151,10 +151,10 @@ class FuelRepositoryImpl implements FuelRepository {
     try {
       // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
-      
-      // Sync em background TEMPORARIAMENTE DESABILITADO devido a índices Firestore ausentes
-      // unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
-      
+
+      // Sync em background (reativado com índices Firestore configurados)
+      unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
+
       return Right(localRecords);
       
     } on CacheException catch (e) {

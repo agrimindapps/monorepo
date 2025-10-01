@@ -21,10 +21,10 @@ abstract class ISyncService {
   Future<bool> get hasPendingSync;
   
   /// Executa sincronização completa do serviço
-  Future<Either<Failure, SyncResult>> sync();
-  
+  Future<Either<Failure, ServiceSyncResult>> sync();
+
   /// Executa sincronização apenas de itens específicos
-  Future<Either<Failure, SyncResult>> syncSpecific(List<String> ids);
+  Future<Either<Failure, ServiceSyncResult>> syncSpecific(List<String> ids);
   
   /// Para a sincronização em andamento
   Future<void> stopSync();
@@ -51,8 +51,8 @@ abstract class ISyncService {
   Future<void> dispose();
 }
 
-/// Resultado de uma operação de sincronização
-class SyncResult {
+/// Resultado de uma operação de sincronização de serviço
+class ServiceSyncResult {
   final bool success;
   final int itemsSynced;
   final int itemsFailed;
@@ -61,7 +61,7 @@ class SyncResult {
   final DateTime timestamp;
   final Map<String, dynamic> metadata;
   
-  SyncResult({
+  ServiceSyncResult({
     required this.success,
     this.itemsSynced = 0,
     this.itemsFailed = 0,
@@ -71,12 +71,12 @@ class SyncResult {
     this.metadata = const {},
   }) : timestamp = timestamp ?? DateTime.now();
   
-  factory SyncResult.success({
+  factory ServiceSyncResult.success({
     required int itemsSynced,
     required Duration duration,
     Map<String, dynamic> metadata = const {},
   }) {
-    return SyncResult(
+    return ServiceSyncResult(
       success: true,
       itemsSynced: itemsSynced,
       duration: duration,
@@ -84,13 +84,13 @@ class SyncResult {
     );
   }
   
-  factory SyncResult.failure({
+  factory ServiceSyncResult.failure({
     required String error,
     required Duration duration,
     int itemsFailed = 0,
     Map<String, dynamic> metadata = const {},
   }) {
-    return SyncResult(
+    return ServiceSyncResult(
       success: false,
       itemsFailed: itemsFailed,
       duration: duration,
@@ -99,13 +99,13 @@ class SyncResult {
     );
   }
   
-  factory SyncResult.partial({
+  factory ServiceSyncResult.partial({
     required int itemsSynced,
     required int itemsFailed,
     required Duration duration,
     Map<String, dynamic> metadata = const {},
   }) {
-    return SyncResult(
+    return ServiceSyncResult(
       success: itemsSynced > 0,
       itemsSynced: itemsSynced,
       itemsFailed: itemsFailed,

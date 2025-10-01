@@ -21,4 +21,8 @@ abstract class RegisterModule {
 
   @lazySingleton
   IAuthRepository get authRepository => FirebaseAuthService();
+
+  @lazySingleton
+  EnhancedAccountDeletionService get enhancedAccountDeletionService =>
+    EnhancedAccountDeletionService(authRepository: authRepository);
 }

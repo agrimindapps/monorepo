@@ -321,7 +321,7 @@ class ExampleProvider extends ManagedProvider {
   
   Stream<String> get dataStream => _dataController.stream;
   
-  Stream<String> get externalDataStream => Stream<dynamic>.periodic(
+  Stream<String> get externalDataStream => Stream<String>.periodic(
     const Duration(seconds: 1),
     (i) => 'Data $i',
   );

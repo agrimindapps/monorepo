@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/failures.dart';
+import '../../features/tasks/domain/task_repository.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
@@ -14,6 +15,7 @@ import 'crashlytics_service.dart';
 class TaskManagerSyncService {
   final TaskManagerAnalyticsService _analyticsService;
   final TaskManagerCrashlyticsService _crashlyticsService;
+  final TaskRepository _taskRepository;
 
   // Stream controllers para progresso
   final StreamController<SyncProgress> _progressController = StreamController<SyncProgress>.broadcast();
@@ -26,6 +28,7 @@ class TaskManagerSyncService {
   TaskManagerSyncService(
     this._analyticsService,
     this._crashlyticsService,
+    this._taskRepository,
   ) {
     _initializeAutoSync();
   }

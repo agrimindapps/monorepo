@@ -29,11 +29,11 @@ class GasometerDataCleaner implements IAppDataCleaner {
     final result = await _existingService.clearAllData();
 
     // Adaptar resultado para o formato esperado pela interface
-    return {
+    return <String, dynamic>{
       'success': result['success'] ?? false,
-      'clearedBoxes': result['clearedBoxes'] ?? [],
-      'clearedPreferences': result['clearedPreferences'] ?? [],
-      'errors': result['errors'] ?? [],
+      'clearedBoxes': result['clearedBoxes'] ?? <String>[],
+      'clearedPreferences': result['clearedPreferences'] ?? <String>[],
+      'errors': result['errors'] ?? <String>[],
       'totalRecordsCleared': _calculateTotalRecords(result),
       'startTime': result['startTime'],
       'endTime': result['endTime'],
@@ -48,16 +48,16 @@ class GasometerDataCleaner implements IAppDataCleaner {
       final existingStats = await _existingService.getDataStatsBeforeCleaning();
 
       // Adaptar para o formato esperado
-      return {
+      return <String, dynamic>{
         'totalBoxes': existingStats['totalBoxes'] ?? 0,
         'totalRecords': existingStats['totalRecords'] ?? 0,
         'appSpecificPrefs': existingStats['appSpecificPrefs'] ?? 0,
         'availableCategories': getAvailableCategories(),
-        'boxStats': existingStats['boxStats'] ?? {},
-        'availableModules': existingStats['availableModules'] ?? [],
+        'boxStats': existingStats['boxStats'] ?? <String, Map<String, dynamic>>{},
+        'availableModules': existingStats['availableModules'] ?? <String>[],
       };
     } catch (e) {
-      return {
+      return <String, dynamic>{
         'error': 'Erro ao obter estatísticas: $e',
       };
     }
@@ -79,11 +79,11 @@ class GasometerDataCleaner implements IAppDataCleaner {
       // Mapear categoria para módulo do GasOMeter
       final moduleName = _getCategoryModuleName(category);
       if (moduleName == null) {
-        return {
+        return <String, dynamic>{
           'category': category,
           'success': false,
-          'errors': ['Categoria "$category" não encontrada'],
-          'clearedBoxes': [],
+          'errors': <String>['Categoria "$category" não encontrada'],
+          'clearedBoxes': <String>[],
           'totalRecordsCleared': 0,
         };
       }
@@ -91,19 +91,19 @@ class GasometerDataCleaner implements IAppDataCleaner {
       // Usar método existente para limpar por módulo
       final result = await _existingService.clearModuleData(moduleName);
 
-      return {
+      return <String, dynamic>{
         'category': category,
         'success': result['errors']?.isEmpty ?? true,
-        'clearedBoxes': result['clearedBoxes'] ?? [],
-        'errors': result['errors'] ?? [],
+        'clearedBoxes': result['clearedBoxes'] ?? <String>[],
+        'errors': result['errors'] ?? <String>[],
         'totalRecordsCleared': result['clearedBoxes']?.length ?? 0,
       };
     } catch (e) {
-      return {
+      return <String, dynamic>{
         'category': category,
         'success': false,
-        'errors': ['Erro ao limpar categoria "$category": $e'],
-        'clearedBoxes': [],
+        'errors': <String>['Erro ao limpar categoria "$category": $e'],
+        'clearedBoxes': <String>[],
         'totalRecordsCleared': 0,
       };
     }
@@ -133,7 +133,7 @@ class GasometerDataCleaner implements IAppDataCleaner {
 
       for (final boxName in availableBoxes) {
         if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box(boxName);
+          final box = Hive.box<dynamic>(boxName);
           if (box.keys.isNotEmpty) {
             if (kDebugMode) {
               debugPrint('⚠️ GasometerDataCleaner: Box "$boxName" ainda contém ${box.keys.length} registros');

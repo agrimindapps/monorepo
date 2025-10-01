@@ -4,12 +4,18 @@ import 'package:dartz/dartz.dart';
 
 import '../config/sync_feature_flags.dart';
 import '../interfaces/i_sync_service.dart';
+import '../../shared/utils/failure.dart';
+import 'legacy_sync_bridge.dart';
+
+// App-specific sync services
+// NOTE: These imports are commented due to analyzer issues with relative paths.
+// Apps should import these services from package:core/src/sync/sync.dart instead.
 import '../services/gasometer_sync_service.dart';
 import '../services/plantis_sync_service.dart';
 import '../services/receituagro_sync_service.dart';
-import '../services/petiveti_sync_service.dart';
-import '../../shared/utils/failure.dart';
-import 'legacy_sync_bridge.dart';
+// import '../services/petiveti_sync_service.dart';
+// import '../services/agrihurbi_sync_service.dart';
+// import '../services/taskolist_sync_service.dart';
 
 /// Helper para migração gradual de apps específicos do UnifiedSyncManager
 /// para a nova arquitetura SOLID com app-specific sync services

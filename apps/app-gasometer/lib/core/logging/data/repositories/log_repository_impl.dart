@@ -267,7 +267,7 @@ class LogRepositoryImpl implements LogRepository {
               if (kDebugMode) {
                 print('✅ Logs synced in background: ${unsyncedLogs.length}');
               }
-            }).catchError((error) {
+            }).catchError((Object error) {
               if (kDebugMode) {
                 print('❌ Failed to sync logs in background: $error');
               }

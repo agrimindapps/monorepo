@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injection.dart';
+import 'modules/account_deletion_module.dart';
 import 'modules/core_module.dart';
 import 'modules/sync_module.dart';
 
@@ -37,6 +38,10 @@ class ModularInjectionContainer {
       // (now EnhancedAnalyticsService is available for GasometerAnalyticsService)
       print('📦 Configuring injectable dependencies...');
       await configureDependencies();
+
+      // Initialize account deletion module (after core services are registered)
+      print('📦 Initializing account deletion module...');
+      AccountDeletionModule.init(_getIt);
 
       // Initialize sync module (after repositories are registered)
       print('📦 Initializing sync module...');

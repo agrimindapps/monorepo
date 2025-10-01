@@ -30,6 +30,7 @@ dependencies:
   intl: any
   xml: any
   firebase_core: any
+  cloud_firestore: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

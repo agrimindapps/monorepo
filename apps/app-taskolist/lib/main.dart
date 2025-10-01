@@ -6,6 +6,7 @@ import 'package:core/core.dart' hide getIt;
 
 import 'core/database/hive_config.dart';
 import 'core/di/injection.dart';
+import 'core/di/modules/account_deletion_module.dart';
 import 'core/di/modules/sync_module.dart';
 import 'core/services/navigation_service.dart' as local_nav;
 import 'core/services/notification_actions_service.dart';
@@ -45,6 +46,16 @@ void main() async {
 
   // Inicializar Dependency Injection
   await configureDependencies();
+
+  // ===== ACCOUNT DELETION INITIALIZATION =====
+  // Initialize account deletion module after DI is ready
+  try {
+    print('🔐 MAIN: Initializing account deletion module...');
+    AccountDeletionModule.init(getIt);
+    print('✅ MAIN: Account deletion module initialized successfully');
+  } catch (e) {
+    print('❌ MAIN: Account deletion initialization failed: $e');
+  }
 
   // ===== SYNC INITIALIZATION =====
   // Force sync initialization after DI is ready

@@ -140,6 +140,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required PlatformService platformService,
     required AuthRateLimiter rateLimiter,
     required AuthLocalDataSource authLocalDataSource,
+    required EnhancedAccountDeletionService enhancedAccountDeletionService,
   })  : _getCurrentUser = getCurrentUser,
         _watchAuthState = watchAuthState,
         _signInWithEmail = signInWithEmail,
@@ -153,6 +154,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         _platformService = platformService,
         _rateLimiter = rateLimiter,
         _authLocalDataSource = authLocalDataSource,
+        _enhancedDeletionService = enhancedAccountDeletionService,
         super(const AuthState.initial()) {
     _initializeAuthState();
     _initializeMonorepoAuthCache();
@@ -164,6 +166,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignUpWithEmail _signUpWithEmail;
   final SignInAnonymously _signInAnonymously;
   final SignOut _signOut;
+  // ignore: unused_field
   final DeleteAccount _deleteAccount;
   final UpdateProfile _updateProfile;
   final SendPasswordReset _sendPasswordReset;
@@ -171,6 +174,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final PlatformService _platformService;
   final AuthRateLimiter _rateLimiter;
   final AuthLocalDataSource _authLocalDataSource;
+  final EnhancedAccountDeletionService _enhancedDeletionService;
 
   // MonorepoAuthCache instance for cross-module security
   final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
@@ -784,8 +788,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  /// DELETE ACCOUNT - migrado do AuthProvider
+  /// DELETE ACCOUNT - Enhanced with EnhancedAccountDeletionService
   Future<void> deleteAccount({String? currentPassword}) async {
+    if (state.currentUser == null) {
+      state = state.copyWith(
+        errorMessage: 'Nenhum usuário autenticado',
+        isLoading: false,
+        status: AuthStatus.error,
+      );
+      return;
+    }
+
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,
@@ -793,86 +806,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
 
     try {
-      // Log deletion attempt for analytics
-      await _analytics.logUserAction('account_deletion_attempted');
+      // Use Enhanced Account Deletion Service
+      final result = await _enhancedDeletionService.deleteAccount(
+        password: currentPassword ?? '',
+        userId: state.currentUser!.id,
+        isAnonymous: state.isAnonymous,
+      );
 
-      // For non-anonymous users, require password verification
-      if (state.currentUser != null && !state.currentUser!.isAnonymous) {
-        if (currentPassword == null || currentPassword.isEmpty) {
+      result.fold(
+        (error) {
           state = state.copyWith(
-            errorMessage: 'Senha atual é obrigatória para exclusão de conta.',
+            errorMessage: error.message,
             isLoading: false,
             status: AuthStatus.error,
           );
-          return;
-        }
-
-        // Re-authenticate with current credentials
-        final reAuthResult = await _signInWithEmail(SignInWithEmailParams(
-          email: state.currentUser!.email!,
-          password: currentPassword,
-        ));
-
-        // Check if re-authentication failed
-        final reAuthSuccess = reAuthResult.fold(
-          (failure) {
+        },
+        (deletionResult) {
+          if (deletionResult.isSuccess) {
+            // Success - perform cleanup
+            _performPostDeletionCleanup();
+          } else {
             state = state.copyWith(
-              errorMessage: 'Senha atual incorreta. Verifique e tente novamente.',
+              errorMessage: deletionResult.userMessage,
               isLoading: false,
               status: AuthStatus.error,
             );
-            return false;
-          },
-          (_) => true,
-        );
-
-        if (!reAuthSuccess) {
-          await _analytics.logUserAction('account_deletion_reauthentication_failed');
-          return;
-        }
-
-        await _analytics.logUserAction('account_deletion_reauthentication_success');
-      }
-
-      // Proceed with account deletion
-      final result = await _deleteAccount();
-
-      await result.fold(
-        (failure) async {
-          state = state.copyWith(
-            errorMessage: _mapFailureToMessage(failure),
-            isLoading: false,
-            status: AuthStatus.error,
-          );
-
-          // Log deletion error
-          await _analytics.logUserAction('account_deletion_error', parameters: {
-            'error': failure.message,
-          });
-        },
-        (_) async {
-          // Log successful deletion
-          await _analytics.logUserAction('account_deletion_success');
-
-          // Clear user state
-          state = state.copyWith(
-            currentUser: null,
-            isAuthenticated: false,
-            isPremium: false,
-            isAnonymous: false,
-            isLoading: false,
-            status: AuthStatus.unauthenticated,
-            clearUser: true,
-          );
-
-          if (kDebugMode) {
-            debugPrint('🔐 Conta deletada com sucesso');
           }
         },
       );
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Erro ao deletar conta: ${e.toString()}',
+        errorMessage: 'Erro inesperado: $e',
         isLoading: false,
         status: AuthStatus.error,
       );
@@ -883,6 +847,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
         StackTrace.current,
         reason: 'delete_account_error',
       );
+    }
+  }
+
+  void _performPostDeletionCleanup() {
+    state = state.copyWith(
+      currentUser: null,
+      isAuthenticated: false,
+      isPremium: false,
+      isAnonymous: false,
+      isLoading: false,
+      status: AuthStatus.unauthenticated,
+      clearUser: true,
+    );
+
+    if (kDebugMode) {
+      debugPrint('🔐 Conta deletada com sucesso');
     }
   }
 
@@ -1121,6 +1101,7 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref
     platformService: sl<PlatformService>(),
     rateLimiter: sl<AuthRateLimiter>(),
     authLocalDataSource: sl<AuthLocalDataSource>(),
+    enhancedAccountDeletionService: sl<EnhancedAccountDeletionService>(),
   );
 });
 

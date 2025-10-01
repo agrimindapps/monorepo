@@ -45,21 +45,26 @@ class CoreModule implements DIModule {
     // via RegisterModule to avoid duplicate registration errors
     // They are available via RegisterModule.firestore and RegisterModule.firebaseAuth
 
-    // Core package repositories (new migration path) 
+    // Core package repositories (new migration path)
     // These will be used by new code and gradual migration
     try {
       getIt.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(),
       );
-      
+
       getIt.registerLazySingleton<core.IAnalyticsRepository>(
-        () => kDebugMode 
+        () => kDebugMode
           ? core.MockAnalyticsService()
           : core.FirebaseAnalyticsService(),
       );
-      
+
       getIt.registerLazySingleton<core.ICrashlyticsRepository>(
         () => core.FirebaseCrashlyticsService(),
+      );
+
+      // Subscription repository from core package
+      getIt.registerLazySingleton<core.ISubscriptionRepository>(
+        () => core.RevenueCatService(),
       );
 
       debugPrint('✅ Core package repositories registered successfully');

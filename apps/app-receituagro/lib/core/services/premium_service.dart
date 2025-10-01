@@ -5,9 +5,10 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
-import '../constants/receituagro_environment_config.dart';
 import 'cloud_functions_service.dart';
 import 'remote_config_service.dart';
+
+// Remove direct RevenueCat imports - use core ISubscriptionRepository instead
 
 /// Premium subscription products for ReceitaAgro
 enum ReceitaAgroPremiumProduct {
@@ -112,20 +113,24 @@ class PremiumStatus {
 
 /// ReceitaAgro Premium Service
 /// Handles subscription management, premium features, and RevenueCat integration
+/// Now uses core ISubscriptionRepository instead of direct purchases_flutter calls
 class ReceitaAgroPremiumService extends ChangeNotifier {
   // Dependencies - required via constructor injection
   final ReceitaAgroAnalyticsService _analytics;
   final ReceitaAgroCloudFunctionsService _cloudFunctions;
   final ReceitaAgroRemoteConfigService _remoteConfig;
+  final ISubscriptionRepository _subscriptionRepository;
 
   /// Constructor with dependency injection
   ReceitaAgroPremiumService({
     required ReceitaAgroAnalyticsService analytics,
     required ReceitaAgroCloudFunctionsService cloudFunctions,
     required ReceitaAgroRemoteConfigService remoteConfig,
+    required ISubscriptionRepository subscriptionRepository,
   })  : _analytics = analytics,
         _cloudFunctions = cloudFunctions,
-        _remoteConfig = remoteConfig;
+        _remoteConfig = remoteConfig,
+        _subscriptionRepository = subscriptionRepository;
 
   /// Factory for singleton pattern (optional, for backward compatibility)
   /// DEPRECATED: Use constructor injection via DI container instead
@@ -153,18 +158,17 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   bool _initialized = false;
   bool _isDisposed = false;
   PremiumStatus _status = PremiumStatus.free();
-  List<StoreProduct> _availableProducts = [];
-  List<Package> _availablePackages = [];
-  CustomerInfo? _customerInfo;
+  List<ProductInfo> _availableProducts = [];
+  SubscriptionEntity? _currentSubscription;
   String? _lastError;
   bool _isLoading = false;
+  StreamSubscription<SubscriptionEntity?>? _subscriptionStreamSubscription;
 
   // Getters
   bool get initialized => _initialized;
   PremiumStatus get status => _status;
-  List<StoreProduct> get availableProducts => _availableProducts;
-  List<Package> get availablePackages => _availablePackages;
-  CustomerInfo? get customerInfo => _customerInfo;
+  List<ProductInfo> get availableProducts => _availableProducts;
+  SubscriptionEntity? get currentSubscription => _currentSubscription;
   String? get lastError => _lastError;
   bool get isLoading => _isLoading;
 
@@ -180,18 +184,18 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      // Skip RevenueCat configuration on web platform
+      // Skip initialization on web platform
       if (kIsWeb) {
         developer.log(
-          '🌐 Premium Service: Skipping RevenueCat configuration on web platform',
+          '🌐 Premium Service: Skipping on web platform',
           name: 'PremiumService',
         );
-        
+
         // Set mock status for web
         _status = PremiumStatus.free();
         _initialized = true;
         _setLoading(false);
-        
+
         developer.log(
           '✅ Premium Service initialized (web mock mode)',
           name: 'PremiumService',
@@ -199,25 +203,27 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
         return;
       }
 
-      // Configure RevenueCat (mobile only)
-      final configuration = PurchasesConfiguration(
-        _getRevenueCatApiKey(),
+      // Listen to subscription status stream from core
+      _subscriptionStreamSubscription = _subscriptionRepository.subscriptionStatus.listen(
+        _handleSubscriptionUpdate,
+        onError: (Object error) {
+          developer.log(
+            '⚠️ Subscription stream error: $error',
+            name: 'PremiumService',
+            error: error,
+          );
+        },
       );
-      
-      await Purchases.configure(configuration);
 
-      // Set up listeners
-      Purchases.addCustomerInfoUpdateListener(_handleCustomerInfoUpdate);
-
-      // Load initial data
-      await _loadCustomerInfo();
+      // Load initial data from core repository
+      await _loadCurrentSubscription();
       await _loadProducts();
-      
+
       _initialized = true;
 
       if (EnvironmentConfig.enableLogging) {
         developer.log(
-          '✅ Premium Service initialized',
+          '✅ Premium Service initialized (using core ISubscriptionRepository)',
           name: 'PremiumService',
         );
       }
@@ -230,7 +236,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       );
     } catch (e, stackTrace) {
       _setError('Failed to initialize Premium Service: $e');
-      
+
       await _analytics.recordError(
         e,
         stackTrace,
@@ -249,7 +255,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   }
 
   /// Purchase a premium subscription
-  Future<Either<String, CustomerInfo>> purchasePackage(Package package) async {
+  Future<Either<String, SubscriptionEntity>> purchaseProduct(String productId) async {
     if (!_initialized) {
       return const Left('Premium Service not initialized');
     }
@@ -260,25 +266,37 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     try {
       await _analytics.logSubscriptionEvent(
         'purchase_started',
-        package.storeProduct.identifier,
+        productId,
       );
 
-      final purchaseResult = await Purchases.purchasePackage(package);
-      final customerInfo = purchaseResult.customerInfo;
-      
-      // Validate with cloud functions
-      await _syncWithCloudFunctions(customerInfo);
-      
-      await _analytics.logSubscriptionEvent(
-        'purchased',
-        package.storeProduct.identifier,
-        additionalData: {
-          'price': package.storeProduct.price,
-          'currency': package.storeProduct.currencyCode,
+      final result = await _subscriptionRepository.purchaseProduct(productId: productId);
+
+      return result.fold(
+        (failure) {
+          final errorMessage = 'Purchase failed: ${failure.message}';
+          _setError(errorMessage);
+          return Left(errorMessage);
+        },
+        (subscription) async {
+          // Update local status
+          _currentSubscription = subscription;
+          _updatePremiumStatusFromEntity(subscription);
+
+          // Sync with cloud functions
+          await _syncSubscriptionWithCloudFunctions(subscription);
+
+          await _analytics.logSubscriptionEvent(
+            'purchased',
+            productId,
+            additionalData: {
+              'tier': subscription.tier.name,
+              'status': subscription.status.name,
+            },
+          );
+
+          return Right(subscription);
         },
       );
-
-      return Right(customerInfo);
     } catch (e, stackTrace) {
       final errorMessage = 'Purchase failed: $e';
       _setError(errorMessage);
@@ -286,7 +304,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       await _analytics.recordError(
         e,
         stackTrace,
-        reason: 'Purchase failed: ${package.storeProduct.identifier}',
+        reason: 'Purchase failed: $productId',
       );
 
       developer.log(
@@ -303,7 +321,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   }
 
   /// Restore purchases
-  Future<Either<String, CustomerInfo>> restorePurchases() async {
+  Future<Either<String, List<SubscriptionEntity>>> restorePurchases() async {
     if (!_initialized) {
       return const Left('Premium Service not initialized');
     }
@@ -312,20 +330,39 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     _clearError();
 
     try {
-      final customerInfo = await Purchases.restorePurchases();
-      
-      // Sync with cloud functions
-      await _syncWithCloudFunctions(customerInfo);
+      final result = await _subscriptionRepository.restorePurchases();
 
-      await _analytics.logEvent(
-        ReceitaAgroAnalyticsEvent.subscriptionViewed.eventName,
-        {
-          'action': 'restore',
-          'active_subscriptions': customerInfo.activeSubscriptions.length,
+      return result.fold(
+        (failure) {
+          final errorMessage = 'Restore failed: ${failure.message}';
+          _setError(errorMessage);
+          return Left(errorMessage);
+        },
+        (subscriptions) async {
+          // Update local status with the first active subscription
+          if (subscriptions.isNotEmpty) {
+            final activeSubscription = subscriptions.firstWhere(
+              (sub) => sub.isActive,
+              orElse: () => subscriptions.first,
+            );
+            _currentSubscription = activeSubscription;
+            _updatePremiumStatusFromEntity(activeSubscription);
+
+            // Sync with cloud functions
+            await _syncSubscriptionWithCloudFunctions(activeSubscription);
+          }
+
+          await _analytics.logEvent(
+            ReceitaAgroAnalyticsEvent.subscriptionViewed.eventName,
+            {
+              'action': 'restore',
+              'active_subscriptions': subscriptions.where((s) => s.isActive).length,
+            },
+          );
+
+          return Right(subscriptions);
         },
       );
-
-      return Right(customerInfo);
     } catch (e, stackTrace) {
       final errorMessage = 'Restore failed: $e';
       _setError(errorMessage);
@@ -396,14 +433,27 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     );
   }
 
-  /// Load customer info and update status
-  Future<void> _loadCustomerInfo() async {
+  /// Load current subscription and update status
+  Future<void> _loadCurrentSubscription() async {
     try {
-      _customerInfo = await Purchases.getCustomerInfo();
-      _updatePremiumStatus(_customerInfo!);
+      final result = await _subscriptionRepository.getCurrentSubscription();
+      result.fold(
+        (failure) {
+          developer.log(
+            '⚠️ Failed to load subscription: ${failure.message}',
+            name: 'PremiumService',
+          );
+        },
+        (subscription) {
+          _currentSubscription = subscription;
+          if (subscription != null) {
+            _updatePremiumStatusFromEntity(subscription);
+          }
+        },
+      );
     } catch (e) {
       developer.log(
-        '⚠️ Failed to load customer info: $e',
+        '⚠️ Failed to load current subscription: $e',
         name: 'PremiumService',
         error: e,
       );
@@ -413,14 +463,18 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   /// Load available products
   Future<void> _loadProducts() async {
     try {
-      final offerings = await Purchases.getOfferings();
-      
-      if (offerings.current != null) {
-        _availablePackages = offerings.current!.availablePackages;
-        _availableProducts = _availablePackages
-            .map((package) => package.storeProduct)
-            .toList();
-      }
+      final result = await _subscriptionRepository.getReceitaAgroProducts();
+      result.fold(
+        (failure) {
+          developer.log(
+            '⚠️ Failed to load products: ${failure.message}',
+            name: 'PremiumService',
+          );
+        },
+        (products) {
+          _availableProducts = products;
+        },
+      );
     } catch (e) {
       developer.log(
         '⚠️ Failed to load products: $e',
@@ -430,35 +484,26 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     }
   }
 
-  /// Handle customer info updates
-  void _handleCustomerInfoUpdate(CustomerInfo customerInfo) {
-    _customerInfo = customerInfo;
-    _updatePremiumStatus(customerInfo);
-    
-    // Sync with cloud functions
-    _syncWithCloudFunctions(customerInfo);
+  /// Handle subscription updates from stream
+  void _handleSubscriptionUpdate(SubscriptionEntity? subscription) {
+    _currentSubscription = subscription;
+    if (subscription != null) {
+      _updatePremiumStatusFromEntity(subscription);
+      // Sync with cloud functions
+      _syncSubscriptionWithCloudFunctions(subscription);
+    } else {
+      _status = PremiumStatus.free();
+      notifyListeners();
+    }
   }
 
-  /// Update premium status based on customer info
-  void _updatePremiumStatus(CustomerInfo customerInfo) {
-    final hasActiveSubscription = customerInfo.activeSubscriptions.isNotEmpty;
-    final entitlementInfo = customerInfo.entitlements.active.values.isNotEmpty
-        ? customerInfo.entitlements.active.values.first
-        : null;
-
-    if (hasActiveSubscription && entitlementInfo != null) {
-      // Parse expiration date correctly from EntitlementInfo
-      DateTime? parsedExpirationDate;
-      final expirationDateString = entitlementInfo.expirationDate;
-      if (expirationDateString != null && expirationDateString.isNotEmpty) {
-        // entitlementInfo.expirationDate is already a String, no need for toString()
-        parsedExpirationDate = DateTime.tryParse(expirationDateString);
-      }
-
+  /// Update premium status based on subscription entity
+  void _updatePremiumStatusFromEntity(SubscriptionEntity subscription) {
+    if (subscription.isActive && subscription.isReceitaAgroSubscription) {
       _status = PremiumStatus.premium(
-        expirationDate: parsedExpirationDate ?? DateTime.now().add(const Duration(days: 30)),
-        productId: entitlementInfo.productIdentifier,
-        isTrialActive: entitlementInfo.periodType == PeriodType.trial,
+        expirationDate: subscription.expirationDate ?? DateTime.now().add(const Duration(days: 30)),
+        productId: subscription.productId,
+        isTrialActive: subscription.isTrialActive,
         maxDevices: _remoteConfig.getIntConfig(ReceitaAgroConfigKey.maxDevicesPerSubscription),
       );
     } else {
@@ -469,19 +514,14 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   }
 
   /// Sync subscription with cloud functions
-  Future<void> _syncWithCloudFunctions(CustomerInfo customerInfo) async {
+  Future<void> _syncSubscriptionWithCloudFunctions(SubscriptionEntity subscription) async {
     try {
-      if (customerInfo.activeSubscriptions.isNotEmpty) {
-        final activeSubscription = customerInfo.activeSubscriptions.first;
-        final entitlement = customerInfo.entitlements.active[activeSubscription];
-
-        if (entitlement != null) {
-          await _cloudFunctions.syncRevenueCatPurchase(
-            receiptData: customerInfo.originalPurchaseDate?.toString() ?? '',
-            productId: entitlement.productIdentifier,
-            purchaseToken: customerInfo.originalApplicationVersion ?? '',
-          );
-        }
+      if (subscription.isActive) {
+        await _cloudFunctions.syncRevenueCatPurchase(
+          receiptData: subscription.originalPurchaseDate?.toIso8601String() ?? '',
+          productId: subscription.productId,
+          purchaseToken: subscription.id,
+        );
       }
     } catch (e) {
       developer.log(
@@ -489,21 +529,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
         name: 'PremiumService',
         error: e,
       );
-    }
-  }
-
-  /// Get RevenueCat API key based on environment
-  String _getRevenueCatApiKey() {
-    try {
-      // Use app-specific configuration
-      final config = ReceituagroEnvironmentConfig();
-      return config.revenueCatApiKey;
-    } catch (e) {
-      // Fallback to dummy keys
-      if (kDebugMode) {
-        print('[PremiumService] Using fallback API key due to configuration error: $e');
-      }
-      return EnvironmentConfig.isProductionMode ? 'dummy_prod_key' : 'dummy_dev_key';
     }
   }
 
@@ -566,21 +591,19 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
 
     _isDisposed = true;
 
-    // Remove RevenueCat listener to prevent memory leak
+    // Cancel subscription stream listener
     try {
-      if (_initialized && !kIsWeb) {
-        Purchases.removeCustomerInfoUpdateListener(_handleCustomerInfoUpdate);
+      _subscriptionStreamSubscription?.cancel();
 
-        if (EnvironmentConfig.enableLogging) {
-          developer.log(
-            '🧹 RevenueCat listener removed',
-            name: 'PremiumService',
-          );
-        }
+      if (EnvironmentConfig.enableLogging) {
+        developer.log(
+          '🧹 Subscription stream listener cancelled',
+          name: 'PremiumService',
+        );
       }
     } catch (e) {
       developer.log(
-        '⚠️ Error removing RevenueCat listener: $e',
+        '⚠️ Error cancelling subscription stream: $e',
         name: 'PremiumService',
         error: e,
       );

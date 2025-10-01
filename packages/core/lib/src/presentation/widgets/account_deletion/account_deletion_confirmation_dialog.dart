@@ -85,10 +85,10 @@ class _AccountDeletionConfirmationDialogState
                     _buildInfoSection(
                       icon: Icons.info_outline,
                       title: 'LGPD/GDPR - Lei Geral de Proteção de Dados',
-                      content:
+                      content: Text(
                           'Você tem o direito de solicitar a exclusão de seus dados '
                           'pessoais de acordo com a LGPD (Lei 13.709/2018) e GDPR. '
-                          'Esta ação é permanente e não pode ser desfeita.',
+                          'Esta ação é permanente e não pode ser desfeita.'),
                       color: Colors.blue,
                     ),
                     const SizedBox(height: 16),

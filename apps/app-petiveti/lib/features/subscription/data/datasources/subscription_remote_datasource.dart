@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:core/core.dart' as core;
 
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/subscription_plan.dart';
@@ -20,277 +19,258 @@ abstract class SubscriptionRemoteDataSource {
   Future<void> restorePurchases(String userId);
   Future<bool> validateReceipt(String receiptData);
   Stream<UserSubscriptionModel?> watchSubscription(String userId);
+
+  /// Get management URL to direct user to store subscription settings
+  Future<String?> getSubscriptionManagementUrl();
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   final FirebaseFirestore firestore;
+  final core.ISubscriptionRepository subscriptionRepository;
 
   SubscriptionRemoteDataSourceImpl({
     required this.firestore,
+    required this.subscriptionRepository,
   });
 
-  Future<SubscriptionPlanModel> _createSubscriptionPlanModel(String planId) async {
-    final offerings = await Purchases.getOfferings();
-    final currentOffering = offerings.current;
-    
-    if (currentOffering != null) {
-      for (final package in currentOffering.availablePackages) {
-        if (package.identifier == planId) {
-          final product = package.storeProduct;
-          return SubscriptionPlanModel(
-            id: package.identifier,
-            productId: planId,
-            title: product.title,
-            description: product.description,
-            price: product.price,
-            currency: product.currencyCode,
-            type: _mapPackageToType(package.packageType),
-            features: const ['Premium Features'],
-            originalPrice: null,
-            trialDays: null,
-            metadata: const {
-              'source': 'revenuecat',
-            },
-          );
-        }
-      }
-    }
-    
-    // Fallback plan
+  // Helper method to map ProductInfo to SubscriptionPlanModel
+  SubscriptionPlanModel _mapProductInfoToPlan(core.ProductInfo productInfo) {
     return SubscriptionPlanModel(
-      id: planId,
-      productId: planId,
-      title: 'Premium Plan',
-      description: 'Premium subscription',
-      price: 0.0,
-      currency: 'USD',
-      type: PlanType.monthly,
-      features: const ['Premium features'],
-      originalPrice: null,
-      trialDays: null,
-      metadata: const {},
+      id: productInfo.productId,
+      productId: productInfo.productId,
+      title: productInfo.title,
+      description: productInfo.description,
+      price: productInfo.price,
+      currency: productInfo.currencyCode,
+      type: _mapSubscriptionPeriodToPlanType(productInfo.subscriptionPeriod),
+      durationInDays: _getDurationInDays(productInfo.subscriptionPeriod),
+      features: _getFeaturesForProduct(productInfo.productId),
+      isPopular: productInfo.productId.contains('yearly'),
+      originalPrice: null, // Not provided by core
+      trialDays: productInfo.freeTrialPeriod != null
+          ? _parseTrialDays(productInfo.freeTrialPeriod!)
+          : null,
+      metadata: {
+        'hasIntroPrice': productInfo.hasIntroPrice,
+        'hasTrial': productInfo.hasFreeTrial,
+      },
     );
   }
 
-  PlanType _mapPackageToType(PackageType packageType) {
-    switch (packageType) {
-      case PackageType.weekly:
-        return PlanType.monthly; // Não temos weekly no PlanType
-      case PackageType.monthly:
-        return PlanType.monthly;
-      case PackageType.annual:
-        return PlanType.yearly;
-      default:
-        return PlanType.monthly;
+  // Helper method to map SubscriptionEntity to UserSubscriptionModel
+  UserSubscriptionModel _mapSubscriptionEntityToUserSubscription(
+    core.SubscriptionEntity entity,
+    String userId,
+  ) {
+    final planModel = SubscriptionPlanModel(
+      id: entity.productId,
+      productId: entity.productId,
+      title: 'Premium Plan',
+      description: 'Premium subscription',
+      price: 0.0,
+      currency: 'BRL',
+      type: _mapTierToPlanType(entity.tier),
+      features: const ['Premium features'],
+    );
+
+    return UserSubscriptionModel(
+      id: entity.id,
+      userId: userId,
+      planId: entity.productId,
+      plan: planModel,
+      status: _mapSubscriptionStatusToPlanStatus(entity.status),
+      startDate: entity.purchaseDate ?? entity.createdAt ?? DateTime.now(),
+      expirationDate: entity.expirationDate,
+      cancelledAt: null, // Not available in SubscriptionEntity
+      pausedAt: null, // Not available in SubscriptionEntity
+      autoRenew: !entity.isExpired,
+      trialEndDate: entity.trialEndDate,
+      receiptData: entity.id, // Using subscription ID as receipt
+      metadata: {},
+      createdAt: entity.createdAt ?? DateTime.now(),
+      updatedAt: entity.updatedAt ?? DateTime.now(),
+    );
+  }
+
+  // Helper: Map subscription period to PlanType
+  PlanType _mapSubscriptionPeriodToPlanType(String? period) {
+    if (period == null) return PlanType.free;
+
+    final periodLower = period.toLowerCase();
+    if (periodLower.contains('month')) return PlanType.monthly;
+    if (periodLower.contains('year') || periodLower.contains('annual')) {
+      return PlanType.yearly;
     }
+    if (periodLower.contains('lifetime')) return PlanType.lifetime;
+
+    return PlanType.monthly;
+  }
+
+  // Helper: Get duration in days from subscription period
+  int? _getDurationInDays(String? period) {
+    if (period == null) return null;
+
+    final periodLower = period.toLowerCase();
+    if (periodLower.contains('month')) return 30;
+    if (periodLower.contains('year') || periodLower.contains('annual')) return 365;
+    if (periodLower.contains('lifetime')) return null;
+
+    return 30;
+  }
+
+  // Helper: Map SubscriptionTier to PlanType
+  PlanType _mapTierToPlanType(core.SubscriptionTier tier) {
+    switch (tier) {
+      case core.SubscriptionTier.free:
+        return PlanType.free;
+      case core.SubscriptionTier.premium:
+        return PlanType.monthly;
+      case core.SubscriptionTier.pro:
+        return PlanType.yearly;
+    }
+  }
+
+  // Helper: Map SubscriptionStatus to PlanStatus
+  PlanStatus _mapSubscriptionStatusToPlanStatus(core.SubscriptionStatus status) {
+    switch (status) {
+      case core.SubscriptionStatus.active:
+        return PlanStatus.active;
+      case core.SubscriptionStatus.expired:
+        return PlanStatus.expired;
+      case core.SubscriptionStatus.cancelled:
+        return PlanStatus.cancelled;
+      case core.SubscriptionStatus.pending:
+        return PlanStatus.pending;
+      case core.SubscriptionStatus.gracePeriod:
+        return PlanStatus.active; // Grace period is still active
+      case core.SubscriptionStatus.unknown:
+        return PlanStatus.pending;
+    }
+  }
+
+  // Helper: Parse trial days from period string
+  int? _parseTrialDays(String period) {
+    final match = RegExp(r'(\d+)').firstMatch(period);
+    if (match != null) {
+      final days = int.tryParse(match.group(1)!);
+      if (period.toLowerCase().contains('week') && days != null) {
+        return days * 7;
+      }
+      return days;
+    }
+    return null;
+  }
+
+  // Helper: Get features for product
+  List<String> _getFeaturesForProduct(String productId) {
+    return [
+      'Acesso ilimitado a todas as calculadoras',
+      'Lembretes inteligentes',
+      'Backup na nuvem',
+      'Suporte prioritário',
+      'Sem anúncios',
+    ];
   }
 
   @override
   Future<List<SubscriptionPlanModel>> getAvailablePlans() async {
     try {
-      // Get offerings from RevenueCat
-      final offerings = await Purchases.getOfferings();
-      
-      if (offerings.current == null) {
-        return [];
-      }
+      // Get products from core repository
+      final result = await subscriptionRepository.getAvailableProducts(
+        productIds: ['petiveti_monthly', 'petiveti_yearly'], // Configure as needed
+      );
 
-      final List<SubscriptionPlanModel> plans = [];
-      
-      // Convert RevenueCat offerings to our models
-      final currentOffering = offerings.current!;
-      
-      for (final package in currentOffering.availablePackages) {
-        final product = package.storeProduct;
-        
-        plans.add(SubscriptionPlanModel(
-          id: package.identifier,
-          productId: product.identifier,
-          title: product.title,
-          description: product.description,
-          price: product.price,
-          currency: product.currencyCode,
-          type: _mapPackageTypeToPlanType(package.packageType),
-          durationInDays: _getDurationInDays(package.packageType),
-          features: _getFeaturesForPackage(package.identifier),
-          isPopular: package.identifier.contains('yearly'),
-          originalPrice: null, // RevenueCat doesn't provide original price directly
-          trialDays: null, // Can be extracted from product.introPrice if available
-          metadata: {
-            'packageType': package.packageType.name,
-            'offeringId': currentOffering.identifier,
-          },
-        ));
-      }
-
-      return plans;
-    } on PlatformException catch (e) {
-      throw ServerException(message: 'Erro ao buscar planos: ${e.message}');
+      return result.fold(
+        (failure) => throw ServerException(message: failure.message),
+        (products) => products.map(_mapProductInfoToPlan).toList(),
+      );
     } catch (e) {
-      throw ServerException(message: 'Erro inesperado ao buscar planos: $e');
+      throw ServerException(message: 'Erro ao buscar planos: $e');
     }
   }
 
   @override
   Future<UserSubscriptionModel?> getCurrentSubscription(String userId) async {
     try {
-      // Get customer info from RevenueCat
-      final customerInfo = await Purchases.getCustomerInfo();
-      
-      // Also get from Firestore for additional metadata
-      final userDoc = await firestore
-          .collection('users')
-          .doc(userId)
-          .collection('subscriptions')
-          .orderBy('createdAt', descending: true)
-          .limit(1)
-          .get();
+      // Get current subscription from core repository
+      final result = await subscriptionRepository.getCurrentSubscription();
 
-      if (customerInfo.entitlements.active.isEmpty) {
-        return null;
-      }
-
-      // Get the first active entitlement (should be primary subscription)
-      final entitlementInfo = customerInfo.entitlements.active.values.first;
-      
-      Map<String, dynamic>? firestoreData;
-      if (userDoc.docs.isNotEmpty) {
-        firestoreData = userDoc.docs.first.data();
-      }
-
-      // First, get the plan details
-      final planModel = await _createSubscriptionPlanModel(entitlementInfo.productIdentifier);
-      
-      return UserSubscriptionModel(
-        id: entitlementInfo.identifier,
-        userId: userId,
-        planId: entitlementInfo.productIdentifier,
-        plan: planModel,
-        status: _mapEntitlementToPlanStatus(entitlementInfo),
-        startDate: DateTime.tryParse(entitlementInfo.originalPurchaseDate) ?? DateTime.now(),
-        expirationDate: entitlementInfo.expirationDate != null ? DateTime.tryParse(entitlementInfo.expirationDate!) : null,
-        cancelledAt: null, // RevenueCat doesn't provide cancellation date directly
-        pausedAt: null,
-        autoRenew: entitlementInfo.willRenew,
-        trialEndDate: null, // Can be derived from entitlementInfo if needed
-        receiptData: customerInfo.originalPurchaseDate.toString(),
-        metadata: (firestoreData?['metadata'] as Map<String, dynamic>?) ?? {},
-        createdAt: firestoreData?['createdAt'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(firestoreData!['createdAt'] as int)
-            : DateTime.tryParse(entitlementInfo.originalPurchaseDate) ?? DateTime.now(),
-        updatedAt: DateTime.now(),
+      return result.fold(
+        (failure) => throw ServerException(message: failure.message),
+        (subscriptionEntity) {
+          if (subscriptionEntity == null) return null;
+          return _mapSubscriptionEntityToUserSubscription(subscriptionEntity, userId);
+        },
       );
-    } on PlatformException catch (e) {
-      throw ServerException(message: 'Erro ao buscar assinatura: ${e.message}');
     } catch (e) {
-      throw ServerException(message: 'Erro inesperado ao buscar assinatura: $e');
+      throw ServerException(message: 'Erro ao buscar assinatura: $e');
     }
   }
 
   @override
   Future<UserSubscriptionModel> subscribeToPlan(String userId, String planId) async {
     try {
-      // Get the package from offerings
-      final offerings = await Purchases.getOfferings();
-      final currentOffering = offerings.current;
-      
-      if (currentOffering == null) {
-        throw const ServerException(message: 'Nenhum plano disponível');
-      }
-
-      final package = currentOffering.availablePackages
-          .where((p) => p.identifier == planId)
-          .firstOrNull;
-
-      if (package == null) {
-        throw ServerException(message: 'Plano não encontrado: $planId');
-      }
-
-      // Make the purchase
-      final purchaseResult = await Purchases.purchasePackage(package);
-      
-      // Verify the purchase was successful
-      if (purchaseResult.customerInfo.entitlements.active.isEmpty) {
-        throw const ServerException(message: 'Falha na compra do plano');
-      }
-
-      final entitlementInfo = purchaseResult.customerInfo.entitlements.active.values.first;
-
-      // Save to Firestore for additional tracking
-      final subscriptionData = {
-        'userId': userId,
-        'planId': planId,
-        'status': _mapEntitlementToPlanStatus(entitlementInfo).name,
-        'startedAt': DateTime.tryParse(entitlementInfo.originalPurchaseDate)?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
-        'expiresAt': entitlementInfo.expirationDate != null 
-            ? DateTime.tryParse(entitlementInfo.expirationDate!)?.millisecondsSinceEpoch
-            : null,
-        'autoRenew': entitlementInfo.willRenew,
-        'receiptData': purchaseResult.customerInfo.originalPurchaseDate.toString(),
-        'metadata': {
-          'entitlementId': entitlementInfo.identifier,
-          'productId': entitlementInfo.productIdentifier,
-        },
-        'createdAt': DateTime.now().millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-
-      await firestore
-          .collection('users')
-          .doc(userId)
-          .collection('subscriptions')
-          .add(subscriptionData);
-
-      // Also update user premium status
-      await firestore.collection('users').doc(userId).update({
-        'isPremium': true,
-        'premiumExpiresAt': entitlementInfo.expirationDate != null 
-            ? DateTime.tryParse(entitlementInfo.expirationDate!)?.millisecondsSinceEpoch
-            : null,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      });
-
-      return UserSubscriptionModel(
-        id: entitlementInfo.identifier,
-        userId: userId,
-        planId: planId,
-        plan: SubscriptionPlanModel(
-          id: planId,
-          productId: planId,
-          title: 'Plano Premium',
-          description: 'Plano Premium',
-          price: 0.0,
-          currency: 'R\$',
-          type: PlanType.monthly,
-          features: const [],
-        ),
-        status: _mapEntitlementToPlanStatus(entitlementInfo),
-        startDate: DateTime.tryParse(entitlementInfo.originalPurchaseDate) ?? DateTime.now(),
-        expirationDate: entitlementInfo.expirationDate != null 
-            ? DateTime.tryParse(entitlementInfo.expirationDate!)
-            : null,
-        cancelledAt: null,
-        pausedAt: null,
-        autoRenew: entitlementInfo.willRenew,
-        trialEndDate: null,
-        receiptData: purchaseResult.customerInfo.originalPurchaseDate.toString(),
-        metadata: subscriptionData['metadata'] as Map<String, dynamic>,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+      // Purchase product via core repository
+      final result = await subscriptionRepository.purchaseProduct(
+        productId: planId,
       );
-    } on PlatformException catch (e) {
-      throw ServerException(message: 'Erro na compra: ${e.message}');
+
+      return result.fold(
+        (failure) => throw ServerException(message: failure.message),
+        (subscriptionEntity) async {
+          // Save to Firestore for cross-device sync
+          final subscriptionData = {
+            'userId': userId,
+            'planId': planId,
+            'status': subscriptionEntity.status.name,
+            'startedAt': subscriptionEntity.purchaseDate?.millisecondsSinceEpoch ??
+                        DateTime.now().millisecondsSinceEpoch,
+            'expiresAt': subscriptionEntity.expirationDate?.millisecondsSinceEpoch,
+            'autoRenew': !subscriptionEntity.isExpired,
+            'receiptData': subscriptionEntity.id,
+            'metadata': {
+              'entitlementId': subscriptionEntity.id,
+              'productId': subscriptionEntity.productId,
+            },
+            'createdAt': DateTime.now().millisecondsSinceEpoch,
+            'updatedAt': DateTime.now().millisecondsSinceEpoch,
+          };
+
+          await firestore
+              .collection('users')
+              .doc(userId)
+              .collection('subscriptions')
+              .add(subscriptionData);
+
+          // Update user premium status
+          await firestore.collection('users').doc(userId).update({
+            'isPremium': subscriptionEntity.isActive,
+            'premiumExpiresAt': subscriptionEntity.expirationDate?.millisecondsSinceEpoch,
+            'updatedAt': DateTime.now().millisecondsSinceEpoch,
+          });
+
+          return _mapSubscriptionEntityToUserSubscription(subscriptionEntity, userId);
+        },
+      );
     } catch (e) {
-      throw ServerException(message: 'Erro inesperado na compra: $e');
+      throw ServerException(message: 'Erro na compra: $e');
     }
   }
 
   @override
   Future<void> cancelSubscription(String userId) async {
     try {
-      // Note: RevenueCat doesn't provide direct cancellation
-      // This typically needs to be done through the app store
-      // We update our records to reflect the intention
+      // IMPORTANT: Subscription cancellation cannot be done programmatically.
+      // Users MUST cancel through:
+      // - iOS: Settings → Apple ID → Subscriptions
+      // - Android: Play Store → Subscriptions
+      //
+      // This method only updates Firestore to track cancellation intent
+      // and prevent features from being enabled after store cancellation.
+      //
+      // The actual cancellation status comes from RevenueCat webhooks
+      // which update when the store processes the cancellation.
+
       await firestore
           .collection('users')
           .doc(userId)
@@ -315,7 +295,14 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<void> pauseSubscription(String userId) async {
     try {
-      // Similar to cancellation, pausing might need to be done through app store
+      // IMPORTANT: Subscription pausing cannot be done programmatically.
+      // This is a store-level operation:
+      // - Android: Play Store supports pausing (up to 3 months)
+      // - iOS: Not supported by App Store
+      //
+      // This method only updates Firestore to track pause intent locally.
+      // The actual pause must be done by user through Play Store settings.
+
       await firestore
           .collection('users')
           .doc(userId)
@@ -368,41 +355,43 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<void> restorePurchases(String userId) async {
     try {
-      final customerInfo = await Purchases.restorePurchases();
-      
-      // Update user premium status based on restored purchases
-      final hasPremium = customerInfo.entitlements.active.isNotEmpty;
-      DateTime? expiresAt;
-      
-      if (hasPremium) {
-        final entitlement = customerInfo.entitlements.active.values.first;
-        expiresAt = entitlement.expirationDate != null 
-            ? DateTime.tryParse(entitlement.expirationDate!) 
-            : null;
-      }
+      final result = await subscriptionRepository.restorePurchases();
 
-      await firestore.collection('users').doc(userId).update({
-        'isPremium': hasPremium,
-        'premiumExpiresAt': expiresAt?.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      });
-    } on PlatformException catch (e) {
-      throw ServerException(message: 'Erro ao restaurar compras: ${e.message}');
+      return result.fold(
+        (failure) => throw ServerException(message: failure.message),
+        (subscriptions) async {
+          final hasPremium = subscriptions.isNotEmpty;
+          DateTime? expiresAt;
+
+          if (hasPremium) {
+            final latestSubscription = subscriptions.first;
+            expiresAt = latestSubscription.expirationDate;
+          }
+
+          await firestore.collection('users').doc(userId).update({
+            'isPremium': hasPremium,
+            'premiumExpiresAt': expiresAt?.millisecondsSinceEpoch,
+            'updatedAt': DateTime.now().millisecondsSinceEpoch,
+          });
+        },
+      );
     } catch (e) {
-      throw ServerException(message: 'Erro inesperado ao restaurar compras: $e');
+      throw ServerException(message: 'Erro ao restaurar compras: $e');
     }
   }
 
   @override
   Future<bool> validateReceipt(String receiptData) async {
     try {
-      // RevenueCat handles receipt validation automatically
-      final customerInfo = await Purchases.getCustomerInfo();
-      return customerInfo.entitlements.active.isNotEmpty;
-    } on PlatformException catch (e) {
-      throw ServerException(message: 'Erro ao validar recibo: ${e.message}');
+      // Use getCurrentSubscription to validate
+      final result = await subscriptionRepository.getCurrentSubscription();
+
+      return result.fold(
+        (failure) => throw ServerException(message: failure.message),
+        (subscription) => subscription?.isActive ?? false,
+      );
     } catch (e) {
-      throw ServerException(message: 'Erro inesperado ao validar recibo: $e');
+      throw ServerException(message: 'Erro ao validar recibo: $e');
     }
   }
 
@@ -423,51 +412,23 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       final doc = snapshot.docs.first;
       final data = doc.data();
 
-      // Also get latest customer info from RevenueCat
+      // Get latest subscription info from core repository
       try {
-        final customerInfo = await Purchases.getCustomerInfo();
-        final hasActiveEntitlement = customerInfo.entitlements.active.isNotEmpty;
-        
-        if (!hasActiveEntitlement) {
-          return null;
-        }
+        final result = await subscriptionRepository.getCurrentSubscription();
 
-        final entitlement = customerInfo.entitlements.active.values.first;
+        return result.fold(
+          (_) => null, // On failure, return null
+          (subscriptionEntity) {
+            if (subscriptionEntity == null) return null;
 
-        return UserSubscriptionModel(
-          id: doc.id,
-          userId: userId,
-          planId: (data['planId'] as String?) ?? entitlement.productIdentifier,
-          plan: SubscriptionPlanModel(
-            id: entitlement.productIdentifier,
-            productId: entitlement.productIdentifier,
-            title: 'Plano Premium',
-            description: 'Plano Premium',
-            price: 0.0,
-            currency: 'R\$',
-            type: PlanType.monthly,
-            features: const [],
-          ),
-          status: _mapEntitlementToPlanStatus(entitlement),
-          startDate: DateTime.fromMillisecondsSinceEpoch(data['startedAt'] as int),
-          expirationDate: entitlement.expirationDate != null 
-              ? DateTime.tryParse(entitlement.expirationDate!)
-              : null,
-          cancelledAt: data['cancelledAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(data['cancelledAt'] as int)
-              : null,
-          pausedAt: data['pausedAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(data['pausedAt'] as int)
-              : null,
-          autoRenew: entitlement.willRenew,
-          trialEndDate: null,
-          receiptData: (data['receiptData'] as String?) ?? '',
-          metadata: Map<String, dynamic>.from(data['metadata'] as Map<dynamic, dynamic>? ?? {}),
-          createdAt: DateTime.fromMillisecondsSinceEpoch(data['createdAt'] as int),
-          updatedAt: DateTime.now(),
+            return _mapSubscriptionEntityToUserSubscription(
+              subscriptionEntity,
+              userId,
+            );
+          },
         );
       } catch (e) {
-        // If RevenueCat fails, return data from Firestore only
+        // Fallback to Firestore data if core repository fails
         return UserSubscriptionModel(
           id: doc.id,
           userId: userId,
@@ -478,7 +439,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
             title: 'Plano Básico',
             description: 'Plano básico temporário',
             price: 0.0,
-            currency: 'R\$',
+            currency: 'BRL',
             type: PlanType.free,
             features: const [],
           ),
@@ -507,60 +468,22 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
     });
   }
 
-  // Helper methods
-  PlanType _mapPackageTypeToPlanType(PackageType packageType) {
-    switch (packageType) {
-      case PackageType.monthly:
-        return PlanType.monthly;
-      case PackageType.annual:
-        return PlanType.yearly;
-      case PackageType.lifetime:
-        return PlanType.lifetime;
-      default:
-        return PlanType.monthly;
-    }
-  }
+  @override
+  Future<String?> getSubscriptionManagementUrl() async {
+    try {
+      // Get management URL from core repository
+      final result = await subscriptionRepository.getManagementUrl();
 
-  int? _getDurationInDays(PackageType packageType) {
-    switch (packageType) {
-      case PackageType.monthly:
-        return 30;
-      case PackageType.annual:
-        return 365;
-      case PackageType.lifetime:
-        return null;
-      default:
-        return 30;
+      return result.fold(
+        (failure) {
+          // Return null on failure, caller should handle fallback
+          return null;
+        },
+        (url) => url,
+      );
+    } catch (e) {
+      // Return null on error, caller should handle fallback
+      return null;
     }
-  }
-
-  List<String> _getFeaturesForPackage(String packageId) {
-    // This would typically come from your backend or be configured
-    return [
-      'Acesso ilimitado a todas as calculadoras',
-      'Lembretes inteligentes',
-      'Backup na nuvem',
-      'Suporte prioritário',
-      'Sem anúncios',
-    ];
-  }
-
-  PlanStatus _mapEntitlementToPlanStatus(EntitlementInfo entitlementInfo) {
-    if (entitlementInfo.isActive) {
-      return PlanStatus.active;
-    } else if (entitlementInfo.expirationDate != null) {
-      // Se expirationDate é String, converte para DateTime
-      DateTime? expirationDateTime;
-      if (entitlementInfo.expirationDate is DateTime) {
-        expirationDateTime = entitlementInfo.expirationDate as DateTime;
-      } else if (entitlementInfo.expirationDate is String) {
-        expirationDateTime = DateTime.tryParse(entitlementInfo.expirationDate as String);
-      }
-      
-      if (expirationDateTime?.isBefore(DateTime.now()) == true) {
-        return PlanStatus.expired;
-      }
-    }
-    return PlanStatus.cancelled;
   }
 }

@@ -51,6 +51,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Custom modules
+import 'modules/subscription_module.dart';
+
 // Import generated file (will be created by code generation)
 // import 'injection_container.config.dart';
 
@@ -349,7 +352,12 @@ Future<void> configureAppDependencies() async {
   // All @injectable/@singleton/@lazySingleton classes are automatically registered
   // This includes all providers, use cases, repositories, and data sources
   configureDependencies();
-  
+
+  // === CUSTOM MODULES ===
+
+  // Initialize subscription module
+  initSubscriptionModule(getIt);
+
   // === POST-INITIALIZATION ===
   
   debugPrint('✅ App Dependencies configured successfully!');

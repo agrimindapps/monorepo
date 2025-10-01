@@ -173,6 +173,7 @@ class InputSanitizer {
   }
   
   /// Log function for debugging sanitization issues (in debug mode only)
+  // ignore: unused_element
   static void _logSanitization(String original, String sanitized) {
     assert(() {
       if (original != sanitized) {

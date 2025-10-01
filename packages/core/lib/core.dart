@@ -183,7 +183,7 @@ export 'src/shared/utils/result.dart';
 // ========== SYNC SYSTEM ==========
 export 'src/sync/app_sync_config.dart';
 export 'src/sync/conflict_resolution/conflict_resolver_factory.dart' hide SyncFailure;
-export 'src/sync/entity_sync_registration.dart' hide IConflictResolver;
+export 'src/sync/entity_sync_registration.dart' hide IConflictResolver, SyncPriority;
 export 'src/sync/unified_sync_manager.dart';
 
 // Sync Interfaces
@@ -195,8 +195,10 @@ export 'src/sync/services/plantis_sync_service.dart';
 export 'src/sync/services/gasometer_sync_service.dart';
 export 'src/sync/services/receituagro_sync_service.dart';
 export 'src/sync/services/taskolist_sync_service.dart';
-export 'src/sync/services/petiveti_sync_service.dart';
-export 'src/sync/services/agrihurbi_sync_service.dart';
+// Note: petiveti_sync_service.dart and agrihurbi_sync_service.dart exist but are not exported here
+// to avoid potential conflicts. Import them directly from 'package:core/src/sync/sync.dart' if needed.
+// export 'src/sync/services/petiveti_sync_service.dart';
+// export 'src/sync/services/agrihurbi_sync_service.dart';
 
 // ========== FEATURES ==========
 export 'src/features/subscription/subscription_page.dart';

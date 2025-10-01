@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/di/modules/account_deletion_module.dart';
 import 'core/di/modules/sync_module.dart';
 import 'firebase_options.dart';
 
@@ -30,6 +31,16 @@ Future<void> main() async {
 
     // Initialize dependency injection (includes Hive initialization)
     await di.init();
+
+    // ===== ACCOUNT DELETION INITIALIZATION =====
+    // Initialize account deletion module after DI is ready
+    try {
+      print('🔐 MAIN: Initializing account deletion module...');
+      AccountDeletionModule.init(di.getIt);
+      print('✅ MAIN: Account deletion module initialized successfully');
+    } catch (e) {
+      print('❌ MAIN: Account deletion initialization failed: $e');
+    }
 
     // ===== SYNC INITIALIZATION =====
     // Force sync initialization after DI is ready

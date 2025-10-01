@@ -85,7 +85,7 @@ class DataCleanerService {
 
     for (final boxKey in availableBoxes) {
       try {
-        final box = Hive.box(boxKey);
+        final box = Hive.box<dynamic>(boxKey);
         final recordCount = box.keys.length;
         
         await box.clear();
@@ -121,7 +121,7 @@ class DataCleanerService {
         throw Exception('Box "$boxKey" não está aberta');
       }
 
-      final box = Hive.box(boxKey);
+      final box = Hive.box<dynamic>(boxKey);
       final recordCount = box.keys.length;
       
       await box.clear();

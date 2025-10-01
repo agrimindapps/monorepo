@@ -54,11 +54,13 @@ class _CrashlyticsHelper {
   }
 
   /// Mark as initialized (called after successful initialization)
+  // ignore: unused_element
   static void markAsInitialized() {
     _isInitialized = true;
   }
 
   /// Reset initialization status (for testing)
+  // ignore: unused_element
   static void reset() {
     _isInitialized = false;
     _lastInitCheck = null;

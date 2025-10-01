@@ -17,6 +17,7 @@ class TaskManagerAuthService {
   final TaskManagerCrashlyticsService _crashlyticsService;
   final TaskManagerSubscriptionService _subscriptionService;
   final TaskManagerSyncService _syncService;
+  final EnhancedAccountDeletionService _enhancedDeletionService;
 
   TaskManagerAuthService(
     this._authRepository,
@@ -24,6 +25,7 @@ class TaskManagerAuthService {
     this._crashlyticsService,
     this._subscriptionService,
     this._syncService,
+    this._enhancedDeletionService,
   );
 
   /// Stream do usuário atual
@@ -363,43 +365,59 @@ class TaskManagerAuthService {
     }
   }
 
-  /// Deletar conta do usuário
-  Future<Either<Failure, void>> deleteAccount() async {
+  /// Deletar conta do usuário - Enhanced with EnhancedAccountDeletionService
+  Future<Either<Failure, void>> deleteAccount({String? password}) async {
     try {
-      final currentUserData = await _getCurrentUserForAnalytics();
+      final user = await currentUser.first;
 
-      _logAuthEvent('account_deletion_requested', currentUserData);
+      if (user == null) {
+        return Left(AuthFailure('Nenhum usuário autenticado'));
+      }
 
-      // Usar o repositório diretamente para deletar conta
-      final result = await _authRepository.deleteAccount();
+      // Use Enhanced Account Deletion Service
+      final result = await _enhancedDeletionService.deleteAccount(
+        password: password ?? '',
+        userId: user.id,
+        isAnonymous: user.provider.name == 'anonymous',
+      );
 
       return result.fold(
-        (failure) {
+        (error) {
           _logAuthEvent('account_deletion_failed', {
-            'error_type': failure.runtimeType.toString(),
-            'error_message': failure.message,
-            ...currentUserData,
+            'error_message': error.message,
+            'user_id': user.id,
           });
 
           unawaited(_crashlyticsService.recordError(
-            exception: failure,
+            exception: error,
             stackTrace: StackTrace.current,
             reason: 'Account deletion failed',
           ));
 
-          return Left(failure);
+          return Left(AuthFailure(error.message));
         },
-        (_) {
-          _logAuthEvent('account_deleted', currentUserData);
+        (deletionResult) {
+          if (deletionResult.isSuccess) {
+            _logAuthEvent('account_deleted', {
+              'user_id': user.id,
+            });
 
-          // Limpar contexto do Crashlytics
-          _crashlyticsService.setTaskManagerContext(
-            userId: 'anonymous',
-            version: '1.0.0',
-            environment: 'production',
-          );
+            // Limpar contexto do Crashlytics
+            _crashlyticsService.setTaskManagerContext(
+              userId: 'anonymous',
+              version: '1.0.0',
+              environment: 'production',
+            );
 
-          return const Right(null);
+            return const Right(null);
+          } else {
+            _logAuthEvent('account_deletion_failed', {
+              'error_message': deletionResult.userMessage,
+              'user_id': user.id,
+            });
+
+            return Left(AuthFailure(deletionResult.userMessage));
+          }
         },
       );
     } catch (e) {

@@ -49,6 +49,7 @@ import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
 import 'core_package_integration.dart';
 import 'injection.dart' as injectable;
+import 'modules/account_deletion_module.dart';
 import 'repositories_di.dart';
 
 final sl = core.GetIt.instance;
@@ -61,6 +62,10 @@ Future<void> init() async {
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
   // Configure all Clean Architecture dependencies first
   configureAllRepositoriesDependencies();
+
+  // ===== ACCOUNT DELETION =====
+  // Initialize account deletion module after repositories
+  AccountDeletionModule.init(sl);
   
   // ===== DEVICE MANAGEMENT =====
   // Register FirebaseDeviceService first (Web-safe)
@@ -458,6 +463,7 @@ Future<void> init() async {
   // ===== FINAL REGISTRATION - SERVICES WITH COMPLEX DEPENDENCIES =====
   // Premium Service (New Architecture) - Register at the end when all dependencies are available
   // Updated to use Constructor Injection instead of Singleton pattern
+  // Now uses core ISubscriptionRepository instead of direct purchases_flutter
   try {
     sl.registerLazySingleton<ReceitaAgroPremiumService>(
       () {
@@ -471,12 +477,16 @@ Future<void> init() async {
         if (!sl.isRegistered<ReceitaAgroRemoteConfigService>()) {
           throw StateError('ReceitaAgroRemoteConfigService must be registered before ReceitaAgroPremiumService');
         }
+        if (!sl.isRegistered<core.ISubscriptionRepository>()) {
+          throw StateError('ISubscriptionRepository must be registered before ReceitaAgroPremiumService');
+        }
 
         // Create instance with constructor injection (NEW ARCHITECTURE)
         final service = ReceitaAgroPremiumService(
           analytics: sl<ReceitaAgroAnalyticsService>(),
           cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
           remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
+          subscriptionRepository: sl<core.ISubscriptionRepository>(),
         );
 
         // Set deprecated singleton instance for backward compatibility
@@ -485,7 +495,7 @@ Future<void> init() async {
         return service;
       },
     );
-    if (kDebugMode) print('✅ ReceitaAgroPremiumService registered successfully with constructor injection');
+    if (kDebugMode) print('✅ ReceitaAgroPremiumService registered successfully with core ISubscriptionRepository');
   } catch (e) {
     if (kDebugMode) print('❌ ReceitaAgroPremiumService registration failed: $e');
     rethrow;

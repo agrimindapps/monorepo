@@ -775,7 +775,7 @@ class AuthProvider extends ChangeNotifier {
     _currentOperation = null;
 
     // Resetar estado de sincronização para próxima sessão
-    await _syncProvider?.resetSyncState();
+    _syncProvider?.resetSyncState();
 
     // Update AuthStateNotifier
     _authStateNotifier.updateUser(null);

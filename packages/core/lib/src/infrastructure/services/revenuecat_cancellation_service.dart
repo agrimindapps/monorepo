@@ -164,18 +164,18 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
           'identifier': entitlement.identifier,
           'productId': entitlement.productIdentifier,
           'periodType': entitlement.periodType.name,
-          'expiresDate': entitlement.expirationDate?.toIso8601String(),
+          'expiresDate': entitlement.expirationDate, // Already a String in ISO 8601 format
           'willRenew': entitlement.willRenew,
           'store': entitlement.store.name,
         };
 
         // Track latest expiration
         if (entitlement.expirationDate != null) {
-          final current = details['latestExpirationDate'];
-          if (current == null ||
-              entitlement.expirationDate!.isAfter(DateTime.parse(current))) {
-            details['latestExpirationDate'] =
-                entitlement.expirationDate!.toIso8601String();
+          final currentString = details['latestExpirationDate'] as String?;
+          final expirationDate = DateTime.parse(entitlement.expirationDate!);
+          if (currentString == null ||
+              expirationDate.isAfter(DateTime.parse(currentString))) {
+            details['latestExpirationDate'] = entitlement.expirationDate!;
           }
         }
       }

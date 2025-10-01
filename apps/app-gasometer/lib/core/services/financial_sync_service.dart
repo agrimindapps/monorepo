@@ -125,12 +125,16 @@ class FinancialSyncService {
     required FinancialAuditTrailService auditService,
     required FinancialConflictResolver conflictResolver,
     required UnifiedSyncManager coreSync,
-  })  : _validator = validator,
+  })  : // ignore: unused_field
+        _validator = validator,
         _auditService = auditService,
+        // ignore: unused_field
         _conflictResolver = conflictResolver,
         _coreSync = coreSync;
+  // ignore: unused_field
   final FinancialValidator _validator;
   final FinancialAuditTrailService _auditService;
+  // ignore: unused_field
   final FinancialConflictResolver _conflictResolver;
   final UnifiedSyncManager _coreSync;
 
@@ -144,6 +148,7 @@ class FinancialSyncService {
   DateTime? _lastSuccessfulSync;
 
   // Configuration
+  // ignore: unused_field
   static const Duration _syncInterval = Duration(minutes: 5);
   static const Duration _financialSyncInterval = Duration(minutes: 2); // More frequent for financial data
   static const int _maxConcurrentSyncs = 3;

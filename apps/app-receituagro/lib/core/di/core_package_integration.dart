@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 // Local imports
 import '../../features/analytics/analytics_service.dart';
+import '../providers/auth_notifier.dart';
 import '../providers/auth_provider.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_validation_service.dart';
@@ -445,17 +446,30 @@ class CorePackageIntegration {
       rethrow;
     }
 
-    // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)
+    // Register ReceitaAgro Auth Provider (Legacy - Provider pattern)
     if (!_sl.isRegistered<ReceitaAgroAuthProvider>()) {
       _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
         () => ReceitaAgroAuthProvider(
           authRepository: _sl<core.IAuthRepository>(),
           deviceService: _sl<DeviceIdentityService>(),
           analytics: _sl<ReceitaAgroAnalyticsService>(),
+          enhancedAccountDeletionService: _sl<core.EnhancedAccountDeletionService>(),
         ),
       );
     }
 
-    if (kDebugMode) print('✅ ReceitaAgro: Auth services registered successfully');
+    // Register AuthNotifier (Riverpod pattern - MIGRATION)
+    if (!_sl.isRegistered<AuthNotifier>()) {
+      _sl.registerLazySingleton<AuthNotifier>(
+        () => AuthNotifier(
+          authRepository: _sl<core.IAuthRepository>(),
+          deviceService: _sl<DeviceIdentityService>(),
+          analytics: _sl<ReceitaAgroAnalyticsService>(),
+          enhancedAccountDeletionService: _sl<core.EnhancedAccountDeletionService>(),
+        ),
+      );
+    }
+
+    if (kDebugMode) print('✅ ReceitaAgro: Auth services registered successfully (Provider + Riverpod)');
   }
 }

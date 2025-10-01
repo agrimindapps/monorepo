@@ -4,6 +4,7 @@ import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injectable_config.dart';
 import 'modules/core_module.dart';
+import 'modules/subscription_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
 /// 
@@ -35,12 +36,13 @@ class ModularInjectionContainer {
   }
 
   /// Create list of modules in dependency order
-  /// 
+  ///
   /// Follows Dependency Inversion Principle - high level depends on abstraction
   static List<DIModule> _createModules() {
     return [
-      CoreModule(),        // External services and core infrastructure
-      // AuthModule(),     // Auth services now registered via @injectable
+      CoreModule(),              // External services and core infrastructure
+      SubscriptionModule(),      // Subscription services (uses core ISubscriptionRepository)
+      // AuthModule(),           // Auth services now registered via @injectable
       // TODO: Add more modules in Phase 2
       // AnimalsModule(),
       // CalculatorsModule(),

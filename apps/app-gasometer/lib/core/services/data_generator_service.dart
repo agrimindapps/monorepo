@@ -25,7 +25,7 @@ class DataGeneratorService {
     }
 
     // Simular tempo de processamento
-    await Future.delayed(Duration(milliseconds: 500 + _random.nextInt(1500)));
+    await Future<void>.delayed(Duration(milliseconds: 500 + _random.nextInt(1500)));
 
     final startTime = DateTime.now();
     
@@ -81,7 +81,7 @@ class DataGeneratorService {
     }
     
     // TODO: Implementar limpeza real através dos repositories
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     
     if (kDebugMode) {
       debugPrint('✅ Dados limpos com sucesso');

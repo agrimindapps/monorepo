@@ -57,6 +57,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
   final auth_usecases.UpdateProfile _updateProfile;
   final auth_usecases.DeleteAccount _deleteAccount;
+  final EnhancedAccountDeletionService _enhancedDeletionService;
 
   // Rate limiting properties
   DateTime? _lastLoginAttempt;
@@ -79,6 +80,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     this._sendPasswordResetEmail,
     this._updateProfile,
     this._deleteAccount,
+    this._enhancedDeletionService,
   ) : super(const AuthState()) {
     _checkAuthState();
   }
@@ -445,26 +447,59 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<bool> deleteAccount() async {
+  Future<bool> deleteAccount({String? password}) async {
+    if (state.user == null) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        error: 'Nenhum usuário autenticado',
+      );
+      return false;
+    }
+
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _deleteAccount(const local.NoParams());
+    try {
+      // Use Enhanced Account Deletion Service
+      final result = await _enhancedDeletionService.deleteAccount(
+        password: password ?? '',
+        userId: state.user!.id,
+        isAnonymous: state.isAnonymous,
+      );
 
-    return result.fold(
-      (failure) {
-        state = state.copyWith(
-          status: AuthStatus.error,
-          error: failure.message,
-        );
-        return false;
-      },
-      (_) {
-        state = state.copyWith(
-          status: AuthStatus.unauthenticated,
-          user: null,
-        );
-        return true;
-      },
+      return result.fold(
+        (error) {
+          state = state.copyWith(
+            status: AuthStatus.error,
+            error: error.message,
+          );
+          return false;
+        },
+        (deletionResult) {
+          if (deletionResult.isSuccess) {
+            _performPostDeletionCleanup();
+            return true;
+          } else {
+            state = state.copyWith(
+              status: AuthStatus.error,
+              error: deletionResult.userMessage,
+            );
+            return false;
+          }
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        error: 'Erro inesperado: $e',
+      );
+      return false;
+    }
+  }
+
+  void _performPostDeletionCleanup() {
+    state = state.copyWith(
+      status: AuthStatus.unauthenticated,
+      user: null,
     );
   }
 
@@ -521,6 +556,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     di.getIt<auth_usecases.SendPasswordResetEmail>(),
     di.getIt<auth_usecases.UpdateProfile>(),
     di.getIt<auth_usecases.DeleteAccount>(),
+    di.getIt<EnhancedAccountDeletionService>(),
   );
 });
 

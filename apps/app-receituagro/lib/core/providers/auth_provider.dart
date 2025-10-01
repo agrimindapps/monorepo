@@ -20,8 +20,9 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
   final IAuthRepository _authRepository;
   final DeviceIdentityService _deviceService;
   final ReceitaAgroAnalyticsService _analytics;
+  final EnhancedAccountDeletionService _enhancedDeletionService;
   // Sync now handled by UnifiedSyncManager from core package
-  
+
   StreamSubscription<UserEntity?>? _userSubscription;
   UserEntity? _currentUser;
   UserSessionData? _sessionData;
@@ -32,9 +33,11 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
     required IAuthRepository authRepository,
     required DeviceIdentityService deviceService,
     required ReceitaAgroAnalyticsService analytics,
+    required EnhancedAccountDeletionService enhancedAccountDeletionService,
   })  : _authRepository = authRepository,
         _deviceService = deviceService,
-        _analytics = analytics {
+        _analytics = analytics,
+        _enhancedDeletionService = enhancedAccountDeletionService {
     _initializeAuthProvider();
   }
 
@@ -498,10 +501,14 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Excluir conta do usuário usando o AccountDeletionService do core
-  /// Integra com ReceitaAgroDataCleaner para limpeza de dados específicos
-  Future<AuthResult> deleteAccount() async {
+  /// Excluir conta do usuário - Enhanced with EnhancedAccountDeletionService
+  Future<AuthResult> deleteAccount({String? password}) async {
     try {
+      if (_currentUser == null) {
+        _errorMessage = 'Nenhum usuário autenticado';
+        return AuthResult.failure('Nenhum usuário autenticado');
+      }
+
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
@@ -511,63 +518,59 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       }
 
       _analytics.trackEvent('account_deletion_attempt', parameters: {
-        'user_id': _currentUser?.id ?? 'unknown',
+        'user_id': _currentUser!.id,
         'user_type': userType.toString(),
       });
 
-      // Criar instância do ReceitaAgroDataCleaner
-      final dataCleaner = ReceitaAgroDataCleaner();
-
-      // Criar AccountDeletionService com o data cleaner específico
-      final accountDeletionService = AccountDeletionService(
-        authRepository: _authRepository,
-        appDataCleaner: dataCleaner,
+      // Use Enhanced Account Deletion Service
+      final result = await _enhancedDeletionService.deleteAccount(
+        password: password ?? '',
+        userId: _currentUser!.id,
+        isAnonymous: isAnonymous,
       );
 
-      // Executar exclusão completa
-      final result = await accountDeletionService.deleteAccount();
-
       return result.fold(
-        (failure) {
-          _errorMessage = failure.message;
+        (error) {
+          _errorMessage = error.message;
           _analytics.trackEvent('account_deletion_failed', parameters: {
-            'error': failure.message,
-            'user_id': _currentUser?.id ?? 'unknown',
+            'error': error.message,
+            'user_id': _currentUser!.id,
           });
 
           if (kDebugMode) {
-            debugPrint('❌ ReceitaAgroAuthProvider: Exclusão de conta falhou - ${failure.message}');
+            debugPrint('❌ ReceitaAgroAuthProvider: Exclusão de conta falhou - ${error.message}');
           }
 
-          return AuthResult.failure(failure.message);
+          return AuthResult.failure(error.message);
         },
         (deletionResult) {
-          _analytics.trackEvent('account_deletion_success', parameters: {
-            'user_id': _currentUser?.id ?? 'unknown',
-            'firebase_delete_success': deletionResult.firebaseDeleteSuccess.toString(),
-            'local_data_cleaned': (deletionResult.localDataCleanupResult?['success'] == true).toString(),
-            'data_cleanup_verified': deletionResult.dataCleanupVerified.toString(),
-            'total_records_cleared': deletionResult.localDataCleanupResult?['totalRecordsCleared']?.toString() ?? '0',
-          });
+          if (deletionResult.isSuccess) {
+            _analytics.trackEvent('account_deletion_success', parameters: {
+              'user_id': _currentUser!.id,
+            });
 
-          if (kDebugMode) {
-            debugPrint('✅ ReceitaAgroAuthProvider: Exclusão de conta concluída com sucesso');
-            debugPrint('   Firebase: ${deletionResult.firebaseDeleteSuccess ? '✅' : '❌'}');
-            debugPrint('   Dados locais: ${deletionResult.localDataCleanupResult?['success'] == true ? '✅' : '⚠️'}');
-            debugPrint('   Verificação: ${deletionResult.dataCleanupVerified ? '✅' : '⚠️'}');
+            if (kDebugMode) {
+              debugPrint('✅ ReceitaAgroAuthProvider: Exclusão de conta concluída com sucesso');
+            }
+
+            // Clear local state
+            _performPostDeletionCleanup();
+
+            return AuthResult.success(const UserEntity(
+              id: 'deleted',
+              email: 'deleted@account.com',
+              displayName: 'Conta excluída',
+              provider: core.AuthProvider.anonymous,
+            ));
+          } else {
+            _errorMessage = deletionResult.userMessage;
+            _analytics.trackEvent('account_deletion_failed', parameters: {
+              'error': deletionResult.userMessage,
+              'user_id': _currentUser!.id,
+            });
+
+            return AuthResult.failure(deletionResult.userMessage);
           }
-
-          // Clear local state (Firebase auth will trigger user state change automatically)
-          _currentUser = null;
-          _sessionData = null;
-          _errorMessage = null;
-
-          return AuthResult.success(const UserEntity(
-            id: 'deleted',
-            email: 'deleted@account.com',
-            displayName: 'Conta excluída',
-            provider: core.AuthProvider.anonymous,
-          ));
         },
       );
 
@@ -584,6 +587,13 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void _performPostDeletionCleanup() {
+    _currentUser = null;
+    _sessionData = null;
+    _errorMessage = null;
+    notifyListeners();
   }
 
   /// Obter preview dos dados que serão excluídos

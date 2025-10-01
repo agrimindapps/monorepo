@@ -307,8 +307,12 @@ void main() async {
     await performanceService.markFirstFrame();
   }
 
-  // Run app (zone guarding handled by Flutter error handlers)
-  runApp(const ReceitaAgroApp());
+  // Run app with ProviderScope for Riverpod (zone guarding handled by Flutter error handlers)
+  runApp(
+    const ProviderScope(
+      child: ReceitaAgroApp(),
+    ),
+  );
 }
 
 class ReceitaAgroApp extends StatelessWidget {

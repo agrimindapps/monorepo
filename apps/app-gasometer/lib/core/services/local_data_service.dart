@@ -12,9 +12,9 @@ class LocalDataService {
   static const String _maintenanceBoxName = 'maintenance_local';
   static const String _userPreferencesKey = 'user_preferences';
 
-  late Box _vehiclesBox;
-  late Box _fuelRecordsBox;
-  late Box _maintenanceBox;
+  late Box<dynamic> _vehiclesBox;
+  late Box<dynamic> _fuelRecordsBox;
+  late Box<dynamic> _maintenanceBox;
   SharedPreferences? _prefs;
 
   bool _isInitialized = false;

@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -11,7 +12,7 @@ import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 
 /// Provider para operações de autenticação usando Clean Architecture
-/// 
+///
 /// Gerencia estado de autenticação seguindo padrões Provider
 /// Utiliza use cases para todas as operações de domínio
 @singleton
@@ -21,6 +22,7 @@ class AuthProvider extends ChangeNotifier {
   final LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final RefreshUserUseCase _refreshUserUseCase;
+  final EnhancedAccountDeletionService _enhancedDeletionService;
 
   AuthProvider({
     required LoginUseCase loginUseCase,
@@ -28,11 +30,13 @@ class AuthProvider extends ChangeNotifier {
     required LogoutUseCase logoutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required RefreshUserUseCase refreshUserUseCase,
+    required EnhancedAccountDeletionService enhancedAccountDeletionService,
   })  : _loginUseCase = loginUseCase,
         _registerUseCase = registerUseCase,
         _logoutUseCase = logoutUseCase,
         _getCurrentUserUseCase = getCurrentUserUseCase,
-        _refreshUserUseCase = refreshUserUseCase {
+        _refreshUserUseCase = refreshUserUseCase,
+        _enhancedDeletionService = enhancedAccountDeletionService {
     _initializeAuthState();
   }
 
@@ -367,6 +371,67 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     debugPrint('AuthProvider: Estado do usuário limpo');
+  }
+
+  /// Deleta a conta do usuário - Enhanced with EnhancedAccountDeletionService
+  Future<bool> deleteAccount({String? password}) async {
+    if (_currentUser == null) {
+      _setError('Nenhum usuário autenticado');
+      return false;
+    }
+
+    _isLoading = true;
+    _clearError();
+    notifyListeners();
+
+    try {
+      debugPrint('AuthProvider: Iniciando exclusão de conta');
+
+      // Use Enhanced Account Deletion Service
+      final result = await _enhancedDeletionService.deleteAccount(
+        password: password ?? '',
+        userId: _currentUser!.id,
+        isAnonymous: false, // agrihurbi doesn't support anonymous
+      );
+
+      return result.fold(
+        (error) {
+          debugPrint('AuthProvider: Erro ao deletar conta - ${error.message}');
+          _setError(error.message);
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        },
+        (deletionResult) {
+          if (deletionResult.isSuccess) {
+            debugPrint('AuthProvider: Conta deletada com sucesso');
+            _performPostDeletionCleanup();
+            return true;
+          } else {
+            debugPrint('AuthProvider: Falha na exclusão - ${deletionResult.userMessage}');
+            _setError(deletionResult.userMessage);
+            _isLoading = false;
+            notifyListeners();
+            return false;
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('AuthProvider: Erro inesperado ao deletar conta - $e');
+      _setError('Erro inesperado: $e');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void _performPostDeletionCleanup() {
+    _currentUser = null;
+    _isLoggedIn = false;
+    _isLoading = false;
+    _errorMessage = null;
+    notifyListeners();
+    debugPrint('AuthProvider: Limpeza pós-exclusão concluída');
   }
 
   @override

@@ -9,17 +9,18 @@ import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 
 /// Service para integração Firebase específica do Gasometer com Analytics
 class GasometerFirebaseService {
+  // ignore: unused_field
   static const String _subscriptionsCollection = 'subscriptions';
   static const String _appId = 'gasometer';
 
   static final GasometerAnalyticsService? _analytics = null; // TODO: Inject when needed
-  
+
   /// Diagnóstico de conectividade Firebase
   static Future<Map<String, dynamic>> checkFirebaseConnectivity() async {
     final result = <String, dynamic>{
       'timestamp': DateTime.now().toIso8601String(),
-      'connectivity': {},
-      'firestore': {},
+      'connectivity': <String, dynamic>{},
+      'firestore': <String, dynamic>{},
       'errors': <String>[],
     };
     

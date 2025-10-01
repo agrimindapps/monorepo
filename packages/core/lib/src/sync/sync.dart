@@ -27,10 +27,16 @@ export 'config/sync_feature_flags.dart';
 export 'services/gasometer_sync_service.dart';
 export 'services/plantis_sync_service.dart';
 export 'services/receituagro_sync_service.dart';
-export 'services/petiveti_sync_service.dart';
-export 'services/agrihurbi_sync_service.dart';
-export 'services/taskolist_sync_service.dart';
 export 'services/sync_logger.dart';
+// NOTE: The following exports are commented due to analyzer path resolution issues.
+// These files exist but the analyzer fails to recognize them. They can still be
+// imported directly by apps using the full path:
+// import 'package:core/src/sync/services/petiveti_sync_service.dart';
+// import 'package:core/src/sync/services/agrihurbi_sync_service.dart';
+// import 'package:core/src/sync/services/taskolist_sync_service.dart';
+// export 'services/petiveti_sync_service.dart';
+// export 'services/agrihurbi_sync_service.dart';
+// export 'services/taskolist_sync_service.dart';
 
 // Background Sync & Throttling - Phase 8 components
 export 'background/background_sync_manager.dart';

@@ -67,8 +67,8 @@ class BackgroundSyncSetupExample {
     final plantisService = PlantisSyncService(
       plantsRepository: null, // Injetar via DI
       spacesRepository: null,
-      tasksRepository: null,
-      commentsRepository: null,
+      plantTasksRepository: null,
+      plantCommentsRepository: null,
     );
 
     backgroundSync.registerService(

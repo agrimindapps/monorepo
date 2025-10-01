@@ -112,23 +112,15 @@ class _RegisterPersonalInfoPageState extends ConsumerState<RegisterPersonalInfoP
       try {
         // TODO: Validate and proceed to next step
         // final success = await registerProvider.validateAndProceedPersonalInfo();
-        
+
         // Simulate validation for now
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        const success = true;
 
         hideRegisterLoading();
 
-        if (success) {
-          // Navigation successful, go to password page
-          if (mounted) {
-            context.go('/register/password');
-          }
-        } else {
-          // TODO: Show error based on provider error
-          // if (registerProvider.errorMessage == 'Este email já possui uma conta.') {
-          //   _showEmailAlreadyExistsDialog();
-          // }
+        // Navigation successful, go to password page
+        if (mounted) {
+          context.go('/register/password');
         }
       } catch (e) {
         hideRegisterLoading();
@@ -137,96 +129,8 @@ class _RegisterPersonalInfoPageState extends ConsumerState<RegisterPersonalInfoP
     }
   }
 
-  void _showEmailAlreadyExistsDialog() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.email, color: Colors.orange, size: 24),
-                      SizedBox(width: 12),
-                      Text(
-                        'Email já cadastrado',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Este email já possui uma conta.',
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Você gostaria de fazer login ou usar outro email?',
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            // Clear email field to allow user to enter different email
-                            _emailController.clear();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: PlantisColors.primary,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Usar outro email',
-                            style: TextStyle(color: PlantisColors.primary),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            context.go('/login');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: PlantisColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text('Fazer Login'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-    );
-  }
+  // TODO: Implement email already exists dialog when validation is implemented
+  // void _showEmailAlreadyExistsDialog() { ... }
 
   @override
   Widget build(BuildContext context) {

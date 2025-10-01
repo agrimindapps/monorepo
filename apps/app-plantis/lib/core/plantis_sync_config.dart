@@ -233,7 +233,7 @@ abstract final class PlantisSyncConfig {
           entityType: Plant,
           collectionName: 'plants',
           fromMap: _plantFromFirebaseMap,
-          toMap: (entity) => (entity as Plant).toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -245,7 +245,7 @@ abstract final class PlantisSyncConfig {
           entityType: Space,
           collectionName: 'spaces',
           fromMap: _spaceFromFirebaseMap,
-          toMap: (entity) => (entity as Space).toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -257,7 +257,7 @@ abstract final class PlantisSyncConfig {
           entityType: Task,
           collectionName: 'tasks',
           fromMap: Task.fromFirebaseMap,
-          toMap: (entity) => (entity as Task).toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -269,7 +269,7 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (entity) => (entity as ComentarioModel).toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -281,7 +281,7 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (entity) => (entity as UserEntity).toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
           conflictStrategy:
               ConflictStrategy.remoteWins, // Remote vence para usuários
           enableRealtime: false, // Sem tempo real para economizar bateria
@@ -296,7 +296,7 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (entity) => (entity as SubscriptionEntity).toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
           conflictStrategy:
               ConflictStrategy
                   .remoteWins, // Remote sempre vence para assinaturas

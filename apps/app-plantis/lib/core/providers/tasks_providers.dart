@@ -30,7 +30,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   late final offline_queue.OfflineSyncQueueService _offlineQueue;
 
   // Stream subscription for auth state changes
-  // ignore: cancel_subscriptions
   StreamSubscription<UserEntity?>? _authSubscription;
 
   @override
@@ -55,6 +54,11 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 
     // Initialize auth listener
     _initializeAuthListener();
+
+    // Setup cleanup on dispose
+    ref.onDispose(() {
+      _authSubscription?.cancel();
+    });
 
     // Start with initial state
     return TasksState.initial();
@@ -127,7 +131,8 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     return task;
   }
 
-  /// Wait for authentication initialization with timeout
+  // TODO: Consider using this method for better auth initialization handling
+  /// Wait for authentication initialization with timeout (currently unused)
   Future<bool> _waitForAuthenticationWithTimeout({
     Duration timeout = const Duration(seconds: 10),
   }) async {

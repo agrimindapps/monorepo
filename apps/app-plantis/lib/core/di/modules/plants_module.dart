@@ -1,20 +1,14 @@
 import 'package:core/core.dart';
 
-import '../../../features/plants/data/datasources/local/plants_local_datasource.dart';
 import '../../../features/plants/data/datasources/local/plant_tasks_local_datasource.dart';
-import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
+import '../../../features/plants/data/datasources/local/plants_local_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plant_tasks_remote_datasource.dart';
+import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
 import '../../../features/plants/data/repositories/plant_comments_repository_impl.dart';
 import '../../../features/plants/data/repositories/plant_tasks_repository_impl.dart';
-import '../../../features/plants/data/repositories/plants_repository_impl.dart';
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../../features/plants/domain/repositories/plant_tasks_repository.dart';
-import '../../../features/plants/domain/repositories/plants_repository.dart';
 import '../../../features/plants/domain/services/plant_task_generator.dart';
-import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
-import '../../../features/plants/domain/usecases/delete_plant_usecase.dart';
-import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
-import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../../../features/plants/presentation/providers/plant_comments_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';

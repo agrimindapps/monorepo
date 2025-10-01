@@ -118,9 +118,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   late final LogoutUseCase _logoutUseCase;
 
   // Stream subscriptions
-  // ignore: cancel_subscriptions
   StreamSubscription<UserEntity?>? _userSubscription;
-  // ignore: cancel_subscriptions
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
 
   AnalyticsProvider? get _analytics {
@@ -178,6 +176,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     } catch (e) {
       _revokeAllOtherDevicesUseCase = null;
     }
+
+    // Setup cleanup on dispose
+    ref.onDispose(() {
+      _userSubscription?.cancel();
+      _subscriptionStream?.cancel();
+    });
 
     // Initialize auth state
     await _initializeAuthState();

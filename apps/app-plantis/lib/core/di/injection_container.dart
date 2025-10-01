@@ -47,7 +47,6 @@ import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/background_sync_provider.dart';
 import '../providers/sync_status_provider.dart';
-import '../services/background_sync_service.dart';
 import '../services/backup_audit_service.dart';
 import '../services/backup_data_transformer_service.dart';
 import '../services/backup_restore_service.dart';

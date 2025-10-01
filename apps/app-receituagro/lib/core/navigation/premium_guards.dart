@@ -119,8 +119,8 @@ class PremiumGuards {
     
     if (!accessResult.hasAccess && currentCount >= maxFavoritesForFreeUser) {
       await _analyticsService.logEvent(
-        ReceitaAgroAnalyticsEvent.premiumFeatureAttempted,
-        parameters: {
+        ReceitaAgroAnalyticsEvent.premiumFeatureAttempted.eventName,
+        {
           'feature_name': 'unlimited_favorites',
           'current_count': currentCount.toString(),
           'max_free_limit': maxFavoritesForFreeUser.toString(),
@@ -163,8 +163,8 @@ class PremiumGuards {
     // Para usuários gratuitos, verificar limite
     if (currentCount >= maxCommentsForFreeUser) {
       await _analyticsService.logEvent(
-        ReceitaAgroAnalyticsEvent.premiumFeatureAttempted,
-        parameters: {
+        ReceitaAgroAnalyticsEvent.premiumFeatureAttempted.eventName,
+        {
           'feature_name': 'unlimited_comments',
           'current_count': currentCount.toString(),
           'max_free_limit': maxCommentsForFreeUser.toString(),
@@ -278,8 +278,8 @@ class PremiumGuards {
     }
 
     await _analyticsService.logEvent(
-      ReceitaAgroAnalyticsEvent.featureUsed,
-      parameters: {
+      ReceitaAgroAnalyticsEvent.featureUsed.eventName,
+      {
         'feature_name': 'usage_limits_check',
         'favorite_usage_percent': favoriteUsagePercent.toString(),
         'comment_usage_percent': commentUsagePercent.toString(),
@@ -300,8 +300,8 @@ class PremiumGuards {
   /// Tracks quando acesso é negado
   Future<void> _trackAccessDenied(PremiumFeature feature, String reason) async {
     await _analyticsService.logEvent(
-      ReceitaAgroAnalyticsEvent.premiumFeatureAttempted,
-      parameters: {
+      ReceitaAgroAnalyticsEvent.premiumFeatureAttempted.eventName,
+      {
         'feature_name': feature.key,
         'access_denied_reason': reason,
         'timestamp': DateTime.now().toIso8601String(),
@@ -312,8 +312,8 @@ class PremiumGuards {
   /// Tracks quando acesso é permitido
   Future<void> _trackAccessGranted(PremiumFeature feature, SubscriptionEntity subscription) async {
     await _analyticsService.logEvent(
-      ReceitaAgroAnalyticsEvent.featureUsed,
-      parameters: {
+      ReceitaAgroAnalyticsEvent.featureUsed.eventName,
+      {
         'feature_name': feature.key,
         'subscription_status': subscription.status.name,
         'subscription_product_id': subscription.productId,
@@ -325,8 +325,8 @@ class PremiumGuards {
   /// Tracks erros de verificação de acesso
   Future<void> _trackAccessError(PremiumFeature feature, String error) async {
     await _analyticsService.logEvent(
-      ReceitaAgroAnalyticsEvent.errorOccurred,
-      parameters: {
+      ReceitaAgroAnalyticsEvent.errorOccurred.eventName,
+      {
         'error_type': 'premium_access_check',
         'feature_name': feature.key,
         'error': error,

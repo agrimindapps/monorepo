@@ -17,7 +17,7 @@ import 'secure_storage_service.dart';
 
 /// Service principal para coordenação de operações de backup
 /// Refatorado seguindo SOLID Principles - delega responsabilidades específicas
-@singleton
+/// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupServiceRefactored {
   final IBackupRepository _backupRepository;
   final BackupValidationService _validationService;

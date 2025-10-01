@@ -223,8 +223,8 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       }
 
       await _analytics.logEvent(
-        ReceitaAgroAnalyticsEvent.appOpened,
-        parameters: {
+        ReceitaAgroAnalyticsEvent.appOpened.eventName,
+        {
           'premium_status': _status.isPremium ? 'premium' : 'free',
         },
       );
@@ -286,10 +286,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       await _analytics.recordError(
         e,
         stackTrace,
-        reason: 'Purchase failed',
-        additionalData: {
-          'product_id': package.storeProduct.identifier,
-        },
+        reason: 'Purchase failed: ${package.storeProduct.identifier}',
       );
 
       developer.log(
@@ -321,8 +318,8 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       await _syncWithCloudFunctions(customerInfo);
 
       await _analytics.logEvent(
-        ReceitaAgroAnalyticsEvent.subscriptionViewed,
-        parameters: {
+        ReceitaAgroAnalyticsEvent.subscriptionViewed.eventName,
+        {
           'action': 'restore',
           'active_subscriptions': customerInfo.activeSubscriptions.length,
         },

@@ -15,7 +15,7 @@ abstract class IBackupRepository {
 }
 
 /// Implementação do repositório de backup usando Firebase Storage
-@LazySingleton(as: IBackupRepository)
+/// NOTE: Registrado manualmente em injection_container.dart (não via @LazySingleton)
 class BackupRepository implements IBackupRepository {
   final FirebaseStorage _storage;
   final IAuthRepository _authRepository;

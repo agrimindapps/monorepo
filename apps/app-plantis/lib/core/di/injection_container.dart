@@ -53,6 +53,7 @@ import '../services/backup_data_transformer_service.dart';
 import '../services/backup_restore_service.dart';
 import '../services/backup_scheduler.dart';
 import '../services/backup_service.dart';
+import '../services/backup_service_refactored.dart';
 import '../services/backup_validation_service.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/interfaces/i_notification_permission_manager.dart';
@@ -72,15 +73,18 @@ import 'modules/tasks_module.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // ===== INJECTABLE AUTO-WIRING =====
-  // Configure Injectable dependencies first (automatic DI)
-  await injectable.configureDependencies();
-
-  // External dependencies
+  // External dependencies (must be first for SharedPreferences)
   await _initExternal();
 
-  // Core services from package
+  // Core services from package (must be before Injectable for IAuthRepository, etc)
   _initCoreServices();
+
+  // Backup services must be before Injectable (BackupServiceRefactored needs them)
+  _registerBackupServices();
+
+  // ===== INJECTABLE AUTO-WIRING =====
+  // Configure Injectable dependencies (requires core services to be registered)
+  await injectable.configureDependencies();
 
   // Features
   _initAuth();
@@ -92,7 +96,7 @@ Future<void> init() async {
   _initComments();
   _initPremium();
   _initSettings();
-  _initBackup();
+  _initBackup(); // Remaining backup config (schedulers, providers)
   _initDataExport();
 
   // App services
@@ -104,17 +108,12 @@ Future<void> _initExternal() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 
-  // Connectivity
-  sl.registerLazySingleton(() => Connectivity());
-
-  // Network Services (usando ConnectivityService do core)
-  sl.registerLazySingleton(() => ConnectivityService.instance);
+  // Connectivity, ConnectivityService e FirebaseStorage agora são registrados via ExternalModule
 }
 
 void _initCoreServices() {
-  // Firebase
+  // Firebase (FirebaseStorage agora via ExternalModule)
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
-  sl.registerLazySingleton(() => FirebaseStorage.instance);
   sl.registerLazySingleton(() => FirebaseFunctions.instance);
 
   // Network Info - Migrated to Adapter Pattern for enhanced features
@@ -258,15 +257,8 @@ void _initAuth() {
   // Auth State Notifier (Singleton)
   sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
 
-  // Background Sync Service
-  sl.registerLazySingleton<BackgroundSyncService>(
-    () => BackgroundSyncService(),
-  );
-
-  // Background Sync Provider
-  sl.registerLazySingleton<BackgroundSyncProvider>(
-    () => BackgroundSyncProvider(sl<BackgroundSyncService>()),
-  );
+  // BackgroundSyncService já registrado via Injectable (injection.config.dart)
+  // BackgroundSyncProvider já registrado via Injectable (injection.config.dart)
 
   // Auth Provider - with BackgroundSyncProvider and DeviceValidation dependencies
   sl.registerLazySingleton(
@@ -442,16 +434,11 @@ void _initSettings() {
   );
 }
 
-void _initBackup() {
-  // Backup Repository
-  sl.registerLazySingleton<IBackupRepository>(
-    () => BackupRepository(
-      storage: sl<FirebaseStorage>(),
-      authRepository: sl<IAuthRepository>(),
-    ),
-  );
+/// Register backup services BEFORE Injectable (required by BackupServiceRefactored)
+void _registerBackupServices() {
+  // NOTE: IBackupRepository será registrado DEPOIS em _initBackup() (precisa de FirebaseStorage do ExternalModule)
 
-  // Backup Services (Refatorados seguindo SOLID)
+  // Backup Services (Refatorados seguindo SOLID) - required by BackupServiceRefactored
   sl.registerLazySingleton<BackupValidationService>(
     () => const BackupValidationService(),
   );
@@ -464,6 +451,19 @@ void _initBackup() {
     () => BackupAuditService(storageService: sl<SecureStorageService>()),
   );
 
+  // NOTE: BackupRestoreService será registrado em _initBackup (precisa dos repositories)
+}
+
+void _initBackup() {
+  // IBackupRepository (needs FirebaseStorage from ExternalModule, so registered here)
+  sl.registerLazySingleton<IBackupRepository>(
+    () => BackupRepository(
+      storage: sl<FirebaseStorage>(),
+      authRepository: sl<IAuthRepository>(),
+    ),
+  );
+
+  // BackupRestoreService (requires repositories registered via modules/Injectable)
   sl.registerLazySingleton<BackupRestoreService>(
     () => BackupRestoreService(
       plantsRepository: sl(),
@@ -476,7 +476,19 @@ void _initBackup() {
     ),
   );
 
-  // Backup Service
+  // BackupServiceRefactored (removed from Injectable, registered manually)
+  sl.registerSingleton<BackupServiceRefactored>(
+    BackupServiceRefactored(
+      backupRepository: sl<IBackupRepository>(),
+      validationService: sl<BackupValidationService>(),
+      transformerService: sl<BackupDataTransformerService>(),
+      restoreService: sl<BackupRestoreService>(),
+      auditService: sl<BackupAuditService>(),
+      storageService: sl<SecureStorageService>(),
+    ),
+  );
+
+  // Backup Service (requires repositories registered via modules)
   sl.registerSingleton<BackupService>(
     BackupService(
       backupRepository: sl<IBackupRepository>(),

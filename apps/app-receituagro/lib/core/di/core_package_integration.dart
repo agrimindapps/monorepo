@@ -4,7 +4,7 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
 // Local imports
-import '../../features/analytics/enhanced_analytics_provider.dart';
+import '../../features/analytics/analytics_service.dart';
 import '../providers/auth_provider.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_validation_service.dart';
@@ -427,16 +427,22 @@ class CorePackageIntegration {
       rethrow; // Re-throw to see the actual error
     }
 
-    // Register the alias for backward compatibility
+    // Register ReceitaAgroAnalyticsService as a wrapper
+    // This is a REAL CLASS (not typedef) that delegates to ReceitaAgroEnhancedAnalyticsProvider
+    // This approach allows GetIt to register both types independently
     try {
       if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
         _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
-          () => _sl<ReceitaAgroEnhancedAnalyticsProvider>(),
+          () => ReceitaAgroAnalyticsService(
+            analyticsRepository: _sl<core.IAnalyticsRepository>(),
+            crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
+          ),
         );
-        if (kDebugMode) print('✅ ReceitaAgro: Analytics Service alias registered');
+        if (kDebugMode) print('✅ ReceitaAgro: Analytics Service wrapper registered successfully');
       }
     } catch (e) {
-      if (kDebugMode) print('❌ ReceitaAgro: Analytics Service alias registration failed - $e');
+      if (kDebugMode) print('❌ ReceitaAgro: Analytics Service wrapper registration failed - $e');
+      rethrow;
     }
 
     // Register ReceitaAgro Auth Provider (using UnifiedSyncManager from core package)

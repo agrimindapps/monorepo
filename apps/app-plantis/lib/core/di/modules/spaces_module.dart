@@ -28,12 +28,7 @@ class SpacesModule {
       ),
     );
 
-    // Use cases
-    sl.registerLazySingleton(() => GetSpacesUseCase(sl()));
-    sl.registerLazySingleton(() => GetSpaceByIdUseCase(sl()));
-    sl.registerLazySingleton(() => AddSpaceUseCase(sl()));
-    sl.registerLazySingleton(() => UpdateSpaceUseCase(sl()));
-    sl.registerLazySingleton(() => DeleteSpaceUseCase(sl()));
+    // Use cases - Todos já registrados via Injectable (@injectable)
 
     // Provider
     sl.registerFactory(

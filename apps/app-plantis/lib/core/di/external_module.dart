@@ -1,19 +1,25 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 
-/// Módulo para registrar dependências externas do core package
+/// Módulo para registrar dependências externas (Firebase, Hive, Connectivity)
+/// IMPORTANTE: Não inclui IAuthRepository, ISubscriptionRepository, ILocalStorageRepository
+/// pois estes são registrados em injection_container.dart para evitar loops
 @module
 abstract class ExternalModule {
-  /// Auth Repository do core
+  /// HiveInterface (required by SyncQueue)
   @lazySingleton
-  IAuthRepository get authRepository => GetIt.instance<IAuthRepository>();
+  HiveInterface get hiveInterface => Hive;
 
-  /// Subscription Repository do core
+  /// Firebase Storage (required by BackupRepository)
   @lazySingleton
-  ISubscriptionRepository get subscriptionRepository =>
-      GetIt.instance<ISubscriptionRepository>();
+  FirebaseStorage get firebaseStorage => FirebaseStorage.instance;
 
-  /// Local Storage Repository do core
+  /// Connectivity (required by BackupScheduler)
   @lazySingleton
-  ILocalStorageRepository get localStorageRepository =>
-      GetIt.instance<ILocalStorageRepository>();
+  Connectivity get connectivity => Connectivity();
+
+  /// ConnectivityService (required by SyncOperations)
+  @lazySingleton
+  ConnectivityService get connectivityService => ConnectivityService.instance;
 }

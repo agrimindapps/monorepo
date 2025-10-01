@@ -115,7 +115,7 @@ abstract final class PlantisSyncConfig {
           entityType: Plant,
           collectionName: 'plants',
           fromMap: _plantFromFirebaseMap,
-          toMap: (plant) => plant.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Espaços das plantas
@@ -123,7 +123,7 @@ abstract final class PlantisSyncConfig {
           entityType: Space,
           collectionName: 'spaces',
           fromMap: _spaceFromFirebaseMap,
-          toMap: (space) => space.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Tasks relacionadas às plantas (usando a entidade real do app)
@@ -131,7 +131,7 @@ abstract final class PlantisSyncConfig {
           entityType: Task,
           collectionName: 'tasks',
           fromMap: Task.fromFirebaseMap,
-          toMap: (task) => task.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Comentários das plantas
@@ -139,7 +139,7 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (comentario) => comentario.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Usuários (profile compartilhado entre apps)
@@ -147,7 +147,7 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (user) => user.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Assinaturas (subscription compartilhada entre apps)
@@ -155,7 +155,7 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (subscription) => subscription.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
       ],
     );
@@ -174,7 +174,7 @@ abstract final class PlantisSyncConfig {
           entityType: Plant,
           collectionName: 'dev_plants',
           fromMap: _plantFromFirebaseMap,
-          toMap: (plant) => plant.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Espaços das plantas (desenvolvimento)
@@ -182,7 +182,7 @@ abstract final class PlantisSyncConfig {
           entityType: Space,
           collectionName: 'dev_spaces',
           fromMap: _spaceFromFirebaseMap,
-          toMap: (space) => space.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Tasks relacionadas às plantas (desenvolvimento)
@@ -190,7 +190,7 @@ abstract final class PlantisSyncConfig {
           entityType: Task,
           collectionName: 'dev_tasks',
           fromMap: Task.fromFirebaseMap,
-          toMap: (task) => task.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Comentários das plantas (desenvolvimento)
@@ -198,7 +198,7 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'dev_comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (comentario) => comentario.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Usuários (desenvolvimento)
@@ -206,7 +206,7 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'dev_users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (user) => user.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
 
         // Assinaturas (desenvolvimento)
@@ -214,7 +214,7 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'dev_subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (subscription) => subscription.toFirebaseMap(),
+          toMap: (entity) => entity.toFirebaseMap(),
         ),
       ],
     );

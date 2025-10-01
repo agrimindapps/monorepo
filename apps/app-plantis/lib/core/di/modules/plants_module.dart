@@ -1,10 +1,14 @@
 import 'package:core/core.dart';
 
 import '../../../features/plants/data/datasources/local/plants_local_datasource.dart';
+import '../../../features/plants/data/datasources/local/plant_tasks_local_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
+import '../../../features/plants/data/datasources/remote/plant_tasks_remote_datasource.dart';
 import '../../../features/plants/data/repositories/plant_comments_repository_impl.dart';
+import '../../../features/plants/data/repositories/plant_tasks_repository_impl.dart';
 import '../../../features/plants/data/repositories/plants_repository_impl.dart';
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
+import '../../../features/plants/domain/repositories/plant_tasks_repository.dart';
 import '../../../features/plants/domain/repositories/plants_repository.dart';
 import '../../../features/plants/domain/services/plant_task_generator.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -26,9 +30,16 @@ abstract class PlantsDIModule {
       () => PlantsRemoteDatasourceImpl(firestore: sl()),
     );
 
-    // Repository
-    sl.registerLazySingleton<PlantsRepository>(
-      () => PlantsRepositoryImpl(
+    // Repository - PlantsRepository já registrado via Injectable (@LazySingleton)
+
+    // Plant Comments Repository
+    sl.registerLazySingleton<PlantCommentsRepository>(
+      () => PlantCommentsRepositoryImpl(),
+    );
+
+    // Plant Tasks Repository
+    sl.registerLazySingleton<PlantTasksRepository>(
+      () => PlantTasksRepositoryImpl(
         localDatasource: sl(),
         remoteDatasource: sl(),
         networkInfo: sl(),
@@ -36,20 +47,16 @@ abstract class PlantsDIModule {
       ),
     );
 
-    // Plant Comments Repository
-    sl.registerLazySingleton<PlantCommentsRepository>(
-      () => PlantCommentsRepositoryImpl(),
+    // Plant Tasks Data Sources
+    sl.registerLazySingleton<PlantTasksLocalDatasource>(
+      () => PlantTasksLocalDatasourceImpl(),
     );
 
-    // Use cases
-    sl.registerLazySingleton(() => GetPlantsUseCase(sl()));
-    sl.registerLazySingleton(() => GetPlantByIdUseCase(sl()));
-    sl.registerLazySingleton(() => SearchPlantsUseCase(sl()));
-    sl.registerLazySingleton(
-      () => AddPlantUseCase(sl(), generateInitialTasksUseCase: sl()),
+    sl.registerLazySingleton<PlantTasksRemoteDatasource>(
+      () => PlantTasksRemoteDatasourceImpl(firestore: sl()),
     );
-    sl.registerLazySingleton(() => UpdatePlantUseCase(sl()));
-    sl.registerLazySingleton(() => DeletePlantUseCase(sl()));
+
+    // Use cases - Todos já registrados via Injectable (@injectable)
 
     // Legacy PlantsProvider removed - now using Riverpod PlantsNotifier
 

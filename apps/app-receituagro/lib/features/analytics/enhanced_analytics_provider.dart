@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-/// Enum de tipos de usuário para analytics
+/// Enum de tipos de usuário para analytics (used by enhanced provider)
 enum AnalyticsUserType { guest, registered, premium }
 
 /// Enhanced Analytics Provider for App-ReceitAgro
@@ -449,5 +449,5 @@ class ReceitaAgroEnhancedAnalyticsProvider {
   bool get isDebugMode => kDebugMode;
 }
 
-/// Alias for backward compatibility
-typedef ReceitaAgroAnalyticsService = ReceitaAgroEnhancedAnalyticsProvider;
+// Note: The typedef ReceitaAgroAnalyticsService is now defined in analytics_service.dart
+// to ensure it's visible to all imports of that file

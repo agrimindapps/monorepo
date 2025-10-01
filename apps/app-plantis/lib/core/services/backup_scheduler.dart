@@ -7,7 +7,7 @@ import '../data/models/backup_model.dart';
 import 'backup_service.dart';
 
 /// Service responsável por agendar e executar backups automáticos
-@singleton
+/// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupScheduler {
   final BackupService _backupService;
   final ISubscriptionRepository _subscriptionRepository;
@@ -267,7 +267,7 @@ class BackupSchedulerStatus {
 }
 
 /// Gerenciador de lifecycle do scheduler
-@singleton
+/// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupSchedulerManager {
   final BackupScheduler _scheduler;
   bool _isInitialized = false;

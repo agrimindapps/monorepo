@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'injectable_config.config.dart';
 
@@ -22,7 +23,16 @@ abstract class RegisterModule {
   
   @singleton
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
-  
+
   @singleton
-  GoogleSignIn get googleSignIn => GoogleSignIn();
+  GoogleSignIn get googleSignIn {
+    // Para web em desenvolvimento, retorna uma instância que não será usada
+    // Em produção, deve-se configurar o clientId via <meta> tag no index.html
+    if (kIsWeb) {
+      // Ignora a inicialização para evitar erro no desenvolvimento web
+      // A autenticação web usa FirebaseAuth diretamente
+      return GoogleSignIn(clientId: '');
+    }
+    return GoogleSignIn();
+  }
 }

@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
-import '../../features/analytics/enhanced_analytics_provider.dart';
+import '../../features/analytics/analytics_service.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../di/injection_container.dart' as di;
 import '../extensions/user_entity_receituagro_extension.dart';

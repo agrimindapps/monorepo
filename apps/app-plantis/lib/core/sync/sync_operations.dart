@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../data/models/sync_queue_item.dart';
-import 'sync_queue.dart';
+import '../data/models/sync_queue_item.dart' as local;
+import 'sync_queue.dart' as local;
 
 @singleton
 class SyncOperations {
-  final SyncQueue _syncQueue;
+  final local.SyncQueue _syncQueue;
   final ConnectivityService _connectivityService;
 
   late StreamSubscription<ConnectivityType> _networkSubscription;
@@ -66,16 +66,16 @@ class SyncOperations {
     }
   }
 
-  List<SyncQueueItem> _prioritizeItems(List<SyncQueueItem> items) {
+  List<local.SyncQueueItem> _prioritizeItems(List<local.SyncQueueItem> items) {
     items.sort((a, b) {
       // Custom priority mapping
-      int getPriority(SyncQueueItem item) {
+      int getPriority(local.SyncQueueItem item) {
         switch (item.operationType) {
-          case SyncOperationType.create:
+          case local.SyncOperationType.create:
             return 3;
-          case SyncOperationType.update:
+          case local.SyncOperationType.update:
             return 2;
-          case SyncOperationType.delete:
+          case local.SyncOperationType.delete:
             return 1;
         }
       }
@@ -90,17 +90,17 @@ class SyncOperations {
     return items;
   }
 
-  Future<void> _processSyncItem(SyncQueueItem item) async {
+  Future<void> _processSyncItem(local.SyncQueueItem item) async {
     // Here you would integrate with your repository/service layer to sync
     // This is a placeholder - replace with actual sync logic for your models
     switch (item.operationType) {
-      case SyncOperationType.create:
+      case local.SyncOperationType.create:
         await _performCreate(item);
         break;
-      case SyncOperationType.update:
+      case local.SyncOperationType.update:
         await _performUpdate(item);
         break;
-      case SyncOperationType.delete:
+      case local.SyncOperationType.delete:
         await _performDelete(item);
         break;
     }
@@ -109,7 +109,7 @@ class SyncOperations {
     await _syncQueue.markItemAsSynced(item.id);
   }
 
-  Future<void> _performCreate(SyncQueueItem item) async {
+  Future<void> _performCreate(local.SyncQueueItem item) async {
     // Implement create logic for specific model types
     // Example (placeholder):
     switch (item.modelType) {
@@ -123,12 +123,12 @@ class SyncOperations {
     }
   }
 
-  Future<void> _performUpdate(SyncQueueItem item) async {
+  Future<void> _performUpdate(local.SyncQueueItem item) async {
     // Implement update logic for specific model types
     // Similar to create method
   }
 
-  Future<void> _performDelete(SyncQueueItem item) async {
+  Future<void> _performDelete(local.SyncQueueItem item) async {
     // Implement delete logic for specific model types
     // Similar to create method
   }

@@ -22,7 +22,7 @@ class AuthProvider extends ChangeNotifier {
   final local_logout.LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final RefreshUserUseCase _refreshUserUseCase;
-  final EnhancedAccountDeletionService _enhancedDeletionService;
+  final EnhancedAccountDeletionService? _enhancedDeletionService;
 
   AuthProvider({
     required local_login.LoginUseCase loginUseCase,
@@ -30,7 +30,7 @@ class AuthProvider extends ChangeNotifier {
     required local_logout.LogoutUseCase logoutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required RefreshUserUseCase refreshUserUseCase,
-    required EnhancedAccountDeletionService enhancedAccountDeletionService,
+    EnhancedAccountDeletionService? enhancedAccountDeletionService,
   })  : _loginUseCase = loginUseCase,
         _registerUseCase = registerUseCase,
         _logoutUseCase = logoutUseCase,
@@ -373,7 +373,8 @@ class AuthProvider extends ChangeNotifier {
     debugPrint('AuthProvider: Estado do usuário limpo');
   }
 
-  /// Deleta a conta do usuário - Enhanced with EnhancedAccountDeletionService
+  /// Deleta a conta do usuário
+  /// TODO: Integrate EnhancedAccountDeletionService when IAuthRepository adapter is implemented
   Future<bool> deleteAccount({String? password}) async {
     if (_currentUser == null) {
       _setError('Nenhum usuário autenticado');
@@ -387,35 +388,44 @@ class AuthProvider extends ChangeNotifier {
     try {
       debugPrint('AuthProvider: Iniciando exclusão de conta');
 
-      // Use Enhanced Account Deletion Service
-      final result = await _enhancedDeletionService.deleteAccount(
-        password: password ?? '',
-        userId: _currentUser!.id,
-        isAnonymous: false, // agrihurbi doesn't support anonymous
-      );
+      if (_enhancedDeletionService != null) {
+        // Use Enhanced Account Deletion Service if available
+        final result = await _enhancedDeletionService!.deleteAccount(
+          password: password ?? '',
+          userId: _currentUser!.id,
+          isAnonymous: false, // agrihurbi doesn't support anonymous
+        );
 
-      return result.fold(
-        (error) {
-          debugPrint('AuthProvider: Erro ao deletar conta - ${error.message}');
-          _setError(error.message);
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        },
-        (deletionResult) {
-          if (deletionResult.isSuccess) {
-            debugPrint('AuthProvider: Conta deletada com sucesso');
-            _performPostDeletionCleanup();
-            return true;
-          } else {
-            debugPrint('AuthProvider: Falha na exclusão - ${deletionResult.userMessage}');
-            _setError(deletionResult.userMessage);
+        return result.fold(
+          (error) {
+            debugPrint('AuthProvider: Erro ao deletar conta - ${error.message}');
+            _setError(error.message);
             _isLoading = false;
             notifyListeners();
             return false;
-          }
-        },
-      );
+          },
+          (deletionResult) {
+            if (deletionResult.isSuccess) {
+              debugPrint('AuthProvider: Conta deletada com sucesso');
+              _performPostDeletionCleanup();
+              return true;
+            } else {
+              debugPrint('AuthProvider: Falha na exclusão - ${deletionResult.userMessage}');
+              _setError(deletionResult.userMessage);
+              _isLoading = false;
+              notifyListeners();
+              return false;
+            }
+          },
+        );
+      } else {
+        // Fallback: Basic account deletion (requires implementation)
+        debugPrint('AuthProvider: EnhancedAccountDeletionService not available');
+        _setError('Funcionalidade de exclusão de conta não está disponível');
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
       debugPrint('AuthProvider: Erro inesperado ao deletar conta - $e');
       _setError('Erro inesperado: $e');

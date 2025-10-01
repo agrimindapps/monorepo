@@ -6,26 +6,34 @@ import 'package:get_it/get_it.dart';
 /// Integra PetivetiSyncService com repositories existentes
 abstract class PetivetiSyncDIModule {
   static void init() {
+    // TODO: PetivetiSyncService not yet implemented in core package
+    // Uncomment when service becomes available
+    //
     // Registrar PetivetiSyncService do core package
     // Este service adiciona logging estruturado e monitoring aos repositories
-    GetIt.instance.registerLazySingleton<PetivetiSyncService>(
-      () => PetivetiSyncServiceFactory.create(
-        animalRepository: null, // Will be integrated with existing repositories
-        appointmentRepository: null,
-        medicationRepository: null,
-        vaccineRepository: null,
-        weightRepository: null,
-        expenseRepository: null,
-        reminderRepository: null,
-      ),
-    );
+    // GetIt.instance.registerLazySingleton<PetivetiSyncService>(
+    //   () => PetivetiSyncServiceFactory.create(
+    //     animalRepository: null, // Will be integrated with existing repositories
+    //     appointmentRepository: null,
+    //     medicationRepository: null,
+    //     vaccineRepository: null,
+    //     weightRepository: null,
+    //     expenseRepository: null,
+    //     reminderRepository: null,
+    //   ),
+    // );
 
     // Inicialização é lazy, service só é criado quando solicitado
+    if (kDebugMode) {
+      print('PetivetiSyncDIModule: Sync service registration skipped (awaiting implementation)');
+    }
   }
 
   /// Inicializa o sync service após o app estar pronto
   /// E conecta com o connectivity monitoring existente
   static Future<void> initializeSyncService() async {
+    // TODO: Uncomment when PetivetiSyncService is implemented
+    /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
       final result = await syncService.initialize();
@@ -41,9 +49,6 @@ abstract class PetivetiSyncDIModule {
           if (kDebugMode) {
             print('✅ Petiveti sync service initialized successfully');
           }
-
-          // Integrar com connectivity monitoring existente
-          _setupConnectivityMonitoring();
         },
       );
     } catch (e) {
@@ -51,33 +56,13 @@ abstract class PetivetiSyncDIModule {
         print('❌ Error initializing Petiveti sync service: $e');
       }
     }
-  }
-
-  /// Configura monitoramento de conectividade para auto-sync
-  static void _setupConnectivityMonitoring() {
-    try {
-      final syncService = GetIt.instance<PetivetiSyncService>();
-
-      // ConnectivityService from core package
-      final connectivityService = ConnectivityService.instance;
-
-      // Conectar o sync service ao stream de conectividade
-      syncService.startConnectivityMonitoring(
-        connectivityService.connectivityStream,
-      );
-
-      if (kDebugMode) {
-        print('✅ Connectivity monitoring integrated with Petiveti sync service');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Failed to setup connectivity monitoring: $e');
-      }
-    }
+    */
   }
 
   /// Executa sync inicial após o usuário fazer login
   static Future<void> performInitialSync() async {
+    // TODO: Uncomment when PetivetiSyncService is implemented
+    /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
 
@@ -115,10 +100,13 @@ abstract class PetivetiSyncDIModule {
         print('❌ Error during initial sync: $e');
       }
     }
+    */
   }
 
   /// Limpa dados de sync (útil para logout)
   static Future<void> clearSyncData() async {
+    // TODO: Uncomment when PetivetiSyncService is implemented
+    /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
       await syncService.clearLocalData();
@@ -131,10 +119,13 @@ abstract class PetivetiSyncDIModule {
         print('❌ Error clearing sync data: $e');
       }
     }
+    */
   }
 
   /// Obtém estatísticas de sincronização
   static Future<void> printSyncStatistics() async {
+    // TODO: Uncomment when PetivetiSyncService is implemented
+    /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
       final stats = await syncService.getStatistics();
@@ -154,10 +145,13 @@ abstract class PetivetiSyncDIModule {
         print('❌ Error getting sync statistics: $e');
       }
     }
+    */
   }
 
   /// Sync específico para animais
   static Future<void> syncAnimals() async {
+    // TODO: Uncomment when PetivetiSyncService is implemented
+    /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
       final result = await syncService.syncAnimals();
@@ -179,10 +173,13 @@ abstract class PetivetiSyncDIModule {
         print('❌ Error syncing animals: $e');
       }
     }
+    */
   }
 
   /// Sync específico para dados veterinários
   static Future<void> syncVeterinaryData() async {
+    // TODO: Uncomment when PetivetiSyncService is implemented
+    /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
       final result = await syncService.syncVeterinaryData();
@@ -204,5 +201,6 @@ abstract class PetivetiSyncDIModule {
         print('❌ Error syncing veterinary data: $e');
       }
     }
+    */
   }
 }

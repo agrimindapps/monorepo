@@ -1,29 +1,32 @@
-import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
-
-import '../injection_container.dart';
 
 /// Módulo de Dependency Injection para sincronização do AgrihUrbi
 /// Integra AgrihUrbiSyncService com repositories existentes
 abstract class AgrihUrbiSyncDIModule {
   static void init() {
+    // TODO: AgrihUrbiSyncService not yet implemented in core package
+    // Uncomment when service becomes available
+    //
     // Registrar AgrihUrbiSyncService do core package
     // Este service adiciona logging estruturado e monitoring aos repositories
-    getIt.registerLazySingleton<AgrihUrbiSyncService>(
-      () => AgrihUrbiSyncServiceFactory.create(
-        livestockRepository: null, // Will be integrated with existing repositories
-        marketRepository: null,
-        weatherRepository: null,
-        calculatorRepository: null,
-      ),
-    );
+    // getIt.registerLazySingleton<AgrihUrbiSyncService>(
+    //   () => AgrihUrbiSyncServiceFactory.create(
+    //     livestockRepository: null, // Will be integrated with existing repositories
+    //     marketRepository: null,
+    //     weatherRepository: null,
+    //     calculatorRepository: null,
+    //   ),
+    // );
 
     // Inicialização é lazy, service só é criado quando solicitado
+    debugPrint('AgrihUrbiSyncDIModule: Sync service registration skipped (awaiting implementation)');
   }
 
   /// Inicializa o sync service após o app estar pronto
   /// E conecta com o connectivity monitoring existente
   static Future<void> initializeSyncService() async {
+    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
       final result = await syncService.initialize();
@@ -39,9 +42,6 @@ abstract class AgrihUrbiSyncDIModule {
           if (kDebugMode) {
             print('✅ AgrihUrbi sync service initialized successfully');
           }
-
-          // Integrar com connectivity monitoring existente
-          _setupConnectivityMonitoring();
         },
       );
     } catch (e) {
@@ -49,33 +49,13 @@ abstract class AgrihUrbiSyncDIModule {
         print('❌ Error initializing AgrihUrbi sync service: $e');
       }
     }
-  }
-
-  /// Configura monitoramento de conectividade para auto-sync
-  static void _setupConnectivityMonitoring() {
-    try {
-      final syncService = getIt<AgrihUrbiSyncService>();
-
-      // ConnectivityService from core package
-      final connectivityService = ConnectivityService.instance;
-
-      // Conectar o sync service ao stream de conectividade
-      syncService.startConnectivityMonitoring(
-        connectivityService.connectivityStream,
-      );
-
-      if (kDebugMode) {
-        print('✅ Connectivity monitoring integrated with AgrihUrbi sync service');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Failed to setup connectivity monitoring: $e');
-      }
-    }
+    */
   }
 
   /// Executa sync inicial após o usuário fazer login
   static Future<void> performInitialSync() async {
+    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
 
@@ -113,10 +93,13 @@ abstract class AgrihUrbiSyncDIModule {
         print('❌ Error during initial sync: $e');
       }
     }
+    */
   }
 
   /// Limpa dados de sync (útil para logout)
   static Future<void> clearSyncData() async {
+    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
       await syncService.clearLocalData();
@@ -129,10 +112,13 @@ abstract class AgrihUrbiSyncDIModule {
         print('❌ Error clearing sync data: $e');
       }
     }
+    */
   }
 
   /// Obtém estatísticas de sincronização
   static Future<void> printSyncStatistics() async {
+    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
       final stats = await syncService.getStatistics();
@@ -152,10 +138,13 @@ abstract class AgrihUrbiSyncDIModule {
         print('❌ Error getting sync statistics: $e');
       }
     }
+    */
   }
 
   /// Sync específico para gado/livestock
   static Future<void> syncLivestock() async {
+    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
       final result = await syncService.syncLivestock();
@@ -177,10 +166,13 @@ abstract class AgrihUrbiSyncDIModule {
         print('❌ Error syncing livestock: $e');
       }
     }
+    */
   }
 
   /// Sync específico para dados de mercado
   static Future<void> syncMarketData() async {
+    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
       final result = await syncService.syncMarketData();
@@ -202,5 +194,6 @@ abstract class AgrihUrbiSyncDIModule {
         print('❌ Error syncing market data: $e');
       }
     }
+    */
   }
 }

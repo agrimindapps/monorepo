@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../data/models/sync_queue_item.dart';
-import '../sync/sync_queue.dart';
+import '../data/models/sync_queue_item.dart' as local;
+import '../sync/sync_queue.dart' as local;
 
 enum SyncState {
   idle, // No sync operations
@@ -15,17 +15,17 @@ enum SyncState {
 
 class SyncStatusProvider with ChangeNotifier {
   final ConnectivityService _connectivityService;
-  final SyncQueue _syncQueue;
+  final local.SyncQueue _syncQueue;
 
   // Stream subscriptions for proper disposal
   StreamSubscription<ConnectivityType>? _networkSubscription;
-  StreamSubscription<List<SyncQueueItem>>? _queueSubscription;
+  StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
 
   SyncState _currentState = SyncState.idle;
   SyncState get currentState => _currentState;
 
-  List<SyncQueueItem> _pendingItems = [];
-  List<SyncQueueItem> get pendingItems => _pendingItems;
+  List<local.SyncQueueItem> _pendingItems = [];
+  List<local.SyncQueueItem> get pendingItems => _pendingItems;
 
   int get pendingItemsCount => _pendingItems.length;
 

@@ -13,8 +13,9 @@ import '../../features/news/domain/usecases/get_commodity_prices.dart';
 import '../../features/news/domain/usecases/get_news.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';
 import '../../features/settings/domain/usecases/manage_settings.dart';
-import '../../features/subscription/domain/entities/subscription_entity.dart';
-import '../../features/subscription/domain/usecases/manage_subscription.dart';
+// NOTE: Subscription imports commented - feature not yet implemented
+// import '../../features/subscription/domain/entities/subscription_entity.dart';
+// import '../../features/subscription/domain/usecases/manage_subscription.dart';
 
 // === SUPPORT STATE CLASSES ===
 
@@ -269,6 +270,9 @@ class NewsState {
   }
 }
 
+// TODO: Subscription feature not yet implemented
+// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
+/*
 /// State para gerenciamento de assinaturas
 class SubscriptionState {
   const SubscriptionState({
@@ -319,6 +323,7 @@ class SubscriptionState {
     );
   }
 }
+*/
 
 // === STATE NOTIFIERS ===
 
@@ -632,6 +637,9 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
   }
 }
 
+// TODO: Subscription feature not yet implemented
+// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
+/*
 /// StateNotifier para gerenciamento de assinaturas
 class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
   SubscriptionStateNotifier(
@@ -722,6 +730,7 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
     state = state.copyWith(errorMessage: null, successMessage: null);
   }
 }
+*/
 
 // === PROVIDER DEFINITIONS ===
 
@@ -749,12 +758,16 @@ final newsProvider = StateNotifierProvider<NewsStateNotifier, NewsState>((ref) {
   );
 });
 
+// TODO: Subscription feature not yet implemented
+// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
+/*
 /// Provider para gerenciamento de assinaturas
 final subscriptionProvider = StateNotifierProvider<SubscriptionStateNotifier, SubscriptionState>((ref) {
   return SubscriptionStateNotifier(
     di.getIt<ManageSubscription>(),
   );
 });
+*/
 
 // === CONVENIENCE PROVIDERS ===
 
@@ -782,6 +795,9 @@ final loadedArticlesProvider = Provider<List<NewsArticleEntity>>((ref) {
   return state.articles;
 });
 
+// TODO: Subscription feature not yet implemented
+// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
+/*
 /// Provider para assinatura ativa
 final activeSubscriptionProvider = Provider<SubscriptionEntity?>((ref) {
   final state = ref.watch(subscriptionProvider);
@@ -793,3 +809,4 @@ final isPremiumUserProvider = Provider<bool>((ref) {
   final state = ref.watch(subscriptionProvider);
   return state.isPremiumUser;
 });
+*/

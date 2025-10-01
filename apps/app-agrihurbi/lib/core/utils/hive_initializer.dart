@@ -5,7 +5,8 @@ import '../../features/livestock/data/models/livestock_enums_adapter.dart';
 import '../../features/markets/data/models/market_enums_adapter.dart';
 import '../../features/news/data/models/commodity_price_model.dart';
 import '../../features/news/data/models/news_article_model.dart';
-import '../../features/subscription/data/models/subscription_model.dart';
+// NOTE: Subscription models commented - not yet implemented
+// import '../../features/subscription/data/models/subscription_model.dart';
 import '../../features/weather/data/models/rain_gauge_model.dart';
 import '../../features/weather/data/models/weather_measurement_model.dart';
 import '../../features/weather/data/models/weather_statistics_model.dart';
@@ -165,25 +166,28 @@ class HiveInitializer {
   /// Registra adapters relacionados à subscription
   static void _registerSubscriptionAdapters() {
     try {
+      // NOTE: Subscription adapters commented - models not yet implemented
+      // TODO: Uncomment when subscription models are created
+
       // SubscriptionModel - TypeId: 16
-      if (!Hive.isAdapterRegistered(16)) {
-        Hive.registerAdapter<SubscriptionModel>(SubscriptionModelAdapter());
-        debugPrint('HiveInitializer: SubscriptionModelAdapter registrado (TypeId: 16)');
-      }
-      
+      // if (!Hive.isAdapterRegistered(16)) {
+      //   Hive.registerAdapter<SubscriptionModel>(SubscriptionModelAdapter());
+      //   debugPrint('HiveInitializer: SubscriptionModelAdapter registrado (TypeId: 16)');
+      // }
+
       // SubscriptionTierModel - TypeId: 17
-      if (!Hive.isAdapterRegistered(17)) {
-        Hive.registerAdapter<SubscriptionTierModel>(SubscriptionTierModelAdapter());
-        debugPrint('HiveInitializer: SubscriptionTierModelAdapter registrado (TypeId: 17)');
-      }
-      
+      // if (!Hive.isAdapterRegistered(17)) {
+      //   Hive.registerAdapter<SubscriptionTierModel>(SubscriptionTierModelAdapter());
+      //   debugPrint('HiveInitializer: SubscriptionTierModelAdapter registrado (TypeId: 17)');
+      // }
+
       // PaymentMethodModel - TypeId: 21
-      if (!Hive.isAdapterRegistered(21)) {
-        Hive.registerAdapter<PaymentMethodModel>(PaymentMethodModelAdapter());
-        debugPrint('HiveInitializer: PaymentMethodModelAdapter registrado (TypeId: 21)');
-      }
-      
-      debugPrint('HiveInitializer: Subscription adapters registrados');
+      // if (!Hive.isAdapterRegistered(21)) {
+      //   Hive.registerAdapter<PaymentMethodModel>(PaymentMethodModelAdapter());
+      //   debugPrint('HiveInitializer: PaymentMethodModelAdapter registrado (TypeId: 21)');
+      // }
+
+      debugPrint('HiveInitializer: Subscription adapters skipped (awaiting implementation)');
     } catch (e) {
       debugPrint('HiveInitializer: Erro ao registrar adapters de subscription - $e');
       rethrow;

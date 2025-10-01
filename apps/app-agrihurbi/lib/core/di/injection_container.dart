@@ -108,8 +108,13 @@ void configureDependencies() {
   getIt.registerSingleton<RefreshUserUseCase>(
     RefreshUserUseCase(getIt<AuthRepository>()),
   );
-  
+
+  // TODO: Enhanced Account Deletion Service integration pending
+  // Requires IAuthRepository adapter implementation
+  // See apps/app-gasometer for reference implementation
+
   // Auth Provider
+  // NOTE: EnhancedAccountDeletionService temporarily removed until adapter is implemented
   getIt.registerSingleton<AuthProvider>(
     AuthProvider(
       loginUseCase: getIt<LoginUseCase>(),
@@ -117,6 +122,7 @@ void configureDependencies() {
       logoutUseCase: getIt<LogoutUseCase>(),
       getCurrentUserUseCase: getIt<GetCurrentUserUseCase>(),
       refreshUserUseCase: getIt<RefreshUserUseCase>(),
+      // enhancedAccountDeletionService: getIt<EnhancedAccountDeletionService>(),
     ),
   );
   

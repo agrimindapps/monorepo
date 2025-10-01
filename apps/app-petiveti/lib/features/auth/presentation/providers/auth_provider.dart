@@ -78,7 +78,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     this._sendEmailVerification,
     this._sendPasswordResetEmail,
     this._updateProfile,
-    this._deleteAccount,
     this._enhancedDeletionService,
   ) : super(const AuthState()) {
     _checkAuthState();
@@ -554,7 +553,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     di.getIt<auth_usecases.SendEmailVerification>(),
     di.getIt<auth_usecases.SendPasswordResetEmail>(),
     di.getIt<auth_usecases.UpdateProfile>(),
-    di.getIt<auth_usecases.DeleteAccount>(),
     di.getIt<EnhancedAccountDeletionService>(),
   );
 });

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:core/src/sync/entity_sync_registration.dart' as entity_sync;
 
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';
 import '../../features/appointments/domain/entities/sync/appointment_sync_entity.dart';
@@ -57,7 +58,7 @@ class PetivetiSyncConfig {
         enableEmergencyMode: false,
         priorityMedicalData: false,
         offlineEmergencyAccess: true,
-        emergencySyncPriority: SyncPriority.normal,
+        emergencySyncPriority: entity_sync.SyncPriority.normal,
       ),
       mediaConfig: const MediaConfig(
         enablePhotoSync: true,
@@ -92,7 +93,7 @@ class PetivetiSyncConfig {
         enableEmergencyMode: true,
         priorityMedicalData: true,
         offlineEmergencyAccess: true,
-        emergencySyncPriority: SyncPriority.high,
+        emergencySyncPriority: entity_sync.SyncPriority.high,
       ),
       mediaConfig: const MediaConfig(
         enablePhotoSync: true,
@@ -128,7 +129,7 @@ class PetivetiSyncConfig {
         enableEmergencyMode: true,
         priorityMedicalData: true,
         offlineEmergencyAccess: true,
-        emergencySyncPriority: SyncPriority.critical,
+        emergencySyncPriority: entity_sync.SyncPriority.critical,
       ),
       mediaConfig: const MediaConfig(
         enablePhotoSync: true,
@@ -167,7 +168,7 @@ class PetivetiSyncConfig {
       enableOfflineMode: true,
       batchSize: 25,
       syncInterval: appSyncConfig.syncInterval,
-      priority: SyncPriority.high,
+      priority: entity_sync.SyncPriority.high,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
 
@@ -197,7 +198,7 @@ class PetivetiSyncConfig {
       enableOfflineMode: true,
       batchSize: 20,
       syncInterval: appSyncConfig.syncInterval,
-      priority: SyncPriority.high,
+      priority: entity_sync.SyncPriority.high,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
 
@@ -211,7 +212,7 @@ class PetivetiSyncConfig {
       enableOfflineMode: true,
       batchSize: 50,
       syncInterval: appSyncConfig.syncInterval,
-      priority: SyncPriority.normal,
+      priority: entity_sync.SyncPriority.normal,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
 
@@ -225,7 +226,7 @@ class PetivetiSyncConfig {
       enableOfflineMode: true,
       batchSize: 10,
       syncInterval: Duration(minutes: appSyncConfig.syncInterval.inMinutes * 2),
-      priority: SyncPriority.low,
+      priority: entity_sync.SyncPriority.low,
       conflictStrategy: ConflictStrategy.localWins,
     ),
   ];
@@ -311,7 +312,7 @@ class EmergencyDataConfig {
     this.enableEmergencyMode = true,
     this.priorityMedicalData = true,
     this.offlineEmergencyAccess = true,
-    this.emergencySyncPriority = SyncPriority.high,
+    this.emergencySyncPriority = entity_sync.SyncPriority.high,
   });
 
   /// Modo de emergência habilitado
@@ -324,7 +325,7 @@ class EmergencyDataConfig {
   final bool offlineEmergencyAccess;
 
   /// Prioridade de sync para emergências
-  final SyncPriority emergencySyncPriority;
+  final entity_sync.SyncPriority emergencySyncPriority;
 
   Map<String, dynamic> toDebugMap() {
     return {

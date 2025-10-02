@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 /// Serviço para detectar a plataforma e fornecer configurações específicas do Gasometer
 /// Wrapper around PlatformCapabilitiesService from core package

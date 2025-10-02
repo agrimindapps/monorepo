@@ -750,9 +750,23 @@ class PlantFormStateManager extends ChangeNotifier {
   void clearError() {
     _updateState(_state.copyWith(clearError: true));
   }
-  
+
   /// Reset do formulário
   void reset() {
     _updateState(const PlantFormState());
+  }
+
+  /// Dispose - Libera recursos e limpa listeners
+  @override
+  void dispose() {
+    // Limpar state para ajudar garbage collector
+    _state = const PlantFormState();
+
+    // Dispose de ChangeNotifier listeners
+    super.dispose();
+
+    if (kDebugMode) {
+      print('🧹 PlantFormStateManager disposed - listeners cleaned up');
+    }
   }
 }

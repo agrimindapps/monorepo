@@ -1,10 +1,15 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
+import '../../../../core/providers/base_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../data/repositories/odometer_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
-import '../constants/odometer_constants.dart';
+import '../../domain/usecases/add_odometer_reading.dart';
+import '../../domain/usecases/delete_odometer_reading.dart';
+import '../../domain/usecases/get_all_odometer_readings.dart';
+import '../../domain/usecases/get_odometer_readings_by_vehicle.dart';
+import '../../domain/usecases/update_odometer_reading.dart';
 import '../services/odometer_validation_service.dart';
 
 /// Provider for managing odometer records operations
@@ -12,22 +17,31 @@ import '../services/odometer_validation_service.dart';
 /// This provider handles CRUD operations for odometer records and integrates
 /// with the vehicles provider to maintain data consistency.
 @injectable
-class OdometerProvider extends ChangeNotifier {
+class OdometerProvider extends BaseProvider {
 
   OdometerProvider(
+    this._getAllOdometerReadingsUseCase,
+    this._getOdometerReadingsByVehicleUseCase,
+    this._addOdometerReadingUseCase,
+    this._updateOdometerReadingUseCase,
+    this._deleteOdometerReadingUseCase,
     this._repository,
     this._vehiclesProvider,
   ) : _validationService = OdometerValidationService(_vehiclesProvider) {
     _initialize();
   }
+
+  final GetAllOdometerReadingsUseCase _getAllOdometerReadingsUseCase;
+  final GetOdometerReadingsByVehicleUseCase _getOdometerReadingsByVehicleUseCase;
+  final AddOdometerReadingUseCase _addOdometerReadingUseCase;
+  final UpdateOdometerReadingUseCase _updateOdometerReadingUseCase;
+  final DeleteOdometerReadingUseCase _deleteOdometerReadingUseCase;
   final OdometerRepository _repository;
   final VehiclesProvider _vehiclesProvider;
   final OdometerValidationService _validationService;
 
   // Internal state
-  final List<OdometerEntity> _odometers = [];
-  bool _isLoading = false;
-  String _error = '';
+  List<OdometerEntity> _odometers = [];
 
   /// Initializes the provider
   Future<void> _initialize() async {
@@ -40,9 +54,6 @@ class OdometerProvider extends ChangeNotifier {
   // ===========================================
 
   List<OdometerEntity> get odometers => List.unmodifiable(_odometers);
-  bool get isLoading => _isLoading;
-  String get error => _error;
-  bool get hasError => _error.isNotEmpty;
 
   /// Gets odometers for a specific vehicle
   List<OdometerEntity> getOdometersByVehicle(String vehicleId) {
@@ -64,20 +75,19 @@ class OdometerProvider extends ChangeNotifier {
 
   /// Loads all odometer records
   Future<void> loadOdometers() async {
-    _setLoading(true);
-    _setError('');
-
-    try {
-      final odometers = await _repository.getAllOdometerReadings();
-      _odometers.clear();
-      _odometers.addAll(odometers);
-      
-    } catch (e) {
-      debugPrint('Error loading odometers: $e');
-      _setError(OdometerConstants.errorMessages['carregarOdometros'] ?? 'Erro ao carregar registros');
-    } finally {
-      _setLoading(false);
-    }
+    await executeListOperation(
+      () async {
+        final result = await _getAllOdometerReadingsUseCase(NoParams());
+        return result.fold(
+          (failure) => throw failure,
+          (odometers) => odometers,
+        );
+      },
+      operationName: 'loadOdometers',
+      onSuccess: (odometers) {
+        _odometers = odometers;
+      },
+    );
   }
 
   /// Alias for loadOdometers for backward compatibility
@@ -87,20 +97,20 @@ class OdometerProvider extends ChangeNotifier {
 
   /// Loads odometers for a specific vehicle
   Future<void> loadOdometersByVehicle(String vehicleId) async {
-    _setLoading(true);
-    _setError('');
-
-    try {
-      final odometers = await _repository.getOdometerReadingsByVehicle(vehicleId);
-      _odometers.removeWhere((o) => o.vehicleId == vehicleId);
-      _odometers.addAll(odometers);
-      
-    } catch (e) {
-      debugPrint('Error loading odometers for vehicle $vehicleId: $e');
-      _setError(OdometerConstants.errorMessages['carregarOdometros'] ?? 'Erro ao carregar registros');
-    } finally {
-      _setLoading(false);
-    }
+    await executeListOperation(
+      () async {
+        final result = await _getOdometerReadingsByVehicleUseCase(vehicleId);
+        return result.fold(
+          (failure) => throw failure,
+          (odometers) => odometers,
+        );
+      },
+      operationName: 'loadOdometersByVehicle',
+      onSuccess: (odometers) {
+        _odometers.removeWhere((o) => o.vehicleId == vehicleId);
+        _odometers.addAll(odometers);
+      },
+    );
   }
 
   // ===========================================
@@ -109,119 +119,110 @@ class OdometerProvider extends ChangeNotifier {
 
   /// Adds a new odometer record
   Future<bool> addOdometer(OdometerEntity odometer) async {
-    _setLoading(true);
-    _setError('');
+    // Validate with context first
+    final validationResult = await _validationService.validateOdometerWithContext(
+      vehicleId: odometer.vehicleId,
+      odometerValue: odometer.value,
+    );
 
-    try {
-      // Validate with context
-      final validationResult = await _validationService.validateOdometerWithContext(
-        vehicleId: odometer.vehicleId,
-        odometerValue: odometer.value,
+    if (!validationResult.isValid) {
+      final error = ValidationError(
+        message: 'Odometer validation failed',
+        userFriendlyMessage: validationResult.errorMessage ?? 'Erro de validação',
       );
-
-      if (!validationResult.isValid) {
-        _setError(validationResult.errorMessage ?? 'Erro de validação');
-        return false;
-      }
-
-      final savedOdometer = await _repository.saveOdometerReading(odometer);
-      if (savedOdometer == null) {
-        _setError(OdometerConstants.errorMessages['salvarOdometro'] ?? 'Erro ao salvar registro');
-        return false;
-      }
-      
-      // Update local state
-      _odometers.add(savedOdometer);
-
-      // Update vehicle's current odometer if this is the latest reading
-      await _updateVehicleOdometer(odometer);
-
-      debugPrint('Odometer record added successfully: ${odometer.id}');
-      return true;
-
-    } catch (e) {
-      debugPrint('Error adding odometer: $e');
-      _setError(OdometerConstants.errorMessages['salvarOdometro'] ?? 'Erro ao salvar registro');
+      logError(error);
+      setState(ProviderState.error, error: error);
       return false;
-    } finally {
-      _setLoading(false);
     }
+
+    return await executeDataOperation(
+      () async {
+        final result = await _addOdometerReadingUseCase(odometer);
+        return result.fold(
+          (failure) => throw failure,
+          (savedOdometer) => savedOdometer,
+        );
+      },
+      operationName: 'addOdometer',
+      onSuccess: (savedOdometer) async {
+        if (savedOdometer != null) {
+          _odometers.add(savedOdometer);
+          // Update vehicle's current odometer if this is the latest reading
+          await _updateVehicleOdometer(odometer);
+          debugPrint('Odometer record added successfully: ${odometer.id}');
+        }
+      },
+    ).then((result) => result != null);
   }
 
   /// Updates an existing odometer record
   Future<bool> updateOdometer(OdometerEntity odometer) async {
-    _setLoading(true);
-    _setError('');
+    // Validate with context first (for editing)
+    final validationResult = await _validationService.validateOdometerWithContext(
+      vehicleId: odometer.vehicleId,
+      odometerValue: odometer.value,
+      currentOdometerId: odometer.id,
+    );
 
-    try {
-      // Validate with context (for editing)
-      final validationResult = await _validationService.validateOdometerWithContext(
-        vehicleId: odometer.vehicleId,
-        odometerValue: odometer.value,
-        currentOdometerId: odometer.id,
+    if (!validationResult.isValid) {
+      final error = ValidationError(
+        message: 'Odometer validation failed',
+        userFriendlyMessage: validationResult.errorMessage ?? 'Erro de validação',
       );
-
-      if (!validationResult.isValid) {
-        _setError(validationResult.errorMessage ?? 'Erro de validação');
-        return false;
-      }
-
-      final updatedOdometer = await _repository.updateOdometerReading(odometer);
-      if (updatedOdometer == null) {
-        _setError(OdometerConstants.errorMessages['atualizarOdometro'] ?? 'Erro ao atualizar registro');
-        return false;
-      }
-
-      // Update local state
-      final index = _odometers.indexWhere((o) => o.id == odometer.id);
-      if (index != -1) {
-        _odometers[index] = updatedOdometer;
-      }
-
-      // Update vehicle's current odometer if necessary
-      await _updateVehicleOdometer(odometer);
-
-      debugPrint('Odometer record updated successfully: ${odometer.id}');
-      return true;
-
-    } catch (e) {
-      debugPrint('Error updating odometer: $e');
-      _setError(OdometerConstants.errorMessages['atualizarOdometro'] ?? 'Erro ao atualizar registro');
+      logError(error);
+      setState(ProviderState.error, error: error);
       return false;
-    } finally {
-      _setLoading(false);
     }
+
+    return await executeDataOperation(
+      () async {
+        final result = await _updateOdometerReadingUseCase(odometer);
+        return result.fold(
+          (failure) => throw failure,
+          (updatedOdometer) => updatedOdometer,
+        );
+      },
+      operationName: 'updateOdometer',
+      onSuccess: (updatedOdometer) async {
+        if (updatedOdometer != null) {
+          final index = _odometers.indexWhere((o) => o.id == odometer.id);
+          if (index != -1) {
+            _odometers[index] = updatedOdometer;
+          }
+          // Update vehicle's current odometer if necessary
+          await _updateVehicleOdometer(odometer);
+          debugPrint('Odometer record updated successfully: ${odometer.id}');
+        }
+      },
+    ).then((result) => result != null);
   }
 
   /// Deletes an odometer record
   Future<bool> deleteOdometer(String odometerId) async {
-    _setLoading(true);
-    _setError('');
+    // Get the odometer before deletion for vehicle update
+    final removedOdometer = _odometers.cast<OdometerEntity?>().firstWhere(
+      (o) => o?.id == odometerId,
+      orElse: () => null,
+    );
 
-    try {
-      final success = await _repository.deleteOdometerReading(odometerId);
-      if (!success) {
-        _setError(OdometerConstants.errorMessages['excluirOdometro'] ?? 'Erro ao excluir registro');
-        return false;
-      }
-
-      // Update local state
-      final removedOdometer = _odometers.firstWhere((o) => o.id == odometerId);
-      _odometers.removeWhere((o) => o.id == odometerId);
-
-      // Recalculate vehicle's current odometer
-      await _recalculateVehicleOdometer(removedOdometer.vehicleId);
-
-      debugPrint('Odometer record deleted successfully: $odometerId');
-      return true;
-
-    } catch (e) {
-      debugPrint('Error deleting odometer: $e');
-      _setError(OdometerConstants.errorMessages['excluirOdometro'] ?? 'Erro ao excluir registro');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
+    return await executeDataOperation(
+      () async {
+        final result = await _deleteOdometerReadingUseCase(odometerId);
+        return result.fold(
+          (failure) => throw failure,
+          (success) => success,
+        );
+      },
+      operationName: 'deleteOdometer',
+      onSuccess: (success) async {
+        if (success && removedOdometer != null) {
+          _odometers.removeWhere((o) => o.id == odometerId);
+          // Recalculate vehicle's current odometer
+          await _recalculateVehicleOdometer(removedOdometer.vehicleId);
+          debugPrint('Odometer record deleted successfully: $odometerId');
+        }
+      },
+    ).then((result) => result == true);
   }
 
   // ===========================================
@@ -278,24 +279,6 @@ class OdometerProvider extends ChangeNotifier {
   // ===========================================
   // HELPER METHODS
   // ===========================================
-
-  void _setLoading(bool value) {
-    if (_isLoading != value) {
-      _isLoading = value;
-      notifyListeners();
-    }
-  }
-
-  void _setError(String value) {
-    if (_error != value) {
-      _error = value;
-      notifyListeners();
-    }
-  }
-
-  void clearError() {
-    _setError('');
-  }
 
   /// Gets validation service for external use
   OdometerValidationService get validationService => _validationService;

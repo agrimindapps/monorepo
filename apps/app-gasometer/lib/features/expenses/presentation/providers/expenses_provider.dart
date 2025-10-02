@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/app_error.dart';
-import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../core/providers/base_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
 import '../../core/constants/expense_constants.dart';
@@ -13,19 +13,32 @@ import '../../domain/services/expense_filters_service.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_statistics_service.dart';
 import '../../domain/services/expense_validation_service.dart';
+import '../../domain/usecases/add_expense.dart';
+import '../../domain/usecases/delete_expense.dart';
+import '../../domain/usecases/get_all_expenses.dart';
+import '../../domain/usecases/get_expenses_by_vehicle.dart';
+import '../../domain/usecases/update_expense.dart';
 import '../models/expense_form_model.dart';
 
 /// Provider principal para gerenciar estado e operações de despesas
 @injectable
 class ExpensesProvider extends BaseProvider {
   ExpensesProvider(
-    this._repository,
+    this._getAllExpensesUseCase,
+    this._getExpensesByVehicleUseCase,
+    this._addExpenseUseCase,
+    this._updateExpenseUseCase,
+    this._deleteExpenseUseCase,
     this._vehiclesProvider,
   ) {
     _initialize();
   }
-  
-  final IExpensesRepository _repository;
+
+  final GetAllExpensesUseCase _getAllExpensesUseCase;
+  final GetExpensesByVehicleUseCase _getExpensesByVehicleUseCase;
+  final AddExpenseUseCase _addExpenseUseCase;
+  final UpdateExpenseUseCase _updateExpenseUseCase;
+  final DeleteExpenseUseCase _deleteExpenseUseCase;
   final VehiclesProvider _vehiclesProvider;
   final ExpenseValidationService _validator = const ExpenseValidationService();
   final ExpenseFormatterService _formatter = ExpenseFormatterService();
@@ -66,7 +79,13 @@ class ExpensesProvider extends BaseProvider {
   /// Carrega todas as despesas
   Future<void> loadExpenses() async {
     await executeListOperation(
-      () => _repository.getAllExpenses(),
+      () async {
+        final result = await _getAllExpensesUseCase(NoParams());
+        return result.fold(
+          (failure) => throw failure,
+          (expenses) => expenses,
+        );
+      },
       operationName: 'loadExpenses',
       onSuccess: (expenses) {
         _expenses = expenses;
@@ -78,7 +97,13 @@ class ExpensesProvider extends BaseProvider {
   /// Carrega despesas por veículo
   Future<void> loadExpensesByVehicle(String vehicleId) async {
     await executeListOperation(
-      () => _repository.getExpensesByVehicle(vehicleId),
+      () async {
+        final result = await _getExpensesByVehicleUseCase(vehicleId);
+        return result.fold(
+          (failure) => throw failure,
+          (expenses) => expenses,
+        );
+      },
       operationName: 'loadExpensesByVehicle',
       parameters: {'vehicleId': vehicleId},
       onSuccess: (expenses) {
@@ -131,7 +156,13 @@ class ExpensesProvider extends BaseProvider {
 
     // Save expense
     final savedExpense = await executeDataOperation(
-      () => _repository.saveExpense(expense),
+      () async {
+        final result = await _addExpenseUseCase(expense);
+        return result.fold(
+          (failure) => throw failure,
+          (expense) => expense,
+        );
+      },
       operationName: 'addExpense',
       parameters: {
         'vehicleId': expense.vehicleId,
@@ -213,7 +244,13 @@ class ExpensesProvider extends BaseProvider {
 
     // Update expense
     final updatedExpense = await executeDataOperation(
-      () => _repository.updateExpense(expense),
+      () async {
+        final result = await _updateExpenseUseCase(expense);
+        return result.fold(
+          (failure) => throw failure,
+          (expense) => expense,
+        );
+      },
       operationName: 'updateExpense',
       parameters: {
         'expenseId': expense.id,
@@ -254,7 +291,13 @@ class ExpensesProvider extends BaseProvider {
     }
 
     final success = await executeDataOperation(
-      () => _repository.deleteExpense(expenseId),
+      () async {
+        final result = await _deleteExpenseUseCase(expenseId);
+        return result.fold(
+          (failure) => throw failure,
+          (deleted) => deleted,
+        );
+      },
       operationName: 'deleteExpense',
       parameters: {'expenseId': expenseId},
       showLoading: false,

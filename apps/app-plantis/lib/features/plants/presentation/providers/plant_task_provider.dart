@@ -212,8 +212,11 @@ class PlantTaskProvider extends ChangeNotifier {
           await _repository.updatePlantTask(completedTask);
         }
 
-        // Generate next task
-        final nextTask = _taskGenerationService.generateNextTask(completedTask);
+        // Generate next task (passa DateTime.now() como completionDate)
+        final nextTask = _taskGenerationService.generateNextTask(
+          completedTask,
+          completionDate: DateTime.now(),
+        );
         tasks.add(nextTask);
 
         // CRÍTICO: Salvar nova task na persistência
@@ -251,8 +254,11 @@ class PlantTaskProvider extends ChangeNotifier {
       // Update the current task
       tasks[taskIndex] = completedTask;
 
-      // Generate next task
-      final nextTask = _taskGenerationService.generateNextTask(completedTask);
+      // Generate next task (passa DateTime.now() como completionDate)
+      final nextTask = _taskGenerationService.generateNextTask(
+        completedTask,
+        completionDate: DateTime.now(),
+      );
       tasks.add(nextTask);
 
       _plantTasks[plantId] = tasks;
@@ -299,8 +305,11 @@ class PlantTaskProvider extends ChangeNotifier {
         await _repository.updatePlantTask(completedTask);
       }
 
-      // Generate next task based on completion date
-      final nextTask = _taskGenerationService.generateNextTask(completedTask);
+      // ✅ Generate next task based on REAL completion date
+      final nextTask = _taskGenerationService.generateNextTask(
+        completedTask,
+        completionDate: completionDate, // ✅ Usa data real fornecida
+      );
       tasks.add(nextTask);
 
       // CRÍTICO: Salvar nova task na persistência se disponível
@@ -415,11 +424,46 @@ class PlantTaskProvider extends ChangeNotifier {
   }
 
   /// Updates tasks when plant configuration changes
+  ///
+  /// ✅ FIX: Deleta tarefas antigas do repositório (soft delete)
+  /// para evitar tarefas órfãs/duplicadas
   Future<void> updateTasksForPlantConfig(Plant plant) async {
-    // Remove existing tasks
-    _plantTasks.remove(plant.id);
+    try {
+      _isLoading = true;
+      notifyListeners();
 
-    // Generate new tasks based on updated config
-    await generateTasksForPlant(plant);
+      // ✅ CRÍTICO: Deletar tarefas antigas do repositório (soft delete)
+      if (_repository != null) {
+        if (kDebugMode) {
+          print(
+            '🗑️ PlantTaskProvider: Deletando tarefas antigas da planta ${plant.id} antes de regenerar',
+          );
+        }
+        await _repository.deletePlantTasksByPlantId(plant.id);
+        if (kDebugMode) {
+          print('✅ PlantTaskProvider: Tarefas antigas deletadas (soft delete)');
+        }
+      }
+
+      // Remove existing tasks da memória
+      _plantTasks.remove(plant.id);
+
+      // Generate new tasks based on updated config
+      await generateTasksForPlant(plant);
+
+      if (kDebugMode) {
+        print(
+          '✅ PlantTaskProvider: Tarefas regeneradas para planta ${plant.id}',
+        );
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao atualizar tarefas da planta: $e';
+      if (kDebugMode) {
+        print('❌ PlantTaskProvider: Erro ao atualizar tarefas: $e');
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

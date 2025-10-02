@@ -360,31 +360,57 @@ class PlantsRepositoryImpl implements PlantsRepository {
             );
           }
 
-          // Se o ID mudou (local vs remoto), remover o registro local antigo para evitar duplicação
+          // Se o ID mudou (local vs remoto), fazer transição segura para evitar duplicação
           if (plantModel.id != remotePlant.id) {
             if (kDebugMode) {
               print(
-                '🌱 PlantsRepositoryImpl.addPlant() - IDs diferentes, removendo registro local antigo',
+                '🌱 PlantsRepositoryImpl.addPlant() - IDs diferentes, iniciando transição segura',
               );
               print('   - ID local: ${plantModel.id}');
               print('   - ID remoto: ${remotePlant.id}');
             }
-            await localDatasource.hardDeletePlant(plantModel.id);
+
+            try {
+              // PASSO 1: Salvar versão remota PRIMEIRO (source of truth)
+              await localDatasource.updatePlant(remotePlant);
+
+              if (kDebugMode) {
+                print('✅ Versão remota salva localmente');
+              }
+
+              // PASSO 2: Tentar deletar versão local antiga
+              try {
+                await localDatasource.hardDeletePlant(plantModel.id);
+                if (kDebugMode) {
+                  print('✅ Registro local antigo removido');
+                }
+              } catch (deleteError) {
+                // Log warning mas não falhar - remoto já está salvo
+                if (kDebugMode) {
+                  print(
+                    '⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError',
+                  );
+                  print('   Mas versão remota foi salva com sucesso');
+                }
+              }
+            } catch (updateError) {
+              // Se falhar ao salvar remoto, manter local e propagar erro
+              if (kDebugMode) {
+                print('❌ Falha ao salvar versão remota: $updateError');
+              }
+              throw CacheFailure(
+                'Falha ao atualizar planta localmente: ${updateError.toString()}',
+              );
+            }
+          } else {
+            // IDs iguais - atualização simples
+            await localDatasource.updatePlant(remotePlant);
 
             if (kDebugMode) {
               print(
-                '✅ PlantsRepositoryImpl.addPlant() - Registro local antigo removido',
+                '✅ PlantsRepositoryImpl.addPlant() - Local atualizado com dados remotos',
               );
             }
-          }
-
-          // Update/add local with remote ID and sync status
-          await localDatasource.updatePlant(remotePlant);
-
-          if (kDebugMode) {
-            print(
-              '✅ PlantsRepositoryImpl.addPlant() - Local atualizado com dados remotos',
-            );
           }
 
           return Right(remotePlant);

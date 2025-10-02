@@ -4,7 +4,8 @@ import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/solid_providers.dart';
-import '../../../../core/providers/state/plant_form_state_manager.dart';
+import '../../../../core/providers/state/plant_form_state_manager.dart'
+    show PlantFormStateManager, PlantFormState;
 import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';
@@ -26,21 +27,50 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateControllers();
+      _setupStateListener();
     });
+  }
+
+  void _setupStateListener() {
+    // Listen para mudanças no state e atualizar controllers automaticamente
+    ref.listenManual(
+      solidPlantFormStateProvider,
+      (previous, next) {
+        if (mounted) {
+          _syncControllersWithState(next);
+        }
+      },
+    );
   }
 
   void _updateControllers() {
     if (mounted) {
       final formState = ref.read(solidPlantFormStateProvider);
-      if (_nameController.text != formState.name) {
-        _nameController.text = formState.name;
-      }
-      if (_speciesController.text != formState.species) {
-        _speciesController.text = formState.species;
-      }
-      if (_notesController.text != formState.notes) {
-        _notesController.text = formState.notes;
-      }
+      _syncControllersWithState(formState);
+    }
+  }
+
+  void _syncControllersWithState(PlantFormState formState) {
+    // Atualizar apenas se valor mudou (evita rebuild desnecessário)
+    if (_nameController.text != formState.name) {
+      _updateControllerSafely(_nameController, formState.name);
+    }
+    if (_speciesController.text != formState.species) {
+      _updateControllerSafely(_speciesController, formState.species);
+    }
+    if (_notesController.text != formState.notes) {
+      _updateControllerSafely(_notesController, formState.notes);
+    }
+  }
+
+  /// Atualiza controller preservando posição do cursor
+  void _updateControllerSafely(TextEditingController controller, String newValue) {
+    final selection = controller.selection;
+    controller.text = newValue;
+
+    // Restaurar cursor position se ainda válido
+    if (selection.isValid && selection.baseOffset <= newValue.length) {
+      controller.selection = selection;
     }
   }
 

@@ -540,9 +540,8 @@ class _AddOdometerPageState extends State<AddOdometerPage> {
       } else {
         if (mounted) {
           // Show error in dialog context (before closing)
-          final errorMessage = odometerProvider.error.isNotEmpty 
-              ? odometerProvider.error 
-              : OdometerConstants.validationMessages['erroGenerico']!;
+          final errorMessage = odometerProvider.error?.displayMessage
+              ?? OdometerConstants.validationMessages['erroGenerico']!;
           _showErrorDialog(OdometerConstants.dialogMessages['erro']!, errorMessage);
         }
       }

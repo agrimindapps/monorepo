@@ -75,8 +75,9 @@ final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
 });
 
 /// Provider para PlantFormStateManager (SOLID-compliant)
-/// Usa ChangeNotifierProvider para observar mudanças no estado
-final solidPlantFormStateManagerProvider = ChangeNotifierProvider<PlantFormStateManager>((ref) {
+/// Usa ChangeNotifierProvider.autoDispose para observar mudanças no estado
+/// autoDispose garante que dispose() é chamado quando não há mais listeners
+final solidPlantFormStateManagerProvider = ChangeNotifierProvider.autoDispose<PlantFormStateManager>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
 
   // Usar DI puro em vez de Service Locator

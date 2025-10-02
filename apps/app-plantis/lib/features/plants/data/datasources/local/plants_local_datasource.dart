@@ -33,16 +33,18 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<Box<String>> get box async {
     if (_box != null) return _box!;
 
-    // Na web, o UnifiedSyncManager já abre a box como Box<dynamic>
-    // Não podemos fazer cast, então retornamos erro para forçar uso do UnifiedSync
-    if (kIsWeb && Hive.isBoxOpen(_boxName)) {
-      throw CacheFailure(
-        'Box "$_boxName" já está aberta pelo UnifiedSyncManager. '
-        'Na web, use apenas UnifiedSyncManager para acesso aos dados.',
-      );
+    // Se a box já está aberta (por UnifiedSync ou outro processo), reutiliza
+    if (Hive.isBoxOpen(_boxName)) {
+      if (kDebugMode) {
+        print('ℹ️ Box "$_boxName" já está aberta - reutilizando');
+      }
+      // Pega a box já aberta e faz cast
+      // Funciona porque UnifiedSync também usa String como valor
+      _box = Hive.box<String>(_boxName);
+      return _box!;
     }
 
-    // Em plataformas nativas, abre normalmente
+    // Se não está aberta, abre normalmente
     _box = await Hive.openBox<String>(_boxName);
     return _box!;
   }

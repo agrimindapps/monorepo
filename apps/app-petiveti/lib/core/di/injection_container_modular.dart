@@ -3,8 +3,12 @@ import 'package:get_it/get_it.dart';
 import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injectable_config.dart';
+import 'modules/animals_module.dart';
 import 'modules/core_module.dart';
+import 'modules/expenses_module.dart';
+import 'modules/medications_module.dart';
 import 'modules/subscription_module.dart';
+import 'modules/vaccines_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
 /// 
@@ -42,11 +46,13 @@ class ModularInjectionContainer {
     return [
       CoreModule(),              // External services and core infrastructure
       SubscriptionModule(),      // Subscription services (uses core ISubscriptionRepository)
-      // AuthModule(),           // Auth services now registered via @injectable
-      // TODO: Add more modules in Phase 2
-      // AnimalsModule(),
+      AnimalsModule(),           // Animals feature
+      ExpensesModule(),          // Expenses feature
+      MedicationsModule(),       // Medications feature
+      VaccinesModule(),          // Vaccines feature
+      // TODO: Add more modules as features are migrated
       // CalculatorsModule(),
-      // ExpensesModule(),
+      // AppointmentsModule(),
       // etc.
     ];
   }

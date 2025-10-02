@@ -743,7 +743,7 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, String>> create(T entity) async {
-    return await _repository.create(entity);
+    return await _repository.create(entity) as Either<Failure, String>;
   }
 
   @override

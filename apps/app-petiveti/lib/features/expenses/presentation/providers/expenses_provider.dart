@@ -4,7 +4,13 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
-import '../../domain/usecases/expense_usecases.dart';
+import '../../domain/usecases/add_expense.dart';
+import '../../domain/usecases/delete_expense.dart';
+import '../../domain/usecases/get_expense_summary.dart';
+import '../../domain/usecases/get_expenses.dart';
+import '../../domain/usecases/get_expenses_by_category.dart';
+import '../../domain/usecases/get_expenses_by_date_range.dart';
+import '../../domain/usecases/update_expense.dart';
 
 // State classes
 class ExpensesState {

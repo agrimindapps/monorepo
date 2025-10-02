@@ -1,13 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
 
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/data_export/presentation/pages/data_export_page.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
-import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/home/pages/landing_page.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
@@ -24,7 +22,6 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
-import '../di/injection_container.dart';
 import '../providers/auth_providers.dart';
 
 class AppRouter {
@@ -290,13 +287,7 @@ class AppRouter {
             GoRoute(
               path: deviceManagement,
               name: 'device-management',
-              builder: (context, state) {
-                // CRITICAL: Provide DeviceManagementProvider for the page
-                return provider.ChangeNotifierProvider<DeviceManagementProvider>(
-                  create: (_) => sl<DeviceManagementProvider>(),
-                  child: const DeviceManagementPage(),
-                );
-              },
+              builder: (context, state) => const DeviceManagementPage(),
             ),
             GoRoute(
               path: licenseStatus,

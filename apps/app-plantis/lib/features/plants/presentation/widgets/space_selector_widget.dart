@@ -1,8 +1,9 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/spaces_provider.dart';
 
-class SpaceSelectorWidget extends StatefulWidget {
+import '../../../../core/providers/spaces_providers.dart';
+
+class SpaceSelectorWidget extends ConsumerStatefulWidget {
   final String? selectedSpaceId;
   final ValueChanged<String?> onSpaceChanged;
   final String? errorText;
@@ -17,10 +18,10 @@ class SpaceSelectorWidget extends StatefulWidget {
   });
 
   @override
-  State<SpaceSelectorWidget> createState() => _SpaceSelectorWidgetState();
+  ConsumerState<SpaceSelectorWidget> createState() => _SpaceSelectorWidgetState();
 }
 
-class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
+class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
   final TextEditingController _customSpaceController = TextEditingController();
   bool _showCustomSpaceField = false;
   String? _selectedSpaceId;
@@ -32,9 +33,14 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
 
     // Carregar espaços quando o widget for inicializado
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final spacesProvider = context.read<SpacesProvider>();
-      if (spacesProvider.spaces.isEmpty) {
-        spacesProvider.loadSpaces();
+      final spacesAsync = ref.read(spacesProvider);
+      final isEmpty = spacesAsync.maybeWhen(
+        data: (state) => state.allSpaces.isEmpty,
+        orElse: () => true,
+      );
+
+      if (isEmpty) {
+        ref.read(spacesProvider.notifier).loadSpaces();
       }
     });
   }
@@ -48,51 +54,32 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final spacesAsync = ref.watch(spacesProvider);
 
-    return Consumer<SpacesProvider>(
-      builder: (context, spacesProvider, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Label
-            Text(
-              'Espaço${widget.isRequired ? ' *' : ''}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label
+        Text(
+          'Espaço${widget.isRequired ? ' *' : ''}',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
 
-            const SizedBox(height: 8),
+        const SizedBox(height: 8),
 
-            // Loading state
-            if (spacesProvider.isLoading && spacesProvider.spaces.isEmpty)
-              Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  color:
-                      theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(
-                            0xFFFFFFFF,
-                          ), // Branco puro para modo claro
-                ),
-                child: const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              )
+        spacesAsync.when(
+          data: (spacesState) {
+            // Normal state - show dropdown
+            if (spacesState.hasSpaces || !spacesState.hasSpaces) {
+              return _buildSpaceDropdown(context, spacesState, theme);
+            }
+
             // Error state
-            else if (spacesProvider.error != null &&
-                spacesProvider.spaces.isEmpty)
-              Container(
+            if (spacesState.error != null) {
+              return Container(
                 height: 56,
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.error),
@@ -100,9 +87,7 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                   color:
                       theme.brightness == Brightness.dark
                           ? const Color(0xFF2C2C2E)
-                          : const Color(
-                            0xFFFFFFFF,
-                          ), // Branco puro para modo claro
+                          : const Color(0xFFFFFFFF),
                 ),
                 child: Center(
                   child: Row(
@@ -121,39 +106,87 @@ class _SpaceSelectorWidgetState extends State<SpaceSelectorWidget> {
                     ],
                   ),
                 ),
-              )
-            // Space selector dropdown
-            else
-              _buildSpaceDropdown(context, spacesProvider, theme),
+              );
+            }
 
-            // Custom space field
-            if (_showCustomSpaceField) ...[
-              const SizedBox(height: 12),
-              _buildCustomSpaceField(context, theme),
-            ],
-
-            // Error text
-            if (widget.errorText != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                widget.errorText!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+            return _buildSpaceDropdown(context, spacesState, theme);
+          },
+          loading: () => Container(
+            height: 56,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
-            ],
-          ],
-        );
-      },
+              borderRadius: BorderRadius.circular(12),
+              color:
+                  theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF),
+            ),
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+          error: (error, _) => Container(
+            height: 56,
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.colorScheme.error),
+              borderRadius: BorderRadius.circular(12),
+              color:
+                  theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error,
+                    color: theme.colorScheme.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Erro ao carregar espaços',
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Custom space field
+        if (_showCustomSpaceField) ...[
+          const SizedBox(height: 12),
+          _buildCustomSpaceField(context, theme),
+        ],
+
+        // Error text
+        if (widget.errorText != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            widget.errorText!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ],
+      ],
     );
   }
 
   Widget _buildSpaceDropdown(
     BuildContext context,
-    SpacesProvider spacesProvider,
+    SpacesState spacesState,
     ThemeData theme,
   ) {
-    final spaces = spacesProvider.spaces;
+    final spaces = spacesState.allSpaces;
 
     // Adiciona opções especiais
     final List<DropdownMenuItem<String?>> items = [

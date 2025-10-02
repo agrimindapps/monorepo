@@ -1,13 +1,13 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/localization/app_strings.dart';
+import '../../../../core/providers/tasks_providers.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../core/utils/task_display_utils.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../providers/tasks_provider.dart';
 import '../providers/tasks_state.dart';
 
 /// Enhanced app bar for tasks with search, filtering, and quick actions
@@ -29,19 +29,19 @@ import '../providers/tasks_state.dart';
 /// The app bar automatically manages its state and communicates changes
 /// to the TasksProvider for data filtering and the parent widget through
 /// the onFilterChanged callback.
-class TasksAppBar extends StatefulWidget implements PreferredSizeWidget {
+class TasksAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
   final ValueChanged<TasksFilterType>? onFilterChanged;
 
   const TasksAppBar({super.key, this.onFilterChanged});
 
   @override
-  State<TasksAppBar> createState() => _TasksAppBarState();
+  ConsumerState<TasksAppBar> createState() => _TasksAppBarState();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 140);
 }
 
-class _TasksAppBarState extends State<TasksAppBar> {
+class _TasksAppBarState extends ConsumerState<TasksAppBar> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
   bool _showSearchBar = false;
@@ -75,7 +75,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(TasksConstants.searchDebounceDelay, () {
       if (mounted) {
-        context.read<TasksProvider>().searchTasks(_searchController.text);
+        ref.read(tasksProvider.notifier).searchTasks(_searchController.text);
       }
     });
   }
@@ -85,7 +85,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
       _showSearchBar = !_showSearchBar;
       if (!_showSearchBar) {
         _searchController.clear();
-        context.read<TasksProvider>().searchTasks('');
+        ref.read(tasksProvider.notifier).searchTasks('');
       }
     });
   }
@@ -129,7 +129,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
     final primaryFilter =
         _activeFilters.isNotEmpty ? _activeFilters.first : TasksFilterType.all;
 
-    context.read<TasksProvider>().setAdvancedFilters(
+    ref.read(tasksProvider.notifier).setAdvancedFilters(
       filter: primaryFilter,
       plantId: _selectedPlantFilter,
       taskTypes: _activeTaskTypes,
@@ -145,7 +145,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
       _activePriorities.clear();
       _selectedPlantFilter = null;
     });
-    context.read<TasksProvider>().setAdvancedFilters(
+    ref.read(tasksProvider.notifier).setAdvancedFilters(
       filter: TasksFilterType.all,
       plantId: null,
       taskTypes: const [],
@@ -230,40 +230,44 @@ class _TasksAppBarState extends State<TasksAppBar> {
                     ),
                     child: Row(
                       children: [
-                        Consumer<TasksProvider>(
-                          builder: (context, provider, child) {
-                            return Row(
-                              children: [
-                                // Para hoje button
-                                _FilterButton(
-                                  text: AppStrings.todayQuickFilter,
-                                  isSelected:
-                                      provider.currentFilter ==
-                                      TasksFilterType.today,
-                                  onTap:
-                                      () => _handleFilterChange(
-                                        context,
-                                        TasksFilterType.today,
-                                      ),
-                                ),
-                                const SizedBox(width: 16),
-                                // Próximas button
-                                _FilterButton(
-                                  text: AppStrings.upcomingQuickFilterFormat
-                                      .replaceAll(
-                                        '%d',
-                                        '${provider.upcomingTasksCount}',
-                                      ),
-                                  isSelected:
-                                      provider.currentFilter ==
-                                      TasksFilterType.upcoming,
-                                  onTap:
-                                      () => _handleFilterChange(
-                                        context,
-                                        TasksFilterType.upcoming,
-                                      ),
-                                ),
-                              ],
+                        Builder(
+                          builder: (context) {
+                            final tasksAsync = ref.watch(tasksProvider);
+                            return tasksAsync.maybeWhen(
+                              data: (tasksState) {
+                                return Row(
+                                  children: [
+                                    // Para hoje button
+                                    _FilterButton(
+                                      text: AppStrings.todayQuickFilter,
+                                      isSelected:
+                                          tasksState.currentFilter ==
+                                          TasksFilterType.today,
+                                      onTap:
+                                          () => _handleFilterChange(
+                                            TasksFilterType.today,
+                                          ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    // Próximas button
+                                    _FilterButton(
+                                      text: AppStrings.upcomingQuickFilterFormat
+                                          .replaceAll(
+                                            '%d',
+                                            '${tasksState.upcomingTasksCount}',
+                                          ),
+                                      isSelected:
+                                          tasksState.currentFilter ==
+                                          TasksFilterType.upcoming,
+                                      onTap:
+                                          () => _handleFilterChange(
+                                            TasksFilterType.upcoming,
+                                          ),
+                                    ),
+                                  ],
+                                );
+                              },
+                              orElse: () => const SizedBox.shrink(),
                             );
                           },
                         ),
@@ -280,8 +284,9 @@ class _TasksAppBarState extends State<TasksAppBar> {
   }
 
   Widget _buildTitleRow(ThemeData theme) {
-    return Consumer<TasksProvider>(
-      builder: (context, provider, child) {
+    final tasksAsync = ref.watch(tasksProvider);
+    return tasksAsync.maybeWhen(
+      data: (tasksState) {
         return Row(
           children: [
             Icon(Icons.task_alt, color: theme.colorScheme.primary, size: 28),
@@ -305,7 +310,7 @@ class _TasksAppBarState extends State<TasksAppBar> {
               child: Text(
                 AppStrings.totalTasksFormat.replaceAll(
                   '%d',
-                  '${provider.totalTasks}',
+                  '${tasksState.totalTasks}',
                 ),
                 style: TextStyle(
                   color: theme.colorScheme.secondary,
@@ -317,6 +322,20 @@ class _TasksAppBarState extends State<TasksAppBar> {
           ],
         );
       },
+      orElse: () => Row(
+        children: [
+          Icon(Icons.task_alt, color: theme.colorScheme.primary, size: 28),
+          const SizedBox(width: 8),
+          Text(
+            AppStrings.tasksTitle,
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -473,8 +492,8 @@ class _TasksAppBarState extends State<TasksAppBar> {
   // Note: Task type and priority name methods moved to TaskDisplayUtils
   // for centralized display logic and better maintainability
 
-  void _handleFilterChange(BuildContext context, TasksFilterType filter) {
-    context.read<TasksProvider>().setFilter(filter);
+  void _handleFilterChange(TasksFilterType filter) {
+    ref.read(tasksProvider.notifier).setFilter(filter);
     widget.onFilterChanged?.call(filter);
   }
 }

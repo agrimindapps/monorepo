@@ -1,15 +1,14 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/providers/plants_providers.dart';
+import '../../../../core/providers/spaces_providers.dart';
 import '../../domain/entities/plant.dart';
-import '../providers/plants_provider.dart';
-import '../providers/spaces_provider.dart';
 import 'plant_card.dart';
 import 'plant_list_tile.dart';
 import 'space_header_widget.dart';
 
-class PlantsGroupedBySpacesView extends StatefulWidget {
+class PlantsGroupedBySpacesView extends ConsumerStatefulWidget {
   final Map<String?, List<Plant>> groupedPlants;
   final ScrollController? scrollController;
   final bool useGridLayout;
@@ -22,51 +21,58 @@ class PlantsGroupedBySpacesView extends StatefulWidget {
   });
 
   @override
-  State<PlantsGroupedBySpacesView> createState() =>
+  ConsumerState<PlantsGroupedBySpacesView> createState() =>
       _PlantsGroupedBySpacesViewState();
 }
 
-class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
-  late SpacesProvider _spacesProvider;
-
+class _PlantsGroupedBySpacesViewState
+    extends ConsumerState<PlantsGroupedBySpacesView> {
   @override
   void initState() {
     super.initState();
-    _spacesProvider = di.sl<SpacesProvider>();
 
     // Carregar espaços se ainda não estiverem carregados
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_spacesProvider.spaces.isEmpty) {
-        _spacesProvider.loadSpaces();
+      final spacesAsync = ref.read(spacesProvider);
+      final isEmpty = spacesAsync.maybeWhen(
+        data: (state) => state.allSpaces.isEmpty,
+        orElse: () => true,
+      );
+
+      if (isEmpty) {
+        ref.read(spacesProvider.notifier).loadSpaces();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _spacesProvider,
-      child: Consumer<SpacesProvider>(
-        builder: (context, spacesProvider, child) {
-          return ListView.builder(
-            controller: widget.scrollController,
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-            itemCount: widget.groupedPlants.length,
-            itemBuilder: (context, index) {
-              final entry = widget.groupedPlants.entries.elementAt(index);
-              final spaceId = entry.key;
-              final plants = entry.value;
+    final spacesAsync = ref.watch(spacesProvider);
 
-              return _buildSpaceSection(
-                context,
-                spaceId,
-                plants,
-                spacesProvider,
-              );
-            },
-          );
-        },
-      ),
+    return ListView.builder(
+      controller: widget.scrollController,
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+      itemCount: widget.groupedPlants.length,
+      itemBuilder: (context, index) {
+        final entry = widget.groupedPlants.entries.elementAt(index);
+        final spaceId = entry.key;
+        final plants = entry.value;
+
+        return spacesAsync.maybeWhen(
+          data: (spacesState) => _buildSpaceSection(
+            context,
+            spaceId,
+            plants,
+            spacesState,
+          ),
+          orElse: () => _buildSpaceSection(
+            context,
+            spaceId,
+            plants,
+            null,
+          ),
+        );
+      },
     );
   }
 
@@ -74,9 +80,9 @@ class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
     BuildContext context,
     String? spaceId,
     List<Plant> plants,
-    SpacesProvider spacesProvider,
+    SpacesState? spacesState,
   ) {
-    final spaceName = _getSpaceName(spaceId, spacesProvider);
+    final spaceName = _getSpaceName(spaceId, spacesState);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,8 +94,7 @@ class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
           plantCount: plants.length,
           onEdit: () {
             // Refresh plants list after space name change
-            final plantsProvider = context.read<PlantsProvider>();
-            plantsProvider.loadPlants();
+            ref.read(plantsProvider.notifier).refreshPlants();
           },
         ),
 
@@ -183,14 +188,18 @@ class _PlantsGroupedBySpacesViewState extends State<PlantsGroupedBySpacesView> {
     );
   }
 
-  String _getSpaceName(String? spaceId, SpacesProvider spacesProvider) {
+  String _getSpaceName(String? spaceId, SpacesState? spacesState) {
     if (spaceId == null) {
       return 'Sem espaço definido';
     }
 
+    if (spacesState == null) {
+      return 'Espaço desconhecido';
+    }
+
     // Try to find space in loaded spaces
     try {
-      final space = spacesProvider.spaces.firstWhere((s) => s.id == spaceId);
+      final space = spacesState.allSpaces.firstWhere((s) => s.id == spaceId);
       return space.displayName;
     } catch (e) {
       // Space not found in loaded spaces, return a fallback

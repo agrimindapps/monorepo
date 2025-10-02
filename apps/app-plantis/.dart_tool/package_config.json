@@ -3,9 +3,9 @@
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-85.0.0",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-76.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.3"
     },
     {
       "name": "_flutterfire_internals",
@@ -14,10 +14,22 @@
       "languageVersion": "3.2"
     },
     {
-      "name": "analyzer",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/analyzer-7.7.1",
+      "name": "_macros",
+      "rootUri": "file:///Users/lucineiloch/fvm/versions/3.29.2/bin/cache/dart-sdk/pkg/_macros",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "analyzer",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/analyzer-6.11.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "analyzer_plugin",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/analyzer_plugin-0.11.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "archive",
@@ -57,15 +69,15 @@
     },
     {
       "name": "build",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build-3.1.0",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build-2.5.4",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "build_config",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_config-1.2.0",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_config-1.1.2",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.6"
     },
     {
       "name": "build_daemon",
@@ -75,19 +87,19 @@
     },
     {
       "name": "build_resolvers",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_resolvers-3.0.3",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_resolvers-2.5.4",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "build_runner",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_runner-2.7.1",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_runner-2.5.4",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
       "name": "build_runner_core",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_runner_core-9.3.1",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/build_runner_core-9.1.2",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -132,6 +144,18 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/checked_yaml-2.0.3",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "ci",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/ci-0.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "cli_util",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/cli_util-0.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "clock",
@@ -230,10 +254,28 @@
       "languageVersion": "3.1"
     },
     {
-      "name": "dart_style",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/dart_style-3.1.1",
+      "name": "custom_lint",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/custom_lint-0.6.10",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "custom_lint_builder",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/custom_lint_builder-0.6.10",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "custom_lint_core",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/custom_lint_core-0.6.10",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "dart_style",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/dart_style-2.3.8",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "dartz",
@@ -626,6 +668,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "freezed_annotation",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/freezed_annotation-2.4.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "frontend_server_client",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/frontend_server_client-4.0.0",
       "packageUri": "lib/",
@@ -702,6 +750,12 @@
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/hive_flutter-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "hotreloader",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/hotreloader-4.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "http",
@@ -783,7 +837,7 @@
     },
     {
       "name": "injectable_generator",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/injectable_generator-2.8.1",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/injectable_generator-2.6.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -872,6 +926,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "macros",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/macros-0.1.3-main.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "matcher",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/matcher-0.12.17",
       "packageUri": "lib/",
@@ -897,9 +957,9 @@
     },
     {
       "name": "mockito",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/mockito-5.5.0",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/mockito-5.4.5",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.6"
     },
     {
       "name": "mocktail",
@@ -1100,6 +1160,30 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "riverpod_analyzer_utils",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_analyzer_utils-0.5.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "riverpod_annotation",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_annotation-2.6.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "riverpod_generator",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_generator-2.6.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "riverpod_lint",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/riverpod_lint-2.6.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "rxdart",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/rxdart-0.28.0",
       "packageUri": "lib/",
@@ -1203,9 +1287,9 @@
     },
     {
       "name": "source_gen",
-      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/source_gen-3.1.0",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/source_gen-1.5.0",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.0"
     },
     {
       "name": "source_span",
@@ -1442,7 +1526,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-10-02T18:45:14.906166Z",
+  "generated": "2025-10-02T19:47:47.762727Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/lucineiloch/fvm/versions/3.29.2",

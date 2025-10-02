@@ -1,9 +1,10 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/widgets.dart' as flutter_widgets;
 
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../utils/auth_validators.dart';
-import '../providers/auth_provider.dart';
 
 /// Dialog modal para capturar email para reset de senha
 ///
@@ -12,15 +13,15 @@ import '../providers/auth_provider.dart';
 /// - Estados de loading durante envio
 /// - Feedback visual de sucesso/erro
 /// - Design consistente com o tema do app
-class ForgotPasswordDialog extends StatefulWidget {
+class ForgotPasswordDialog extends ConsumerStatefulWidget {
   const ForgotPasswordDialog({super.key});
 
   @override
-  State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+  ConsumerState<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
 }
 
-class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
-  final _formKey = GlobalKey<FormState>();
+class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
+  final _formKey = GlobalKey<flutter_widgets.FormState>();
   final _emailController = TextEditingController();
   final _emailFocusNode = FocusNode();
 
@@ -314,8 +315,8 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
     });
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final result = await authProvider.resetPassword(
+      final authNotifier = ref.read(authProvider.notifier);
+      final result = await authNotifier.resetPassword(
         _emailController.text.trim(),
       );
 
@@ -326,9 +327,16 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
             _successMessage = 'Email de redefinição enviado com sucesso!';
           });
         } else {
+          // Get error from auth state
+          final authState = ref.read(authProvider);
+          final errorMsg = authState.maybeWhen(
+            error: (error, _) => error.toString(),
+            orElse: () => 'Erro ao enviar email',
+          );
+
           setState(() {
             _isLoading = false;
-            _errorMessage = authProvider.errorMessage ?? 'Erro ao enviar email';
+            _errorMessage = errorMsg;
           });
         }
       }

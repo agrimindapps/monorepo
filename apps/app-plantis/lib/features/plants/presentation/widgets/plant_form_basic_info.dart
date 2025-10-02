@@ -1,14 +1,12 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/solid_providers.dart';
+import '../../../../core/providers/spaces_providers.dart';
 import '../../../../core/providers/state/plant_form_state_manager.dart'
     show PlantFormStateManager, PlantFormState;
 import '../../../../core/validation/validators.dart';
 import '../../domain/usecases/spaces_usecases.dart';
-import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';
 
 class PlantFormBasicInfo extends ConsumerStatefulWidget {
@@ -469,14 +467,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             const SizedBox(height: 12),
 
             // Space selector
-            provider.ChangeNotifierProvider(
-              create: (_) => di.sl<SpacesProvider>(),
-              child: SpaceSelectorWidget(
-                selectedSpaceId: formState.spaceId,
-                onSpaceChanged:
-                    (spaceId) => _handleSpaceSelection(formManager, spaceId),
-                errorText: fieldErrors['space'],
-              ),
+            SpaceSelectorWidget(
+              selectedSpaceId: formState.spaceId,
+              onSpaceChanged:
+                  (spaceId) => _handleSpaceSelection(formManager, spaceId),
+              errorText: fieldErrors['space'],
             ),
 
             const SizedBox(height: 12),
@@ -715,11 +710,16 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
       if (spaceName.trim().isEmpty) return;
 
       try {
-        final spacesProvider = di.sl<SpacesProvider>();
-        await spacesProvider.loadSpaces(); // Garantir que temos a lista atual
+        final spacesNotifier = ref.read(spacesProvider.notifier);
+        await spacesNotifier.loadSpaces(); // Garantir que temos a lista atual
 
         // Verificar se já existe um espaço com esse nome
-        final existingSpace = spacesProvider.findSpaceByName(spaceName);
+        final spacesState = ref.read(spacesProvider);
+        final existingSpace = spacesState.maybeWhen(
+          data: (state) => state.findSpaceByName(spaceName),
+          orElse: () => null,
+        );
+
         if (existingSpace != null) {
           // Usar o espaço existente
           formManager.setSpaceId(existingSpace.id);
@@ -737,14 +737,18 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         }
 
         // Criar novo espaço
-        final success = await spacesProvider.addSpace(
+        final success = await spacesNotifier.addSpace(
           AddSpaceParams(name: spaceName),
         );
 
         if (success && mounted) {
           // Buscar o espaço recém-criado
-          await spacesProvider.loadSpaces();
-          final newSpace = spacesProvider.findSpaceByName(spaceName);
+          await spacesNotifier.loadSpaces();
+          final updatedState = ref.read(spacesProvider);
+          final newSpace = updatedState.maybeWhen(
+            data: (state) => state.findSpaceByName(spaceName),
+            orElse: () => null,
+          );
 
           if (newSpace != null) {
             formManager.setSpaceId(newSpace.id);

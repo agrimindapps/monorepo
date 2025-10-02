@@ -1,10 +1,10 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/providers/spaces_providers.dart';
 import '../../domain/usecases/spaces_usecases.dart';
-import '../providers/spaces_provider.dart';
 
-class SpaceHeaderWidget extends StatefulWidget {
+class SpaceHeaderWidget extends ConsumerStatefulWidget {
   final String? spaceId;
   final String spaceName;
   final int plantCount;
@@ -19,10 +19,10 @@ class SpaceHeaderWidget extends StatefulWidget {
   });
 
   @override
-  State<SpaceHeaderWidget> createState() => _SpaceHeaderWidgetState();
+  ConsumerState<SpaceHeaderWidget> createState() => _SpaceHeaderWidgetState();
 }
 
-class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
+class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
   bool _isEditing = false;
   late TextEditingController _controller;
   late FocusNode _focusNode;
@@ -198,16 +198,21 @@ class _SpaceHeaderWidgetState extends State<SpaceHeaderWidget> {
     }
 
     try {
-      final spacesProvider = context.read<SpacesProvider>();
+      final spacesNotifier = ref.read(spacesProvider.notifier);
+      final spacesState = ref.read(spacesProvider);
 
       // Check if name already exists (case insensitive)
-      final existingSpace = spacesProvider.findSpaceByName(newName);
+      final existingSpace = spacesState.maybeWhen(
+        data: (state) => state.findSpaceByName(newName),
+        orElse: () => null,
+      );
+
       if (existingSpace != null && existingSpace.id != widget.spaceId) {
         _showError('Já existe um espaço com esse nome');
         return;
       }
 
-      final success = await spacesProvider.updateSpace(
+      final success = await spacesNotifier.updateSpace(
         UpdateSpaceParams(id: widget.spaceId!, name: newName),
       );
 

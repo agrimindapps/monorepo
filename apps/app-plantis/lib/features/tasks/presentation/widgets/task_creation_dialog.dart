@@ -1,10 +1,11 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/widgets.dart' as flutter_widgets;
 
 import '../../../../core/localization/app_strings.dart';
+import '../../../../core/providers/plants_providers.dart';
 import '../../../../core/validation/validators.dart';
 import '../../../plants/domain/entities/plant.dart';
-import '../../../plants/presentation/providers/plants_provider.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart';
 
@@ -37,7 +38,7 @@ import '../../domain/entities/task.dart';
 /// - Sets appropriate default priority based on task type
 /// - Validates required fields before allowing submission
 /// - Handles loading states during plant retrieval
-class TaskCreationDialog extends StatefulWidget {
+class TaskCreationDialog extends ConsumerStatefulWidget {
   final VoidCallback? onCancel;
   final Function(TaskCreationData)? onConfirm;
 
@@ -79,11 +80,11 @@ class TaskCreationDialog extends StatefulWidget {
   }
 
   @override
-  State<TaskCreationDialog> createState() => _TaskCreationDialogState();
+  ConsumerState<TaskCreationDialog> createState() => _TaskCreationDialogState();
 }
 
-class _TaskCreationDialogState extends State<TaskCreationDialog> {
-  final _formKey = GlobalKey<FormState>();
+class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
+  final _formKey = GlobalKey<flutter_widgets.FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -109,7 +110,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
     super.dispose();
   }
 
-  /// Loads available plants from PlantsProvider with error handling
+  /// Loads available plants from Riverpod PlantsProvider with error handling
   ///
   /// This method retrieves all plants that can be associated with tasks.
   /// It manages loading states and automatically selects the first plant
@@ -122,11 +123,16 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
   Future<void> _loadPlants() async {
     setState(() => _isLoadingPlants = true);
 
-    final plantsProvider = context.read<PlantsProvider>();
-    await plantsProvider.loadPlants();
+    await ref.read(plantsProvider.notifier).refreshPlants();
+
+    final plantsAsync = ref.read(plantsProvider);
+    final plants = plantsAsync.maybeWhen(
+      data: (state) => state.allPlants,
+      orElse: () => <Plant>[],
+    );
 
     setState(() {
-      _plants = plantsProvider.plants;
+      _plants = plants;
       _isLoadingPlants = false;
 
       // Auto-select first plant if available

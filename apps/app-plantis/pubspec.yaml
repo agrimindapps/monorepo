@@ -26,12 +26,15 @@ dependencies:
   path_provider: any
   flutter_secure_storage: any
   url_launcher: any
-  provider: any
   device_info_plus: any
   intl: any
   equatable: any
   cloud_firestore: any
-  flutter_riverpod: any
+
+  # Riverpod (State Management)
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
   flutter_staggered_grid_view: ^0.7.0
   go_router: any
   mime: ^2.0.0
@@ -43,11 +46,14 @@ dev_dependencies:
 
   # Testing
   mockito: ^5.4.4
-  build_runner: ^2.4.6
   mocktail: ^1.0.4
 
   # Code generation
+  build_runner: ^2.4.6
   injectable_generator: ^2.6.2
+  riverpod_generator: ^2.6.1
+  riverpod_lint: ^2.6.1
+  custom_lint: ^0.6.0
 
 flutter:
   uses-material-design: true

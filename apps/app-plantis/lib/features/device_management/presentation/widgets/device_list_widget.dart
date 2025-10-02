@@ -1,61 +1,58 @@
+import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/providers/device_management_providers.dart';
 import '../../data/models/device_model.dart';
-import '../providers/device_management_provider.dart';
 import 'device_tile_widget.dart';
 
 /// Widget que exibe a lista de dispositivos do usuário
 /// Organizada em seções de dispositivos ativos e inativos
-class DeviceListWidget extends StatelessWidget {
+class DeviceListWidget extends ConsumerWidget {
   const DeviceListWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<DeviceManagementProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading && !provider.hasDevices) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final deviceManagementAsync = ref.watch(deviceManagementProvider);
 
-        if (!provider.hasDevices) {
+    return deviceManagementAsync.when(
+      data: (deviceState) {
+        if (!deviceState.hasDevices) {
           return const Center(child: Text('Nenhum dispositivo encontrado'));
         }
 
         return RefreshIndicator(
-          onRefresh: provider.refresh,
+          onRefresh: () => ref.read(deviceManagementProvider.notifier).refresh(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               // Seção de dispositivos ativos
-              if (provider.activeDevices.isNotEmpty) ...[
+              if (deviceState.activeDevices.isNotEmpty) ...[
                 _buildSectionHeader(
                   context,
                   'Dispositivos Ativos',
-                  provider.activeDevices.length,
+                  deviceState.activeDevices.length,
                   Icons.verified,
                   Colors.green,
                 ),
                 const SizedBox(height: 8),
-                ...provider.activeDevices.map(
-                  (device) => _buildDeviceItem(context, device, provider),
+                ...deviceState.activeDevices.map(
+                  (device) => _buildDeviceItem(context, ref, device, deviceState),
                 ),
               ],
 
               // Seção de dispositivos inativos
-              if (provider.inactiveDevices.isNotEmpty) ...[
+              if (deviceState.inactiveDevices.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 _buildSectionHeader(
                   context,
                   'Dispositivos Inativos',
-                  provider.inactiveDevices.length,
+                  deviceState.inactiveDevices.length,
                   Icons.block,
                   Colors.grey,
                 ),
                 const SizedBox(height: 8),
-                ...provider.inactiveDevices.map(
-                  (device) => _buildDeviceItem(context, device, provider),
+                ...deviceState.inactiveDevices.map(
+                  (device) => _buildDeviceItem(context, ref, device, deviceState),
                 ),
               ],
 
@@ -65,6 +62,8 @@ class DeviceListWidget extends StatelessWidget {
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Erro: $error')),
     );
   }
 
@@ -121,19 +120,19 @@ class DeviceListWidget extends StatelessWidget {
 
   Widget _buildDeviceItem(
     BuildContext context,
+    WidgetRef ref,
     DeviceModel device,
-    DeviceManagementProvider provider,
+    DeviceManagementState deviceState,
   ) {
+    final isBeingRevoked = deviceState.isRevoking && deviceState.revokingDeviceUuid == device.uuid;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: DeviceTileWidget(
         device: device,
-        isCurrentDevice: provider.currentDevice?.uuid == device.uuid,
-        isBeingRevoked: provider.isDeviceBeingRevoked(device.uuid),
-        onRevoke:
-            device.isActive
-                ? () => _showRevokeDialog(context, device, provider)
-                : null,
+        isCurrentDevice: deviceState.currentDevice?.uuid == device.uuid,
+        isBeingRevoked: isBeingRevoked,
+        onRevoke: device.isActive ? () => _showRevokeDialog(context, ref, device, deviceState) : null,
         onTap: () => _showDeviceDetails(context, device),
       ),
     );
@@ -141,11 +140,12 @@ class DeviceListWidget extends StatelessWidget {
 
   Future<void> _showRevokeDialog(
     BuildContext context,
+    WidgetRef ref,
     DeviceModel device,
-    DeviceManagementProvider provider,
+    DeviceManagementState deviceState,
   ) async {
     // Previne revogar o dispositivo atual
-    if (provider.currentDevice?.uuid == device.uuid) {
+    if (deviceState.currentDevice?.uuid == device.uuid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Não é possível revogar o dispositivo atual'),
@@ -231,8 +231,8 @@ class DeviceListWidget extends StatelessWidget {
           ),
     );
 
-    if (confirmed == true) {
-      final success = await provider.revokeDevice(
+    if (confirmed == true && context.mounted) {
+      final success = await ref.read(deviceManagementProvider.notifier).revokeDevice(
         device.uuid,
         reason: 'Revogado manualmente via interface',
       );
@@ -261,13 +261,13 @@ class DeviceListWidget extends StatelessWidget {
 }
 
 /// Sheet de detalhes do dispositivo
-class _DeviceDetailsSheet extends StatelessWidget {
+class _DeviceDetailsSheet extends ConsumerWidget {
   final DeviceModel device;
 
   const _DeviceDetailsSheet({required this.device});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.5,
@@ -410,9 +410,9 @@ class _DeviceDetailsSheet extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Indicador se é o dispositivo atual
-                    Consumer<DeviceManagementProvider>(
-                      builder: (context, provider, child) {
-                        if (provider.currentDevice?.uuid == device.uuid) {
+                    ref.watch(deviceManagementProvider).when(
+                      data: (deviceState) {
+                        if (deviceState.currentDevice?.uuid == device.uuid) {
                           return Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -429,8 +429,7 @@ class _DeviceDetailsSheet extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Dispositivo Atual',
@@ -456,6 +455,8 @@ class _DeviceDetailsSheet extends StatelessWidget {
                         }
                         return const SizedBox.shrink();
                       },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
                     ),
                   ],
                 ),

@@ -1,27 +1,40 @@
+import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../core/providers/device_management_providers.dart';
 import '../../data/models/device_model.dart';
-import '../providers/device_management_provider.dart';
 
 /// Widget que exibe estatísticas detalhadas dos dispositivos
 /// Mostra informações analíticas e recomendações para o usuário
-class DeviceStatisticsWidget extends StatelessWidget {
+class DeviceStatisticsWidget extends ConsumerStatefulWidget {
   const DeviceStatisticsWidget({super.key});
 
   @override
+  ConsumerState<DeviceStatisticsWidget> createState() => _DeviceStatisticsWidgetState();
+}
+
+class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Load statistics on init
+    Future.microtask(() => ref.read(deviceManagementProvider.notifier).loadStatistics());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceManagementProvider>(
-      builder: (context, provider, child) {
-        if (provider.statistics == null) {
+    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+
+    return deviceManagementAsync.when(
+      data: (deviceState) {
+        if (deviceState.statistics == null) {
           return _buildEmptyState(context);
         }
 
-        final stats = provider.statistics!;
+        final stats = deviceState.statistics!;
 
         return RefreshIndicator(
-          onRefresh: () => provider.loadStatistics(refresh: true),
+          onRefresh: () => ref.read(deviceManagementProvider.notifier).loadStatistics(refresh: true),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -48,6 +61,8 @@ class DeviceStatisticsWidget extends StatelessWidget {
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Erro ao carregar estatísticas: $error')),
     );
   }
 

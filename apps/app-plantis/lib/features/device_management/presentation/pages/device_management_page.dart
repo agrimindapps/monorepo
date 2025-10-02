@@ -1,21 +1,21 @@
+import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/device_management_provider.dart';
+import '../../../../core/providers/device_management_providers.dart';
 import '../widgets/device_actions_widget.dart';
 import '../widgets/device_list_widget.dart';
 import '../widgets/device_statistics_widget.dart';
 
 /// Página principal de gerenciamento de dispositivos
 /// Interface principal para visualizar e gerenciar dispositivos no app-plantis
-class DeviceManagementPage extends StatefulWidget {
+class DeviceManagementPage extends ConsumerStatefulWidget {
   const DeviceManagementPage({super.key});
 
   @override
-  State<DeviceManagementPage> createState() => _DeviceManagementPageState();
+  ConsumerState<DeviceManagementPage> createState() => _DeviceManagementPageState();
 }
 
-class _DeviceManagementPageState extends State<DeviceManagementPage>
+class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
@@ -33,46 +33,46 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
 
   @override
   Widget build(BuildContext context) {
+    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gerenciar Dispositivos'),
         elevation: 0,
         actions: [
-          Consumer<DeviceManagementProvider>(
-            builder: (context, provider, child) {
-              return PopupMenuButton<String>(
-                onSelected:
-                    (value) => _handleMenuAction(context, value, provider),
-                itemBuilder:
-                    (context) => [
-                      const PopupMenuItem(
-                        value: 'refresh',
-                        child: ListTile(
-                          leading: Icon(Icons.refresh),
-                          title: Text('Atualizar'),
-                          dense: true,
-                        ),
-                      ),
-                      if (provider.hasDevices && provider.activeDeviceCount > 1)
-                        const PopupMenuItem(
-                          value: 'revoke_all',
-                          child: ListTile(
-                            leading: Icon(Icons.logout, color: Colors.red),
-                            title: Text('Revogar Outros Dispositivos'),
-                            dense: true,
-                          ),
-                        ),
-                      const PopupMenuItem(
-                        value: 'help',
-                        child: ListTile(
-                          leading: Icon(Icons.help_outline),
-                          title: Text('Ajuda'),
-                          dense: true,
-                        ),
-                      ),
-                    ],
-              );
-            },
+          deviceManagementAsync.when(
+            data: (deviceState) => PopupMenuButton<String>(
+              onSelected: (value) => _handleMenuAction(context, value),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'refresh',
+                  child: ListTile(
+                    leading: Icon(Icons.refresh),
+                    title: Text('Atualizar'),
+                    dense: true,
+                  ),
+                ),
+                if (deviceState.hasDevices && deviceState.activeDeviceCount > 1)
+                  const PopupMenuItem(
+                    value: 'revoke_all',
+                    child: ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red),
+                      title: Text('Revogar Outros Dispositivos'),
+                      dense: true,
+                    ),
+                  ),
+                const PopupMenuItem(
+                  value: 'help',
+                  child: ListTile(
+                    leading: Icon(Icons.help_outline),
+                    title: Text('Ajuda'),
+                    dense: true,
+                  ),
+                ),
+              ],
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
         bottom: TabBar(
@@ -83,39 +83,41 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
           ],
         ),
       ),
-      body: Consumer<DeviceManagementProvider>(
-        builder: (context, provider, child) {
-          return Column(
-            children: [
-              // Mensagens de feedback
-              _buildFeedbackMessages(provider),
+      body: deviceManagementAsync.when(
+        data: (deviceState) => Column(
+          children: [
+            // Mensagens de feedback
+            _buildFeedbackMessages(deviceState),
 
-              // Status geral
-              _buildGeneralStatus(provider),
+            // Status geral
+            _buildGeneralStatus(deviceState),
 
-              // Conteúdo das abas
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // Aba de dispositivos
-                    _buildDevicesTab(provider),
+            // Conteúdo das abas
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Aba de dispositivos
+                  _buildDevicesTab(deviceState),
 
-                    // Aba de estatísticas
-                    _buildStatisticsTab(provider),
-                  ],
-                ),
+                  // Aba de estatísticas
+                  _buildStatisticsTab(deviceState),
+                ],
               ),
-            ],
-          );
-        },
+            ),
+          ],
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Erro ao carregar: $error'),
+        ),
       ),
       floatingActionButton: _buildFloatingActionButton(context),
     );
   }
 
-  Widget _buildFeedbackMessages(DeviceManagementProvider provider) {
-    if (provider.errorMessage != null) {
+  Widget _buildFeedbackMessages(DeviceManagementState deviceState) {
+    if (deviceState.errorMessage != null) {
       return Container(
         width: double.infinity,
         margin: const EdgeInsets.all(16),
@@ -131,13 +133,13 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                provider.errorMessage!,
+                deviceState.errorMessage!,
                 style: TextStyle(color: Colors.red.shade700, fontSize: 14),
               ),
             ),
             IconButton(
               icon: Icon(Icons.close, color: Colors.red.shade600, size: 18),
-              onPressed: provider.clearMessages,
+              onPressed: () => ref.read(deviceManagementProvider.notifier).clearError(),
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
             ),
@@ -146,7 +148,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
       );
     }
 
-    if (provider.successMessage != null) {
+    if (deviceState.successMessage != null) {
       return Container(
         width: double.infinity,
         margin: const EdgeInsets.all(16),
@@ -166,13 +168,13 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                provider.successMessage!,
+                deviceState.successMessage!,
                 style: TextStyle(color: Colors.green.shade700, fontSize: 14),
               ),
             ),
             IconButton(
               icon: Icon(Icons.close, color: Colors.green.shade600, size: 18),
-              onPressed: provider.clearMessages,
+              onPressed: () => ref.read(deviceManagementProvider.notifier).clearSuccess(),
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
             ),
@@ -184,7 +186,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
     return const SizedBox.shrink();
   }
 
-  Widget _buildGeneralStatus(DeviceManagementProvider provider) {
+  Widget _buildGeneralStatus(DeviceManagementState deviceState) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -200,12 +202,12 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: provider.statusColor.withValues(alpha: 0.1),
+              color: deviceState.statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
-              provider.statusIcon,
-              color: provider.statusColor,
+              deviceState.statusIcon,
+              color: deviceState.statusColor,
               size: 24,
             ),
           ),
@@ -215,7 +217,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  provider.statusText,
+                  deviceState.statusText,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -223,7 +225,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  provider.deviceLimitText,
+                  deviceState.deviceLimitText,
                   style: TextStyle(
                     fontSize: 14,
                     color: Theme.of(
@@ -234,7 +236,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
               ],
             ),
           ),
-          if (provider.hasReachedDeviceLimit)
+          if (deviceState.hasReachedDeviceLimit)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -250,7 +252,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
                 ),
               ),
             )
-          else if (provider.isNearDeviceLimit)
+          else if (deviceState.isNearDeviceLimit)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -271,21 +273,8 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
     );
   }
 
-  Widget _buildDevicesTab(DeviceManagementProvider provider) {
-    if (provider.isLoading && !provider.hasDevices) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Carregando dispositivos...'),
-          ],
-        ),
-      );
-    }
-
-    if (!provider.hasDevices) {
+  Widget _buildDevicesTab(DeviceManagementState deviceState) {
+    if (!deviceState.hasDevices) {
       return _buildEmptyDevicesState();
     }
 
@@ -302,20 +291,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
     );
   }
 
-  Widget _buildStatisticsTab(DeviceManagementProvider provider) {
-    if (provider.isLoading && provider.statistics == null) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Carregando estatísticas...'),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildStatisticsTab(DeviceManagementState deviceState) {
     return const DeviceStatisticsWidget();
   }
 
@@ -360,43 +336,39 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
   }
 
   Widget? _buildFloatingActionButton(BuildContext context) {
-    return Consumer<DeviceManagementProvider>(
-      builder: (context, provider, child) {
-        if (!provider.canAddMoreDevices) return const SizedBox.shrink();
+    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+
+    return deviceManagementAsync.when(
+      data: (deviceState) {
+        if (!deviceState.canAddMoreDevices) return null;
 
         return FloatingActionButton.extended(
-          onPressed:
-              provider.isValidating
-                  ? null
-                  : () => _validateCurrentDevice(context),
-          icon:
-              provider.isValidating
-                  ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                  : const Icon(Icons.add),
+          onPressed: deviceState.isValidating ? null : () => _validateCurrentDevice(context),
+          icon: deviceState.isValidating
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.add),
           label: Text(
-            provider.isValidating ? 'Validando...' : 'Validar Dispositivo',
+            deviceState.isValidating ? 'Validando...' : 'Validar Dispositivo',
           ),
         );
       },
+      loading: () => null,
+      error: (_, __) => null,
     );
   }
 
-  Future<void> _handleMenuAction(
-    BuildContext context,
-    String action,
-    DeviceManagementProvider provider,
-  ) async {
+  Future<void> _handleMenuAction(BuildContext context, String action) async {
     switch (action) {
       case 'refresh':
-        await provider.refresh();
+        await ref.read(deviceManagementProvider.notifier).refresh();
         break;
 
       case 'revoke_all':
-        await _showRevokeAllDialog(context, provider);
+        await _showRevokeAllDialog(context);
         break;
 
       case 'help':
@@ -406,9 +378,9 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
   }
 
   Future<void> _validateCurrentDevice(BuildContext context) async {
-    final provider = context.read<DeviceManagementProvider>();
+    final notifier = ref.read(deviceManagementProvider.notifier);
 
-    final result = await provider.validateCurrentDevice();
+    final result = await notifier.validateCurrentDevice();
 
     if (result != null && !result.isValid) {
       if (mounted) {
@@ -422,41 +394,40 @@ class _DeviceManagementPageState extends State<DeviceManagementPage>
     }
   }
 
-  Future<void> _showRevokeAllDialog(
-    BuildContext context,
-    DeviceManagementProvider provider,
-  ) async {
+  Future<void> _showRevokeAllDialog(BuildContext context) async {
+    final deviceState = ref.read(deviceManagementProvider).valueOrNull;
+    if (deviceState == null) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Revogar Outros Dispositivos'),
-            content: Text(
-              'Isso irá desconectar todos os outros dispositivos (${provider.activeDeviceCount - 1}), '
-              'mantendo apenas este dispositivo ativo.\n\n'
-              'Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Revogar Todos'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Revogar Outros Dispositivos'),
+        content: Text(
+          'Isso irá desconectar todos os outros dispositivos (${deviceState.activeDeviceCount - 1}), '
+          'mantendo apenas este dispositivo ativo.\n\n'
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Revogar Todos'),
+          ),
+        ],
+      ),
     );
 
-    if (confirmed == true) {
-      await provider.revokeAllOtherDevices(
-        reason: 'Logout remoto via interface de gerenciamento',
-      );
+    if (confirmed == true && mounted) {
+      await ref.read(deviceManagementProvider.notifier).revokeAllOtherDevices(
+            reason: 'Logout remoto via interface de gerenciamento',
+          );
     }
   }
 

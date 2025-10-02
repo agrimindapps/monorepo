@@ -1,28 +1,29 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/localization/app_strings.dart';
+import '../../../../core/providers/tasks_providers.dart';
 import '../../core/constants/tasks_constants.dart';
-import '../providers/tasks_provider.dart';
 
-class TasksDashboard extends StatelessWidget {
+class TasksDashboard extends ConsumerWidget {
   const TasksDashboard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
-    // Optimized with Selector - only rebuilds when task statistics change
-    return Selector<TasksProvider, Map<String, int>>(
-      selector:
-          (context, provider) => {
-            'totalTasks': provider.totalTasks,
-            'pendingTasks': provider.pendingTasks,
-            'todayTasks': provider.todayTasks,
-            'overdueTasks': provider.overdueTasks,
-            'completedTasks': provider.completedTasks,
-          },
-      builder: (context, taskStats, child) {
+    // Optimized with select - only rebuilds when task statistics change
+    final tasksAsync = ref.watch(tasksProvider);
+
+    return tasksAsync.maybeWhen(
+      data: (tasksState) {
+        final taskStats = {
+          'totalTasks': tasksState.totalTasks,
+          'pendingTasks': tasksState.pendingTasks,
+          'todayTasks': tasksState.todayTasks,
+          'overdueTasks': tasksState.overdueTasks,
+          'completedTasks': tasksState.completedTasks,
+        };
         return Container(
           padding: const EdgeInsets.all(TasksConstants.dashboardPadding),
           decoration: BoxDecoration(
@@ -90,6 +91,10 @@ class TasksDashboard extends StatelessWidget {
           ),
         );
       },
+      orElse: () => Container(
+        padding: const EdgeInsets.all(TasksConstants.dashboardPadding),
+        child: const Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 }

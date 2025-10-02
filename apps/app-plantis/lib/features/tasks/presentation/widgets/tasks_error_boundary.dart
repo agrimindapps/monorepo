@@ -1,8 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/tasks_provider.dart';
+import '../../../../core/providers/tasks_providers.dart';
 
 /// Error boundary widget for the tasks feature
 ///
@@ -12,7 +12,7 @@ import '../providers/tasks_provider.dart';
 /// - Provides recovery mechanisms (retry, refresh)
 /// - Reports errors for debugging while maintaining user experience
 /// - Handles different types of errors with appropriate actions
-class TasksErrorBoundary extends StatefulWidget {
+class TasksErrorBoundary extends ConsumerStatefulWidget {
   final Widget child;
   final String? customErrorMessage;
   final VoidCallback? onRetry;
@@ -25,10 +25,10 @@ class TasksErrorBoundary extends StatefulWidget {
   });
 
   @override
-  State<TasksErrorBoundary> createState() => _TasksErrorBoundaryState();
+  ConsumerState<TasksErrorBoundary> createState() => _TasksErrorBoundaryState();
 }
 
-class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
+class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
   FlutterErrorDetails? _errorDetails;
   bool _hasError = false;
 
@@ -259,10 +259,10 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
       if (widget.onRetry != null) {
         widget.onRetry!();
       } else {
-        // Safely access TasksProvider with error handling
-        final tasksProvider = context.read<TasksProvider>();
-        tasksProvider.clearError(); // Clear any existing errors
-        tasksProvider.loadTasks();
+        // Safely access TasksNotifier with error handling
+        final tasksNotifier = ref.read(tasksProvider.notifier);
+        tasksNotifier.clearError(); // Clear any existing errors
+        tasksNotifier.loadTasks();
       }
 
       // Reset error state
@@ -293,15 +293,15 @@ class _TasksErrorBoundaryState extends State<TasksErrorBoundary> {
       _errorDetails = null;
     });
 
-    // Clear any cached state in the provider
+    // Clear any cached state in the notifier
     try {
-      final tasksProvider = context.read<TasksProvider>();
-      tasksProvider.clearError();
+      final tasksNotifier = ref.read(tasksProvider.notifier);
+      tasksNotifier.clearError();
 
       // Reload tasks from scratch
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          tasksProvider.loadTasks();
+          tasksNotifier.loadTasks();
         }
       });
     } catch (e) {

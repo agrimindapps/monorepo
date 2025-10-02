@@ -1,109 +1,111 @@
+import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/device_management_provider.dart';
+import '../../../../core/providers/device_management_providers.dart';
 
 /// Widget de ações rápidas para gerenciamento de dispositivos
 /// Fornece acesso rápido às funcionalidades principais
-class DeviceActionsWidget extends StatelessWidget {
+class DeviceActionsWidget extends ConsumerWidget {
   const DeviceActionsWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<DeviceManagementProvider>(
-      builder: (context, provider, child) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              // Primeira linha de ações
+  Widget build(BuildContext context, WidgetRef ref) {
+    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+
+    return deviceManagementAsync.when(
+      data: (deviceState) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          children: [
+            // Primeira linha de ações
+            Row(
+              children: [
+                // Validar dispositivo atual
+                Expanded(
+                  child: _buildActionCard(
+                    context: context,
+                    ref: ref,
+                    title: 'Validar Dispositivo',
+                    subtitle: 'Registrar este aparelho',
+                    icon: Icons.verified,
+                    color: Colors.blue,
+                    enabled: !deviceState.isValidating && deviceState.canAddMoreDevices,
+                    loading: deviceState.isValidating,
+                    onTap: () => _validateCurrentDevice(context, ref),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Atualizar lista
+                Expanded(
+                  child: _buildActionCard(
+                    context: context,
+                    ref: ref,
+                    title: 'Atualizar',
+                    subtitle: 'Sincronizar dados',
+                    icon: Icons.refresh,
+                    color: Colors.green,
+                    enabled: true,
+                    loading: false,
+                    onTap: () => ref.read(deviceManagementProvider.notifier).refresh(),
+                  ),
+                ),
+              ],
+            ),
+
+            // Segunda linha de ações (se aplicável)
+            if (deviceState.hasDevices && deviceState.activeDeviceCount > 1) ...[
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  // Validar dispositivo atual
+                  // Revogar outros dispositivos
                   Expanded(
                     child: _buildActionCard(
                       context: context,
-                      title: 'Validar Dispositivo',
-                      subtitle: 'Registrar este aparelho',
-                      icon: Icons.verified,
-                      color: Colors.blue,
-                      enabled:
-                          !provider.isValidating && provider.canAddMoreDevices,
-                      loading: provider.isValidating,
-                      onTap: () => _validateCurrentDevice(context, provider),
+                      ref: ref,
+                      title: 'Logout Remoto',
+                      subtitle: 'Desconectar outros dispositivos',
+                      icon: Icons.logout,
+                      color: Colors.red,
+                      enabled: !deviceState.isRevoking,
+                      loading: deviceState.isRevoking,
+                      onTap: () => _showRevokeAllDialog(context, ref, deviceState),
                     ),
                   ),
 
                   const SizedBox(width: 12),
 
-                  // Atualizar lista
+                  // Espaço para ação futura ou informação
                   Expanded(
-                    child: _buildActionCard(
+                    child: _buildInfoCard(
                       context: context,
-                      title: 'Atualizar',
-                      subtitle: 'Sincronizar dados',
-                      icon: Icons.refresh,
-                      color: Colors.green,
-                      enabled: !provider.isLoading,
-                      loading: provider.isLoading,
-                      onTap: () => provider.refresh(),
+                      title: '${deviceState.activeDeviceCount}/3',
+                      subtitle: 'Dispositivos ativos',
+                      icon: Icons.devices,
+                      color: deviceState.hasReachedDeviceLimit ? Colors.orange : Colors.grey,
                     ),
                   ),
                 ],
               ),
-
-              // Segunda linha de ações (se aplicável)
-              if (provider.hasDevices && provider.activeDeviceCount > 1) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    // Revogar outros dispositivos
-                    Expanded(
-                      child: _buildActionCard(
-                        context: context,
-                        title: 'Logout Remoto',
-                        subtitle: 'Desconectar outros dispositivos',
-                        icon: Icons.logout,
-                        color: Colors.red,
-                        enabled: !provider.isRevoking,
-                        loading: provider.isRevoking,
-                        onTap: () => _showRevokeAllDialog(context, provider),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Espaço para ação futura ou informação
-                    Expanded(
-                      child: _buildInfoCard(
-                        context: context,
-                        title: '${provider.activeDeviceCount}/3',
-                        subtitle: 'Dispositivos ativos',
-                        icon: Icons.devices,
-                        color:
-                            provider.hasReachedDeviceLimit
-                                ? Colors.orange
-                                : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              // Aviso de limite se necessário
-              if (provider.hasReachedDeviceLimit) ...[
-                const SizedBox(height: 8),
-                _buildLimitWarning(context),
-              ],
             ],
-          ),
-        );
-      },
+
+            // Aviso de limite se necessário
+            if (deviceState.hasReachedDeviceLimit) ...[
+              const SizedBox(height: 8),
+              _buildLimitWarning(context),
+            ],
+          ],
+        ),
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Erro: $error')),
     );
   }
 
   Widget _buildActionCard({
     required BuildContext context,
+    required WidgetRef ref,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -268,9 +270,10 @@ class DeviceActionsWidget extends StatelessWidget {
 
   Future<void> _validateCurrentDevice(
     BuildContext context,
-    DeviceManagementProvider provider,
+    WidgetRef ref,
   ) async {
-    final result = await provider.validateCurrentDevice();
+    final notifier = ref.read(deviceManagementProvider.notifier);
+    final result = await notifier.validateCurrentDevice();
 
     if (result != null && !result.isValid && context.mounted) {
       String message = result.message ?? 'Falha na validação';
@@ -301,75 +304,75 @@ class DeviceActionsWidget extends StatelessWidget {
 
   Future<void> _showRevokeAllDialog(
     BuildContext context,
-    DeviceManagementProvider provider,
+    WidgetRef ref,
+    DeviceManagementState deviceState,
   ) async {
-    final otherDevicesCount = provider.activeDeviceCount - 1;
+    final otherDevicesCount = deviceState.activeDeviceCount - 1;
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Logout Remoto'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Esta ação irá desconectar todos os outros dispositivos '
-                  '($otherDevicesCount ${otherDevicesCount == 1 ? 'dispositivo' : 'dispositivos'}), '
-                  'mantendo apenas este ativo.',
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.orange.shade600,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Os dispositivos desconectados precisarão fazer login novamente.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange.shade700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Logout Remoto'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Esta ação irá desconectar todos os outros dispositivos '
+              '($otherDevicesCount ${otherDevicesCount == 1 ? 'dispositivo' : 'dispositivos'}), '
+              'mantendo apenas este ativo.',
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Desconectar Outros'),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.orange.shade600,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Os dispositivos desconectados precisarão fazer login novamente.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Desconectar Outros'),
+          ),
+        ],
+      ),
     );
 
-    if (confirmed == true) {
-      final result = await provider.revokeAllOtherDevices(
-        reason: 'Logout remoto via ações rápidas',
-      );
+    if (confirmed == true && context.mounted) {
+      final result = await ref.read(deviceManagementProvider.notifier).revokeAllOtherDevices(
+            reason: 'Logout remoto via ações rápidas',
+          );
 
       if (result && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

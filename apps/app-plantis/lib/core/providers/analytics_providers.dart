@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/app_constants.dart';
+
 /// Estado do analytics para Riverpod StateNotifier
 @immutable
 class AnalyticsState {
@@ -68,8 +70,8 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
          analytics: analyticsRepository,
          crashlytics: crashlyticsRepository,
          config: AnalyticsConfig.forApp(
-           appId: 'plantis',
-           version: '1.0.0', // TODO: Get from package_info
+           appId: AppConstants.appId,
+           version: AppConstants.defaultVersion, // Note: Version should be loaded from package_info in production
            enableAnalytics: EnvironmentConfig.enableAnalytics,
            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
          ),
@@ -191,11 +193,11 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   // ==========================================================================
 
   Future<void> logAppOpen() async {
-    await logEvent('app_open', {'app': 'plantis'});
+    await logEvent('app_open', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
 
   Future<void> logAppBackground() async {
-    await logEvent('app_background', {'app': 'plantis'});
+    await logEvent('app_background', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
 
   // ==========================================================================
@@ -409,7 +411,7 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
 
   Future<void> logTrialStarted() async {
     await logEvent('trial_started', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'trial_type': 'premium',
     });
   }
@@ -451,14 +453,14 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
 
   Future<void> logSessionStart() async {
     await logEvent('session_start', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
 
   Future<void> logSessionEnd(int durationSeconds) async {
     await logEvent('session_end', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'duration_seconds': durationSeconds,
     });
   }

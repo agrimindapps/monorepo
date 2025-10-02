@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../constants/app_constants.dart';
+
 /// Enhanced Analytics Provider for App-Plantis
 /// Now uses the Enhanced Analytics Service from core package
 /// Maintains backward compatibility while leveraging enhanced features
@@ -14,8 +16,8 @@ class AnalyticsProvider {
          analytics: analyticsRepository,
          crashlytics: crashlyticsRepository,
          config: AnalyticsConfig.forApp(
-           appId: 'plantis',
-           version: '1.0.0', // TODO: Get from package_info
+           appId: AppConstants.appId,
+           version: AppConstants.defaultVersion, // Note: Version should be loaded from package_info in production
            enableAnalytics: EnvironmentConfig.enableAnalytics,
            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
          ),
@@ -96,11 +98,11 @@ class AnalyticsProvider {
   // ==========================================================================
 
   Future<void> logAppOpen() async {
-    await _enhancedService.logEvent('app_open', {'app': 'plantis'});
+    await _enhancedService.logEvent('app_open', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
 
   Future<void> logAppBackground() async {
-    await _enhancedService.logEvent('app_background', {'app': 'plantis'});
+    await _enhancedService.logEvent('app_background', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
 
   // ==========================================================================
@@ -214,14 +216,14 @@ class AnalyticsProvider {
 
   Future<void> logTrialStarted() async {
     await _enhancedService.logEvent('trial_started', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'trial_type': 'premium',
     });
   }
 
   Future<void> logTrialEnded(String reason) async {
     await _enhancedService.logEvent('trial_ended', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'reason': reason,
     });
   }
@@ -259,14 +261,14 @@ class AnalyticsProvider {
 
   Future<void> logSessionStart() async {
     await _enhancedService.logEvent('session_start', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
 
   Future<void> logSessionEnd(int durationSeconds) async {
     await _enhancedService.logEvent('session_end', {
-      'app': 'plantis',
+      AppConstants.analyticsAppParam: AppConstants.appId,
       'duration_seconds': durationSeconds,
     });
   }

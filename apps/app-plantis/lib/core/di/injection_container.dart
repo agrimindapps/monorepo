@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../constants/app_constants.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
     as providers;
@@ -158,7 +159,7 @@ void _initCoreServices() {
   // Enhanced Secure Storage Service with Plantis configuration
   sl.registerLazySingleton<EnhancedSecureStorageService>(
     () => EnhancedSecureStorageService(
-      appIdentifier: 'plantis',
+      appIdentifier: AppConstants.appId,
       config: const SecureStorageConfig.plantis(),
     ),
   );
@@ -167,7 +168,7 @@ void _initCoreServices() {
   sl.registerLazySingleton<EnhancedEncryptedStorageService>(
     () => EnhancedEncryptedStorageService(
       secureStorage: sl<EnhancedSecureStorageService>(),
-      appIdentifier: 'plantis',
+      appIdentifier: AppConstants.appId,
     ),
   );
 
@@ -187,13 +188,12 @@ void _initCoreServices() {
   // App Rating Repository
   sl.registerLazySingleton<IAppRatingRepository>(
     () => AppRatingService(
-      appStoreId: '123456789', // TODO: Replace with actual App Store ID
-      googlePlayId:
-          'br.com.agrimsolution.plantis', // TODO: Replace with actual Play Store ID
-      minDays: 3,
-      minLaunches: 5,
-      remindDays: 7,
-      remindLaunches: 10,
+      appStoreId: AppConstants.appStoreId,
+      googlePlayId: AppConstants.googlePlayId,
+      minDays: AppConstants.appRatingMinDays,
+      minLaunches: AppConstants.appRatingMinLaunches,
+      remindDays: AppConstants.appRatingRemindDays,
+      remindLaunches: AppConstants.appRatingRemindLaunches,
     ),
   );
 

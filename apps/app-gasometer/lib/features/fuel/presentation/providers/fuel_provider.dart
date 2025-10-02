@@ -14,6 +14,7 @@ import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../domain/usecases/update_fuel_record.dart';
 import '../services/fuel_filters_service.dart';
 import '../services/fuel_statistics_service.dart';
+import '../services/fuel_validation_service.dart';
 
 /// Provider for managing fuel records operations
 ///
@@ -41,7 +42,8 @@ class FuelProvider extends BaseProvider {
         _getRecentFuelRecords = getRecentFuelRecords,
         _connectivityService = connectivityService,
         _statisticsService = FuelStatisticsService(),
-        _filtersService = FuelFiltersService() {
+        _filtersService = FuelFiltersService(),
+        _validationService = FuelValidationService() {
     _initializeConnectivity();
   }
 
@@ -59,6 +61,7 @@ class FuelProvider extends BaseProvider {
   final core.ConnectivityService _connectivityService;
   final FuelStatisticsService _statisticsService;
   final FuelFiltersService _filtersService;
+  final FuelValidationService _validationService;
 
   // Connectivity
   StreamSubscription<bool>? _connectivitySubscription;

@@ -14,6 +14,7 @@ import '../../domain/usecases/get_odometer_readings_by_vehicle.dart';
 import '../../domain/usecases/get_vehicle_odometer_stats.dart';
 import '../../domain/usecases/search_odometer_readings.dart';
 import '../../domain/usecases/update_odometer_reading.dart';
+import '../services/odometer_formatter_service.dart';
 import '../services/odometer_validation_service.dart';
 
 /// Provider for managing odometer records operations
@@ -35,7 +36,8 @@ class OdometerProvider extends BaseProvider {
     this._getOdometerReadingsByTypeUseCase,
     this._findDuplicateOdometerReadingsUseCase,
     this._vehiclesProvider,
-  ) : _validationService = OdometerValidationService(_vehiclesProvider) {
+  ) : _validationService = OdometerValidationService(_vehiclesProvider),
+      _formatterService = OdometerFormatterService() {
     _initialize();
   }
 
@@ -50,7 +52,10 @@ class OdometerProvider extends BaseProvider {
   final GetOdometerReadingsByTypeUseCase _getOdometerReadingsByTypeUseCase;
   final FindDuplicateOdometerReadingsUseCase _findDuplicateOdometerReadingsUseCase;
   final VehiclesProvider _vehiclesProvider;
+
+  // Services
   final OdometerValidationService _validationService;
+  final OdometerFormatterService _formatterService;
 
   // Internal state
   List<OdometerEntity> _odometers = [];
@@ -137,12 +142,8 @@ class OdometerProvider extends BaseProvider {
     );
 
     if (!validationResult.isValid) {
-      final error = ValidationError(
-        message: 'Odometer validation failed',
-        userFriendlyMessage: validationResult.errorMessage ?? 'Erro de validação',
-      );
-      logError(error);
-      setState(ProviderState.error, error: error);
+      debugPrint('Odometer validation failed: ${validationResult.errorMessage}');
+      setState(ProviderState.error);
       return false;
     }
 
@@ -176,12 +177,8 @@ class OdometerProvider extends BaseProvider {
     );
 
     if (!validationResult.isValid) {
-      final error = ValidationError(
-        message: 'Odometer validation failed',
-        userFriendlyMessage: validationResult.errorMessage ?? 'Erro de validação',
-      );
-      logError(error);
-      setState(ProviderState.error, error: error);
+      debugPrint('Odometer validation failed: ${validationResult.errorMessage}');
+      setState(ProviderState.error);
       return false;
     }
 

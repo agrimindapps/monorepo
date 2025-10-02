@@ -11,7 +11,10 @@ import '../../domain/usecases/get_maintenance_analytics.dart';
 import '../../domain/usecases/get_maintenance_records_by_vehicle.dart';
 import '../../domain/usecases/get_upcoming_maintenance_records.dart';
 import '../../domain/usecases/update_maintenance_record.dart';
+import '../services/maintenance_filters_service.dart';
+import '../services/maintenance_formatter_service.dart';
 import '../services/maintenance_statistics_service.dart';
+import '../services/maintenance_validation_service.dart';
 
 /// Provider for managing maintenance records operations
 ///
@@ -27,7 +30,10 @@ class MaintenanceProvider extends BaseProvider {
     this._deleteMaintenanceRecord,
     this._getUpcomingMaintenanceRecords,
     this._getMaintenanceAnalytics,
-  ) : _statisticsService = MaintenanceStatisticsService();
+  ) : _statisticsService = MaintenanceStatisticsService(),
+      _validationService = MaintenanceValidationService(),
+      _formatterService = MaintenanceFormatterService(),
+      _filtersService = MaintenanceFiltersService();
 
   // Use Cases
   final GetAllMaintenanceRecords _getAllMaintenanceRecords;
@@ -40,6 +46,9 @@ class MaintenanceProvider extends BaseProvider {
 
   // Services
   final MaintenanceStatisticsService _statisticsService;
+  final MaintenanceValidationService _validationService;
+  final MaintenanceFormatterService _formatterService;
+  final MaintenanceFiltersService _filtersService;
 
   // Internal state
   List<MaintenanceEntity> _maintenanceRecords = [];

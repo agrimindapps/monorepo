@@ -42,7 +42,7 @@ class MaintenanceFormModel extends Equatable {
       vehicleId: vehicleId,
       vehicle: null,
       type: MaintenanceType.preventive,
-      status: MaintenanceStatus.completed,
+      status: MaintenanceStatus.pending,
       title: '',
       description: '',
       cost: 0.0,
@@ -215,11 +215,11 @@ class MaintenanceFormModel extends Equatable {
   }
 
   /// Verifica se o modelo tem dados válidos mínimos
-  bool get hasMinimumData => 
-      vehicleId.isNotEmpty && 
-      title.trim().isNotEmpty && 
+  bool get hasMinimumData =>
+      vehicleId.isNotEmpty &&
+      title.trim().isNotEmpty &&
       description.trim().isNotEmpty &&
-      cost > 0 &&
+      cost >= 0 &&
       odometer >= 0;
 
   /// Verifica se há erros de validação
@@ -233,6 +233,30 @@ class MaintenanceFormModel extends Equatable {
 
   /// Verifica se é uma edição (tem ID)
   bool get isEditing => id.isNotEmpty;
+
+  /// Verifica se a manutenção está concluída
+  bool get isCompleted => status == MaintenanceStatus.completed;
+
+  /// Verifica se a manutenção está pendente
+  bool get isPending => status == MaintenanceStatus.pending;
+
+  /// Verifica se a manutenção está em andamento
+  bool get isInProgress => status == MaintenanceStatus.inProgress;
+
+  /// Verifica se a manutenção foi cancelada
+  bool get isCancelled => status == MaintenanceStatus.cancelled;
+
+  /// Verifica se é manutenção preventiva
+  bool get isPreventive => type == MaintenanceType.preventive;
+
+  /// Verifica se é manutenção corretiva
+  bool get isCorrective => type == MaintenanceType.corrective;
+
+  /// Verifica se é revisão/inspeção
+  bool get isInspection => type == MaintenanceType.inspection;
+
+  /// Verifica se é manutenção emergencial
+  bool get isEmergency => type == MaintenanceType.emergency;
 
   /// Verifica se tem informações da oficina
   bool get hasWorkshopInfo => 
@@ -439,6 +463,14 @@ class MaintenanceFormModel extends Equatable {
     'hasErrors': hasErrors,
     'hasChanges': hasChanges,
     'isEditing': isEditing,
+    'isCompleted': isCompleted,
+    'isPending': isPending,
+    'isInProgress': isInProgress,
+    'isCancelled': isCancelled,
+    'isPreventive': isPreventive,
+    'isCorrective': isCorrective,
+    'isInspection': isInspection,
+    'isEmergency': isEmergency,
     'hasWorkshopInfo': hasWorkshopInfo,
     'hasNextService': hasNextService,
     'hasPhotos': hasPhotos,

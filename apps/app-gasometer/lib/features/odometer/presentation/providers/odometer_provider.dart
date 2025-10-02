@@ -3,12 +3,16 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/providers/base_provider.dart';
 import '../../../vehicles/presentation/providers/vehicles_provider.dart';
-import '../../data/repositories/odometer_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/usecases/add_odometer_reading.dart';
 import '../../domain/usecases/delete_odometer_reading.dart';
+import '../../domain/usecases/find_duplicate_odometer_readings.dart';
 import '../../domain/usecases/get_all_odometer_readings.dart';
+import '../../domain/usecases/get_odometer_readings_by_period.dart';
+import '../../domain/usecases/get_odometer_readings_by_type.dart';
 import '../../domain/usecases/get_odometer_readings_by_vehicle.dart';
+import '../../domain/usecases/get_vehicle_odometer_stats.dart';
+import '../../domain/usecases/search_odometer_readings.dart';
 import '../../domain/usecases/update_odometer_reading.dart';
 import '../services/odometer_validation_service.dart';
 
@@ -25,7 +29,11 @@ class OdometerProvider extends BaseProvider {
     this._addOdometerReadingUseCase,
     this._updateOdometerReadingUseCase,
     this._deleteOdometerReadingUseCase,
-    this._repository,
+    this._getVehicleOdometerStatsUseCase,
+    this._searchOdometerReadingsUseCase,
+    this._getOdometerReadingsByPeriodUseCase,
+    this._getOdometerReadingsByTypeUseCase,
+    this._findDuplicateOdometerReadingsUseCase,
     this._vehiclesProvider,
   ) : _validationService = OdometerValidationService(_vehiclesProvider) {
     _initialize();
@@ -36,7 +44,11 @@ class OdometerProvider extends BaseProvider {
   final AddOdometerReadingUseCase _addOdometerReadingUseCase;
   final UpdateOdometerReadingUseCase _updateOdometerReadingUseCase;
   final DeleteOdometerReadingUseCase _deleteOdometerReadingUseCase;
-  final OdometerRepository _repository;
+  final GetVehicleOdometerStatsUseCase _getVehicleOdometerStatsUseCase;
+  final SearchOdometerReadingsUseCase _searchOdometerReadingsUseCase;
+  final GetOdometerReadingsByPeriodUseCase _getOdometerReadingsByPeriodUseCase;
+  final GetOdometerReadingsByTypeUseCase _getOdometerReadingsByTypeUseCase;
+  final FindDuplicateOdometerReadingsUseCase _findDuplicateOdometerReadingsUseCase;
   final VehiclesProvider _vehiclesProvider;
   final OdometerValidationService _validationService;
 
@@ -45,7 +57,6 @@ class OdometerProvider extends BaseProvider {
 
   /// Initializes the provider
   Future<void> _initialize() async {
-    await _repository.initialize();
     await loadOdometers();
   }
 
@@ -283,10 +294,23 @@ class OdometerProvider extends BaseProvider {
   /// Gets validation service for external use
   OdometerValidationService get validationService => _validationService;
 
-  /// Gets statistics for a vehicle using repository
+  /// Gets statistics for a vehicle using Use Case
   Future<Map<String, dynamic>> getVehicleOdometerStats(String vehicleId) async {
     try {
-      return await _repository.getVehicleStats(vehicleId);
+      final result = await _getVehicleOdometerStatsUseCase(vehicleId);
+      return result.fold(
+        (failure) {
+          debugPrint('Error getting vehicle stats: ${failure.message}');
+          return {
+            'totalRecords': 0,
+            'currentOdometer': 0.0,
+            'firstReading': null,
+            'lastReading': null,
+            'totalDistance': 0.0,
+          };
+        },
+        (stats) => stats,
+      );
     } catch (e) {
       debugPrint('Error getting vehicle stats: $e');
       return {
@@ -299,40 +323,69 @@ class OdometerProvider extends BaseProvider {
     }
   }
 
-  /// Searches readings by text
+  /// Searches readings by text using Use Case
   Future<List<OdometerEntity>> searchOdometerReadings(String query) async {
     try {
-      return await _repository.searchOdometerReadings(query);
+      final result = await _searchOdometerReadingsUseCase(query);
+      return result.fold(
+        (failure) {
+          debugPrint('Error searching odometer readings: ${failure.message}');
+          return [];
+        },
+        (readings) => readings,
+      );
     } catch (e) {
       debugPrint('Error searching odometer readings: $e');
       return [];
     }
   }
 
-  /// Loads readings by period
+  /// Loads readings by period using Use Case
   Future<List<OdometerEntity>> getOdometerReadingsByPeriod(DateTime start, DateTime end) async {
     try {
-      return await _repository.getOdometerReadingsByPeriod(start, end);
+      final params = OdometerPeriodParams(startDate: start, endDate: end);
+      final result = await _getOdometerReadingsByPeriodUseCase(params);
+      return result.fold(
+        (failure) {
+          debugPrint('Error loading odometer readings by period: ${failure.message}');
+          return [];
+        },
+        (readings) => readings,
+      );
     } catch (e) {
       debugPrint('Error loading odometer readings by period: $e');
       return [];
     }
   }
 
-  /// Loads readings by type
+  /// Loads readings by type using Use Case
   Future<List<OdometerEntity>> getOdometerReadingsByType(OdometerType type) async {
     try {
-      return await _repository.getOdometerReadingsByType(type);
+      final result = await _getOdometerReadingsByTypeUseCase(type);
+      return result.fold(
+        (failure) {
+          debugPrint('Error loading odometer readings by type: ${failure.message}');
+          return [];
+        },
+        (readings) => readings,
+      );
     } catch (e) {
       debugPrint('Error loading odometer readings by type: $e');
       return [];
     }
   }
 
-  /// Finds duplicates
+  /// Finds duplicates using Use Case
   Future<List<OdometerEntity>> findDuplicateReadings() async {
     try {
-      return await _repository.findDuplicates();
+      final result = await _findDuplicateOdometerReadingsUseCase(NoParams());
+      return result.fold(
+        (failure) {
+          debugPrint('Error finding duplicates: ${failure.message}');
+          return [];
+        },
+        (duplicates) => duplicates,
+      );
     } catch (e) {
       debugPrint('Error finding duplicates: $e');
       return [];
@@ -340,9 +393,14 @@ class OdometerProvider extends BaseProvider {
   }
 
   /// Clears all readings (debug only)
+  ///
+  /// DEPRECATED: This method should not be used as it bypasses Use Cases.
+  /// Consider creating a ClearAllOdometerReadingsUseCase if this functionality is needed.
+  @Deprecated('Use ClearAllOdometerReadingsUseCase instead')
   Future<void> clearAllReadings() async {
     try {
-      await _repository.clearAllOdometerReadings();
+      // TODO: Create ClearAllOdometerReadingsUseCase to maintain SOLID principles
+      debugPrint('clearAllReadings is deprecated and disabled');
       _odometers.clear();
       notifyListeners();
     } catch (e) {

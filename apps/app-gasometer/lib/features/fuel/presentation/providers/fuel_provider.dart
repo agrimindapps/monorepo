@@ -4,95 +4,70 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/app_error.dart';
-import '../../../../core/error/error_handler.dart';
-import '../../../../core/error/error_reporter.dart';
+import '../../../../core/providers/base_provider.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/usecases/add_fuel_record.dart';
 import '../../domain/usecases/delete_fuel_record.dart';
 import '../../domain/usecases/get_all_fuel_records.dart';
 import '../../domain/usecases/get_fuel_analytics.dart';
 import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
-import '../../domain/usecases/search_fuel_records.dart';
 import '../../domain/usecases/update_fuel_record.dart';
+import '../services/fuel_filters_service.dart';
+import '../services/fuel_statistics_service.dart';
 
-// Statistics models for caching
-class FuelStatistics {
-
-  const FuelStatistics({
-    required this.totalLiters,
-    required this.totalCost,
-    required this.averagePrice,
-    required this.averageConsumption,
-    required this.totalRecords,
-    required this.lastUpdated,
-  });
-  final double totalLiters;
-  final double totalCost;
-  final double averagePrice;
-  final double averageConsumption;
-  final int totalRecords;
-  final DateTime lastUpdated;
-
-  bool get needsRecalculation {
-    final now = DateTime.now();
-    const maxCacheTime = Duration(minutes: 5);
-    return now.difference(lastUpdated) > maxCacheTime;
-  }
-}
-
+/// Provider for managing fuel records operations
+///
+/// This provider handles CRUD operations for fuel records and integrates
+/// with analytics and connectivity management.
 @injectable
-class FuelProvider extends ChangeNotifier {
-
+class FuelProvider extends BaseProvider {
   FuelProvider({
     required GetAllFuelRecords getAllFuelRecords,
     required GetFuelRecordsByVehicle getFuelRecordsByVehicle,
     required AddFuelRecord addFuelRecord,
     required UpdateFuelRecord updateFuelRecord,
     required DeleteFuelRecord deleteFuelRecord,
-    required SearchFuelRecords searchFuelRecords,
     required GetAverageConsumption getAverageConsumption,
     required GetTotalSpent getTotalSpent,
     required GetRecentFuelRecords getRecentFuelRecords,
-    required ErrorHandler errorHandler,
-    required ErrorReporter errorReporter,
     required core.ConnectivityService connectivityService,
   })  : _getAllFuelRecords = getAllFuelRecords,
         _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
         _addFuelRecord = addFuelRecord,
         _updateFuelRecord = updateFuelRecord,
         _deleteFuelRecord = deleteFuelRecord,
-        _searchFuelRecords = searchFuelRecords,
         _getAverageConsumption = getAverageConsumption,
         _getTotalSpent = getTotalSpent,
         _getRecentFuelRecords = getRecentFuelRecords,
-        _errorHandler = errorHandler,
-        _errorReporter = errorReporter,
-        _connectivityService = connectivityService {
+        _connectivityService = connectivityService,
+        _statisticsService = FuelStatisticsService(),
+        _filtersService = FuelFiltersService() {
     _initializeConnectivity();
   }
+
+  // Use Cases
   final GetAllFuelRecords _getAllFuelRecords;
   final GetFuelRecordsByVehicle _getFuelRecordsByVehicle;
   final AddFuelRecord _addFuelRecord;
   final UpdateFuelRecord _updateFuelRecord;
   final DeleteFuelRecord _deleteFuelRecord;
-  final SearchFuelRecords _searchFuelRecords;
   final GetAverageConsumption _getAverageConsumption;
   final GetTotalSpent _getTotalSpent;
   final GetRecentFuelRecords _getRecentFuelRecords;
-  final ErrorHandler _errorHandler;
-  final ErrorReporter _errorReporter;
+
+  // Services
+  final core.ConnectivityService _connectivityService;
+  final FuelStatisticsService _statisticsService;
+  final FuelFiltersService _filtersService;
 
   // Connectivity
-  final core.ConnectivityService _connectivityService;
   StreamSubscription<bool>? _connectivitySubscription;
   bool _isOnline = true;
   final List<FuelRecordEntity> _offlinePendingRecords = [];
 
+  // Internal state
   List<FuelRecordEntity> _fuelRecords = [];
   List<FuelRecordEntity> _filteredFuelRecords = [];
-  bool _isLoading = false;
-  String? _errorMessage;
   String _currentVehicleFilter = '';
   String _searchQuery = '';
 
@@ -100,43 +75,43 @@ class FuelProvider extends ChangeNotifier {
   double _averageConsumption = 0.0;
   double _totalSpent = 0.0;
   List<FuelRecordEntity> _recentRecords = [];
-  
+
   // Cached statistics
   FuelStatistics? _cachedStatistics;
   bool _statisticsNeedRecalculation = true;
 
+  // ===========================================
+  // GETTERS
+  // ===========================================
+
   List<FuelRecordEntity> get fuelRecords {
-    // Se há busca ativa, retornar os filtrados; senão, retornar todos
     return _searchQuery.isNotEmpty ? _filteredFuelRecords : _fuelRecords;
   }
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+
   String get currentVehicleFilter => _currentVehicleFilter;
   String get searchQuery => _searchQuery;
   double get averageConsumption => _averageConsumption;
   double get totalSpent => _totalSpent;
   List<FuelRecordEntity> get recentRecords => _recentRecords;
-  
-  // Cached statistics getter
+
   FuelStatistics get statistics {
     final records = fuelRecords;
-    if (_cachedStatistics == null || 
-        _statisticsNeedRecalculation || 
+    if (_cachedStatistics == null ||
+        _statisticsNeedRecalculation ||
         _cachedStatistics!.needsRecalculation ||
         _cachedStatistics!.totalRecords != records.length) {
-      _cachedStatistics = _calculateStatistics(records);
+      _cachedStatistics = _statisticsService.calculateStatistics(records);
       _statisticsNeedRecalculation = false;
     }
     return _cachedStatistics!;
   }
 
-  bool get hasError => _errorMessage != null;
   bool get hasRecords => fuelRecords.isNotEmpty;
   int get recordsCount => fuelRecords.length;
-  
   bool get hasActiveVehicleFilter => _currentVehicleFilter.isNotEmpty;
   bool get hasActiveSearch => _searchQuery.isNotEmpty;
   bool get hasActiveFilters => hasActiveVehicleFilter || hasActiveSearch;
+
   String get activeFiltersDescription {
     if (hasActiveSearch && hasActiveVehicleFilter) {
       return 'Busca: "$_searchQuery" no veículo selecionado';
@@ -148,184 +123,225 @@ class FuelProvider extends ChangeNotifier {
     return '';
   }
 
-  Future<void> loadAllFuelRecords() async {
-    _setLoading(true);
-    _clearError();
+  // Connectivity getters
+  bool get isOnline => _isOnline;
+  bool get hasOfflinePendingRecords => _offlinePendingRecords.isNotEmpty;
+  int get offlinePendingRecordsCount => _offlinePendingRecords.length;
+  List<FuelRecordEntity> get offlinePendingRecords =>
+      List.unmodifiable(_offlinePendingRecords);
 
-    final result = await _errorHandler.handleProviderOperation(
+  // ===========================================
+  // LOADING OPERATIONS
+  // ===========================================
+
+  /// Loads all fuel records
+  Future<void> loadAllFuelRecords() async {
+    await executeListOperation(
       () async {
         final result = await _getAllFuelRecords();
         return result.fold(
-          (failure) => throw _convertFailureToError(failure),
+          (failure) => throw failure,
           (records) => records,
         );
       },
-      providerName: 'FuelProvider',
-      methodName: 'loadAllFuelRecords',
-    );
-
-    result.fold(
-      (error) => _handleError(error),
-      (records) {
+      operationName: 'loadAllFuelRecords',
+      onSuccess: (records) {
         _fuelRecords = records;
         _applyCurrentFilters();
         _invalidateStatistics();
-        debugPrint('🚗 Carregados ${records.length} registros de combustível');
+        logInfo('Loaded ${records.length} fuel records');
       },
     );
-
-    _setLoading(false);
   }
 
+  /// Loads fuel records for a specific vehicle
   Future<void> loadFuelRecordsByVehicle(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
-    _setLoading(true);
-    _clearError();
     _currentVehicleFilter = vehicleId;
 
-    final result = await _getFuelRecordsByVehicle(
-      GetFuelRecordsByVehicleParams(vehicleId: vehicleId),
-    );
-
-    result.fold(
-      (failure) => _handleError(failure),
-      (records) {
+    await executeListOperation(
+      () async {
+        final result = await _getFuelRecordsByVehicle(
+          GetFuelRecordsByVehicleParams(vehicleId: vehicleId),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (records) => records,
+        );
+      },
+      operationName: 'loadFuelRecordsByVehicle',
+      onSuccess: (records) {
         _fuelRecords = records;
         _applyCurrentFilters();
         _invalidateStatistics();
-        debugPrint('🚗 Carregados ${records.length} registros para veículo $vehicleId');
+        logInfo('Loaded ${records.length} records for vehicle $vehicleId');
       },
     );
-
-    _setLoading(false);
   }
 
-  Future<bool> addFuelRecord(FuelRecordEntity fuelRecord) async {
-    _setLoading(true);
-    _clearError();
+  // ===========================================
+  // CRUD OPERATIONS
+  // ===========================================
 
+  /// Adds a new fuel record
+  Future<bool> addFuelRecord(FuelRecordEntity fuelRecord) async {
     // Check connectivity first
     if (!_isOnline) {
       // Save offline - add to pending list and local records
       _offlinePendingRecords.add(fuelRecord);
-      _fuelRecords.insert(0, fuelRecord); // Add to UI immediately
+      _fuelRecords.insert(0, fuelRecord);
       _applyCurrentFilters();
       _invalidateStatistics();
-      _setLoading(false);
-      debugPrint('🔌 Registro salvo offline: ${fuelRecord.id}');
+      notifyListeners();
+      logInfo('Record saved offline: ${fuelRecord.id}');
       return true;
     }
 
     // Online - try to sync immediately
-    final result = await _addFuelRecord(
-      AddFuelRecordParams(fuelRecord: fuelRecord),
-    );
-
-    return result.fold(
-      (failure) {
-        // Failed online - save offline as fallback
-        _offlinePendingRecords.add(fuelRecord);
-        _fuelRecords.insert(0, fuelRecord);
+    return await executeDataOperation(
+      () async {
+        final result = await _addFuelRecord(
+          AddFuelRecordParams(fuelRecord: fuelRecord),
+        );
+        return result.fold(
+          (failure) {
+            // Failed online - save offline as fallback
+            _offlinePendingRecords.add(fuelRecord);
+            _fuelRecords.insert(0, fuelRecord);
+            _applyCurrentFilters();
+            _invalidateStatistics();
+            logInfo('Online error, saved offline: ${failure.message}');
+            // Return a success value since we saved offline
+            return fuelRecord;
+          },
+          (addedRecord) => addedRecord,
+        );
+      },
+      operationName: 'addFuelRecord',
+      onSuccess: (addedRecord) {
+        // Only add if not already added offline
+        if (!_offlinePendingRecords.contains(fuelRecord)) {
+          _fuelRecords.insert(0, addedRecord);
+        }
         _applyCurrentFilters();
         _invalidateStatistics();
-        _setLoading(false);
-        debugPrint('🔌 Erro online, salvo offline: ${failure.message}');
-        return true; // Return true because we saved offline
+        logInfo('Fuel record synced: ${addedRecord.id}');
       },
-      (addedRecord) {
-        _fuelRecords.insert(0, addedRecord); // Add to beginning (most recent)
-        _applyCurrentFilters();
-        _invalidateStatistics();
-        _setLoading(false);
-        debugPrint('🚗 Registro de combustível sincronizado: ${addedRecord.id}');
-        return true;
-      },
-    );
+    ).then((result) => result != null);
   }
 
+  /// Updates an existing fuel record
   Future<bool> updateFuelRecord(FuelRecordEntity fuelRecord) async {
-    _setLoading(true);
-    _clearError();
-
-    final result = await _updateFuelRecord(
-      UpdateFuelRecordParams(fuelRecord: fuelRecord),
-    );
-
-    return result.fold(
-      (failure) {
-        _handleError(failure);
-        _setLoading(false);
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _updateFuelRecord(
+          UpdateFuelRecordParams(fuelRecord: fuelRecord),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (updatedRecord) => updatedRecord,
+        );
       },
-      (updatedRecord) {
+      operationName: 'updateFuelRecord',
+      onSuccess: (updatedRecord) {
         final index = _fuelRecords.indexWhere((r) => r.id == updatedRecord.id);
         if (index != -1) {
           _fuelRecords[index] = updatedRecord;
           _applyCurrentFilters();
           _invalidateStatistics();
         }
-        _setLoading(false);
-        debugPrint('🚗 Registro de combustível atualizado: ${updatedRecord.id}');
-        return true;
+        logInfo('Fuel record updated: ${updatedRecord.id}');
       },
-    );
+    ).then((result) => result != null);
   }
 
+  /// Deletes a fuel record
   Future<bool> deleteFuelRecord(String id) async {
     if (id.isEmpty) return false;
 
-    _setLoading(true);
-    _clearError();
-
-    final result = await _deleteFuelRecord(
-      DeleteFuelRecordParams(id: id),
-    );
-
-    return result.fold(
-      (failure) {
-        _handleError(failure);
-        _setLoading(false);
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _deleteFuelRecord(
+          DeleteFuelRecordParams(id: id),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (_) => true, // Unit to boolean
+        );
       },
-      (_) {
+      operationName: 'deleteFuelRecord',
+      onSuccess: (success) {
         _fuelRecords.removeWhere((record) => record.id == id);
         _applyCurrentFilters();
         _invalidateStatistics();
-        _setLoading(false);
-        debugPrint('🚗 Registro de combustível removido: $id');
-        return true;
+        logInfo('Fuel record deleted: $id');
       },
-    );
+    ).then((result) => result == true);
   }
 
+  // ===========================================
+  // SEARCH AND FILTER OPERATIONS
+  // ===========================================
+
+  /// Searches fuel records by query
   void searchFuelRecords(String query) {
     _searchQuery = query.trim();
     _applyCurrentFilters();
-    
+
     if (_searchQuery.isNotEmpty && _searchQuery.length >= 2) {
-      debugPrint('🔍 Encontrados ${_filteredFuelRecords.length} registros para "$_searchQuery"');
+      logInfo('Search found ${_filteredFuelRecords.length} records for "$_searchQuery"');
     }
   }
 
+  /// Clears search query
   void clearSearch() {
     _searchQuery = '';
     _filteredFuelRecords.clear();
     notifyListeners();
   }
 
+  /// Filters records by vehicle
+  void filterByVehicle(String vehicleId) {
+    if (_currentVehicleFilter != vehicleId) {
+      loadFuelRecordsByVehicle(vehicleId);
+    }
+  }
+
+  /// Clears all filters
+  void clearAllFilters() {
+    _currentVehicleFilter = '';
+    clearSearch();
+    loadAllFuelRecords();
+  }
+
+  /// Applies current filters using service
+  void _applyCurrentFilters() {
+    if (_searchQuery.isEmpty) {
+      _filteredFuelRecords.clear();
+    } else {
+      _filteredFuelRecords = _filtersService.applySearchFilter(
+        _fuelRecords,
+        _searchQuery,
+      );
+    }
+    notifyListeners();
+  }
+
+  // ===========================================
+  // ANALYTICS OPERATIONS
+  // ===========================================
+
+  /// Loads analytics for a vehicle
   Future<void> loadAnalytics(String vehicleId) async {
     if (vehicleId.isEmpty) return;
-
-    _setLoading(true);
-    _clearError();
 
     final consumptionResult = await _getAverageConsumption(
       GetAverageConsumptionParams(vehicleId: vehicleId),
     );
 
     consumptionResult.fold(
-      (failure) => debugPrint('Erro ao carregar consumo médio: ${failure.message}'),
+      (failure) => debugPrint('Error loading average consumption: ${failure.message}'),
       (consumption) => _averageConsumption = consumption,
     );
 
@@ -338,7 +354,7 @@ class FuelProvider extends ChangeNotifier {
     );
 
     totalSpentResult.fold(
-      (failure) => debugPrint('Erro ao carregar total gasto: ${failure.message}'),
+      (failure) => debugPrint('Error loading total spent: ${failure.message}'),
       (total) => _totalSpent = total,
     );
 
@@ -347,14 +363,19 @@ class FuelProvider extends ChangeNotifier {
     );
 
     recentResult.fold(
-      (failure) => debugPrint('Erro ao carregar registros recentes: ${failure.message}'),
+      (failure) => debugPrint('Error loading recent records: ${failure.message}'),
       (records) => _recentRecords = records,
     );
 
-    _setLoading(false);
-    debugPrint('🚗 Analytics carregados para veículo $vehicleId');
+    notifyListeners();
+    logInfo('Analytics loaded for vehicle $vehicleId');
   }
 
+  // ===========================================
+  // HELPER METHODS
+  // ===========================================
+
+  /// Gets a fuel record by ID
   FuelRecordEntity? getFuelRecordById(String id) {
     try {
       return _fuelRecords.firstWhere((record) => record.id == id);
@@ -363,6 +384,25 @@ class FuelProvider extends ChangeNotifier {
     }
   }
 
+  /// Gets total spent in date range using service
+  double getTotalSpentInDateRange(DateTime startDate, DateTime endDate) {
+    return _statisticsService.getTotalSpentInDateRange(
+      fuelRecords,
+      startDate,
+      endDate,
+    );
+  }
+
+  /// Gets total liters in date range using service
+  double getTotalLitersInDateRange(DateTime startDate, DateTime endDate) {
+    return _statisticsService.getTotalLitersInDateRange(
+      fuelRecords,
+      startDate,
+      endDate,
+    );
+  }
+
+  /// Clears all data
   void clearAllData() {
     _fuelRecords.clear();
     _filteredFuelRecords.clear();
@@ -372,176 +412,24 @@ class FuelProvider extends ChangeNotifier {
     _totalSpent = 0.0;
     _recentRecords.clear();
     _invalidateStatistics();
-    _clearError();
+    setState(ProviderState.loaded);
     notifyListeners();
   }
 
-  void clearError() {
-    _clearError();
-  }
-
-  void filterByVehicle(String vehicleId) {
-    if (_currentVehicleFilter != vehicleId) {
-      loadFuelRecordsByVehicle(vehicleId);
-    }
-  }
-
-  
-  void clearAllFilters() {
-    _currentVehicleFilter = '';
-    clearSearch();
-    loadAllFuelRecords();
-  }
-
-
-  double getTotalSpentInDateRange(DateTime startDate, DateTime endDate) {
-    final recordsInRange = fuelRecords.where((record) {
-      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
-    }).toList();
-    return recordsInRange.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
-  }
-
-  double getTotalLitersInDateRange(DateTime startDate, DateTime endDate) {
-    final recordsInRange = fuelRecords.where((record) {
-      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
-    }).toList();
-    return recordsInRange.map((r) => r.liters).fold(0.0, (a, b) => a + b);
-  }
-
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _clearError() {
-    if (_errorMessage != null) {
-      _errorMessage = null;
-      notifyListeners();
-    }
-  }
-
-  void _handleError(dynamic error) {
-    if (error is core.Failure) {
-      _errorMessage = _mapFailureToMessage(error);
-    } else if (error is AppError) {
-      _errorMessage = error.displayMessage;
-      _errorReporter.reportProviderError(
-        error,
-        providerName: 'FuelProvider',
-        method: 'handleError',
-        state: {
-          'records_count': _fuelRecords.length,
-          'is_loading': _isLoading,
-          'search_query': _searchQuery,
-        },
-      );
-    } else {
-      _errorMessage = 'Erro inesperado: ${error.toString()}';
-    }
-
-    debugPrint('🚗 Erro no FuelProvider: $_errorMessage');
-    notifyListeners();
-  }
-
-  AppError _convertFailureToError(core.Failure failure) {
-    if (failure is core.NetworkFailure) {
-      return const NetworkError(
-        message: 'Erro de conexão ao carregar dados de combustível',
-      );
-    } else if (failure is core.ServerFailure) {
-      return const ServerError(
-        message: 'Erro do servidor ao processar dados de combustível',
-        statusCode: 500,
-      );
-    } else if (failure is core.ValidationFailure) {
-      return ValidationError(
-        message: failure.message,
-      );
-    } else {
-      return UnexpectedError(
-        message: 'Erro inesperado no carregamento de combustível: ${failure.message}',
-      );
-    }
-  }
-
-  String _mapFailureToMessage(core.Failure failure) {
-    if (failure is core.ValidationFailure) {
-      return failure.message;
-    } else if (failure is core.NetworkFailure) {
-      return 'Erro de conexão. Verifique sua internet.';
-    } else if (failure is core.ServerFailure) {
-      return 'Erro do servidor. Tente novamente mais tarde.';
-    } else if (failure is core.CacheFailure) {
-      return 'Erro no armazenamento local. Tente reiniciar o app.';
-    } else {
-      return 'Erro inesperado. Tente novamente.';
-    }
-  }
-
-  void _applyCurrentFilters() {
-    // Se não há busca ativa, limpar os filtros e usar todos os registros
-    if (_searchQuery.isEmpty) {
-      _filteredFuelRecords.clear();
-    } else {
-      // Aplicar busca nos registros carregados
-      _filteredFuelRecords = _fuelRecords.where((record) {
-        final searchLower = _searchQuery.toLowerCase();
-        return record.gasStationName?.toLowerCase().contains(searchLower) == true ||
-               record.gasStationBrand?.toLowerCase().contains(searchLower) == true ||
-               record.notes?.toLowerCase().contains(searchLower) == true ||
-               record.fuelType.displayName.toLowerCase().contains(searchLower);
-      }).toList();
-    }
-    
-    notifyListeners();
-  }
-  
-  // Statistics calculation method
-  FuelStatistics _calculateStatistics(List<FuelRecordEntity> records) {
-    if (records.isEmpty) {
-      return FuelStatistics(
-        totalLiters: 0.0,
-        totalCost: 0.0,
-        averagePrice: 0.0,
-        averageConsumption: 0.0,
-        totalRecords: 0,
-        lastUpdated: DateTime.now(),
-      );
-    }
-    
-    final totalLiters = records.fold<double>(0, (sum, record) => sum + record.liters);
-    final totalCost = records.fold<double>(0, (sum, record) => sum + record.totalPrice);
-    final averagePrice = records.fold<double>(0, (sum, record) => sum + record.pricePerLiter) / records.length;
-    
-    // Calculate consumption only for records with odometer data
-    double averageConsumption = 0.0;
-    final recordsWithConsumption = records.where((r) => r.consumption != null && r.consumption! > 0).toList();
-    if (recordsWithConsumption.isNotEmpty) {
-      averageConsumption = recordsWithConsumption.fold<double>(0, (sum, record) => sum + record.consumption!) / recordsWithConsumption.length;
-    }
-    
-    return FuelStatistics(
-      totalLiters: totalLiters,
-      totalCost: totalCost,
-      averagePrice: averagePrice,
-      averageConsumption: averageConsumption,
-      totalRecords: records.length,
-      lastUpdated: DateTime.now(),
-    );
-  }
-
+  /// Invalidates cached statistics
   void _invalidateStatistics() {
     _statisticsNeedRecalculation = true;
   }
 
-  // ===== CONNECTIVITY METHODS =====
+  // ===========================================
+  // CONNECTIVITY METHODS
+  // ===========================================
 
+  /// Initializes connectivity monitoring
   void _initializeConnectivity() {
     _connectivityService.isOnline().then((result) {
       result.fold(
-        (failure) => debugPrint('🔌 Erro ao verificar conectividade inicial: ${failure.message}'),
+        (failure) => debugPrint('Error checking initial connectivity: ${failure.message}'),
         (isOnline) {
           _isOnline = isOnline;
           if (isOnline) _syncOfflinePendingRecords();
@@ -551,28 +439,30 @@ class FuelProvider extends ChangeNotifier {
 
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
       _onConnectivityChanged,
-      onError: (Object error) => debugPrint('🔌 Erro no stream de conectividade: $error'),
+      onError: (Object error) => debugPrint('Error in connectivity stream: $error'),
     );
   }
 
+  /// Handles connectivity changes
   void _onConnectivityChanged(bool isOnline) {
     final wasOnline = _isOnline;
     _isOnline = isOnline;
 
-    debugPrint('🔌 Conectividade mudou: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}');
+    debugPrint('Connectivity changed: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}');
 
     if (!wasOnline && isOnline) {
-      // Ficamos online - sincronizar dados offline
+      // Came back online - sync offline data
       _syncOfflinePendingRecords();
     }
 
     notifyListeners();
   }
 
+  /// Syncs offline pending records
   Future<void> _syncOfflinePendingRecords() async {
     if (_offlinePendingRecords.isEmpty) return;
 
-    debugPrint('🔌 Sincronizando ${_offlinePendingRecords.length} registros offline...');
+    debugPrint('Syncing ${_offlinePendingRecords.length} offline records...');
 
     final recordsToSync = List<FuelRecordEntity>.from(_offlinePendingRecords);
     _offlinePendingRecords.clear();
@@ -582,33 +472,26 @@ class FuelProvider extends ChangeNotifier {
         final result = await _addFuelRecord(AddFuelRecordParams(fuelRecord: record));
         result.fold(
           (failure) {
-            // Se falhou, volta para a lista de offline
+            // Failed - add back to offline list
             _offlinePendingRecords.add(record);
-            debugPrint('🔌 Falha ao sincronizar registro: ${failure.message}');
+            debugPrint('Failed to sync record: ${failure.message}');
           },
           (syncedRecord) {
-            debugPrint('🔌 Registro sincronizado com sucesso: ${syncedRecord.id}');
+            debugPrint('Record synced successfully: ${syncedRecord.id}');
           },
         );
       } catch (e) {
         _offlinePendingRecords.add(record);
-        debugPrint('🔌 Erro ao sincronizar registro: $e');
+        debugPrint('Error syncing record: $e');
       }
     }
 
     if (_offlinePendingRecords.isEmpty) {
-      debugPrint('🔌 Todos os registros foram sincronizados!');
+      debugPrint('All records synced!');
     }
 
     notifyListeners();
   }
-
-  // Getters para UI
-
-  bool get isOnline => _isOnline;
-  bool get hasOfflinePendingRecords => _offlinePendingRecords.isNotEmpty;
-  int get offlinePendingRecordsCount => _offlinePendingRecords.length;
-  List<FuelRecordEntity> get offlinePendingRecords => List.unmodifiable(_offlinePendingRecords);
 
   @override
   void dispose() {

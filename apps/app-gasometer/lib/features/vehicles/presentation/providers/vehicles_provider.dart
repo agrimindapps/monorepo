@@ -1,19 +1,28 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ValidationError;
 import 'package:flutter/foundation.dart';
+
+import '../../../../core/error/app_error.dart';
+import '../../../../core/providers/base_provider.dart';
 import '../../domain/entities/vehicle_entity.dart';
-import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/usecases/add_vehicle.dart';
 import '../../domain/usecases/delete_vehicle.dart';
 import '../../domain/usecases/get_all_vehicles.dart';
 import '../../domain/usecases/get_vehicle_by_id.dart';
 import '../../domain/usecases/search_vehicles.dart';
 import '../../domain/usecases/update_vehicle.dart';
+import '../../domain/usecases/watch_vehicles.dart';
+import '../services/vehicle_filters_service.dart';
+import '../services/vehicle_formatter_service.dart';
+import '../services/vehicle_validation_service.dart';
 
+/// Provider for managing vehicles operations
+///
+/// This provider handles CRUD operations for vehicles and integrates
+/// real-time updates through streams.
 @injectable
-class VehiclesProvider extends ChangeNotifier {
-
+class VehiclesProvider extends BaseProvider {
   VehiclesProvider({
     required GetAllVehicles getAllVehicles,
     required GetVehicleById getVehicleById,
@@ -21,252 +30,289 @@ class VehiclesProvider extends ChangeNotifier {
     required UpdateVehicle updateVehicle,
     required DeleteVehicle deleteVehicle,
     required SearchVehicles searchVehicles,
-    required VehicleRepository repository,
+    required WatchVehicles watchVehicles,
   })  : _getAllVehicles = getAllVehicles,
         _getVehicleById = getVehicleById,
         _addVehicle = addVehicle,
         _updateVehicle = updateVehicle,
         _deleteVehicle = deleteVehicle,
         _searchVehicles = searchVehicles,
-        _repository = repository;
+        _watchVehicles = watchVehicles,
+        _validationService = VehicleValidationService(),
+        _formatterService = VehicleFormatterService(),
+        _filtersService = VehicleFiltersService();
+
+  // Use Cases
   final GetAllVehicles _getAllVehicles;
   final GetVehicleById _getVehicleById;
   final AddVehicle _addVehicle;
   final UpdateVehicle _updateVehicle;
   final DeleteVehicle _deleteVehicle;
   final SearchVehicles _searchVehicles;
-  final VehicleRepository _repository;
+  final WatchVehicles _watchVehicles;
 
+  // Services
+  final VehicleValidationService _validationService;
+  final VehicleFormatterService _formatterService;
+  final VehicleFiltersService _filtersService;
+
+  // Internal state
   List<VehicleEntity> _vehicles = [];
-  bool _isLoading = false;
-  String? _errorMessage;
   bool _isInitialized = false;
-  StreamSubscription<Either<Failure, List<VehicleEntity>>>?
-      _vehicleSubscription;
+  StreamSubscription<Either<Failure, List<VehicleEntity>>>? _vehicleSubscription;
 
-  List<VehicleEntity> get vehicles => _vehicles;
-  List<VehicleEntity> get activeVehicles =>
-      _vehicles.where((v) => v.isActive).toList();
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  // ===========================================
+  // GETTERS
+  // ===========================================
+
+  List<VehicleEntity> get vehicles => List.unmodifiable(_vehicles);
+  List<VehicleEntity> get activeVehicles => _filtersService.filterActive(_vehicles);
   bool get isInitialized => _isInitialized;
   bool get hasVehicles => _vehicles.isNotEmpty;
   int get vehicleCount => _vehicles.length;
   int get activeVehicleCount => activeVehicles.length;
 
-  /// Inicializa o provider carregando os veículos.
-  /// Deve ser chamado explicitamente após a criação do provider.
+  // Service getters for external use
+  VehicleValidationService get validationService => _validationService;
+  VehicleFormatterService get formatterService => _formatterService;
+  VehicleFiltersService get filtersService => _filtersService;
+
+  // ===========================================
+  // INITIALIZATION
+  // ===========================================
+
+  /// Initializes the provider by loading vehicles and starting stream
   Future<void> initialize() async {
     if (_isInitialized) return;
-    await _initialize();
+
+    await executeListOperation(
+      () async => await loadVehicles(),
+      operationName: 'initialize',
+      onSuccess: (_) {
+        _startWatchingVehicles();
+        _isInitialized = true;
+        logInfo('VehiclesProvider initialized successfully');
+      },
+    );
   }
 
-  Future<void> _initialize() async {
-    try {
-      await loadVehicles();
-      _startWatchingVehicles();
-    } catch (e) {
-      _errorMessage = 'Erro ao inicializar: ${e.toString()}';
-    } finally {
-      _isInitialized = true;
-      notifyListeners();
-    }
-  }
-
+  /// Starts watching vehicles stream for real-time updates
   void _startWatchingVehicles() {
     _vehicleSubscription?.cancel();
-    _vehicleSubscription = _repository.watchVehicles().listen(
+    _vehicleSubscription = _watchVehicles().listen(
       (result) {
         result.fold(
           (failure) {
             if (!_isInitialized) {
-              _errorMessage = _mapFailureToMessage(failure);
-              notifyListeners();
+              debugPrint('Error in vehicle stream: ${failure.message}');
+              final error = ValidationError(message: failure.message);
+              setState(ProviderState.error, error: error);
             }
           },
           (vehicles) {
             _vehicles = vehicles;
-            _isLoading = false;
-            _errorMessage = null;
+            setState(ProviderState.loaded);
             notifyListeners();
           },
         );
       },
       onError: (Object error) {
         if (!_isInitialized) {
-          _errorMessage = 'Erro na sincronização: ${error.toString()}';
-          _isLoading = false;
-          notifyListeners();
+          debugPrint('Error in vehicle stream: $error');
+          final appError = ValidationError(message: error.toString());
+          setState(ProviderState.error, error: appError);
         }
       },
     );
   }
 
-  Future<void> loadVehicles() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  // ===========================================
+  // LOADING OPERATIONS
+  // ===========================================
 
-    final result = await _getAllVehicles();
-    result.fold(
-      (failure) {
-        _errorMessage = _mapFailureToMessage(failure);
-        _isLoading = false;
-        notifyListeners();
+  /// Loads all vehicles
+  Future<List<VehicleEntity>> loadVehicles() async {
+    return await executeListOperation(
+      () async {
+        final result = await _getAllVehicles();
+        return result.fold(
+          (failure) => throw failure,
+          (vehicles) => vehicles,
+        );
       },
-      (vehicles) {
+      operationName: 'loadVehicles',
+      onSuccess: (vehicles) {
         _vehicles = vehicles;
-        _isLoading = false;
-        notifyListeners();
+        logInfo('Loaded ${vehicles.length} vehicles');
       },
-    );
+    ).then((vehicles) => vehicles ?? []);
   }
 
-  String _mapFailureToMessage(Failure failure) {
-    if (failure is ServerFailure) {
-      return 'Erro do servidor. Tente novamente mais tarde.';
-    } else if (failure is NetworkFailure) {
-      return 'Erro de conexão. Verifique sua internet.';
-    } else if (failure is CacheFailure) {
-      return 'Erro de cache local.';
-    } else if (failure is ValidationFailure) {
-      return failure.message;
-    } else {
-      return 'Erro inesperado. Tente novamente.';
-    }
-  }
+  // ===========================================
+  // CRUD OPERATIONS
+  // ===========================================
 
+  /// Adds a new vehicle
   Future<bool> addVehicle(VehicleEntity vehicle) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      // Add timeout to prevent UI freeze from hanging operations
-      final result = await _addVehicle(AddVehicleParams(vehicle: vehicle))
-          .timeout(const Duration(seconds: 30));
-
-      return result.fold(
-        (failure) {
-          _errorMessage = _mapFailureToMessage(failure);
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        },
-        (addedVehicle) {
-          _vehicles.add(addedVehicle);
-          _isLoading = false;
-          notifyListeners();
-          return true;
-        },
+    // Validate first
+    final errors = _validationService.validateForAdd(vehicle, _vehicles);
+    if (errors.isNotEmpty) {
+      final errorMsg = errors.values.first;
+      setState(
+        ProviderState.error,
+        error: ValidationError(message: errorMsg),
       );
-    } on TimeoutException {
-      _errorMessage =
-          'Operação expirou. Veículo pode ter sido salvo localmente.';
-      _isLoading = false;
-      notifyListeners();
-      // Refresh vehicles list to check if it was actually saved
-      await loadVehicles();
-      return false;
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
       return false;
     }
+
+    return await executeDataOperation(
+      () async {
+        final result = await _addVehicle(AddVehicleParams(vehicle: vehicle))
+            .timeout(const Duration(seconds: 30));
+
+        return result.fold(
+          (failure) => throw failure,
+          (addedVehicle) => addedVehicle,
+        );
+      },
+      operationName: 'addVehicle',
+      onSuccess: (addedVehicle) {
+        _vehicles.add(addedVehicle);
+        logInfo('Vehicle added successfully: ${addedVehicle.id}');
+      },
+    ).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () async {
+        setState(
+          ProviderState.error,
+          error: ValidationError(
+            message: 'Operação expirou. Veículo pode ter sido salvo localmente.',
+          ),
+        );
+        // Refresh to check if it was actually saved
+        await loadVehicles();
+        return null;
+      },
+    ).then((result) => result != null);
   }
 
+  /// Updates an existing vehicle
   Future<bool> updateVehicle(VehicleEntity vehicle) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    // Validate first
+    final errors = _validationService.validateForUpdate(vehicle, _vehicles);
+    if (errors.isNotEmpty) {
+      final errorMsg = errors.values.first;
+      setState(
+        ProviderState.error,
+        error: ValidationError(message: errorMsg),
+      );
+      return false;
+    }
 
-    final result = await _updateVehicle(UpdateVehicleParams(vehicle: vehicle));
-
-    return result.fold(
-      (failure) {
-        _errorMessage = _mapFailureToMessage(failure);
-        _isLoading = false;
-        notifyListeners();
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _updateVehicle(UpdateVehicleParams(vehicle: vehicle));
+        return result.fold(
+          (failure) => throw failure,
+          (updatedVehicle) => updatedVehicle,
+        );
       },
-      (updatedVehicle) {
+      operationName: 'updateVehicle',
+      onSuccess: (updatedVehicle) {
         final index = _vehicles.indexWhere((v) => v.id == vehicle.id);
         if (index != -1) {
           _vehicles[index] = updatedVehicle;
         }
-        _isLoading = false;
-        notifyListeners();
-        return true;
+        logInfo('Vehicle updated successfully: ${updatedVehicle.id}');
       },
-    );
+    ).then((result) => result != null);
   }
 
+  /// Deletes a vehicle
   Future<bool> deleteVehicle(String vehicleId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    final result =
-        await _deleteVehicle(DeleteVehicleParams(vehicleId: vehicleId));
-
-    return result.fold(
-      (failure) {
-        _errorMessage = _mapFailureToMessage(failure);
-        _isLoading = false;
-        notifyListeners();
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _deleteVehicle(DeleteVehicleParams(vehicleId: vehicleId));
+        return result.fold(
+          (failure) => throw failure,
+          (_) => true,
+        );
       },
-      (_) {
+      operationName: 'deleteVehicle',
+      onSuccess: (_) {
         _vehicles.removeWhere((v) => v.id == vehicleId);
-        _isLoading = false;
-        notifyListeners();
-        return true;
+        logInfo('Vehicle deleted successfully: $vehicleId');
       },
-    );
+    ).then((result) => result == true);
   }
 
+  // ===========================================
+  // QUERY OPERATIONS
+  // ===========================================
+
+  /// Gets a vehicle by ID
   Future<VehicleEntity?> getVehicleById(String vehicleId) async {
-    final result =
-        await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
+    final result = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
 
     return result.fold(
       (failure) {
-        _errorMessage = _mapFailureToMessage(failure);
-        notifyListeners();
+        debugPrint('Error getting vehicle by ID: ${failure.message}');
         return null;
       },
       (vehicle) => vehicle,
     );
   }
 
+  /// Searches vehicles by query
   Future<List<VehicleEntity>> searchVehicles(String query) async {
     final result = await _searchVehicles(SearchVehiclesParams(query: query));
 
     return result.fold(
       (failure) {
-        _errorMessage = _mapFailureToMessage(failure);
-        notifyListeners();
+        debugPrint('Error searching vehicles: ${failure.message}');
         return <VehicleEntity>[];
       },
       (vehicles) => vehicles,
     );
   }
 
+  // ===========================================
+  // FILTER OPERATIONS (Using Service)
+  // ===========================================
+
+  /// Gets vehicles by type
   List<VehicleEntity> getVehiclesByType(VehicleType type) {
-    return _vehicles.where((v) => v.type == type && v.isActive).toList();
+    return _filtersService.filterByType(_vehicles, type);
   }
 
+  /// Gets vehicles by fuel type
   List<VehicleEntity> getVehiclesByFuelType(FuelType fuelType) {
-    return _vehicles
-        .where((v) => v.supportedFuels.contains(fuelType) && v.isActive)
-        .toList();
+    return _filtersService.filterByFuelType(_vehicles, fuelType);
   }
 
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+  /// Searches vehicles locally (using service)
+  List<VehicleEntity> searchVehiclesLocal(String query) {
+    return _filtersService.searchVehicles(_vehicles, query);
   }
+
+  /// Sorts vehicles by name
+  List<VehicleEntity> sortByName({bool ascending = true}) {
+    return _filtersService.sortByName(_vehicles, ascending: ascending);
+  }
+
+  /// Sorts vehicles by brand/model
+  List<VehicleEntity> sortByBrandModel({bool ascending = true}) {
+    return _filtersService.sortByBrandModel(_vehicles, ascending: ascending);
+  }
+
+  /// Sorts vehicles by year
+  List<VehicleEntity> sortByYear({bool ascending = true}) {
+    return _filtersService.sortByYear(_vehicles, ascending: ascending);
+  }
+
+  // ===========================================
+  // CLEANUP
+  // ===========================================
 
   @override
   void dispose() {

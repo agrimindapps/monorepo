@@ -11,42 +11,12 @@ import '../../domain/usecases/get_maintenance_analytics.dart';
 import '../../domain/usecases/get_maintenance_records_by_vehicle.dart';
 import '../../domain/usecases/get_upcoming_maintenance_records.dart';
 import '../../domain/usecases/update_maintenance_record.dart';
+import '../services/maintenance_statistics_service.dart';
 
-// Statistics models for caching
-class MaintenanceStatistics {
-  const MaintenanceStatistics({
-    required this.totalCost,
-    required this.preventiveCount,
-    required this.correctiveCount,
-    required this.inspectionCount,
-    required this.emergencyCount,
-    required this.totalRecords,
-    required this.recentRecords,
-    required this.lastUpdated,
-  });
-
-  final double totalCost;
-  final int preventiveCount;
-  final int correctiveCount;
-  final int inspectionCount;
-  final int emergencyCount;
-  final int totalRecords;
-  final List<MaintenanceEntity> recentRecords;
-  final DateTime lastUpdated;
-
-  bool get needsRecalculation {
-    final now = DateTime.now();
-    const maxCacheTime = Duration(minutes: 5);
-    return now.difference(lastUpdated) > maxCacheTime;
-  }
-
-  String get formattedTotalCost => 'R\$ ${totalCost.toStringAsFixed(2)}';
-
-  String get maintenanceCountSummary {
-    return '$preventiveCount preventivas, $correctiveCount corretivas, $inspectionCount revisões, $emergencyCount emergenciais';
-  }
-}
-
+/// Provider for managing maintenance records operations
+///
+/// This provider handles CRUD operations for maintenance records and integrates
+/// with analytics and statistics.
 @injectable
 class MaintenanceProvider extends BaseProvider {
   MaintenanceProvider(
@@ -57,8 +27,9 @@ class MaintenanceProvider extends BaseProvider {
     this._deleteMaintenanceRecord,
     this._getUpcomingMaintenanceRecords,
     this._getMaintenanceAnalytics,
-  );
+  ) : _statisticsService = MaintenanceStatisticsService();
 
+  // Use Cases
   final GetAllMaintenanceRecords _getAllMaintenanceRecords;
   final GetMaintenanceRecordsByVehicle _getMaintenanceRecordsByVehicle;
   final AddMaintenanceRecord _addMaintenanceRecord;
@@ -67,84 +38,78 @@ class MaintenanceProvider extends BaseProvider {
   final GetUpcomingMaintenanceRecords _getUpcomingMaintenanceRecords;
   final GetMaintenanceAnalytics _getMaintenanceAnalytics;
 
-  // State variables
+  // Services
+  final MaintenanceStatisticsService _statisticsService;
+
+  // Internal state
   List<MaintenanceEntity> _maintenanceRecords = [];
   List<MaintenanceEntity> _upcomingRecords = [];
   MaintenanceAnalytics? _analytics;
-  
-  bool _isLoading = false;
-  bool _isLoadingUpcoming = false;
-  bool _isLoadingAnalytics = false;
-  String? _errorMessage;
   String? _selectedVehicleId;
-  
+
   // Cached statistics
   MaintenanceStatistics? _cachedStatistics;
   bool _statisticsNeedRecalculation = true;
 
-  // Getters
-  List<MaintenanceEntity> get maintenanceRecords => _maintenanceRecords;
-  List<MaintenanceEntity> get upcomingRecords => _upcomingRecords;
+  // ===========================================
+  // GETTERS
+  // ===========================================
+
+  List<MaintenanceEntity> get maintenanceRecords =>
+      List.unmodifiable(_maintenanceRecords);
+  List<MaintenanceEntity> get upcomingRecords =>
+      List.unmodifiable(_upcomingRecords);
   MaintenanceAnalytics? get analytics => _analytics;
-  
-  @override
-  bool get isLoading => _isLoading;
-  bool get isLoadingUpcoming => _isLoadingUpcoming;
-  bool get isLoadingAnalytics => _isLoadingAnalytics;
-  String? get errorMessage => _errorMessage;
   String? get selectedVehicleId => _selectedVehicleId;
 
-  // Filtered records
+  /// Filtered records by selected vehicle
   List<MaintenanceEntity> get filteredRecords {
     if (_selectedVehicleId == null) return _maintenanceRecords;
-    return _maintenanceRecords.where((record) => record.vehicleId == _selectedVehicleId).toList();
+    return _maintenanceRecords
+        .where((record) => record.vehicleId == _selectedVehicleId)
+        .toList();
   }
 
-  // Cached statistics getter
+  /// Cached statistics getter
   MaintenanceStatistics get statistics {
     final records = filteredRecords;
     if (_cachedStatistics == null ||
         _statisticsNeedRecalculation ||
         _cachedStatistics!.needsRecalculation ||
         _cachedStatistics!.totalRecords != records.length) {
-      _cachedStatistics = _calculateStatistics(records);
+      _cachedStatistics = _statisticsService.calculateStatistics(records);
       _statisticsNeedRecalculation = false;
     }
     return _cachedStatistics!;
   }
-  
+
   // Convenience getters for maintenance statistics
   double get totalMaintenanceCost => statistics.totalCost;
-  
-  Map<MaintenanceType, int> get maintenanceCountByType {
-    final stats = statistics;
-    return {
-      MaintenanceType.preventive: stats.preventiveCount,
-      MaintenanceType.corrective: stats.correctiveCount,
-      MaintenanceType.inspection: stats.inspectionCount,
-      MaintenanceType.emergency: stats.emergencyCount,
-    };
-  }
-  
-  List<MaintenanceEntity> get recentMaintenanceRecords => statistics.recentRecords;
 
-  List<MaintenanceEntity> get overdueMaintenance {
-    final now = DateTime.now();
-    return filteredRecords.where((record) {
-      if (record.nextServiceDate == null) return false;
-      return record.nextServiceDate!.isBefore(now);
-    }).toList();
-  }
+  Map<MaintenanceType, int> get maintenanceCountByType =>
+      _statisticsService.getMaintenanceCountByType(statistics);
 
-  List<MaintenanceEntity> get pendingMaintenance {
-    return filteredRecords.where((record) => record.status == MaintenanceStatus.pending).toList();
-  }
+  List<MaintenanceEntity> get recentMaintenanceRecords =>
+      statistics.recentRecords;
 
-  List<MaintenanceEntity> get completedMaintenance {
-    return filteredRecords.where((record) => record.status == MaintenanceStatus.completed).toList();
-  }
+  List<MaintenanceEntity> get overdueMaintenance =>
+      _statisticsService.getOverdueMaintenance(filteredRecords);
 
-  // Methods
+  List<MaintenanceEntity> get pendingMaintenance =>
+      _statisticsService.getPendingMaintenance(filteredRecords);
+
+  List<MaintenanceEntity> get completedMaintenance =>
+      _statisticsService.getCompletedMaintenance(filteredRecords);
+
+  // Formatted getters for UI
+  String get formattedTotalCost => statistics.formattedTotalCost;
+  String get maintenanceCountSummary => statistics.maintenanceCountSummary;
+
+  // ===========================================
+  // VEHICLE SELECTION
+  // ===========================================
+
+  /// Selects a vehicle and loads its maintenance data
   void selectVehicle(String? vehicleId) {
     if (_selectedVehicleId != vehicleId) {
       _selectedVehicleId = vehicleId;
@@ -158,276 +123,238 @@ class MaintenanceProvider extends BaseProvider {
     }
   }
 
+  // ===========================================
+  // LOADING OPERATIONS
+  // ===========================================
+
+  /// Loads all maintenance records
   Future<void> loadAllMaintenanceRecords() async {
-    _setLoading(true);
-    _clearError();
-
-    final result = await _getAllMaintenanceRecords(const NoParams());
-    
-    result.fold(
-      (failure) => _setError(failure.message),
-      (records) {
+    await executeListOperation(
+      () async {
+        final result = await _getAllMaintenanceRecords(const NoParams());
+        return result.fold(
+          (failure) => throw failure,
+          (records) => records,
+        );
+      },
+      operationName: 'loadAllMaintenanceRecords',
+      onSuccess: (records) {
         _maintenanceRecords = records;
+        _sortRecords();
         _invalidateStatistics();
-        _setLoading(false);
+        logInfo('Loaded ${records.length} maintenance records');
       },
     );
   }
 
+  /// Loads maintenance records for a specific vehicle
   Future<void> loadMaintenanceRecordsByVehicle(String vehicleId) async {
-    _setLoading(true);
-    _clearError();
-
-    final result = await _getMaintenanceRecordsByVehicle(
-      GetMaintenanceRecordsByVehicleParams(vehicleId: vehicleId),
-    );
-    
-    result.fold(
-      (failure) => _setError(failure.message),
-      (records) {
+    await executeListOperation(
+      () async {
+        final result = await _getMaintenanceRecordsByVehicle(
+          GetMaintenanceRecordsByVehicleParams(vehicleId: vehicleId),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (records) => records,
+        );
+      },
+      operationName: 'loadMaintenanceRecordsByVehicle',
+      onSuccess: (records) {
         _maintenanceRecords = records;
+        _sortRecords();
         _invalidateStatistics();
-        _setLoading(false);
+        logInfo('Loaded ${records.length} records for vehicle $vehicleId');
       },
     );
   }
 
-  Future<void> loadUpcomingMaintenanceRecords(String vehicleId, {int days = 30}) async {
-    _setLoadingUpcoming(true);
-
-    final result = await _getUpcomingMaintenanceRecords(
-      GetUpcomingMaintenanceRecordsParams(vehicleId: vehicleId, days: days),
-    );
-    
-    result.fold(
-      (failure) => _setError(failure.message),
-      (records) {
+  /// Loads upcoming maintenance records
+  Future<void> loadUpcomingMaintenanceRecords(String vehicleId,
+      {int days = 30}) async {
+    await executeListOperation(
+      () async {
+        final result = await _getUpcomingMaintenanceRecords(
+          GetUpcomingMaintenanceRecordsParams(
+            vehicleId: vehicleId,
+            days: days,
+          ),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (records) => records,
+        );
+      },
+      operationName: 'loadUpcomingMaintenanceRecords',
+      onSuccess: (records) {
         _upcomingRecords = records;
-        _setLoadingUpcoming(false);
+        logInfo('Loaded ${records.length} upcoming maintenance records');
       },
     );
   }
 
-  Future<void> loadMaintenanceAnalytics(String vehicleId, {DateTime? startDate, DateTime? endDate}) async {
-    _setLoadingAnalytics(true);
-
-    final result = await _getMaintenanceAnalytics(
-      GetMaintenanceAnalyticsParams(
-        vehicleId: vehicleId,
-        startDate: startDate,
-        endDate: endDate,
-      ),
-    );
-    
-    result.fold(
-      (failure) => _setError(failure.message),
-      (analytics) {
+  /// Loads maintenance analytics
+  Future<void> loadMaintenanceAnalytics(
+    String vehicleId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    await executeDataOperation(
+      () async {
+        final result = await _getMaintenanceAnalytics(
+          GetMaintenanceAnalyticsParams(
+            vehicleId: vehicleId,
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (analytics) => analytics,
+        );
+      },
+      operationName: 'loadMaintenanceAnalytics',
+      onSuccess: (analytics) {
         _analytics = analytics;
-        _setLoadingAnalytics(false);
+        logInfo('Loaded maintenance analytics for vehicle $vehicleId');
       },
     );
   }
 
+  // ===========================================
+  // CRUD OPERATIONS
+  // ===========================================
+
+  /// Adds a new maintenance record
   Future<bool> addMaintenanceRecord(MaintenanceEntity maintenance) async {
-    _clearError();
-
-    final result = await _addMaintenanceRecord(
-      AddMaintenanceRecordParams(maintenance: maintenance),
-    );
-
-    return result.fold(
-      (failure) {
-        _setError(failure.message);
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _addMaintenanceRecord(
+          AddMaintenanceRecordParams(maintenance: maintenance),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (addedRecord) => addedRecord,
+        );
       },
-      (addedRecord) {
+      operationName: 'addMaintenanceRecord',
+      onSuccess: (addedRecord) {
         _maintenanceRecords.add(addedRecord);
         _sortRecords();
         _invalidateStatistics();
-        notifyListeners();
-        return true;
+        logInfo('Maintenance record added: ${addedRecord.id}');
       },
-    );
+    ).then((result) => result != null);
   }
 
+  /// Updates an existing maintenance record
   Future<bool> updateMaintenanceRecord(MaintenanceEntity maintenance) async {
-    _clearError();
-
-    final result = await _updateMaintenanceRecord(
-      UpdateMaintenanceRecordParams(maintenance: maintenance),
-    );
-
-    return result.fold(
-      (failure) {
-        _setError(failure.message);
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _updateMaintenanceRecord(
+          UpdateMaintenanceRecordParams(maintenance: maintenance),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (updatedRecord) => updatedRecord,
+        );
       },
-      (updatedRecord) {
-        final index = _maintenanceRecords.indexWhere((r) => r.id == updatedRecord.id);
+      operationName: 'updateMaintenanceRecord',
+      onSuccess: (updatedRecord) {
+        final index =
+            _maintenanceRecords.indexWhere((r) => r.id == updatedRecord.id);
         if (index != -1) {
           _maintenanceRecords[index] = updatedRecord;
           _invalidateStatistics();
-          notifyListeners();
         }
-        return true;
+        logInfo('Maintenance record updated: ${updatedRecord.id}');
       },
-    );
+    ).then((result) => result != null);
   }
 
+  /// Deletes a maintenance record
   Future<bool> deleteMaintenanceRecord(String id) async {
-    _clearError();
-
-    final result = await _deleteMaintenanceRecord(
-      DeleteMaintenanceRecordParams(id: id),
-    );
-
-    return result.fold(
-      (failure) {
-        _setError(failure.message);
-        return false;
+    return await executeDataOperation(
+      () async {
+        final result = await _deleteMaintenanceRecord(
+          DeleteMaintenanceRecordParams(id: id),
+        );
+        return result.fold(
+          (failure) => throw failure,
+          (_) => true,
+        );
       },
-      (_) {
+      operationName: 'deleteMaintenanceRecord',
+      onSuccess: (_) {
         _maintenanceRecords.removeWhere((record) => record.id == id);
         _invalidateStatistics();
-        notifyListeners();
-        return true;
+        logInfo('Maintenance record deleted: $id');
       },
-    );
+    ).then((result) => result == true);
   }
 
+  // ===========================================
+  // QUERY OPERATIONS
+  // ===========================================
+
+  /// Searches maintenance records by query
   List<MaintenanceEntity> searchMaintenanceRecords(String query) {
     if (query.isEmpty) return filteredRecords;
 
     final lowerQuery = query.toLowerCase();
     return filteredRecords.where((record) {
       return record.title.toLowerCase().contains(lowerQuery) ||
-             record.description.toLowerCase().contains(lowerQuery) ||
-             record.workshopName?.toLowerCase().contains(lowerQuery) == true ||
-             record.notes?.toLowerCase().contains(lowerQuery) == true;
+          record.description.toLowerCase().contains(lowerQuery) ||
+          record.workshopName?.toLowerCase().contains(lowerQuery) == true ||
+          record.notes?.toLowerCase().contains(lowerQuery) == true;
     }).toList();
   }
 
+  /// Gets maintenance records by type
   List<MaintenanceEntity> getMaintenanceRecordsByType(MaintenanceType type) {
     return filteredRecords.where((record) => record.type == type).toList();
   }
 
-  List<MaintenanceEntity> getMaintenanceRecordsByStatus(MaintenanceStatus status) {
+  /// Gets maintenance records by status
+  List<MaintenanceEntity> getMaintenanceRecordsByStatus(
+      MaintenanceStatus status) {
     return filteredRecords.where((record) => record.status == status).toList();
   }
 
-  List<MaintenanceEntity> getMaintenanceRecordsByDateRange(DateTime startDate, DateTime endDate) {
+  /// Gets maintenance records by date range
+  List<MaintenanceEntity> getMaintenanceRecordsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) {
     return filteredRecords.where((record) {
-      return record.serviceDate.isAfter(startDate) && record.serviceDate.isBefore(endDate);
+      return record.serviceDate.isAfter(startDate) &&
+          record.serviceDate.isBefore(endDate);
     }).toList();
   }
 
-  // Formatted getters for UI (now use cached statistics)
-  String get formattedTotalCost => statistics.formattedTotalCost;
-  String get maintenanceCountSummary => statistics.maintenanceCountSummary;
+  // ===========================================
+  // HELPER METHODS
+  // ===========================================
 
-  // Helper methods
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    if (!loading) notifyListeners();
-  }
-
-  void _setLoadingUpcoming(bool loading) {
-    _isLoadingUpcoming = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingAnalytics(bool loading) {
-    _isLoadingAnalytics = loading;
-    notifyListeners();
-  }
-
-  void _setError(String message) {
-    _errorMessage = message;
-    _isLoading = false;
-    _isLoadingUpcoming = false;
-    _isLoadingAnalytics = false;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _errorMessage = null;
-  }
-
+  /// Sorts records by service date (most recent first)
   void _sortRecords() {
-    _maintenanceRecords.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
+    _maintenanceRecords
+        .sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
   }
 
-  // Clear all data
+  /// Invalidates cached statistics
+  void _invalidateStatistics() {
+    _statisticsNeedRecalculation = true;
+  }
+
+  /// Clears all data
   void clear() {
     _maintenanceRecords.clear();
     _upcomingRecords.clear();
     _analytics = null;
     _selectedVehicleId = null;
-    _isLoading = false;
-    _isLoadingUpcoming = false;
-    _isLoadingAnalytics = false;
-    _errorMessage = null;
     _invalidateStatistics();
+    setState(ProviderState.loaded);
     notifyListeners();
-  }
-  
-  // Statistics calculation method
-  MaintenanceStatistics _calculateStatistics(List<MaintenanceEntity> records) {
-    if (records.isEmpty) {
-      return MaintenanceStatistics(
-        totalCost: 0.0,
-        preventiveCount: 0,
-        correctiveCount: 0,
-        inspectionCount: 0,
-        emergencyCount: 0,
-        totalRecords: 0,
-        recentRecords: [],
-        lastUpdated: DateTime.now(),
-      );
-    }
-    
-    final totalCost = records.fold<double>(0.0, (sum, record) => sum + record.cost);
-    
-    int preventiveCount = 0;
-    int correctiveCount = 0;
-    int inspectionCount = 0;
-    int emergencyCount = 0;
-    
-    for (final record in records) {
-      switch (record.type) {
-        case MaintenanceType.preventive:
-          preventiveCount++;
-          break;
-        case MaintenanceType.corrective:
-          correctiveCount++;
-          break;
-        case MaintenanceType.inspection:
-          inspectionCount++;
-          break;
-        case MaintenanceType.emergency:
-          emergencyCount++;
-          break;
-      }
-    }
-    
-    // Get recent records (sorted by date)
-    final sortedRecords = List<MaintenanceEntity>.from(records);
-    sortedRecords.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
-    final recentRecords = sortedRecords.take(5).toList();
-    
-    return MaintenanceStatistics(
-      totalCost: totalCost,
-      preventiveCount: preventiveCount,
-      correctiveCount: correctiveCount,
-      inspectionCount: inspectionCount,
-      emergencyCount: emergencyCount,
-      totalRecords: records.length,
-      recentRecords: recentRecords,
-      lastUpdated: DateTime.now(),
-    );
-  }
-  
-  void _invalidateStatistics() {
-    _statisticsNeedRecalculation = true;
   }
 }

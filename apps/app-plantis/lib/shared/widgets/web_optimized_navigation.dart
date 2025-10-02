@@ -677,8 +677,6 @@ class _SidebarFooter extends StatelessWidget {
           child: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
               // For now, show guest user until we implement proper Riverpod providers
-              const user = null;
-              const isAnonymous = true;
 
               if (!isExpanded) {
                 // Versão colapsada - apenas avatar com tooltip
@@ -712,21 +710,11 @@ class _SidebarFooter extends StatelessWidget {
                             ],
                           ),
                           child: const Center(
-                            child:
-                                isAnonymous
-                                    ? Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 22,
-                                    )
-                                    : Text(
-                                      '?',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
+                            child: Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                         ),
 
@@ -738,10 +726,7 @@ class _SidebarFooter extends StatelessWidget {
                             width: 12,
                             height: 12,
                             decoration: BoxDecoration(
-                              color:
-                                  isAnonymous
-                                      ? Colors.orange
-                                      : PlantisColors.success,
+                              color: Colors.orange,
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
                                 color: theme.colorScheme.surface,
@@ -782,21 +767,11 @@ class _SidebarFooter extends StatelessWidget {
                       ],
                     ),
                     child: const Center(
-                      child:
-                          isAnonymous
-                              ? Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 20,
-                              )
-                              : Text(
-                                '?',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
 
@@ -816,7 +791,7 @@ class _SidebarFooter extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          isAnonymous ? 'Modo Offline' : 'Jardineiro',
+                          'Modo Offline',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 11,
@@ -833,8 +808,7 @@ class _SidebarFooter extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color:
-                          isAnonymous ? Colors.orange : PlantisColors.success,
+                      color: Colors.orange,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

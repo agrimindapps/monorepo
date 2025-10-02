@@ -17,8 +17,8 @@ class SyncCoordinatorService {
 
   SyncCoordinatorService._();
 
-  final Map<String, SyncOperation> _activeOperations = {};
-  final Queue<SyncOperation> _operationQueue = Queue<SyncOperation>();
+  final Map<String, SyncOperation<dynamic>> _activeOperations = {};
+  final Queue<SyncOperation<dynamic>> _operationQueue = Queue<SyncOperation<dynamic>>();
   final Map<String, DateTime> _lastOperationTime = {};
 
   Timer? _queueProcessor;

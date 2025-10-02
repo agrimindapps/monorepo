@@ -385,11 +385,11 @@ class PromoHeaderSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Row(
+                const Row(
                   children: [
                     Icon(Icons.water_drop, size: 12, color: PlantisColors.water),
-                    const SizedBox(width: 4),
-                    const Text(
+                    SizedBox(width: 4),
+                    Text(
                       'Regar amanhã',
                       style: TextStyle(
                         color: Colors.black54,

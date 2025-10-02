@@ -138,7 +138,7 @@ class TaskListItem extends StatelessWidget {
                         Expanded(
                           child: Text(
                             // TODO: Resolve plant name from plantId - this file appears unused
-                            '${task.type.displayName}',
+                            task.type.displayName,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withValues(
                                 alpha: 0.7,

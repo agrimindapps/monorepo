@@ -26,7 +26,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     String plantId,
   ) async {
     try {
-      print('🔍 getCommentsForPlant - Type: ${ComentarioModel}');
+      print('🔍 getCommentsForPlant - Type: $ComentarioModel');
       print('   App: $_appName');
 
       // Use UnifiedSyncManager to find all comments and filter locally

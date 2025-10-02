@@ -896,6 +896,18 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "mockito",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/mockito-5.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "mocktail",
+      "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/mocktail-1.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "nested",
       "rootUri": "file:///Users/lucineiloch/.pub-cache/hosted/pub.dev/nested-1.0.0",
       "packageUri": "lib/",
@@ -1430,7 +1442,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-10-02T10:52:30.123812Z",
+  "generated": "2025-10-02T18:45:14.906166Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/lucineiloch/fvm/versions/3.29.2",

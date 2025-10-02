@@ -1,6 +1,4 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 
 /// Módulo para registrar dependências externas (Firebase, Hive, Connectivity)
 /// IMPORTANTE: Não inclui IAuthRepository, ISubscriptionRepository, ILocalStorageRepository

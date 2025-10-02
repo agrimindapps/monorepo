@@ -297,7 +297,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                           ),
                         )
                       : const Icon(Icons.download),
-                  label: Text(
+                  label: const Text(
                     isLoading ? 'Processando...' : 'Exportar Dados',
                   ),
                   style: ElevatedButton.styleFrom(

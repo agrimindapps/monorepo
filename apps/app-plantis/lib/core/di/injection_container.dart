@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 
-import '../constants/app_constants.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart'
     as providers;
@@ -38,11 +37,12 @@ import '../../features/settings/presentation/providers/backup_settings_provider.
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
+import '../auth/auth_state_notifier.dart';
+import '../config/security_config.dart';
+import '../constants/app_constants.dart';
 import '../data/adapters/network_info_adapter.dart';
 import '../data/adapters/plantis_image_service_adapter.dart';
 import '../data/adapters/plantis_storage_adapter.dart';
-import '../auth/auth_state_notifier.dart';
-import '../config/security_config.dart';
 import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
@@ -698,11 +698,11 @@ class _StubPerformanceRepository implements IPerformanceRepository {
   Future<bool> isCpuHealthy() async => true;
 
   @override
-  Future<AppStartupMetrics> getStartupMetrics() async => AppStartupMetrics(
-        coldStartTime: const Duration(seconds: 1),
-        warmStartTime: const Duration(milliseconds: 500),
-        timeToInteractive: const Duration(seconds: 2),
-        firstFrameTime: const Duration(milliseconds: 800),
+  Future<AppStartupMetrics> getStartupMetrics() async => const AppStartupMetrics(
+        coldStartTime: Duration(seconds: 1),
+        warmStartTime: Duration(milliseconds: 500),
+        timeToInteractive: Duration(seconds: 2),
+        firstFrameTime: Duration(milliseconds: 800),
       );
 
   @override

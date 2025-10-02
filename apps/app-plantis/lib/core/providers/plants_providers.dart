@@ -8,8 +8,8 @@ import '../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
-import '../data/adapters/auth_state_provider_adapter.dart';
 import '../auth/auth_state_notifier.dart';
+import '../data/adapters/auth_state_provider_adapter.dart';
 import '../interfaces/i_auth_state_provider.dart';
 import '../services/plants_care_calculator.dart';
 import '../services/plants_data_service.dart';
@@ -382,7 +382,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
         _authStateNotifier.currentUser != null) {
       debugPrint('🌱 PlantsNotifier: Usuário já autenticado, carregando plantas...');
       // Load initial data immediately
-      final result = await _getPlantsUseCase.call(NoParams());
+      final result = await _getPlantsUseCase.call(const NoParams());
       return result.fold(
         (failure) {
           debugPrint('❌ Erro ao carregar plantas iniciais: ${failure.message}');

@@ -768,8 +768,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   ),
                 ),
                 child: isLoading
-                    ? Padding(
-                        padding: const EdgeInsets.all(2),
+                    ? const Padding(
+                        padding: EdgeInsets.all(2),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(

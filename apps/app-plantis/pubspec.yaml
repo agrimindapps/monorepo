@@ -41,8 +41,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Code generation
+  # Testing
+  mockito: ^5.4.4
   build_runner: ^2.4.6
+  mocktail: ^1.0.4
+
+  # Code generation
   injectable_generator: ^2.6.2
 
 flutter:

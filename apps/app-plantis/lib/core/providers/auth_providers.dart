@@ -109,9 +109,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   late final BackgroundSyncProvider? _backgroundSyncProvider;
   late final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
   late final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
-  // ignore: unused_field
-  late final device_revocation.RevokeAllOtherDevicesUseCase?
-  _revokeAllOtherDevicesUseCase;
   late final ResetPasswordUseCase _resetPasswordUseCase;
   late final IAuthRepository _authRepository;
   late final ISubscriptionRepository? _subscriptionRepository;
@@ -169,13 +166,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       _revokeDeviceUseCase = di.sl<device_revocation.RevokeDeviceUseCase>();
     } catch (e) {
       _revokeDeviceUseCase = null;
-    }
-
-    try {
-      _revokeAllOtherDevicesUseCase =
-          di.sl<device_revocation.RevokeAllOtherDevicesUseCase>();
-    } catch (e) {
-      _revokeAllOtherDevicesUseCase = null;
     }
 
     // Setup cleanup on dispose

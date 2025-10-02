@@ -6,13 +6,13 @@ import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../data/adapters/auth_state_provider_adapter.dart';
 import '../interfaces/i_auth_state_provider.dart';
+import '../providers/state/plant_form_state_manager.dart';
+import '../providers/state/plants_state_manager.dart';
 import '../services/form_validation_service.dart';
 import '../services/image_management_service.dart';
 import '../services/plants_care_calculator.dart';
 import '../services/plants_data_service.dart';
 import '../services/plants_filter_service.dart';
-import '../providers/state/plant_form_state_manager.dart';
-import '../providers/state/plants_state_manager.dart';
 
 /// Factory para criar instâncias seguindo padrão Dependency Injection
 /// Resolve violação de Service Locator anti-pattern

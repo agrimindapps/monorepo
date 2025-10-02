@@ -41,8 +41,15 @@ class DiagnosticoEntity {
   bool get isComplete => hasDefensivoInfo && hasCulturaInfo && hasPragaInfo;
 
   /// Displayable information
+  /// ⚠️ DEPRECATED: Usar DiagnosticoEntityResolver para obter nomes atualizados
+  /// Estes getters usam campos cached que podem estar desatualizados
+  @Deprecated('Use DiagnosticoEntityResolver.resolveDefensivoNome() instead')
   String get displayDefensivo => nomeDefensivo ?? 'Defensivo ${idDefensivo.substring(0, 8)}';
+
+  @Deprecated('Use DiagnosticoEntityResolver.resolveCulturaNome() instead')
   String get displayCultura => nomeCultura ?? 'Cultura ${idCultura.substring(0, 8)}';
+
+  @Deprecated('Use DiagnosticoEntityResolver.resolvePragaNome() instead')
   String get displayPraga => nomePraga ?? 'Praga ${idPraga.substring(0, 8)}';
 
   /// Validação de dosagem

@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/plant.dart';
+import '../providers/plant_task_provider.dart';
 import '../providers/plants_provider.dart';
 import 'empty_plants_widget.dart';
 import 'enhanced_plant_card.dart';
@@ -107,15 +109,47 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   // ITaskDataProvider implementation
   @override
   Future<List<TaskInfo>> getPendingTasks(String plantId) async {
-    // TODO: Implement task loading from task provider
-    // For now, return mock data instantly
-    return [
-      TaskInfo(
-        type: 'Regar',
-        dueDate: DateTime.now().add(const Duration(days: 1)),
-        isOverdue: false,
-      ),
-    ];
+    try {
+      // Get PlantTaskProvider from DI
+      final plantTaskProvider = di.sl<PlantTaskProvider>();
+
+      // Load tasks if not already loaded for this plant
+      await plantTaskProvider.loadTasksForPlant(plantId);
+
+      // Get overdue and upcoming tasks
+      final overdueTasks = plantTaskProvider.getOverdueTasksForPlant(plantId);
+      final upcomingTasks = plantTaskProvider.getUpcomingTasksForPlant(plantId);
+
+      // Convert to TaskInfo format
+      final tasks = <TaskInfo>[];
+
+      // Add overdue tasks
+      for (final task in overdueTasks) {
+        tasks.add(TaskInfo(
+          type: task.type.toString().split('.').last,
+          dueDate: task.scheduledDate,
+          isOverdue: true,
+        ));
+      }
+
+      // Add upcoming tasks (not overdue)
+      for (final task in upcomingTasks) {
+        if (!overdueTasks.contains(task)) {
+          tasks.add(TaskInfo(
+            type: task.type.toString().split('.').last,
+            dueDate: task.scheduledDate,
+            isOverdue: false,
+          ));
+        }
+      }
+
+      return tasks;
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error loading tasks for plant $plantId: $e');
+      }
+      return [];
+    }
   }
 
   Future<void> _loadInitialData() async {
@@ -136,7 +170,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   }
 
   void _showRemoveConfirmation(Plant plant) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

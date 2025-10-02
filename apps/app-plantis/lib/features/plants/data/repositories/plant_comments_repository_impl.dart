@@ -5,6 +5,7 @@ import '../../../../core/plantis_sync_config.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
 /// Implementation of PlantCommentsRepository using the unified sync system
+@LazySingleton(as: PlantCommentsRepository)
 class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
   static const String _appName = 'plantis';
 
@@ -25,23 +26,29 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     String plantId,
   ) async {
     try {
+      print('🔍 getCommentsForPlant - Type: ${ComentarioModel}');
+      print('   App: $_appName');
+
       // Use UnifiedSyncManager to find all comments and filter locally
       final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(
         _appName,
       );
 
-      return result.fold(
-        (failure) async {
-          // If failure is because sync not initialized, try to initialize
-          if (failure.message.contains('No sync repository found') ||
-              failure.message.contains('not initialized')) {
-            await _ensureSyncInitialized();
-            // Try again after initialization
-            final retryResult = await UnifiedSyncManager.instance
-                .findAll<ComentarioModel>(_appName);
-            return retryResult.fold((retryFailure) => Left(retryFailure), (
-              comments,
-            ) {
+      // Handle error case
+      if (result.isLeft()) {
+        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
+
+        // If failure is because sync not initialized, try to initialize
+        if (failure.message.contains('No sync repository found') ||
+            failure.message.contains('not initialized')) {
+          await _ensureSyncInitialized();
+          // Try again after initialization
+          final retryResult = await UnifiedSyncManager.instance
+              .findAll<ComentarioModel>(_appName);
+
+          return retryResult.fold(
+            (retryFailure) => Left(retryFailure),
+            (comments) {
               final filteredComments =
                   comments
                       .where(
@@ -55,28 +62,30 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
                       ),
                     );
               return Right(filteredComments);
-            });
-          }
-          return Left(failure);
-        },
-        (comments) {
-          // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
-          final filteredComments =
-              comments
-                  .where(
-                    (comment) =>
-                        !comment.isDeleted && comment.plantId == plantId,
-                  )
-                  .toList()
-                ..sort(
-                  (a, b) => (b.dataCriacao ?? DateTime.now()).compareTo(
-                    a.dataCriacao ?? DateTime.now(),
-                  ),
-                );
+            },
+          );
+        }
+        return Left(failure);
+      }
 
-          return Right(filteredComments);
-        },
-      );
+      // Handle success case
+      final comments = result.fold((l) => throw Exception('Unreachable'), (r) => r);
+
+      // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
+      final filteredComments =
+          comments
+              .where(
+                (comment) =>
+                    !comment.isDeleted && comment.plantId == plantId,
+              )
+              .toList()
+            ..sort(
+              (a, b) => (b.dataCriacao ?? DateTime.now()).compareTo(
+                a.dataCriacao ?? DateTime.now(),
+              ),
+            );
+
+      return Right(filteredComments);
     } catch (e) {
       // Fallback: return empty list if sync not available
       return const Right([]);
@@ -108,7 +117,9 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         comment,
       );
 
-      return result.fold((failure) async {
+      // Handle error case
+      if (result.isLeft()) {
+        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
         print('   ❌ Create failed: ${failure.message}');
 
         // If failure is because sync not initialized, try to initialize
@@ -132,10 +143,11 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
           );
         }
         return Left(failure);
-      }, (commentId) {
-        print('   ✅ Comment created successfully, ID: $commentId');
-        return Right(comment);
-      });
+      }
+
+      // Handle success case
+      print('   ✅ Comment created successfully');
+      return Right(comment);
     } catch (e, stack) {
       print('   ❌ Exception in addComment: $e');
       print('   Stack: $stack');
@@ -157,7 +169,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         updatedComment,
       );
 
-      return result.fold((failure) async {
+      // Handle error case
+      if (result.isLeft()) {
+        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
+
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
@@ -171,7 +186,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
           );
         }
         return Left(failure);
-      }, (_) => Right(updatedComment));
+      }
+
+      // Handle success case
+      return Right(updatedComment);
     } catch (e) {
       return Left(CacheFailure('Failed to update comment: $e'));
     }
@@ -185,7 +203,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         commentId,
       );
 
-      return result.fold((failure) async {
+      // Handle error case
+      if (result.isLeft()) {
+        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
+
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
@@ -197,7 +218,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
           );
         }
         return Left(failure);
-      }, (success) => Right(success));
+      }
+
+      // Handle success case
+      return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Failed to delete comment: $e'));
     }

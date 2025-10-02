@@ -50,7 +50,8 @@ abstract class SyncDIModule {
   static void _setupConnectivityMonitoring(GetIt sl) {
     try {
       final syncService = sl<ReceitaAgroSyncService>();
-      final connectivityService = sl<ConnectivityService>();
+      // Use singleton instance instead of GetIt - ConnectivityService não está registrado no DI
+      final connectivityService = ConnectivityService.instance;
 
       // Conectar o sync service ao stream de conectividade
       syncService.startConnectivityMonitoring(

@@ -34,6 +34,7 @@ class CorePackageIntegration {
     await _registerAuthServices();
     await _registerAnalyticsServices();
     await _registerConnectivityServices(); // Added for EnhancedConnectivityService
+    await _registerPerformanceAndCrashlyticsServices(); // Added for Firebase services migration
     await _registerReceitaAgroAuthServices();
   }
 
@@ -88,9 +89,13 @@ class CorePackageIntegration {
     }
     
     // Auth Repository from Core Package
+    // Note: ReceitaAgro uses anonymous auth only, no Google/Facebook Sign-In
+    // Pass null for GoogleSignIn on Web to avoid clientId configuration issues
     try {
       _sl.registerLazySingleton<core.IAuthRepository>(
-        () => core.FirebaseAuthService(),
+        () => core.FirebaseAuthService(
+          googleSignIn: kIsWeb ? null : core.GoogleSignIn(scopes: ['email']),
+        ),
       );
     } catch (e) {
       if (kDebugMode) print('IAuthRepository registration failed: $e');
@@ -406,6 +411,21 @@ class CorePackageIntegration {
 
     // ReceitaAgro Enhanced Analytics Provider will be registered in _registerReceitaAgroAuthServices
     // to avoid duplicate registration
+  }
+
+  /// Register Performance and Crashlytics services for Firebase migration
+  static Future<void> _registerPerformanceAndCrashlyticsServices() async {
+    // Performance Service (required by main.dart _initializeFirebaseServices)
+    try {
+      if (!_sl.isRegistered<core.IPerformanceRepository>()) {
+        _sl.registerLazySingleton<core.IPerformanceRepository>(
+          () => core.PerformanceService(),
+        );
+        if (kDebugMode) print('✅ Core Package: Performance Service registered');
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ Core Package: Performance Service registration failed - $e');
+    }
   }
 
   /// Register ReceitaAgro-specific auth services

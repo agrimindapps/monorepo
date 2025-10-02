@@ -1,13 +1,15 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Task;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
+import '../../../tasks/domain/entities/task.dart';
 import '../../domain/entities/plant_task.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
 import '../datasources/local/plant_tasks_local_datasource.dart';
 import '../datasources/remote/plant_tasks_remote_datasource.dart';
 import '../models/plant_task_model.dart';
 
+@LazySingleton(as: PlantTasksRepository)
 class PlantTasksRepositoryImpl implements PlantTasksRepository {
   final PlantTasksLocalDatasource localDatasource;
   final PlantTasksRemoteDatasource remoteDatasource;
@@ -342,22 +344,60 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
       if (kDebugMode) {
         print(
-          '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId',
+          '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId usando UnifiedSyncManager',
         );
       }
 
-      // Always delete locally first
-      await localDatasource.deletePlantTasksByPlantId(plantId);
+      // MODERNIZADO: Usar UnifiedSyncManager com Task entity (suporta Firebase sync)
+      // 1. Buscar todas as tasks da planta
+      final tasksResult = await UnifiedSyncManager.instance.findAll<Task>(
+        'plantis',
+      );
 
-      // TODO: Implementar sync com remote quando disponível
+      return tasksResult.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('❌ Erro ao buscar tasks: ${failure.message}');
+          }
+          return Left(failure);
+        },
+        (allTasks) async {
+          // 2. Filtrar tasks desta planta específica que não estão deletadas
+          final plantTasks =
+              allTasks
+                  .where(
+                    (task) => task.plantId == plantId && !task.isDeleted,
+                  )
+                  .toList();
 
-      if (kDebugMode) {
-        print(
-          '✅ PlantTasksRepository: Tasks da planta $plantId deletadas com sucesso',
-        );
-      }
+          if (kDebugMode) {
+            print(
+              '🗑️ Encontradas ${plantTasks.length} tasks para deletar da planta $plantId',
+            );
+          }
 
-      return const Right(null);
+          // 3. Deletar cada task (soft delete + sync Firebase automático)
+          for (final task in plantTasks) {
+            final deleteResult = await UnifiedSyncManager.instance
+                .delete<Task>('plantis', task.id);
+
+            if (deleteResult.isLeft()) {
+              if (kDebugMode) {
+                print('⚠️ Erro ao deletar task ${task.id}');
+              }
+              // Continue deletando outras tasks mesmo se uma falhar
+            }
+          }
+
+          if (kDebugMode) {
+            print(
+              '✅ PlantTasksRepository: ${plantTasks.length} tasks da planta $plantId deletadas com sucesso',
+            );
+          }
+
+          return const Right(null);
+        },
+      );
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {

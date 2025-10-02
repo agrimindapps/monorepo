@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:core/core.dart' hide LogEntry, LogLevel;
 
 import '../../utils/uuid_generator.dart';
 import '../entities/log_entry.dart';
@@ -16,19 +15,19 @@ class LoggingService {
   LoggingService._();
 
   LogRepository? _logRepository;
-  FirebaseAnalytics? _analytics;
-  FirebaseCrashlytics? _crashlytics;
+  IAnalyticsRepository? _analyticsRepository;
+  ICrashlyticsRepository? _crashlyticsRepository;
   String? _currentUserId;
 
   /// Initialize the logging service with dependencies
   Future<void> initialize({
     required LogRepository logRepository,
-    FirebaseAnalytics? analytics,
-    FirebaseCrashlytics? crashlytics,
+    IAnalyticsRepository? analyticsRepository,
+    ICrashlyticsRepository? crashlyticsRepository,
   }) async {
     _logRepository = logRepository;
-    _analytics = analytics;
-    _crashlytics = crashlytics;
+    _analyticsRepository = analyticsRepository;
+    _crashlyticsRepository = crashlyticsRepository;
   }
 
   /// Set the current user ID for log entries
@@ -171,17 +170,10 @@ class LoggingService {
       metadata: enhancedParameters,
     );
 
-    // Send to Firebase Analytics
-    final analyticsParams = <String, Object>{};
-    for (final entry in enhancedParameters.entries) {
-      if (entry.value != null) {
-        analyticsParams[entry.key] = entry.value.toString();
-      }
-    }
-    
-    await _analytics?.logEvent(
-      name: eventName,
-      parameters: analyticsParams,
+    // Send to Firebase Analytics via repository
+    await _analyticsRepository?.logEvent(
+      eventName,
+      parameters: enhancedParameters,
     );
   }
 
@@ -261,14 +253,18 @@ class LoggingService {
     try {
       // Set custom keys for better error tracking
       for (final entry in context.entries) {
-        await _crashlytics?.setCustomKey(entry.key, entry.value.toString());
+        await _crashlyticsRepository?.setCustomKey(
+          key: entry.key,
+          value: entry.value.toString(),
+        );
       }
 
       // Record the error
-      await _crashlytics?.recordError(
-        error,
-        stackTrace,
+      await _crashlyticsRepository?.recordError(
+        exception: error,
+        stackTrace: stackTrace ?? StackTrace.empty,
         fatal: false,
+        additionalInfo: context,
       );
     } catch (e) {
       // If Crashlytics fails, at least log it locally

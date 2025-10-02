@@ -62,15 +62,16 @@ class DiagnosticoGroupingService {
     
     for (final item in items) {
       final idCultura = getIdCultura(item);
-      final nomeCultura = getNomeCultura(item);
-      
-      // Usa o resolver para garantir consistência
-      final culturaNome = await _resolver.resolveCulturaNome(
-        idCultura: idCultura,
-        nomeCultura: nomeCultura,
-        defaultValue: defaultGroupName,
-      );
-      
+
+      // ✅ CORRETO: Usa apenas ID para resolver, NUNCA nome cached
+      String culturaNome = defaultGroupName;
+      if (idCultura != null && idCultura.isNotEmpty) {
+        culturaNome = await _resolver.resolveCulturaNome(
+          idCultura: idCultura,
+          defaultValue: defaultGroupName,
+        );
+      }
+
       grouped.putIfAbsent(culturaNome, () => []).add(item);
     }
 
@@ -117,14 +118,16 @@ class DiagnosticoGroupingService {
     
     for (final item in items) {
       final idDefensivo = getIdDefensivo(item);
-      final nomeDefensivo = getNomeDefensivo(item);
-      
-      final defensivoNome = await _resolver.resolveDefensivoNome(
-        idDefensivo: idDefensivo,
-        nomeDefensivo: nomeDefensivo,
-        defaultValue: defaultGroupName,
-      );
-      
+
+      // ✅ CORRETO: Usa apenas ID para resolver, NUNCA nome cached
+      String defensivoNome = defaultGroupName;
+      if (idDefensivo != null && idDefensivo.isNotEmpty) {
+        defensivoNome = await _resolver.resolveDefensivoNome(
+          idDefensivo: idDefensivo,
+          defaultValue: defaultGroupName,
+        );
+      }
+
       grouped.putIfAbsent(defensivoNome, () => []).add(item);
     }
 
@@ -156,14 +159,16 @@ class DiagnosticoGroupingService {
     
     for (final item in items) {
       final idPraga = getIdPraga(item);
-      final nomePraga = getNomePraga(item);
-      
-      final pragaNome = await _resolver.resolvePragaNome(
-        idPraga: idPraga,
-        nomePraga: nomePraga,
-        defaultValue: defaultGroupName,
-      );
-      
+
+      // ✅ CORRETO: Usa apenas ID para resolver, NUNCA nome cached
+      String pragaNome = defaultGroupName;
+      if (idPraga != null && idPraga.isNotEmpty) {
+        pragaNome = await _resolver.resolvePragaNome(
+          idPraga: idPraga,
+          defaultValue: defaultGroupName,
+        );
+      }
+
       grouped.putIfAbsent(pragaNome, () => []).add(item);
     }
 

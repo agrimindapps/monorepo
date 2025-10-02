@@ -63,6 +63,7 @@ class PlantisBoxes {
   static const String reminders = 'plantis_reminders';
   static const String care_logs = 'plantis_care_logs';
   static const String backups = 'plantis_backups';
+  static const String comentarios = 'comentarios';
 }
 
 /// Plantis-specific image service configuration

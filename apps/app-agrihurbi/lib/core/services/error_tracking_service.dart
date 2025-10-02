@@ -4,17 +4,19 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 /// Service centralizado para tracking e logging de erros
-/// 
-/// Integra com FirebaseAnalytics e futuramente com Crashlytics
+///
+/// Integra com Firebase Analytics, Crashlytics e Performance
 /// Implementa diferentes níveis de logging e contexto de erro
 @singleton
 class ErrorTrackingService {
-  final FirebaseAnalyticsService _analyticsService;
-  // final HiveStorageService _hiveStorageService; // Reserved for future use
-  
+  final IAnalyticsRepository _analyticsService;
+  final ICrashlyticsRepository _crashlyticsService;
+  final IPerformanceRepository _performanceService;
+
   const ErrorTrackingService(
     this._analyticsService,
-    // _hiveStorageService, // Reserved for future use
+    this._crashlyticsService,
+    this._performanceService,
   );
   
   /// Registra um erro crítico que afeta a funcionalidade principal
@@ -34,16 +36,30 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-      
+
+      // Log to Crashlytics as fatal error
+      await _crashlyticsService.recordError(
+        exception: error,
+        stackTrace: stackTrace ?? StackTrace.current,
+        reason: 'Critical error in ${feature ?? 'unknown feature'}',
+        fatal: true,
+        additionalInfo: context,
+      );
+
       // Log to analytics
       await _analyticsService.logEvent(
         'critical_error',
         parameters: _sanitizeParameters(errorData),
       );
-      
+
+      // Set user context if provided
+      if (userId != null) {
+        await _crashlyticsService.setUserId(userId);
+      }
+
       // Store locally for debugging
       await _storeErrorLocally(errorData);
-      
+
       // Print to console in debug mode
       if (kDebugMode) {
         debugPrint('🔴 CRITICAL ERROR: $error');
@@ -72,13 +88,21 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-      
+
+      // Log to Crashlytics as non-fatal error
+      await _crashlyticsService.recordNonFatalError(
+        exception: warning,
+        stackTrace: StackTrace.current,
+        reason: 'Warning in ${feature ?? 'unknown feature'}',
+        additionalInfo: context,
+      );
+
       // Log to analytics
       await _analyticsService.logEvent(
         'warning',
         parameters: _sanitizeParameters(warningData),
       );
-      
+
       // Print to console in debug mode
       if (kDebugMode) {
         debugPrint('🟡 WARNING: $warning');
@@ -142,12 +166,33 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-      
+
+      // Record performance metric
+      await _performanceService.recordTiming(
+        'operation_$operation',
+        Duration(milliseconds: durationMs),
+        tags: {
+          'feature': feature ?? 'unknown',
+          'threshold_exceeded': threshold != null && durationMs > threshold ? 'true' : 'false',
+        },
+      );
+
+      // Log to analytics
       await _analyticsService.logEvent(
         'performance_issue',
         parameters: _sanitizeParameters(performanceData),
       );
-      
+
+      // Log to crashlytics if threshold exceeded
+      if (threshold != null && durationMs > threshold) {
+        await _crashlyticsService.recordNonFatalError(
+          exception: 'Performance threshold exceeded',
+          stackTrace: StackTrace.current,
+          reason: '$operation took ${durationMs}ms (threshold: ${threshold}ms)',
+          additionalInfo: context,
+        );
+      }
+
       if (kDebugMode) {
         debugPrint('⚡ PERFORMANCE: $operation took ${durationMs}ms');
       }
@@ -177,12 +222,23 @@ class ErrorTrackingService {
         userId: userId,
         feature: 'network',
       );
-      
+
+      // Log to Crashlytics if critical network error
+      if (statusCode == null || statusCode >= 500) {
+        await _crashlyticsService.recordNetworkError(
+          url: endpoint,
+          statusCode: statusCode ?? 0,
+          errorMessage: error,
+          context: context,
+        );
+      }
+
+      // Log to analytics
       await _analyticsService.logEvent(
         'network_error',
         parameters: _sanitizeParameters(networkData),
       );
-      
+
       if (kDebugMode) {
         debugPrint('🌐 NETWORK ERROR: $endpoint - $error');
       }

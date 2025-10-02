@@ -6,14 +6,10 @@ import '../data/repositories/pragas_hive_repository.dart';
 
 /// Extensão para DiagnosticoHive com métodos display e formatação
 extension DiagnosticoHiveExtension on DiagnosticoHive {
-  /// Retorna o nome do defensivo resolvendo dinamicamente se necessário
+  /// Retorna o nome do defensivo SEMPRE resolvendo dinamicamente usando fkIdDefensivo
+  /// NUNCA usa o campo nomeDefensivo armazenado (pode estar desatualizado)
   Future<String> getDisplayNomeDefensivo() async {
-    // Primeiro tenta usar o nome já armazenado
-    if (nomeDefensivo?.isNotEmpty == true) {
-      return nomeDefensivo!;
-    }
-    
-    // Se não tiver, resolve dinamicamente usando o repository
+    // SEMPRE resolve dinamicamente usando o repository
     try {
       final repository = di.sl<FitossanitarioHiveRepository>();
       final defensivo = await repository.getById(fkIdDefensivo);
@@ -23,18 +19,14 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     } catch (e) {
       // Falha silenciosamente para não quebrar a UI
     }
-    
+
     return 'Defensivo não identificado';
   }
 
-  /// Retorna o nome da cultura resolvendo dinamicamente se necessário
+  /// Retorna o nome da cultura SEMPRE resolvendo dinamicamente usando fkIdCultura
+  /// NUNCA usa o campo nomeCultura armazenado (pode estar desatualizado)
   Future<String> getDisplayNomeCultura() async {
-    // Primeiro tenta usar o nome já armazenado
-    if (nomeCultura?.isNotEmpty == true) {
-      return nomeCultura!;
-    }
-    
-    // Se não tiver, resolve dinamicamente usando o repository
+    // SEMPRE resolve dinamicamente usando o repository
     try {
       final repository = di.sl<CulturaHiveRepository>();
       final cultura = await repository.getById(fkIdCultura);
@@ -44,18 +36,14 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     } catch (e) {
       // Falha silenciosamente para não quebrar a UI
     }
-    
+
     return 'Cultura não identificada';
   }
 
-  /// Retorna o nome da praga resolvendo dinamicamente se necessário
+  /// Retorna o nome da praga SEMPRE resolvendo dinamicamente usando fkIdPraga
+  /// NUNCA usa o campo nomePraga armazenado (pode estar desatualizado)
   Future<String> getDisplayNomePraga() async {
-    // Primeiro tenta usar o nome já armazenado
-    if (nomePraga?.isNotEmpty == true) {
-      return nomePraga!;
-    }
-    
-    // Se não tiver, resolve dinamicamente usando o repository
+    // SEMPRE resolve dinamicamente usando o repository
     try {
       final repository = di.sl<PragasHiveRepository>();
       final praga = await repository.getById(fkIdPraga);
@@ -65,7 +53,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
     } catch (e) {
       // Falha silenciosamente para não quebrar a UI
     }
-    
+
     return 'Praga não identificada';
   }
 

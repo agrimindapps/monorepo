@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/plant.dart';
+import '../../domain/repositories/plant_comments_repository.dart';
+import '../../domain/repositories/plant_tasks_repository.dart';
 import '../../domain/repositories/plants_repository.dart';
 import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
@@ -18,6 +20,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
     required this.remoteDatasource,
     required this.networkInfo,
     required this.authService,
+    required this.taskRepository,
+    required this.commentsRepository,
   }) {
     // ENHANCED FEATURE: Start real-time connectivity monitoring
     _initializeConnectivityMonitoring();
@@ -27,6 +31,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
   final PlantsRemoteDatasource remoteDatasource;
   final NetworkInfo networkInfo;
   final IAuthRepository authService;
+  final PlantTasksRepository taskRepository;
+  final PlantCommentsRepository commentsRepository;
 
   // ENHANCED FEATURE: Real-time connectivity monitoring
   StreamSubscription<bool>? _connectivitySubscription;
@@ -151,15 +157,45 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        // CRITICAL FIX: Return proper error instead of empty list for unauthenticated users
-        return const Left(
-          AuthFailure(
-            'Usuário não autenticado. Aguarde a inicialização ou faça login.',
-          ),
+        // Return empty list for unauthenticated users (consistent with searchPlants)
+        // This allows UI to show empty state instead of error during auth initialization
+        return const Right([]);
+      }
+
+      // WEB: usar apenas UnifiedSyncManager (evita conflitos de box)
+      if (kIsWeb) {
+        if (kDebugMode) {
+          print('🌐 PlantsRepository (Web): Using UnifiedSyncManager');
+        }
+
+        final result = await UnifiedSyncManager.instance.findAll<Plant>(
+          'plantis',
+        );
+
+        return result.fold(
+          (failure) => Left(failure),
+          (plants) {
+            // Filtrar plantas não deletadas e ordenar
+            final activePlants =
+                plants.where((p) => !p.isDeleted).toList()
+                  ..sort(
+                    (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+                      a.createdAt ?? DateTime.now(),
+                    ),
+                  );
+
+            if (kDebugMode) {
+              print(
+                '✅ PlantsRepository (Web): Loaded ${activePlants.length} plants',
+              );
+            }
+
+            return Right(activePlants);
+          },
         );
       }
 
-      // ALWAYS return local data first for instant UI response
+      // MOBILE/DESKTOP: usar datasource legado
       final localPlants = await localDatasource.getPlants();
 
       // Start background sync immediately (fire and forget)
@@ -212,7 +248,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
             _logSyncMetrics(remotePlants.length, syncType);
           }
         })
-        .catchError((e) {
+        .catchError((Object e) {
           // CRITICAL FIX: Log background sync errors for debugging
           if (kDebugMode) {
             print('⚠️ PlantsRepository: Background sync failed: $e');
@@ -438,16 +474,57 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
 
-      // Always delete locally first
+      if (kDebugMode) {
+        print('🗑️ Deleting plant: $id');
+      }
+
+      // 1. Delete all related tasks first
+      if (kDebugMode) {
+        print('🗑️ Deleting tasks for plant: $id');
+      }
+      final tasksResult = await taskRepository.deletePlantTasksByPlantId(id);
+      if (tasksResult.isLeft()) {
+        if (kDebugMode) {
+          print('⚠️ Failed to delete tasks for plant $id: ${tasksResult.fold((f) => f.message, (_) => '')}');
+        }
+        // Continue even if task deletion fails
+      }
+
+      // 2. Delete all related comments
+      if (kDebugMode) {
+        print('🗑️ Deleting comments for plant: $id');
+      }
+      final commentsResult = await commentsRepository.deleteCommentsForPlant(id);
+      if (commentsResult.isLeft()) {
+        if (kDebugMode) {
+          print('⚠️ Failed to delete comments for plant $id: ${commentsResult.fold((f) => f.message, (_) => '')}');
+        }
+        // Continue even if comment deletion fails
+      }
+
+      // 3. Delete the plant itself (soft delete locally)
+      if (kDebugMode) {
+        print('🗑️ Deleting plant locally: $id');
+      }
       await localDatasource.deletePlant(id);
 
+      // 4. Try to delete remotely if connected
       if (await networkInfo.isConnected) {
         try {
-          // Try to delete remotely
+          if (kDebugMode) {
+            print('🗑️ Deleting plant remotely: $id');
+          }
           await remoteDatasource.deletePlant(id, userId);
         } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Remote deletion failed, will sync later: $e');
+          }
           // If remote fails, the local soft delete will sync later
         }
+      }
+
+      if (kDebugMode) {
+        print('✅ Plant deleted successfully: $id');
       }
 
       return const Right(null);

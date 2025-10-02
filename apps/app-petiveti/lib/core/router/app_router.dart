@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/animals/presentation/pages/animals_page.dart';
@@ -36,9 +37,8 @@ import '../../features/weight/presentation/pages/weight_page.dart';
 import '../navigation/bottom_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // CORREÇÃO: Não tentar acessar authProvider imediatamente
-  // Sempre começar com splash para dar tempo da inicialização DI
-  const initialRoute = '/splash';
+  // Web inicia em promo (landing page), Mobile/Desktop inicia em splash
+  final initialRoute = kIsWeb ? '/promo' : '/splash';
   
   return GoRouter(
     initialLocation: initialRoute,

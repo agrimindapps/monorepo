@@ -35,6 +35,10 @@ import 'features/settings/presentation/providers/profile_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'firebase_options.dart';
 
+// Global references for error handlers
+late ICrashlyticsRepository _crashlyticsRepository;
+late IPerformanceRepository _performanceRepository;
+
 /// Handler para mensagens em background (deve ser top-level function)
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -58,6 +62,12 @@ void main() async {
   // Migrate theme preferences from app-specific to core package
   await ThemePreferenceMigration.migratePreferences();
 
+  // Initialize dependency injection
+  await di.init();
+
+  // Initialize Firebase services (Analytics, Crashlytics, Performance)
+  await _initializeFirebaseServices();
+
   // Sign in anonymously if no user is logged in
   // This ensures the app works even without user authentication
   final auth = FirebaseAuth.instance;
@@ -67,47 +77,15 @@ void main() async {
     } catch (e) {
       // Log error but don't block app startup
       if (EnvironmentConfig.enableAnalytics) {
-        await FirebaseCrashlytics.instance.recordError(
-          e,
-          StackTrace.current,
+        await _crashlyticsRepository.recordError(
+          exception: e,
+          stackTrace: StackTrace.current,
           reason: 'Failed to sign in anonymously',
           fatal: false,
         );
       }
     }
   }
-
-  // Initialize Performance Service
-  final performanceService = PerformanceService();
-
-  // Start performance tracking (only for mobile platforms)
-  if (!kIsWeb) {
-    await performanceService.startPerformanceTracking(
-      config: const PerformanceConfig(
-        enableFpsMonitoring: true,
-        enableMemoryMonitoring: true,
-        enableCpuMonitoring: false,
-        enableFirebaseIntegration: true,
-      ),
-    );
-    await performanceService.markAppStarted();
-  }
-
-  // Configure Crashlytics (only in production/staging and not on web)
-  if (EnvironmentConfig.enableAnalytics && !kIsWeb) {
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
-
-    // Pass all uncaught asynchronous errors to Crashlytics
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-  }
-
-  // Initialize dependency injection
-  await di.init();
 
   // ===== CONNECTIVITY INITIALIZATION =====
   // Initialize ConnectivityService for agricultural operations with poor network
@@ -139,9 +117,9 @@ void main() async {
     debugPrint('❌ [MAIN] Connectivity services initialization failed: $e');
     // Don't block app startup - connectivity will be handled gracefully
     if (EnvironmentConfig.enableAnalytics) {
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        StackTrace.current,
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: StackTrace.current,
         reason: 'Failed to initialize connectivity services',
         fatal: false,
       );
@@ -169,8 +147,10 @@ void main() async {
   }
 
   // ===== PUSH NOTIFICATIONS INITIALIZATION =====
-  // Configurar handler para mensagens em background
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Configurar handler para mensagens em background (apenas mobile)
+  if (!kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
 
   // Inicializar Firebase Messaging Service
   try {
@@ -227,9 +207,9 @@ void main() async {
   } catch (e) {
     // Log error but don't block app startup
     if (EnvironmentConfig.enableAnalytics) {
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        StackTrace.current,
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: StackTrace.current,
         reason: 'Failed to initialize RevenueCat',
         fatal: false,
       );
@@ -244,9 +224,9 @@ void main() async {
     (error) {
       // Log error but don't block app startup
       if (EnvironmentConfig.enableAnalytics) {
-        FirebaseCrashlytics.instance.recordError(
-          error,
-          StackTrace.current,
+        _crashlyticsRepository.recordError(
+          exception: error,
+          stackTrace: StackTrace.current,
           fatal: false,
         );
       }
@@ -288,9 +268,9 @@ void main() async {
     print('🔧 [DEBUG] Stack trace do erro: ${StackTrace.current}');
     // Log error but don't block app startup - AppDataManager already loaded the data
     if (EnvironmentConfig.enableAnalytics) {
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        StackTrace.current,
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: StackTrace.current,
         reason: 'ReceitaAgroDataSetup failed but AppDataManager succeeded',
         fatal: false,
       );
@@ -304,7 +284,7 @@ void main() async {
 
   // Mark first frame before running app
   if (!kIsWeb) {
-    await performanceService.markFirstFrame();
+    await _performanceRepository.markFirstFrame();
   }
 
   // Run app with ProviderScope for Riverpod (zone guarding handled by Flutter error handlers)
@@ -313,6 +293,90 @@ void main() async {
       child: ReceitaAgroApp(),
     ),
   );
+}
+
+/// Initialize Firebase services (Analytics, Crashlytics, Performance)
+Future<void> _initializeFirebaseServices() async {
+  try {
+    debugPrint('🚀 Initializing Firebase services...');
+
+    // Get services from DI
+    final analyticsRepository = di.sl<IAnalyticsRepository>();
+    _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
+    _performanceRepository = di.sl<IPerformanceRepository>();
+
+    // Configure Crashlytics error handlers (only in production/staging and not on web)
+    if (EnvironmentConfig.enableAnalytics && !kIsWeb) {
+      FlutterError.onError = (errorDetails) {
+        _crashlyticsRepository.recordError(
+          exception: errorDetails.exception,
+          stackTrace: errorDetails.stack ?? StackTrace.empty,
+          reason: errorDetails.summary.toString(),
+          fatal: true,
+        );
+      };
+
+      // Pass all uncaught asynchronous errors to Crashlytics
+      PlatformDispatcher.instance.onError = (error, stack) {
+        _crashlyticsRepository.recordError(
+          exception: error,
+          stackTrace: stack,
+          fatal: true,
+        );
+        return true;
+      };
+    }
+
+    // Configure initial context for Crashlytics
+    await _crashlyticsRepository.setCustomKey(
+      key: 'app_name',
+      value: 'ReceitaAgro',
+    );
+    await _crashlyticsRepository.setCustomKey(
+      key: 'environment',
+      value: EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+    );
+
+    // Start performance tracking (only for mobile platforms)
+    if (!kIsWeb) {
+      await _performanceRepository.startPerformanceTracking(
+        config: const PerformanceConfig(
+          enableFpsMonitoring: true,
+          enableMemoryMonitoring: true,
+          enableCpuMonitoring: false,
+          enableFirebaseIntegration: true,
+        ),
+      );
+      await _performanceRepository.markAppStarted();
+    }
+
+    // Log app initialization
+    await analyticsRepository.logEvent(
+      'app_initialized',
+      parameters: {
+        'platform': kIsWeb ? 'web' : 'mobile',
+        'environment': EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      },
+    );
+
+    await _crashlyticsRepository.log('ReceitaAgro app initialized successfully');
+
+    debugPrint('✅ Firebase services initialized successfully');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Error initializing Firebase services: $e');
+
+    // Try to record error even if services failed
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Firebase services initialization failed',
+      );
+    } catch (_) {
+      // Ignore if Crashlytics also failed
+    }
+  }
 }
 
 class ReceitaAgroApp extends StatelessWidget {

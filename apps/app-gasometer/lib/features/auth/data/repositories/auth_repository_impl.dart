@@ -258,14 +258,110 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> signInWithGoogle() async {
-    // Not implemented without Google Sign-In package
-    return Left(UnexpectedFailure('Google Sign-In not implemented'));
+    try {
+      final userModel = await remoteDataSource.signInWithGoogle();
+
+      // Cache user locally
+      await localDataSource.cacheUser(userModel);
+
+      return Right(userModel);
+    } on local_exceptions.AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on local_exceptions.ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithApple() async {
+    try {
+      final userModel = await remoteDataSource.signInWithApple();
+
+      // Cache user locally
+      await localDataSource.cacheUser(userModel);
+
+      return Right(userModel);
+    } on local_exceptions.AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on local_exceptions.ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithFacebook() async {
+    try {
+      final userModel = await remoteDataSource.signInWithFacebook();
+
+      // Cache user locally
+      await localDataSource.cacheUser(userModel);
+
+      return Right(userModel);
+    } on local_exceptions.AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on local_exceptions.ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
   }
 
   @override
   Future<Either<Failure, UserEntity>> linkAnonymousWithGoogle() async {
-    // Not implemented without Google Sign-In package
-    return Left(UnexpectedFailure('Google Sign-In linking not implemented'));
+    try {
+      final userModel = await remoteDataSource.linkAnonymousWithGoogle();
+
+      // Cache the converted user
+      await localDataSource.cacheUser(userModel);
+
+      return Right(userModel);
+    } on local_exceptions.AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on local_exceptions.ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> linkAnonymousWithApple() async {
+    try {
+      final userModel = await remoteDataSource.linkAnonymousWithApple();
+
+      // Cache the converted user
+      await localDataSource.cacheUser(userModel);
+
+      return Right(userModel);
+    } on local_exceptions.AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on local_exceptions.ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> linkAnonymousWithFacebook() async {
+    try {
+      final userModel = await remoteDataSource.linkAnonymousWithFacebook();
+
+      // Cache the converted user
+      await localDataSource.cacheUser(userModel);
+
+      return Right(userModel);
+    } on local_exceptions.AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(e.message));
+    } on local_exceptions.ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
   }
 
   @override
@@ -347,12 +443,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Either<Failure, Unit> validateEmail(String email) {
     if (email.isEmpty) {
-      return Left(ValidationFailure('Email não pode estar vazio'));
+      return const Left(ValidationFailure('Email não pode estar vazio'));
     }
 
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
-      return Left(ValidationFailure('Email inválido'));
+      return const Left(ValidationFailure('Email inválido'));
     }
 
     return const Right(unit);
@@ -361,11 +457,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Either<Failure, Unit> validatePassword(String password) {
     if (password.isEmpty) {
-      return Left(ValidationFailure('Senha não pode estar vazia'));
+      return const Left(ValidationFailure('Senha não pode estar vazia'));
     }
 
     if (password.length < 6) {
-      return Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
+      return const Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
     }
 
     return const Right(unit);

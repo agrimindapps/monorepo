@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -12,14 +13,15 @@ import '../../features/odometer/presentation/pages/add_odometer_page.dart';
 import '../../features/odometer/presentation/pages/odometer_page.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Start with login route to avoid redirect issues
-  const initialRoute = '/login';
+  // Web inicia em promo, Mobile/Desktop inicia em login
+  final initialRoute = kIsWeb ? '/promo' : '/login';
 
   return GoRouter(
     initialLocation: initialRoute,
@@ -152,6 +154,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+
+      // Promo page (outside main navigation) - Para Web
+      GoRoute(
+        path: '/promo',
+        name: 'promo',
+        builder: (context, state) => const PromoPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -1,8 +1,6 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' hide getIt;
 
 import 'core/database/hive_config.dart';
 import 'core/di/injection.dart';
@@ -12,13 +10,17 @@ import 'core/services/navigation_service.dart' as local_nav;
 import 'core/services/notification_actions_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/notification_test_helper.dart';
+import 'features/auth/presentation/login_page.dart';
+import 'features/premium/presentation/promotional_page.dart';
+import 'features/tasks/presentation/providers/theme_provider.dart';
 import 'firebase_options.dart';
 import 'infrastructure/services/analytics_service.dart';
 import 'infrastructure/services/crashlytics_service.dart';
 import 'infrastructure/services/notification_service.dart';
 import 'infrastructure/services/performance_service.dart';
-import 'features/premium/presentation/promotional_page.dart';
-import 'features/tasks/presentation/providers/theme_provider.dart';
+
+// Global reference to crashlytics for error handlers
+late ICrashlyticsRepository _crashlyticsRepository;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,24 +28,36 @@ void main() async {
   // Inicializar Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Configurar Crashlytics para capturar erros Flutter
-  if (!kIsWeb) {
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
-
-    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-  }
-
   // Inicializar Hive
   await HiveConfig.initialize();
 
   // Inicializar Dependency Injection
   await configureDependencies();
+
+  // Get crashlytics repository from DI
+  _crashlyticsRepository = getIt<ICrashlyticsRepository>();
+
+  // Configurar Crashlytics para capturar erros Flutter
+  if (!kIsWeb) {
+    FlutterError.onError = (errorDetails) {
+      _crashlyticsRepository.recordError(
+        exception: errorDetails.exception,
+        stackTrace: errorDetails.stack ?? StackTrace.empty,
+        reason: errorDetails.summary.toString(),
+        fatal: true,
+      );
+    };
+
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      _crashlyticsRepository.recordError(
+        exception: error,
+        stackTrace: stack,
+        fatal: true,
+      );
+      return true;
+    };
+  }
 
   // ===== ACCOUNT DELETION INITIALIZATION =====
   // Initialize account deletion module after DI is ready
@@ -143,9 +157,9 @@ Future<void> _initializeFirebaseServices() async {
 
     // Registrar erro mesmo se os serviços não estiverem totalmente configurados
     try {
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        stackTrace,
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
     } catch (_) {
@@ -185,7 +199,8 @@ class TaskManagerApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       navigatorKey: local_nav.NavigationService.navigatorKey,
-      home: const PromotionalPage(),
+      // Web inicia em promo (landing page), Mobile/Desktop inicia em login
+      home: kIsWeb ? const PromotionalPage() : const LoginPage(),
     );
   }
 }

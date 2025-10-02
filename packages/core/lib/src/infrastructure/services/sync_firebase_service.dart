@@ -84,17 +84,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       if (_isInitialized) return const Right(null);
 
-      // Skip initialization on Web platform due to Hive limitations
-      if (kIsWeb) {
-        if (kDebugMode) {
-          developer.log(
-            '⚠️ SyncFirebaseService: Skipping initialization on Web platform (Hive limitations)',
-            name: 'SyncFirebaseService',
-          );
-        }
-        return Left(UnknownFailure('SyncFirebaseService not supported on Web platform'));
-      }
-
       // Inicializar dependências
       _localStorage = getIt<ILocalStorageRepository>();
       _connectivity = ConnectivityService.instance;
@@ -119,9 +108,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       _setupAutoSync();
 
       _isInitialized = true;
-      
-      developer.log('SyncFirebaseService<$T> inicializado para $collectionName', name: 'SyncService');
-      
+
+      developer.log(
+        'SyncFirebaseService<$T> inicializado para $collectionName${kIsWeb ? " (Web)" : ""}',
+        name: 'SyncService',
+      );
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao inicializar SyncFirebaseService: $e'));
@@ -563,7 +555,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
-      await initialize();
+      final result = await initialize();
+      if (result.isLeft()) {
+        throw Exception(result.fold((failure) => failure.message, (_) => 'Unknown error'));
+      }
     }
   }
 

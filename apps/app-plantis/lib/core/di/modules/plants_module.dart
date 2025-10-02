@@ -4,10 +4,6 @@ import '../../../features/plants/data/datasources/local/plant_tasks_local_dataso
 import '../../../features/plants/data/datasources/local/plants_local_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plant_tasks_remote_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
-import '../../../features/plants/data/repositories/plant_comments_repository_impl.dart';
-import '../../../features/plants/data/repositories/plant_tasks_repository_impl.dart';
-import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
-import '../../../features/plants/domain/repositories/plant_tasks_repository.dart';
 import '../../../features/plants/domain/services/plant_task_generator.dart';
 import '../../../features/plants/presentation/providers/plant_comments_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
@@ -26,20 +22,8 @@ abstract class PlantsDIModule {
 
     // Repository - PlantsRepository já registrado via Injectable (@LazySingleton)
 
-    // Plant Comments Repository
-    sl.registerLazySingleton<PlantCommentsRepository>(
-      () => PlantCommentsRepositoryImpl(),
-    );
-
-    // Plant Tasks Repository
-    sl.registerLazySingleton<PlantTasksRepository>(
-      () => PlantTasksRepositoryImpl(
-        localDatasource: sl(),
-        remoteDatasource: sl(),
-        networkInfo: sl(),
-        authService: sl(),
-      ),
-    );
+    // Plant Comments Repository - Registrado via Injectable (@LazySingleton)
+    // Plant Tasks Repository - Registrado via Injectable (@LazySingleton)
 
     // Plant Tasks Data Sources
     sl.registerLazySingleton<PlantTasksLocalDatasource>(
@@ -68,7 +52,12 @@ abstract class PlantsDIModule {
     sl.registerLazySingleton(() => PlantTaskGenerator());
 
     // Plant task provider
-    sl.registerFactory(() => PlantTaskProvider(taskGenerationService: sl()));
+    sl.registerFactory(
+      () => PlantTaskProvider(
+        taskGenerationService: sl(),
+        repository: sl(),
+      ),
+    );
 
     // Plant comments provider
     sl.registerFactory(() => PlantCommentsProvider(repository: sl()));

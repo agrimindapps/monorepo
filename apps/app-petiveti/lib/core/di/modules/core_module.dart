@@ -1,7 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core;
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
@@ -29,24 +27,14 @@ class CoreModule implements DIModule {
   }
 
   Future<void> _registerExternalServices(GetIt getIt) async {
-    // PHASE 1 MIGRATION: Register both direct Firebase services AND core repositories
-    // This allows gradual migration without breaking existing code
-    
-    // Direct Firebase services (existing code compatibility)
-    getIt.registerLazySingleton<FirebaseAnalytics>(
-      () => FirebaseAnalytics.instance,
-    );
+    // MIGRATION COMPLETED: Using only core package repositories
+    // Removed direct Firebase services to avoid duplication
 
-    getIt.registerLazySingleton<FirebaseCrashlytics>(
-      () => FirebaseCrashlytics.instance,
-    );
-
-    // NOTE: FirebaseFirestore and FirebaseAuth are now registered by injectable 
+    // NOTE: FirebaseFirestore and FirebaseAuth are now registered by injectable
     // via RegisterModule to avoid duplicate registration errors
     // They are available via RegisterModule.firestore and RegisterModule.firebaseAuth
 
-    // Core package repositories (new migration path)
-    // These will be used by new code and gradual migration
+    // Core package repositories (standard migration path)
     try {
       getIt.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(),
@@ -60,6 +48,10 @@ class CoreModule implements DIModule {
 
       getIt.registerLazySingleton<core.ICrashlyticsRepository>(
         () => core.FirebaseCrashlyticsService(),
+      );
+
+      getIt.registerLazySingleton<core.IPerformanceRepository>(
+        () => core.PerformanceService(),
       );
 
       // Subscription repository from core package
@@ -121,11 +113,11 @@ class CoreModule implements DIModule {
   /// Initialize logging service after all dependencies are registered
   static Future<void> initializeLoggingService(GetIt getIt) async {
     try {
-      // Initialize with Firebase services now that they're properly configured
+      // Initialize with core repository interfaces
       await LoggingService.instance.initialize(
         logRepository: getIt<LogRepository>(),
-        analytics: getIt<FirebaseAnalytics>(),
-        crashlytics: getIt<FirebaseCrashlytics>(),
+        analyticsRepository: getIt<core.IAnalyticsRepository>(),
+        crashlyticsRepository: getIt<core.ICrashlyticsRepository>(),
       );
     } catch (e) {
       // If logging service fails to initialize, continue without it

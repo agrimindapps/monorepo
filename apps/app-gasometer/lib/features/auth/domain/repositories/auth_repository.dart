@@ -7,10 +7,12 @@ abstract class AuthRepository {
   
   // Sign In Methods
   Future<Either<Failure, UserEntity>> signInWithEmail({
-    required String email, 
+    required String email,
     required String password,
   });
   Future<Either<Failure, UserEntity>> signInWithGoogle();
+  Future<Either<Failure, UserEntity>> signInWithApple();
+  Future<Either<Failure, UserEntity>> signInWithFacebook();
   Future<Either<Failure, UserEntity>> signInAnonymously();
   
   // Sign Up
@@ -42,6 +44,8 @@ abstract class AuthRepository {
     required String password,
   });
   Future<Either<Failure, UserEntity>> linkAnonymousWithGoogle();
+  Future<Either<Failure, UserEntity>> linkAnonymousWithApple();
+  Future<Either<Failure, UserEntity>> linkAnonymousWithFacebook();
   
   // Sign Out
   Future<Either<Failure, Unit>> signOut();

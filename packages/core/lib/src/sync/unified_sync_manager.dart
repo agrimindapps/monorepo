@@ -743,40 +743,46 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, String>> create(T entity) async {
-    final result = await _repository.create(entity);
-    return result as Future<Either<Failure, String>>;
+    return await _repository.create(entity);
   }
 
   @override
   Future<Either<Failure, void>> update(String id, T entity) async {
-    final result = await _repository.update(id, entity);
-    return result as Future<Either<Failure, void>>;
+    return await _repository.update(id, entity) as Either<Failure, void>;
   }
 
   @override
   Future<Either<Failure, void>> delete(String id) async {
-    final result = await _repository.delete(id);
-    return result as Future<Either<Failure, void>>;
+    return await _repository.delete(id) as Either<Failure, void>;
   }
 
   @override
   Future<Either<Failure, T?>> findById(String id) async {
-    final result = await _repository.findById(id);
-    return result as Future<Either<Failure, T?>>;
+    final result = await _repository.findById(id) as Either<Failure, dynamic>;
+    return result.fold(
+      (Failure failure) => Left<Failure, T?>(failure),
+      (dynamic entity) => Right<Failure, T?>(entity as T?),
+    );
   }
 
   @override
   Future<Either<Failure, List<T>>> findAll() async {
-    final result = await _repository.findAll();
-    return result as Future<Either<Failure, List<T>>>;
+    final result = await _repository.findAll() as Either<Failure, List<dynamic>>;
+    return result.fold(
+      (failure) => Left(failure),
+      (list) => Right(list.cast<T>()),
+    );
   }
 
   @override
   Future<Either<Failure, List<T>>> findWhere(
     Map<String, dynamic> filters,
   ) async {
-    final result = await _repository.findWhere(filters);
-    return result as Future<Either<Failure, List<T>>>;
+    final result = await _repository.findWhere(filters) as Either<Failure, List<dynamic>>;
+    return result.fold(
+      (failure) => Left(failure),
+      (list) => Right(list.cast<T>()),
+    );
   }
 
   @override
@@ -787,14 +793,12 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, void>> forceSync() async {
-    final result = await _repository.forceSync();
-    return result as Future<Either<Failure, void>>;
+    return await _repository.forceSync() as Either<Failure, void>;
   }
 
   @override
   Future<Either<Failure, void>> clearLocalData() async {
-    final result = await _repository.clearLocalData();
-    return result as Future<Either<Failure, void>>;
+    return await _repository.clearLocalData() as Either<Failure, void>;
   }
 
   @override
@@ -804,8 +808,7 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, void>> initialize() async {
-    final result = await _repository.initialize();
-    return result as Future<Either<Failure, void>>;
+    return await _repository.initialize() as Either<Failure, void>;
   }
 
   // Implementações para métodos faltantes
@@ -815,14 +818,12 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, List<String>>> createBatch(List<T> items) async {
-    final result = await _repository.createBatch(items);
-    return result as Future<Either<Failure, List<String>>>;
+    return await _repository.createBatch(items) as Either<Failure, List<String>>;
   }
 
   @override
   Future<Either<Failure, void>> deleteBatch(List<String> ids) async {
-    final result = await _repository.deleteBatch(ids);
-    return result as Future<Either<Failure, void>>;
+    return await _repository.deleteBatch(ids) as Either<Failure, void>;
   }
 
   @override
@@ -830,8 +831,11 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
     int? limit,
     Duration? since,
   }) async {
-    final result = await _repository.findRecent(limit: limit, since: since);
-    return result as Future<Either<Failure, List<T>>>;
+    final result = await _repository.findRecent(limit: limit, since: since) as Either<Failure, List<dynamic>>;
+    return result.fold(
+      (failure) => Left(failure),
+      (list) => Right(list.cast<T>()),
+    );
   }
 
   @override
@@ -844,26 +848,34 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
       query,
       searchFields: searchFields,
       limit: limit,
+    ) as Either<Failure, List<dynamic>>;
+    return result.fold(
+      (failure) => Left(failure),
+      (list) => Right(list.cast<T>()),
     );
-    return result as Future<Either<Failure, List<T>>>;
   }
 
   @override
   Future<Either<Failure, List<T>>> getUnsyncedItems() async {
-    final result = await _repository.getUnsyncedItems();
-    return result as Future<Either<Failure, List<T>>>;
+    final result = await _repository.getUnsyncedItems() as Either<Failure, List<dynamic>>;
+    return result.fold(
+      (failure) => Left(failure),
+      (list) => Right(list.cast<T>()),
+    );
   }
 
   @override
   Future<Either<Failure, List<T>>> getConflictedItems() async {
-    final result = await _repository.getConflictedItems();
-    return result as Future<Either<Failure, List<T>>>;
+    final result = await _repository.getConflictedItems() as Either<Failure, List<dynamic>>;
+    return result.fold(
+      (failure) => Left(failure),
+      (list) => Right(list.cast<T>()),
+    );
   }
 
   @override
   Future<Either<Failure, void>> resolveConflict(String id, T resolution) async {
-    final result = await _repository.resolveConflict(id, resolution);
-    return result as Future<Either<Failure, void>>;
+    return await _repository.resolveConflict(id, resolution) as Either<Failure, void>;
   }
 
   @override
@@ -872,8 +884,7 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, void>> updateBatch(Map<String, T> items) async {
-    final result = await _repository.updateBatch(items);
-    return result as Future<Either<Failure, void>>;
+    return await _repository.updateBatch(items) as Either<Failure, void>;
   }
 }
 

@@ -78,7 +78,9 @@ class DeviceManagementSection extends StatelessWidget {
                       ),
                     ),
                     subtitle: Text(
-                      'Recursos em desenvolvimento',
+                      devices.isEmpty
+                          ? 'Nenhum dispositivo conectado'
+                          : '${devices.length} ${devices.length == 1 ? 'dispositivo' : 'dispositivos'} conectado${devices.length == 1 ? '' : 's'}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

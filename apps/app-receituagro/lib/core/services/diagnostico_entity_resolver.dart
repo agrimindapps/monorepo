@@ -52,45 +52,38 @@ class DiagnosticoEntityResolver {
     debugPrint('🗑️ DiagnosticoEntityResolver: Cache limpo');
   }
 
-  /// Resolve nome de cultura com múltiplas estratégias
-  /// 
-  /// Ordem de prioridade:
+  /// Resolve nome de cultura APENAS usando ID (NUNCA aceita nome cached)
+  ///
+  /// ✅ REGRA CRÍTICA: SEMPRE resolve via repository.getById()
+  /// ❌ NUNCA usa campos nomeCultura cached
+  ///
+  /// Ordem de resolução:
   /// 1. Cache (se válido)
   /// 2. Busca por idCultura no repositório
-  /// 3. Usa nomeCultura fornecido
-  /// 4. Retorna valor padrão
+  /// 3. Retorna valor padrão
   Future<String> resolveCulturaNome({
-    String? idCultura,
-    String? nomeCultura,
+    required String idCultura,
     String defaultValue = 'Cultura não especificada',
   }) async {
     try {
       // 1. Verifica cache primeiro
-      final cacheKey = idCultura ?? nomeCultura ?? '';
-      if (_isCacheValid && _culturaCache.containsKey(cacheKey)) {
-        return _culturaCache[cacheKey]!;
+      if (_isCacheValid && _culturaCache.containsKey(idCultura)) {
+        return _culturaCache[idCultura]!;
       }
 
-      // 2. Tenta resolver por ID
-      if (idCultura?.isNotEmpty == true) {
-        final culturaData = await _culturaRepository.getById(idCultura!);
+      // 2. SEMPRE tenta resolver por ID
+      if (idCultura.isNotEmpty) {
+        final culturaData = await _culturaRepository.getById(idCultura);
         if (culturaData != null && culturaData.cultura.isNotEmpty) {
           final resolvedName = culturaData.cultura;
-          _culturaCache[cacheKey] = resolvedName;
+          _culturaCache[idCultura] = resolvedName;
           _updateCacheTimestamp();
           return resolvedName;
         }
       }
 
-      // 3. Usa nome fornecido como fallback
-      if (nomeCultura != null && nomeCultura.isNotEmpty) {
-        _culturaCache[cacheKey] = nomeCultura;
-        _updateCacheTimestamp();
-        return nomeCultura;
-      }
-
-      // 4. Retorna valor padrão
-      _culturaCache[cacheKey] = defaultValue;
+      // 3. Retorna valor padrão
+      _culturaCache[idCultura] = defaultValue;
       _updateCacheTimestamp();
       return defaultValue;
     } catch (e) {
@@ -99,39 +92,38 @@ class DiagnosticoEntityResolver {
     }
   }
 
-  /// Resolve nome de defensivo com múltiplas estratégias
+  /// Resolve nome de defensivo APENAS usando ID (NUNCA aceita nome cached)
+  ///
+  /// ✅ REGRA CRÍTICA: SEMPRE resolve via repository.getById()
+  /// ❌ NUNCA usa campos nomeDefensivo cached
+  ///
+  /// Ordem de resolução:
+  /// 1. Cache (se válido)
+  /// 2. Busca por idDefensivo no repositório
+  /// 3. Retorna valor padrão
   Future<String> resolveDefensivoNome({
-    String? idDefensivo,
-    String? nomeDefensivo,
+    required String idDefensivo,
     String defaultValue = 'Defensivo não especificado',
   }) async {
     try {
       // 1. Verifica cache primeiro
-      final cacheKey = idDefensivo ?? nomeDefensivo ?? '';
-      if (_isCacheValid && _defensivoCache.containsKey(cacheKey)) {
-        return _defensivoCache[cacheKey]!;
+      if (_isCacheValid && _defensivoCache.containsKey(idDefensivo)) {
+        return _defensivoCache[idDefensivo]!;
       }
 
-      // 2. Tenta resolver por ID
-      if (idDefensivo?.isNotEmpty == true) {
-        final defensivoData = await _defensivoRepository.getById(idDefensivo!);
+      // 2. SEMPRE tenta resolver por ID
+      if (idDefensivo.isNotEmpty) {
+        final defensivoData = await _defensivoRepository.getById(idDefensivo);
         if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
           final resolvedName = defensivoData.nomeComum;
-          _defensivoCache[cacheKey] = resolvedName;
+          _defensivoCache[idDefensivo] = resolvedName;
           _updateCacheTimestamp();
           return resolvedName;
         }
       }
 
-      // 3. Usa nome fornecido como fallback
-      if (nomeDefensivo != null && nomeDefensivo.isNotEmpty) {
-        _defensivoCache[cacheKey] = nomeDefensivo;
-        _updateCacheTimestamp();
-        return nomeDefensivo;
-      }
-
-      // 4. Retorna valor padrão
-      _defensivoCache[cacheKey] = defaultValue;
+      // 3. Retorna valor padrão
+      _defensivoCache[idDefensivo] = defaultValue;
       _updateCacheTimestamp();
       return defaultValue;
     } catch (e) {
@@ -140,39 +132,38 @@ class DiagnosticoEntityResolver {
     }
   }
 
-  /// Resolve nome de praga com múltiplas estratégias
+  /// Resolve nome de praga APENAS usando ID (NUNCA aceita nome cached)
+  ///
+  /// ✅ REGRA CRÍTICA: SEMPRE resolve via repository.getById()
+  /// ❌ NUNCA usa campos nomePraga cached
+  ///
+  /// Ordem de resolução:
+  /// 1. Cache (se válido)
+  /// 2. Busca por idPraga no repositório
+  /// 3. Retorna valor padrão
   Future<String> resolvePragaNome({
-    String? idPraga,
-    String? nomePraga,
+    required String idPraga,
     String defaultValue = 'Praga não especificada',
   }) async {
     try {
       // 1. Verifica cache primeiro
-      final cacheKey = idPraga ?? nomePraga ?? '';
-      if (_isCacheValid && _pragaCache.containsKey(cacheKey)) {
-        return _pragaCache[cacheKey]!;
+      if (_isCacheValid && _pragaCache.containsKey(idPraga)) {
+        return _pragaCache[idPraga]!;
       }
 
-      // 2. Tenta resolver por ID
-      if (idPraga?.isNotEmpty == true) {
-        final pragaData = await _pragasRepository.getById(idPraga!);
+      // 2. SEMPRE tenta resolver por ID
+      if (idPraga.isNotEmpty) {
+        final pragaData = await _pragasRepository.getById(idPraga);
         if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
           final resolvedName = pragaData.nomeComum;
-          _pragaCache[cacheKey] = resolvedName;
+          _pragaCache[idPraga] = resolvedName;
           _updateCacheTimestamp();
           return resolvedName;
         }
       }
 
-      // 3. Usa nome fornecido como fallback
-      if (nomePraga != null && nomePraga.isNotEmpty) {
-        _pragaCache[cacheKey] = nomePraga;
-        _updateCacheTimestamp();
-        return nomePraga;
-      }
-
-      // 4. Retorna valor padrão
-      _pragaCache[cacheKey] = defaultValue;
+      // 3. Retorna valor padrão
+      _pragaCache[idPraga] = defaultValue;
       _updateCacheTimestamp();
       return defaultValue;
     } catch (e) {
@@ -182,53 +173,44 @@ class DiagnosticoEntityResolver {
   }
 
   /// Resolve múltiplas entidades em batch para otimização
-  Future<Map<String, String>> resolveBatchCulturas(List<ResolveRequest> requests) async {
+  Future<Map<String, String>> resolveBatchCulturas(List<String> ids) async {
     final results = <String, String>{};
-    
-    for (final request in requests) {
-      final key = request.key;
+
+    for (final id in ids) {
       final resolvedName = await resolveCulturaNome(
-        idCultura: request.id,
-        nomeCultura: request.nome,
-        defaultValue: request.defaultValue ?? 'Cultura não especificada',
+        idCultura: id,
       );
-      results[key] = resolvedName;
+      results[id] = resolvedName;
     }
-    
+
     return results;
   }
 
   /// Resolve múltiplos defensivos em batch
-  Future<Map<String, String>> resolveBatchDefensivos(List<ResolveRequest> requests) async {
+  Future<Map<String, String>> resolveBatchDefensivos(List<String> ids) async {
     final results = <String, String>{};
-    
-    for (final request in requests) {
-      final key = request.key;
+
+    for (final id in ids) {
       final resolvedName = await resolveDefensivoNome(
-        idDefensivo: request.id,
-        nomeDefensivo: request.nome,
-        defaultValue: request.defaultValue ?? 'Defensivo não especificado',
+        idDefensivo: id,
       );
-      results[key] = resolvedName;
+      results[id] = resolvedName;
     }
-    
+
     return results;
   }
 
   /// Resolve múltiplas pragas em batch
-  Future<Map<String, String>> resolveBatchPragas(List<ResolveRequest> requests) async {
+  Future<Map<String, String>> resolveBatchPragas(List<String> ids) async {
     final results = <String, String>{};
-    
-    for (final request in requests) {
-      final key = request.key;
+
+    for (final id in ids) {
       final resolvedName = await resolvePragaNome(
-        idPraga: request.id,
-        nomePraga: request.nome,
-        defaultValue: request.defaultValue ?? 'Praga não especificada',
+        idPraga: id,
       );
-      results[key] = resolvedName;
+      results[id] = resolvedName;
     }
-    
+
     return results;
   }
 

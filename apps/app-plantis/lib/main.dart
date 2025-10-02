@@ -19,6 +19,10 @@ import 'core/storage/plantis_boxes_setup.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
+// Global references for error handlers
+late ICrashlyticsRepository _crashlyticsRepository;
+late IPerformanceRepository _performanceRepository;
+
 // Provider local para SharedPreferences do app-plantis
 final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError(
@@ -38,31 +42,6 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Initialize Performance Service
-  final performanceService = PerformanceService();
-  await performanceService.startPerformanceTracking(
-    config: const PerformanceConfig(
-      enableFpsMonitoring: true,
-      enableMemoryMonitoring: true,
-      enableCpuMonitoring: false,
-      enableFirebaseIntegration: true,
-    ),
-  );
-  await performanceService.markAppStarted();
-
-  // Configure Crashlytics (only in production/staging)
-  if (EnvironmentConfig.enableAnalytics) {
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
-
-    // Pass all uncaught asynchronous errors to Crashlytics
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-  }
 
   // Configure sync system for Plantis
   await PlantisSyncConfig.configure();
@@ -105,6 +84,9 @@ void main() async {
   // Initialize sync service with connectivity monitoring
   await SyncDIModule.initializeSyncService(di.sl);
 
+  // Initialize Firebase services (Analytics, Crashlytics, Performance)
+  await _initializeFirebaseServices();
+
   // Initialize SharedPreferences for core providers
   final prefs = await SharedPreferences.getInstance();
 
@@ -114,7 +96,7 @@ void main() async {
     unawaited(
       runZonedGuarded<Future<void>>(
         () async {
-          await performanceService.markFirstFrame();
+          await _performanceRepository.markFirstFrame();
           runApp(
             ProviderScope(
               overrides: [
@@ -126,13 +108,17 @@ void main() async {
           );
         },
         (error, stack) {
-          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          _crashlyticsRepository.recordError(
+            exception: error,
+            stackTrace: stack,
+            fatal: true,
+          );
         },
       ),
     );
   } else {
     // Run app normally in development
-    await performanceService.markFirstFrame();
+    await _performanceRepository.markFirstFrame();
     runApp(
       ProviderScope(
         overrides: [
@@ -142,5 +128,87 @@ void main() async {
         child: const PlantisApp(),
       ),
     );
+  }
+}
+
+/// Initialize Firebase services (Analytics, Crashlytics, Performance)
+Future<void> _initializeFirebaseServices() async {
+  try {
+    debugPrint('🚀 Initializing Firebase services...');
+
+    // Get services from DI
+    final analyticsRepository = di.sl<IAnalyticsRepository>();
+    _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
+    _performanceRepository = di.sl<IPerformanceRepository>();
+
+    // Configure Crashlytics error handlers (only in production/staging)
+    if (EnvironmentConfig.enableAnalytics) {
+      FlutterError.onError = (errorDetails) {
+        _crashlyticsRepository.recordError(
+          exception: errorDetails.exception,
+          stackTrace: errorDetails.stack ?? StackTrace.empty,
+          reason: errorDetails.summary.toString(),
+          fatal: true,
+        );
+      };
+
+      PlatformDispatcher.instance.onError = (error, stack) {
+        _crashlyticsRepository.recordError(
+          exception: error,
+          stackTrace: stack,
+          fatal: true,
+        );
+        return true;
+      };
+    }
+
+    // Configure initial context for Crashlytics
+    await _crashlyticsRepository.setCustomKey(
+      key: 'app_name',
+      value: 'Plantis',
+    );
+    await _crashlyticsRepository.setCustomKey(
+      key: 'environment',
+      value: EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+    );
+
+    // Start performance tracking
+    await _performanceRepository.startPerformanceTracking(
+      config: const PerformanceConfig(
+        enableFpsMonitoring: true,
+        enableMemoryMonitoring: true,
+        enableCpuMonitoring: false,
+        enableFirebaseIntegration: true,
+      ),
+    );
+    await _performanceRepository.markAppStarted();
+
+    // Log app initialization
+    await analyticsRepository.logEvent(
+      'app_initialized',
+      parameters: {
+        'platform': 'mobile',
+        'environment':
+            EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      },
+    );
+
+    await _crashlyticsRepository.log('Plantis app initialized successfully');
+
+    debugPrint('✅ Firebase services initialized successfully');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Error initializing Firebase services: $e');
+
+    // Try to record error even if services failed
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Firebase services initialization failed',
+      );
+    } catch (_) {
+      // Ignore if Crashlytics also failed
+    }
   }
 }

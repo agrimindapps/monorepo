@@ -1,9 +1,22 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
+import '../../domain/repositories/auth_repository.dart';
 
 /// Widget para botões de login social
 /// Segue o princípio da Responsabilidade Única
-class SocialLoginButtonsWidget extends StatelessWidget {
-  const SocialLoginButtonsWidget({super.key});
+class SocialLoginButtonsWidget extends StatefulWidget {
+  const SocialLoginButtonsWidget({super.key, this.onLoginSuccess});
+
+  final VoidCallback? onLoginSuccess;
+
+  @override
+  State<SocialLoginButtonsWidget> createState() => _SocialLoginButtonsWidgetState();
+}
+
+class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +31,7 @@ class SocialLoginButtonsWidget extends StatelessWidget {
           label: 'Google',
           color: Colors.red.shade600,
           backgroundColor: isDark ? Colors.grey[800]! : Colors.grey[100]!,
-          onPressed: null, // Desabilitado por enquanto
+          onPressed: _isLoading ? null : () => _handleGoogleSignIn(context),
         ),
         const SizedBox(width: 16),
         _buildSocialButton(
@@ -27,19 +40,149 @@ class SocialLoginButtonsWidget extends StatelessWidget {
           label: 'Apple',
           color: isDark ? Colors.white : Colors.black,
           backgroundColor: isDark ? Colors.grey[800]! : Colors.grey[100]!,
-          onPressed: null, // Desabilitado por enquanto
+          onPressed: _isLoading ? null : () => _handleAppleSignIn(context),
         ),
         const SizedBox(width: 16),
         _buildSocialButton(
           context: context,
-          icon: Icons.window,
-          label: 'Microsoft',
-          color: Colors.blue.shade600,
+          icon: Icons.facebook,
+          label: 'Facebook',
+          color: Colors.blue.shade700,
           backgroundColor: isDark ? Colors.grey[800]! : Colors.grey[100]!,
-          onPressed: null, // Desabilitado por enquanto
+          onPressed: _isLoading ? null : () => _handleFacebookSignIn(context),
         ),
       ],
     );
+  }
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Get AuthRepository from GetIt (injectable)
+      final authRepository = GetIt.I<AuthRepository>();
+      final result = await authRepository.signInWithGoogle();
+
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+
+      result.fold(
+        (failure) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        (_) {
+          if (widget.onLoginSuccess != null) {
+            widget.onLoginSuccess!();
+          }
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Erro no login com Google: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleAppleSignIn(BuildContext context) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final authRepository = GetIt.I<AuthRepository>();
+      final result = await authRepository.signInWithApple();
+
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+
+      result.fold(
+        (failure) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        (_) {
+          if (widget.onLoginSuccess != null) {
+            widget.onLoginSuccess!();
+          }
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Erro no login com Apple: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleFacebookSignIn(BuildContext context) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final authRepository = GetIt.I<AuthRepository>();
+      final result = await authRepository.signInWithFacebook();
+
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+
+      result.fold(
+        (failure) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        (_) {
+          if (widget.onLoginSuccess != null) {
+            widget.onLoginSuccess!();
+          }
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Erro no login com Facebook: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Widget _buildSocialButton({
@@ -53,7 +196,7 @@ class SocialLoginButtonsWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Tooltip(
-      message: 'Login com $label (Em breve)',
+      message: onPressed != null ? 'Login com $label' : 'Login com $label (Em breve)',
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: Icon(

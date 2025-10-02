@@ -578,7 +578,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
               plants:
                   plantsState.searchQuery.isNotEmpty
                       ? plantsState.searchResults
-                      : plantsState.allPlants,
+                      : plantsState.filteredPlants,
               isSearching: plantsState.searchQuery.isNotEmpty,
               searchQuery: plantsState.searchQuery,
             );

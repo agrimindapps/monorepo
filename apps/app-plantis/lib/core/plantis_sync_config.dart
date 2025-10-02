@@ -115,7 +115,7 @@ abstract final class PlantisSyncConfig {
           entityType: Plant,
           collectionName: 'plants',
           fromMap: _plantFromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Plant).toFirebaseMap(),
         ),
 
         // Espaços das plantas
@@ -123,7 +123,7 @@ abstract final class PlantisSyncConfig {
           entityType: Space,
           collectionName: 'spaces',
           fromMap: _spaceFromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Space).toFirebaseMap(),
         ),
 
         // Tasks relacionadas às plantas (usando a entidade real do app)
@@ -131,7 +131,7 @@ abstract final class PlantisSyncConfig {
           entityType: Task,
           collectionName: 'tasks',
           fromMap: Task.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Task).toFirebaseMap(),
         ),
 
         // Comentários das plantas
@@ -139,7 +139,7 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
         ),
 
         // Usuários (profile compartilhado entre apps)
@@ -147,7 +147,7 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
         ),
 
         // Assinaturas (subscription compartilhada entre apps)
@@ -155,7 +155,7 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as SubscriptionEntity).toFirebaseMap(),
         ),
       ],
     );
@@ -174,7 +174,7 @@ abstract final class PlantisSyncConfig {
           entityType: Plant,
           collectionName: 'dev_plants',
           fromMap: _plantFromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Plant).toFirebaseMap(),
         ),
 
         // Espaços das plantas (desenvolvimento)
@@ -182,7 +182,7 @@ abstract final class PlantisSyncConfig {
           entityType: Space,
           collectionName: 'dev_spaces',
           fromMap: _spaceFromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Space).toFirebaseMap(),
         ),
 
         // Tasks relacionadas às plantas (desenvolvimento)
@@ -190,7 +190,7 @@ abstract final class PlantisSyncConfig {
           entityType: Task,
           collectionName: 'dev_tasks',
           fromMap: Task.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Task).toFirebaseMap(),
         ),
 
         // Comentários das plantas (desenvolvimento)
@@ -198,7 +198,7 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'dev_comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
         ),
 
         // Usuários (desenvolvimento)
@@ -206,7 +206,7 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'dev_users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
         ),
 
         // Assinaturas (desenvolvimento)
@@ -214,7 +214,7 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'dev_subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as SubscriptionEntity).toFirebaseMap(),
         ),
       ],
     );
@@ -233,7 +233,7 @@ abstract final class PlantisSyncConfig {
           entityType: Plant,
           collectionName: 'plants',
           fromMap: _plantFromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Plant).toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -245,7 +245,7 @@ abstract final class PlantisSyncConfig {
           entityType: Space,
           collectionName: 'spaces',
           fromMap: _spaceFromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Space).toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -257,7 +257,7 @@ abstract final class PlantisSyncConfig {
           entityType: Task,
           collectionName: 'tasks',
           fromMap: Task.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as Task).toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -269,7 +269,7 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -281,7 +281,7 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
           conflictStrategy:
               ConflictStrategy.remoteWins, // Remote vence para usuários
           enableRealtime: false, // Sem tempo real para economizar bateria
@@ -296,7 +296,7 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (entity) => entity.toFirebaseMap(),
+          toMap: (BaseSyncEntity entity) => (entity as SubscriptionEntity).toFirebaseMap(),
           conflictStrategy:
               ConflictStrategy
                   .remoteWins, // Remote sempre vence para assinaturas

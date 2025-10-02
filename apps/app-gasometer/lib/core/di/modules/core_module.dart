@@ -1,6 +1,4 @@
 import 'package:core/core.dart' as core;
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
@@ -19,24 +17,14 @@ class CoreModule implements DIModule {
   }
 
   Future<void> _registerExternalServices(GetIt getIt) async {
-    // PHASE 1 MIGRATION: Register both direct Firebase services AND core repositories
-    // This allows gradual migration without breaking existing code
-
-    // Direct Firebase services (existing code compatibility)
-    getIt.registerLazySingleton<FirebaseAnalytics>(
-      () => FirebaseAnalytics.instance,
-    );
-
-    getIt.registerLazySingleton<FirebaseCrashlytics>(
-      () => FirebaseCrashlytics.instance,
-    );
+    // MIGRATION COMPLETED: Using only core package repositories
+    // Removed direct Firebase services to avoid duplication
 
     // NOTE: FirebaseFirestore and FirebaseAuth are now registered by injectable
     // via RegisterModule to avoid duplicate registration errors
     // They are available via RegisterModule.firestore and RegisterModule.firebaseAuth
 
-    // Core package repositories (new migration path)
-    // These will be used by new code and gradual migration
+    // Core package repositories (standard migration path)
     try {
       getIt.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(),
@@ -50,6 +38,10 @@ class CoreModule implements DIModule {
 
       getIt.registerLazySingleton<core.ICrashlyticsRepository>(
         () => core.FirebaseCrashlyticsService(),
+      );
+
+      getIt.registerLazySingleton<core.IPerformanceRepository>(
+        () => core.PerformanceService(),
       );
 
       // Register EnhancedAnalyticsService with app-specific configuration

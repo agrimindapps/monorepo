@@ -31,6 +31,9 @@ abstract class IAuthRepository {
   /// Faz login com Apple
   Future<Either<Failure, UserEntity>> signInWithApple();
 
+  /// Faz login com Facebook
+  Future<Either<Failure, UserEntity>> signInWithFacebook();
+
   /// Faz login anônimo
   Future<Either<Failure, UserEntity>> signInAnonymously();
 
@@ -82,4 +85,7 @@ abstract class IAuthRepository {
 
   /// Vincula conta com Apple
   Future<Either<Failure, UserEntity>> linkWithApple();
+
+  /// Vincula conta com Facebook
+  Future<Either<Failure, UserEntity>> linkWithFacebook();
 }

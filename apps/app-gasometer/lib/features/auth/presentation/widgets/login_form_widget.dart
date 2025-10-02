@@ -113,20 +113,6 @@ class LoginFormWidget extends ConsumerWidget {
 
           // Botões de login social
           const SocialLoginButtonsWidget(),
-          const SizedBox(height: 16),
-
-          // Nota sobre login social
-          Center(
-            child: Text(
-              '* Opções de login social estarão disponíveis em breve',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
 
           const SizedBox(height: 16),
 

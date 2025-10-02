@@ -25,10 +25,12 @@ class EnhancedDefensivosBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<EnhancedDefensivosBottomSheet> createState() => _EnhancedDefensivosBottomSheetState();
+  State<EnhancedDefensivosBottomSheet> createState() =>
+      _EnhancedDefensivosBottomSheetState();
 }
 
-class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottomSheet> {
+class _EnhancedDefensivosBottomSheetState
+    extends State<EnhancedDefensivosBottomSheet> {
   // Novos serviços
   final _resolver = DiagnosticoEntityResolver.instance;
   // Cache service available but not needed for this widget
@@ -66,12 +68,13 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
     try {
       // Validar cada defensivo
       for (final defensivo in _allDefensivos) {
-        final validation = await _compatibilityService.validateFullCompatibility(
-          idDefensivo: defensivo,
-          idCultura: '', // Cultura não disponível em PragaPorCultura
-          idPraga: widget.pragaPorCultura.praga.idReg,
-          includeAlternatives: false,
-        );
+        final validation = await _compatibilityService
+            .validateFullCompatibility(
+              idDefensivo: defensivo,
+              idCultura: '', // Cultura não disponível em PragaPorCultura
+              idPraga: widget.pragaPorCultura.praga.idReg,
+              includeAlternatives: false,
+            );
 
         _compatibilityCache[defensivo] = validation;
       }
@@ -90,16 +93,17 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
       return;
     }
 
+    // ✅ CORRETO: Resolve usando ID do defensivo, NUNCA nome cached
     final filtered = <String>[];
-    for (final defensivo in _allDefensivos) {
+    for (final defensivoId in _allDefensivos) {
       final resolvedName = await _resolver.resolveDefensivoNome(
-        nomeDefensivo: defensivo,
+        idDefensivo: defensivoId,
       );
       if (resolvedName.toLowerCase().contains(query.toLowerCase())) {
-        filtered.add(defensivo);
+        filtered.add(defensivoId);
       }
     }
-    
+
     if (mounted) {
       setState(() {
         _filteredDefensivos = filtered;
@@ -126,9 +130,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
             const SizedBox(height: 12),
             _buildStatsRow(context),
             const SizedBox(height: 16),
-            Expanded(
-              child: _buildDefensivosList(context),
-            ),
+            Expanded(child: _buildDefensivosList(context)),
           ],
         ),
       ),
@@ -137,17 +139,16 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName = widget.pragaPorCultura.praga.nomeComum ?? 
-                     widget.pragaPorCultura.praga.nomeCientifico ??
-                     'Praga não identificada';
+    final pragaName =
+        widget.pragaPorCultura.praga.nomeComum ??
+        widget.pragaPorCultura.praga.nomeCientifico ??
+        'Praga não identificada';
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor.withValues(alpha: 0.3),
-          ),
+          bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
         ),
       ),
       child: Row(
@@ -157,10 +158,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
             height: 48,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.blue.shade200,
-                  Colors.blue.shade400,
-                ],
+                colors: [Colors.blue.shade200, Colors.blue.shade400],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -197,10 +195,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
-              Icons.close,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -214,9 +209,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
       ),
       child: TextField(
         controller: _searchController,
@@ -224,24 +217,29 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
         decoration: InputDecoration(
           hintText: 'Buscar defensivo...',
           prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    _onSearchChanged('');
-                  },
-                )
-              : null,
+          suffixIcon:
+              _searchController.text.isNotEmpty
+                  ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                      _onSearchChanged('');
+                    },
+                  )
+                  : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildStatsRow(BuildContext context) {
-    final validCount = _compatibilityCache.values.where((v) => v.isValid).length;
+    final validCount =
+        _compatibilityCache.values.where((v) => v.isValid).length;
     final totalCount = _filteredDefensivos.length;
 
     return Row(
@@ -284,9 +282,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -295,10 +291,7 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
             SizedBox(
               width: 14,
               height: 14,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: color,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2, color: color),
             )
           else
             Icon(icon, size: 14, color: color),
@@ -325,9 +318,9 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
 
     return ListView.separated(
       itemCount: _filteredDefensivos.length,
-      separatorBuilder: (context, index) => Divider(
-        color: theme.dividerColor.withValues(alpha: 0.3),
-      ),
+      separatorBuilder:
+          (context, index) =>
+              Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
       itemBuilder: (context, index) {
         final defensivo = _filteredDefensivos[index];
         return _buildDefensivoTile(context, defensivo, index);
@@ -335,15 +328,20 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
     );
   }
 
-  Widget _buildDefensivoTile(BuildContext context, String defensivo, int index) {
+  Widget _buildDefensivoTile(
+    BuildContext context,
+    String defensivoId,
+    int index,
+  ) {
     final theme = Theme.of(context);
-    final compatibility = _compatibilityCache[defensivo];
+    final compatibility = _compatibilityCache[defensivoId];
 
+    // ✅ CORRETO: Resolve usando ID, não nome cached
     return FutureBuilder<String>(
-      future: _resolver.resolveDefensivoNome(nomeDefensivo: defensivo),
+      future: _resolver.resolveDefensivoNome(idDefensivo: defensivoId),
       builder: (context, snapshot) {
-        final resolvedName = snapshot.data ?? defensivo;
-        
+        final resolvedName = snapshot.data ?? 'Defensivo não encontrado';
+
         return RepaintBoundary(
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 4),
@@ -355,12 +353,17 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
               ),
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
               leading: Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: _getCompatibilityColor(compatibility).withValues(alpha: 0.1),
+                  color: _getCompatibilityColor(
+                    compatibility,
+                  ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -395,17 +398,21 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
                     ),
                   ),
                   if (compatibility != null && !compatibility.isValid)
-                    ...compatibility.issues.take(1).map((issue) => Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        '⚠️ $issue',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.orange.shade700,
-                          fontWeight: FontWeight.w500,
+                    ...compatibility.issues
+                        .take(1)
+                        .map(
+                          (issue) => Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              '⚠️ $issue',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    )),
                 ],
               ),
               trailing: Icon(
@@ -534,10 +541,11 @@ class _EnhancedDefensivosBottomSheetState extends State<EnhancedDefensivosBottom
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => EnhancedDefensivosBottomSheet(
-        pragaPorCultura: pragaPorCultura,
-        onDefensivoTap: onDefensivoTap,
-      ),
+      builder:
+          (context) => EnhancedDefensivosBottomSheet(
+            pragaPorCultura: pragaPorCultura,
+            onDefensivoTap: onDefensivoTap,
+          ),
     );
   }
 }

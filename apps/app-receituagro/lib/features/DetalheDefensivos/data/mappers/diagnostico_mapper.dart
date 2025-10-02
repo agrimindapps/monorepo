@@ -1,6 +1,7 @@
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart' as diag_entity;
 import '../../domain/entities/diagnostico_entity.dart';
 
@@ -24,25 +25,32 @@ class DiagnosticoMapper {
   }
 
   /// Converte da entity de diagnósticos para entity local com resolução de nomes
+  /// ✅ CORRETO: SEMPRE resolve usando IDs, NUNCA confia em campos cached
   static Future<DiagnosticoEntity> fromDiagnosticosEntityWithResolution(
     diag_entity.DiagnosticoEntity entity,
   ) async {
-    // Resolver nome da cultura se não estiver disponível
-    String culturaNome = entity.nomeCultura ?? 'Não especificado';
-    if (culturaNome == 'Não especificado' && entity.idCultura.isNotEmpty) {
+    // ✅ SEMPRE resolve nome da cultura usando fkIdCultura (NUNCA usa nomeCultura cached)
+    String culturaNome = 'Não especificado';
+    if (entity.idCultura.isNotEmpty) {
       culturaNome = await _resolveCulturaNome(entity.idCultura);
     }
 
-    // Resolver nome da praga se não estiver disponível
-    String pragaNome = entity.nomePraga ?? 'Praga não identificada';
-    if (pragaNome == 'Praga não identificada' && entity.idPraga.isNotEmpty) {
+    // ✅ SEMPRE resolve nome da praga usando fkIdPraga (NUNCA usa nomePraga cached)
+    String pragaNome = 'Praga não identificada';
+    if (entity.idPraga.isNotEmpty) {
       pragaNome = await _resolvePragaNome(entity.idPraga);
+    }
+
+    // ✅ SEMPRE resolve nome do defensivo usando fkIdDefensivo
+    String defensivoNome = 'Defensivo não identificado';
+    if (entity.idDefensivo.isNotEmpty) {
+      defensivoNome = await _resolveDefensivoNome(entity.idDefensivo);
     }
 
     return DiagnosticoEntity(
       id: entity.id,
       idDefensivo: entity.idDefensivo,
-      nomeDefensivo: entity.nomeDefensivo,
+      nomeDefensivo: defensivoNome,
       nomeCultura: culturaNome,
       nomePraga: pragaNome,
       dosagem: entity.dosagem.displayDosagem,
@@ -50,6 +58,20 @@ class DiagnosticoMapper {
       cultura: culturaNome,
       grupo: pragaNome,
     );
+  }
+
+  /// Resolve o nome do defensivo pelo ID
+  static Future<String> _resolveDefensivoNome(String idDefensivo) async {
+    try {
+      final defensivoRepository = sl<FitossanitarioHiveRepository>();
+      final defensivoData = await defensivoRepository.getById(idDefensivo);
+      if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
+        return defensivoData.nomeComum;
+      }
+    } catch (e) {
+      // Silently fail
+    }
+    return 'Defensivo não identificado';
   }
 
   /// Resolve o nome da cultura pelo ID

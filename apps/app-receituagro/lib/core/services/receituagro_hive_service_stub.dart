@@ -1,10 +1,16 @@
 import 'dart:developer' as developer;
 
-/// Stub/adapter class to replace the removed ReceitaAgroHiveService
-/// Provides the same interface but delegates to individual repository instances
-/// This maintains compatibility while using the new architecture
-/// 
-/// Note: This is a transitional class. New code should use repositories directly.
+/// ⚠️ DEPRECATED: This stub class is maintained for backward compatibility only.
+///
+/// **Migration Guide:**
+/// - Use individual repositories directly instead of this service
+/// - For fitossanitários: Use `FitossanitarioHiveRepository`
+/// - For pragas: Use `PragasHiveRepository`
+/// - For culturas: Use `CulturaHiveRepository`
+/// - For diagnósticos: Use `DiagnosticoHiveRepository`
+///
+/// **This class will be REMOVED in the next major version.**
+@Deprecated('Use individual repositories directly (FitossanitarioHiveRepository, PragasHiveRepository, etc.)')
 class ReceitaAgroHiveService {
 
   // Initialization methods

@@ -11,6 +11,9 @@ abstract class AuthRemoteDataSource {
   // Sign In
   Future<UserEntity> signInWithEmail(String email, String password);
   Future<UserEntity> signInAnonymously();
+  Future<UserEntity> signInWithGoogle();
+  Future<UserEntity> signInWithApple();
+  Future<UserEntity> signInWithFacebook();
 
   // Sign Up
   Future<UserEntity> signUpWithEmail(
@@ -30,6 +33,9 @@ abstract class AuthRemoteDataSource {
 
   // Account Conversion
   Future<UserEntity> linkAnonymousWithEmail(String email, String password);
+  Future<UserEntity> linkAnonymousWithGoogle();
+  Future<UserEntity> linkAnonymousWithApple();
+  Future<UserEntity> linkAnonymousWithFacebook();
 
   // Sign Out
   Future<void> signOut();
@@ -42,9 +48,14 @@ abstract class AuthRemoteDataSource {
 
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore);
+  AuthRemoteDataSourceImpl(
+    this._firebaseAuth,
+    this._firestore,
+    this._coreAuthRepository,
+  );
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final IAuthRepository _coreAuthRepository;
 
   @override
   Stream<UserEntity?> watchAuthState() {
@@ -275,6 +286,114 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<UserEntity> signInWithGoogle() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting Google Sign In via core...');
+      }
+
+      final result = await _coreAuthRepository.signInWithGoogle();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Gasometer: Google Sign In failed - ${failure.message}');
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint('✅ Gasometer: Google Sign In successful, converting to app entity...');
+          }
+
+          // Convert core UserEntity to app UserEntity and save to Firestore
+          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
+          await saveUserToFirestore(appUser);
+
+          return appUser;
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error in Google Sign In: $e');
+      }
+      throw ServerException('Unexpected Google Sign In error: $e');
+    }
+  }
+
+  @override
+  Future<UserEntity> signInWithApple() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting Apple Sign In via core...');
+      }
+
+      final result = await _coreAuthRepository.signInWithApple();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Gasometer: Apple Sign In failed - ${failure.message}');
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint('✅ Gasometer: Apple Sign In successful, converting to app entity...');
+          }
+
+          // Convert core UserEntity to app UserEntity and save to Firestore
+          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
+          await saveUserToFirestore(appUser);
+
+          return appUser;
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error in Apple Sign In: $e');
+      }
+      throw ServerException('Unexpected Apple Sign In error: $e');
+    }
+  }
+
+  @override
+  Future<UserEntity> signInWithFacebook() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting Facebook Sign In via core...');
+      }
+
+      final result = await _coreAuthRepository.signInWithFacebook();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Gasometer: Facebook Sign In failed - ${failure.message}');
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint('✅ Gasometer: Facebook Sign In successful, converting to app entity...');
+          }
+
+          // Convert core UserEntity to app UserEntity and save to Firestore
+          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
+          await saveUserToFirestore(appUser);
+
+          return appUser;
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error in Facebook Sign In: $e');
+      }
+      throw ServerException('Unexpected Facebook Sign In error: $e');
+    }
+  }
+
+  @override
   Future<UserEntity> linkAnonymousWithEmail(
     String email,
     String password,
@@ -307,6 +426,114 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw AuthenticationException('Account linking failed: ${e.message}');
     } catch (e) {
       throw ServerException('Unexpected account linking error: $e');
+    }
+  }
+
+  @override
+  Future<UserEntity> linkAnonymousWithGoogle() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting to link anonymous account with Google...');
+      }
+
+      final result = await _coreAuthRepository.linkWithGoogle();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Gasometer: Google account linking failed - ${failure.message}');
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint('✅ Gasometer: Google account linking successful, converting to app entity...');
+          }
+
+          // Convert core UserEntity to app UserEntity and save to Firestore
+          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
+          await saveUserToFirestore(appUser);
+
+          return appUser;
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error linking with Google: $e');
+      }
+      throw ServerException('Unexpected Google linking error: $e');
+    }
+  }
+
+  @override
+  Future<UserEntity> linkAnonymousWithApple() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting to link anonymous account with Apple...');
+      }
+
+      final result = await _coreAuthRepository.linkWithApple();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Gasometer: Apple account linking failed - ${failure.message}');
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint('✅ Gasometer: Apple account linking successful, converting to app entity...');
+          }
+
+          // Convert core UserEntity to app UserEntity and save to Firestore
+          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
+          await saveUserToFirestore(appUser);
+
+          return appUser;
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error linking with Apple: $e');
+      }
+      throw ServerException('Unexpected Apple linking error: $e');
+    }
+  }
+
+  @override
+  Future<UserEntity> linkAnonymousWithFacebook() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting to link anonymous account with Facebook...');
+      }
+
+      final result = await _coreAuthRepository.linkWithFacebook();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ Gasometer: Facebook account linking failed - ${failure.message}');
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint('✅ Gasometer: Facebook account linking successful, converting to app entity...');
+          }
+
+          // Convert core UserEntity to app UserEntity and save to Firestore
+          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
+          await saveUserToFirestore(appUser);
+
+          return appUser;
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error linking with Facebook: $e');
+      }
+      throw ServerException('Unexpected Facebook linking error: $e');
     }
   }
 

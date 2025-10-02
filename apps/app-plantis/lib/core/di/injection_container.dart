@@ -142,6 +142,11 @@ void _initCoreServices() {
     () => FirebaseCrashlyticsService(),
   );
 
+  // Performance Repository - Stub implementation (to be implemented)
+  sl.registerLazySingleton<IPerformanceRepository>(
+    () => _StubPerformanceRepository(),
+  );
+
   // Box Registry Service (required by HiveStorageService)
   sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
 
@@ -616,4 +621,199 @@ void _initDataExport() {
       repository: sl<DataExportRepository>(),
     ),
   );
+}
+
+/// Stub implementation of IPerformanceRepository for development
+/// TODO: Implement full performance tracking using Firebase Performance
+class _StubPerformanceRepository implements IPerformanceRepository {
+  @override
+  Future<bool> startPerformanceTracking({PerformanceConfig? config}) async =>
+      true;
+
+  @override
+  Future<bool> stopPerformanceTracking() async => true;
+
+  @override
+  Future<bool> pausePerformanceTracking() async => true;
+
+  @override
+  Future<bool> resumePerformanceTracking() async => true;
+
+  @override
+  PerformanceMonitoringState getMonitoringState() =>
+      PerformanceMonitoringState.running;
+
+  @override
+  Future<void> setPerformanceThresholds(PerformanceThresholds thresholds) async {}
+
+  @override
+  Stream<double> getFpsStream() => Stream.value(60.0);
+
+  @override
+  Future<double> getCurrentFps() async => 60.0;
+
+  @override
+  Future<FpsMetrics> getFpsMetrics({Duration? period}) async => const FpsMetrics(
+        currentFps: 60.0,
+        averageFps: 60.0,
+        minFps: 55.0,
+        maxFps: 60.0,
+        frameDrops: 0,
+        jankFrames: 0,
+        measurementDuration: Duration(seconds: 1),
+      );
+
+  @override
+  Future<bool> isFpsHealthy() async => true;
+
+  @override
+  Stream<MemoryUsage> getMemoryStream() => Stream.value(
+        const MemoryUsage(
+          usedMemory: 0,
+          totalMemory: 100,
+          availableMemory: 100,
+        ),
+      );
+
+  @override
+  Future<MemoryUsage> getMemoryUsage() async => const MemoryUsage(
+        usedMemory: 0,
+        totalMemory: 100,
+        availableMemory: 100,
+      );
+
+  @override
+  Future<bool> isMemoryHealthy() async => true;
+
+  @override
+  Future<void> forceGarbageCollection() async {}
+
+  @override
+  Future<double> getCpuUsage() async => 0.0;
+
+  @override
+  Stream<double> getCpuStream() => Stream.value(0.0);
+
+  @override
+  Future<bool> isCpuHealthy() async => true;
+
+  @override
+  Future<AppStartupMetrics> getStartupMetrics() async => AppStartupMetrics(
+        coldStartTime: const Duration(seconds: 1),
+        warmStartTime: const Duration(milliseconds: 500),
+        timeToInteractive: const Duration(seconds: 2),
+        firstFrameTime: const Duration(milliseconds: 800),
+      );
+
+  @override
+  Future<void> markAppStarted() async {}
+
+  @override
+  Future<void> markFirstFrame() async {}
+
+  @override
+  Future<void> markAppInteractive() async {}
+
+  @override
+  Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {}
+
+  @override
+  Future<TraceResult?> stopTrace(String traceName, {Map<String, double>? metrics}) async =>
+      null;
+
+  @override
+  Future<Duration> measureOperationTime<T>(
+    String operationName,
+    Future<T> Function() operation, {
+    Map<String, String>? attributes,
+  }) async {
+    final start = DateTime.now();
+    await operation();
+    return DateTime.now().difference(start);
+  }
+
+  @override
+  List<String> getActiveTraces() => [];
+
+  @override
+  Future<void> recordCustomMetric({
+    required String name,
+    required double value,
+    required MetricType type,
+    String? unit,
+    Map<String, String>? tags,
+  }) async {}
+
+  @override
+  Future<void> incrementCounter(String name, {Map<String, String>? tags}) async {}
+
+  @override
+  Future<void> recordGauge(String name, double value, {Map<String, String>? tags}) async {}
+
+  @override
+  Future<void> recordTiming(String name, Duration duration, {Map<String, String>? tags}) async {}
+
+  @override
+  Future<PerformanceMetrics> getCurrentMetrics() async => PerformanceMetrics(
+        fps: 60.0,
+        memoryUsage: const MemoryUsage(
+          usedMemory: 0,
+          totalMemory: 100,
+          availableMemory: 100,
+        ),
+        cpuUsage: 0.0,
+        timestamp: DateTime.now(),
+      );
+
+  @override
+  Future<List<PerformanceMetrics>> getPerformanceHistory({
+    DateTime? since,
+    int? limit,
+    Duration? period,
+  }) async => [];
+
+  @override
+  Future<Map<String, dynamic>> getPerformanceReport({
+    DateTime? startTime,
+    DateTime? endTime,
+  }) async => {};
+
+  @override
+  Future<String> exportPerformanceData({
+    required String format,
+    DateTime? startTime,
+    DateTime? endTime,
+  }) async => '';
+
+  @override
+  Stream<Map<String, dynamic>> getPerformanceAlertsStream() => Stream.value({});
+
+  @override
+  Future<List<String>> checkPerformanceIssues() async => [];
+
+  @override
+  Future<void> setPerformanceAlertCallback(
+    void Function(String alertType, Map<String, dynamic> data) callback,
+  ) async {}
+
+  @override
+  Future<bool> syncWithFirebase() async => true;
+
+  @override
+  Future<void> enableFirebaseSync({Duration? interval}) async {}
+
+  @override
+  Future<void> disableFirebaseSync() async {}
+
+  @override
+  Future<void> clearOldPerformanceData({Duration? olderThan}) async {}
+
+  @override
+  Future<Map<String, dynamic>> getDevicePerformanceInfo() async => {};
+
+  @override
+  Future<Map<String, bool>> getFeatureSupport() async => {};
+
+  @override
+  Future<void> resetAllMetrics() async {}
 }

@@ -159,6 +159,14 @@ extension UserEntityGasometerExtension on UserEntity {
     );
   }
   
+  /// Factory: Cria UserEntity a partir de core UserEntity (para social login)
+  static UserEntity fromCoreUserEntity(UserEntity coreUser) {
+    // Adiciona módulo específico do gasometer mantendo todas as outras propriedades
+    return coreUser.copyWith(
+      moduleName: 'gasometer',
+    );
+  }
+
   /// Factory: Cria UserEntity a partir de Firebase User (migrado do UserModel)
   static UserEntity fromFirebaseUser(User firebaseUser) {
     core.AuthProvider provider = core.AuthProvider.anonymous;

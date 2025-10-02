@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
 /// Model para diagnóstico usado na UI
@@ -83,20 +85,38 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
           final diagnosticosList = <DiagnosticoModel>[];
 
           for (final entity in diagnosticosEntities) {
-            // Resolver nome da cultura se não estiver disponível
-            String culturaNome = entity.nomeCultura ?? 'Não especificado';
-            if (culturaNome == 'Não especificado' && entity.idCultura.isNotEmpty) {
+            // SEMPRE resolver nome da cultura usando fkIdCultura (NUNCA usar nomeCultura)
+            String culturaNome = 'Não especificado';
+            if (entity.idCultura.isNotEmpty) {
               culturaNome = await _resolveCulturaNome(entity.idCultura);
+            }
+
+            // SEMPRE resolver nome da praga usando fkIdPraga (NUNCA usar nomePraga)
+            String pragaNome = pragaName ?? '';
+            if (pragaNome.isEmpty && entity.idPraga.isNotEmpty) {
+              pragaNome = await _resolvePragaNome(entity.idPraga);
+            }
+            if (pragaNome.isEmpty) {
+              pragaNome = 'Praga não identificada';
+            }
+
+            // SEMPRE resolver nome do defensivo usando fkIdDefensivo (NUNCA usar nomeDefensivo)
+            String defensivoNome = '';
+            if (entity.idDefensivo.isNotEmpty) {
+              defensivoNome = await _resolveDefensivoNome(entity.idDefensivo);
+            }
+            if (defensivoNome.isEmpty) {
+              defensivoNome = 'Defensivo não especificado';
             }
 
             diagnosticosList.add(
               DiagnosticoModel(
                 id: entity.id,
-                nome: entity.nomeDefensivo ?? 'Defensivo não especificado',
+                nome: defensivoNome,
                 ingredienteAtivo: entity.idDefensivo,
                 dosagem: entity.dosagem.displayDosagem,
                 cultura: culturaNome,
-                grupo: pragaName ?? entity.nomePraga ?? 'Praga não identificada',
+                grupo: pragaNome,
               ),
             );
           }
@@ -126,6 +146,34 @@ class DiagnosticosPragaProvider extends ChangeNotifier {
       debugPrint('⚠️ Erro ao resolver nome da cultura: $e');
     }
     return 'Não especificado';
+  }
+
+  /// Resolve o nome da praga pelo ID usando o repository
+  Future<String> _resolvePragaNome(String idPraga) async {
+    try {
+      final pragaRepository = sl<PragasHiveRepository>();
+      final pragaData = await pragaRepository.getById(idPraga);
+      if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
+        return pragaData.nomeComum;
+      }
+    } catch (e) {
+      debugPrint('⚠️ Erro ao resolver nome da praga: $e');
+    }
+    return '';
+  }
+
+  /// Resolve o nome do defensivo pelo ID usando o repository
+  Future<String> _resolveDefensivoNome(String idDefensivo) async {
+    try {
+      final defensivoRepository = sl<FitossanitarioHiveRepository>();
+      final defensivoData = await defensivoRepository.getById(idDefensivo);
+      if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
+        return defensivoData.nomeComum;
+      }
+    } catch (e) {
+      debugPrint('⚠️ Erro ao resolver nome do defensivo: $e');
+    }
+    return '';
   }
 
 

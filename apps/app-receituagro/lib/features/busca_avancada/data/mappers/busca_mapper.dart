@@ -2,24 +2,60 @@ import '../../../../core/data/models/cultura_hive.dart';
 import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/data/models/pragas_hive.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../domain/entities/busca_entity.dart';
 
 /// Mapper para conversão entre diferentes modelos e BuscaResultEntity
-/// TEMPORARIAMENTE SIMPLIFICADO para resolver build blockers
-/// TODO: Revisar e implementar mapeamentos corretos após análise das propriedades dos modelos
 class BuscaMapper {
   /// Converte DiagnosticoHive para BuscaResultEntity
-  static BuscaResultEntity diagnosticoToEntity(DiagnosticoHive diagnostico) {
+  /// ✅ CORRETO: Resolve nomes usando repositories, NUNCA usa campos cached
+  static Future<BuscaResultEntity> diagnosticoToEntity(DiagnosticoHive diagnostico) async {
+    // Resolve nomes dinamicamente usando repositories
+    String defensivoNome = 'Defensivo não encontrado';
+    String culturaNome = 'Cultura não encontrada';
+    String pragaNome = 'Praga não encontrada';
+
+    try {
+      // Resolve defensivo
+      final defensivoRepo = sl<FitossanitarioHiveRepository>();
+      final defensivo = await defensivoRepo.getById(diagnostico.fkIdDefensivo);
+      if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
+        defensivoNome = defensivo.nomeComum;
+      }
+
+      // Resolve cultura
+      final culturaRepo = sl<CulturaHiveRepository>();
+      final cultura = await culturaRepo.getById(diagnostico.fkIdCultura);
+      if (cultura != null && cultura.cultura.isNotEmpty) {
+        culturaNome = cultura.cultura;
+      }
+
+      // Resolve praga
+      final pragaRepo = sl<PragasHiveRepository>();
+      final praga = await pragaRepo.getById(diagnostico.fkIdPraga);
+      if (praga != null && praga.nomeComum.isNotEmpty) {
+        pragaNome = praga.nomeComum;
+      }
+    } catch (e) {
+      // Falha silenciosamente para não quebrar a UI
+    }
+
     return BuscaResultEntity(
       id: diagnostico.objectId,
       tipo: 'diagnostico',
-      titulo: diagnostico.nomeDefensivo ?? 'Defensivo não informado',
-      subtitulo: diagnostico.nomeCultura ?? 'Cultura não informada',
-      descricao: '${diagnostico.nomePraga ?? "Praga não informada"} - ${diagnostico.dsMax}${diagnostico.um}',
+      titulo: defensivoNome,
+      subtitulo: culturaNome,
+      descricao: '$pragaNome - ${diagnostico.dsMax}${diagnostico.um}',
       metadata: {
-        'cultura': diagnostico.nomeCultura ?? '',
-        'praga': diagnostico.nomePraga ?? '',
-        'defensivo': diagnostico.nomeDefensivo ?? '',
+        'idCultura': diagnostico.fkIdCultura,
+        'idPraga': diagnostico.fkIdPraga,
+        'idDefensivo': diagnostico.fkIdDefensivo,
+        'cultura': culturaNome,
+        'praga': pragaNome,
+        'defensivo': defensivoNome,
         'dosagem': '${diagnostico.dsMax}${diagnostico.um}',
       },
       relevancia: 1.0,
@@ -85,9 +121,13 @@ class BuscaMapper {
     );
   }
 
-  /// Converte lista de diagnósticos
-  static List<BuscaResultEntity> diagnosticosToEntityList(List<DiagnosticoHive> diagnosticos) {
-    return diagnosticos.map((d) => diagnosticoToEntity(d)).toList();
+  /// Converte lista de diagnósticos com resolução assíncrona
+  static Future<List<BuscaResultEntity>> diagnosticosToEntityList(List<DiagnosticoHive> diagnosticos) async {
+    final results = <BuscaResultEntity>[];
+    for (final d in diagnosticos) {
+      results.add(await diagnosticoToEntity(d));
+    }
+    return results;
   }
 
   /// Converte lista de pragas

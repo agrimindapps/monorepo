@@ -12,15 +12,18 @@ import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_se
 import 'package:app_agrihurbi/features/markets/presentation/pages/market_detail_page.dart';
 import 'package:app_agrihurbi/features/markets/presentation/pages/markets_list_page.dart';
 import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
+import 'package:app_agrihurbi/features/promo/presentation/pages/promo_page.dart';
 import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
 import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../providers/providers.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  const initialRoute = '/login';
+  // Web inicia em promo (landing page), Mobile/Desktop inicia em login
+  final initialRoute = kIsWeb ? '/promo' : '/login';
 
   return GoRouter(
     initialLocation: initialRoute,
@@ -31,14 +34,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         final authState = ref.read(authProvider);
         final isAuthenticated = authState.isAuthenticated;
         final isOnAuthPage = state.matchedLocation.startsWith('/login') || state.matchedLocation.startsWith('/register');
+        final isOnPromo = state.matchedLocation == '/promo';
 
-        // If not authenticated and not on auth page, redirect to login
-        if (!isAuthenticated && !isOnAuthPage) {
-          return '/login';
+        // If not authenticated and not on auth page or promo, redirect to login (or promo for web)
+        if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
+          return kIsWeb ? '/promo' : '/login';
         }
 
-        // If authenticated and on auth page, redirect to home
-        if (isAuthenticated && isOnAuthPage) {
+        // If authenticated and on auth page or promo, redirect to home
+        if (isAuthenticated && (isOnAuthPage || isOnPromo)) {
           return '/home';
         }
 
@@ -49,6 +53,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
     },
     routes: [
+      // Promotional Page (outside auth flow)
+      GoRoute(
+        path: '/promo',
+        name: 'promo',
+        builder: (context, state) => const PromoPage(),
+      ),
+
       // Authentication Routes
       GoRoute(
         path: '/login',

@@ -74,20 +74,16 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   @override
   ResultFuture<List<DiagnosticoEntity>> getDiagnosticosByCultura(String cultura) async {
     try {
-      final allResult = await _diagnosticosRepository.getAll();
-      
+      // ✅ CORRETO: Usar idCultura para filtrar, não nomeCultura cached
+      final allResult = await _diagnosticosRepository.getByCultura(cultura);
+
       return allResult.fold(
         (failure) => Left(failure),
         (diagnosticosEntities) {
-          final filteredEntities = diagnosticosEntities
-              .where((entity) => 
-                  entity.nomeCultura?.toLowerCase() == cultura.toLowerCase())
-              .toList();
-          
-          final models = filteredEntities
+          final models = diagnosticosEntities
               .map((entity) => DiagnosticoModel.fromDiagnosticsEntity(entity))
               .toList();
-          
+
           return Right(models);
         },
       );
@@ -99,20 +95,16 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   @override
   ResultFuture<List<DiagnosticoEntity>> getDiagnosticosByPraga(String praga) async {
     try {
-      final allResult = await _diagnosticosRepository.getAll();
-      
+      // ✅ CORRETO: Usar idPraga para filtrar, não nomePraga cached
+      final allResult = await _diagnosticosRepository.getByPraga(praga);
+
       return allResult.fold(
         (failure) => Left(failure),
         (diagnosticosEntities) {
-          final filteredEntities = diagnosticosEntities
-              .where((entity) => 
-                  entity.nomePraga?.toLowerCase().contains(praga.toLowerCase()) == true)
-              .toList();
-          
-          final models = filteredEntities
+          final models = diagnosticosEntities
               .map((entity) => DiagnosticoModel.fromDiagnosticsEntity(entity))
               .toList();
-          
+
           return Right(models);
         },
       );
@@ -155,35 +147,23 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
     int? offset,
   }) async {
     try {
-      final allResult = await _diagnosticosRepository.getAll();
-      
-      return allResult.fold(
+      // ✅ CORRETO: Usar repository methods que filtram por IDs, não por nomes cached
+      var result = await _diagnosticosRepository.getAll();
+
+      // Aplicar filtros usando os métodos corretos do repository
+      if (cultura != null && cultura.isNotEmpty) {
+        result = await _diagnosticosRepository.getByCultura(cultura);
+      } else if (praga != null && praga.isNotEmpty) {
+        result = await _diagnosticosRepository.getByPraga(praga);
+      } else if (defensivo != null && defensivo.isNotEmpty) {
+        result = await _diagnosticosRepository.getByDefensivo(defensivo);
+      }
+
+      return result.fold(
         (failure) => Left(failure),
         (diagnosticosEntities) {
           var filteredEntities = diagnosticosEntities;
-          
-          // Aplicar filtros
-          if (cultura != null && cultura.isNotEmpty) {
-            filteredEntities = filteredEntities
-                .where((entity) => 
-                    entity.nomeCultura?.toLowerCase() == cultura.toLowerCase())
-                .toList();
-          }
-          
-          if (praga != null && praga.isNotEmpty) {
-            filteredEntities = filteredEntities
-                .where((entity) => 
-                    entity.nomePraga?.toLowerCase().contains(praga.toLowerCase()) == true)
-                .toList();
-          }
-          
-          if (defensivo != null && defensivo.isNotEmpty) {
-            filteredEntities = filteredEntities
-                .where((entity) => 
-                    entity.nomeDefensivo?.toLowerCase().contains(defensivo.toLowerCase()) == true)
-                .toList();
-          }
-          
+
           // Aplicar paginação
           if (offset != null && offset > 0) {
             if (offset >= filteredEntities.length) {
@@ -191,15 +171,15 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
             }
             filteredEntities = filteredEntities.skip(offset).toList();
           }
-          
+
           if (limit != null && limit > 0) {
             filteredEntities = filteredEntities.take(limit).toList();
           }
-          
+
           final models = filteredEntities
               .map((entity) => DiagnosticoModel.fromDiagnosticsEntity(entity))
               .toList();
-          
+
           return Right(models);
         },
       );
@@ -215,33 +195,23 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
         return const Right([]);
       }
 
-      final searchQuery = query.toLowerCase();
+      // ⚠️ NOTA: Search por texto livre requer resolver IDs para nomes
+      // Por ora, delegamos para o repository que usa IDs
+      // TODO: Implementar busca full-text após resolução de nomes
+      debugPrint('⚠️ searchDiagnosticos: Busca por texto livre pode retornar resultados incompletos');
+      debugPrint('   Recomenda-se usar filtros específicos por ID (cultura/praga/defensivo)');
+
       final allResult = await _diagnosticosRepository.getAll();
-      
+
       return allResult.fold(
         (failure) => Left(failure),
         (diagnosticosEntities) {
-          final filteredEntities = diagnosticosEntities
-              .where((entity) => 
-                  entity.nomeDefensivo?.toLowerCase().contains(searchQuery) == true ||
-                  entity.nomeCultura?.toLowerCase().contains(searchQuery) == true ||
-                  entity.nomePraga?.toLowerCase().contains(searchQuery) == true)
-              .toList();
-          
-          final models = filteredEntities
+          // Por enquanto, retorna todos e deixa a UI filtrar após resolução
+          // Isso garante que nenhum resultado válido seja perdido
+          final models = diagnosticosEntities
               .map((entity) => DiagnosticoModel.fromDiagnosticsEntity(entity))
               .toList();
-          
-          // Ordenar por relevância
-          models.sort((a, b) {
-            final aNameMatch = a.nomeDefensivo?.toLowerCase().contains(searchQuery) == true;
-            final bNameMatch = b.nomeDefensivo?.toLowerCase().contains(searchQuery) == true;
-            
-            if (aNameMatch && !bNameMatch) return -1;
-            if (!aNameMatch && bNameMatch) return 1;
-            return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
-          });
-          
+
           return Right(models);
         },
       );

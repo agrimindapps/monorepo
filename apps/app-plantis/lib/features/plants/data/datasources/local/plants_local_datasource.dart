@@ -20,7 +20,7 @@ abstract class PlantsLocalDatasource {
 }
 
 class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
-  static const String _boxName = 'plants';
+  static const String _boxName = 'plants'; // Usa box do UnifiedSyncManager
   Box<String>? _box;
 
   // Cache for performance optimization
@@ -31,7 +31,19 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   final PlantsSearchService _searchService = PlantsSearchService.instance;
 
   Future<Box<String>> get box async {
-    _box ??= await Hive.openBox<String>(_boxName);
+    if (_box != null) return _box!;
+
+    // Na web, o UnifiedSyncManager já abre a box como Box<dynamic>
+    // Não podemos fazer cast, então retornamos erro para forçar uso do UnifiedSync
+    if (kIsWeb && Hive.isBoxOpen(_boxName)) {
+      throw CacheFailure(
+        'Box "$_boxName" já está aberta pelo UnifiedSyncManager. '
+        'Na web, use apenas UnifiedSyncManager para acesso aos dados.',
+      );
+    }
+
+    // Em plataformas nativas, abre normalmente
+    _box = await Hive.openBox<String>(_boxName);
     return _box!;
   }
 

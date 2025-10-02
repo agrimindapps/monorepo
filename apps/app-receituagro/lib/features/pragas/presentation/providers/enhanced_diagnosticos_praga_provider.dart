@@ -4,7 +4,6 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../../core/services/diagnostico_entity_resolver.dart';
 import '../../../../core/services/diagnostico_grouping_service.dart';
-// import '../../../../core/services/enhanced_diagnostico_cache_service.dart'; // Temporariamente desabilitado
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
@@ -234,17 +233,19 @@ class EnhancedDiagnosticosPragaProvider extends ChangeNotifier {
   /// Atualiza lista de culturas disponíveis
   Future<void> _updateAvailableCulturas() async {
     final culturas = <String>{'Todas'};
-    
+
     for (final diag in _diagnosticos) {
-      final culturaNome = await _resolver.resolveCulturaNome(
-        idCultura: diag.idCultura,
-        nomeCultura: diag.nomeCultura,
-      );
-      if (culturaNome.isNotEmpty && culturaNome != 'Cultura não especificada') {
-        culturas.add(culturaNome);
+      // ✅ CORRETO: Resolve apenas usando ID, NUNCA nomeCultura cached
+      if (diag.idCultura.isNotEmpty) {
+        final culturaNome = await _resolver.resolveCulturaNome(
+          idCultura: diag.idCultura,
+        );
+        if (culturaNome.isNotEmpty && culturaNome != 'Cultura não especificada') {
+          culturas.add(culturaNome);
+        }
       }
     }
-    
+
     _availableCulturas = culturas.toList()..sort();
   }
 

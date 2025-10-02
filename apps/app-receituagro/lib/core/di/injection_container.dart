@@ -39,11 +39,12 @@ import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
 import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
-import '../services/enhanced_diagnostic_integration_service.dart';
+// REMOVED: enhanced_diagnostic_integration_service - obsolete stub
 import '../services/firebase_messaging_service.dart';
 import '../services/mock_premium_service.dart';
 import '../services/premium_service.dart';
 import '../services/promotional_notification_manager.dart';
+import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
@@ -62,6 +63,12 @@ Future<void> init() async {
   // ===== CLEAN ARCHITECTURE REPOSITORIES & USE CASES =====
   // Configure all Clean Architecture dependencies first
   configureAllRepositoriesDependencies();
+
+  // ===== DATA CLEANER =====
+  // Register ReceitaAgroDataCleaner before AccountDeletionModule (required dependency)
+  sl.registerLazySingleton<core.IAppDataCleaner>(
+    () => ReceitaAgroDataCleaner(),
+  );
 
   // ===== ACCOUNT DELETION =====
   // Initialize account deletion module after repositories
@@ -370,10 +377,7 @@ Future<void> init() async {
 
   // ===== DIAGNÓSTICOS CLEAN ARCHITECTURE =====
   
-  // Enhanced Diagnostic Integration Service - Stub for removed service
-  sl.registerLazySingleton<EnhancedDiagnosticIntegrationService>(
-    () => EnhancedDiagnosticIntegrationService(),
-  );
+  // REMOVED: EnhancedDiagnosticIntegrationService - obsolete stub that did nothing
 
   // Enhanced Diagnosticos Repository - Direct implementation (usando DiagnosticoHiveRepository já registrado)
   sl.registerLazySingleton<IDiagnosticosRepository>(

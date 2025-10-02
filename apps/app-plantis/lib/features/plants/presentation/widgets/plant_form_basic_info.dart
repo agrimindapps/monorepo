@@ -6,6 +6,7 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/solid_providers.dart';
 import '../../../../core/providers/state/plant_form_state_manager.dart'
     show PlantFormStateManager, PlantFormState;
+import '../../../../core/validation/validators.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 import '../providers/spaces_provider.dart';
 import 'space_selector_widget.dart';
@@ -780,68 +781,19 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     }
   }
 
-  /// Validates plant name with security checks
+  /// Validates plant name using centralized validator
   String? _validatePlantName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Por favor, insira o nome da planta';
-    }
-
-    final trimmedValue = value.trim();
-
-    if (trimmedValue.length < 2) {
-      return 'Nome deve ter pelo menos 2 caracteres';
-    }
-
-    if (trimmedValue.length > 100) {
-      return 'Nome muito longo (máximo 100 caracteres)';
-    }
-
-    // Check for potentially malicious characters
-    if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedValue)) {
-      return 'Nome contém caracteres não permitidos';
-    }
-
-    return null;
+    return Validators.plantName(value);
   }
 
-  /// Validates plant species with security checks
+  /// Validates plant species using centralized validator
   String? _validateSpecies(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return null; // Species is optional
-    }
-
-    final trimmedValue = value.trim();
-
-    if (trimmedValue.length > 100) {
-      return 'Espécie muito longa (máximo 100 caracteres)';
-    }
-
-    // Check for potentially malicious characters
-    if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedValue)) {
-      return 'Espécie contém caracteres não permitidos';
-    }
-
-    return null;
+    return Validators.plantSpecies(value);
   }
 
-  /// Validates notes with security checks
+  /// Validates notes using centralized validator
   String? _validateNotes(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return null; // Notes are optional
-    }
-
-    final trimmedValue = value.trim();
-
-    if (trimmedValue.length > 1000) {
-      return 'Observações muito longas (máximo 1000 caracteres)';
-    }
-
-    // Check for potentially malicious characters (allow newlines for notes)
-    if (RegExp(r'[<>"\\]').hasMatch(trimmedValue)) {
-      return 'Observações contêm caracteres não permitidos';
-    }
-
-    return null;
+    return Validators.plantNotes(value);
   }
 
   /// Build upload progress indicator

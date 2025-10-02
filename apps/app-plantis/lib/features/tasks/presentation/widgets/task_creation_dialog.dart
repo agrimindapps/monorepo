@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/localization/app_strings.dart';
+import '../../../../core/validation/validators.dart';
 import '../../../plants/domain/entities/plant.dart';
 import '../../../plants/presentation/providers/plants_provider.dart';
 import '../../core/constants/tasks_constants.dart';
@@ -448,12 +449,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
             hintText: AppStrings.taskTitleHint,
             border: OutlineInputBorder(),
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return AppStrings.titleRequired;
-            }
-            return null;
-          },
+          validator: Validators.taskTitle,
         ),
       ],
     );
@@ -485,6 +481,7 @@ class _TaskCreationDialogState extends State<TaskCreationDialog> {
             hintText: AppStrings.taskDescriptionHint,
             border: OutlineInputBorder(),
           ),
+          validator: Validators.taskDescription,
           maxLines: TasksConstants.taskDescriptionMaxLines,
           maxLength: TasksConstants.taskDescriptionMaxLength,
         ),

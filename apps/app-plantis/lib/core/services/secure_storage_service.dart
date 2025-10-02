@@ -1,10 +1,8 @@
-import 'dart:convert';
-
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Secure storage service for sensitive data
-/// Uses platform keychain/keystore for encryption
+/// Wrapper around EnhancedSecureStorageService from core package
 class SecureStorageService {
   static SecureStorageService? _instance;
   static SecureStorageService get instance =>
@@ -12,17 +10,11 @@ class SecureStorageService {
 
   SecureStorageService._();
 
-  static const FlutterSecureStorage _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-      keyCipherAlgorithm:
-          KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
-      storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
-    ),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
-      accountName: 'app_plantis_secure_data',
-    ),
+  // Use core's EnhancedSecureStorageService
+  late final EnhancedSecureStorageService _coreStorage =
+      EnhancedSecureStorageService(
+    appIdentifier: 'plantis',
+    config: const SecureStorageConfig.plantis(),
   );
 
   // Keys for sensitive data
@@ -34,231 +26,222 @@ class SecureStorageService {
 
   /// Store user credentials securely
   Future<void> storeUserCredentials(UserCredentials credentials) async {
-    try {
-      final jsonString = jsonEncode(credentials.toJson());
-      await _storage.write(key: _userCredentialsKey, value: jsonString);
-      debugPrint('🔒 User credentials stored securely');
-    } catch (e) {
-      debugPrint('❌ Error storing user credentials: $e');
-      rethrow;
-    }
+    final result = await _coreStorage.storeSecureData(
+      key: _userCredentialsKey,
+      data: credentials.toJson(),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ Error storing user credentials: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (_) => debugPrint('🔒 User credentials stored securely'),
+    );
   }
 
   /// Retrieve user credentials
   Future<UserCredentials?> getUserCredentials() async {
-    try {
-      final jsonString = await _storage.read(key: _userCredentialsKey);
-      if (jsonString == null) return null;
+    final result = await _coreStorage.getSecureData<Map<String, dynamic>>(
+      key: _userCredentialsKey,
+    );
 
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return UserCredentials.fromJson(json);
-    } catch (e) {
-      debugPrint('❌ Error retrieving user credentials: $e');
-      return null;
-    }
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error retrieving user credentials: ${failure.message}');
+        return null;
+      },
+      (json) => json != null ? UserCredentials.fromJson(json) : null,
+    );
   }
 
   /// Store location data securely
   Future<void> storeLocationData(LocationData locationData) async {
-    try {
-      final jsonString = jsonEncode(locationData.toJson());
-      await _storage.write(key: _locationDataKey, value: jsonString);
-      debugPrint('🔒 Location data stored securely');
-    } catch (e) {
-      debugPrint('❌ Error storing location data: $e');
-      rethrow;
-    }
+    final result = await _coreStorage.storeSecureData(
+      key: _locationDataKey,
+      data: locationData.toJson(),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ Error storing location data: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (_) => debugPrint('🔒 Location data stored securely'),
+    );
   }
 
   /// Retrieve location data
   Future<LocationData?> getLocationData() async {
-    try {
-      final jsonString = await _storage.read(key: _locationDataKey);
-      if (jsonString == null) return null;
+    final result = await _coreStorage.getSecureData<Map<String, dynamic>>(
+      key: _locationDataKey,
+    );
 
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return LocationData.fromJson(json);
-    } catch (e) {
-      debugPrint('❌ Error retrieving location data: $e');
-      return null;
-    }
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error retrieving location data: ${failure.message}');
+        return null;
+      },
+      (json) => json != null ? LocationData.fromJson(json) : null,
+    );
   }
 
   /// Store personal information securely
   Future<void> storePersonalInfo(PersonalInfo personalInfo) async {
-    try {
-      final jsonString = jsonEncode(personalInfo.toJson());
-      await _storage.write(key: _personalInfoKey, value: jsonString);
-      debugPrint('🔒 Personal info stored securely');
-    } catch (e) {
-      debugPrint('❌ Error storing personal info: $e');
-      rethrow;
-    }
+    final result = await _coreStorage.storeSecureData(
+      key: _personalInfoKey,
+      data: personalInfo.toJson(),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ Error storing personal info: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (_) => debugPrint('🔒 Personal info stored securely'),
+    );
   }
 
   /// Retrieve personal information
   Future<PersonalInfo?> getPersonalInfo() async {
-    try {
-      final jsonString = await _storage.read(key: _personalInfoKey);
-      if (jsonString == null) return null;
+    final result = await _coreStorage.getSecureData<Map<String, dynamic>>(
+      key: _personalInfoKey,
+    );
 
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return PersonalInfo.fromJson(json);
-    } catch (e) {
-      debugPrint('❌ Error retrieving personal info: $e');
-      return null;
-    }
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error retrieving personal info: ${failure.message}');
+        return null;
+      },
+      (json) => json != null ? PersonalInfo.fromJson(json) : null,
+    );
   }
 
   /// Generate and store Hive encryption key
   Future<List<int>> getOrCreateHiveEncryptionKey() async {
-    try {
-      final existingKey = await _storage.read(key: _encryptionKeyKey);
+    final result = await _coreStorage.getOrCreateEncryptionKey(
+      keyName: _encryptionKeyKey,
+    );
 
-      if (existingKey != null) {
-        // Decode existing key
-        final keyList = jsonDecode(existingKey) as List<dynamic>;
-        return keyList.cast<int>();
-      }
-
-      // Generate new 256-bit encryption key
-      final newKey = List<int>.generate(
-        32,
-        (index) => DateTime.now().millisecondsSinceEpoch.hashCode % 256,
-      );
-
-      // Store the key securely
-      await _storage.write(key: _encryptionKeyKey, value: jsonEncode(newKey));
-
-      debugPrint('🔑 New Hive encryption key generated and stored');
-      return newKey;
-    } catch (e) {
-      debugPrint('❌ Error with Hive encryption key: $e');
-      rethrow;
-    }
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error with Hive encryption key: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (key) => key,
+    );
   }
 
   /// Store biometric data hash
   Future<void> storeBiometricData(String biometricHash) async {
-    try {
-      await _storage.write(key: _biometricDataKey, value: biometricHash);
-      debugPrint('🔒 Biometric data stored securely');
-    } catch (e) {
-      debugPrint('❌ Error storing biometric data: $e');
-      rethrow;
-    }
+    final result = await _coreStorage.storeBiometricHash(biometricHash);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ Error storing biometric data: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (_) => debugPrint('🔒 Biometric data stored securely'),
+    );
   }
 
   /// Retrieve biometric data hash
   Future<String?> getBiometricData() async {
-    try {
-      return await _storage.read(key: _biometricDataKey);
-    } catch (e) {
-      debugPrint('❌ Error retrieving biometric data: $e');
-      return null;
-    }
+    final result = await _coreStorage.getBiometricHash();
+
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error retrieving biometric data: ${failure.message}');
+        return null;
+      },
+      (hash) => hash,
+    );
   }
 
   /// Clear specific secure data
   Future<void> clearUserCredentials() async {
-    await _storage.delete(key: _userCredentialsKey);
+    await _coreStorage.deleteSecureData(_userCredentialsKey);
     debugPrint('🗑️ User credentials cleared');
   }
 
   Future<void> clearLocationData() async {
-    await _storage.delete(key: _locationDataKey);
+    await _coreStorage.deleteSecureData(_locationDataKey);
     debugPrint('🗑️ Location data cleared');
   }
 
   Future<void> clearPersonalInfo() async {
-    await _storage.delete(key: _personalInfoKey);
+    await _coreStorage.deleteSecureData(_personalInfoKey);
     debugPrint('🗑️ Personal info cleared');
   }
 
   Future<void> clearBiometricData() async {
-    await _storage.delete(key: _biometricDataKey);
+    await _coreStorage.deleteSecureData(_biometricDataKey);
     debugPrint('🗑️ Biometric data cleared');
   }
 
   /// Clear all secure storage (DANGEROUS - use only for logout/reset)
   Future<void> clearAllSecureData() async {
-    try {
-      await _storage.deleteAll();
-      debugPrint('🗑️ All secure data cleared');
-    } catch (e) {
-      debugPrint('❌ Error clearing secure data: $e');
-      rethrow;
-    }
+    final result = await _coreStorage.clearAllSecureData();
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ Error clearing secure data: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (_) => debugPrint('🗑️ All secure data cleared'),
+    );
   }
 
   /// Check if secure storage is available
   Future<bool> isSecureStorageAvailable() async {
-    try {
-      await _storage.containsKey(key: 'test_key');
-      return true;
-    } catch (e) {
-      debugPrint('❌ Secure storage not available: $e');
-      return false;
-    }
+    return await _coreStorage.isSecureStorageAvailable();
   }
 
   /// Generic methods for simple data types
   Future<String?> getString(String key) async {
-    try {
-      return await _storage.read(key: key);
-    } catch (e) {
-      debugPrint('❌ Error reading string for key $key: $e');
-      return null;
-    }
+    final result = await _coreStorage.getSecureData<String>(key: key);
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error reading string for key $key: ${failure.message}');
+        return null;
+      },
+      (value) => value,
+    );
   }
 
   Future<void> setString(String key, String value) async {
-    try {
-      await _storage.write(key: key, value: value);
-    } catch (e) {
-      debugPrint('❌ Error writing string for key $key: $e');
-      rethrow;
-    }
+    final result = await _coreStorage.storeSecureData<String>(
+      key: key,
+      data: value,
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ Error writing string for key $key: ${failure.message}');
+        throw Exception(failure.message);
+      },
+      (_) {},
+    );
   }
 
   Future<bool?> getBool(String key) async {
-    try {
-      final value = await _storage.read(key: key);
-      if (value == null) return null;
-      return value.toLowerCase() == 'true';
-    } catch (e) {
-      debugPrint('❌ Error reading bool for key $key: $e');
-      return null;
-    }
+    final stringValue = await getString(key);
+    if (stringValue == null) return null;
+    return stringValue.toLowerCase() == 'true';
   }
 
   Future<void> setBool(String key, bool value) async {
-    try {
-      await _storage.write(key: key, value: value.toString());
-    } catch (e) {
-      debugPrint('❌ Error writing bool for key $key: $e');
-      rethrow;
-    }
+    await setString(key, value.toString());
   }
 
   Future<int?> getInt(String key) async {
-    try {
-      final value = await _storage.read(key: key);
-      if (value == null) return null;
-      return int.tryParse(value);
-    } catch (e) {
-      debugPrint('❌ Error reading int for key $key: $e');
-      return null;
-    }
+    final stringValue = await getString(key);
+    if (stringValue == null) return null;
+    return int.tryParse(stringValue);
   }
 
   Future<void> setInt(String key, int value) async {
-    try {
-      await _storage.write(key: key, value: value.toString());
-    } catch (e) {
-      debugPrint('❌ Error writing int for key $key: $e');
-      rethrow;
-    }
+    await setString(key, value.toString());
   }
 
   /// Get all keys (for debugging)
@@ -267,12 +250,23 @@ class SecureStorageService {
       throw UnsupportedError('This method is only available in debug mode');
     }
 
-    try {
-      return await _storage.readAll();
-    } catch (e) {
-      debugPrint('❌ Error reading all secure data: $e');
-      return {};
-    }
+    final result = await _coreStorage.getAllKeys();
+    return result.fold(
+      (failure) {
+        debugPrint('❌ Error reading all secure data: ${failure.message}');
+        return {};
+      },
+      (keys) async {
+        final allData = <String, String>{};
+        for (final key in keys) {
+          final value = await getString(key);
+          if (value != null) {
+            allData[key] = value;
+          }
+        }
+        return allData;
+      },
+    );
   }
 }
 

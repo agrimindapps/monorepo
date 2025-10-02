@@ -13,7 +13,7 @@ import 'package:go_router/go_router.dart';
 // import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/services/data_sanitization_service.dart';
-import '../../../../core/services/gasometer_data_cleaner_service.dart';
+import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
 import '../../domain/services/profile_image_service.dart';
@@ -2021,8 +2021,8 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
                     });
 
                     try {
-                      final dataCleanerService = GetIt.instance<GasometerDataCleanerService>();
-                      final result = await dataCleanerService.clearUserContentOnly();
+                      final dataCleanerService = DataCleanerService.instance;
+                      final result = await dataCleanerService.clearAllData();
 
                       if (context.mounted) {
                         Navigator.of(context).pop();

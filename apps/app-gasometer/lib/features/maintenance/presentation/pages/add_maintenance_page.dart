@@ -6,7 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/interfaces/validation_result.dart';
+import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/base_provider.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
+import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/money_form_field.dart';
 import '../../../../core/widgets/notes_form_field.dart';
@@ -14,9 +18,6 @@ import '../../../../core/widgets/odometer_field.dart';
 import '../../../../core/widgets/receipt_section.dart';
 import '../../../../core/widgets/validated_dropdown_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
-import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/widgets/form_dialog.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../providers/maintenance_form_provider.dart';
 import '../providers/maintenance_provider.dart';
@@ -443,8 +444,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         debugPrint('[MAINTENANCE DEBUG] Provider error message: ${maintenanceProvider.errorMessage}');
         if (mounted) {
           // Show error in dialog context (before closing)
-          final errorMessage = maintenanceProvider.errorMessage?.isNotEmpty == true 
-              ? maintenanceProvider.errorMessage! 
+          final errorMessage = maintenanceProvider.errorMessage.isNotEmpty
+              ? maintenanceProvider.errorMessage
               : 'Erro ao salvar manutenção';
           _showErrorDialog('Erro', errorMessage);
         }

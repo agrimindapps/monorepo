@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ValidationError;
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/app_error.dart';
 import '../../../../core/providers/base_provider.dart';

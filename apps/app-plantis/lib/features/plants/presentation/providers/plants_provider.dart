@@ -5,18 +5,36 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/plant.dart';
+import '../../domain/services/plants_care_service.dart';
+import '../../domain/services/plants_crud_service.dart';
+import '../../domain/services/plants_filter_service.dart';
+import '../../domain/services/plants_sort_service.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 
+// Export enums from services for backward compatibility
+export '../../domain/services/plants_care_service.dart' show CareStatus;
+export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
+
+/// Plants Provider refactored with specialized services
+/// Now follows Single Responsibility Principle using Facade pattern
+///
+/// Delegates to:
+/// - PlantsCrudService: CRUD operations
+/// - PlantsFilterService: Search & filtering
+/// - PlantsSortService: Sorting & views
+/// - PlantsCareService: Care analytics
 class PlantsProvider extends ChangeNotifier {
-  final GetPlantsUseCase _getPlantsUseCase;
-  final GetPlantByIdUseCase _getPlantByIdUseCase;
+  // Specialized services
+  final PlantsCrudService _crudService;
+  final PlantsFilterService _filterService;
+  final PlantsSortService _sortService;
+  final PlantsCareService _careService;
+
+  // Legacy use cases (kept for search functionality not yet in services)
   final SearchPlantsUseCase _searchPlantsUseCase;
-  final AddPlantUseCase _addPlantUseCase;
-  final UpdatePlantUseCase _updatePlantUseCase;
-  final DeletePlantUseCase _deletePlantUseCase;
   final AuthStateNotifier _authStateNotifier;
 
   // Stream subscription for auth state changes
@@ -33,12 +51,17 @@ class PlantsProvider extends ChangeNotifier {
     required UpdatePlantUseCase updatePlantUseCase,
     required DeletePlantUseCase deletePlantUseCase,
     AuthStateNotifier? authStateNotifier,
-  }) : _getPlantsUseCase = getPlantsUseCase,
-       _getPlantByIdUseCase = getPlantByIdUseCase,
+  }) : _crudService = PlantsCrudService(
+         getPlantsUseCase: getPlantsUseCase,
+         getPlantByIdUseCase: getPlantByIdUseCase,
+         addPlantUseCase: addPlantUseCase,
+         updatePlantUseCase: updatePlantUseCase,
+         deletePlantUseCase: deletePlantUseCase,
+       ),
+       _filterService = PlantsFilterService(),
+       _sortService = PlantsSortService(),
+       _careService = PlantsCareService(),
        _searchPlantsUseCase = searchPlantsUseCase,
-       _addPlantUseCase = addPlantUseCase,
-       _updatePlantUseCase = updatePlantUseCase,
-       _deletePlantUseCase = deletePlantUseCase,
        _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance {
     // Initialize auth state listener
     _initializeAuthListener();
@@ -188,7 +211,7 @@ class PlantsProvider extends ChangeNotifier {
           // Atualizar apenas se houve mudanças reais
           if (_hasDataChanged(domainPlants)) {
             final oldCount = _plants.length;
-            _plants = _sortPlants(domainPlants);
+            _plants = _sortService.sortPlants(domainPlants, _sortBy);
             _applyFilters();
 
             if (kDebugMode) {
@@ -442,14 +465,14 @@ class PlantsProvider extends ChangeNotifier {
       }
       _clearError();
 
-      // Try to get cached/local data first (immediate response)
-      final localResult = await _getPlantsUseCase.call(const NoParams());
+      // Delegate to CRUD service
+      final localResult = await _crudService.getAllPlants();
 
       localResult.fold(
         (failure) {
           if (kDebugMode) {
             print(
-              '⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}',
+              '⚠️ PlantsProvider: Dados locais não disponíveis: ${_crudService.getErrorMessage(failure)}',
             );
           }
           // Don't set error yet - try remote sync
@@ -479,18 +502,18 @@ class PlantsProvider extends ChangeNotifier {
 
     // Execute sync in background
     Future.delayed(const Duration(milliseconds: 100), () async {
-      final result = await _getPlantsUseCase.call(const NoParams());
+      final result = await _crudService.getAllPlants();
 
       result.fold(
         (failure) {
           if (kDebugMode) {
             print(
-              '❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}',
+              '❌ PlantsProvider: Background sync falhou: ${_crudService.getErrorMessage(failure)}',
             );
           }
           // Only set error if no local data was loaded
           if (_plants.isEmpty) {
-            _setError(_getErrorMessage(failure));
+            _setError(_crudService.getErrorMessage(failure));
           }
         },
         (plants) {
@@ -507,7 +530,7 @@ class PlantsProvider extends ChangeNotifier {
 
   /// Updates plants data and notifies listeners
   void _updatePlantsData(List<Plant> plants) {
-    _plants = _sortPlants(plants);
+    _plants = _sortService.sortPlants(plants, _sortBy);
     _clearError();
     _applyFilters();
     _setLoading(false);
@@ -524,11 +547,11 @@ class PlantsProvider extends ChangeNotifier {
 
   // Get plant by ID
   Future<Plant?> getPlantById(String id) async {
-    final result = await _getPlantByIdUseCase.call(id);
+    final result = await _crudService.getPlantById(id);
 
     return result.fold(
       (failure) {
-        _setError(_getErrorMessage(failure));
+        _setError(_crudService.getErrorMessage(failure));
         return null;
       },
       (plant) {
@@ -555,8 +578,8 @@ class PlantsProvider extends ChangeNotifier {
 
     final result = await _searchPlantsUseCase.call(SearchPlantsParams(query));
 
-    result.fold((failure) => _setError(_getErrorMessage(failure)), (results) {
-      _searchResults = _sortPlants(results);
+    result.fold((failure) => _setError(_crudService.getErrorMessage(failure)), (results) {
+      _searchResults = _sortService.sortPlants(results, _sortBy);
       _isSearching = false;
     });
 
@@ -568,14 +591,14 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final result = await _addPlantUseCase.call(params);
+    final result = await _crudService.addPlant(params);
 
     final success = result.fold(
-      (failure) {
-        _setError(_getErrorMessage(failure));
+      (Failure failure) {
+        _setError(_crudService.getErrorMessage(failure));
         return false;
       },
-      (plant) {
+      (Plant plant) {
         _plants.insert(0, plant);
         _applyFilters();
         return true;
@@ -591,18 +614,18 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final result = await _updatePlantUseCase.call(params);
+    final result = await _crudService.updatePlant(params);
 
     final success = result.fold(
-      (failure) {
-        _setError(_getErrorMessage(failure));
+      (Failure failure) {
+        _setError(_crudService.getErrorMessage(failure));
         return false;
       },
-      (updatedPlant) {
+      (Plant updatedPlant) {
         final index = _plants.indexWhere((p) => p.id == updatedPlant.id);
         if (index != -1) {
           _plants[index] = updatedPlant;
-          _plants = _sortPlants(_plants);
+          _plants = _sortService.sortPlants(_plants, _sortBy);
           _applyFilters();
         }
 
@@ -624,11 +647,11 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
-    final result = await _deletePlantUseCase.call(id);
+    final result = await _crudService.deletePlant(id);
 
     final success = result.fold(
-      (failure) {
-        _setError(_getErrorMessage(failure));
+      (Failure failure) {
+        _setError(_crudService.getErrorMessage(failure));
         return false;
       },
       (_) {
@@ -661,8 +684,8 @@ class PlantsProvider extends ChangeNotifier {
   void setSortBy(SortBy sort) {
     if (_sortBy != sort) {
       _sortBy = sort;
-      _plants = _sortPlants(_plants);
-      _searchResults = _sortPlants(_searchResults);
+      _plants = _sortService.sortPlants(_plants, _sortBy);
+      _searchResults = _sortService.sortPlants(_searchResults, _sortBy);
       _applyFilters();
     }
   }
@@ -688,37 +711,23 @@ class PlantsProvider extends ChangeNotifier {
   /// Groups plants by spaces for grouped view
   Map<String?, List<Plant>> get plantsGroupedBySpaces {
     final plantsToGroup = _searchQuery.isNotEmpty ? _searchResults : _plants;
-    final Map<String?, List<Plant>> groupedPlants = {};
-
-    for (final plant in plantsToGroup) {
-      final spaceId = plant.spaceId;
-      if (!groupedPlants.containsKey(spaceId)) {
-        groupedPlants[spaceId] = [];
-      }
-      groupedPlants[spaceId]!.add(plant);
-    }
-
-    return groupedPlants;
+    return _filterService.groupPlantsBySpaces(plantsToGroup);
   }
 
   /// Gets the count of plants in each space
   Map<String?, int> get plantCountsBySpace {
-    final grouped = plantsGroupedBySpaces;
-    return grouped.map((spaceId, plants) => MapEntry(spaceId, plants.length));
+    final plantsToGroup = _searchQuery.isNotEmpty ? _searchResults : _plants;
+    return _filterService.getPlantCountsBySpace(plantsToGroup);
   }
 
   /// Toggle between normal view and grouped by spaces view
   void toggleGroupedView() {
-    if (_viewMode == ViewMode.groupedBySpaces) {
-      _viewMode = ViewMode.list; // Volta para lista normal
-    } else {
-      _viewMode = ViewMode.groupedBySpaces; // Muda para agrupado
-    }
+    _viewMode = _sortService.toggleGroupedView(_viewMode);
     notifyListeners();
   }
 
   /// Check if current view is grouped by spaces
-  bool get isGroupedBySpaces => _viewMode == ViewMode.groupedBySpaces;
+  bool get isGroupedBySpaces => _sortService.isGroupedView(_viewMode);
 
   // Clear selected plant
   void clearSelectedPlant() {
@@ -766,200 +775,24 @@ class PlantsProvider extends ChangeNotifier {
   }
 
   // Get plants count
-  int get plantsCount => _plants.length;
+  int get plantsCount => _crudService.getPlantCount(_plants);
 
   // Get plants that need watering soon (next 2 days)
   List<Plant> getPlantsNeedingWater() {
-    final now = DateTime.now();
-    final threshold = now.add(const Duration(days: 2));
-
-    return _plants.where((plant) {
-      final config = plant.config;
-      if (config == null) return false;
-
-      // Check if watering care is enabled and has valid interval
-      if (config.enableWateringCare == true &&
-          config.wateringIntervalDays != null) {
-        final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
-        final nextWatering = lastWatering.add(
-          Duration(days: config.wateringIntervalDays!),
-        );
-
-        return nextWatering.isBefore(threshold) ||
-            nextWatering.isAtSameMomentAs(threshold);
-      }
-
-      // Fallback to old logic for backward compatibility
-      if (config.wateringIntervalDays != null) {
-        final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
-        final nextWatering = lastWatering.add(
-          Duration(days: config.wateringIntervalDays!),
-        );
-
-        return nextWatering.isBefore(threshold) ||
-            nextWatering.isAtSameMomentAs(threshold);
-      }
-
-      return false;
-    }).toList();
+    return _careService.getPlantsNeedingWater(_plants);
   }
 
   // Get plants that need fertilizer soon (next 2 days)
   List<Plant> getPlantsNeedingFertilizer() {
-    final now = DateTime.now();
-    final threshold = now.add(const Duration(days: 2));
-
-    return _plants.where((plant) {
-      final config = plant.config;
-      if (config == null) return false;
-
-      // Check if fertilizer care is enabled and has valid interval
-      if (config.enableFertilizerCare == true &&
-          config.fertilizingIntervalDays != null) {
-        final lastFertilizer =
-            config.lastFertilizerDate ?? plant.createdAt ?? now;
-        final nextFertilizer = lastFertilizer.add(
-          Duration(days: config.fertilizingIntervalDays!),
-        );
-
-        return nextFertilizer.isBefore(threshold) ||
-            nextFertilizer.isAtSameMomentAs(threshold);
-      }
-
-      // Fallback to old logic for backward compatibility
-      if (config.fertilizingIntervalDays != null) {
-        final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
-        final nextFertilizer = lastFertilizer.add(
-          Duration(days: config.fertilizingIntervalDays!),
-        );
-
-        return nextFertilizer.isBefore(threshold) ||
-            nextFertilizer.isAtSameMomentAs(threshold);
-      }
-
-      return false;
-    }).toList();
+    return _careService.getPlantsNeedingFertilizer(_plants);
   }
 
   // Get plants by care status
   List<Plant> getPlantsByCareStatus(CareStatus status) {
-    final now = DateTime.now();
-
-    return _plants.where((plant) {
-      final config = plant.config;
-      if (config == null) {
-        return status == CareStatus.unknown;
-      }
-
-      switch (status) {
-        case CareStatus.needsWater:
-          return _checkWaterStatus(plant, now, 0);
-        case CareStatus.soonWater:
-          return _checkWaterStatus(plant, now, 2);
-        case CareStatus.needsFertilizer:
-          return _checkFertilizerStatus(plant, now, 0);
-        case CareStatus.soonFertilizer:
-          return _checkFertilizerStatus(plant, now, 2);
-        case CareStatus.good:
-          return _isPlantInGoodCondition(plant, now);
-        case CareStatus.unknown:
-          return config.wateringIntervalDays == null &&
-              config.fertilizingIntervalDays == null;
-      }
-    }).toList();
+    return _careService.getPlantsByCareStatus(_plants, status);
   }
 
-  // Helper method to check water status
-  bool _checkWaterStatus(Plant plant, DateTime now, int dayThreshold) {
-    final config = plant.config;
-    if (config == null) return false;
-
-    // Use new care system if enabled
-    if (config.enableWateringCare == true &&
-        config.wateringIntervalDays != null) {
-      final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
-      final nextWatering = lastWatering.add(
-        Duration(days: config.wateringIntervalDays!),
-      );
-      final daysDifference = nextWatering.difference(now).inDays;
-
-      return dayThreshold == 0
-          ? daysDifference <= 0
-          : daysDifference > 0 && daysDifference <= dayThreshold;
-    }
-
-    // Fallback to old system
-    if (config.wateringIntervalDays != null) {
-      final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
-      final nextWatering = lastWatering.add(
-        Duration(days: config.wateringIntervalDays!),
-      );
-      final daysDifference = nextWatering.difference(now).inDays;
-
-      return dayThreshold == 0
-          ? daysDifference <= 0
-          : daysDifference > 0 && daysDifference <= dayThreshold;
-    }
-
-    return false;
-  }
-
-  // Helper method to check fertilizer status
-  bool _checkFertilizerStatus(Plant plant, DateTime now, int dayThreshold) {
-    final config = plant.config;
-    if (config == null) return false;
-
-    // Use new care system if enabled
-    if (config.enableFertilizerCare == true &&
-        config.fertilizingIntervalDays != null) {
-      final lastFertilizer =
-          config.lastFertilizerDate ?? plant.createdAt ?? now;
-      final nextFertilizer = lastFertilizer.add(
-        Duration(days: config.fertilizingIntervalDays!),
-      );
-      final daysDifference = nextFertilizer.difference(now).inDays;
-
-      return dayThreshold == 0
-          ? daysDifference <= 0
-          : daysDifference > 0 && daysDifference <= dayThreshold;
-    }
-
-    // Fallback to old system
-    if (config.fertilizingIntervalDays != null) {
-      final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
-      final nextFertilizer = lastFertilizer.add(
-        Duration(days: config.fertilizingIntervalDays!),
-      );
-      final daysDifference = nextFertilizer.difference(now).inDays;
-
-      return dayThreshold == 0
-          ? daysDifference <= 0
-          : daysDifference > 0 && daysDifference <= dayThreshold;
-    }
-
-    return false;
-  }
-
-  // Helper method to check if plant is in good condition
-  bool _isPlantInGoodCondition(Plant plant, DateTime now) {
-    final waterGood =
-        !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
-    final fertilizerGood =
-        !_checkFertilizerStatus(plant, now, 0) &&
-        !_checkFertilizerStatus(plant, now, 2);
-
-    final config = plant.config;
-    final hasWaterCare =
-        config?.enableWateringCare == true ||
-        config?.wateringIntervalDays != null;
-    final hasFertilizerCare =
-        config?.enableFertilizerCare == true ||
-        config?.fertilizingIntervalDays != null;
-
-    // Plant is good if it doesn't need water or fertilizer within 2 days
-    return (hasWaterCare ? waterGood : true) &&
-        (hasFertilizerCare ? fertilizerGood : true);
-  }
+  // Care status helper methods now delegated to PlantsCareService
 
   // Private methods
   void _setLoading(bool loading) {
@@ -983,106 +816,20 @@ class PlantsProvider extends ChangeNotifier {
     }
   }
 
-  List<Plant> _sortPlants(List<Plant> plants) {
-    final sortedPlants = List<Plant>.from(plants);
-
-    switch (_sortBy) {
-      case SortBy.newest:
-        sortedPlants.sort(
-          (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
-            a.createdAt ?? DateTime.now(),
-          ),
-        );
-        break;
-      case SortBy.oldest:
-        sortedPlants.sort(
-          (a, b) => (a.createdAt ?? DateTime.now()).compareTo(
-            b.createdAt ?? DateTime.now(),
-          ),
-        );
-        break;
-      case SortBy.name:
-        sortedPlants.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case SortBy.species:
-        sortedPlants.sort(
-          (a, b) => (a.species ?? '').compareTo(b.species ?? ''),
-        );
-        break;
-    }
-
-    return sortedPlants;
-  }
+  // Sorting now delegated to PlantsSortService
 
   void _applyFilters() {
     List<Plant> filtered = List.from(_plants);
 
     if (_filterBySpace != null) {
-      filtered =
-          filtered.where((plant) => plant.spaceId == _filterBySpace).toList();
+      filtered = _filterService.filterBySpace(filtered, _filterBySpace);
     }
 
     _plants = filtered;
     notifyListeners();
   }
 
-  String _getErrorMessage(Failure failure) {
-    // Log detailed error for debugging
-    if (kDebugMode) {
-      print('PlantsProvider Error Details:');
-      print('- Type: ${failure.runtimeType}');
-      print('- Message: ${failure.message}');
-      print('- Stack trace: ${StackTrace.current}');
-    }
-
-    switch (failure.runtimeType) {
-      case ValidationFailure _:
-        return failure.message.isNotEmpty
-            ? failure.message
-            : 'Dados inválidos fornecidos';
-      case CacheFailure _:
-        // More specific cache error messages
-        if (failure.message.contains('PlantaModelAdapter') ||
-            failure.message.contains('TypeAdapter')) {
-          return 'Erro ao acessar dados locais. O app será reiniciado para corrigir o problema.';
-        }
-        if (failure.message.contains('HiveError') ||
-            failure.message.contains('corrupted')) {
-          return 'Dados locais corrompidos. Sincronizando com servidor...';
-        }
-        return failure.message.isNotEmpty
-            ? 'Cache: ${failure.message}'
-            : 'Erro ao acessar dados locais';
-      case NetworkFailure _:
-        return 'Sem conexão com a internet. Verifique sua conectividade.';
-      case ServerFailure _:
-        // Check if it's specifically an auth error
-        if (failure.message.contains('não autenticado') ||
-            failure.message.contains('unauthorized') ||
-            failure.message.contains('Usuário não autenticado')) {
-          return 'Sessão expirada. Tente fazer login novamente.';
-        }
-        if (failure.message.contains('403') ||
-            failure.message.contains('Forbidden')) {
-          return 'Acesso negado. Verifique suas permissões.';
-        }
-        if (failure.message.contains('500') ||
-            failure.message.contains('Internal')) {
-          return 'Erro no servidor. Tente novamente em alguns instantes.';
-        }
-        return failure.message.isNotEmpty
-            ? 'Servidor: ${failure.message}'
-            : 'Erro no servidor';
-      case NotFoundFailure _:
-        return failure.message.isNotEmpty
-            ? failure.message
-            : 'Dados não encontrados';
-      default:
-        final errorContext =
-            kDebugMode ? ' (${failure.runtimeType}: ${failure.message})' : '';
-        return 'Ops! Algo deu errado$errorContext';
-    }
-  }
+  // Error handling now delegated to PlantsCrudService
 
   @override
   void dispose() {
@@ -1095,22 +842,4 @@ class PlantsProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-enum ViewMode {
-  grid,
-  list,
-  groupedBySpaces,
-  groupedBySpacesGrid,
-  groupedBySpacesList,
-}
-
-enum SortBy { newest, oldest, name, species }
-
-enum CareStatus {
-  needsWater,
-  soonWater,
-  needsFertilizer,
-  soonFertilizer,
-  good,
-  unknown,
-}
+// Enums now exported from services - see top of file

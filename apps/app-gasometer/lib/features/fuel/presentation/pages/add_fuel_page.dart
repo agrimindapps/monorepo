@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/base_provider.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../providers/fuel_form_provider.dart';
 import '../providers/fuel_provider.dart';
@@ -240,8 +241,8 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
         debugPrint('[FUEL DEBUG] Provider error message: ${fuelProvider.errorMessage}');
         if (mounted) {
           // Show error in dialog context (before closing)
-          final errorMessage = fuelProvider.errorMessage?.isNotEmpty == true 
-              ? fuelProvider.errorMessage! 
+          final errorMessage = fuelProvider.errorMessage.isNotEmpty
+              ? fuelProvider.errorMessage
               : 'Erro ao salvar abastecimento';
           _showErrorDialog('Erro', errorMessage);
         }

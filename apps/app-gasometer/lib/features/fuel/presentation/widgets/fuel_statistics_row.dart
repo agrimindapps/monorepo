@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../providers/fuel_provider.dart';
+import '../services/fuel_statistics_service.dart';
 import 'fuel_stat_card.dart';
 
 /// Reusable fuel statistics row widget following SOLID principles

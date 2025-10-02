@@ -7,14 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/widgets/form_section_header.dart';
-import '../../../../core/widgets/notes_form_field.dart';
-import '../../../../core/widgets/validated_form_field.dart';
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/base_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/validation/form_validator.dart';
 import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
+import '../../../../core/widgets/form_section_header.dart';
+import '../../../../core/widgets/notes_form_field.dart';
+import '../../../../core/widgets/validated_form_field.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_form_provider.dart';
@@ -928,7 +929,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
           Navigator.of(context).pop(true);
         } else {
           // Se falhou, mostrar o erro no header
-          final errorMessage = vehiclesProvider.errorMessage ?? 'Erro desconhecido ao salvar veículo';
+          final errorMessage = vehiclesProvider.errorMessage.isNotEmpty
+              ? vehiclesProvider.errorMessage
+              : 'Erro desconhecido ao salvar veículo';
           setFormError('Erro ao salvar veículo: $errorMessage');
         }
       }

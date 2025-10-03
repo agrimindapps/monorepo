@@ -24,15 +24,24 @@ abstract class PlantTasksLocalDatasource {
 
 class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   static const String _boxName = 'plant_tasks';
-  Box<String>? _box;
+  Box? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
 
   // Cache for performance optimization
   List<PlantTask>? _cachedTasks;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
 
-  Future<Box<String>> get box async {
-    _box ??= await Hive.openBox<String>(_boxName);
+  Future<Box> get box async {
+    if (_box != null) return _box!;
+
+    // If box is already open (by UnifiedSync), reuse it
+    if (Hive.isBoxOpen(_boxName)) {
+      _box = Hive.box(_boxName);
+      return _box!;
+    }
+
+    // Otherwise open it
+    _box = await Hive.openBox(_boxName);
     return _box!;
   }
 
@@ -63,7 +72,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
 
       for (final key in hiveBox.keys) {
         try {
-          final taskJson = hiveBox.get(key);
+          final taskJson = hiveBox.get(key) as String?;
           if (taskJson != null) {
             final taskData = jsonDecode(taskJson) as Map<String, dynamic>;
             final taskModel = PlantTaskModel.fromJson(taskData);
@@ -150,7 +159,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<PlantTask?> getPlantTaskById(String id) async {
     try {
       final hiveBox = await box;
-      final taskJson = hiveBox.get(id);
+      final taskJson = hiveBox.get(id) as String?;
 
       if (taskJson == null) {
         return null;
@@ -292,7 +301,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final hiveBox = await box;
 
       // Get existing task first for soft delete
-      final taskJson = hiveBox.get(id);
+      final taskJson = hiveBox.get(id) as String?;
       if (taskJson != null) {
         final taskData = jsonDecode(taskJson) as Map<String, dynamic>;
         final taskModel = PlantTaskModel.fromJson(taskData);

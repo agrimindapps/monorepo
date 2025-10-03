@@ -15,10 +15,19 @@ abstract class SpacesLocalDatasource {
 
 class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   static const String _boxName = 'spaces';
-  Box<String>? _box;
+  Box? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
 
-  Future<Box<String>> get box async {
-    _box ??= await Hive.openBox<String>(_boxName);
+  Future<Box> get box async {
+    if (_box != null) return _box!;
+
+    // If box is already open (by UnifiedSync), reuse it
+    if (Hive.isBoxOpen(_boxName)) {
+      _box = Hive.box(_boxName);
+      return _box!;
+    }
+
+    // Otherwise open it
+    _box = await Hive.openBox(_boxName);
     return _box!;
   }
 
@@ -29,7 +38,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final spaces = <SpaceModel>[];
 
       for (final key in hiveBox.keys) {
-        final spaceJson = hiveBox.get(key);
+        final spaceJson = hiveBox.get(key) as String?;
         if (spaceJson != null) {
           final spaceData = jsonDecode(spaceJson) as Map<String, dynamic>;
           final space = SpaceModel.fromJson(spaceData);
@@ -58,7 +67,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   Future<SpaceModel?> getSpaceById(String id) async {
     try {
       final hiveBox = await box;
-      final spaceJson = hiveBox.get(id);
+      final spaceJson = hiveBox.get(id) as String?;
 
       if (spaceJson == null) {
         return null;
@@ -107,7 +116,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final hiveBox = await box;
 
       // Get existing space first
-      final spaceJson = hiveBox.get(id);
+      final spaceJson = hiveBox.get(id) as String?;
       if (spaceJson != null) {
         final spaceData = jsonDecode(spaceJson) as Map<String, dynamic>;
         final space = SpaceModel.fromJson(spaceData);

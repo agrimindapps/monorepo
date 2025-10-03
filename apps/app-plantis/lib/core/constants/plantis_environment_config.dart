@@ -57,13 +57,15 @@ class PlantisEnvironmentConfig extends AppEnvironmentConfig {
 /// Plantis-specific box names for local storage
 class PlantisBoxes {
   static const String main = 'plantis_main';
-  static const String plants = 'plantis_plants';
-  static const String spaces = 'plantis_spaces';
-  static const String tasks = 'plantis_tasks';
+  // Boxes gerenciadas pelo UnifiedSyncManager (sem prefixo plantis_)
+  static const String plants = 'plants';
+  static const String spaces = 'spaces';
+  static const String tasks = 'tasks';
+  static const String comentarios = 'comentarios';
+  // Boxes específicas do Plantis (com prefixo)
   static const String reminders = 'plantis_reminders';
   static const String care_logs = 'plantis_care_logs';
   static const String backups = 'plantis_backups';
-  static const String comentarios = 'comentarios';
 }
 
 /// Plantis-specific image service configuration

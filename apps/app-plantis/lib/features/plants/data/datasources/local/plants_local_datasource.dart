@@ -21,7 +21,7 @@ abstract class PlantsLocalDatasource {
 
 class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   static const String _boxName = 'plants'; // Usa box do UnifiedSyncManager
-  Box<String>? _box;
+  Box? _box; // Sem tipo específico para aceitar Box<dynamic> ou Box<String>
 
   // Cache for performance optimization
   List<Plant>? _cachedPlants;
@@ -30,7 +30,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
   final PlantsSearchService _searchService = PlantsSearchService.instance;
 
-  Future<Box<String>> get box async {
+  Future<Box> get box async {
     if (_box != null) return _box!;
 
     // Se a box já está aberta (por UnifiedSync ou outro processo), reutiliza
@@ -38,14 +38,13 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       if (kDebugMode) {
         print('ℹ️ Box "$_boxName" já está aberta - reutilizando');
       }
-      // Pega a box já aberta e faz cast
-      // Funciona porque UnifiedSync também usa String como valor
-      _box = Hive.box<String>(_boxName);
+      // Pega a box já aberta (pode ser Box<dynamic> ou Box<String>)
+      _box = Hive.box(_boxName);
       return _box!;
     }
 
     // Se não está aberta, abre normalmente
-    _box = await Hive.openBox<String>(_boxName);
+    _box = await Hive.openBox(_boxName);
     return _box!;
   }
 
@@ -65,7 +64,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
       for (final key in hiveBox.keys) {
         try {
-          final plantJson = hiveBox.get(key);
+          final plantJson = hiveBox.get(key) as String?;
           if (plantJson != null) {
             final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
             final plant = PlantModel.fromJson(plantData);
@@ -113,7 +112,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<Plant?> getPlantById(String id) async {
     try {
       final hiveBox = await box;
-      final plantJson = hiveBox.get(id);
+      final plantJson = hiveBox.get(id) as String?;
 
       if (plantJson == null) {
         return null;
@@ -217,7 +216,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final hiveBox = await box;
 
       // Get existing plant first
-      final plantJson = hiveBox.get(id);
+      final plantJson = hiveBox.get(id) as String?;
       if (plantJson != null) {
         final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
         final plant = PlantModel.fromJson(plantData);

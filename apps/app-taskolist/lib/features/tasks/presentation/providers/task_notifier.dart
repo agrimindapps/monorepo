@@ -1,0 +1,427 @@
+import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
+
+import '../../../../core/di/injection.dart' as di;
+import '../../domain/create_task.dart';
+import '../../domain/delete_task.dart';
+import '../../domain/get_subtasks.dart';
+import '../../domain/get_tasks.dart';
+import '../../domain/reorder_tasks.dart';
+import '../../domain/task_entity.dart';
+import '../../domain/update_task.dart';
+import '../../domain/watch_tasks.dart';
+
+part 'task_notifier.g.dart';
+
+// =============================================================================
+// DEPENDENCY PROVIDERS (Use Cases from GetIt)
+// =============================================================================
+
+@riverpod
+CreateTask createTaskUseCase(CreateTaskUseCaseRef ref) {
+  return di.getIt<CreateTask>();
+}
+
+@riverpod
+DeleteTask deleteTaskUseCase(DeleteTaskUseCaseRef ref) {
+  return di.getIt<DeleteTask>();
+}
+
+@riverpod
+GetTasks getTasksUseCase(GetTasksUseCaseRef ref) {
+  return di.getIt<GetTasks>();
+}
+
+@riverpod
+ReorderTasks reorderTasksUseCase(ReorderTasksUseCaseRef ref) {
+  return di.getIt<ReorderTasks>();
+}
+
+@riverpod
+UpdateTask updateTaskUseCase(UpdateTaskUseCaseRef ref) {
+  return di.getIt<UpdateTask>();
+}
+
+@riverpod
+WatchTasks watchTasksUseCase(WatchTasksUseCaseRef ref) {
+  return di.getIt<WatchTasks>();
+}
+
+@riverpod
+GetSubtasks getSubtasksUseCase(GetSubtasksUseCaseRef ref) {
+  return di.getIt<GetSubtasks>();
+}
+
+// =============================================================================
+// TASK ASYNC NOTIFIER (Main state management)
+// =============================================================================
+
+@riverpod
+class TaskNotifier extends _$TaskNotifier {
+  late final CreateTask _createTask;
+  late final DeleteTask _deleteTask;
+  late final GetTasks _getTasks;
+  late final ReorderTasks _reorderTasks;
+  late final UpdateTask _updateTask;
+  late final WatchTasks _watchTasks;
+
+  @override
+  Future<List<TaskEntity>> build() async {
+    // Initialize use cases
+    _createTask = ref.read(createTaskUseCaseProvider);
+    _deleteTask = ref.read(deleteTaskUseCaseProvider);
+    _getTasks = ref.read(getTasksUseCaseProvider);
+    _reorderTasks = ref.read(reorderTasksUseCaseProvider);
+    _updateTask = ref.read(updateTaskUseCaseProvider);
+    _watchTasks = ref.read(watchTasksUseCaseProvider);
+
+    // Load initial tasks
+    final result = await _getTasks(const GetTasksParams());
+
+    return result.fold(
+      (failure) => throw failure,
+      (tasks) => tasks,
+    );
+  }
+
+  // =============================================================================
+  // ACTIONS
+  // =============================================================================
+
+  Future<void> getTasks({
+    String? listId,
+    String? userId,
+    TaskStatus? status,
+    TaskPriority? priority,
+    bool? isStarred,
+  }) async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      final result = await _getTasks(GetTasksParams(
+        listId: listId,
+        userId: userId,
+        status: status,
+        priority: priority,
+        isStarred: isStarred,
+      ));
+
+      return result.fold(
+        (failure) => throw failure,
+        (tasks) => tasks,
+      );
+    });
+  }
+
+  Future<void> createTask(TaskEntity task) async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      final result = await _createTask(CreateTaskParams(task: task));
+
+      return result.fold(
+        (failure) => throw failure,
+        (taskId) {
+          final updatedTask = task.copyWith(id: taskId);
+          final currentTasks = state.value ?? [];
+          return [...currentTasks, updatedTask];
+        },
+      );
+    });
+  }
+
+  /// Método específico para criar subtasks
+  Future<void> createSubtask(TaskEntity subtask) async {
+    await createTask(subtask);
+  }
+
+  Future<void> updateTask(TaskEntity task) async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      final result = await _updateTask(UpdateTaskParams(task: task));
+
+      return result.fold(
+        (failure) => throw failure,
+        (_) {
+          final currentTasks = state.value ?? [];
+          return currentTasks.map((t) {
+            return t.id == task.id ? task : t;
+          }).toList();
+        },
+      );
+    });
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      final result = await _deleteTask(DeleteTaskParams(taskId: taskId));
+
+      return result.fold(
+        (failure) => throw failure,
+        (_) {
+          final currentTasks = state.value ?? [];
+          return currentTasks.where((t) => t.id != taskId).toList();
+        },
+      );
+    });
+  }
+
+  /// Métodos específicos para subtasks
+  Future<void> updateSubtask(TaskEntity subtask) async {
+    await updateTask(subtask);
+  }
+
+  Future<void> deleteSubtask(String subtaskId) async {
+    await deleteTask(subtaskId);
+  }
+
+  Future<void> reorderTasks(List<String> taskIds) async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      final result = await _reorderTasks(ReorderTasksParams(taskIds: taskIds));
+
+      return result.fold(
+        (failure) => throw failure,
+        (_) {
+          final currentTasks = state.value ?? [];
+          // Reordenar as tasks localmente conforme a nova ordem
+          final reorderedTasks = <TaskEntity>[];
+
+          // Adicionar tasks na nova ordem
+          for (int i = 0; i < taskIds.length; i++) {
+            final taskId = taskIds[i];
+            final task = currentTasks.firstWhere(
+              (t) => t.id == taskId,
+              orElse: () => currentTasks.first, // fallback, não deveria acontecer
+            );
+            reorderedTasks.add(task.copyWith(position: i));
+          }
+
+          // Adicionar qualquer task que não estava na lista de reordenação
+          final remainingTasks = currentTasks.where(
+            (task) => !taskIds.contains(task.id),
+          ).toList();
+          reorderedTasks.addAll(remainingTasks);
+
+          return reorderedTasks;
+        },
+      );
+    });
+  }
+}
+
+// =============================================================================
+// STREAM PROVIDER (Watch tasks)
+// =============================================================================
+
+/// Classes para parâmetros
+class TasksStreamParams {
+  final String? listId;
+  final String? userId;
+  final TaskStatus? status;
+  final TaskPriority? priority;
+  final bool? isStarred;
+
+  const TasksStreamParams({
+    this.listId,
+    this.userId,
+    this.status,
+    this.priority,
+    this.isStarred,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is TasksStreamParams &&
+        other.listId == listId &&
+        other.userId == userId &&
+        other.status == status &&
+        other.priority == priority &&
+        other.isStarred == isStarred;
+  }
+
+  @override
+  int get hashCode {
+    return listId.hashCode ^
+        userId.hashCode ^
+        status.hashCode ^
+        priority.hashCode ^
+        isStarred.hashCode;
+  }
+}
+
+/// Provider para stream de tasks
+@riverpod
+Stream<List<TaskEntity>> tasksStream(
+  TasksStreamRef ref,
+  TasksStreamParams params,
+) {
+  final watchTasks = ref.watch(watchTasksUseCaseProvider);
+
+  return watchTasks(WatchTasksParams(
+    listId: params.listId,
+    userId: params.userId,
+    status: params.status,
+    priority: params.priority,
+    isStarred: params.isStarred,
+  ));
+}
+
+// =============================================================================
+// FUTURE PROVIDER (Create task with auto ID)
+// =============================================================================
+
+class TaskCreationData {
+  final String title;
+  final String? description;
+  final String listId;
+  final String createdById;
+  final String? assignedToId;
+  final DateTime? dueDate;
+  final DateTime? reminderDate;
+  final TaskStatus? status;
+  final TaskPriority? priority;
+  final bool? isStarred;
+  final int? position;
+  final List<String>? tags;
+  final String? parentTaskId;
+
+  const TaskCreationData({
+    required this.title,
+    this.description,
+    required this.listId,
+    required this.createdById,
+    this.assignedToId,
+    this.dueDate,
+    this.reminderDate,
+    this.status,
+    this.priority,
+    this.isStarred,
+    this.position,
+    this.tags,
+    this.parentTaskId,
+  });
+}
+
+/// Provider para criar task com ID automático
+@riverpod
+Future<String> createTaskWithId(
+  CreateTaskWithIdRef ref,
+  TaskCreationData taskData,
+) async {
+  final createTask = ref.watch(createTaskUseCaseProvider);
+  const uuid = Uuid();
+
+  final task = TaskEntity(
+    id: uuid.v4(),
+    title: taskData.title,
+    description: taskData.description,
+    listId: taskData.listId,
+    createdById: taskData.createdById,
+    assignedToId: taskData.assignedToId,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+    dueDate: taskData.dueDate,
+    reminderDate: taskData.reminderDate,
+    status: taskData.status ?? TaskStatus.pending,
+    priority: taskData.priority ?? TaskPriority.medium,
+    isStarred: taskData.isStarred ?? false,
+    position: taskData.position ?? 0,
+    tags: taskData.tags ?? const [],
+    parentTaskId: taskData.parentTaskId,
+  );
+
+  final result = await createTask(CreateTaskParams(task: task));
+
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (taskId) => taskId,
+  );
+}
+
+// =============================================================================
+// FUTURE PROVIDER (Get tasks)
+// =============================================================================
+
+class GetTasksRequest {
+  final String? listId;
+  final String? userId;
+  final TaskStatus? status;
+  final TaskPriority? priority;
+  final bool? isStarred;
+
+  const GetTasksRequest({
+    this.listId,
+    this.userId,
+    this.status,
+    this.priority,
+    this.isStarred,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is GetTasksRequest &&
+        other.listId == listId &&
+        other.userId == userId &&
+        other.status == status &&
+        other.priority == priority &&
+        other.isStarred == isStarred;
+  }
+
+  @override
+  int get hashCode {
+    return listId.hashCode ^
+        userId.hashCode ^
+        status.hashCode ^
+        priority.hashCode ^
+        isStarred.hashCode;
+  }
+}
+
+/// Provider para buscar tasks
+@riverpod
+Future<List<TaskEntity>> getTasksFuture(
+  GetTasksFutureRef ref,
+  GetTasksRequest request,
+) async {
+  final getTasks = ref.watch(getTasksUseCaseProvider);
+
+  final result = await getTasks(GetTasksParams(
+    listId: request.listId,
+    userId: request.userId,
+    status: request.status,
+    priority: request.priority,
+    isStarred: request.isStarred,
+  ));
+
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (tasks) => tasks,
+  );
+}
+
+// =============================================================================
+// SUBTASKS PROVIDERS
+// =============================================================================
+
+/// Provider para buscar subtasks de uma tarefa específica
+@riverpod
+Future<List<TaskEntity>> subtasks(SubtasksRef ref, String parentTaskId) async {
+  final getSubtasks = ref.watch(getSubtasksUseCaseProvider);
+
+  final result = await getSubtasks(GetSubtasksParams(parentTaskId: parentTaskId));
+
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (subtasks) => subtasks,
+  );
+}

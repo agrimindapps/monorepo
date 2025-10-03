@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/datasources/auth_local_data_source.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/usecases/delete_account.dart';
+import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
 import '../../domain/usecases/sign_in_anonymously.dart';
@@ -223,10 +222,11 @@ class Auth extends _$Auth {
     }
   }
 
-  Future<void> _setupUserSession(UserEntity? user) async {
+  Future<void> _setupUserSession(gasometer_auth.UserEntity? user) async {
     if (user == null) return;
     try {
-      if (user.isAnonymous) {
+      final isAnonymous = user.isAnonymous;
+      if (isAnonymous) {
         if (kDebugMode) {
           debugPrint('🔐 Usuário anônimo logado');
         }
@@ -235,9 +235,10 @@ class Auth extends _$Auth {
 
       // For registered users, set up analytics and check premium
       await _analytics.setUserId(user.id);
+      final isPremium = user.isPremium;
       await _analytics.setUserProperties({
-        'user_type': user.isAnonymous ? 'anonymous' : 'authenticated',
-        'is_premium': user.isPremium.toString(),
+        'user_type': isAnonymous ? 'anonymous' : 'authenticated',
+        'is_premium': isPremium.toString(),
       });
     } catch (e) {
       debugPrint('Erro ao configurar sessão do usuário: $e');
@@ -689,7 +690,7 @@ class Auth extends _$Auth {
   }
 
   /// Helper method to save user data locally including avatar
-  Future<void> _saveUserLocallyWithAvatar(UserEntity user) async {
+  Future<void> _saveUserLocallyWithAvatar(gasometer_auth.UserEntity user) async {
     try {
       if (kDebugMode) {
         debugPrint('🔐 Salvando dados do usuário localmente com avatar');
@@ -928,11 +929,11 @@ class Auth extends _$Auth {
   Future<void> resetRateLimit() => _rateLimiter.resetRateLimit();
 
   /// Convert core UserEntity to gasometer UserEntity
-  UserEntity? _convertFromCoreUser(core.UserEntity? coreUser) {
+  gasometer_auth.UserEntity? _convertFromCoreUser(core.UserEntity? coreUser) {
     if (coreUser == null) return null;
 
     // Convert from core UserEntity to gasometer UserEntity
-    return UserEntity(
+    return gasometer_auth.UserEntity(
       id: coreUser.id,
       email: coreUser.email.isEmpty ? null : coreUser.email,
       displayName: coreUser.displayName.isEmpty ? null : coreUser.displayName,
@@ -951,20 +952,20 @@ class Auth extends _$Auth {
   }
 
   /// Map AuthProvider to UserType
-  UserType _mapAuthProviderToUserType(core.AuthProvider provider) {
+  gasometer_auth.UserType _mapAuthProviderToUserType(core.AuthProvider provider) {
     switch (provider) {
       case core.AuthProvider.anonymous:
-        return UserType.anonymous;
+        return gasometer_auth.UserType.anonymous;
       case core.AuthProvider.email:
       case core.AuthProvider.google:
       case core.AuthProvider.apple:
       case core.AuthProvider.facebook:
-        return UserType.registered;
+        return gasometer_auth.UserType.registered;
     }
   }
 
   /// Convert gasometer UserEntity to core UserEntity
-  core.UserEntity _convertToCore(UserEntity gasometerUser) {
+  core.UserEntity _convertToCore(gasometer_auth.UserEntity gasometerUser) {
     // Safely extract metadata
     final metadata = gasometerUser.metadata;
     final phone = metadata['phone'];
@@ -986,12 +987,12 @@ class Auth extends _$Auth {
   }
 
   /// Map UserType to AuthProvider for reverse conversion
-  core.AuthProvider _mapUserTypeToAuthProvider(UserType userType) {
+  core.AuthProvider _mapUserTypeToAuthProvider(gasometer_auth.UserType userType) {
     switch (userType) {
-      case UserType.anonymous:
+      case gasometer_auth.UserType.anonymous:
         return core.AuthProvider.anonymous;
-      case UserType.registered:
-      case UserType.premium:
+      case gasometer_auth.UserType.registered:
+      case gasometer_auth.UserType.premium:
         return core.AuthProvider.email; // Default to email for registered users
     }
   }

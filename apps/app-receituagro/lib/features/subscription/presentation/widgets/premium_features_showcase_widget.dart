@@ -1,18 +1,19 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
-import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
 import '../providers/subscription_provider.dart';
 
 /// Advanced Premium Features Showcase Widget
-/// 
+///
 /// Features:
 /// - Dynamic feature cards with A/B testing
 /// - Cross-platform premium validation indicators
 /// - Feature discovery onboarding flow
 /// - Premium feature usage statistics
 /// - Interactive feature previews
-class PremiumFeaturesShowcaseWidget extends StatefulWidget {
+class PremiumFeaturesShowcaseWidget extends ConsumerStatefulWidget {
   final SubscriptionProvider subscriptionProvider;
   final bool showFullDetails;
   final VoidCallback? onUpgradePressed;
@@ -25,10 +26,10 @@ class PremiumFeaturesShowcaseWidget extends StatefulWidget {
   });
 
   @override
-  State<PremiumFeaturesShowcaseWidget> createState() => _PremiumFeaturesShowcaseWidgetState();
+  ConsumerState<PremiumFeaturesShowcaseWidget> createState() => _PremiumFeaturesShowcaseWidgetState();
 }
 
-class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseWidget>
+class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesShowcaseWidget>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _animationController;
@@ -61,8 +62,13 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.Consumer<FeatureFlagsProvider>(
-      builder: (context, featureFlags, child) {
+    // Watch feature flags from Riverpod
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+
+    return featureFlagsAsync.when(
+      data: (featureFlagsState) {
+        final featureFlags = ref.read(featureFlagsNotifierProvider.notifier);
+
         return FadeTransition(
           opacity: _fadeAnimation,
           child: Column(
@@ -70,14 +76,14 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
             children: [
               // Header with Premium Status
               _buildHeader(context, featureFlags),
-              
+
               const SizedBox(height: 24),
-              
+
               // Feature Categories Tabs
               _buildFeatureTabs(context),
-              
+
               const SizedBox(height: 16),
-              
+
               // Feature Content
               SizedBox(
                 height: widget.showFullDetails ? 400 : 300,
@@ -90,13 +96,13 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
                   ],
                 ),
               ),
-              
+
               // Cross-platform Sync Indicator
               if (widget.showFullDetails) ...[
                 const SizedBox(height: 24),
                 _buildCrossPlatformIndicator(context, featureFlags),
               ],
-              
+
               // Upgrade CTA
               if (!widget.subscriptionProvider.hasActiveSubscription) ...[
                 const SizedBox(height: 24),
@@ -106,11 +112,13 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
     );
   }
 
   /// Header with Premium Status and Validation
-  Widget _buildHeader(BuildContext context, FeatureFlagsProvider featureFlags) {
+  Widget _buildHeader(BuildContext context, FeatureFlagsNotifier featureFlags) {
     final theme = Theme.of(context);
     final hasActiveSubscription = widget.subscriptionProvider.hasActiveSubscription;
     
@@ -242,7 +250,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
   }
 
   /// Core Features Tab
-  Widget _buildCoreFeatures(BuildContext context, FeatureFlagsProvider featureFlags) {
+  Widget _buildCoreFeatures(BuildContext context, FeatureFlagsNotifier featureFlags) {
     final coreFeatures = [
       const PremiumFeature(
         icon: Icons.favorite,
@@ -271,7 +279,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
   }
 
   /// Advanced Features Tab
-  Widget _buildAdvancedFeatures(BuildContext context, FeatureFlagsProvider featureFlags) {
+  Widget _buildAdvancedFeatures(BuildContext context, FeatureFlagsNotifier featureFlags) {
     final advancedFeatures = [
       PremiumFeature(
         icon: Icons.cloud_download,
@@ -300,7 +308,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
   }
 
   /// Exclusive Features Tab
-  Widget _buildExclusiveFeatures(BuildContext context, FeatureFlagsProvider featureFlags) {
+  Widget _buildExclusiveFeatures(BuildContext context, FeatureFlagsNotifier featureFlags) {
     final exclusiveFeatures = [
       const PremiumFeature(
         icon: Icons.support_agent,
@@ -458,7 +466,7 @@ class _PremiumFeaturesShowcaseWidgetState extends State<PremiumFeaturesShowcaseW
   }
 
   /// Cross-platform Sync Indicator
-  Widget _buildCrossPlatformIndicator(BuildContext context, FeatureFlagsProvider featureFlags) {
+  Widget _buildCrossPlatformIndicator(BuildContext context, FeatureFlagsNotifier featureFlags) {
     if (!featureFlags.isContentSynchronizationEnabled) return const SizedBox.shrink();
     
     final theme = Theme.of(context);

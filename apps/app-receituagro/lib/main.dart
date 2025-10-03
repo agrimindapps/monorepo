@@ -5,18 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart' as provider;
 
 // Local imports
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
-import 'core/utils/receita_agro_data_inspector_initializer.dart';
+import 'core/di/receituagro_data_setup.dart';
 import 'core/navigation/app_router.dart' as app_router;
-import 'core/providers/auth_provider.dart';
-import 'core/providers/feature_flags_provider.dart';
-import 'core/providers/preferences_provider.dart';
-import 'core/providers/remote_config_provider.dart';
-import 'core/providers/theme_provider.dart';
+import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
 import 'core/services/diagnosticos_data_loader.dart';
@@ -25,14 +20,12 @@ import 'core/services/premium_service.dart';
 import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
-import 'core/di/receituagro_data_setup.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
+import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/navigation/main_navigation_page.dart';
-import 'features/settings/presentation/providers/profile_provider.dart';
-import 'features/settings/presentation/providers/settings_provider.dart';
 import 'firebase_options.dart';
 
 // Global references for error handlers
@@ -178,8 +171,9 @@ void main() async {
     final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
     await analyticsService.initialize();
   } catch (e) {
-    if (kDebugMode)
+    if (kDebugMode) {
       print('❌ [MAIN] ReceitaAgroAnalyticsService not registered: $e');
+    }
     // Analytics service will be initialized later when properly registered
   }
 
@@ -379,56 +373,23 @@ Future<void> _initializeFirebaseServices() async {
   }
 }
 
-class ReceitaAgroApp extends StatelessWidget {
+class ReceitaAgroApp extends ConsumerWidget {
   const ReceitaAgroApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider.MultiProvider(
-      providers: [
-        provider.ChangeNotifierProvider(
-          create: (_) => ThemeProvider()..initialize(),
-        ),
-        provider.ChangeNotifierProvider(
-          create: (_) => PreferencesProvider()..initialize(),
-        ),
-        // Auth Provider from Core Package Integration
-        provider.ChangeNotifierProvider(
-          create: (_) => di.sl<ReceitaAgroAuthProvider>(),
-        ),
-        // Sprint 1 Providers
-        provider.ChangeNotifierProvider(
-          create: (_) => di.sl<RemoteConfigProvider>()..initialize(),
-        ),
-        provider.ChangeNotifierProvider(
-          create: (_) => di.sl<FeatureFlagsProvider>()..initialize(),
-        ),
-        provider.ChangeNotifierProvider(
-          create: (_) => di.sl<ReceitaAgroPremiumService>(),
-        ),
-        // Profile Provider for user profile management
-        provider.ChangeNotifierProvider(
-          create: (_) => di.sl<ProfileProvider>(),
-        ),
-        // Settings Provider for device management and settings
-        provider.ChangeNotifierProvider(
-          create: (_) => di.sl<SettingsProvider>(),
-        ),
-      ],
-      child: provider.Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return MaterialApp(
-            title: 'Pragas Soja',
-            theme: ReceitaAgroTheme.lightTheme,
-            darkTheme: ReceitaAgroTheme.darkTheme,
-            themeMode: themeProvider.themeMode,
-            home: const MainNavigationPage(),
-            onGenerateRoute: app_router.AppRouter.generateRoute,
-            navigatorKey: NavigationService.navigatorKey,
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch theme from Riverpod
+    final themeMode = ref.watch(themeNotifierProvider);
+
+    return MaterialApp(
+        title: 'Pragas Soja',
+        theme: ReceitaAgroTheme.lightTheme,
+        darkTheme: ReceitaAgroTheme.darkTheme,
+        themeMode: themeMode,
+        home: const MainNavigationPage(),
+        onGenerateRoute: app_router.AppRouter.generateRoute,
+        navigatorKey: NavigationService.navigatorKey,
+        debugShowCheckedModeBanner: false,
     );
   }
 }

@@ -10,14 +10,25 @@ include: ../../analysis_options.yaml
 
 analyzer:
   # Configurações específicas do app-receituagro
+  plugins:
+    - custom_lint
+
   exclude:
     # Excluir arquivos específicos do app
     - "lib/firebase_options.dart"
-    
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+
+# Riverpod Linting
+custom_lint:
+  rules:
+    - riverpod_final_provider
+    - provider_dependencies
+
 linter:
   rules:
     # Overrides específicos para app-receituagro se necessário
     # (manter mínimo possível para consistência)
-    
+
     # Permitir prints em desenvolvimento (será removido em produção)
     avoid_print: false

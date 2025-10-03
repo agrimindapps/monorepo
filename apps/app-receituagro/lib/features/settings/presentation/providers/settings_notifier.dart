@@ -1,0 +1,676 @@
+import 'dart:async';
+
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/interfaces/i_premium_service.dart';
+import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/services/device_identity_service.dart';
+import '../../../../core/services/promotional_notification_manager.dart';
+import '../../../../core/services/receituagro_notification_service.dart';
+import '../../domain/entities/user_settings_entity.dart';
+import '../../domain/usecases/get_user_settings_usecase.dart';
+import '../../domain/usecases/update_user_settings_usecase.dart';
+
+part 'settings_notifier.g.dart';
+
+/// Settings state
+class SettingsState {
+  final UserSettingsEntity? settings;
+  final bool isLoading;
+  final String? error;
+  final String currentUserId;
+  final bool isPremiumUser;
+  final DeviceEntity? currentDevice;
+  final List<DeviceEntity> connectedDevices;
+
+  const SettingsState({
+    this.settings,
+    required this.isLoading,
+    this.error,
+    required this.currentUserId,
+    required this.isPremiumUser,
+    this.currentDevice,
+    required this.connectedDevices,
+  });
+
+  factory SettingsState.initial() {
+    return const SettingsState(
+      settings: null,
+      isLoading: false,
+      error: null,
+      currentUserId: '',
+      isPremiumUser: false,
+      currentDevice: null,
+      connectedDevices: [],
+    );
+  }
+
+  SettingsState copyWith({
+    UserSettingsEntity? settings,
+    bool? isLoading,
+    String? error,
+    String? currentUserId,
+    bool? isPremiumUser,
+    DeviceEntity? currentDevice,
+    List<DeviceEntity>? connectedDevices,
+  }) {
+    return SettingsState(
+      settings: settings ?? this.settings,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+      currentUserId: currentUserId ?? this.currentUserId,
+      isPremiumUser: isPremiumUser ?? this.isPremiumUser,
+      currentDevice: currentDevice ?? this.currentDevice,
+      connectedDevices: connectedDevices ?? this.connectedDevices,
+    );
+  }
+
+  SettingsState clearError() {
+    return copyWith(error: null);
+  }
+
+  // Settings getters for easier access
+  bool get isDarkTheme => settings?.isDarkTheme ?? false;
+  bool get notificationsEnabled => settings?.notificationsEnabled ?? true;
+  bool get soundEnabled => settings?.soundEnabled ?? true;
+  String get language => settings?.language ?? 'pt-BR';
+  bool get isDevelopmentMode => settings?.isDevelopmentMode ?? false;
+  bool get speechToTextEnabled => settings?.speechToTextEnabled ?? false;
+  bool get analyticsEnabled => settings?.analyticsEnabled ?? true;
+  bool get hasSettings => settings != null;
+
+  /// Converts DeviceEntity to DeviceInfo for UI compatibility
+  DeviceInfo _convertToDeviceInfo(DeviceEntity entity) {
+    return DeviceInfo(
+      uuid: entity.uuid,
+      name: entity.name,
+      model: entity.model,
+      platform: entity.platform,
+      systemVersion: entity.systemVersion,
+      appVersion: entity.appVersion,
+      buildNumber: entity.buildNumber,
+      identifier: entity.id,
+      isPhysicalDevice: entity.isPhysicalDevice,
+      manufacturer: entity.manufacturer,
+      firstLoginAt: entity.firstLoginAt,
+      lastActiveAt: entity.lastActiveAt,
+      isActive: entity.isActive,
+    );
+  }
+
+  /// Current device as DeviceInfo for UI compatibility
+  DeviceInfo? get currentDeviceInfo =>
+      currentDevice != null ? _convertToDeviceInfo(currentDevice!) : null;
+
+  /// Connected devices as DeviceInfo list for UI compatibility
+  List<DeviceInfo> get connectedDevicesInfo =>
+      connectedDevices.map((device) => _convertToDeviceInfo(device)).toList();
+}
+
+/// Settings notifier for user settings management
+@riverpod
+class SettingsNotifier extends _$SettingsNotifier {
+  late final GetUserSettingsUseCase _getUserSettingsUseCase;
+  late final UpdateUserSettingsUseCase _updateUserSettingsUseCase;
+
+  // Services from DI
+  late final IPremiumService _premiumService;
+  late final ReceitaAgroNotificationService _notificationService;
+  late final PromotionalNotificationManager _promotionalManager;
+  late final IAnalyticsRepository _analyticsRepository;
+  late final ICrashlyticsRepository _crashlyticsRepository;
+  late final IAppRatingRepository _appRatingRepository;
+  // DeviceIdentityService not currently used
+  // late final DeviceIdentityService _deviceIdentityService;
+  late final FeatureFlagsProvider _featureFlagsProvider;
+  DeviceManagementService? _deviceManagementService;
+
+  @override
+  Future<SettingsState> build() async {
+    // Get use cases from DI
+    _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
+    _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
+
+    // Initialize services
+    _initializeServices();
+
+    // Cleanup on dispose
+    ref.onDispose(() {
+      unawaited(
+        _notificationService.cancelAllNotifications().catchError((Object e) {
+          debugPrint('Error cleaning notification resources: $e');
+          return false;
+        }),
+      );
+    });
+
+    return SettingsState.initial();
+  }
+
+  void _initializeServices() {
+    try {
+      _premiumService = di.sl<IPremiumService>();
+      _notificationService = di.sl<ReceitaAgroNotificationService>();
+      _promotionalManager = PromotionalNotificationManager();
+      _analyticsRepository = di.sl<IAnalyticsRepository>();
+      _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
+      _appRatingRepository = di.sl<IAppRatingRepository>();
+      // _deviceIdentityService = di.sl<DeviceIdentityService>(); // Not currently used
+      _featureFlagsProvider = di.sl<FeatureFlagsProvider>();
+
+      // DeviceManagementService may not be available on Web
+      if (di.sl.isRegistered<DeviceManagementService>()) {
+        _deviceManagementService = di.sl<DeviceManagementService>();
+      } else {
+        debugPrint('⚠️  DeviceManagementService not available (Web platform)');
+      }
+    } catch (e) {
+      debugPrint('Error initializing services: $e');
+      debugPrint('Stack trace:');
+      debugPrint(StackTrace.current.toString());
+    }
+  }
+
+  /// Initialize provider and load settings for user
+  Future<void> initialize(String userId) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    if (userId.isEmpty) {
+      state = AsyncValue.data(currentState.copyWith(error: 'Invalid user ID'));
+      return;
+    }
+
+    state = AsyncValue.data(currentState.copyWith(currentUserId: userId));
+
+    await Future.wait([
+      loadSettings(),
+      _loadPremiumStatus(),
+      _loadDeviceInfo(),
+    ]);
+  }
+
+  /// Load user settings
+  Future<void> loadSettings() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    if (currentState.currentUserId.isEmpty) {
+      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      return;
+    }
+
+    try {
+      state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+
+      final settings = await _getUserSettingsUseCase(currentState.currentUserId);
+
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, settings: settings),
+      );
+    } catch (e) {
+      debugPrint('Error loading settings: $e');
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, error: e.toString()),
+      );
+    }
+  }
+
+  /// Load premium status
+  Future<void> _loadPremiumStatus() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    try {
+      final isPremium = await _premiumService.isPremiumUser();
+      state = AsyncValue.data(currentState.copyWith(isPremiumUser: isPremium));
+    } catch (e) {
+      debugPrint('Error loading premium status: $e');
+    }
+  }
+
+  /// Update theme setting
+  Future<bool> setDarkTheme(bool isDark) async {
+    return await _updateSingleSetting('isDarkTheme', isDark);
+  }
+
+  /// Update notifications setting
+  Future<bool> setNotificationsEnabled(bool enabled) async {
+    final success = await _updateSingleSetting('notificationsEnabled', enabled);
+
+    if (success) {
+      // Atualizar preferências promocionais baseado na configuração geral
+      try {
+        final currentPrefs =
+            await _promotionalManager.getUserNotificationPreferences();
+        final newPrefs = currentPrefs.copyWith(promotionalEnabled: enabled);
+        await _promotionalManager.saveUserNotificationPreferences(newPrefs);
+      } catch (e) {
+        debugPrint('Error updating promotional preferences: $e');
+      }
+    }
+
+    return success;
+  }
+
+  /// Update sound setting
+  Future<bool> setSoundEnabled(bool enabled) async {
+    return await _updateSingleSetting('soundEnabled', enabled);
+  }
+
+  /// Update language setting
+  Future<bool> setLanguage(String language) async {
+    return await _updateSingleSetting('language', language);
+  }
+
+  /// Update speech to text setting
+  Future<bool> setSpeechToTextEnabled(bool enabled) async {
+    return await _updateSingleSetting('speechToTextEnabled', enabled);
+  }
+
+  /// Update analytics setting
+  Future<bool> setAnalyticsEnabled(bool enabled) async {
+    return await _updateSingleSetting('analyticsEnabled', enabled);
+  }
+
+  // Premium Management Methods
+
+  /// Generate test license (development only)
+  Future<bool> generateTestLicense() async {
+    try {
+      await _premiumService.generateTestSubscription();
+      await _loadPremiumStatus();
+      return true;
+    } catch (e) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      }
+      debugPrint('Error generating test license: $e');
+      return false;
+    }
+  }
+
+  /// Remove test license (development only)
+  Future<bool> removeTestLicense() async {
+    try {
+      await _premiumService.removeTestSubscription();
+      await _loadPremiumStatus();
+      return true;
+    } catch (e) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      }
+      debugPrint('Error removing test license: $e');
+      return false;
+    }
+  }
+
+  // Notification Management Methods
+
+  /// Test notification functionality
+  Future<bool> testNotification() async {
+    try {
+      // TODO: Implement notification test when interface is available
+      debugPrint('Notification test - not implemented yet');
+
+      await _analyticsRepository.logEvent(
+        'notification_test',
+        parameters: {'status': 'success'},
+      );
+
+      return true;
+    } catch (e) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      }
+      debugPrint('Error testing notification: $e');
+
+      await _analyticsRepository.logEvent(
+        'notification_test',
+        parameters: {'status': 'error', 'error': e.toString()},
+      );
+
+      return false;
+    }
+  }
+
+  /// Open notification settings
+  Future<void> openNotificationSettings() async {
+    try {
+      await _notificationService.openNotificationSettings();
+    } catch (e) {
+      debugPrint('Error opening notification settings: $e');
+    }
+  }
+
+  // Analytics Management Methods
+
+  /// Test analytics functionality
+  Future<bool> testAnalytics() async {
+    try {
+      final testData = {
+        'test_event': 'settings_test_analytics',
+        'timestamp': DateTime.now().toIso8601String(),
+        'platform': Theme.of(NavigationService.navigatorKey.currentContext!).platform.toString(),
+      };
+
+      await _analyticsRepository.logEvent(
+        'test_analytics',
+        parameters: testData,
+      );
+
+      // TODO: Implement setUserProperty when interface is available
+      // await _analyticsRepository.setUserProperty(
+      //   name: 'last_analytics_test',
+      //   value: DateTime.now().toIso8601String(),
+      // );
+
+      return true;
+    } catch (e) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      }
+      debugPrint('Error testing analytics: $e');
+      return false;
+    }
+  }
+
+  // Crashlytics Management Methods
+
+  /// Test crashlytics functionality
+  Future<bool> testCrashlytics() async {
+    try {
+      await _crashlyticsRepository.log('Test crashlytics log from settings');
+
+      await _crashlyticsRepository.setCustomKey(
+        key: 'test_timestamp',
+        value: DateTime.now().toIso8601String(),
+      );
+
+      await _crashlyticsRepository.recordError(
+        exception: Exception('Test exception from settings'),
+        stackTrace: StackTrace.current,
+        reason: 'Testing Crashlytics integration',
+        fatal: false,
+      );
+
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.clearError());
+      }
+
+      return true;
+    } catch (e) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      }
+      debugPrint('Error testing crashlytics: $e');
+      return false;
+    }
+  }
+
+  // App Rating Methods
+
+  /// Show rate app dialog
+  Future<bool> showRateAppDialog(BuildContext context) async {
+    try {
+      // TODO: Implement app rating when interface methods are available
+      // final shouldShow = await _appRatingRepository.shouldShowRatingPrompt();
+      // if (!shouldShow) {
+      //   return false;
+      // }
+
+      await _appRatingRepository.showRatingDialog();
+
+      await _analyticsRepository.logEvent(
+        'rate_app_shown',
+        parameters: {'timestamp': DateTime.now().toIso8601String()},
+      );
+
+      return true;
+    } catch (e) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      }
+      debugPrint('Error showing rate app dialog: $e');
+      return false;
+    }
+  }
+
+  /// Update a single setting
+  Future<bool> _updateSingleSetting(String key, dynamic value) async {
+    final currentState = state.value;
+    if (currentState == null || currentState.settings == null) {
+      debugPrint('No settings to update');
+      return false;
+    }
+
+    try {
+      final currentSettings = currentState.settings!;
+      UserSettingsEntity updatedSettings;
+
+      switch (key) {
+        case 'isDarkTheme':
+          updatedSettings = currentSettings.copyWith(isDarkTheme: value as bool);
+          break;
+        case 'notificationsEnabled':
+          updatedSettings = currentSettings.copyWith(notificationsEnabled: value as bool);
+          break;
+        case 'soundEnabled':
+          updatedSettings = currentSettings.copyWith(soundEnabled: value as bool);
+          break;
+        case 'language':
+          updatedSettings = currentSettings.copyWith(language: value as String);
+          break;
+        case 'speechToTextEnabled':
+          updatedSettings = currentSettings.copyWith(speechToTextEnabled: value as bool);
+          break;
+        case 'analyticsEnabled':
+          updatedSettings = currentSettings.copyWith(analyticsEnabled: value as bool);
+          break;
+        default:
+          debugPrint('Unknown setting key: $key');
+          return false;
+      }
+
+      await _updateUserSettingsUseCase(updatedSettings);
+
+      state = AsyncValue.data(currentState.copyWith(settings: updatedSettings));
+
+      return true;
+    } catch (e) {
+      debugPrint('Error updating setting $key: $e');
+      state = AsyncValue.data(currentState.copyWith(error: e.toString()));
+      return false;
+    }
+  }
+
+  /// Refresh all data
+  Future<void> refresh() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    await Future.wait([
+      loadSettings(),
+      _loadPremiumStatus(),
+      _loadDeviceInfo(),
+    ]);
+  }
+
+  /// Load device information
+  Future<void> _loadDeviceInfo() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    try {
+      if (currentState.currentUserId.isEmpty) {
+        debugPrint('⚠️  Cannot load device info: User ID not set');
+        return;
+      }
+
+      if (_deviceManagementService == null) {
+        debugPrint('⚠️  DeviceManagementService not available - skipping device load');
+        return;
+      }
+
+      // TODO: Implement device loading when interface methods are available
+      DeviceEntity? currentDevice;
+      List<DeviceEntity> connectedDevices = [];
+
+      state = AsyncValue.data(
+        currentState.copyWith(
+          currentDevice: currentDevice,
+          connectedDevices: connectedDevices,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Unexpected error loading device info: $e');
+    }
+  }
+
+  /// Revoke a device
+  Future<void> revokeDevice(String deviceUuid) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    try {
+      if (currentState.currentUserId.isEmpty) {
+        state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+        return;
+      }
+
+      if (_deviceManagementService == null) {
+        state = AsyncValue.data(
+          currentState.copyWith(error: 'Device management not available'),
+        );
+        return;
+      }
+
+      state = AsyncValue.data(currentState.copyWith(isLoading: true));
+
+      // TODO: Implement revokeDevice when interface is available
+      final result = await _deviceManagementService!.revokeDevice(deviceUuid);
+
+      await result.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(isLoading: false, error: failure.message),
+          );
+        },
+        (_) async {
+          await _loadDeviceInfo();
+          state = AsyncValue.data(currentState.copyWith(isLoading: false).clearError());
+        },
+      );
+    } catch (e) {
+      debugPrint('Unexpected error revoking device: $e');
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, error: e.toString()),
+      );
+    }
+  }
+
+  /// Add a device
+  Future<bool> addDevice(DeviceEntity device) async {
+    final currentState = state.value;
+    if (currentState == null) return false;
+
+    try {
+      if (currentState.currentUserId.isEmpty) {
+        state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+        return false;
+      }
+
+      if (_deviceManagementService == null) {
+        state = AsyncValue.data(
+          currentState.copyWith(error: 'Device management not available'),
+        );
+        return false;
+      }
+
+      state = AsyncValue.data(currentState.copyWith(isLoading: true));
+
+      // TODO: Implement registerDevice when interface is available
+      final result = Right<Failure, DeviceEntity>(device); // Placeholder
+
+      return result.fold(
+        (Failure failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(isLoading: false, error: failure.message),
+          );
+          return false;
+        },
+        (DeviceEntity registeredDevice) async {
+          await _loadDeviceInfo();
+          state = AsyncValue.data(currentState.copyWith(isLoading: false).clearError());
+          return true;
+        },
+      );
+    } catch (e) {
+      debugPrint('Unexpected error adding device: $e');
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, error: e.toString()),
+      );
+      return false;
+    }
+  }
+
+  /// Check if user can add more devices
+  Future<bool> canAddMoreDevices() async {
+    final currentState = state.value;
+    if (currentState == null) return false;
+
+    try {
+      if (currentState.currentUserId.isEmpty) {
+        return false;
+      }
+
+      if (_deviceManagementService == null) {
+        debugPrint(
+            '⚠️  DeviceManagementService not available - using local fallback');
+        // Fallback: allow if less than 3 devices locally
+        return currentState.connectedDevices.length < 3;
+      }
+
+      final result = await _deviceManagementService!.canAddMoreDevices();
+      return result.fold(
+        (failure) {
+          debugPrint('Error checking if can add more devices: $failure');
+          // Fallback to local count check
+          return currentState.connectedDevices.length < 3;
+        },
+        (canAdd) => canAdd,
+      );
+    } catch (e) {
+      debugPrint('Unexpected error checking device limit: $e');
+      // Fallback to local count check
+      return currentState.connectedDevices.length < 3;
+    }
+  }
+
+  /// Get device by UUID
+  DeviceEntity? getDeviceByUuid(String uuid) {
+    final currentState = state.value;
+    if (currentState == null) return null;
+
+    try {
+      return currentState.connectedDevices
+          .firstWhere((device) => device.uuid == uuid);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Check if device management is enabled
+  bool get isDeviceManagementEnabled =>
+      _featureFlagsProvider.isDeviceManagementEnabled;
+}

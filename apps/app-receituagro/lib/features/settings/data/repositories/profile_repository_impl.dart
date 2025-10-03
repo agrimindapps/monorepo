@@ -2,20 +2,20 @@ import 'dart:io';
 
 import 'package:core/core.dart';
 
-import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../domain/repositories/profile_repository.dart';
 
 /// Implementação do ProfileRepository para ReceitaAgro
 /// Utiliza o ProfileImageService do core package
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileImageService _profileImageService;
-  final ReceitaAgroAuthProvider _authProvider;
+  final ReceitaAgroAuthNotifier _authNotifier;
 
   ProfileRepositoryImpl({
     required ProfileImageService profileImageService,
-    required ReceitaAgroAuthProvider authProvider,
+    required ReceitaAgroAuthNotifier authNotifier,
   })  : _profileImageService = profileImageService,
-        _authProvider = authProvider;
+        _authNotifier = authNotifier;
 
   @override
   Future<Result<ProfileImageResult>> uploadProfileImage(
@@ -55,7 +55,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   String getUserInitials() {
-    final user = _authProvider.currentUser;
+    final user = _authNotifier.state.value?.currentUser;
     return _profileImageService.getUserInitials(user?.displayName ?? user?.email);
   }
 
@@ -73,8 +73,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileImageConfig get config => _profileImageService.config;
 
   @override
-  UserEntity? get currentUser => _authProvider.currentUser;
+  UserEntity? get currentUser => _authNotifier.state.value?.currentUser;
 
   @override
-  bool get isAuthenticated => _authProvider.isAuthenticated;
+  bool get isAuthenticated => _authNotifier.state.value?.isAuthenticated ?? false;
 }

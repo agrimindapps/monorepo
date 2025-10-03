@@ -14,9 +14,11 @@ export 'domain/repositories/i_defensivo_details_repository.dart';
 export 'domain/usecases/get_defensivo_details_usecase.dart';
 export 'domain/usecases/get_diagnosticos_usecase.dart';
 export 'domain/usecases/toggle_favorite_usecase.dart';
-export 'presentation/providers/defensivo_details_provider.dart';
-export 'presentation/providers/diagnosticos_provider.dart';
-export 'presentation/providers/tab_controller_provider.dart';
+// Migrated to Riverpod - defensivo_details_notifier.dart (lifecycle managed automatically)
+// export 'presentation/providers/defensivo_details_provider.dart';
+// Migrated to Riverpod - diagnosticos_notifier.dart (lifecycle managed automatically)
+// export 'presentation/providers/diagnosticos_provider.dart';
+export 'presentation/providers/tab_controller_notifier.dart';
 export 'presentation/widgets/defensivo_info_cards_widget.dart';
 export 'presentation/widgets/diagnosticos_tab_widget.dart';
 export 'presentation/widgets/optimized_tab_bar_widget.dart';

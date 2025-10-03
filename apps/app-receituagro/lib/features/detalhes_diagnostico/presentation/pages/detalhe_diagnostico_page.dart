@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/mixins/premium_status_listener.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../navigation/bottom_nav_wrapper.dart';
-import '../providers/detalhe_diagnostico_provider.dart';
+import '../providers/detalhe_diagnostico_notifier.dart';
 import '../widgets/aplicacao_instrucoes_widget.dart';
 import '../widgets/diagnostico_detalhes_widget.dart';
 import '../widgets/diagnostico_info_widget.dart';
 
-class DetalheDiagnosticoPage extends StatefulWidget {
+class DetalheDiagnosticoPage extends ConsumerStatefulWidget {
   final String diagnosticoId;
   final String nomeDefensivo;
   final String nomePraga;
@@ -24,38 +23,29 @@ class DetalheDiagnosticoPage extends StatefulWidget {
   });
 
   @override
-  State<DetalheDiagnosticoPage> createState() => _DetalheDiagnosticoPageState();
+  ConsumerState<DetalheDiagnosticoPage> createState() => _DetalheDiagnosticoPageState();
 }
 
-class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
-    with PremiumStatusListener {
-  
+class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final detalheDiagnosticoProvider = provider.Provider.of<DetalheDiagnosticoProvider>(context, listen: false);
-      await detalheDiagnosticoProvider.loadDiagnosticoData(widget.diagnosticoId);
-      await detalheDiagnosticoProvider.loadFavoritoState(widget.diagnosticoId);
-      await detalheDiagnosticoProvider.loadPremiumStatus();
+      final notifier = ref.read(detalheDiagnosticoNotifierProvider.notifier);
+      await notifier.loadDiagnosticoData(widget.diagnosticoId);
+      await notifier.loadFavoritoState(widget.diagnosticoId);
+      await notifier.loadPremiumStatus();
     });
-  }
-  
-  @override
-  void onPremiumStatusChanged(bool isPremium) {
-    // Atualiza o provider quando o status premium muda
-    final detalheDiagnosticoProvider = provider.Provider.of<DetalheDiagnosticoProvider>(context, listen: false);
-    detalheDiagnosticoProvider.loadPremiumStatus();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
-    return provider.Consumer<DetalheDiagnosticoProvider>(
-      builder: (context, provider, child) {
-        return BottomNavWrapper(
+    final asyncState = ref.watch(detalheDiagnosticoNotifierProvider);
+
+    return asyncState.when(
+      data: (state) => BottomNavWrapper(
           selectedIndex: 0, // Assumindo que diagnóstico está relacionado a defensivos
           child: ColoredBox(
             color: theme.scaffoldBackgroundColor,
@@ -65,13 +55,13 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
                   constraints: const BoxConstraints(maxWidth: 1120),
                   child: Column(
                     children: [
-                      _buildModernHeader(provider, isDark),
+                      _buildModernHeader(state, isDark),
                       Expanded(
-                        child: provider.isLoading
+                        child: state.isLoading
                             ? _buildLoadingState()
-                            : provider.hasError
-                                ? _buildErrorState(provider)
-                                : _buildContent(provider),
+                            : state.hasError
+                                ? _buildErrorState(state)
+                                : _buildContent(state),
                       ),
                     ],
                   ),
@@ -79,22 +69,23 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
               ),
             ),
           ),
-        );
-      },
+        ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Erro: $error')),
     );
   }
 
-  Widget _buildModernHeader(DetalheDiagnosticoProvider provider, bool isDark) {
+  Widget _buildModernHeader(DetalheDiagnosticoState state, bool isDark) {
     return ModernHeaderWidget(
       title: 'Diagnóstico',
       subtitle: 'Detalhes do diagnóstico',
       leftIcon: Icons.medical_services_outlined,
-      rightIcon: provider.isFavorited ? Icons.favorite : Icons.favorite_border,
+      rightIcon: state.isFavorited ? Icons.favorite : Icons.favorite_border,
       isDark: isDark,
       showBackButton: true,
       showActions: true,
       onBackPressed: () => Navigator.of(context).pop(),
-      onRightIconPressed: () => _toggleFavorito(provider),
+      onRightIconPressed: () => _toggleFavorito(),
     );
   }
 
@@ -156,9 +147,9 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
     );
   }
 
-  Widget _buildErrorState(DetalheDiagnosticoProvider provider) {
+  Widget _buildErrorState(DetalheDiagnosticoState state) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Container(
         margin: const EdgeInsets.all(8.0),
@@ -203,7 +194,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
             ),
             const SizedBox(height: 8),
             Text(
-              provider.errorMessage ?? 'Dados do diagnóstico não encontrados',
+              state.errorMessage ?? 'Dados do diagnóstico não encontrados',
               style: TextStyle(
                 fontSize: 14,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -212,7 +203,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => provider.loadDiagnosticoData(widget.diagnosticoId),
+              onPressed: () => ref.read(detalheDiagnosticoNotifierProvider.notifier).loadDiagnosticoData(widget.diagnosticoId),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar Novamente'),
               style: ElevatedButton.styleFrom(
@@ -227,8 +218,7 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
     );
   }
 
-
-  Widget _buildContent(DetalheDiagnosticoProvider provider) {
+  Widget _buildContent(DetalheDiagnosticoState state) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -239,24 +229,24 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
             nomePraga: widget.nomePraga,
             nomeDefensivo: widget.nomeDefensivo,
             cultura: widget.cultura,
-            diagnosticoData: provider.diagnosticoData,
+            diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),
-          
+
           // Seção de Detalhes do Diagnóstico (sempre visível)
           DiagnosticoDetalhesWidget(
-            diagnosticoData: provider.diagnosticoData,
+            diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),
-          
+
           // Seção de Instruções de Aplicação (sempre visível)
           AplicacaoInstrucoesWidget(
-            diagnosticoData: provider.diagnosticoData,
+            diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),
-          
+
           // Recursos Premium - Visíveis mas controlados por isPremium
-          _buildPremiumFeatures(provider),
+          _buildPremiumFeatures(state),
           
           const SizedBox(height: 80), // Espaço para bottom navigation
         ],
@@ -264,13 +254,12 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
     );
   }
   
-  Widget _buildPremiumFeatures(DetalheDiagnosticoProvider provider) {
+  Widget _buildPremiumFeatures(DetalheDiagnosticoState state) {
     // Removido - sem seções premium visíveis
     return const SizedBox.shrink();
   }
-  
 
-  void _toggleFavorito(DetalheDiagnosticoProvider provider) async {
+  Future<void> _toggleFavorito() async {
     final itemData = {
       'id': widget.diagnosticoId,
       'nomeDefensivo': widget.nomeDefensivo,
@@ -278,12 +267,14 @@ class _DetalheDiagnosticoPageState extends State<DetalheDiagnosticoPage>
       'cultura': widget.cultura,
     };
 
-    final success = await provider.toggleFavorito(widget.diagnosticoId, itemData);
+    final notifier = ref.read(detalheDiagnosticoNotifierProvider.notifier);
+    final success = await notifier.toggleFavorito(widget.diagnosticoId, itemData);
 
     if (!success && mounted) {
+      final state = ref.read(detalheDiagnosticoNotifierProvider).value;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao ${provider.isFavorited ? 'adicionar' : 'remover'} favorito'),
+          content: Text('Erro ao ${state?.isFavorited == true ? 'adicionar' : 'remover'} favorito'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),

@@ -1,19 +1,17 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/theme/spacing_tokens.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/models/cultura_hive.dart';
 import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../../../core/data/models/pragas_hive.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
-import '../../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_provider.dart';
-import '../providers/diagnosticos_provider.dart';
+import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 
 /// Componentes modulares para exibição de diagnósticos em páginas de defensivos
 ///
@@ -31,16 +29,16 @@ import '../providers/diagnosticos_provider.dart';
 /// - Campo de busca por texto
 /// - Dropdown de seleção de cultura
 /// - Layout responsivo e design consistente
-class DiagnosticoDefensivoFilterWidget extends StatefulWidget {
+class DiagnosticoDefensivoFilterWidget extends ConsumerStatefulWidget {
   const DiagnosticoDefensivoFilterWidget({super.key});
 
   @override
-  State<DiagnosticoDefensivoFilterWidget> createState() =>
+  ConsumerState<DiagnosticoDefensivoFilterWidget> createState() =>
       _DiagnosticoDefensivoFilterWidgetState();
 }
 
 class _DiagnosticoDefensivoFilterWidgetState
-    extends State<DiagnosticoDefensivoFilterWidget> {
+    extends ConsumerState<DiagnosticoDefensivoFilterWidget> {
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
 
@@ -65,9 +63,15 @@ class _DiagnosticoDefensivoFilterWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final diagnosticosAsync = ref.watch(diagnosticosNotifierProvider);
+
     return RepaintBoundary(
-      child: provider.Consumer<DiagnosticosProvider>(
-        builder: (context, provider, child) {
+      child: diagnosticosAsync.when(
+        data: (diagnosticosState) {
+          // Extract available cultures from filtersData
+          final availableCulturas = diagnosticosState.filtersData?.culturas ?? ['Todas'];
+          final selectedCultura = diagnosticosState.currentFilters.idCultura ?? 'Todas';
+
           return Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
             child: Row(
@@ -76,7 +80,10 @@ class _DiagnosticoDefensivoFilterWidgetState
                   flex: _isSearchFocused ? 2 : 1,
                   child: _SearchField(
                     focusNode: _searchFocusNode,
-                    onChanged: (query) => provider.setSearchQuery(query),
+                    onChanged: (query) {
+                      // Trigger search by pattern
+                      ref.read(diagnosticosNotifierProvider.notifier).searchByPattern(query);
+                    },
                   ),
                 ),
                 if (!_isSearchFocused) ...[
@@ -84,10 +91,18 @@ class _DiagnosticoDefensivoFilterWidgetState
                   Expanded(
                     flex: 1,
                     child: _CultureDropdown(
-                      value: provider.selectedCultura ?? 'Todas',
-                      cultures: provider.availableCulturas,
-                      onChanged: (cultura) =>
-                          provider.setSelectedCultura(cultura),
+                      value: selectedCultura,
+                      cultures: availableCulturas,
+                      onChanged: (cultura) {
+                        if (cultura == 'Todas') {
+                          ref.read(diagnosticosNotifierProvider.notifier).clearFilters();
+                        } else {
+                          ref.read(diagnosticosNotifierProvider.notifier).getDiagnosticosByCultura(
+                            cultura,
+                            nomeCultura: cultura,
+                          );
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -95,6 +110,17 @@ class _DiagnosticoDefensivoFilterWidgetState
             ),
           );
         },
+        loading: () => Container(
+          padding: const EdgeInsets.all(SpacingTokens.sm),
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        error: (error, _) => Container(
+          padding: const EdgeInsets.all(SpacingTokens.sm),
+          child: const _SearchField(
+            focusNode: null,
+            onChanged: null,
+          ),
+        ),
       ),
     );
   }
@@ -102,8 +128,8 @@ class _DiagnosticoDefensivoFilterWidgetState
 
 /// Campo de busca personalizado
 class _SearchField extends StatelessWidget {
-  final ValueChanged<String> onChanged;
-  final FocusNode focusNode;
+  final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
 
   const _SearchField({
     required this.onChanged,
@@ -214,7 +240,7 @@ class _CultureDropdown extends StatelessWidget {
 // ============================================================================
 
 /// Widget para gerenciamento de estados da lista de diagnósticos
-class DiagnosticoDefensivoStateManager extends StatelessWidget {
+class DiagnosticoDefensivoStateManager extends ConsumerWidget {
   final String defensivoName;
   final Widget Function(List<dynamic>) builder;
   final VoidCallback? onRetry;
@@ -227,26 +253,33 @@ class DiagnosticoDefensivoStateManager extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return provider.Consumer<DiagnosticosProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final diagnosticosAsync = ref.watch(diagnosticosNotifierProvider);
+
+    return diagnosticosAsync.when(
+      data: (diagnosticosState) {
+        if (diagnosticosState.isLoading) {
           return const DiagnosticoDefensivoLoadingWidget();
         }
 
-        if (provider.hasError) {
+        if (diagnosticosState.hasError) {
           return DiagnosticoDefensivoErrorWidget(
-            errorMessage: provider.errorMessage ?? 'Erro desconhecido',
+            errorMessage: diagnosticosState.errorMessage ?? 'Erro desconhecido',
             onRetry: onRetry,
           );
         }
 
-        if (provider.diagnosticos.isEmpty) {
+        if (diagnosticosState.diagnosticos.isEmpty) {
           return DiagnosticoDefensivoEmptyWidget(defensivoName: defensivoName);
         }
 
-        return builder(provider.diagnosticos);
+        return builder(diagnosticosState.diagnosticos);
       },
+      loading: () => const DiagnosticoDefensivoLoadingWidget(),
+      error: (error, _) => DiagnosticoDefensivoErrorWidget(
+        errorMessage: error.toString(),
+        onRetry: onRetry,
+      ),
     );
   }
 }
@@ -1035,14 +1068,11 @@ class _DiagnosticoDefensivoDialogWidgetState
     if (diagnosticoId != null) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (context) => provider.ChangeNotifierProvider(
-            create: (_) => DetalheDiagnosticoProvider(),
-            child: DetalheDiagnosticoPage(
-              diagnosticoId: diagnosticoId,
-              nomeDefensivo: widget.defensivoName,
-              nomePraga: nomePraga,
-              cultura: cultura,
-            ),
+          builder: (context) => DetalheDiagnosticoPage(
+            diagnosticoId: diagnosticoId,
+            nomeDefensivo: widget.defensivoName,
+            nomePraga: nomePraga,
+            cultura: cultura,
           ),
         ),
       );

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/pages/data_inspector_page.dart';
-import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/providers/settings_notifier.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
 
 /// Development tools section (debug mode only)
 /// Provides testing and debugging functionality
-class DevelopmentSection extends StatelessWidget {
+class DevelopmentSection extends ConsumerWidget {
   const DevelopmentSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // DEVELOPMENT: Always show during app development
     // TODO: Remove or gate this properly for production builds
 
@@ -35,7 +35,7 @@ class DevelopmentSection extends StatelessWidget {
                 backgroundColor: Colors.green.withValues(alpha: 0.1),
                 title: 'Gerar Licença Teste',
                 subtitle: 'Ativa licença premium por 30 dias',
-                onTap: () => _generateTestLicense(context),
+                onTap: () => _generateTestLicense(context, ref),
               ),
               Divider(
                 height: 1,
@@ -48,7 +48,7 @@ class DevelopmentSection extends StatelessWidget {
                 backgroundColor: Colors.green.withValues(alpha: 0.1),
                 title: 'Remover Licença Teste',
                 subtitle: 'Remove licença premium ativa',
-                onTap: () => _removeTestLicense(context),
+                onTap: () => _removeTestLicense(context, ref),
               ),
               Divider(
                 height: 1,
@@ -71,12 +71,12 @@ class DevelopmentSection extends StatelessWidget {
   }
 
 
-  Future<void> _generateTestLicense(BuildContext context) async {
-    final provider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
-    
+  Future<void> _generateTestLicense(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(settingsNotifierProvider.notifier);
+
     try {
-      final success = await provider.generateTestLicense();
-      
+      final success = await notifier.generateTestLicense();
+
       if (context.mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -85,10 +85,15 @@ class DevelopmentSection extends StatelessWidget {
             ),
           );
         } else {
+          final state = ref.read(settingsNotifierProvider);
+          final errorMsg = state.when(
+            data: (data) => data.error ?? SettingsDesignTokens.testSubscriptionError,
+            loading: () => SettingsDesignTokens.testSubscriptionError,
+            error: (e, _) => e.toString(),
+          );
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SettingsDesignTokens.getErrorSnackbar(
-              provider.error ?? SettingsDesignTokens.testSubscriptionError,
-            ),
+            SettingsDesignTokens.getErrorSnackbar(errorMsg),
           );
         }
       }
@@ -101,7 +106,7 @@ class DevelopmentSection extends StatelessWidget {
     }
   }
 
-  Future<void> _removeTestLicense(BuildContext context) async {
+  Future<void> _removeTestLicense(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -142,13 +147,13 @@ class DevelopmentSection extends StatelessWidget {
         ],
       ),
     );
-    
+
     if (confirmed == true && context.mounted) {
-      final provider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
-      
+      final notifier = ref.read(settingsNotifierProvider.notifier);
+
       try {
-        final success = await provider.removeTestLicense();
-        
+        final success = await notifier.removeTestLicense();
+
         if (context.mounted) {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -158,10 +163,15 @@ class DevelopmentSection extends StatelessWidget {
               ),
             );
           } else {
+            final state = ref.read(settingsNotifierProvider);
+            final errorMsg = state.when(
+              data: (data) => data.error ?? SettingsDesignTokens.removeSubscriptionError,
+              loading: () => SettingsDesignTokens.removeSubscriptionError,
+              error: (e, _) => e.toString(),
+            );
+
             ScaffoldMessenger.of(context).showSnackBar(
-              SettingsDesignTokens.getErrorSnackbar(
-                provider.error ?? SettingsDesignTokens.removeSubscriptionError,
-              ),
+              SettingsDesignTokens.getErrorSnackbar(errorMsg),
             );
           }
         }

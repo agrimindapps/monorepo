@@ -7,7 +7,6 @@ import '../domain/repositories/i_comentarios_repository.dart';
 import '../domain/usecases/add_comentario_usecase.dart';
 import '../domain/usecases/delete_comentario_usecase.dart';
 import '../domain/usecases/get_comentarios_usecase.dart';
-import '../presentation/providers/comentarios_notifier.dart';
 
 /// Dependency Injection setup for Comentarios module following Clean Architecture.
 /// Registers all dependencies required for the comentarios feature.
@@ -36,37 +35,13 @@ class ComentariosDI {
       () => DeleteComentarioUseCase(getIt<IComentariosRepository>()),
     );
 
-    // Provider layer
-    getIt.registerFactory<ComentariosProvider>(
-      () => ComentariosProvider(
-        getComentariosUseCase: getIt<GetComentariosUseCase>(),
-        addComentarioUseCase: getIt<AddComentarioUseCase>(),
-        deleteComentarioUseCase: getIt<DeleteComentarioUseCase>(),
-        errorHandler: getIt<ErrorHandlerService>(),
-      ),
-    );
-
-    // Register as singleton for provider persistence
-    getIt.registerLazySingleton<ComentariosProvider>(
-      () => ComentariosProvider(
-        getComentariosUseCase: getIt<GetComentariosUseCase>(),
-        addComentarioUseCase: getIt<AddComentarioUseCase>(),
-        deleteComentarioUseCase: getIt<DeleteComentarioUseCase>(),
-        errorHandler: getIt<ErrorHandlerService>(),
-      ),
-      instanceName: 'singleton',
-    );
+    // ComentariosProvider removed - Riverpod manages lifecycle automatically
+    // Migration complete: Using ComentariosNotifier instead
   }
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
-    if (getIt.isRegistered<ComentariosProvider>()) {
-      getIt.unregister<ComentariosProvider>();
-    }
-
-    if (getIt.isRegistered<ComentariosProvider>(instanceName: 'singleton')) {
-      getIt.unregister<ComentariosProvider>(instanceName: 'singleton');
-    }
+    // ComentariosProvider unregister removed - not registered anymore
 
     if (getIt.isRegistered<DeleteComentarioUseCase>()) {
       getIt.unregister<DeleteComentarioUseCase>();

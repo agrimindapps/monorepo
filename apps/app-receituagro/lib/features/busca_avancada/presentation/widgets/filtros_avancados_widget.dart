@@ -1,24 +1,39 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/busca_avancada_provider.dart';
+import '../providers/busca_avancada_notifier.dart';
 
 /// Widget especializado para formulário de filtros da busca avançada
-class FiltrosAvancadosWidget extends StatelessWidget {
-  final BuscaAvancadaProvider provider;
+class FiltrosAvancadosWidget extends ConsumerWidget {
   final VoidCallback onBuscarPressed;
   final VoidCallback onLimparPressed;
 
   const FiltrosAvancadosWidget({
     super.key,
-    required this.provider,
     required this.onBuscarPressed,
     required this.onLimparPressed,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final buscaState = ref.watch(buscaAvancadaNotifierProvider);
+
+    return buscaState.when(
+      data: (state) => _buildContent(context, theme, state, ref),
+      loading: () => _buildLoadingState(theme),
+      error: (error, _) => _buildErrorState(theme, error),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    ThemeData theme,
+    BuscaAvancadaState state,
+    WidgetRef ref,
+  ) {
+    final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -39,9 +54,9 @@ class FiltrosAvancadosWidget extends StatelessWidget {
         children: [
           _buildHeader(theme),
           const SizedBox(height: 16),
-          _buildFiltrosGrid(theme),
+          _buildFiltrosGrid(theme, state, notifier),
           const SizedBox(height: 24),
-          _buildBotoes(theme),
+          _buildBotoes(theme, state),
         ],
       ),
     );
@@ -87,7 +102,11 @@ class FiltrosAvancadosWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildFiltrosGrid(ThemeData theme) {
+  Widget _buildFiltrosGrid(
+    ThemeData theme,
+    BuscaAvancadaState state,
+    BuscaAvancadaNotifier notifier,
+  ) {
     return Column(
       children: [
         Row(
@@ -98,9 +117,9 @@ class FiltrosAvancadosWidget extends StatelessWidget {
                 label: 'Cultura',
                 icon: FontAwesomeIcons.seedling,
                 iconColor: Colors.green,
-                items: provider.culturas,
-                selectedValue: provider.culturaIdSelecionada,
-                onChanged: provider.setCulturaId,
+                items: state.culturas,
+                selectedValue: state.culturaIdSelecionada,
+                onChanged: notifier.setCulturaId,
                 hint: 'Selecione uma cultura',
               ),
             ),
@@ -111,9 +130,9 @@ class FiltrosAvancadosWidget extends StatelessWidget {
                 label: 'Praga',
                 icon: FontAwesomeIcons.bug,
                 iconColor: Colors.red,
-                items: provider.pragas,
-                selectedValue: provider.pragaIdSelecionada,
-                onChanged: provider.setPragaId,
+                items: state.pragas,
+                selectedValue: state.pragaIdSelecionada,
+                onChanged: notifier.setPragaId,
                 hint: 'Selecione uma praga',
               ),
             ),
@@ -125,9 +144,9 @@ class FiltrosAvancadosWidget extends StatelessWidget {
           label: 'Defensivo',
           icon: FontAwesomeIcons.vial,
           iconColor: Colors.blue,
-          items: provider.defensivos,
-          selectedValue: provider.defensivoIdSelecionado,
-          onChanged: provider.setDefensivoId,
+          items: state.defensivos,
+          selectedValue: state.defensivoIdSelecionado,
+          onChanged: notifier.setDefensivoId,
           hint: 'Selecione um defensivo',
           fullWidth: true,
         ),
@@ -225,14 +244,14 @@ class FiltrosAvancadosWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildBotoes(ThemeData theme) {
+  Widget _buildBotoes(ThemeData theme, BuscaAvancadaState state) {
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: ElevatedButton.icon(
-            onPressed: provider.isLoading ? null : onBuscarPressed,
-            icon: provider.isLoading
+            onPressed: state.isLoading ? null : onBuscarPressed,
+            icon: state.isLoading
                 ? SizedBox(
                     width: 16,
                     height: 16,
@@ -243,7 +262,7 @@ class FiltrosAvancadosWidget extends StatelessWidget {
                   )
                 : const Icon(Icons.search, size: 20),
             label: Text(
-              provider.isLoading ? 'Buscando...' : 'Buscar',
+              state.isLoading ? 'Buscando...' : 'Buscar',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -262,7 +281,7 @@ class FiltrosAvancadosWidget extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: provider.isLoading ? null : onLimparPressed,
+            onPressed: state.isLoading ? null : onLimparPressed,
             icon: const Icon(Icons.clear, size: 18),
             label: const Text(
               'Limpar',
@@ -284,6 +303,35 @@ class FiltrosAvancadosWidget extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLoadingState(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ThemeData theme, Object error) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Text(
+          'Erro: $error',
+          style: TextStyle(color: theme.colorScheme.error),
+        ),
+      ),
     );
   }
 }

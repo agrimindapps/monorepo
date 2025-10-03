@@ -1,21 +1,25 @@
 import 'package:core/core.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
-import '../../providers/auth_provider.dart' as app_auth;
-import '../models/app_settings_model.dart';
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/favoritos/data/favorito_defensivo_model.dart';
+import '../models/app_settings_model.dart';
 
 /// Repository para gerenciar dados específicos do usuário com sincronização
 class UserDataRepository {
   static const String _appSettingsBoxName = 'app_settings';
   static const String _subscriptionDataBoxName = 'subscription_data';
 
-  final app_auth.ReceitaAgroAuthProvider _authProvider;
+  UserDataRepository();
 
-  UserDataRepository(this._authProvider);
-
-  /// Obtém o userId atual do AuthProvider
-  String? get currentUserId => _authProvider.currentUser?.id;
+  /// Obtém o userId atual via Firebase Auth (synchronous access)
+  String? get currentUserId {
+    try {
+      return firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+    } catch (e) {
+      return null;
+    }
+  }
 
   /// Verifica se há um usuário logado
   bool get hasCurrentUser => currentUserId != null;

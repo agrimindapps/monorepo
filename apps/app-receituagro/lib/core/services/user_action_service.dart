@@ -1,19 +1,21 @@
+import 'package:core/core.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 
 import '../../features/settings/constants/settings_design_tokens.dart';
-import '../providers/auth_provider.dart';
 
 /// Serviço para coordenar ações do usuário (logout, clear data, delete account)
 /// Centraliza as operações e feedback ao usuário
 class UserActionService {
-  final ReceitaAgroAuthProvider _authProvider;
+  final IAuthRepository _authRepository;
+  final EnhancedAccountDeletionService _accountDeletionService;
 
-  UserActionService(this._authProvider);
+  UserActionService(this._authRepository, this._accountDeletionService);
 
   /// Realizar logout do usuário
   Future<void> performLogout(BuildContext context) async {
     try {
-      await _authProvider.signOut();
+      await _authRepository.signOut();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SettingsDesignTokens.getSuccessSnackbar('Logout realizado com sucesso!'),
@@ -74,70 +76,119 @@ class UserActionService {
     );
 
     try {
-      // Execute account deletion
-      final result = await _authProvider.deleteAccount();
-
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Fechar dialog de progresso
-
-        if (result.isSuccess) {
-          // Success - show confirmation and navigate away
+      // Get current user ID via Firebase Auth (synchronous access)
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (userId.isEmpty) {
+        if (context.mounted) {
+          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text('Conta excluída com sucesso. Todos os dados foram removidos.'),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 5),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-
-          // Navigate to app start or login page
-          if (context.mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-          }
-        } else {
-          // Error - show error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text('Erro na exclusão: ${result.errorMessage ?? "Erro desconhecido"}'),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 8),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              action: SnackBarAction(
-                label: 'Tentar Novamente',
-                textColor: Colors.white,
-                onPressed: () async {
-                  await deleteAccount(context);
-                },
-              ),
-            ),
+            SettingsDesignTokens.getErrorSnackbar('Usuário não autenticado'),
           );
         }
+        return;
       }
+
+      // Execute account deletion
+      final result = await _accountDeletionService.deleteAccount(
+        password: '',
+        userId: userId,
+        isAnonymous: false,
+      );
+
+      result.fold(
+        (error) {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text('Erro na exclusão: ${error.message}'),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 8),
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                action: SnackBarAction(
+                  label: 'Tentar Novamente',
+                  textColor: Colors.white,
+                  onPressed: () async {
+                    await deleteAccount(context);
+                  },
+                ),
+              ),
+            );
+          }
+        },
+        (deletionResult) {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+
+            if (deletionResult.isSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text('Conta excluída com sucesso. Todos os dados foram removidos.'),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 5),
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              );
+
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.error, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text('Erro na exclusão: ${deletionResult.userMessage}'),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 8),
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  action: SnackBarAction(
+                    label: 'Tentar Novamente',
+                    textColor: Colors.white,
+                    onPressed: () async {
+                      await deleteAccount(context);
+                    },
+                  ),
+                ),
+              );
+            }
+          }
+        },
+      );
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // Fechar dialog de progresso

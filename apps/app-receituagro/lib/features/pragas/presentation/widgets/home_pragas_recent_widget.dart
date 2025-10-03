@@ -1,26 +1,26 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/praga_entity.dart';
-import '../providers/home_pragas_provider.dart';
+import '../providers/home_pragas_notifier.dart';
 
 /// Widget para exibir seção de últimos acessados na home de pragas
-/// 
+///
 /// Responsabilidades:
 /// - Exibir lista de pragas acessadas recentemente
 /// - Navegação para detalhes da praga
 /// - Registro de novos acessos
 /// - Estados vazio e loading
 class HomePragasRecentWidget extends StatelessWidget {
-  final HomePragasProvider provider;
+  final HomePragasState state;
 
   const HomePragasRecentWidget({
     super.key,
-    required this.provider,
+    required this.state,
   });
 
   @override
@@ -29,18 +29,18 @@ class HomePragasRecentWidget extends StatelessWidget {
       title: 'Últimos Acessados',
       actionIcon: Icons.history,
       onActionPressed: () {},
-      isLoading: provider.isLoading,
+      isLoading: state.isLoading,
       emptyMessage: 'Nenhuma praga acessada recentemente',
-      isEmpty: provider.recentPragas.isEmpty,
+      isEmpty: state.recentPragas.isEmpty,
       showCard: true,
-      child: provider.recentPragas.isEmpty
+      child: state.recentPragas.isEmpty
           ? const SizedBox.shrink()
           : ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: provider.recentPragas.length,
+              itemCount: state.recentPragas.length,
               itemBuilder: (context, index) {
-                final praga = provider.recentPragas[index];
+                final praga = state.recentPragas[index];
                 return _buildPragaItem(context, praga);
               },
               separatorBuilder: (context, index) => Divider(
@@ -121,7 +121,7 @@ class HomePragasRecentWidget extends StatelessWidget {
 
   void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName, PragaEntity praga) {
     // Registra o acesso através do provider
-    provider.recordPragaAccess(praga);
+    state.recordPragaAccess(praga);
     
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     navigationService.navigateToDetalhePraga(

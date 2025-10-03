@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
@@ -9,22 +10,22 @@ import 'domain/entities/praga_entity.dart';
 import 'presentation/pages/detalhe_praga_page.dart';
 import 'domain/usecases/get_pragas_usecase.dart';
 import 'data/praga_view_mode.dart';
-import 'presentation/providers/pragas_provider.dart';
+import 'presentation/providers/pragas_notifier.dart';
 import 'widgets/praga_card_widget.dart';
 import 'widgets/praga_search_field_widget.dart';
 import 'widgets/pragas_empty_state_widget.dart';
 import 'widgets/pragas_loading_skeleton_widget.dart';
 
-class ListaPragasPage extends StatefulWidget {
+class ListaPragasPage extends ConsumerStatefulWidget {
   final String? pragaType;
 
   const ListaPragasPage({super.key, this.pragaType});
 
   @override
-  State<ListaPragasPage> createState() => _ListaPragasPageState();
+  ConsumerState<ListaPragasPage> createState() => _ListaPragasPageState();
 }
 
-class _ListaPragasPageState extends State<ListaPragasPage> {
+class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounceTimer;
 
@@ -32,7 +33,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   PragaViewMode _viewMode = PragaViewMode.grid;
   String _searchText = '';
   late String _currentPragaType;
-  late PragasProvider _pragasProvider;
 
   @override
   void initState() {
@@ -40,14 +40,12 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
 
-    // Inicializa o provider diretamente
-    _pragasProvider = GetIt.instance<PragasProvider>();
-
-    // Inicialização única e ordenada
+    // Inicialização única e ordenada via Riverpod
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final notifier = ref.read(pragasNotifierProvider.notifier);
       try {
-        await _pragasProvider.loadStats();
-        await _pragasProvider.loadPragasByTipo(_currentPragaType);
+        await notifier.loadStats();
+        await notifier.loadPragasByTipo(_currentPragaType);
       } catch (e) {
         // Erro será tratado pelo provider
       }
@@ -59,10 +57,6 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     _searchDebounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-
-    // Limpa dados do provider para evitar memory leaks
-    _pragasProvider.clear();
-
     super.dispose();
   }
 
@@ -81,14 +75,15 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   }
 
   void _performDebouncedSearch(String searchText) async {
+    final notifier = ref.read(pragasNotifierProvider.notifier);
     if (searchText.trim().isEmpty) {
-      await _pragasProvider.loadPragasByTipo(_currentPragaType);
+      await notifier.loadPragasByTipo(_currentPragaType);
     } else {
-      await _pragasProvider.searchPragas(searchText.trim());
+      await notifier.searchPragas(searchText.trim());
     }
   }
 
-  // Métodos de filtragem migrados para PragasProvider
+  // Métodos de filtragem migrados para PragasNotifier
 
   void _clearSearch() async {
     _searchDebounceTimer?.cancel();
@@ -98,7 +93,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       _searchText = '';
     });
 
-    await _pragasProvider.loadPragasByTipo(_currentPragaType);
+    final notifier = ref.read(pragasNotifierProvider.notifier);
+    await notifier.loadPragasByTipo(_currentPragaType);
   }
 
   void _toggleViewMode(PragaViewMode mode) {
@@ -113,7 +109,8 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     });
 
     // Aplica ordenação diretamente na lista atual
-    _pragasProvider.sortPragas(_isAscending);
+    final notifier = ref.read(pragasNotifierProvider.notifier);
+    notifier.sortPragas(_isAscending);
   }
 
   void _handleItemTap(PragaEntity praga) {
@@ -134,6 +131,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pragasState = ref.watch(pragasNotifierProvider);
 
     return PopScope(
       canPop: true,
@@ -144,23 +142,19 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1120),
-                child: Column(
-                  children: [
-                    AnimatedBuilder(
-                      animation: _pragasProvider,
-                      builder: (context, child) {
-                        return _buildModernHeader(isDark, _pragasProvider);
-                      },
-                    ),
-                    Expanded(
-                      child: AnimatedBuilder(
-                        animation: _pragasProvider,
-                        builder: (context, child) {
-                          return _buildBody(isDark, _pragasProvider);
-                        },
+                child: pragasState.when(
+                  data: (state) => Column(
+                    children: [
+                      _buildModernHeader(isDark, state),
+                      Expanded(
+                        child: _buildBody(isDark, state),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(
+                    child: Text('Erro: $error'),
+                  ),
                 ),
               ),
             ),
@@ -170,10 +164,10 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  Widget _buildModernHeader(bool isDark, PragasProvider provider) {
+  Widget _buildModernHeader(bool isDark, PragasState state) {
     return ModernHeaderWidget(
       title: _getHeaderTitle(),
-      subtitle: _getHeaderSubtitle(provider),
+      subtitle: _getHeaderSubtitle(state),
       leftIcon: Icons.pest_control_outlined,
       rightIcon: _isAscending
           ? Icons.arrow_upward_outlined
@@ -188,11 +182,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  Widget _buildBody(bool isDark, PragasProvider provider) {
+  Widget _buildBody(bool isDark, PragasState state) {
     return Column(
       children: [
         _buildSearchField(isDark),
-        Expanded(child: _buildContent(isDark, provider)),
+        Expanded(child: _buildContent(isDark, state)),
       ],
     );
   }
@@ -209,7 +203,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  Widget _buildContent(bool isDark, PragasProvider provider) {
+  Widget _buildContent(bool isDark, PragasState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -217,7 +211,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
         Expanded(
           child: CustomScrollView(
             slivers: [
-              _buildPragasSliver(isDark, provider),
+              _buildPragasSliver(isDark, state),
             ],
           ),
         ),
@@ -225,14 +219,14 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  Widget _buildPragasSliver(bool isDark, PragasProvider provider) {
-    if (provider.isLoading) {
+  Widget _buildPragasSliver(bool isDark, PragasState state) {
+    if (state.isLoading) {
       return SliverToBoxAdapter(
         child: PragasLoadingSkeletonWidget(viewMode: _viewMode, isDark: isDark),
       );
     }
 
-    if (provider.errorMessage != null) {
+    if (state.errorMessage != null) {
       return SliverFillRemaining(
         hasScrollBody: false,
         child: Center(
@@ -257,7 +251,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  provider.errorMessage!,
+                  state.errorMessage!,
                   style: TextStyle(
                     fontSize: 14,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -271,7 +265,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       );
     }
 
-    if (provider.pragas.isEmpty && _searchText.isEmpty) {
+    if (state.pragas.isEmpty && _searchText.isEmpty) {
       return SliverFillRemaining(
         hasScrollBody: false,
         child: PragasEmptyStateWidget(
@@ -281,7 +275,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
       );
     }
 
-    if (provider.pragas.isEmpty && _searchText.isNotEmpty) {
+    if (state.pragas.isEmpty && _searchText.isNotEmpty) {
       return SliverFillRemaining(
         hasScrollBody: false,
         child: Center(
@@ -320,11 +314,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     }
 
     return _viewMode.isGrid
-        ? _buildSliverGrid(isDark, provider)
-        : _buildSliverList(isDark, provider);
+        ? _buildSliverGrid(isDark, state)
+        : _buildSliverList(isDark, state);
   }
 
-  Widget _buildSliverGrid(bool isDark, PragasProvider provider) {
+  Widget _buildSliverGrid(bool isDark, PragasState state) {
     return SliverPadding(
       padding: const EdgeInsets.all(0),
       sliver: SliverToBoxAdapter(
@@ -353,9 +347,9 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
                         crossAxisSpacing: ReceitaAgroSpacing.sm,
                         mainAxisSpacing: ReceitaAgroSpacing.sm,
                       ),
-                      itemCount: provider.pragas.length,
+                      itemCount: state.pragas.length,
                       itemBuilder: (context, index) {
-                        final praga = provider.pragas[index];
+                        final praga = state.pragas[index];
                         return PragaCardWidget(
                           praga: praga,
                           mode: PragaCardMode.grid,
@@ -374,7 +368,7 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     );
   }
 
-  Widget _buildSliverList(bool isDark, PragasProvider provider) {
+  Widget _buildSliverList(bool isDark, PragasState state) {
     return SliverPadding(
       padding: const EdgeInsets.all(0),
       sliver: SliverToBoxAdapter(
@@ -392,11 +386,11 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
               SliverPadding(
                 padding: const EdgeInsets.all(0),
                 sliver: SliverList.separated(
-                  itemCount: provider.pragas.length,
+                  itemCount: state.pragas.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 4),
                   itemBuilder: (context, index) {
-                    final praga = provider.pragas[index];
+                    final praga = state.pragas[index];
                     return PragaCardWidget(
                       praga: praga,
                       mode: PragaCardMode.list,
@@ -426,17 +420,17 @@ class _ListaPragasPageState extends State<ListaPragasPage> {
     }
   }
 
-  String _getHeaderSubtitle(PragasProvider provider) {
-    if (provider.isLoading && provider.pragas.isEmpty) {
+  String _getHeaderSubtitle(PragasState state) {
+    if (state.isLoading && state.pragas.isEmpty) {
       return 'Carregando registros...';
     }
 
-    if (provider.errorMessage != null) {
+    if (state.errorMessage != null) {
       return 'Erro no carregamento';
     }
 
     // Usa as estatísticas da sessão em vez do count filtrado
-    final stats = provider.stats;
+    final stats = state.stats;
     if (stats != null) {
       final totalSessao = _getTotalPorTipo(stats);
       return '$totalSessao registros na sessão';

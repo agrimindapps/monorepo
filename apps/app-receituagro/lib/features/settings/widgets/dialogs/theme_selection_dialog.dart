@@ -1,37 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/providers/theme_notifier.dart';
 import '../../constants/settings_design_tokens.dart';
 
-class ThemeSelectionDialog extends StatelessWidget {
+class ThemeSelectionDialog extends ConsumerWidget {
   const ThemeSelectionDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final currentThemeMode = ref.watch(themeNotifierProvider);
 
-    return provider_lib.Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildDialogHeader(context, theme),
-                const SizedBox(height: 20),
-                _buildThemeOptions(context, theme, themeProvider),
-                const SizedBox(height: 24),
-                _buildActionButtons(context),
-              ],
-            ),
-          ),
-        );
-      },
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDialogHeader(context, theme),
+            const SizedBox(height: 20),
+            _buildThemeOptions(context, theme, ref, currentThemeMode),
+            const SizedBox(height: 24),
+            _buildActionButtons(context),
+          ],
+        ),
+      ),
     );
   }
 
@@ -75,7 +72,7 @@ class ThemeSelectionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeOptions(BuildContext context, ThemeData theme, ThemeProvider themeProvider) {
+  Widget _buildThemeOptions(BuildContext context, ThemeData theme, WidgetRef ref, ThemeMode currentThemeMode) {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
@@ -89,7 +86,8 @@ class ThemeSelectionDialog extends StatelessWidget {
           _buildThemeOption(
             context,
             theme,
-            themeProvider,
+            ref,
+            currentThemeMode,
             ThemeMode.light,
             'Tema Claro',
             'Interface sempre clara',
@@ -103,7 +101,8 @@ class ThemeSelectionDialog extends StatelessWidget {
           _buildThemeOption(
             context,
             theme,
-            themeProvider,
+            ref,
+            currentThemeMode,
             ThemeMode.dark,
             'Tema Escuro',
             'Interface sempre escura',
@@ -116,7 +115,8 @@ class ThemeSelectionDialog extends StatelessWidget {
           _buildThemeOption(
             context,
             theme,
-            themeProvider,
+            ref,
+            currentThemeMode,
             ThemeMode.system,
             'Automático',
             'Segue as configurações do sistema',
@@ -131,7 +131,8 @@ class ThemeSelectionDialog extends StatelessWidget {
   Widget _buildThemeOption(
     BuildContext context,
     ThemeData theme,
-    ThemeProvider themeProvider,
+    WidgetRef ref,
+    ThemeMode currentThemeMode,
     ThemeMode themeMode,
     String title,
     String subtitle,
@@ -139,14 +140,14 @@ class ThemeSelectionDialog extends StatelessWidget {
     bool isFirst = false,
     bool isLast = false,
   }) {
-    final isSelected = themeProvider.themeMode == themeMode;
-    
+    final isSelected = currentThemeMode == themeMode;
+
     return Semantics(
       label: '$title. $subtitle',
       selected: isSelected,
       button: true,
       child: InkWell(
-        onTap: () => _onThemeSelected(context, themeProvider, themeMode, title),
+        onTap: () => _onThemeSelected(context, ref, themeMode, title),
         borderRadius: BorderRadius.vertical(
           top: isFirst ? const Radius.circular(8) : Radius.zero,
           bottom: isLast ? const Radius.circular(8) : Radius.zero,
@@ -154,7 +155,7 @@ class ThemeSelectionDialog extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isSelected 
+            color: isSelected
                 ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
                 : Colors.transparent,
             borderRadius: BorderRadius.vertical(
@@ -167,14 +168,14 @@ class ThemeSelectionDialog extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isSelected 
+                  color: isSelected
                       ? theme.colorScheme.primary
                       : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
                   icon,
-                  color: isSelected 
+                  color: isSelected
                       ? theme.colorScheme.onPrimary
                       : theme.colorScheme.onSurfaceVariant,
                   size: 20,
@@ -189,7 +190,7 @@ class ThemeSelectionDialog extends StatelessWidget {
                       title,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color: isSelected 
+                        color: isSelected
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurface,
                       ),
@@ -236,11 +237,11 @@ class ThemeSelectionDialog extends StatelessWidget {
 
   Future<void> _onThemeSelected(
     BuildContext context,
-    ThemeProvider themeProvider,
+    WidgetRef ref,
     ThemeMode themeMode,
     String themeName,
   ) async {
-    await themeProvider.setThemeMode(themeMode);
+    await ref.read(themeNotifierProvider.notifier).setThemeMode(themeMode);
 
     if (context.mounted) {
       Navigator.of(context).pop();

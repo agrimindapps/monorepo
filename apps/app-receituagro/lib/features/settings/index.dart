@@ -10,9 +10,8 @@ export 'domain/exceptions/settings_exceptions.dart';
 export 'domain/repositories/i_user_settings_repository.dart';
 // Model exports
 export 'data/settings_state.dart';
-// Presentation layer
-export 'presentation/providers/settings_provider.dart';
-export 'presentation/providers/user_settings_provider.dart';
+// Presentation layer (Riverpod)
+export 'presentation/providers/settings_notifier.dart';
 // Services
 export 'domain/device_service.dart';
 export 'domain/navigation_service.dart';

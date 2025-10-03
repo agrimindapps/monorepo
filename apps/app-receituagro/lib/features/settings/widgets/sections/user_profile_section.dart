@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
-import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/providers/settings_notifier.dart';
 import '../items/sync_status_item.dart';
 import '../shared/settings_list_tile.dart';
 
+// Provider accessor for FeatureFlagsProvider (ChangeNotifier from DI)
+final featureFlagsProviderProvider = Provider<FeatureFlagsProvider>((ref) => GetIt.instance<FeatureFlagsProvider>());
+
 /// User Profile & Account Management Section
-/// 
+///
 /// Features:
 /// - Authentication options for guests (login/register)
 /// - User profile display and editing for authenticated users
@@ -19,76 +23,134 @@ import '../shared/settings_list_tile.dart';
 /// - Settings sync status indicators
 /// - Account management options
 /// - Theme/language sync between devices
-class UserProfileSection extends StatelessWidget {
+class UserProfileSection extends ConsumerWidget {
   const UserProfileSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.Consumer3<SettingsProvider, FeatureFlagsProvider, ReceitaAgroAuthProvider>(
-      builder: (context, settingsProvider, featureFlags, authProvider, child) {
-        return Card(
-          margin: SettingsDesignTokens.sectionMargin,
-          elevation: SettingsDesignTokens.cardElevation,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(receitaAgroAuthNotifierProvider);
+
+    return authState.when(
+      data: (authData) => _UserProfileCard(authData: authData),
+      loading: () => const Card(
+        margin: SettingsDesignTokens.sectionMargin,
+        elevation: SettingsDesignTokens.cardElevation,
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (error, _) => Card(
+        margin: SettingsDesignTokens.sectionMargin,
+        elevation: SettingsDesignTokens.cardElevation,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: Text('Erro ao carregar perfil: $error'),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Section Header
-              _buildSectionHeader(context, authProvider),
-              
-              // Content based on auth status
-              if (!authProvider.isAuthenticated || authProvider.isAnonymous) ...[
-                // Authentication options for guests
-                _buildAuthenticationOptions(context, authProvider),
-              ] else ...[
-                // User profile for authenticated users
-                _buildUserProfile(context, settingsProvider, authProvider),
-                
-                // Settings Sync Status
-                if (featureFlags.isContentSynchronizationEnabled)
-                  _buildSyncStatus(context, settingsProvider, featureFlags),
-                
+        ),
+      ),
+    );
+  }
+}
+
+/// Internal widget to handle the card with SettingsNotifier and FeatureFlagsProvider
+class _UserProfileCard extends ConsumerWidget {
+  final ReceitaAgroAuthState authData;
+
+  const _UserProfileCard({required this.authData});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Access Riverpod SettingsNotifier state
+    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final featureFlags = ref.read(featureFlagsProviderProvider);
+
+    return settingsAsync.when(
+      data: (settingsState) => ListenableBuilder(
+        listenable: featureFlags,
+        builder: (context, _) {
+          return Card(
+            margin: SettingsDesignTokens.sectionMargin,
+            elevation: SettingsDesignTokens.cardElevation,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Section Header
+                _buildSectionHeader(context, authData),
+
+                // Content based on auth status
+                if (!authData.isAuthenticated || authData.isAnonymous) ...[
+                  // Authentication options for guests
+                  _buildAuthenticationOptions(context, ref),
+                ] else ...[
+                  // User profile for authenticated users
+                  _buildUserProfile(context, settingsState, authData),
+
+                  // Settings Sync Status
+                  if (featureFlags.isContentSynchronizationEnabled)
+                    _buildSyncStatus(context, settingsState, featureFlags),
+
+                ],
               ],
-            ],
+            ),
+          );
+        },
+      ),
+      loading: () => const Card(
+        margin: SettingsDesignTokens.sectionMargin,
+        elevation: SettingsDesignTokens.cardElevation,
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (error, _) => Card(
+        margin: SettingsDesignTokens.sectionMargin,
+        elevation: SettingsDesignTokens.cardElevation,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: Text('Erro ao carregar configurações: $error'),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-
   /// Authentication options for guests
-  Widget _buildAuthenticationOptions(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildAuthenticationOptions(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         SettingsListTile(
           leadingIcon: Icons.login,
           title: 'Fazer Login',
           subtitle: 'Acesse sua conta existente',
-          onTap: () => _showLoginDialog(context, authProvider),
+          onTap: () => _showLoginDialog(context, ref),
         ),
         const Divider(height: 1),
         SettingsListTile(
           leadingIcon: Icons.person_add,
           title: 'Criar Conta',
           subtitle: 'Cadastre-se para sincronizar dados',
-          onTap: () => _showSignupDialog(context, authProvider),
+          onTap: () => _showSignupDialog(context, ref),
         ),
         const Divider(height: 1),
         SettingsListTile(
           leadingIcon: Icons.info_outline,
           title: 'Sobre Conta',
           subtitle: 'Benefícios de ter uma conta',
-          onTap: () => _showAccountBenefitsDialog(context),
+          onTap: () => _showAccountBenefitsDialog(context, ref),
         ),
       ],
     );
   }
 
   /// Section Header
-  Widget _buildSectionHeader(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildSectionHeader(BuildContext context, ReceitaAgroAuthState authState) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -128,14 +190,14 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// User Profile Display
-  Widget _buildUserProfile(BuildContext context, SettingsProvider settingsProvider, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildUserProfile(BuildContext context, SettingsState settingsState, ReceitaAgroAuthState authState) {
     final theme = Theme.of(context);
-    final currentDevice = settingsProvider.currentDeviceInfo;
+    final currentDevice = settingsState.currentDeviceInfo;
     
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: InkWell(
-        onTap: () => _openUserProfileDialog(context, settingsProvider),
+        onTap: () => _openUserProfileDialog(context, settingsState),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -167,7 +229,7 @@ class UserProfileSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _getUserEmail(settingsProvider),
+                      _getUserEmail(settingsState),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -216,9 +278,9 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Settings Sync Status
-  Widget _buildSyncStatus(BuildContext context, SettingsProvider settingsProvider, FeatureFlagsProvider featureFlags) {
+  Widget _buildSyncStatus(BuildContext context, SettingsState settingsState, FeatureFlagsProvider featureFlags) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Column(
@@ -232,32 +294,32 @@ class UserProfileSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          
+
           // Sync Status Items
           SyncStatusItem(
             label: 'Tema',
-            value: settingsProvider.isDarkTheme ? 'Escuro' : 'Claro',
+            value: settingsState.isDarkTheme ? 'Escuro' : 'Claro',
             isSynced: true,
             icon: Icons.palette,
           ),
           const SizedBox(height: 4),
           SyncStatusItem(
             label: 'Idioma',
-            value: _getLanguageDisplay(settingsProvider.language),
+            value: _getLanguageDisplay(settingsState.language),
             isSynced: true,
             icon: Icons.language,
           ),
           const SizedBox(height: 4),
           SyncStatusItem(
             label: 'Notificações',
-            value: settingsProvider.notificationsEnabled ? 'Ativadas' : 'Desativadas',
+            value: settingsState.notificationsEnabled ? 'Ativadas' : 'Desativadas',
             isSynced: true,
             icon: Icons.notifications,
           ),
           const SizedBox(height: 4),
           SyncStatusItem(
             label: 'Som',
-            value: settingsProvider.soundEnabled ? 'Ativado' : 'Desativado',
+            value: settingsState.soundEnabled ? 'Ativado' : 'Desativado',
             isSynced: true,
             icon: Icons.volume_up,
           ),
@@ -282,7 +344,7 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Get user email (mock)
-  String _getUserEmail(SettingsProvider settingsProvider) {
+  String _getUserEmail(SettingsState settingsState) {
     // In real implementation, this would come from auth service
     return 'usuario@receituagro.com';
   }
@@ -310,13 +372,13 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Navigate to Profile Page
-  Future<void> _openUserProfileDialog(BuildContext context, SettingsProvider settingsProvider) async {
+  Future<void> _openUserProfileDialog(BuildContext context, SettingsState settingsState) async {
     await Navigator.pushNamed(context, '/profile');
   }
 
 
   /// Show login dialog
-  void _showLoginDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  void _showLoginDialog(BuildContext context, WidgetRef ref) {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
 
@@ -351,7 +413,7 @@ class UserProfileSection extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () => _performLogin(context, authProvider, emailController.text, passwordController.text),
+            onPressed: () => _performLogin(context, ref, emailController.text, passwordController.text),
             child: const Text('Entrar'),
           ),
         ],
@@ -360,7 +422,7 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Show signup dialog
-  void _showSignupDialog(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  void _showSignupDialog(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -405,10 +467,10 @@ class UserProfileSection extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () => _performSignup(
-              context, 
-              authProvider, 
-              nameController.text, 
-              emailController.text, 
+              context,
+              ref,
+              nameController.text,
+              emailController.text,
               passwordController.text
             ),
             child: const Text('Criar'),
@@ -419,7 +481,7 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Show account benefits dialog
-  void _showAccountBenefitsDialog(BuildContext context) {
+  void _showAccountBenefitsDialog(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -442,9 +504,7 @@ class UserProfileSection extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Chamar o método de criar conta
-              final authProvider = provider_lib.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
-              _showSignupDialog(context, authProvider);
+              _showSignupDialog(context, ref);
             },
             child: const Text('Criar Conta'),
           ),
@@ -454,19 +514,19 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Perform login
-  Future<void> _performLogin(BuildContext context, ReceitaAgroAuthProvider authProvider, String email, String password) async {
+  Future<void> _performLogin(BuildContext context, WidgetRef ref, String email, String password) async {
     if (email.isEmpty || password.isEmpty) {
       _showSnackBar(context, 'Preencha todos os campos', Colors.red);
       return;
     }
 
     Navigator.pop(context);
-    
-    final result = await authProvider.signInWithEmailAndPassword(
-      email: email.trim(), 
+
+    final result = await ref.read(receitaAgroAuthNotifierProvider.notifier).signInWithEmailAndPassword(
+      email: email.trim(),
       password: password,
     );
-    
+
     if (context.mounted) {
       _showSnackBar(
         context,
@@ -477,20 +537,20 @@ class UserProfileSection extends StatelessWidget {
   }
 
   /// Perform signup
-  Future<void> _performSignup(BuildContext context, ReceitaAgroAuthProvider authProvider, String name, String email, String password) async {
+  Future<void> _performSignup(BuildContext context, WidgetRef ref, String name, String email, String password) async {
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       _showSnackBar(context, 'Preencha todos os campos', Colors.red);
       return;
     }
 
     Navigator.pop(context);
-    
-    final result = await authProvider.signUpWithEmailAndPassword(
-      email: email.trim(), 
+
+    final result = await ref.read(receitaAgroAuthNotifierProvider.notifier).signUpWithEmailAndPassword(
+      email: email.trim(),
       password: password,
       displayName: name.trim(),
     );
-    
+
     if (context.mounted) {
       _showSnackBar(
         context,

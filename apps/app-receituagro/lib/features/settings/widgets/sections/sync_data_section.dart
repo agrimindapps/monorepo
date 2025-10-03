@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as flutter_provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/auth_provider.dart';
 import '../../constants/settings_design_tokens.dart';
 
 /// Seção simplificada de sincronização de dados na ProfilePage
 /// Mostra como um item de lista simples com ícone de sincronização
-class SyncDataSection extends StatefulWidget {
+class SyncDataSection extends ConsumerStatefulWidget {
   const SyncDataSection({super.key});
 
   @override
-  State<SyncDataSection> createState() => _SyncDataSectionState();
+  ConsumerState<SyncDataSection> createState() => _SyncDataSectionState();
 }
 
-class _SyncDataSectionState extends State<SyncDataSection> {
+class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   bool _isSyncing = false;
   String _lastSyncText = 'Há 2 horas';
 
@@ -21,8 +22,9 @@ class _SyncDataSectionState extends State<SyncDataSection> {
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
 
-    final authProvider = flutter_provider.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
-    
+    // Get AuthProvider from DI (ChangeNotifier - not yet migrated to Riverpod)
+    final authProvider = di.sl<ReceitaAgroAuthProvider>();
+
     if (!authProvider.isAuthenticated) {
       _showMessage('Faça login para sincronizar seus dados', isError: true);
       return;
@@ -35,13 +37,13 @@ class _SyncDataSectionState extends State<SyncDataSection> {
     try {
       // Usar sincronização real do AuthProvider
       final success = await authProvider.forceSyncUserData();
-      
+
       if (mounted) {
         setState(() {
           _lastSyncText = success ? 'Agora mesmo' : _lastSyncText;
           _isSyncing = false;
         });
-        
+
         if (success) {
           _showMessage('Sincronização concluída com sucesso!');
         } else {
@@ -74,13 +76,25 @@ class _SyncDataSectionState extends State<SyncDataSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authProvider = context.watch<ReceitaAgroAuthProvider>();
-    
-    // Só mostra seção para usuários autenticados
-    if (!authProvider.isAuthenticated || authProvider.isAnonymous) {
-      return const SizedBox.shrink();
-    }
 
+    // Get AuthProvider from DI (ChangeNotifier - not yet migrated to Riverpod)
+    final authProvider = di.sl<ReceitaAgroAuthProvider>();
+
+    // Listen to changes using ListenableBuilder
+    return ListenableBuilder(
+      listenable: authProvider,
+      builder: (context, child) {
+        // Só mostra seção para usuários autenticados
+        if (!authProvider.isAuthenticated || authProvider.isAnonymous) {
+          return const SizedBox.shrink();
+        }
+
+        return _buildSyncCard(context, theme);
+      },
+    );
+  }
+
+  Widget _buildSyncCard(BuildContext context, ThemeData theme) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

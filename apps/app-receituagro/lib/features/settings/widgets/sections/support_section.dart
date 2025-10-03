@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../constants/settings_design_tokens.dart';
-import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/providers/settings_notifier.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
 
 /// Support and feedback section
 /// Handles app rating and user feedback
-class SupportSection extends StatelessWidget {
+class SupportSection extends ConsumerWidget {
   const SupportSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,7 +29,7 @@ class SupportSection extends StatelessWidget {
                 leadingIcon: Icons.star_outline,
                 title: 'Avaliar o App',
                 subtitle: 'Avalie nossa experiência na loja',
-                onTap: () => _showRateApp(context),
+                onTap: () => _showRateApp(context, ref),
               ),
               Divider(
                 height: 1,
@@ -40,7 +40,7 @@ class SupportSection extends StatelessWidget {
                 leadingIcon: Icons.feedback_outlined,
                 title: 'Enviar Feedback',
                 subtitle: 'Nos ajude a melhorar o app',
-                onTap: () => _showFeedback(context),
+                onTap: () => _showFeedback(context, ref),
               ),
               Divider(
                 height: 1,
@@ -51,7 +51,7 @@ class SupportSection extends StatelessWidget {
                 leadingIcon: Icons.info_outline,
                 title: 'Sobre o Aplicativo',
                 subtitle: 'Versão, suporte e informações',
-                onTap: () => _showAboutApp(context),
+                onTap: () => _showAboutApp(context, ref),
               ),
             ],
           ),
@@ -60,12 +60,12 @@ class SupportSection extends StatelessWidget {
     );
   }
 
-  Future<void> _showRateApp(BuildContext context) async {
-    final provider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
-    
+  Future<void> _showRateApp(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(settingsNotifierProvider.notifier);
+
     try {
-      final success = await provider.showRateAppDialog(context);
-      
+      final success = await notifier.showRateAppDialog(context);
+
       if (context.mounted && !success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SettingsDesignTokens.getErrorSnackbar(
@@ -82,20 +82,24 @@ class SupportSection extends StatelessWidget {
     }
   }
 
-  void _showFeedback(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SettingsDesignTokens.getWarningSnackbar(
-        'Sistema de feedback em desenvolvimento',
-      ),
-    );
+  void _showFeedback(BuildContext context, WidgetRef ref) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SettingsDesignTokens.getWarningSnackbar(
+          'Sistema de feedback em desenvolvimento',
+        ),
+      );
+    }
   }
 
-  void _showAboutApp(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Sobre o app - Em desenvolvimento'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+  void _showAboutApp(BuildContext context, WidgetRef ref) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sobre o app - Em desenvolvimento'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    }
   }
 }

@@ -10,10 +10,6 @@ import '../domain/usecases/get_defensivos_agrupados_usecase.dart';
 import '../domain/usecases/get_defensivos_com_filtros_usecase.dart';
 import '../domain/usecases/get_defensivos_completos_usecase.dart';
 import '../domain/usecases/get_defensivos_usecase.dart';
-// Presentation
-import '../presentation/providers/defensivos_notifier.dart';
-import '../presentation/providers/defensivos_unificado_notifier.dart';
-import '../presentation/providers/home_defensivos_notifier.dart';
 
 /// Configuração de injeção de dependências para o módulo Defensivos
 /// Segue padrão Clean Architecture + GetIt para DI
@@ -39,23 +35,9 @@ void configureDefensivosDependencies() {
   getIt.registerLazySingleton(() => GetDefensivosCompletosUseCase(getIt()));
   getIt.registerLazySingleton(() => GetDefensivosComFiltrosUseCase(getIt()));
 
-  // Providers
-  getIt.registerFactory(() => DefensivosProvider(
-    getDefensivosUseCase: getIt(),
-    getDefensivosByClasseUseCase: getIt(),
-    searchDefensivosUseCase: getIt(),
-    getClassesAgronomicasUseCase: getIt(),
-    getFabricantesUseCase: getIt(),
-  ));
-
-  getIt.registerFactory(() => HomeDefensivosProvider(
-    repository: getIt(),
-  ));
-  
-  // Provider Unificado (Novo)
-  getIt.registerFactory(() => DefensivosUnificadoProvider(
-    getDefensivosAgrupadosUseCase: getIt(),
-    getDefensivosCompletosUseCase: getIt(),
-    getDefensivosComFiltrosUseCase: getIt(),
-  ));
+  // All Providers removed - Riverpod manages lifecycle automatically
+  // Migration complete: Using Notifiers instead:
+  // - DefensivosNotifier
+  // - HomeDefensivosNotifier
+  // - DefensivosUnificadoNotifier
 }

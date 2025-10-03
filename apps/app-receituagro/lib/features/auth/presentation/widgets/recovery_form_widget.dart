@@ -1,110 +1,109 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:provider/provider.dart' as provider;
-
-import '../controllers/login_controller.dart';
+import '../notifiers/login_notifier.dart';
 import 'auth_button_widget.dart';
 import 'auth_text_field_widget.dart';
 
 /// Widget responsável pelo formulário de recuperação de senha do ReceitaAgro
 /// Adaptado do app-gasometer com tema verde
-class RecoveryFormWidget extends StatelessWidget {
+/// Migrado para Riverpod
+class RecoveryFormWidget extends ConsumerWidget {
   const RecoveryFormWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider.Consumer<LoginController>(
-      builder: (context, controller, child) {
-        final primaryColor = _getReceitaAgroPrimaryColor(
-          Theme.of(context).brightness == Brightness.dark
-        );
-        
-        return Form(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loginState = ref.watch(loginNotifierProvider);
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
 
-              // Descrição
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'Esqueceu sua senha?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Digite seu email e enviaremos instruções\npara redefinir sua senha.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                        height: 1.4,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+    final primaryColor = _getReceitaAgroPrimaryColor(
+      Theme.of(context).brightness == Brightness.dark
+    );
+
+    return Form(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Descrição
+          Center(
+            child: Column(
+              children: [
+                Text(
+                  'Esqueceu sua senha?',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              
-              const SizedBox(height: 30),
-
-              // Campo de email
-              AuthTextFieldWidget(
-                controller: controller.emailController,
-                label: 'Email',
-                hint: 'Insira seu email cadastrado',
-                prefixIcon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                validator: controller.validateEmail,
-                onFieldSubmitted: (_) => _handlePasswordReset(context),
-              ),
-
-              // Mensagem de erro
-              if (controller.errorMessage != null) ...[
-                const SizedBox(height: 16),
-                _buildErrorMessage(context, controller.errorMessage!),
+                const SizedBox(height: 8),
+                Text(
+                  'Digite seu email e enviaremos instruções\npara redefinir sua senha.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
-              
-              const SizedBox(height: 30),
+            ),
+          ),
 
-              // Botão de enviar
-              AuthButtonWidget(
-                text: 'Recuperar Senha',
-                isLoading: controller.isLoading,
-                onPressed: () => _handlePasswordReset(context),
+          const SizedBox(height: 30),
+
+          // Campo de email
+          AuthTextFieldWidget(
+            controller: loginNotifier.emailController,
+            label: 'Email',
+            hint: 'Insira seu email cadastrado',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            validator: loginNotifier.validateEmail,
+            onFieldSubmitted: (_) => _handlePasswordReset(context, ref),
+          ),
+
+          // Mensagem de erro
+          if (loginState.errorMessage != null) ...[
+            const SizedBox(height: 16),
+            _buildErrorMessage(context, ref, loginState.errorMessage!),
+          ],
+
+          const SizedBox(height: 30),
+
+          // Botão de enviar
+          AuthButtonWidget(
+            text: 'Recuperar Senha',
+            isLoading: loginState.isLoading,
+            onPressed: () => _handlePasswordReset(context, ref),
+          ),
+
+          const SizedBox(height: 30),
+
+          // Botão de voltar ao login
+          Center(
+            child: TextButton.icon(
+              onPressed: loginNotifier.hideRecoveryForm,
+              icon: Icon(
+                Icons.arrow_back,
+                size: 18,
+                color: primaryColor,
               ),
-
-
-              const SizedBox(height: 30),
-
-              // Botão de voltar ao login
-              Center(
-                child: TextButton.icon(
-                  onPressed: controller.hideRecoveryForm,
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 18,
-                    color: primaryColor,
-                  ),
-                  label: Text(
-                    'Voltar ao login',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+              label: Text(
+                'Voltar ao login',
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  Widget _buildErrorMessage(BuildContext context, String message) {
+  Widget _buildErrorMessage(BuildContext context, WidgetRef ref, String message) {
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -131,10 +130,7 @@ class RecoveryFormWidget extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () {
-              final controller = provider.Provider.of<LoginController>(context, listen: false);
-              controller.clearError();
-            },
+            onTap: loginNotifier.clearError,
             child: Container(
               padding: const EdgeInsets.all(4),
               child: Icon(
@@ -149,18 +145,20 @@ class RecoveryFormWidget extends StatelessWidget {
     );
   }
 
-  void _handlePasswordReset(BuildContext context) async {
+  void _handlePasswordReset(BuildContext context, WidgetRef ref) async {
     if (kDebugMode) {
       print('🎯 RecoveryFormWidget: Enviando email de recuperação');
     }
-    
-    final controller = provider.Provider.of<LoginController>(context, listen: false);
-    await controller.sendPasswordReset();
-    
+
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    await loginNotifier.sendPasswordReset();
+
     if (!context.mounted) return;
-    
+
+    final loginState = ref.read(loginNotifierProvider);
+
     // Mostrar mensagem de sucesso se não houve erro
-    if (controller.errorMessage == null) {
+    if (loginState.errorMessage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -173,7 +171,7 @@ class RecoveryFormWidget extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Instruções de alteração de senha foram enviadas para ${controller.emailController.text}',
+                  'Instruções de alteração de senha foram enviadas para ${loginNotifier.emailController.text}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -206,9 +204,9 @@ class RecoveryFormWidget extends StatelessWidget {
           ),
         ),
       );
-      
+
       // Voltar ao login após envio bem-sucedido
-      controller.hideRecoveryForm();
+      loginNotifier.hideRecoveryForm();
     } else {
       // Mostrar erro via SnackBar superior
       ScaffoldMessenger.of(context).showSnackBar(
@@ -223,7 +221,7 @@ class RecoveryFormWidget extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  controller.errorMessage!,
+                  loginState.errorMessage!,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -250,14 +248,14 @@ class RecoveryFormWidget extends StatelessWidget {
             textColor: Colors.white,
             onPressed: () {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              controller.clearError();
+              loginNotifier.clearError();
             },
           ),
         ),
       );
-      
+
       // Limpar erro após mostrar
-      controller.clearError();
+      loginNotifier.clearError();
     }
   }
 

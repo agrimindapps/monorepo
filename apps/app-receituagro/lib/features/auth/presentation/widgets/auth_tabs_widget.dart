@@ -1,56 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:provider/provider.dart' as provider;
-
-import '../controllers/login_controller.dart';
+import '../notifiers/login_notifier.dart';
 
 /// Widget para tabs de autenticação (Login/Cadastro) do ReceitaAgro
 /// Adaptado do app-gasometer com tema verde
-class AuthTabsWidget extends StatelessWidget {
+/// Migrado para Riverpod
+class AuthTabsWidget extends ConsumerWidget {
   const AuthTabsWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider.Consumer<LoginController>(
-      builder: (context, controller, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final primaryColor = _getReceitaAgroPrimaryColor(isDark);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loginState = ref.watch(loginNotifierProvider);
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
 
-        return Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Tab Login
-              _buildTab(
-                context: context,
-                title: 'Entrar',
-                isActive: !controller.isSignUpMode,
-                onTap: () {
-                  if (controller.isSignUpMode) {
-                    controller.toggleAuthMode();
-                  }
-                },
-                isDark: isDark,
-                primaryColor: primaryColor,
-              ),
-              const SizedBox(width: 40),
-              // Tab Cadastro
-              _buildTab(
-                context: context,
-                title: 'Cadastrar',
-                isActive: controller.isSignUpMode,
-                onTap: () {
-                  if (!controller.isSignUpMode) {
-                    controller.toggleAuthMode();
-                  }
-                },
-                isDark: isDark,
-                primaryColor: primaryColor,
-              ),
-            ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = _getReceitaAgroPrimaryColor(isDark);
+
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Tab Login
+          _buildTab(
+            context: context,
+            title: 'Entrar',
+            isActive: !loginState.isSignUpMode,
+            onTap: () {
+              if (loginState.isSignUpMode) {
+                loginNotifier.toggleAuthMode();
+              }
+            },
+            isDark: isDark,
+            primaryColor: primaryColor,
           ),
-        );
-      },
+          const SizedBox(width: 40),
+          // Tab Cadastro
+          _buildTab(
+            context: context,
+            title: 'Cadastrar',
+            isActive: loginState.isSignUpMode,
+            onTap: () {
+              if (!loginState.isSignUpMode) {
+                loginNotifier.toggleAuthMode();
+              }
+            },
+            isDark: isDark,
+            primaryColor: primaryColor,
+          ),
+        ],
+      ),
     );
   }
 

@@ -4,7 +4,6 @@ import '../../../core/data/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_repository_impl.dart';
 import '../domain/repositories/i_pragas_repository.dart';
 import '../domain/usecases/get_pragas_usecase.dart';
-import '../presentation/providers/pragas_provider.dart';
 
 /// Configuração de Dependency Injection para o módulo de Pragas
 /// Princípio: Dependency Inversion
@@ -61,19 +60,9 @@ class PragasDI {
       () => GetPragasStatsUseCase(repository: sl()),
     );
 
-    // Providers
-    sl.registerLazySingleton<PragasProvider>(
-      () => PragasProvider(
-        getPragasUseCase: sl(),
-        getPragasByTipoUseCase: sl(),
-        getPragaByIdUseCase: sl(),
-        getPragasByCulturaUseCase: sl(),
-        searchPragasUseCase: sl(),
-        getRecentPragasUseCase: sl(),
-        getSuggestedPragasUseCase: sl(),
-        getPragasStatsUseCase: sl(),
-      ),
-    );
+    // Provider removed - Riverpod manages lifecycle automatically
+    // Riverpod notifiers: PragasNotifier, HomePragasNotifier, DetalhePragaNotifier, etc.
+    // State is managed via @riverpod providers in presentation/providers/
   }
 }
 

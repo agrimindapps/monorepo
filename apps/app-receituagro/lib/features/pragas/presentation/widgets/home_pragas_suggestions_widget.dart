@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../pages/detalhe_praga_page.dart';
-import '../providers/home_pragas_provider.dart';
+import '../providers/home_pragas_notifier.dart';
 
 /// Widget para exibir seção de sugestões com carrossel na home de pragas
 ///
@@ -13,11 +13,11 @@ import '../providers/home_pragas_provider.dart';
 /// - Navegação para detalhes da praga
 /// - Estados vazio e loading
 class HomePragasSuggestionsWidget extends StatefulWidget {
-  final HomePragasProvider provider;
+  final HomePragasState state;
 
   const HomePragasSuggestionsWidget({
     super.key,
-    required this.provider,
+    required this.state,
   });
 
   @override
@@ -80,7 +80,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
   }
 
   Widget _buildCarousel(BuildContext context) {
-    final suggestions = widget.provider.getSuggestionsList();
+    final suggestions = widget.state.getSuggestionsList();
 
     if (suggestions.isEmpty) {
       return _buildEmptyCarousel(context);
@@ -93,7 +93,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
         controller: _pageController,
         itemCount: suggestions.length,
         onPageChanged: (index) {
-          widget.provider.updateCarouselIndex(index);
+          widget.state.updateCarouselIndex(index);
         },
         itemBuilder: (context, index) {
           final suggestion = suggestions[index];
@@ -317,7 +317,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
   }
 
   Widget _buildDotIndicators(BuildContext context) {
-    final suggestions = widget.provider.getSuggestionsList();
+    final suggestions = widget.state.getSuggestionsList();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -336,7 +336,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
             ),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: widget.provider.currentCarouselIndex == entry.key
+              color: widget.state.currentCarouselIndex == entry.key
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             ),

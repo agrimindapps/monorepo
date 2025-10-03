@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../constants/settings_design_tokens.dart';
@@ -8,13 +9,18 @@ import '../../pages/profile_page.dart';
 
 /// Seção simplificada de usuário nas configurações
 /// Mostra apenas resumo do usuário com navegação para perfil completo
-class AuthSection extends StatelessWidget {
+class AuthSection extends ConsumerWidget {
   const AuthSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.Consumer<ReceitaAgroAuthProvider>(
-      builder: (context, authProvider, child) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get AuthProvider from DI (ChangeNotifier - not yet migrated to Riverpod)
+    final authProvider = di.sl<ReceitaAgroAuthProvider>();
+
+    // Listen to changes using addListener pattern
+    return ListenableBuilder(
+      listenable: authProvider,
+      builder: (context, child) {
         if (authProvider.isLoading) {
           return _buildLoadingSection(context);
         }
@@ -347,17 +353,21 @@ class AuthSection extends StatelessWidget {
   }
 
   void _navigateToLogin(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (context) => const LoginPage()),
-    );
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (context) => const LoginPage()),
+      );
+    }
   }
 
   void _navigateToUserProfile(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (context) => const ProfilePage()),
-    );
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (context) => const ProfilePage()),
+      );
+    }
   }
 
   String _formatDate(DateTime date) {

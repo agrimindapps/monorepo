@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 
-// Import the enhanced provider
-import 'enhanced_analytics_provider.dart';
+import '../../core/enums/analytics_user_type.dart';
 
-// Export types from enhanced provider (including AnalyticsUserType and ReceitaAgroEnhancedAnalyticsProvider)
-export 'enhanced_analytics_provider.dart' show ReceitaAgroEnhancedAnalyticsProvider, AnalyticsUserType;
+// Export types
+export 'enhanced_analytics_notifier.dart' show EnhancedAnalyticsNotifier;
+export '../../core/enums/analytics_user_type.dart' show AnalyticsUserType;
 
 /// Analytics events specific to ReceitaAgro
 enum ReceitaAgroAnalyticsEvent {
@@ -50,89 +50,140 @@ enum ReceitaAgroAnalyticsEvent {
   final String eventName;
 }
 
-/// ReceitaAgroAnalyticsService - Wrapper class for backward compatibility
-/// This class delegates all calls to ReceitaAgroEnhancedAnalyticsProvider
+/// ReceitaAgroAnalyticsService - Service wrapper for Core Package analytics
+/// This class provides a simplified interface for analytics operations
+/// Uses Core Package services directly instead of Riverpod notifier
 ///
-/// This approach is used instead of typedef because:
-/// 1. GetIt needs distinct runtime types for registration
-/// 2. Typedef creates compile-time aliases but same runtime type
-/// 3. This allows both types to be registered in GetIt independently
+/// This approach is used for:
+/// 1. GetIt dependency injection compatibility
+/// 2. Service-layer analytics operations (not UI state management)
+/// 3. Backward compatibility with existing analytics code
 class ReceitaAgroAnalyticsService {
-  final ReceitaAgroEnhancedAnalyticsProvider _provider;
+  final IAnalyticsRepository _analyticsRepository;
+  final ICrashlyticsRepository _crashlyticsRepository;
 
   ReceitaAgroAnalyticsService({
     required IAnalyticsRepository analyticsRepository,
     required ICrashlyticsRepository crashlyticsRepository,
-  }) : _provider = ReceitaAgroEnhancedAnalyticsProvider(
-          analyticsRepository: analyticsRepository,
-          crashlyticsRepository: crashlyticsRepository,
-        );
+  })  : _analyticsRepository = analyticsRepository,
+        _crashlyticsRepository = crashlyticsRepository;
 
-  // Delegate all methods to the provider
-  Future<void> initialize() => _provider.initialize();
+  // Core analytics operations
+  Future<void> initialize() async {
+    // Analytics repository doesn't have initialize method - it's auto-initialized
+  }
 
-  Future<void> logEvent(String eventName, Map<String, dynamic>? parameters) =>
-      _provider.logEvent(eventName, parameters);
+  Future<void> logEvent(String eventName, Map<String, dynamic>? parameters) async {
+    await _analyticsRepository.logEvent(eventName, parameters: parameters);
+  }
 
-  Future<void> setUserId(String userId) => _provider.setUserId(userId);
+  Future<void> setUserId(String userId) async {
+    await _analyticsRepository.setUserId(userId);
+  }
 
-  Future<void> setUserProperty(String name, String value) =>
-      _provider.setUserProperty(name, value);
+  Future<void> setUserProperty(String name, String value) async {
+    await _analyticsRepository.setUserProperties(properties: {name: value});
+  }
 
-  Future<void> recordError(dynamic error, StackTrace? stackTrace, {String? reason}) =>
-      _provider.recordError(error, stackTrace, reason: reason);
+  Future<void> recordError(dynamic error, StackTrace? stackTrace, {String? reason}) async {
+    await _crashlyticsRepository.recordError(
+      exception: error,
+      stackTrace: stackTrace ?? StackTrace.empty,
+      reason: reason,
+    );
+  }
 
-  Future<void> logLogin(String method) => _provider.logLogin(method);
+  Future<void> logLogin(String method) async {
+    await _analyticsRepository.logLogin(method: method);
+  }
 
-  Future<void> logSignUp(String method) => _provider.logSignUp(method);
+  Future<void> logSignUp(String method) async {
+    await _analyticsRepository.logSignUp(method: method);
+  }
 
-  Future<void> logLogout() => _provider.logLogout();
+  Future<void> logLogout() async {
+    await _analyticsRepository.logLogout();
+  }
 
-  Future<void> logAppOpen() => _provider.logAppOpen();
+  Future<void> logAppOpen() async {
+    await logEvent('app_open', null);
+  }
 
-  Future<void> logSubscriptionEvent(String eventType, String? productId, {Map<String, dynamic>? additionalData}) =>
-      _provider.logSubscriptionEvent(eventType, productId, additionalData: additionalData);
+  Future<void> logSubscriptionEvent(String eventType, String? productId, {Map<String, dynamic>? additionalData}) async {
+    final params = <String, dynamic>{
+      'event_type': eventType,
+      if (productId != null) 'product_id': productId,
+      ...?additionalData,
+    };
+    await logEvent('subscription_event', params);
+  }
 
-  Future<void> logPremiumAttempt(String featureName) =>
-      _provider.logPremiumAttempt(featureName);
+  Future<void> logPremiumAttempt(String featureName) async {
+    await logEvent('premium_attempt', {'feature': featureName});
+  }
 
   // Legacy compatibility methods
-  void trackLogin(String method, {Map<String, dynamic>? metadata}) =>
-      _provider.trackLogin(method, metadata: metadata);
+  void trackLogin(String method, {Map<String, dynamic>? metadata}) {
+    logLogin(method);
+    if (metadata != null) logEvent('login_metadata', metadata);
+  }
 
-  void trackSignup(String method, {required bool success}) =>
-      _provider.trackSignup(method, success: success);
+  void trackSignup(String method, {required bool success}) {
+    if (success) {
+      logSignUp(method);
+    } else {
+      logEvent('signup_failed', {'method': method});
+    }
+  }
 
-  void trackLogout(String reason) => _provider.trackLogout(reason);
+  void trackLogout(String reason) {
+    logEvent('logout', {'reason': reason});
+  }
 
-  void trackEvent(String eventName, {Map<String, dynamic>? parameters}) =>
-      _provider.trackEvent(eventName, parameters: parameters);
+  void trackEvent(String eventName, {Map<String, dynamic>? parameters}) {
+    logEvent(eventName, parameters);
+  }
 
-  void trackError(String context, String error, {bool fatal = false, Map<String, dynamic>? metadata}) =>
-      _provider.trackError(context, error, fatal: fatal, metadata: metadata);
+  void trackError(String context, String error, {bool fatal = false, Map<String, dynamic>? metadata}) {
+    recordError(error, StackTrace.current, reason: '$context${fatal ? ' (FATAL)' : ''}');
+  }
 
   Future<void> setUserProperties({
     required AnalyticsUserType userType,
     required bool isPremium,
     required int deviceCount,
-  }) => _provider.setUserProperties(
-        userType: userType,
-        isPremium: isPremium,
-        deviceCount: deviceCount,
-      );
+  }) async {
+    await setUserProperty('user_type', userType.toString().split('.').last);
+    await setUserProperty('is_premium', isPremium.toString());
+    await setUserProperty('device_count', deviceCount.toString());
+  }
 
-  Future<void> clearUser() => _provider.clearUser();
+  Future<void> clearUser() async {
+    await setUserId('');
+  }
 
-  void trackAuthFunnelStep(String step) => _provider.trackAuthFunnelStep(step);
+  void trackAuthFunnelStep(String step) {
+    logEvent('auth_funnel_step', {'step': step});
+  }
 
-  void trackDeviceAdded(String platform) => _provider.trackDeviceAdded(platform);
+  void trackDeviceAdded(String platform) {
+    logEvent('device_added', {'platform': platform});
+  }
 
-  void trackDeviceLimitReached() => _provider.trackDeviceLimitReached();
+  void trackDeviceLimitReached() {
+    logEvent('device_limit_reached', null);
+  }
 
-  void trackMigrationStart() => _provider.trackMigrationStart();
+  void trackMigrationStart() {
+    logEvent('migration_start', null);
+  }
 
-  void trackMigrationComplete(int migratedCount, int duration) =>
-      _provider.trackMigrationComplete(migratedCount, duration);
+  void trackMigrationComplete(int migratedCount, int duration) {
+    logEvent('migration_complete', {
+      'migrated_count': migratedCount,
+      'duration_ms': duration,
+    });
+  }
 }
 
 /// Secondary alias for backward compatibility

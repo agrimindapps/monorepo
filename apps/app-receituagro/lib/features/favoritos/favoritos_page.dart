@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
-import 'favoritos_di.dart';
-import 'presentation/providers/favoritos_provider_simplified.dart';
+import 'presentation/notifiers/favoritos_notifier.dart';
 import 'presentation/widgets/favoritos_tabs_widget.dart';
 
-/// Favoritos Page - Implementação consolidada sem wrapper desnecessário
-/// 
-/// REFATORAÇÃO APLICADA:
-/// ✅ Eliminado wrapper desnecessário (double rendering)
-/// ✅ Consolidação direta da lógica principal
+/// Favoritos Page - Implementação com Riverpod
+///
+/// MIGRAÇÃO PARA RIVERPOD:
+/// ✅ Migrado de Provider para Riverpod com code generation
+/// ✅ ConsumerStatefulWidget para state management
 /// ✅ Mantido método estático reloadIfActive()
 /// ✅ Template consolidado aplicado
-/// ✅ Provider pattern para state management
 /// ✅ Tab system optimization
-/// 
+///
 /// FUNCIONALIDADES PRESERVADAS:
-/// - Sistema de abas (Defensivos, Pragas, Diagnósticos)  
+/// - Sistema de abas (Defensivos, Pragas, Diagnósticos)
 /// - Add/remove favoritos functionality
 /// - Premium restrictions para diagnósticos
 /// - Navigation para detalhes
@@ -26,13 +24,13 @@ import 'presentation/widgets/favoritos_tabs_widget.dart';
 /// - Pull-to-refresh
 /// - App lifecycle management
 /// - Static method reloadIfActive()
-class FavoritosPage extends StatefulWidget {
+class FavoritosPage extends ConsumerStatefulWidget {
   const FavoritosPage({super.key});
 
   static _FavoritosPageState? _currentState;
 
   @override
-  State<FavoritosPage> createState() => _FavoritosPageState();
+  ConsumerState<FavoritosPage> createState() => _FavoritosPageState();
 
   /// Método estático para recarregar a página quando estiver ativa
   static void reloadIfActive() {
@@ -40,7 +38,7 @@ class FavoritosPage extends StatefulWidget {
   }
 }
 
-class _FavoritosPageState extends State<FavoritosPage> 
+class _FavoritosPageState extends ConsumerState<FavoritosPage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
 
   late TabController _tabController;
@@ -76,37 +74,34 @@ class _FavoritosPageState extends State<FavoritosPage>
   }
 
   void _reloadFavoritos() {
-    final provider = FavoritosDI.get<FavoritosProviderSimplified>();
-    provider.loadAllFavoritos();
+    ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    final provider = FavoritosDI.get<FavoritosProviderSimplified>();
-    
+    final state = ref.watch(favoritosNotifierProvider);
+
     // Inicialização lazy
     if (!_hasInitialized) {
       _hasInitialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        provider.initialize();
+        ref.read(favoritosNotifierProvider.notifier).initialize();
       });
     }
-    
-    return provider_lib.ChangeNotifierProvider.value(
-      value: provider,
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: ResponsiveContentWrapper(
-              child: Column(
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: ResponsiveContentWrapper(
+            child: Column(
               children: [
-                _buildModernHeader(context, isDark),
+                _buildModernHeader(context, isDark, state),
                 const SizedBox(height: 8),
                 Expanded(
                   child: FavoritosTabsWidget(
@@ -117,26 +112,21 @@ class _FavoritosPageState extends State<FavoritosPage>
               ],
             ),
           ),
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return provider_lib.Consumer<FavoritosProviderSimplified>(
-      builder: (context, provider, child) {
-        return ModernHeaderWidget(
-          title: 'Favoritos',
-          subtitle: provider.hasAnyFavoritos 
-              ? '${provider.allFavoritos.length} itens salvos'
-              : 'Seus itens salvos',
-          leftIcon: Icons.favorite,
-          showBackButton: false,
-          showActions: false,
-          isDark: isDark,
-        );
-      },
+  Widget _buildModernHeader(BuildContext context, bool isDark, FavoritosState state) {
+    return ModernHeaderWidget(
+      title: 'Favoritos',
+      subtitle: state.hasAnyFavoritos
+          ? '${state.allFavoritos.length} itens salvos'
+          : 'Seus itens salvos',
+      leftIcon: Icons.favorite,
+      showBackButton: false,
+      showActions: false,
+      isDark: isDark,
     );
   }
 }

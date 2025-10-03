@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:provider/provider.dart' as provider;
-
-import '../controllers/login_controller.dart';
+import '../notifiers/login_notifier.dart';
 import 'auth_button_widget.dart';
 import 'auth_text_field_widget.dart';
 
 /// Widget responsável pelo formulário de login do ReceitaAgro
 /// Adaptado do app-gasometer com integração ao ReceitaAgroAuthProvider
-class LoginFormWidget extends StatelessWidget {
+/// Migrado para Riverpod
+class LoginFormWidget extends ConsumerWidget {
   final VoidCallback? onLoginSuccess;
 
   const LoginFormWidget({
@@ -18,122 +18,118 @@ class LoginFormWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return provider.Consumer<LoginController>(
-      builder: (context, controller, child) {
-        return Form(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Acesse sua conta para gerenciar suas receitas agropecuárias',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 30),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loginState = ref.watch(loginNotifierProvider);
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
 
-              // Campo de email
-              AuthTextFieldWidget(
-                controller: controller.emailController,
-                label: 'Email',
-                hint: 'Insira seu email',
-                prefixIcon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                validator: controller.validateEmail,
-                onFieldSubmitted: (_) {
-                  // Focar no próximo campo
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Campo de senha
-              AuthTextFieldWidget(
-                controller: controller.passwordController,
-                label: 'Senha',
-                hint: 'Insira sua senha',
-                prefixIcon: Icons.lock_outline,
-                obscureText: controller.obscurePassword,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    controller.obscurePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                  ),
-                  onPressed: controller.togglePasswordVisibility,
-                  tooltip: controller.obscurePassword
-                      ? 'Mostrar senha'
-                      : 'Ocultar senha',
-                ),
-                validator: controller.validatePassword,
-                onFieldSubmitted: (_) => _handleLogin(context),
-              ),
-              const SizedBox(height: 15),
-
-              // Esqueceu senha
-              _buildForgotPassword(context),
-
-              const SizedBox(height: 30),
-
-              // Botão de login
-              AuthButtonWidget(
-                text: 'Entrar',
-                isLoading: controller.isLoading,
-                onPressed: () => _handleLogin(context),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Botão de voltar ao perfil
-              Center(
-                child: TextButton.icon(
-                  onPressed: () => _navigateBackToProfile(context),
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 18,
-                    color: _getReceitaAgroPrimaryColor(
-                      Theme.of(context).brightness == Brightness.dark
-                    ),
-                  ),
-                  label: Text(
-                    'Voltar ao perfil',
-                    style: TextStyle(
-                      color: _getReceitaAgroPrimaryColor(
-                        Theme.of(context).brightness == Brightness.dark
-                      ),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    return Form(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Acesse sua conta para gerenciar suas receitas agropecuárias',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey[600],
+            ),
           ),
-        );
-      },
-    );
-  }
+          const SizedBox(height: 30),
 
-  Widget _buildForgotPassword(BuildContext context) {
-    return provider.Consumer<LoginController>(
-      builder: (context, controller, child) {
-        final primaryColor = _getReceitaAgroPrimaryColor(
-          Theme.of(context).brightness == Brightness.dark
-        );
-        
-        return Align(
-          alignment: Alignment.centerRight,
-          child: GestureDetector(
-            onTap: controller.showRecoveryForm,
-            child: Text(
-              'Esqueceu sua senha?',
-              style: TextStyle(
-                color: primaryColor,
-                fontWeight: FontWeight.w500,
+          // Campo de email
+          AuthTextFieldWidget(
+            controller: loginNotifier.emailController,
+            label: 'Email',
+            hint: 'Insira seu email',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            validator: loginNotifier.validateEmail,
+            onFieldSubmitted: (_) {
+              // Focar no próximo campo
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Campo de senha
+          AuthTextFieldWidget(
+            controller: loginNotifier.passwordController,
+            label: 'Senha',
+            hint: 'Insira sua senha',
+            prefixIcon: Icons.lock_outline,
+            obscureText: loginState.obscurePassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                loginState.obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              onPressed: loginNotifier.togglePasswordVisibility,
+              tooltip: loginState.obscurePassword
+                  ? 'Mostrar senha'
+                  : 'Ocultar senha',
+            ),
+            validator: loginNotifier.validatePassword,
+            onFieldSubmitted: (_) => _handleLogin(context, ref),
+          ),
+          const SizedBox(height: 15),
+
+          // Esqueceu senha
+          _buildForgotPassword(context, ref),
+
+          const SizedBox(height: 30),
+
+          // Botão de login
+          AuthButtonWidget(
+            text: 'Entrar',
+            isLoading: loginState.isLoading,
+            onPressed: () => _handleLogin(context, ref),
+          ),
+
+          const SizedBox(height: 30),
+
+          // Botão de voltar ao perfil
+          Center(
+            child: TextButton.icon(
+              onPressed: () => _navigateBackToProfile(context),
+              icon: Icon(
+                Icons.arrow_back,
+                size: 18,
+                color: _getReceitaAgroPrimaryColor(
+                  Theme.of(context).brightness == Brightness.dark
+                ),
+              ),
+              label: Text(
+                'Voltar ao perfil',
+                style: TextStyle(
+                  color: _getReceitaAgroPrimaryColor(
+                    Theme.of(context).brightness == Brightness.dark
+                  ),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
-        );
-      },
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForgotPassword(BuildContext context, WidgetRef ref) {
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final primaryColor = _getReceitaAgroPrimaryColor(
+      Theme.of(context).brightness == Brightness.dark
+    );
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: loginNotifier.showRecoveryForm,
+        child: Text(
+          'Esqueceu sua senha?',
+          style: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 
@@ -142,19 +138,21 @@ class LoginFormWidget extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
-  void _handleLogin(BuildContext context) async {
+  void _handleLogin(BuildContext context, WidgetRef ref) async {
     if (kDebugMode) {
       print('🎯 LoginFormWidget: Iniciando login no ReceitaAgro');
     }
-    
-    final controller = provider.Provider.of<LoginController>(context, listen: false);
-    await controller.signInWithEmailAndSync();
-    
+
+    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    await loginNotifier.signInWithEmailAndSync();
+
     if (!context.mounted) return;
-    
-    if (controller.isAuthenticated && onLoginSuccess != null) {
+
+    final loginState = ref.read(loginNotifierProvider);
+
+    if (loginState.isAuthenticated && onLoginSuccess != null) {
       onLoginSuccess!();
-    } else if (controller.errorMessage != null) {
+    } else if (loginState.errorMessage != null) {
       // Mostrar erro via SnackBar superior
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -168,7 +166,7 @@ class LoginFormWidget extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  controller.errorMessage!,
+                  loginState.errorMessage!,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -195,14 +193,14 @@ class LoginFormWidget extends StatelessWidget {
             textColor: Colors.white,
             onPressed: () {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              controller.clearError();
+              loginNotifier.clearError();
             },
           ),
         ),
       );
-      
+
       // Limpar erro após mostrar
-      controller.clearError();
+      loginNotifier.clearError();
     }
   }
 

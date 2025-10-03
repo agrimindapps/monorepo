@@ -14,7 +14,8 @@ import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
-import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
+// Migrated to Riverpod - diagnosticos_notifier.dart (lifecycle managed automatically)
+// import '../../features/diagnosticos/presentation/providers/diagnosticos_provider.dart';
 import '../../features/favoritos/favoritos_di.dart';
 import '../../features/favoritos/domain/favoritos_cache_service.dart';
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
@@ -23,8 +24,6 @@ import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../interfaces/i_premium_service.dart';
 import '../navigation/agricultural_navigation_extension.dart';
-import '../providers/feature_flags_provider.dart';
-import '../providers/remote_config_provider.dart';
 import '../data/repositories/comentarios_hive_repository.dart';
 import '../data/repositories/cultura_hive_repository.dart';
 import '../data/repositories/diagnostico_hive_repository.dart';
@@ -144,16 +143,7 @@ Future<void> init() async {
 
   // NOTE: ReceitaAgroSyncConfig.configure() is now called in main.dart
   // to avoid race conditions and ensure proper initialization order
-  
-  // Providers for state management
-  sl.registerLazySingleton<RemoteConfigProvider>(
-    () => RemoteConfigProvider(),
-  );
-  
-  sl.registerLazySingleton<FeatureFlagsProvider>(
-    () => FeatureFlagsProvider(),
-  );
-  
+
   // Premium Service (New Architecture) - Delayed registration
   // Register after all dependencies are confirmed available
   
@@ -429,22 +419,8 @@ Future<void> init() async {
     () => GetDiagnosticoFiltersDataUseCase(sl<IDiagnosticosRepository>()),
   );
 
-  // Provider para Diagnósticos
-  sl.registerLazySingleton<DiagnosticosProvider>(
-    () => DiagnosticosProvider(
-      getDiagnosticosUseCase: sl<GetDiagnosticosUseCase>(),
-      getDiagnosticoByIdUseCase: sl<GetDiagnosticoByIdUseCase>(),
-      getRecomendacoesUseCase: sl<GetRecomendacoesUseCase>(),
-      getDiagnosticosByDefensivoUseCase: sl<GetDiagnosticosByDefensivoUseCase>(),
-      getDiagnosticosByCulturaUseCase: sl<GetDiagnosticosByCulturaUseCase>(),
-      getDiagnosticosByPragaUseCase: sl<GetDiagnosticosByPragaUseCase>(),
-      searchDiagnosticosWithFiltersUseCase: sl<SearchDiagnosticosWithFiltersUseCase>(),
-      getDiagnosticoStatsUseCase: sl<GetDiagnosticoStatsUseCase>(),
-      validateCompatibilidadeUseCase: sl<ValidateCompatibilidadeUseCase>(),
-      searchDiagnosticosByPatternUseCase: sl<SearchDiagnosticosByPatternUseCase>(),
-      getDiagnosticoFiltersDataUseCase: sl<GetDiagnosticoFiltersDataUseCase>(),
-    ),
-  );
+  // Migrated to Riverpod - DiagnosticosNotifier (lifecycle managed automatically)
+  // Use cases remain registered for Riverpod notifier dependency injection
   
   // ===== FAVORITOS SYSTEM =====
   // Sistema de Favoritos usando DI simplificado

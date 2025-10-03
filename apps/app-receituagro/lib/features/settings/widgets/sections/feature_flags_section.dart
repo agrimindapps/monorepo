@@ -1,16 +1,16 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
 import '../../../../core/providers/feature_flags_provider.dart';
 import '../../constants/settings_design_tokens.dart';
-import '../../presentation/providers/settings_provider.dart';
 import '../dialogs/feature_flags_admin_dialog.dart';
 
 /// Feature Flags Section for Settings Page
-/// 
+///
 /// Features:
 /// - Feature flags status overview
-/// - A/B testing indicators  
+/// - A/B testing indicators
 /// - Admin panel access (debug mode)
 /// - Remote config sync status
 /// - Dynamic UI based on flags
@@ -19,10 +19,10 @@ class FeatureFlagsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.Consumer2<SettingsProvider, FeatureFlagsProvider>(
-      builder: (context, settingsProvider, featureFlagsProvider, child) {
-        // Only show in development mode or if explicitly enabled
-        if (!settingsProvider.isDevelopmentMode && !_shouldShowInProduction(featureFlagsProvider)) {
+    return provider_lib.Consumer<FeatureFlagsProvider>(
+      builder: (context, featureFlagsProvider, child) {
+        // Only show if feature flags indicate production display
+        if (!_shouldShowInProduction(featureFlagsProvider)) {
           return const SizedBox.shrink();
         }
 
@@ -44,8 +44,8 @@ class FeatureFlagsSection extends StatelessWidget {
               // A/B Testing Status
               _buildABTestingStatus(context, featureFlagsProvider),
               
-              // Admin Actions
-              if (settingsProvider.isDevelopmentMode)
+              // Admin Actions (show for development builds)
+              if (EnvironmentConfig.isDebugMode)
                 _buildAdminActions(context, featureFlagsProvider),
             ],
           ),

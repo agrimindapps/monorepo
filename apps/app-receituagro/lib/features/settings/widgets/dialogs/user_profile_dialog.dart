@@ -1,42 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
+import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../../core/services/device_identity_service.dart';
 import '../../presentation/providers/settings_provider.dart';
 
 /// User Profile Dialog
-/// 
+///
 /// Features:
 /// - Display name editing
 /// - Email display and management
 /// - Avatar selection/upload
 /// - Account settings shortcuts
 /// - Settings sync preferences
-class UserProfileDialog extends StatefulWidget {
-  final SettingsProvider provider;
-
-  const UserProfileDialog({
-    super.key,
-    required this.provider,
-  });
+class UserProfileDialog extends ConsumerStatefulWidget {
+  const UserProfileDialog({super.key});
 
   @override
-  State<UserProfileDialog> createState() => _UserProfileDialogState();
+  ConsumerState<UserProfileDialog> createState() => _UserProfileDialogState();
 }
 
-class _UserProfileDialogState extends State<UserProfileDialog> {
+class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   late TextEditingController _displayNameController;
   late TextEditingController _emailController;
   bool _isEditing = false;
   bool _isSaving = false;
+  late SettingsProvider _settingsProvider;
 
   @override
   void initState() {
     super.initState();
-    _displayNameController = TextEditingController(
-      text: _getUserDisplayName(),
-    );
-    _emailController = TextEditingController(
-      text: _getUserEmail(),
-    );
+    _settingsProvider = GetIt.instance<SettingsProvider>();
+    _displayNameController = TextEditingController();
+    _emailController = TextEditingController();
+
+    // Initialize values asynchronously after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(receitaAgroAuthNotifierProvider).value;
+      if (authState != null && mounted) {
+        setState(() {
+          _displayNameController.text = _getUserDisplayName(authState);
+          _emailController.text = _getUserEmail(authState);
+        });
+      }
+    });
   }
 
   @override
@@ -46,8 +54,13 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
     super.dispose();
   }
 
-  String _getUserDisplayName() {
-    final device = widget.provider.currentDevice;
+  String _getUserDisplayName(ReceitaAgroAuthState authState) {
+    final user = authState.currentUser;
+    if (user != null && user.displayName.isNotEmpty) {
+      return user.displayName;
+    }
+
+    final device = _settingsProvider.currentDeviceInfo;
     if (device?.name.isNotEmpty == true) {
       final name = device!.name;
       if (name.contains('iPhone')) return 'Usuário iPhone';
@@ -59,15 +72,36 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
     return 'Usuário ReceitaAgro';
   }
 
-  String _getUserEmail() {
-    // In real implementation, this would come from auth service
-    return 'usuario@receituagro.com';
+  String _getUserEmail(ReceitaAgroAuthState authState) {
+    final user = authState.currentUser;
+    return user?.email ?? 'usuario@receituagro.com';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authState = ref.watch(receitaAgroAuthNotifierProvider);
 
+    return authState.when(
+      data: (state) => _buildDialogContent(context, theme, state),
+      loading: () => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (error, _) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(child: Text('Erro ao carregar perfil: $error')),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogContent(BuildContext context, ThemeData theme, ReceitaAgroAuthState authState) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -104,25 +138,25 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Avatar
-            _buildAvatar(theme),
-            
+            _buildAvatar(theme, authState),
+
             const SizedBox(height: 24),
-            
+
             // Profile Form
             Expanded(
               child: SingleChildScrollView(
-                child: _buildProfileForm(theme),
+                child: _buildProfileForm(theme, authState),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Actions
-            _buildActions(theme),
+            _buildActions(theme, authState),
           ],
         ),
       ),
@@ -130,14 +164,18 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
   }
 
   /// Build user avatar
-  Widget _buildAvatar(ThemeData theme) {
+  Widget _buildAvatar(ThemeData theme, ReceitaAgroAuthState authState) {
+    final displayName = _displayNameController.text.isEmpty
+        ? _getUserDisplayName(authState)
+        : _displayNameController.text;
+
     return Stack(
       children: [
         CircleAvatar(
           radius: 40,
           backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           child: Text(
-            _getInitials(_displayNameController.text),
+            _getInitials(displayName),
             style: theme.textTheme.headlineMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -174,7 +212,11 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
   }
 
   /// Build profile form
-  Widget _buildProfileForm(ThemeData theme) {
+  Widget _buildProfileForm(ThemeData theme, ReceitaAgroAuthState authState) {
+    final currentDevice = _settingsProvider.currentDeviceInfo;
+    final connectedDevices = _settingsProvider.connectedDevices;
+    final isPremium = false; // TODO: Get from premium state when available
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,9 +249,9 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
             setState(() {}); // Rebuild to update avatar initials
           },
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Email Field
         Text(
           'Email',
@@ -226,12 +268,14 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            suffixIcon: const Icon(Icons.verified, color: Colors.green, size: 16),
+            suffixIcon: authState.isAuthenticated
+                ? const Icon(Icons.verified, color: Colors.green, size: 16)
+                : null,
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Account Information
         Container(
           padding: const EdgeInsets.all(16),
@@ -252,9 +296,9 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildInfoRow('Dispositivo Atual', widget.provider.currentDevice?.displayName ?? 'Desconhecido'),
-              _buildInfoRow('Dispositivos Conectados', '${widget.provider.connectedDevices.length} de 3'),
-              _buildInfoRow('Status Premium', widget.provider.isPremiumUser ? 'Ativo' : 'Inativo'),
+              _buildInfoRow('Dispositivo Atual', currentDevice?.displayName ?? 'Desconhecido'),
+              _buildInfoRow('Dispositivos Conectados', '${connectedDevices.length} de 3'),
+              _buildInfoRow('Status Premium', isPremium ? 'Ativo' : 'Inativo'),
               _buildInfoRow('Sincronização', 'Ativa'),
             ],
           ),
@@ -287,7 +331,7 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
   }
 
   /// Build action buttons
-  Widget _buildActions(ThemeData theme) {
+  Widget _buildActions(ThemeData theme, ReceitaAgroAuthState authState) {
     if (!_isEditing) {
       return Row(
         children: [
@@ -316,7 +360,7 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: _isSaving ? null : _cancelEdit,
+            onPressed: _isSaving ? null : () => _cancelEdit(authState),
             child: const Text('Cancelar'),
           ),
         ),
@@ -366,11 +410,11 @@ class _UserProfileDialogState extends State<UserProfileDialog> {
   }
 
   /// Cancel editing
-  void _cancelEdit() {
+  void _cancelEdit(ReceitaAgroAuthState authState) {
     setState(() {
       _isEditing = false;
-      _displayNameController.text = _getUserDisplayName();
-      _emailController.text = _getUserEmail();
+      _displayNameController.text = _getUserDisplayName(authState);
+      _emailController.text = _getUserEmail(authState);
     });
   }
 

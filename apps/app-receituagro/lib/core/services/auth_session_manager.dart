@@ -1,8 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../features/analytics/analytics_service.dart';
+import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
+import '../enums/analytics_user_type.dart';
 import 'device_identity_service.dart';
 
 /// User type enum for authentication state

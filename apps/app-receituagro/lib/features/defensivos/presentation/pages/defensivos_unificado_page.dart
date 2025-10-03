@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
-import '../../data/services/defensivos_grouping_service.dart';
+import '../../data/defensivo_view_mode.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/entities/defensivo_group_entity.dart';
-import '../../data/defensivo_view_mode.dart';
-import '../providers/defensivos_drill_down_provider.dart';
-import '../providers/defensivos_unificado_provider.dart';
+import '../providers/defensivos_drill_down_notifier.dart';
+import '../providers/defensivos_unificado_notifier.dart';
 import '../widgets/comparacao_defensivos_widget.dart';
 import '../widgets/defensivo_search_field_widget.dart';
 import '../widgets/defensivos_group_list_widget.dart';
@@ -16,13 +15,13 @@ import '../widgets/defensivos_list_widget.dart';
 /// Página unificada de defensivos
 /// Consolida funcionalidades de defensivos individuais e agrupados
 /// Implementa arquitetura SOLID e Clean Architecture
-/// 
+///
 /// Argumentos de navegação:
 /// - tipoAgrupamento: String? - Tipo de agrupamento (fabricantes, modoAcao, etc.)
 /// - textoFiltro: String? - Filtro de texto opcional
 /// - modoCompleto: bool - Controle de modo de exibição (não usado para filtros)
 /// - isAgrupados: bool - Se true, carrega dados agrupados por categoria
-class DefensivosUnificadoPage extends StatefulWidget {
+class DefensivosUnificadoPage extends ConsumerStatefulWidget {
   final String? tipoAgrupamento;
   final String? textoFiltro;
   final bool modoCompleto;
@@ -37,38 +36,27 @@ class DefensivosUnificadoPage extends StatefulWidget {
   });
 
   @override
-  State<DefensivosUnificadoPage> createState() => _DefensivosUnificadoPageState();
+  ConsumerState<DefensivosUnificadoPage> createState() => _DefensivosUnificadoPageState();
 }
 
-class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
+class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPage> {
   final TextEditingController _searchController = TextEditingController();
   DefensivoViewMode _viewMode = DefensivoViewMode.list;
   String _searchText = '';
   bool _isAscending = true;
-  
-  // Providers para drill-down
-  late DefensivosDrillDownProvider _drillDownProvider;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    _initializeDrillDownProvider();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _carregarDefensivos();
     });
-  }
-  
-  void _initializeDrillDownProvider() {
-    _drillDownProvider = DefensivosDrillDownProvider(
-      groupingService: DefensivosGroupingService(),
-    );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _drillDownProvider.dispose();
     super.dispose();
   }
 
@@ -76,10 +64,10 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
     setState(() {
       _searchText = _searchController.text;
     });
-    
-    // Atualizar drill-down provider se estiver usando drill-down
+
+    // Atualizar drill-down notifier se estiver usando drill-down
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      _drillDownProvider.updateSearchFilter(_searchText);
+      ref.read(defensivosDrillDownNotifierProvider.notifier).updateSearchFilter(_searchText);
     }
   }
 
@@ -88,10 +76,10 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
     setState(() {
       _searchText = '';
     });
-    
-    // Limpar filtro no drill-down provider
+
+    // Limpar filtro no drill-down notifier
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      _drillDownProvider.clearSearchFilter();
+      ref.read(defensivosDrillDownNotifierProvider.notifier).clearSearchFilter();
     }
   }
 
@@ -105,34 +93,37 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
     setState(() {
       _isAscending = !_isAscending;
     });
-    
-    // Atualizar ordenação no drill-down provider
+
+    // Atualizar ordenação no drill-down notifier
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      _drillDownProvider.toggleSort();
+      ref.read(defensivosDrillDownNotifierProvider.notifier).toggleSort();
     }
   }
 
   void _carregarDefensivos() {
-    final providerInstance = provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false);
-    
+    final notifier = ref.read(defensivosUnificadoNotifierProvider.notifier);
+
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       // Carrega defensivos agrupados e inicializa drill-down
-      providerInstance.carregarDefensivosAgrupados(
+      notifier.carregarDefensivosAgrupados(
         tipoAgrupamento: widget.tipoAgrupamento!,
         filtroTexto: widget.textoFiltro,
       ).then((_) {
-        // Inicializar drill-down provider com dados carregados
-        _drillDownProvider.initializeWithDefensivos(
-          defensivos: providerInstance.defensivos,
-          tipoAgrupamento: widget.tipoAgrupamento!,
-        );
+        // Inicializar drill-down notifier com dados carregados
+        final state = ref.read(defensivosUnificadoNotifierProvider);
+        state.whenData((data) {
+          ref.read(defensivosDrillDownNotifierProvider.notifier).initializeWithDefensivos(
+            defensivos: data.defensivos,
+            tipoAgrupamento: widget.tipoAgrupamento!,
+          );
+        });
       });
     } else if (widget.modoCompleto) {
       // Carrega defensivos completos (lista simples)
-      providerInstance.carregarDefensivosCompletos();
+      notifier.carregarDefensivosCompletos();
     } else {
       // Fallback para lista simples
-      providerInstance.carregarDefensivosCompletos();
+      notifier.carregarDefensivosCompletos();
     }
   }
 
@@ -140,7 +131,8 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+    final unificadoState = ref.watch(defensivosUnificadoNotifierProvider);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -149,65 +141,85 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
-              child: provider.Consumer<DefensivosUnificadoProvider>(
-                builder: (context, provider, child) {
+              child: unificadoState.when(
+                data: (state) {
                   return Column(
                     children: [
-                      _buildModernHeader(provider, isDark),
+                      _buildModernHeader(state, isDark),
                       Expanded(
-                        child: provider.isLoading
+                        child: state.isLoading
                             ? const Center(child: CircularProgressIndicator())
-                            : provider.hasError
-                                ? _buildErrorState(provider)
+                            : state.hasError
+                                ? _buildErrorState(state)
                                 : widget.isAgrupados && widget.tipoAgrupamento != null
-                                    ? _buildDrillDownContent(provider)
-                                    : _buildContent(provider),
+                                    ? _buildDrillDownContent(state)
+                                    : _buildContent(state),
                       ),
                     ],
                   );
                 },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('Erro: $error'),
+                ),
               ),
             ),
           ),
         ),
       ),
-      floatingActionButton: provider.Consumer<DefensivosUnificadoProvider>(
-        builder: (context, provider, child) {
-          if (provider.modoComparacao && provider.defensivosSelecionados.length >= 2) {
+      floatingActionButton: unificadoState.whenOrNull(
+        data: (state) {
+          if (state.modoComparacao && state.defensivosSelecionados.length >= 2) {
             return FloatingActionButton.extended(
-              onPressed: () => _mostrarComparacao(provider.defensivosSelecionados),
+              onPressed: () => _mostrarComparacao(state.defensivosSelecionados),
               icon: const Icon(Icons.compare_arrows),
-              label: Text('Comparar (${provider.defensivosSelecionados.length})'),
+              label: Text('Comparar (${state.defensivosSelecionados.length})'),
               backgroundColor: theme.colorScheme.primary,
             );
           }
           return const SizedBox.shrink();
         },
-      ),
+      ) ?? const SizedBox.shrink(),
     );
   }
 
-  Widget _buildModernHeader(DefensivosUnificadoProvider provider, bool isDark) {
+  Widget _buildModernHeader(DefensivosUnificadoState state, bool isDark) {
     String titulo;
     String subtitulo;
 
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       // Header para drill-down
-      titulo = _drillDownProvider.pageTitle;
-      subtitulo = _drillDownProvider.pageSubtitle;
-      
-      // Se está no nível de itens, mostrar contador dos itens filtrados
-      if (_drillDownProvider.isAtItemLevel) {
-        subtitulo = '${_drillDownProvider.currentGroupItems.length} defensivo(s) encontrado(s)';
+      final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
+
+      drillDownState.whenData((drillDown) {
+        titulo = drillDown.pageTitle;
+        subtitulo = drillDown.pageSubtitle;
+
+        // Se está no nível de itens, mostrar contador dos itens filtrados
+        if (drillDown.isAtItemLevel) {
+          subtitulo = '${drillDown.currentGroupItems.length} defensivo(s) encontrado(s)';
+        } else {
+          // No nível de grupos, mostrar quantidade de grupos
+          subtitulo = '${drillDown.groups.length} grupo(s) encontrado(s)';
+        }
+      });
+
+      titulo = drillDownState.value?.pageTitle ?? 'Defensivos';
+      subtitulo = drillDownState.value?.pageSubtitle ?? '';
+
+      if (drillDownState.value?.isAtItemLevel ?? false) {
+        subtitulo = '${drillDownState.value?.currentGroupItems.length ?? 0} defensivo(s) encontrado(s)';
       } else {
-        // No nível de grupos, mostrar quantidade de grupos
-        subtitulo = '${_drillDownProvider.groups.length} grupo(s) encontrado(s)';
+        subtitulo = '${drillDownState.value?.groups.length ?? 0} grupo(s) encontrado(s)';
       }
     } else {
       // Header tradicional
       titulo = 'Lista de Defensivos';
-      subtitulo = '${provider.defensivosFiltrados.length} defensivo(s) encontrado(s)';
+      subtitulo = '${state.defensivosFiltrados.length} defensivo(s) encontrado(s)';
     }
+
+    final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
+    final canGoBack = drillDownState.value?.canGoBack ?? false;
 
     return ModernHeaderWidget(
       title: titulo,
@@ -217,16 +229,16 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: widget.isAgrupados && _drillDownProvider.canGoBack 
-          ? _onDrillDownBack 
+      onBackPressed: widget.isAgrupados && canGoBack
+          ? _onDrillDownBack
           : null,
       onRightIconPressed: _toggleSort,
     );
   }
 
-  Widget _buildContent(DefensivosUnificadoProvider provider) {
+  Widget _buildContent(DefensivosUnificadoState state) {
     // Aplicar ordenação local aos defensivos
-    final defensivosOrdenados = List<DefensivoEntity>.from(provider.defensivosFiltrados);
+    final defensivosOrdenados = List<DefensivoEntity>.from(state.defensivosFiltrados);
     defensivosOrdenados.sort((a, b) {
       final comparison = a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
       return _isAscending ? comparison : -comparison;
@@ -234,15 +246,17 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
 
     return Column(
       children: [
-        _buildSearchField(provider),
+        _buildSearchField(state),
         Expanded(
           child: DefensivosListWidget(
             defensivos: defensivosOrdenados,
-            modoComparacao: provider.modoComparacao,
-            defensivosSelecionados: provider.defensivosSelecionados,
+            modoComparacao: state.modoComparacao,
+            defensivosSelecionados: state.defensivosSelecionados,
             onTap: _navegarParaDetalhes,
-            onSelecaoChanged: provider.modoComparacao ? provider.toggleSelecaoDefensivo : null,
-            onClearFilters: provider.limparFiltros,
+            onSelecaoChanged: state.modoComparacao
+                ? (defensivo) => ref.read(defensivosUnificadoNotifierProvider.notifier).toggleSelecaoDefensivo(defensivo)
+                : null,
+            onClearFilters: () => ref.read(defensivosUnificadoNotifierProvider.notifier).limparFiltros(),
             hasActiveSearch: _searchText.isNotEmpty,
           ),
         ),
@@ -250,9 +264,9 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
     );
   }
 
-  Widget _buildSearchField(DefensivosUnificadoProvider provider) {
+  Widget _buildSearchField(DefensivosUnificadoState state) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return DefensivoSearchFieldWidget(
       controller: _searchController,
       tipoAgrupamento: widget.tipoAgrupamento,
@@ -261,11 +275,11 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
       onViewModeChanged: _toggleViewMode,
       onClear: _clearSearch,
       onChanged: (value) {}, // O listener já está no controller
-      isSearching: provider.isLoading,
+      isSearching: state.isLoading,
     );
   }
 
-  Widget _buildErrorState(DefensivosUnificadoProvider provider) {
+  Widget _buildErrorState(DefensivosUnificadoState state) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -285,13 +299,13 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              provider.errorMessage ?? 'Erro desconhecido',
+              state.errorMessage ?? 'Erro desconhecido',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: provider.reload,
+              onPressed: () => ref.read(defensivosUnificadoNotifierProvider.notifier).reload(),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar Novamente'),
             ),
@@ -302,36 +316,39 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   /// Constrói conteúdo para drill-down navigation
-  Widget _buildDrillDownContent(DefensivosUnificadoProvider provider) {
-    return ListenableBuilder(
-      listenable: _drillDownProvider,
-      builder: (context, _) {
-        if (_drillDownProvider.isLoading) {
+  Widget _buildDrillDownContent(DefensivosUnificadoState state) {
+    final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
+
+    return drillDownState.when(
+      data: (drillDown) {
+        if (drillDown.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (_drillDownProvider.hasError) {
-          return _buildDrillDownErrorState();
+        if (drillDown.hasError) {
+          return _buildDrillDownErrorState(drillDown);
         }
 
         return Column(
           children: [
-            _buildSearchField(provider),
+            _buildSearchField(state),
             Expanded(
-              child: _drillDownProvider.isAtGroupLevel
-                  ? _buildGroupsList()
-                  : _buildItemsList(),
+              child: drillDown.isAtGroupLevel
+                  ? _buildGroupsList(drillDown)
+                  : _buildItemsList(drillDown, state),
             ),
           ],
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => _buildDrillDownErrorState(null),
     );
   }
 
   /// Constrói lista de grupos
-  Widget _buildGroupsList() {
+  Widget _buildGroupsList(DefensivosDrillDownState drillDown) {
     return DefensivosGroupListWidget(
-      grupos: _drillDownProvider.groups,
+      grupos: drillDown.filteredGroups,
       onGroupTap: _onGroupTap,
       onClearFilters: _clearSearch,
       searchText: _searchText,
@@ -339,14 +356,14 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   /// Constrói lista de itens do grupo
-  Widget _buildItemsList() {
+  Widget _buildItemsList(DefensivosDrillDownState drillDown, DefensivosUnificadoState state) {
     return DefensivosListWidget(
-      defensivos: _drillDownProvider.currentGroupItems,
-      modoComparacao: provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).modoComparacao,
-      defensivosSelecionados: provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).defensivosSelecionados,
+      defensivos: drillDown.currentGroupItems,
+      modoComparacao: state.modoComparacao,
+      defensivosSelecionados: state.defensivosSelecionados,
       onTap: _navegarParaDetalhes,
-      onSelecaoChanged: provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).modoComparacao 
-          ? provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).toggleSelecaoDefensivo 
+      onSelecaoChanged: state.modoComparacao
+          ? (defensivo) => ref.read(defensivosUnificadoNotifierProvider.notifier).toggleSelecaoDefensivo(defensivo)
           : null,
       onClearFilters: _clearSearch,
       hasActiveSearch: _searchText.isNotEmpty,
@@ -354,7 +371,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   /// Estado de erro para drill-down
-  Widget _buildDrillDownErrorState() {
+  Widget _buildDrillDownErrorState(DefensivosDrillDownState? drillDown) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -374,7 +391,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              _drillDownProvider.errorMessage ?? 'Erro desconhecido',
+              drillDown?.errorMessage ?? 'Erro desconhecido',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
@@ -391,18 +408,17 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
   }
 
   // Handlers para drill-down navigation
-  
+
   void _onGroupTap(DefensivoGroupEntity group) {
-    _drillDownProvider.drillDownToGroup(group);
+    ref.read(defensivosDrillDownNotifierProvider.notifier).drillDownToGroup(group);
   }
 
   void _onDrillDownBack() {
-    _drillDownProvider.goBackToGroups();
+    ref.read(defensivosDrillDownNotifierProvider.notifier).goBackToGroups();
   }
 
-
   void _reloadDrillDownData() {
-    _drillDownProvider.clearError();
+    ref.read(defensivosDrillDownNotifierProvider.notifier).clearError();
     _carregarDefensivos();
   }
 
@@ -431,7 +447,7 @@ class _DefensivosUnificadoPageState extends State<DefensivosUnificadoPage> {
           defensivos: defensivos,
           onFechar: () {
             Navigator.of(context).pop();
-            provider.Provider.of<DefensivosUnificadoProvider>(context, listen: false).limparSelecao();
+            ref.read(defensivosUnificadoNotifierProvider.notifier).limparSelecao();
           },
         ),
       ),

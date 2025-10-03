@@ -3,21 +3,21 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
-import '../providers/home_pragas_provider.dart';
+import '../providers/home_pragas_notifier.dart';
 
 /// Widget para exibir grid de estatísticas/categorias na home de pragas
-/// 
+///
 /// Responsabilidades:
 /// - Exibir botões para cada categoria (Insetos, Doenças, Plantas, Culturas)
 /// - Layout responsivo (vertical em dispositivos pequenos)
 /// - Navegação para páginas específicas de cada categoria
 /// - Estados de loading com shimmer
 class HomePragasStatsWidget extends StatelessWidget {
-  final HomePragasProvider provider;
+  final HomePragasState state;
 
   const HomePragasStatsWidget({
     super.key,
-    required this.provider,
+    required this.state,
   });
 
   @override
@@ -37,7 +37,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             horizontal: 0,
             vertical: ReceitaAgroSpacing.sm,
           ),
-          child: provider.errorMessage != null
+          child: state.errorMessage != null
               ? _buildErrorState(context)
               : LayoutBuilder(
                   builder: (context, constraints) {
@@ -91,7 +91,7 @@ class HomePragasStatsWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: provider.refreshPragasData,
+            onPressed: null, // Refresh handled by parent widget with ref
             child: const Text('Tentar Novamente'),
           ),
         ],
@@ -112,7 +112,7 @@ class HomePragasStatsWidget extends StatelessWidget {
           children: [
             _buildCategoryButton(
               context: context,
-              count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?.insetos ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'insetos'),
@@ -121,7 +121,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?.doencas ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'doencas'),
@@ -130,7 +130,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?.plantas ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'plantas'),
@@ -142,7 +142,7 @@ class HomePragasStatsWidget extends StatelessWidget {
         // Segunda row: Culturas
         _buildCategoryButton(
           context: context,
-          count: '${provider.totalCulturas}',
+          count: '${state.totalCulturas}',
           title: 'Culturas',
           width: cultureButtonWidth,
           onTap: () => _navigateToCategory(context, 'culturas'),
@@ -164,7 +164,7 @@ class HomePragasStatsWidget extends StatelessWidget {
           children: [
             _buildCategoryButton(
               context: context,
-              count: provider.isLoading ? '...' : '${provider.stats?.insetos ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?.insetos ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'insetos'),
@@ -173,7 +173,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: provider.isLoading ? '...' : '${provider.stats?.doencas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?.doencas ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'doencas'),
@@ -182,7 +182,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: provider.isLoading ? '...' : '${provider.stats?.plantas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?.plantas ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'plantas'),
@@ -194,7 +194,7 @@ class HomePragasStatsWidget extends StatelessWidget {
         // Segunda row: Culturas
         _buildCategoryButton(
           context: context,
-          count: '${provider.totalCulturas}',
+          count: '${state.totalCulturas}',
           title: 'Culturas',
           width: cultureButtonWidth,
           onTap: () => _navigateToCategory(context, 'culturas'),

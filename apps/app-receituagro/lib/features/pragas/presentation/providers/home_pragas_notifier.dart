@@ -4,7 +4,7 @@ import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/app_data_manager.dart';
 import '../../domain/entities/praga_entity.dart';
-import 'pragas_provider.dart';
+import 'pragas_notifier.dart';
 
 part 'home_pragas_notifier.g.dart';
 
@@ -21,6 +21,10 @@ class HomePragasState {
   final List<PragaEntity> suggestedPragas;
   final List<PragaEntity> recentPragas;
 
+  // Callback references for widget interactions
+  final void Function(PragaEntity)? _onRecordPragaAccess;
+  final void Function(int)? _onUpdateCarouselIndex;
+
   const HomePragasState({
     required this.isInitializing,
     required this.initializationFailed,
@@ -32,7 +36,10 @@ class HomePragasState {
     this.stats,
     required this.suggestedPragas,
     required this.recentPragas,
-  });
+    void Function(PragaEntity)? onRecordPragaAccess,
+    void Function(int)? onUpdateCarouselIndex,
+  }) : _onRecordPragaAccess = onRecordPragaAccess,
+       _onUpdateCarouselIndex = onUpdateCarouselIndex;
 
   factory HomePragasState.initial() {
     return const HomePragasState(
@@ -60,6 +67,8 @@ class HomePragasState {
     dynamic stats,
     List<PragaEntity>? suggestedPragas,
     List<PragaEntity>? recentPragas,
+    void Function(PragaEntity)? onRecordPragaAccess,
+    void Function(int)? onUpdateCarouselIndex,
   }) {
     return HomePragasState(
       isInitializing: isInitializing ?? this.isInitializing,
@@ -72,21 +81,66 @@ class HomePragasState {
       stats: stats ?? this.stats,
       suggestedPragas: suggestedPragas ?? this.suggestedPragas,
       recentPragas: recentPragas ?? this.recentPragas,
+      onRecordPragaAccess: onRecordPragaAccess ?? _onRecordPragaAccess,
+      onUpdateCarouselIndex: onUpdateCarouselIndex ?? _onUpdateCarouselIndex,
     );
+  }
+
+  /// Helper method to record praga access (delegates to callback)
+  void recordPragaAccess(PragaEntity praga) {
+    _onRecordPragaAccess?.call(praga);
+  }
+
+  /// Helper method to update carousel index (delegates to callback)
+  void updateCarouselIndex(int index) {
+    _onUpdateCarouselIndex?.call(index);
+  }
+
+  /// Helper method to get suggestions list formatted for carousel
+  List<Map<String, dynamic>> getSuggestionsList() {
+    if (isLoading || suggestedPragas.isEmpty) {
+      return [];
+    }
+
+    return suggestedPragas.map((praga) {
+      String emoji = '🐛';
+      String type = 'Inseto';
+
+      switch (praga.tipoPraga) {
+        case '1':
+          emoji = '🐛';
+          type = 'Inseto';
+          break;
+        case '2':
+          emoji = '🦠';
+          type = 'Doença';
+          break;
+        case '3':
+          emoji = '🌿';
+          type = 'Planta';
+          break;
+      }
+
+      return {
+        'id': praga.idReg,
+        'name': praga.nomeComum,
+        'scientific': praga.nomeCientifico,
+        'type': type,
+        'emoji': emoji,
+      };
+    }).toList();
   }
 }
 
 /// Notifier para gerenciamento de estado da página Home de Pragas
 @riverpod
 class HomePragasNotifier extends _$HomePragasNotifier {
-  late final PragasProvider _pragasProvider;
   late final CulturaHiveRepository _culturaRepository;
   late final IAppDataManager _appDataManager;
 
   @override
   Future<HomePragasState> build() async {
     // Get dependencies from DI
-    _pragasProvider = di.sl<PragasProvider>();
     _culturaRepository = di.sl<CulturaHiveRepository>();
     _appDataManager = di.sl<IAppDataManager>();
 
@@ -103,18 +157,22 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       // Inicializa pragas com retry logic
       await _initializePragasWithRetry();
 
-      // Get data from pragas provider
+      // Get data from pragas notifier
+      final pragasState = ref.read(pragasNotifierProvider).value;
+
       return HomePragasState(
         isInitializing: false,
         initializationFailed: false,
         initializationError: null,
         totalCulturas: totalCulturas,
         currentCarouselIndex: 0,
-        isLoading: _pragasProvider.isLoading,
-        errorMessage: _pragasProvider.errorMessage,
-        stats: _pragasProvider.stats,
-        suggestedPragas: _pragasProvider.suggestedPragas,
-        recentPragas: _pragasProvider.recentPragas,
+        isLoading: pragasState?.isLoading ?? false,
+        errorMessage: pragasState?.errorMessage,
+        stats: pragasState?.stats,
+        suggestedPragas: pragasState?.suggestedPragas ?? [],
+        recentPragas: pragasState?.recentPragas ?? [],
+        onRecordPragaAccess: (praga) => recordPragaAccess(praga),
+        onUpdateCarouselIndex: (index) => updateCarouselIndex(index),
       );
     } catch (e) {
       return HomePragasState.initial().copyWith(
@@ -148,14 +206,14 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       final isDataReady = await _appDataManager.isDataReady();
 
       if (isDataReady) {
-        await _pragasProvider.initialize();
+        await ref.read(pragasNotifierProvider.notifier).initialize();
         return;
       }
 
       // Verifica se atingiu o limite de tentativas
       if (attempts >= maxAttempts - 1) {
         // Fallback: inicializa mesmo sem dados prontos
-        await _pragasProvider.initialize();
+        await ref.read(pragasNotifierProvider.notifier).initialize();
         return;
       }
 
@@ -170,7 +228,7 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       } else {
         // Último recurso: inicializa diretamente
         try {
-          await _pragasProvider.initialize();
+          await ref.read(pragasNotifierProvider.notifier).initialize();
         } catch (finalError) {
           rethrow;
         }
@@ -184,32 +242,42 @@ class HomePragasNotifier extends _$HomePragasNotifier {
     if (currentState == null) return;
 
     if (currentState.currentCarouselIndex != index) {
-      state = AsyncValue.data(currentState.copyWith(currentCarouselIndex: index));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          currentCarouselIndex: index,
+          onRecordPragaAccess: (praga) => recordPragaAccess(praga),
+          onUpdateCarouselIndex: (idx) => updateCarouselIndex(idx),
+        ),
+      );
     }
   }
 
   /// Força atualização dos dados de pragas
   Future<void> refreshPragasData() async {
-    await _pragasProvider.initialize();
+    await ref.read(pragasNotifierProvider.notifier).initialize();
 
     final currentState = state.value;
     if (currentState == null) return;
 
     // Update state with new pragas data
+    final pragasState = ref.read(pragasNotifierProvider).value;
+
     state = AsyncValue.data(
       currentState.copyWith(
-        isLoading: _pragasProvider.isLoading,
-        errorMessage: _pragasProvider.errorMessage,
-        stats: _pragasProvider.stats,
-        suggestedPragas: _pragasProvider.suggestedPragas,
-        recentPragas: _pragasProvider.recentPragas,
+        isLoading: pragasState?.isLoading ?? false,
+        errorMessage: pragasState?.errorMessage,
+        stats: pragasState?.stats,
+        suggestedPragas: pragasState?.suggestedPragas ?? [],
+        recentPragas: pragasState?.recentPragas ?? [],
+        onRecordPragaAccess: (praga) => recordPragaAccess(praga),
+        onUpdateCarouselIndex: (index) => updateCarouselIndex(index),
       ),
     );
   }
 
   /// Registra acesso a uma praga
   void recordPragaAccess(PragaEntity praga) {
-    _pragasProvider.recordPragaAccess(praga);
+    ref.read(pragasNotifierProvider.notifier).recordPragaAccess(praga);
   }
 
   /// Força recarregamento completo de todos os dados
@@ -222,48 +290,12 @@ class HomePragasNotifier extends _$HomePragasNotifier {
         isInitializing: true,
         initializationFailed: false,
         initializationError: null,
+        onRecordPragaAccess: (praga) => recordPragaAccess(praga),
+        onUpdateCarouselIndex: (index) => updateCarouselIndex(index),
       ),
     );
 
     final newState = await _initialize();
     state = AsyncValue.data(newState);
-  }
-
-  /// Gera lista de sugestões formatada para o carrossel
-  List<Map<String, dynamic>> getSuggestionsList() {
-    final currentState = state.value;
-    if (currentState == null ||
-        currentState.isLoading ||
-        currentState.suggestedPragas.isEmpty) {
-      return [];
-    }
-
-    return currentState.suggestedPragas.map((praga) {
-      String emoji = '🐛';
-      String type = 'Inseto';
-
-      switch (praga.tipoPraga) {
-        case '1':
-          emoji = '🐛';
-          type = 'Inseto';
-          break;
-        case '2':
-          emoji = '🦠';
-          type = 'Doença';
-          break;
-        case '3':
-          emoji = '🌿';
-          type = 'Planta';
-          break;
-      }
-
-      return {
-        'id': praga.idReg, // Include ID for better navigation precision
-        'name': praga.nomeComum,
-        'scientific': praga.nomeCientifico,
-        'type': type,
-        'emoji': emoji,
-      };
-    }).toList();
   }
 }

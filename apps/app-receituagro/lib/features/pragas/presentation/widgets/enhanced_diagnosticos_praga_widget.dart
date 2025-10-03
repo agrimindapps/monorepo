@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/services/diagnostico_compatibility_service.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../providers/enhanced_diagnosticos_praga_provider.dart';
+import '../providers/enhanced_diagnosticos_praga_notifier.dart';
 // import 'diagnostico_dialog_widget.dart'; // TODO: Criar versão para DiagnosticoEntity
 
 /// Widget aprimorado para exibir diagnósticos relacionados à praga
-/// 
-/// Utiliza os novos serviços centralizados e o provider aprimorado para:
+///
+/// Utiliza os novos serviços centralizados e o notifier aprimorado para:
 /// - Performance otimizada com cache inteligente
 /// - Agrupamento consistente por cultura
 /// - Validação de compatibilidade em tempo real
 /// - Busca avançada por texto
 /// - Estados de carregamento mais informativos
 /// - Métricas de qualidade dos dados
-class EnhancedDiagnosticosPragaWidget extends StatefulWidget {
+class EnhancedDiagnosticosPragaWidget extends ConsumerStatefulWidget {
   final String pragaName;
   final String? pragaId;
 
@@ -27,29 +27,31 @@ class EnhancedDiagnosticosPragaWidget extends StatefulWidget {
   });
 
   @override
-  State<EnhancedDiagnosticosPragaWidget> createState() => 
+  ConsumerState<EnhancedDiagnosticosPragaWidget> createState() =>
       _EnhancedDiagnosticosPragaWidgetState();
 }
 
-class _EnhancedDiagnosticosPragaWidgetState 
-    extends State<EnhancedDiagnosticosPragaWidget> {
-  late EnhancedDiagnosticosPragaProvider _provider;
+class _EnhancedDiagnosticosPragaWidgetState
+    extends ConsumerState<EnhancedDiagnosticosPragaWidget> {
   final TextEditingController _searchController = TextEditingController();
   bool _showCompatibilityIndicators = true;
 
   @override
   void initState() {
     super.initState();
-    _provider = EnhancedDiagnosticosPragaProvider();
-    _initializeProvider();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeProvider();
+    });
   }
 
   Future<void> _initializeProvider() async {
-    await _provider.initialize();
-    
+    final notifier = ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier);
+    await notifier.initialize();
+
     // Carrega dados baseado no que foi fornecido
     if (widget.pragaId?.isNotEmpty == true) {
-      await _provider.loadDiagnosticos(widget.pragaId!);
+      await notifier.loadDiagnosticos(widget.pragaId!);
     } else {
       // Se não temos pragaId, precisamos buscar pela praga primeiro
       // Para isso, este widget agora requer pragaId obrigatório
@@ -60,35 +62,35 @@ class _EnhancedDiagnosticosPragaWidgetState
   @override
   void dispose() {
     _searchController.dispose();
-    _provider.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.ChangeNotifierProvider.value(
-      value: _provider,
-      child: RepaintBoundary(
-        child: Column(
+    final asyncState = ref.watch(enhancedDiagnosticosPragaNotifierProvider);
+
+    return RepaintBoundary(
+      child: asyncState.when(
+        data: (state) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(),
-            _buildFilters(),
+            _buildHeader(context, state),
+            _buildFilters(context, state),
             Flexible(
-              child: _buildContent(),
+              child: _buildContent(context, state),
             ),
           ],
         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Erro: $error')),
       ),
     );
   }
 
   /// Constrói header com estatísticas
-  Widget _buildHeader() {
-    return provider_lib.Consumer<EnhancedDiagnosticosPragaProvider>(
-      builder: (context, provider, child) {
-        final stats = provider.stats;
-        
+  Widget _buildHeader(BuildContext context, EnhancedDiagnosticosPragaState state) {
+    final stats = state.stats;
+
         return Container(
           padding: const EdgeInsets.all(SpacingTokens.sm),
           decoration: BoxDecoration(
@@ -110,10 +112,10 @@ class _EnhancedDiagnosticosPragaWidgetState
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (provider.hasData) ...[
+                    if (state.hasData) ...[
                       const SizedBox(height: 4),
                       Text(
-                        provider.hasFilters
+                        state.hasFilters
                             ? '${stats.filtered} de ${stats.total} diagnósticos'
                             : '${stats.total} diagnósticos em ${stats.groups} culturas',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -124,7 +126,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                   ],
                 ),
               ),
-              if (provider.hasData) ...[
+              if (state.hasData) ...[
                 _buildCacheIndicator(stats.cacheHitRate),
                 const SizedBox(width: SpacingTokens.xs),
                 IconButton(
@@ -139,21 +141,21 @@ class _EnhancedDiagnosticosPragaWidgetState
                       _showCompatibilityIndicators = !_showCompatibilityIndicators;
                     });
                   },
-                  tooltip: _showCompatibilityIndicators 
+                  tooltip: _showCompatibilityIndicators
                       ? 'Ocultar indicadores de compatibilidade'
                       : 'Mostrar indicadores de compatibilidade',
                 ),
                 IconButton(
                   icon: const Icon(Icons.refresh, size: 20),
-                  onPressed: provider.isLoading ? null : () => provider.refresh(),
+                  onPressed: state.isLoading
+                      ? null
+                      : () => ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).refresh(),
                   tooltip: 'Atualizar dados',
                 ),
               ],
             ],
           ),
         );
-      },
-    );
   }
 
   /// Constrói indicador de cache
@@ -190,124 +192,116 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói área de filtros
-  Widget _buildFilters() {
-    return provider_lib.Consumer<EnhancedDiagnosticosPragaProvider>(
-      builder: (context, provider, child) {
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SpacingTokens.sm,
-            vertical: SpacingTokens.xs,
-          ),
-          child: Column(
+  Widget _buildFilters(BuildContext context, EnhancedDiagnosticosPragaState state) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: SpacingTokens.xs,
+      ),
+      child: Column(
+        children: [
+          // Campo de busca
+          Row(
             children: [
-              // Campo de busca
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Buscar por defensivo, cultura ou ID...',
-                        prefixIcon: const Icon(Icons.search, size: 20),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 18),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  provider.updateSearchQuery('');
-                                },
-                              )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Theme.of(context).dividerColor,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        provider.updateSearchQuery(value);
-                      },
-                    ),
-                  ),
-                  if (provider.hasFilters) ...[
-                    const SizedBox(width: SpacingTokens.xs),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        _searchController.clear();
-                        provider.clearFilters();
-                      },
-                      icon: const Icon(Icons.clear_all, size: 16),
-                      label: const Text('Limpar'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              
-              // Dropdown de culturas
-              if (provider.availableCulturas.length > 2) ...[
-                const SizedBox(height: SpacingTokens.xs),
-                DropdownButtonFormField<String>(
-                  value: provider.selectedCultura,
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
                   decoration: InputDecoration(
-                    labelText: 'Filtrar por cultura',
+                    hintText: 'Buscar por defensivo, cultura ou ID...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).updateSearchQuery('');
+                            },
+                          )
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
                   ),
-                  items: provider.availableCulturas.map((cultura) {
-                    return DropdownMenuItem(
-                      value: cultura,
-                      child: Text(cultura),
-                    );
-                  }).toList(),
                   onChanged: (value) {
-                    if (value != null) {
-                      provider.updateSelectedCultura(value);
-                    }
+                    ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).updateSearchQuery(value);
                   },
+                ),
+              ),
+              if (state.hasFilters) ...[
+                const SizedBox(width: SpacingTokens.xs),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    _searchController.clear();
+                    ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).clearFilters();
+                  },
+                  icon: const Icon(Icons.clear_all, size: 16),
+                  label: const Text('Limpar'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
                 ),
               ],
             ],
           ),
-        );
-      },
+
+          // Dropdown de culturas
+          if (state.availableCulturas.length > 2) ...[
+            const SizedBox(height: SpacingTokens.xs),
+            DropdownButtonFormField<String>(
+              value: state.selectedCultura,
+              decoration: InputDecoration(
+                labelText: 'Filtrar por cultura',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              items: state.availableCulturas.map((String cultura) {
+                return DropdownMenuItem(
+                  value: cultura,
+                  child: Text(cultura),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).updateSelectedCultura(value);
+                }
+              },
+            ),
+          ],
+        ],
+      ),
     );
   }
 
   /// Constrói conteúdo principal
-  Widget _buildContent() {
-    return provider_lib.Consumer<EnhancedDiagnosticosPragaProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return _buildLoadingState();
-        }
+  Widget _buildContent(BuildContext context, EnhancedDiagnosticosPragaState state) {
+    if (state.isLoading) {
+      return _buildLoadingState();
+    }
 
-        if (provider.hasError) {
-          return _buildErrorState(provider.errorMessage!, provider);
-        }
+    if (state.hasError) {
+      return _buildErrorState(context, state.errorMessage!);
+    }
 
-        if (!provider.hasData) {
-          return _buildEmptyState();
-        }
+    if (!state.hasData) {
+      return _buildEmptyState(context);
+    }
 
-        return _buildDiagnosticsList(provider);
-      },
-    );
+    return _buildDiagnosticsList(context, state);
   }
 
   /// Constrói estado de carregamento
@@ -328,7 +322,7 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói estado de erro
-  Widget _buildErrorState(String error, EnhancedDiagnosticosPragaProvider provider) {
+  Widget _buildErrorState(BuildContext context, String error) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.xl),
@@ -353,7 +347,7 @@ class _EnhancedDiagnosticosPragaWidgetState
             ),
             const SizedBox(height: SpacingTokens.md),
             ElevatedButton.icon(
-              onPressed: () => provider.refresh(),
+              onPressed: () => ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar novamente'),
             ),
@@ -364,7 +358,7 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói estado vazio
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.xl),
@@ -394,9 +388,9 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói lista de diagnósticos agrupados
-  Widget _buildDiagnosticsList(EnhancedDiagnosticosPragaProvider provider) {
-    final groupedDiagnostics = provider.groupedDiagnosticos;
-    
+  Widget _buildDiagnosticsList(BuildContext context, EnhancedDiagnosticosPragaState state) {
+    final groupedDiagnostics = state.groupedDiagnosticos;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(
         top: SpacingTokens.xs,
@@ -404,30 +398,30 @@ class _EnhancedDiagnosticosPragaWidgetState
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: _buildGroupedWidgets(groupedDiagnostics),
+        children: _buildGroupedWidgets(context, groupedDiagnostics),
       ),
     );
   }
 
   /// Constrói widgets agrupados por cultura
-  List<Widget> _buildGroupedWidgets(Map<String, List<DiagnosticoEntity>> grouped) {
+  List<Widget> _buildGroupedWidgets(BuildContext context, Map<String, List<DiagnosticoEntity>> grouped) {
     final widgets = <Widget>[];
 
     grouped.forEach((cultura, diagnosticos) {
       // Cabeçalho da cultura
-      widgets.add(_buildCultureHeader(cultura, diagnosticos.length));
+      widgets.add(_buildCultureHeader(context, cultura, diagnosticos.length));
       widgets.add(const SizedBox(height: SpacingTokens.sm));
 
       // Items de diagnósticos
       for (int i = 0; i < diagnosticos.length; i++) {
         final diagnostico = diagnosticos[i];
-        widgets.add(_buildDiagnosticoItem(diagnostico));
-        
+        widgets.add(_buildDiagnosticoItem(context, diagnostico));
+
         if (i < diagnosticos.length - 1) {
           widgets.add(const SizedBox(height: SpacingTokens.xs));
         }
       }
-      
+
       widgets.add(const SizedBox(height: SpacingTokens.lg));
     });
 
@@ -435,7 +429,7 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói cabeçalho de cultura
-  Widget _buildCultureHeader(String cultura, int count) {
+  Widget _buildCultureHeader(BuildContext context, String cultura, int count) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.sm,
@@ -486,11 +480,11 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói item de diagnóstico
-  Widget _buildDiagnosticoItem(DiagnosticoEntity diagnostico) {
+  Widget _buildDiagnosticoItem(BuildContext context, DiagnosticoEntity diagnostico) {
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
-        onTap: () => _showDiagnosticoDialog(diagnostico),
+        onTap: () => _showDiagnosticoDialog(context, diagnostico),
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -508,17 +502,17 @@ class _EnhancedDiagnosticosPragaWidgetState
                     ),
                   ),
                   if (_showCompatibilityIndicators)
-                    _buildCompatibilityIndicator(diagnostico),
+                    _buildCompatibilityIndicator(context, diagnostico),
                 ],
               ),
-              
+
               const SizedBox(height: SpacingTokens.xs),
-              
+
               Text(
                 'Dosagem: ${diagnostico.dosagem.displayDosagem}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              
+
               if (diagnostico.aplicacao.isValid) ...[
                 const SizedBox(height: 2),
                 Text(
@@ -526,9 +520,9 @@ class _EnhancedDiagnosticosPragaWidgetState
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-              
+
               const SizedBox(height: SpacingTokens.xs),
-              
+
               Row(
                 children: [
                   _buildCompletudeChip(diagnostico.completude),
@@ -548,9 +542,12 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói indicador de compatibilidade
-  Widget _buildCompatibilityIndicator(DiagnosticoEntity diagnostico) {
+  Widget _buildCompatibilityIndicator(BuildContext context, DiagnosticoEntity diagnostico) {
+    // Get the compatibility service from the notifier
+    final notifier = ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier);
+
     return FutureBuilder<CompatibilityValidation?>(
-      future: _provider.validateCompatibility(diagnostico),
+      future: notifier.validateCompatibility(diagnostico),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox(
@@ -612,11 +609,11 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Mostra modal de detalhes do diagnóstico
-  void _showDiagnosticoDialog(DiagnosticoEntity diagnostico) {
+  void _showDiagnosticoDialog(BuildContext context, DiagnosticoEntity diagnostico) {
     // TODO: Implementar dialog para DiagnosticoEntity
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(diagnostico.displayDefensivo),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -630,7 +627,7 @@ class _EnhancedDiagnosticosPragaWidgetState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Fechar'),
           ),
         ],

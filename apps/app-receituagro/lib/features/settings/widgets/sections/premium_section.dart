@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../subscription/presentation/pages/subscription_page.dart';
 import '../../constants/settings_design_tokens.dart';
-import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/providers/settings_notifier.dart';
 
 /// Premium subscription management section
 /// Shows different content based on premium status
-class PremiumSection extends StatelessWidget {
+class PremiumSection extends ConsumerWidget {
   const PremiumSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.Consumer<SettingsProvider>(
-      builder: (context, provider, child) {
-        if (provider.isPremiumUser) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsState = ref.watch(settingsNotifierProvider);
+
+    return settingsState.when(
+      data: (state) {
+        if (state.isPremiumUser) {
           return _buildActivePremiumCard(context);
         } else {
           return _buildPremiumSubscriptionCard(context);
         }
       },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (error, _) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text('Erro: $error'),
+      ),
     );
   }
 
@@ -207,12 +219,14 @@ class PremiumSection extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (context) => const SubscriptionPage(),
-                      ),
-                    );
+                    if (context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (context) => const SubscriptionPage(),
+                        ),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.settings, size: 20),
                   label: Text(
@@ -249,12 +263,14 @@ class PremiumSection extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const SubscriptionPage(),
-              ),
-            );
+            if (context.mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const SubscriptionPage(),
+                ),
+              );
+            }
           },
           borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
           child: Container(

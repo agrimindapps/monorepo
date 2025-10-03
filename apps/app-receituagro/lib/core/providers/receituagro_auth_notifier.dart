@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
-import '../../features/settings/presentation/providers/settings_provider.dart';
-import '../di/injection_container.dart' as di;
-import '../extensions/user_entity_receituagro_extension.dart';
 import '../data/models/user_session_data.dart';
+import '../di/injection_container.dart' as di;
+import '../enums/analytics_user_type.dart';
+import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 
@@ -153,33 +153,14 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
 
       final deviceInfo = await _deviceService.getDeviceInfo();
 
-      final deviceEntity = DeviceEntity(
-        id: deviceInfo.uuid,
-        uuid: deviceInfo.uuid,
-        name: deviceInfo.name,
-        model: deviceInfo.model,
-        platform: deviceInfo.platform,
-        systemVersion: deviceInfo.systemVersion,
-        appVersion: deviceInfo.appVersion,
-        buildNumber: deviceInfo.buildNumber,
-        isPhysicalDevice: deviceInfo.isPhysicalDevice,
-        manufacturer: deviceInfo.manufacturer,
-        firstLoginAt: deviceInfo.firstLoginAt,
-        lastActiveAt: DateTime.now(),
-        isActive: true,
-      );
+      // Device registration is now handled by DeviceManagementService
+      // which is integrated with SettingsNotifier (Riverpod)
+      // Track device login for analytics
+      _analytics.trackDeviceAdded(deviceInfo.platform);
 
-      final settingsProvider = di.sl<SettingsProvider>();
-      await settingsProvider.initialize(user.id);
-
-      final success = await settingsProvider.addDevice(deviceEntity);
-
-      if (success) {
-        if (kDebugMode) print('✅ Auth Notifier: Device ${deviceInfo.name} registered successfully');
-        _analytics.trackDeviceAdded(deviceInfo.platform);
-      } else {
-        if (kDebugMode) print('⚠️ Auth Notifier: Device registration failed or device already exists');
-        _analytics.trackDeviceAdded(deviceInfo.platform);
+      if (kDebugMode) {
+        print('✅ Auth Notifier: Device login detected for ${deviceInfo.name}');
+        print('   Device management handled by SettingsNotifier');
       }
 
       await _syncUserProfile(user, deviceInfo);

@@ -1,19 +1,18 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
 
 import '../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/services/receituagro_navigation_service.dart';
 import '../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
-import '../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_provider.dart';
 import '../data/favorito_defensivo_model.dart';
 import '../data/favorito_diagnostico_model.dart';
 import '../data/favorito_praga_model.dart';
 
 /// Serviço de navegação inteligente para favoritos
 /// Usa dados reais dos repositórios para navegação correta
+/// MIGRADO PARA RIVERPOD: Removida dependência de Provider
 class FavoritosNavigationService {
   final FitossanitarioHiveRepository _fitossanitarioRepository;
   final PragasHiveRepository _pragasRepository;
@@ -81,6 +80,7 @@ class FavoritosNavigationService {
   }
 
   /// Navega para detalhes do diagnóstico com dados relacionais completos
+  /// MIGRADO: Usa Riverpod ao invés de Provider
   Future<void> navigateToDiagnosticoDetails(
     BuildContext context,
     FavoritoDiagnosticoModel diagnostico,
@@ -88,19 +88,16 @@ class FavoritosNavigationService {
     try {
       // Busca diagnóstico completo com dados relacionais
       final diagnosticoCompleto = await _integrationService.getDiagnosticoCompleto(diagnostico.idReg);
-      
+
       if (diagnosticoCompleto != null) {
         await Navigator.push<void>(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => provider.ChangeNotifierProvider(
-              create: (_) => DetalheDiagnosticoProvider(),
-              child: DetalheDiagnosticoPage(
-                diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
-                nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
-                nomePraga: diagnosticoCompleto.nomePraga,
-                cultura: diagnosticoCompleto.nomeCultura,
-              ),
+            builder: (context) => DetalheDiagnosticoPage(
+              diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
+              nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
+              nomePraga: diagnosticoCompleto.nomePraga,
+              cultura: diagnosticoCompleto.nomeCultura,
             ),
           ),
         );

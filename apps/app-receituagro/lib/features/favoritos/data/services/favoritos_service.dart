@@ -1,15 +1,15 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:get_it/get_it.dart';
 
-import '../../../../core/di/injection_container.dart';
-import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/entities/favorito_sync_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -18,10 +18,6 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Princípio: Consolidação de responsabilidades similares para reduzir complexidade
 class FavoritosService {
   final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
-  final ReceitaAgroAuthProvider? _authProvider =
-      sl.isRegistered<ReceitaAgroAuthProvider>()
-          ? sl<ReceitaAgroAuthProvider>()
-          : null;
 
   // Cache interno consolidado
   final Map<String, dynamic> _memoryCache = {};
@@ -838,10 +834,9 @@ class FavoritosService {
     );
 
     try {
-      // Verifica se o usuário está autenticado
-      if (_authProvider == null ||
-          !_authProvider.isAuthenticated ||
-          _authProvider.isAnonymous) {
+      // Verifica se o usuário está autenticado via Firebase Auth (synchronous access)
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null || userId.isEmpty) {
         developer.log(
           '❌ FIRESTORE SYNC: Usuário não autenticado - pulando sincronização de favorito',
           name: 'FavoritosService',
@@ -850,7 +845,7 @@ class FavoritosService {
       }
 
       developer.log(
-        '✅ FIRESTORE SYNC: Usuário autenticado - userId=${_authProvider.currentUser?.id}',
+        '✅ FIRESTORE SYNC: Usuário autenticado - userId=$userId',
         name: 'FavoritosService',
       );
 
@@ -902,7 +897,7 @@ class FavoritosService {
         adicionadoEm: DateTime.now(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        userId: _authProvider.currentUser?.id,
+        userId: userId,
       );
 
       developer.log(

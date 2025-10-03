@@ -1,59 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/responsive_content_wrapper.dart';
-import '../providers/home_pragas_provider.dart';
+import '../providers/home_pragas_notifier.dart';
 import '../widgets/home_pragas_error_widget.dart';
 import '../widgets/home_pragas_recent_widget.dart';
 import '../widgets/home_pragas_stats_widget.dart';
 import '../widgets/home_pragas_suggestions_widget.dart';
 
 /// Página clean da Home de Pragas seguindo Clean Architecture
-/// 
+///
 /// Responsabilidades:
 /// - Layout principal da página
 /// - Coordenação entre widgets especializados
 /// - Gerenciamento de estados de loading/erro
-/// - Integração com HomePragasProvider
-class HomePragasPage extends StatelessWidget {
+/// - Integração com HomePragasNotifier (Riverpod)
+class HomePragasPage extends ConsumerWidget {
   const HomePragasPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.ChangeNotifierProvider(
-      create: (_) => HomePragasProvider(),
-      child: const _HomePragasContent(),
-    );
-  }
-}
-
-class _HomePragasContent extends StatelessWidget {
-  const _HomePragasContent();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+    final asyncState = ref.watch(homePragasNotifierProvider);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
           child: ResponsiveContentWrapper(
-            child: provider_lib.Consumer<HomePragasProvider>(
-              builder: (context, provider, child) {
-                return Column(
-                  children: [
-                    _buildHeader(context, isDark, provider),
-                    Expanded(
-                      child: _buildBody(context, provider),
-                    ),
-                  ],
-                );
-              },
+            child: asyncState.when(
+              data: (state) => Column(
+                children: [
+                  _buildHeader(context, isDark, state),
+                  Expanded(
+                    child: _buildBody(context, ref, state),
+                  ),
+                ],
+              ),
+              loading: () => _buildLoadingState(context),
+              error: (error, stack) => HomePragasErrorWidget(
+                errorMessage: error.toString(),
+                onRetry: () => ref.refresh(homePragasNotifierProvider),
+              ),
             ),
           ),
         ),
@@ -61,17 +53,17 @@ class _HomePragasContent extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isDark, HomePragasProvider provider) {
+  Widget _buildHeader(BuildContext context, bool isDark, HomePragasState state) {
     String subtitle = 'Carregando pragas...';
-    
-    if (provider.initializationFailed) {
+
+    if (state.initializationFailed) {
       subtitle = 'Erro ao carregar dados';
-    } else if (!provider.isLoading && provider.stats != null) {
-      final stats = provider.stats;
+    } else if (!state.isLoading && state.stats != null) {
+      final stats = state.stats;
       final total = (stats?.insetos ?? 0) + (stats?.doencas ?? 0) + (stats?.plantas ?? 0);
       subtitle = 'Identifique e controle $total pragas';
     }
-    
+
     return ModernHeaderWidget(
       title: 'Pragas e Doenças',
       subtitle: subtitle,
@@ -82,17 +74,17 @@ class _HomePragasContent extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, HomePragasProvider provider) {
+  Widget _buildBody(BuildContext context, WidgetRef ref, HomePragasState state) {
     // Estado de inicialização
-    if (provider.isInitializing) {
+    if (state.isInitializing) {
       return _buildLoadingState(context);
     }
 
     // Estado de erro de inicialização
-    if (provider.initializationFailed) {
+    if (state.initializationFailed) {
       return HomePragasErrorWidget(
-        errorMessage: provider.initializationError ?? 'Erro desconhecido',
-        onRetry: provider.forceRefresh,
+        errorMessage: state.initializationError ?? 'Erro desconhecido',
+        onRetry: () => ref.read(homePragasNotifierProvider.notifier).forceRefresh(),
       );
     }
 
@@ -104,20 +96,20 @@ class _HomePragasContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: ReceitaAgroSpacing.sm),
-              
+
               // Grid de estatísticas/categorias
-              HomePragasStatsWidget(provider: provider),
-              
+              HomePragasStatsWidget(state: state),
+
               const SizedBox(height: ReceitaAgroSpacing.sm),
-              
+
               // Seção de sugestões com carrossel
-              HomePragasSuggestionsWidget(provider: provider),
-              
+              HomePragasSuggestionsWidget(state: state),
+
               const SizedBox(height: ReceitaAgroSpacing.sm),
-              
+
               // Seção de últimos acessados
-              HomePragasRecentWidget(provider: provider),
-              
+              HomePragasRecentWidget(state: state),
+
               const SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),
             ],
           ),
@@ -128,7 +120,7 @@ class _HomePragasContent extends StatelessWidget {
 
   Widget _buildLoadingState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

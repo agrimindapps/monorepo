@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/export_request.dart';
-import '../providers/data_export_provider.dart';
+import '../providers/data_export_notifier.dart';
 
 /// Dialog that shows export progress with proper Future typing
-class ExportProgressDialog extends StatefulWidget {
+class ExportProgressDialog extends ConsumerStatefulWidget {
   final String userId;
   final Set<DataType> dataTypes;
   final ExportFormat format;
@@ -36,10 +36,10 @@ class ExportProgressDialog extends StatefulWidget {
   }
 
   @override
-  State<ExportProgressDialog> createState() => _ExportProgressDialogState();
+  ConsumerState<ExportProgressDialog> createState() => _ExportProgressDialogState();
 }
 
-class _ExportProgressDialogState extends State<ExportProgressDialog> {
+class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
   ExportRequest? _completedRequest;
   bool _hasStarted = false;
 
@@ -55,8 +55,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     if (_hasStarted) return;
     _hasStarted = true;
 
-    final dataProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
-    final request = await dataProvider.requestExport(
+    final request = await ref.read(dataExportNotifierProvider.notifier).requestExport(
       userId: widget.userId,
       dataTypes: widget.dataTypes,
       format: widget.format,
@@ -75,9 +74,11 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return provider.Consumer<DataExportProvider>(
-      builder: (BuildContext context, DataExportProvider dataProvider, Widget? child) {
-        final progress = dataProvider.currentProgress;
+    final exportStateAsync = ref.watch(dataExportNotifierProvider);
+
+    return exportStateAsync.when(
+      data: (exportState) {
+        final progress = exportState.currentProgress;
 
         return PopScope(
           canPop: progress.isCompleted || progress.errorMessage != null,
@@ -106,6 +107,30 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
           ),
         );
       },
+      loading: () => AlertDialog(
+        title: const Text('Exportando dados'),
+        content: const SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Inicializando exportação...'),
+            ],
+          ),
+        ),
+      ),
+      error: (error, _) => AlertDialog(
+        title: const Text('Erro'),
+        content: Text('Erro ao exportar: $error'),
+        actions: [
+          TextButton(
+            onPressed: _closeDialog,
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -210,7 +235,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            provider.Provider.of<DataExportProvider>(context, listen: false).resetProgress();
+            ref.read(dataExportNotifierProvider.notifier).resetProgress();
             _hasStarted = false;
             _completedRequest = null;
             _startExport();
@@ -225,8 +250,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
         if (_completedRequest?.downloadUrl != null)
           TextButton(
             onPressed: () async {
-              final exportProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
-              final success = await exportProvider.downloadExport(_completedRequest!.id);
+              final success = await ref.read(dataExportNotifierProvider.notifier).downloadExport(_completedRequest!.id);
 
               if (!success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -279,14 +303,26 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     );
 
     if (shouldCancel == true && context.mounted) {
-      provider.Provider.of<DataExportProvider>(context, listen: false).resetProgress();
+      ref.read(dataExportNotifierProvider.notifier).resetProgress();
       _closeDialog();
     }
   }
 }
 
 /// Simplified version for showing quick progress updates
-mixin ExportProgressSnackBar {
+/// Note: This is a Consumer widget wrapper for snackbar
+class ExportProgressSnackBar extends ConsumerWidget {
+  final String userId;
+  final Set<DataType> dataTypes;
+  final ExportFormat format;
+
+  const ExportProgressSnackBar({
+    super.key,
+    required this.userId,
+    required this.dataTypes,
+    required this.format,
+  });
+
   /// Shows a progress snackbar that updates automatically
   static void show(
     BuildContext context, {
@@ -296,67 +332,101 @@ mixin ExportProgressSnackBar {
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: provider.Consumer<DataExportProvider>(
-          builder: (BuildContext context, DataExportProvider dataProvider, Widget? child) {
-            final progress = dataProvider.currentProgress;
-
-            if (progress.errorMessage != null) {
-              return Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text('Erro: ${progress.errorMessage}'),
-                  ),
-                ],
-              );
-            }
-
-            if (progress.isCompleted) {
-              return const Row(
-                children: [
-                  Icon(Icons.check, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text('Exportação concluída!'),
-                ],
-              );
-            }
-
-            return Row(
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    value: progress.percentage / 100,
-                    strokeWidth: 2,
-                    backgroundColor: Colors.white.withValues(alpha: 0.3),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        progress.currentTask,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        '${progress.percentage.toStringAsFixed(0)}%',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
+        content: ExportProgressSnackBar(
+          userId: userId,
+          dataTypes: dataTypes,
+          format: format,
         ),
         duration: const Duration(seconds: 30), // Long duration for ongoing process
         behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final exportStateAsync = ref.watch(dataExportNotifierProvider);
+
+    return exportStateAsync.when(
+      data: (exportState) {
+        final progress = exportState.currentProgress;
+
+        if (progress.errorMessage != null) {
+          return Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('Erro: ${progress.errorMessage}'),
+              ),
+            ],
+          );
+        }
+
+        if (progress.isCompleted) {
+          return const Row(
+            children: [
+              Icon(Icons.check, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Exportação concluída!'),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                value: progress.percentage / 100,
+                strokeWidth: 2,
+                backgroundColor: Colors.white.withValues(alpha: 0.3),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    progress.currentTask,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    '${progress.percentage.toStringAsFixed(0)}%',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const Row(
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+          SizedBox(width: 16),
+          Text('Inicializando...'),
+        ],
+      ),
+      error: (error, _) => Row(
+        children: [
+          const Icon(Icons.error, color: Colors.white),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text('Erro: $error'),
+          ),
+        ],
       ),
     );
   }

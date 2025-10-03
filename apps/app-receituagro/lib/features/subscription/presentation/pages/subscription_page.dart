@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/subscription_provider.dart';
+import '../providers/subscription_notifier.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
 import '../widgets/subscription_plans_widget.dart';
@@ -22,62 +21,83 @@ import '../widgets/subscription_status_widget.dart';
 /// - View ativa: SubscriptionStatusWidget
 /// - View planos: SubscriptionPlansWidget + SubscriptionBenefitsWidget
 /// - Footer com ações: PaymentActionsWidget
-class SubscriptionPage extends StatefulWidget {
+class SubscriptionPage extends ConsumerStatefulWidget {
   const SubscriptionPage({super.key});
 
   @override
-  State<SubscriptionPage> createState() => _SubscriptionPageState();
+  ConsumerState<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
-class _SubscriptionPageState extends State<SubscriptionPage> {
+class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load subscription data on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(subscriptionNotifierProvider.notifier).loadSubscriptionData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return provider_lib.ChangeNotifierProvider(
-      create: (_) => GetIt.instance<SubscriptionProvider>()..loadSubscriptionData(),
-      child: provider_lib.Consumer<SubscriptionProvider>(
-        builder: (context, provider, child) {
-          // Mostrar mensagens se existirem
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _showMessages(context, provider);
-          });
+    final subscriptionState = ref.watch(subscriptionNotifierProvider);
 
-          return Scaffold(
-            backgroundColor: const Color(0xFF1B4332),
-            body: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF1B4332),  // Deep forest green
-                    Color(0xFF2D5016),  // Rich agricultural green  
-                    Color(0xFF40916C),  // Fresh green accent
+    return subscriptionState.when(
+      data: (state) {
+        // Show messages if exist
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showMessages(context, state);
+        });
+
+        return Scaffold(
+          backgroundColor: const Color(0xFF1B4332),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1B4332),  // Deep forest green
+                  Color(0xFF2D5016),  // Rich agricultural green
+                  Color(0xFF40916C),  // Fresh green accent
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Column(
+                  children: [
+                    // Header com título e botão de fechar
+                    _buildHeader(context),
+
+                    // Conteúdo principal
+                    Expanded(
+                      child: state.isLoading
+                          ? _buildLoadingView()
+                          : state.hasActiveSubscription
+                              ? _buildActiveSubscriptionView()
+                              : _buildPlansView(),
+                    ),
                   ],
                 ),
               ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                  child: Column(
-                    children: [
-                      // Header com título e botão de fechar
-                      _buildHeader(context),
-
-                      // Conteúdo principal
-                      Expanded(
-                        child: provider.isLoading
-                            ? _buildLoadingView()
-                            : provider.hasActiveSubscription
-                                ? _buildActiveSubscriptionView(provider)
-                                : _buildPlansView(provider),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
-          );
-        },
+          ),
+        );
+      },
+      loading: () => Scaffold(
+        backgroundColor: const Color(0xFF1B4332),
+        body: _buildLoadingView(),
+      ),
+      error: (error, stack) => Scaffold(
+        backgroundColor: const Color(0xFF1B4332),
+        body: Center(
+          child: Text(
+            'Erro ao carregar dados: $error',
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
       ),
     );
   }
@@ -119,7 +139,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   /// View para usuários com subscription ativa
-  Widget _buildActiveSubscriptionView(SubscriptionProvider provider) {
+  Widget _buildActiveSubscriptionView() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -146,7 +166,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   /// View para seleção de planos (usuário sem subscription)
-  Widget _buildPlansView(SubscriptionProvider provider) {
+  Widget _buildPlansView() {
     return Expanded(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
@@ -203,28 +223,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   /// Exibe mensagens de erro, sucesso ou informação
-  void _showMessages(BuildContext context, SubscriptionProvider provider) {
-    if (provider.errorMessage != null) {
+  void _showMessages(BuildContext context, SubscriptionState state) {
+    if (state.errorMessage != null) {
       _showSnackBar(
         context,
-        provider.errorMessage!,
+        state.errorMessage!,
         Colors.red,
       );
-      provider.clearMessages();
-    } else if (provider.successMessage != null) {
+      ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+    } else if (state.successMessage != null) {
       _showSnackBar(
         context,
-        provider.successMessage!,
+        state.successMessage!,
         Colors.green,
       );
-      provider.clearMessages();
-    } else if (provider.infoMessage != null) {
+      ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+    } else if (state.infoMessage != null) {
       _showSnackBar(
         context,
-        provider.infoMessage!,
+        state.infoMessage!,
         Colors.blue,
       );
-      provider.clearMessages();
+      ref.read(subscriptionNotifierProvider.notifier).clearMessages();
     }
   }
 

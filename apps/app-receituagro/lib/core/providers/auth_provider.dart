@@ -5,10 +5,9 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
-import '../../features/settings/presentation/providers/settings_provider.dart';
-import '../di/injection_container.dart' as di;
-import '../extensions/user_entity_receituagro_extension.dart';
 import '../data/models/user_session_data.dart';
+import '../enums/analytics_user_type.dart';
+import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 // sync_orchestrator.dart removed - using UnifiedSyncManager from core package
@@ -166,39 +165,11 @@ class ReceitaAgroAuthProvider extends ChangeNotifier {
       
       // Get current device info
       final deviceInfo = await _deviceService.getDeviceInfo();
-      
-      // Convert DeviceInfo to DeviceEntity for validation
-      final deviceEntity = DeviceEntity(
-        id: deviceInfo.uuid,
-        uuid: deviceInfo.uuid,
-        name: deviceInfo.name,
-        model: deviceInfo.model,
-        platform: deviceInfo.platform,
-        systemVersion: deviceInfo.systemVersion,
-        appVersion: deviceInfo.appVersion,
-        buildNumber: deviceInfo.buildNumber,
-        isPhysicalDevice: deviceInfo.isPhysicalDevice,
-        manufacturer: deviceInfo.manufacturer,
-        firstLoginAt: deviceInfo.firstLoginAt,
-        lastActiveAt: DateTime.now(),
-        isActive: true,
-      );
-      
-      // Import SettingsProvider to register device
-      final settingsProvider = di.sl<SettingsProvider>();
-      await settingsProvider.initialize(user.id);
-      
-      // Try to add/validate device automatically
-      final success = await settingsProvider.addDevice(deviceEntity);
-      
-      if (success) {
-        if (kDebugMode) print('✅ Auth Provider: Device ${deviceInfo.name} registered successfully');
-        _analytics.trackDeviceAdded(deviceInfo.platform);
-      } else {
-        if (kDebugMode) print('⚠️ Auth Provider: Device registration failed or device already exists');
-        // Even if registration fails (e.g., device already exists), still track for analytics
-        _analytics.trackDeviceAdded(deviceInfo.platform);
-      }
+
+      // Device registration will be handled by DeviceManagementService
+      // Track device login for analytics
+      if (kDebugMode) print('✅ Auth Provider: Device ${deviceInfo.name} login tracked');
+      _analytics.trackDeviceAdded(deviceInfo.platform);
       
       // Sincroniza perfil do usuário com Firestore
       await _syncUserProfile(user, deviceInfo);

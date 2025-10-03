@@ -1,38 +1,44 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/diagnostico_integration_service.dart';
 import '../../../detalhes_diagnostico/widgets/diagnostico_relacional_card_widget.dart';
-import '../providers/busca_avancada_provider.dart';
+import '../providers/busca_avancada_notifier.dart';
 
 /// Widget especializado para exibir resultados da busca avançada
-class ResultadosBuscaWidget extends StatelessWidget {
-  final BuscaAvancadaProvider provider;
-
-  const ResultadosBuscaWidget({
-    super.key,
-    required this.provider,
-  });
+class ResultadosBuscaWidget extends ConsumerWidget {
+  const ResultadosBuscaWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    if (provider.isLoading) {
-      return SliverToBoxAdapter(child: _buildLoadingState(context));
-    }
-    
-    if (provider.hasError) {
-      return SliverToBoxAdapter(child: _buildErrorState(context));
-    }
-    
-    if (!provider.hasSearched) {
-      return SliverToBoxAdapter(child: _buildEstadoInicial(context));
-    }
-    
-    if (provider.resultados.isEmpty) {
-      return SliverToBoxAdapter(child: _buildEstadoSemResultados(context));
-    }
-    
-    return _buildListaResultados();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final buscaState = ref.watch(buscaAvancadaNotifierProvider);
+
+    return buscaState.when(
+      data: (state) {
+        if (state.isLoading) {
+          return SliverToBoxAdapter(child: _buildLoadingState(context));
+        }
+
+        if (state.hasError) {
+          return SliverToBoxAdapter(child: _buildErrorState(context, state, ref));
+        }
+
+        if (!state.hasSearched) {
+          return SliverToBoxAdapter(child: _buildEstadoInicial(context));
+        }
+
+        if (state.resultados.isEmpty) {
+          return SliverToBoxAdapter(child: _buildEstadoSemResultados(context, ref));
+        }
+
+        return _buildListaResultados(state);
+      },
+      loading: () => SliverToBoxAdapter(child: _buildLoadingState(context)),
+      error: (error, _) => SliverToBoxAdapter(
+        child: _buildErrorStateFromException(context, error),
+      ),
+    );
   }
 
   Widget _buildLoadingState(BuildContext context) {
@@ -91,9 +97,14 @@ class ResultadosBuscaWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context) {
+  Widget _buildErrorState(
+    BuildContext context,
+    BuscaAvancadaState state,
+    WidgetRef ref,
+  ) {
     final theme = Theme.of(context);
-    
+    final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
+
     return Container(
       margin: const EdgeInsets.all(16.0),
       padding: const EdgeInsets.all(24.0),
@@ -137,7 +148,7 @@ class ResultadosBuscaWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            provider.errorMessage ?? 'Verifique os filtros e tente novamente',
+            state.errorMessage ?? 'Verifique os filtros e tente novamente',
             style: TextStyle(
               fontSize: 14,
               color: theme.colorScheme.onSurfaceVariant,
@@ -146,7 +157,7 @@ class ResultadosBuscaWidget extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => provider.realizarBusca(),
+            onPressed: () => notifier.realizarBusca(),
             icon: const Icon(Icons.refresh),
             label: const Text('Tentar Novamente'),
             style: ElevatedButton.styleFrom(
@@ -154,6 +165,31 @@ class ResultadosBuscaWidget extends StatelessWidget {
               foregroundColor: theme.colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorStateFromException(BuildContext context, Object error) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error_outline, size: 40, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            'Erro: $error',
+            style: TextStyle(color: theme.colorScheme.error),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -295,9 +331,10 @@ class ResultadosBuscaWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildEstadoSemResultados(BuildContext context) {
+  Widget _buildEstadoSemResultados(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+    final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
+
     return Container(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -337,7 +374,7 @@ class ResultadosBuscaWidget extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => provider.limparFiltros(),
+            onPressed: () => notifier.limparFiltros(),
             icon: const Icon(Icons.clear),
             label: const Text('Limpar Filtros'),
             style: ElevatedButton.styleFrom(
@@ -351,11 +388,11 @@ class ResultadosBuscaWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildListaResultados() {
+  Widget _buildListaResultados(BuscaAvancadaState state) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          final diagnostico = provider.resultados[index];
+          final diagnostico = state.resultados[index];
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: DiagnosticoRelacionalCardWidget(
@@ -364,7 +401,7 @@ class ResultadosBuscaWidget extends StatelessWidget {
             ),
           );
         },
-        childCount: provider.resultados.length,
+        childCount: state.resultados.length,
       ),
     );
   }

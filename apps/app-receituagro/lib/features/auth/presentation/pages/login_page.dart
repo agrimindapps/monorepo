@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/auth_provider.dart';
-import '../controllers/login_controller.dart';
+import '../notifiers/login_notifier.dart';
 import '../widgets/auth_tabs_widget.dart';
 import '../widgets/login_background_widget.dart';
 import '../widgets/login_form_widget.dart';
@@ -12,7 +11,8 @@ import '../widgets/signup_form_widget.dart';
 
 /// Página de login do ReceitaAgro seguindo padrões SOLID
 /// Adaptada do app-gasometer com tema verde e integração com ReceitaAgroAuthProvider
-class LoginPage extends StatefulWidget {
+/// Migrada para Riverpod
+class LoginPage extends ConsumerStatefulWidget {
   final bool? showBackButton;
 
   const LoginPage({
@@ -21,10 +21,10 @@ class LoginPage extends StatefulWidget {
   });
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _LoginPageState extends ConsumerState<LoginPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
@@ -73,21 +73,19 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return provider.ChangeNotifierProvider<LoginController>(
-      create: (context) => LoginController(
-        authProvider: provider.Provider.of<ReceitaAgroAuthProvider>(context, listen: false),
-      ),
-      child: provider.Consumer<LoginController>(
-        builder: (context, controller, child) {
-          return Scaffold(
-            body: AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle.light,
-              child: LoginBackgroundWidget(
-                child: _buildResponsiveLayout(context),
-              ),
-            ),
-          );
-        },
+    // Watch login state for auth success navigation
+    ref.listen(loginNotifierProvider, (previous, next) {
+      if (next.isAuthenticated && mounted) {
+        _handleAuthSuccess();
+      }
+    });
+
+    return Scaffold(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: LoginBackgroundWidget(
+          child: _buildResponsiveLayout(context),
+        ),
       ),
     );
   }
@@ -299,53 +297,51 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _buildAuthContent() {
-    return provider.Consumer<LoginController>(
-      builder: (context, controller, child) {
-        if (controller.isShowingRecoveryForm) {
-          return const RecoveryFormWidget();
-        }
+    final loginState = ref.watch(loginNotifierProvider);
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AuthTabsWidget(),
-              const SizedBox(height: 30),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.0, 0.1),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      )),
-                      child: child,
+    if (loginState.isShowingRecoveryForm) {
+      return const RecoveryFormWidget();
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const AuthTabsWidget(),
+          const SizedBox(height: 30),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.0, 0.1),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  )),
+                  child: child,
+                ),
+              );
+            },
+            child: loginState.isSignUpMode
+                ? Container(
+                    key: const ValueKey('signup'),
+                    child: SignupFormWidget(
+                      onSignupSuccess: _handleAuthSuccess,
                     ),
-                  );
-                },
-                child: controller.isSignUpMode
-                    ? Container(
-                        key: const ValueKey('signup'),
-                        child: SignupFormWidget(
-                          onSignupSuccess: _handleAuthSuccess,
-                        ),
-                      )
-                    : Container(
-                        key: const ValueKey('login'),
-                        child: LoginFormWidget(
-                          onLoginSuccess: _handleAuthSuccess,
-                        ),
-                      ),
-              ),
-            ],
+                  )
+                : Container(
+                    key: const ValueKey('login'),
+                    child: LoginFormWidget(
+                      onLoginSuccess: _handleAuthSuccess,
+                    ),
+                  ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

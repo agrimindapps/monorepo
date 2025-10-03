@@ -1,13 +1,12 @@
 import 'package:core/core.dart' as core;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/di/injection_container.dart';
 import '../../../core/interfaces/i_premium_service.dart';
-import '../../../core/providers/auth_provider.dart';
+import '../../../features/comentarios/data/comentario_model.dart';
 import '../constants/comentarios_design_tokens.dart';
 import '../domain/entities/comentario_sync_entity.dart';
-import '../data/comentario_model.dart';
 
 abstract class IComentariosRepository {
   Future<List<ComentarioModel>> getAllComentarios();
@@ -19,7 +18,6 @@ abstract class IComentariosRepository {
 class ComentariosService extends ChangeNotifier {
   final IComentariosRepository? _repository;
   final IPremiumService? _premiumService;
-  final ReceitaAgroAuthProvider? _authProvider = sl.isRegistered<ReceitaAgroAuthProvider>() ? sl<ReceitaAgroAuthProvider>() : null;
 
   ComentariosService({
     IComentariosRepository? repository,
@@ -195,13 +193,14 @@ class ComentariosService extends ChangeNotifier {
   Future<void> _queueSyncOperation(String operation, ComentarioModel comentario) async {
     print('💬 COMENTARIO_SERVICE: Iniciando operação de sync - operation=$operation, comentario_id=${comentario.id}');
     try {
-      // Verifica se o usuário está autenticado
-      if (_authProvider == null || !_authProvider.isAuthenticated || _authProvider.isAnonymous) {
+      // Verifica se o usuário está autenticado via Firebase Auth (synchronous access)
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null || userId.isEmpty) {
         print('⚠️ COMENTARIO_SERVICE: Usuário não autenticado - pulando sincronização de comentário');
         return;
       }
-      
-      print('✅ COMENTARIO_SERVICE: Usuário autenticado - userId=${_authProvider.currentUser?.id}');
+
+      print('✅ COMENTARIO_SERVICE: Usuário autenticado - userId=$userId');
 
       // Verifica se há dados válidos para sincronização
       if (comentario.id.isEmpty) {
@@ -223,7 +222,7 @@ class ComentariosService extends ChangeNotifier {
         status: comentario.status,
         createdAt: comentario.createdAt,
         updatedAt: comentario.updatedAt,
-        userId: _authProvider.currentUser?.id,
+        userId: userId,
       );
       print('✅ COMENTARIO_SERVICE: Entidade de sincronização criada - syncEntity.id=${syncEntity.id}');
 

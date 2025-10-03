@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 // Local imports
 import '../../features/analytics/analytics_service.dart';
 import '../providers/auth_notifier.dart';
-import '../providers/receituagro_auth_notifier.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_validation_service.dart';
 import 'injection_container.dart' as di;
@@ -430,23 +429,8 @@ class CorePackageIntegration {
 
   /// Register ReceitaAgro-specific auth services
   static Future<void> _registerReceitaAgroAuthServices() async {
-    // Register ReceitaAgro Enhanced Analytics Service first
-    try {
-      if (!_sl.isRegistered<ReceitaAgroEnhancedAnalyticsProvider>()) {
-        _sl.registerLazySingleton<ReceitaAgroEnhancedAnalyticsProvider>(
-          () => ReceitaAgroEnhancedAnalyticsProvider(
-            analyticsRepository: _sl<core.IAnalyticsRepository>(),
-            crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
-          ),
-        );
-        if (kDebugMode) print('✅ ReceitaAgroEnhancedAnalyticsProvider registered successfully');
-      } else {
-        if (kDebugMode) print('⚠️ ReceitaAgroEnhancedAnalyticsProvider already registered');
-      }
-    } catch (e) {
-      if (kDebugMode) print('❌ ReceitaAgroEnhancedAnalyticsProvider registration failed: $e');
-      rethrow; // Re-throw to see the actual error
-    }
+    // ReceitaAgroEnhancedAnalyticsProvider removed - Migrated to Riverpod
+    // Now using EnhancedAnalyticsNotifier (Riverpod - lifecycle managed automatically)
 
     // Register ReceitaAgroAnalyticsService as a wrapper
     // This is a REAL CLASS (not typedef) that delegates to ReceitaAgroEnhancedAnalyticsProvider
@@ -466,17 +450,8 @@ class CorePackageIntegration {
       rethrow;
     }
 
-    // Register ReceitaAgro Auth Provider (Legacy - Provider pattern)
-    if (!_sl.isRegistered<ReceitaAgroAuthProvider>()) {
-      _sl.registerLazySingleton<ReceitaAgroAuthProvider>(
-        () => ReceitaAgroAuthProvider(
-          authRepository: _sl<core.IAuthRepository>(),
-          deviceService: _sl<DeviceIdentityService>(),
-          analytics: _sl<ReceitaAgroAnalyticsService>(),
-          enhancedAccountDeletionService: _sl<core.EnhancedAccountDeletionService>(),
-        ),
-      );
-    }
+    // ReceitaAgroAuthProvider removed - Riverpod manages lifecycle automatically
+    // Migration complete: Using ReceitaAgroAuthNotifier instead
 
     // Register AuthNotifier (Riverpod pattern - MIGRATION)
     if (!_sl.isRegistered<AuthNotifier>()) {

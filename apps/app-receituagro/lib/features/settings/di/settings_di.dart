@@ -7,9 +7,6 @@ import '../domain/repositories/i_user_settings_repository.dart';
 import '../domain/repositories/profile_repository.dart';
 import '../domain/usecases/get_user_settings_usecase.dart';
 import '../domain/usecases/update_user_settings_usecase.dart';
-import '../presentation/providers/profile_notifier.dart';
-import '../presentation/providers/settings_notifier.dart';
-import '../presentation/providers/user_settings_notifier.dart';
 
 /// Dependency Injection setup for Settings module following Clean Architecture.
 /// Registers all dependencies required for the settings feature.
@@ -29,30 +26,10 @@ abstract class SettingsDI {
       () => UpdateUserSettingsUseCase(getIt<IUserSettingsRepository>()),
     );
 
-    // Provider layer - UserSettingsProvider
-    getIt.registerFactory<UserSettingsProvider>(
-      () => UserSettingsProvider(
-        getUserSettingsUseCase: getIt<GetUserSettingsUseCase>(),
-        updateUserSettingsUseCase: getIt<UpdateUserSettingsUseCase>(),
-      ),
-    );
-
-    // Unified Settings Provider for the refactored SettingsPage
-    getIt.registerLazySingleton<SettingsProvider>(
-      () => SettingsProvider(
-        getUserSettingsUseCase: getIt<GetUserSettingsUseCase>(),
-        updateUserSettingsUseCase: getIt<UpdateUserSettingsUseCase>(),
-      ),
-    );
-
-    // Register as singleton for provider persistence across app
-    getIt.registerLazySingleton<UserSettingsProvider>(
-      () => UserSettingsProvider(
-        getUserSettingsUseCase: getIt<GetUserSettingsUseCase>(),
-        updateUserSettingsUseCase: getIt<UpdateUserSettingsUseCase>(),
-      ),
-      instanceName: 'singleton',
-    );
+    // All Providers removed - Riverpod manages lifecycle automatically
+    // Migration complete: Using Notifiers instead:
+    // - UserSettingsNotifier
+    // - SettingsNotifier
 
     // ===== PROFILE MANAGEMENT =====
     
@@ -65,31 +42,17 @@ abstract class SettingsDI {
     getIt.registerLazySingleton<ProfileRepository>(
       () => ProfileRepositoryImpl(
         profileImageService: getIt<ProfileImageService>(),
-        authProvider: getIt<ReceitaAgroAuthProvider>(),
+        authNotifier: getIt<ReceitaAgroAuthNotifier>(),
       ),
     );
-    
-    // ProfileProvider for state management
-    getIt.registerLazySingleton<ProfileProvider>(
-      () => ProfileProvider(
-        profileRepository: getIt<ProfileRepository>(),
-      ),
-    );
+
+    // ProfileProvider removed - Riverpod manages lifecycle automatically
+    // Migration complete: Using ProfileNotifier instead
   }
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
-    if (getIt.isRegistered<SettingsProvider>()) {
-      getIt.unregister<SettingsProvider>();
-    }
-
-    if (getIt.isRegistered<UserSettingsProvider>()) {
-      getIt.unregister<UserSettingsProvider>();
-    }
-
-    if (getIt.isRegistered<UserSettingsProvider>(instanceName: 'singleton')) {
-      getIt.unregister<UserSettingsProvider>(instanceName: 'singleton');
-    }
+    // All Provider unregisters removed - not registered anymore
 
     if (getIt.isRegistered<UpdateUserSettingsUseCase>()) {
       getIt.unregister<UpdateUserSettingsUseCase>();
@@ -104,9 +67,7 @@ abstract class SettingsDI {
     }
 
     // Profile dependencies cleanup
-    if (getIt.isRegistered<ProfileProvider>()) {
-      getIt.unregister<ProfileProvider>();
-    }
+    // ProfileProvider unregister removed - not registered anymore
 
     if (getIt.isRegistered<ProfileRepository>()) {
       getIt.unregister<ProfileRepository>();

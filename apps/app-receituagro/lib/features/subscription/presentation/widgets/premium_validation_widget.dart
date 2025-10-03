@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider_lib;
 
 import '../../../../core/providers/feature_flags_provider.dart';
-import '../providers/subscription_provider.dart';
+import '../providers/subscription_notifier.dart';
 
 /// Premium Validation Widget for Cross-platform Premium Status
-/// 
+///
 /// Features:
 /// - Real-time premium status validation
 /// - Cross-platform subscription sync
 /// - Device-specific premium indicators
 /// - Subscription conflict resolution
 /// - Premium restoration functionality
-class PremiumValidationWidget extends StatefulWidget {
+class PremiumValidationWidget extends ConsumerStatefulWidget {
   final bool showFullDetails;
   final VoidCallback? onRestorePressed;
   final VoidCallback? onSyncPressed;
@@ -25,10 +26,10 @@ class PremiumValidationWidget extends StatefulWidget {
   });
 
   @override
-  State<PremiumValidationWidget> createState() => _PremiumValidationWidgetState();
+  ConsumerState<PremiumValidationWidget> createState() => _PremiumValidationWidgetState();
 }
 
-class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
+class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidget>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -59,45 +60,50 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.Consumer2<SubscriptionProvider, FeatureFlagsProvider>(
-      builder: (context, subscriptionProvider, featureFlags, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Main Validation Card
-            _buildValidationCard(context, subscriptionProvider, featureFlags),
-            
-            if (widget.showFullDetails) ...[
-              const SizedBox(height: 16),
-              
-              // Device-specific Premium Status
-              _buildDeviceStatusCard(context, subscriptionProvider),
-              
-              const SizedBox(height: 16),
-              
-              // Cross-platform Sync Status
-              _buildSyncStatusCard(context, subscriptionProvider, featureFlags),
-            ],
-            
-            // Action Buttons
-            if (widget.showFullDetails) ...[
-              const SizedBox(height: 16),
-              _buildActionButtons(context, subscriptionProvider),
-            ],
+    final subscriptionState = ref.watch(subscriptionNotifierProvider);
+    final featureFlags = provider_lib.Provider.of<FeatureFlagsProvider>(context);
+
+    return subscriptionState.when(
+      data: (state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Main Validation Card
+          _buildValidationCard(context, state, featureFlags),
+
+          if (widget.showFullDetails) ...[
+            const SizedBox(height: 16),
+
+            // Device-specific Premium Status
+            _buildDeviceStatusCard(context, state),
+
+            const SizedBox(height: 16),
+
+            // Cross-platform Sync Status
+            _buildSyncStatusCard(context, state, featureFlags),
           ],
-        );
-      },
+
+          // Action Buttons
+          if (widget.showFullDetails) ...[
+            const SizedBox(height: 16),
+            _buildActionButtons(context),
+          ],
+        ],
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Erro: $error'),
+      ),
     );
   }
 
   /// Main Premium Validation Card
   Widget _buildValidationCard(
     BuildContext context,
-    SubscriptionProvider subscriptionProvider,
+    SubscriptionState subscriptionState,
     FeatureFlagsProvider featureFlags,
   ) {
     final theme = Theme.of(context);
-    final hasActiveSubscription = subscriptionProvider.hasActiveSubscription;
+    final hasActiveSubscription = subscriptionState.hasActiveSubscription;
     final isValidationEnabled = featureFlags.isSubscriptionValidationEnabled;
 
     return Container(
@@ -174,7 +180,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
                 ),
                 if (hasActiveSubscription) ...[
                   const SizedBox(height: 8),
-                  _buildSubscriptionDetails(context, subscriptionProvider),
+                  _buildSubscriptionDetails(context, subscriptionState),
                 ],
               ],
             ),
@@ -213,7 +219,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
   }
 
   /// Subscription Details
-  Widget _buildSubscriptionDetails(BuildContext context, SubscriptionProvider subscriptionProvider) {
+  Widget _buildSubscriptionDetails(BuildContext context, SubscriptionState subscriptionState) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -230,7 +236,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
           ),
           const SizedBox(width: 4),
           Text(
-            _formatExpiryDate(subscriptionProvider.subscriptionExpiryDate),
+            _formatExpiryDate(subscriptionState.subscriptionExpiryDate),
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Colors.white,
               fontSize: 10,
@@ -242,7 +248,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
   }
 
   /// Device-specific Premium Status Card
-  Widget _buildDeviceStatusCard(BuildContext context, SubscriptionProvider subscriptionProvider) {
+  Widget _buildDeviceStatusCard(BuildContext context, SubscriptionState subscriptionState) {
     final theme = Theme.of(context);
     
     return Card(
@@ -276,22 +282,22 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
             _buildStatusItem(
               context,
               'Validação Local',
-              subscriptionProvider.hasLocalPremiumValidation ? 'Ativa' : 'Inativa',
-              subscriptionProvider.hasLocalPremiumValidation,
+              subscriptionState.hasLocalPremiumValidation ? 'Ativa' : 'Inativa',
+              subscriptionState.hasLocalPremiumValidation,
             ),
             const SizedBox(height: 8),
             _buildStatusItem(
               context,
               'Sincronização Premium',
-              subscriptionProvider.isPremiumSyncActive ? 'Sincronizado' : 'Pendente',
-              subscriptionProvider.isPremiumSyncActive,
+              subscriptionState.isPremiumSyncActive ? 'Sincronizado' : 'Pendente',
+              subscriptionState.isPremiumSyncActive,
             ),
             const SizedBox(height: 8),
             _buildStatusItem(
               context,
               'Cache Premium',
-              subscriptionProvider.hasPremiumCache ? 'Disponível' : 'Indisponível',
-              subscriptionProvider.hasPremiumCache,
+              subscriptionState.hasPremiumCache ? 'Disponível' : 'Indisponível',
+              subscriptionState.hasPremiumCache,
             ),
           ],
         ),
@@ -302,7 +308,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
   /// Cross-platform Sync Status Card
   Widget _buildSyncStatusCard(
     BuildContext context,
-    SubscriptionProvider subscriptionProvider,
+    SubscriptionState subscriptionState,
     FeatureFlagsProvider featureFlags,
   ) {
     final theme = Theme.of(context);
@@ -357,21 +363,21 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
               _buildSyncItem(
                 context,
                 'iOS',
-                subscriptionProvider.isIOSPremiumActive,
+                subscriptionState.isIOSPremiumActive,
                 Icons.phone_iphone,
               ),
               const SizedBox(height: 8),
               _buildSyncItem(
                 context,
                 'Android',
-                subscriptionProvider.isAndroidPremiumActive,
+                subscriptionState.isAndroidPremiumActive,
                 Icons.android,
               ),
               const SizedBox(height: 8),
               _buildSyncItem(
                 context,
                 'Web',
-                subscriptionProvider.isWebPremiumActive,
+                subscriptionState.isWebPremiumActive,
                 Icons.web,
               ),
             ] else ...[
@@ -474,7 +480,7 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
   }
 
   /// Action Buttons
-  Widget _buildActionButtons(BuildContext context, SubscriptionProvider subscriptionProvider) {
+  Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         // Restore Purchases Button
@@ -524,9 +530,8 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
       widget.onRestorePressed!();
     } else {
       // Default restore logic
-      final subscriptionProvider = provider_lib.Provider.of<SubscriptionProvider>(context, listen: false);
-      await subscriptionProvider.restorePurchases();
-      
+      await ref.read(subscriptionNotifierProvider.notifier).restorePurchases();
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -548,11 +553,11 @@ class _PremiumValidationWidgetState extends State<PremiumValidationWidget>
         widget.onSyncPressed!();
       } else {
         // Default sync logic
-        final subscriptionProvider = provider_lib.Provider.of<SubscriptionProvider>(context, listen: false);
-        await subscriptionProvider.validatePremiumStatus();
-        await subscriptionProvider.syncPremiumStatus();
+        final notifier = ref.read(subscriptionNotifierProvider.notifier);
+        await notifier.validatePremiumStatus();
+        await notifier.syncPremiumStatus();
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

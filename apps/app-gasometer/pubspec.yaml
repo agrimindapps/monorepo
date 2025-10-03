@@ -27,6 +27,7 @@ dependencies:
   firebase_crashlytics: any
   provider: any
   flutter_riverpod: any
+  riverpod_annotation: any
   hive_flutter: any
   intl: any
   hive: any
@@ -48,6 +49,9 @@ dev_dependencies:
     sdk: flutter
   build_runner: any
   injectable_generator: any
+  riverpod_generator: any
+  riverpod_lint: any
+  custom_lint: any
 
 # The following section is specific to Flutter packages.
 flutter:

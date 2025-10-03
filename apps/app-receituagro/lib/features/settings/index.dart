@@ -11,7 +11,8 @@ export 'domain/repositories/i_user_settings_repository.dart';
 // Model exports
 export 'data/settings_state.dart';
 // Presentation layer (Riverpod)
-export 'presentation/providers/settings_notifier.dart';
+// Note: Import settings_notifier.dart directly when needed to avoid conflicts
+// export 'presentation/providers/settings_notifier.dart';
 // Services
 export 'domain/device_service.dart';
 export 'domain/navigation_service.dart';

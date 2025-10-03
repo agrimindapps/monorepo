@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../../core/services/device_identity_service.dart';
-import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/providers/settings_notifier.dart';
 
 /// User Profile Dialog
 ///
@@ -26,12 +25,10 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   late TextEditingController _emailController;
   bool _isEditing = false;
   bool _isSaving = false;
-  late SettingsProvider _settingsProvider;
 
   @override
   void initState() {
     super.initState();
-    _settingsProvider = GetIt.instance<SettingsProvider>();
     _displayNameController = TextEditingController();
     _emailController = TextEditingController();
 
@@ -60,7 +57,9 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
       return user.displayName;
     }
 
-    final device = _settingsProvider.currentDeviceInfo;
+    // Get device info from settings notifier
+    final settingsState = ref.read(settingsNotifierProvider).value;
+    final device = settingsState?.currentDeviceInfo;
     if (device?.name.isNotEmpty == true) {
       final name = device!.name;
       if (name.contains('iPhone')) return 'Usuário iPhone';
@@ -213,8 +212,9 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
 
   /// Build profile form
   Widget _buildProfileForm(ThemeData theme, ReceitaAgroAuthState authState) {
-    final currentDevice = _settingsProvider.currentDeviceInfo;
-    final connectedDevices = _settingsProvider.connectedDevices;
+    final settingsState = ref.read(settingsNotifierProvider).value;
+    final currentDevice = settingsState?.currentDeviceInfo;
+    final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
     final isPremium = false; // TODO: Get from premium state when available
 
     return Column(

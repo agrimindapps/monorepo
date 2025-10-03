@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-part 'comentario_model.g.dart';
+// Note: Hive adapter not generated - keeping @HiveType for future
 
 /// Comentario model with Firebase sync support
 /// TypeId: 0 - Sequential numbering

@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-part 'sync_queue_item.g.dart';
+// Note: Hive adapter not generated - keeping @HiveType for future
 
 enum SyncOperationType { create, update, delete }
 

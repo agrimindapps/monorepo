@@ -5,7 +5,6 @@ import '../../../features/plants/data/datasources/local/plants_local_datasource.
 import '../../../features/plants/data/datasources/remote/plant_tasks_remote_datasource.dart';
 import '../../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
 import '../../../features/plants/domain/services/plant_task_generator.dart';
-import '../../../features/plants/presentation/providers/plant_comments_provider.dart';
 import '../../../features/plants/presentation/providers/plant_details_provider.dart';
 import '../../../features/plants/presentation/providers/plant_task_provider.dart';
 
@@ -59,7 +58,7 @@ abstract class PlantsDIModule {
       ),
     );
 
-    // Plant comments provider
-    sl.registerFactory(() => PlantCommentsProvider(repository: sl()));
+    // PlantCommentsProvider migrado para Riverpod - agora usa PlantCommentsNotifier
+    // Acesso via ref.read(plantCommentsNotifierProvider.notifier)
   }
 }

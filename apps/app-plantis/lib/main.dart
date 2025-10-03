@@ -50,11 +50,8 @@ void main() async {
   await Hive.initFlutter();
 
   // Register Hive adapters
-  Hive.registerAdapter(ComentarioModelAdapter()); // TypeId: 0
-  Hive.registerAdapter(EspacoModelAdapter()); // TypeId: 1
-  // Hive.registerAdapter(PlantaModelAdapter()); // TypeId: 2 - REMOVIDO: Migrado para PlantModel
-  // Hive.registerAdapter(TarefaModelAdapter()); // TypeId: 3 - DEPRECATED: Migrado para TaskModel
-  Hive.registerAdapter(PlantaConfigModelAdapter()); // TypeId: 4
+  // Note: Most models migrated to new architecture and no longer need adapters
+  // TypeId 0-4 reserved for legacy models (now removed)
 
   // Register License Model adapters (from core package)
   Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10

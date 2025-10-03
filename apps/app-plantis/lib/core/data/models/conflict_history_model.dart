@@ -3,8 +3,7 @@
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
-part 'conflict_history_model.g.dart';
-
+// Note: Hive adapter not generated yet - TypeId 10 reserved
 @HiveType(typeId: 10)
 // ignore: must_be_immutable
 class ConflictHistoryModel extends BaseSyncModel {

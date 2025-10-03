@@ -4,7 +4,6 @@ import '../../../features/plants/data/datasources/local/spaces_local_datasource.
 import '../../../features/plants/data/datasources/remote/spaces_remote_datasource.dart';
 import '../../../features/plants/data/repositories/spaces_repository_impl.dart';
 import '../../../features/plants/domain/repositories/spaces_repository.dart';
-import '../../../features/plants/presentation/providers/spaces_provider.dart';
 
 class SpacesModule {
   static void init(GetIt sl) {
@@ -29,15 +28,7 @@ class SpacesModule {
 
     // Use cases - Todos já registrados via Injectable (@injectable)
 
-    // Provider
-    sl.registerFactory(
-      () => SpacesProvider(
-        getSpacesUseCase: sl(),
-        getSpaceByIdUseCase: sl(),
-        addSpaceUseCase: sl(),
-        updateSpaceUseCase: sl(),
-        deleteSpaceUseCase: sl(),
-      ),
-    );
+    // SpacesProvider migrado para Riverpod - agora usa SpacesNotifier
+    // Acesso via ref.read(spacesNotifierProvider.notifier)
   }
 }

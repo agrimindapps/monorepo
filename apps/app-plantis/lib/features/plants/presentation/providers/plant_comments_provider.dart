@@ -1,187 +1,324 @@
-import 'package:flutter/foundation.dart';
+import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
-/// Provider for managing plant comments state
-class PlantCommentsProvider extends ChangeNotifier {
-  final PlantCommentsRepository _repository;
+part 'plant_comments_provider.g.dart';
 
-  PlantCommentsProvider({required PlantCommentsRepository repository})
-    : _repository = repository;
+/// Plant Comments State model for Riverpod
+class PlantCommentsState {
+  final List<ComentarioModel> comments;
+  final bool isLoading;
+  final String? error;
+  final String? currentPlantId;
 
-  List<ComentarioModel> _comments = [];
-  bool _isLoading = false;
-  String? _errorMessage;
-  String? _currentPlantId;
+  const PlantCommentsState({
+    this.comments = const [],
+    this.isLoading = false,
+    this.error,
+    this.currentPlantId,
+  });
 
-  // Getters
-  List<ComentarioModel> get comments => List.unmodifiable(_comments);
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  bool get hasComments => _comments.isNotEmpty;
-  int get commentsCount => _comments.length;
+  // Convenience getters
+  bool get hasComments => comments.isNotEmpty;
+  int get commentsCount => comments.length;
+  bool get hasError => error != null;
+
+  /// Check if comments are loaded for current plant
+  bool isLoadedForPlant(String plantId) {
+    return currentPlantId == plantId && !isLoading;
+  }
+
+  /// Get comment by ID
+  ComentarioModel? getCommentById(String commentId) {
+    try {
+      return comments.firstWhere((comment) => comment.id == commentId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  PlantCommentsState copyWith({
+    List<ComentarioModel>? comments,
+    bool? isLoading,
+    String? error,
+    String? currentPlantId,
+    bool clearError = false,
+    bool clearComments = false,
+  }) {
+    return PlantCommentsState(
+      comments: clearComments ? [] : (comments ?? this.comments),
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : (error ?? this.error),
+      currentPlantId: currentPlantId ?? this.currentPlantId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlantCommentsState &&
+          runtimeType == other.runtimeType &&
+          comments == other.comments &&
+          isLoading == other.isLoading &&
+          error == other.error &&
+          currentPlantId == other.currentPlantId;
+
+  @override
+  int get hashCode =>
+      comments.hashCode ^
+      isLoading.hashCode ^
+      error.hashCode ^
+      currentPlantId.hashCode;
+}
+
+/// Plant Comments Notifier using Riverpod code generation
+@riverpod
+class PlantCommentsNotifier extends _$PlantCommentsNotifier {
+  late final PlantCommentsRepository _repository;
+
+  @override
+  Future<PlantCommentsState> build() async {
+    // Initialize repository from DI
+    _repository = ref.read(plantCommentsRepositoryProvider);
+
+    // Start with empty state
+    return const PlantCommentsState();
+  }
 
   /// Load comments for a specific plant
   Future<void> loadComments(String plantId) async {
-    if (_currentPlantId == plantId && _comments.isNotEmpty) {
-      // Comments already loaded for this plant
+    final currentState = state.valueOrNull ?? const PlantCommentsState();
+
+    // Comments already loaded for this plant
+    if (currentState.currentPlantId == plantId &&
+        currentState.comments.isNotEmpty) {
       return;
     }
 
-    _setLoading(true);
-    _currentPlantId = plantId;
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true, currentPlantId: plantId),
+    );
 
     final result = await _repository.getCommentsForPlant(plantId);
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        _comments = [];
+        state = AsyncValue.data(
+          const PlantCommentsState().copyWith(
+            error: failure.message,
+            isLoading: false,
+            currentPlantId: plantId,
+          ),
+        );
       },
       (comments) {
-        _errorMessage = null;
-        _comments = comments;
+        state = AsyncValue.data(
+          PlantCommentsState(
+            comments: comments,
+            isLoading: false,
+            currentPlantId: plantId,
+          ),
+        );
       },
     );
-
-    _setLoading(false);
   }
 
   /// Add a new comment
   Future<bool> addComment(String plantId, String content) async {
     if (content.trim().isEmpty) {
-      _errorMessage = 'Comentário não pode estar vazio';
-      notifyListeners();
+      final currentState = state.valueOrNull ?? const PlantCommentsState();
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Comentário não pode estar vazio'),
+      );
       return false;
     }
 
-    _setLoading(true);
+    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true, clearError: true),
+    );
 
     final result = await _repository.addComment(plantId, content.trim());
 
-    final success = result.fold(
+    return result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        final newState = state.valueOrNull ?? const PlantCommentsState();
+        state = AsyncValue.data(
+          newState.copyWith(error: failure.message, isLoading: false),
+        );
         return false;
       },
       (comment) {
-        _errorMessage = null;
+        final newState = state.valueOrNull ?? const PlantCommentsState();
         // Add to the beginning of the list (newest first)
-        _comments.insert(0, comment);
+        final updatedComments = [comment, ...newState.comments];
+        state = AsyncValue.data(
+          newState.copyWith(
+            comments: updatedComments,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
         return true;
       },
     );
-
-    _setLoading(false);
-    return success;
   }
 
   /// Update an existing comment
   Future<bool> updateComment(String commentId, String newContent) async {
     if (newContent.trim().isEmpty) {
-      _errorMessage = 'Comentário não pode estar vazio';
-      notifyListeners();
+      final currentState = state.valueOrNull ?? const PlantCommentsState();
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Comentário não pode estar vazio'),
+      );
       return false;
     }
 
-    final commentIndex = _comments.indexWhere((c) => c.id == commentId);
+    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final commentIndex =
+        currentState.comments.indexWhere((c) => c.id == commentId);
+
     if (commentIndex == -1) {
-      _errorMessage = 'Comentário não encontrado';
-      notifyListeners();
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Comentário não encontrado'),
+      );
       return false;
     }
 
-    _setLoading(true);
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true, clearError: true),
+    );
 
-    final originalComment = _comments[commentIndex];
+    final originalComment = currentState.comments[commentIndex];
     final updatedComment = originalComment.copyWith(
       conteudo: newContent.trim(),
     );
 
     final result = await _repository.updateComment(updatedComment);
 
-    final success = result.fold(
+    return result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        final newState = state.valueOrNull ?? const PlantCommentsState();
+        state = AsyncValue.data(
+          newState.copyWith(error: failure.message, isLoading: false),
+        );
         return false;
       },
       (comment) {
-        _errorMessage = null;
-        _comments[commentIndex] = comment;
+        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final updatedComments =
+            List<ComentarioModel>.from(newState.comments);
+        updatedComments[commentIndex] = comment;
+
+        state = AsyncValue.data(
+          newState.copyWith(
+            comments: updatedComments,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
         return true;
       },
     );
-
-    _setLoading(false);
-    return success;
   }
 
   /// Delete a comment
   Future<bool> deleteComment(String commentId) async {
-    final commentIndex = _comments.indexWhere((c) => c.id == commentId);
+    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final commentIndex =
+        currentState.comments.indexWhere((c) => c.id == commentId);
+
     if (commentIndex == -1) {
-      _errorMessage = 'Comentário não encontrado';
-      notifyListeners();
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Comentário não encontrado'),
+      );
       return false;
     }
 
-    _setLoading(true);
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true, clearError: true),
+    );
 
     final result = await _repository.deleteComment(commentId);
 
-    final success = result.fold(
+    return result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        final newState = state.valueOrNull ?? const PlantCommentsState();
+        state = AsyncValue.data(
+          newState.copyWith(error: failure.message, isLoading: false),
+        );
         return false;
       },
       (_) {
-        _errorMessage = null;
-        _comments.removeAt(commentIndex);
+        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final updatedComments =
+            newState.comments.where((c) => c.id != commentId).toList();
+
+        state = AsyncValue.data(
+          newState.copyWith(
+            comments: updatedComments,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
         return true;
       },
     );
-
-    _setLoading(false);
-    return success;
   }
 
   /// Clear comments when navigating away
   void clearComments() {
-    _comments.clear();
-    _currentPlantId = null;
-    _errorMessage = null;
-    notifyListeners();
+    state = const AsyncValue.data(PlantCommentsState());
   }
 
   /// Clear error message
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  /// Get comment by ID
-  ComentarioModel? getCommentById(String commentId) {
-    try {
-      return _comments.firstWhere((comment) => comment.id == commentId);
-    } catch (e) {
-      return null;
+    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    if (currentState.hasError) {
+      state = AsyncValue.data(currentState.copyWith(clearError: true));
     }
   }
+}
 
-  /// Check if comments are loaded for current plant
-  bool isLoadedForPlant(String plantId) {
-    return _currentPlantId == plantId && !_isLoading;
-  }
+// === DEPENDENCY PROVIDERS (GetIt DI) ===
 
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
+@riverpod
+PlantCommentsRepository plantCommentsRepository(
+  PlantCommentsRepositoryRef ref,
+) {
+  return GetIt.instance<PlantCommentsRepository>();
+}
 
-  @override
-  void dispose() {
-    _comments.clear();
-    super.dispose();
-  }
+// === COMPATIBILITY PROVIDERS (for gradual migration) ===
+
+@riverpod
+List<ComentarioModel> plantComments(PlantCommentsRef ref) {
+  final commentsState = ref.watch(plantCommentsNotifierProvider);
+  return commentsState.when(
+    data: (state) => state.comments,
+    loading: () => [],
+    error: (_, __) => [],
+  );
+}
+
+@riverpod
+bool plantCommentsIsLoading(PlantCommentsIsLoadingRef ref) {
+  final commentsState = ref.watch(plantCommentsNotifierProvider);
+  return commentsState.when(
+    data: (state) => state.isLoading,
+    loading: () => true,
+    error: (_, __) => false,
+  );
+}
+
+@riverpod
+String? plantCommentsError(PlantCommentsErrorRef ref) {
+  final commentsState = ref.watch(plantCommentsNotifierProvider);
+  return commentsState.when(
+    data: (state) => state.error,
+    loading: () => null,
+    error: (error, _) => error.toString(),
+  );
 }

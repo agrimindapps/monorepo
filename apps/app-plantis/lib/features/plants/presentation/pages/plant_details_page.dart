@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../providers/plant_comments_provider.dart';
 import '../providers/plant_details_provider.dart';
 import '../providers/plant_task_provider.dart';
 import '../widgets/plant_details/plant_details_view.dart';
@@ -20,6 +19,7 @@ import '../widgets/plant_details/plant_details_view.dart';
 /// - PlantNotesSection: Observations and comments
 /// - PlantDetailsView: Main visual structure
 /// - FIXED: Proper DI injection using ChangeNotifierProvider.value instead of antipattern
+/// - PlantCommentsProvider migrado para Riverpod (PlantCommentsNotifier)
 class PlantDetailsPage extends StatelessWidget {
   final String plantId;
 
@@ -35,9 +35,8 @@ class PlantDetailsPage extends StatelessWidget {
         ChangeNotifierProvider<PlantTaskProvider>.value(
           value: di.sl<PlantTaskProvider>(),
         ),
-        ChangeNotifierProvider<PlantCommentsProvider>.value(
-          value: di.sl<PlantCommentsProvider>(),
-        ),
+        // PlantCommentsProvider migrado para Riverpod
+        // Acesso via ref.read(plantCommentsNotifierProvider.notifier)
       ],
       child: PlantDetailsView(plantId: plantId),
     );

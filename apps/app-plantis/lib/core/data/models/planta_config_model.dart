@@ -3,7 +3,7 @@
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
-part 'planta_config_model.g.dart';
+// Note: Hive adapter not generated - keeping @HiveType for future
 
 /// PlantaConfig model with Firebase sync support
 /// TypeId: 4 - Sequential numbering

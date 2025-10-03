@@ -3,7 +3,7 @@
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
-part 'espaco_model.g.dart';
+// Note: Hive adapter not generated - keeping @HiveType for future
 
 /// Espaco model with Firebase sync support
 /// TypeId: 1 - Sequential numbering

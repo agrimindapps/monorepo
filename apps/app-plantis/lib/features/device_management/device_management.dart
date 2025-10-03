@@ -9,8 +9,6 @@ export 'data/datasources/device_remote_datasource.dart';
 // Data layer exports
 export 'data/models/device_model.dart';
 export 'data/repositories/device_repository_impl.dart';
-// Module and configuration
-export 'device_management_module.dart';
 // Domain layer exports
 export 'domain/repositories/device_repository.dart';
 export 'domain/usecases/get_device_statistics_usecase.dart';

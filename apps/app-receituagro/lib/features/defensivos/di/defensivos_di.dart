@@ -11,9 +11,9 @@ import '../domain/usecases/get_defensivos_com_filtros_usecase.dart';
 import '../domain/usecases/get_defensivos_completos_usecase.dart';
 import '../domain/usecases/get_defensivos_usecase.dart';
 // Presentation
-import '../presentation/providers/defensivos_provider.dart';
-import '../presentation/providers/defensivos_unificado_provider.dart';
-import '../presentation/providers/home_defensivos_provider.dart';
+import '../presentation/providers/defensivos_notifier.dart';
+import '../presentation/providers/defensivos_unificado_notifier.dart';
+import '../presentation/providers/home_defensivos_notifier.dart';
 
 /// Configuração de injeção de dependências para o módulo Defensivos
 /// Segue padrão Clean Architecture + GetIt para DI

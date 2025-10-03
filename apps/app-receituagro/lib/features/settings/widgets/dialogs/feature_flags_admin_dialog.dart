@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
 
 /// Feature Flags Admin Panel Dialog (Debug/Development Mode Only)
-/// 
+///
 /// Features:
 /// - Complete feature flags overview
 /// - Remote Config values inspection
 /// - Feature discovery onboarding simulation
 /// - A/B test variant switching (local override)
 /// - Debug information and diagnostics
-class FeatureFlagsAdminDialog extends StatefulWidget {
-  final FeatureFlagsProvider provider;
-
-  const FeatureFlagsAdminDialog({
-    super.key,
-    required this.provider,
-  });
+class FeatureFlagsAdminDialog extends ConsumerStatefulWidget {
+  const FeatureFlagsAdminDialog({super.key});
 
   @override
-  State<FeatureFlagsAdminDialog> createState() => _FeatureFlagsAdminDialogState();
+  ConsumerState<FeatureFlagsAdminDialog> createState() => _FeatureFlagsAdminDialogState();
 }
 
-class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
+class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialog>
     with TickerProviderStateMixin {
   late TabController _tabController;
   Map<String, dynamic> _debugInfo = {};
@@ -42,21 +38,26 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
   }
 
   void _loadDebugInfo() {
-    _debugInfo = widget.provider.getDebugInfo();
-    if (mounted) {
-      setState(() {});
-    }
+    final featureFlagsState = ref.read(featureFlagsNotifierProvider);
+    featureFlagsState.whenData((state) {
+      _debugInfo = ref.read(featureFlagsNotifierProvider.notifier).getDebugInfo();
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final featureFlagsState = ref.watch(featureFlagsNotifierProvider);
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Container(
+    return featureFlagsState.when(
+      data: (state) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
         constraints: const BoxConstraints(
           maxWidth: 700,
           maxHeight: 600,
@@ -156,11 +157,23 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
           ],
         ),
       ),
+      ),
+      loading: () => const Dialog(
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Dialog(
+        child: Center(child: Text('Erro: $error')),
+      ),
     );
   }
 
   /// Feature Flags Tab
   Widget _buildFeatureFlagsTab() {
+    final state = ref.read(featureFlagsNotifierProvider).value;
+    if (state == null) return const SizedBox.shrink();
+
+    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -170,34 +183,34 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
           _buildFeatureGroup(
             'Core Features',
             [
-              _FeatureFlagDebugItem('Premium Features', widget.provider.isPremiumFeaturesEnabled),
-              _FeatureFlagDebugItem('Advanced Diagnostics', widget.provider.isAdvancedDiagnosticsEnabled),
-              _FeatureFlagDebugItem('Offline Mode', widget.provider.isOfflineModeEnabled),
-              _FeatureFlagDebugItem('Push Notifications', widget.provider.isPushNotificationsEnabled),
+              _FeatureFlagDebugItem('Premium Features', notifier.isPremiumFeaturesEnabled),
+              _FeatureFlagDebugItem('Advanced Diagnostics', notifier.isAdvancedDiagnosticsEnabled),
+              _FeatureFlagDebugItem('Offline Mode', notifier.isOfflineModeEnabled),
+              _FeatureFlagDebugItem('Push Notifications', notifier.isPushNotificationsEnabled),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Performance Features
           _buildFeatureGroup(
             'Performance Features',
             [
-              _FeatureFlagDebugItem('Image Optimization', widget.provider.isImageOptimizationEnabled),
-              _FeatureFlagDebugItem('Data Caching', widget.provider.isDataCachingEnabled),
-              _FeatureFlagDebugItem('Preload Content', widget.provider.isPreloadContentEnabled),
+              _FeatureFlagDebugItem('Image Optimization', notifier.isImageOptimizationEnabled),
+              _FeatureFlagDebugItem('Data Caching', notifier.isDataCachingEnabled),
+              _FeatureFlagDebugItem('Preload Content', notifier.isPreloadContentEnabled),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Business Logic Features
           _buildFeatureGroup(
             'Business Logic Features',
             [
-              _FeatureFlagDebugItem('Subscription Validation', widget.provider.isSubscriptionValidationEnabled),
-              _FeatureFlagDebugItem('Device Management', widget.provider.isDeviceManagementEnabled),
-              _FeatureFlagDebugItem('Content Synchronization', widget.provider.isContentSynchronizationEnabled),
+              _FeatureFlagDebugItem('Subscription Validation', notifier.isSubscriptionValidationEnabled),
+              _FeatureFlagDebugItem('Device Management', notifier.isDeviceManagementEnabled),
+              _FeatureFlagDebugItem('Content Synchronization', notifier.isContentSynchronizationEnabled),
             ],
           ),
         ],
@@ -207,6 +220,11 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
 
   /// A/B Testing Tab
   Widget _buildABTestingTab() {
+    final state = ref.read(featureFlagsNotifierProvider).value;
+    if (state == null) return const SizedBox.shrink();
+
+    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -219,14 +237,14 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // UI/UX A/B Tests
           _buildABTestGroup(
             'UI/UX Tests',
             [
-              _ABTestDebugItem('New UI Design', widget.provider.isNewUiDesignEnabled, 'Variant B'),
-              _ABTestDebugItem('Improved Onboarding', widget.provider.isImprovedOnboardingEnabled, 'Test Group'),
-              _ABTestDebugItem('Gamification', widget.provider.isGamificationEnabled, 'Experimental'),
+              _ABTestDebugItem('New UI Design', notifier.isNewUiDesignEnabled, 'Variant B'),
+              _ABTestDebugItem('Improved Onboarding', notifier.isImprovedOnboardingEnabled, 'Test Group'),
+              _ABTestDebugItem('Gamification', notifier.isGamificationEnabled, 'Experimental'),
             ],
           ),
           
@@ -284,6 +302,9 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
 
   /// Remote Config Tab
   Widget _buildRemoteConfigTab() {
+    final state = ref.read(featureFlagsNotifierProvider).value;
+    final isInitialized = state?.isInitialized ?? false;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -306,17 +327,17 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Remote Config Status
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: widget.provider.isInitialized
+              color: isInitialized
                   ? Colors.green.withValues(alpha: 0.1)
                   : Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: widget.provider.isInitialized
+                color: isInitialized
                     ? Colors.green.withValues(alpha: 0.3)
                     : Colors.orange.withValues(alpha: 0.3),
               ),
@@ -324,13 +345,13 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
             child: Row(
               children: [
                 Icon(
-                  widget.provider.isInitialized ? Icons.check_circle : Icons.sync,
-                  color: widget.provider.isInitialized ? Colors.green : Colors.orange,
+                  isInitialized ? Icons.check_circle : Icons.sync,
+                  color: isInitialized ? Colors.green : Colors.orange,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  widget.provider.isInitialized 
+                  isInitialized
                       ? 'Remote Config Inicializado'
                       : 'Aguardando Inicialização',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -613,9 +634,9 @@ class _FeatureFlagsAdminDialogState extends State<FeatureFlagsAdminDialog>
   /// Refresh All
   Future<void> _refreshAll() async {
     try {
-      await widget.provider.refresh();
+      await ref.read(featureFlagsNotifierProvider.notifier).refresh();
       _loadDebugInfo();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

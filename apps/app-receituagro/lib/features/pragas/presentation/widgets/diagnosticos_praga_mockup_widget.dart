@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/spacing_tokens.dart';
-import '../providers/detalhe_praga_provider.dart';
-import '../providers/diagnosticos_praga_provider.dart';
+import '../providers/detalhe_praga_notifier.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 import 'cultura_section_mockup_widget.dart';
 import 'diagnostico_dialog_widget.dart';
 import 'diagnostico_mockup_card.dart';
@@ -22,7 +22,7 @@ import 'filters_mockup_widget.dart';
 /// - Estados de loading, erro e vazio
 ///
 /// Responsabilidade: orquestrar componentes mockup mantendo funcionalidade
-class DiagnosticosPragaMockupWidget extends StatelessWidget {
+class DiagnosticosPragaMockupWidget extends ConsumerWidget {
   final String pragaName;
 
   const DiagnosticosPragaMockupWidget({
@@ -31,14 +31,14 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return RepaintBoundary(
       child: Card(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Filtros superiores pixel-perfect
-            _buildFiltersMockup(),
+            _buildFiltersMockup(ref),
 
             // Lista de diagnósticos com gerenciamento de estados
             Flexible(
@@ -52,7 +52,7 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
                     builder: (context) =>
                         _buildDiagnosticsMockupList(diagnosticos, context),
                   ),
-                  onRetry: () => _retryLoadDiagnostics(context),
+                  onRetry: () => _retryLoadDiagnostics(context, ref),
                 ),
               ),
             ),
@@ -62,34 +62,38 @@ class DiagnosticosPragaMockupWidget extends StatelessWidget {
     );
   }
 
-  /// Filtros superiores integrados com provider
-  Widget _buildFiltersMockup() {
-    return provider_lib.Consumer<DiagnosticosPragaProvider>(
-      builder: (context, provider, child) {
-        return FiltersMockupWidget(
-          searchText: provider.searchQuery,
-          selectedFilter: provider.selectedCultura,
-          onSearchChanged: provider.updateSearchQuery,
-          onFilterChanged: provider.updateSelectedCultura,
-          filterOptions: provider.culturas,
-        );
-      },
+  /// Filtros superiores integrados com notifier
+  Widget _buildFiltersMockup(WidgetRef ref) {
+    final state = ref.watch(diagnosticosPragaNotifierProvider);
+
+    return state.when(
+      data: (data) => FiltersMockupWidget(
+        searchText: data.searchQuery,
+        selectedFilter: data.selectedCultura,
+        onSearchChanged: (value) {
+          ref.read(diagnosticosPragaNotifierProvider.notifier).updateSearchQuery(value);
+        },
+        onFilterChanged: (value) {
+          ref.read(diagnosticosPragaNotifierProvider.notifier).updateSelectedCultura(value);
+        },
+        filterOptions: data.culturas,
+      ),
+      loading: () => const SizedBox(height: 48),
+      error: (error, _) => const SizedBox(height: 48),
     );
   }
 
   /// Callback para retry quando houver erro
-  void _retryLoadDiagnostics(BuildContext context) {
-    final diagnosticosProvider =
-        provider_lib.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
-    final pragaProvider =
-        provider_lib.Provider.of<DetalhePragaProvider>(context, listen: false);
+  void _retryLoadDiagnostics(BuildContext context, WidgetRef ref) {
+    final diagnosticosState = ref.read(diagnosticosPragaNotifierProvider).value;
+    final pragaState = ref.read(detalhePragaNotifierProvider).value;
 
-    diagnosticosProvider.clearError();
+    ref.read(diagnosticosPragaNotifierProvider.notifier).clearError();
 
     // Recarregar diagnósticos se temos os dados da praga
-    if (pragaProvider.pragaData != null && pragaProvider.pragaData!.idReg.isNotEmpty) {
-      diagnosticosProvider.loadDiagnosticos(
-        pragaProvider.pragaData!.idReg,
+    if (pragaState?.pragaData != null && pragaState!.pragaData!.idReg.isNotEmpty) {
+      ref.read(diagnosticosPragaNotifierProvider.notifier).loadDiagnosticos(
+        pragaState.pragaData!.idReg,
         pragaName: pragaName,
       );
     }
@@ -244,31 +248,37 @@ class _DiagnosticosPragaMockupDebugWidgetState
   }
 
   Widget _buildDebugControls() {
-    return provider_lib.Consumer<DiagnosticosPragaProvider>(
-      builder: (context, provider, child) {
-        return Container(
-          color: Colors.yellow.shade100,
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('DEBUG: Diagnósticos Mockup'),
-              Text('Total: ${provider.diagnosticos.length}'),
-              Text('Filtrados: ${provider.filteredDiagnosticos.length}'),
-              Text('Culturas: ${provider.groupedDiagnosticos.keys.length}'),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _useMockupLayout,
-                    onChanged: (value) => setState(() {
-                      _useMockupLayout = value ?? true;
-                    }),
-                  ),
-                  const Text('Layout Mockup'),
-                ],
-              ),
-            ],
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(diagnosticosPragaNotifierProvider);
+
+        return state.when(
+          data: (data) => Container(
+            color: Colors.yellow.shade100,
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('DEBUG: Diagnósticos Mockup'),
+                Text('Total: ${data.diagnosticos.length}'),
+                Text('Filtrados: ${data.filteredDiagnosticos.length}'),
+                Text('Culturas: ${data.groupedDiagnosticos.keys.length}'),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _useMockupLayout,
+                      onChanged: (value) => setState(() {
+                        _useMockupLayout = value ?? true;
+                      }),
+                    ),
+                    const Text('Layout Mockup'),
+                  ],
+                ),
+              ],
+            ),
           ),
+          loading: () => const SizedBox.shrink(),
+          error: (error, _) => const SizedBox.shrink(),
         );
       },
     );

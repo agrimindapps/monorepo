@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/detalhe_defensivo_provider.dart';
+import '../providers/detalhe_defensivo_notifier.dart';
 
 /// Widget para tab de comentários com restrição premium
-class ComentariosTabWidget extends StatefulWidget {
+/// Migrated to Riverpod - uses ConsumerStatefulWidget
+class ComentariosTabWidget extends ConsumerStatefulWidget {
   final String defensivoName;
 
   const ComentariosTabWidget({
@@ -13,10 +14,10 @@ class ComentariosTabWidget extends StatefulWidget {
   });
 
   @override
-  State<ComentariosTabWidget> createState() => _ComentariosTabWidgetState();
+  ConsumerState<ComentariosTabWidget> createState() => _ComentariosTabWidgetState();
 }
 
-class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
+class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
   final TextEditingController _commentController = TextEditingController();
 
   @override
@@ -27,36 +28,36 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return provider.Consumer<DetalheDefensivoProvider>(
-      builder: (context, provider, child) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Para usuários premium, mostra campo de comentário + lista
-              if (provider.isPremium) ...[
-                // Add new comment section (campo de cadastro)
-                _buildAddCommentSection(provider),
-                const SizedBox(height: 24),
-              ],
-              
-              // Content
-              provider.isPremium 
-                ? _buildPremiumContent(provider)
-                : _buildFreeContent(),
-                
-              const SizedBox(height: 80), // Espaço para bottom navigation
+    final state = ref.watch(detalheDefensivoNotifierProvider);
+
+    return state.when(
+      data: (data) => SingleChildScrollView(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Para usuários premium, mostra campo de comentário + lista
+            if (data.isPremium) ...[
+              // Add new comment section (campo de cadastro)
+              _buildAddCommentSection(data),
+              const SizedBox(height: 24),
             ],
-          ),
-        );
-      },
+
+            // Content
+            data.isPremium ? _buildPremiumContent(data) : _buildFreeContent(),
+
+            const SizedBox(height: 80), // Espaço para bottom navigation
+          ],
+        ),
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Erro ao carregar comentários')),
     );
   }
 
   /// Constrói seção para adicionar comentário
-  Widget _buildAddCommentSection(DetalheDefensivoProvider provider) {
+  Widget _buildAddCommentSection(DetalheDefensivoState data) {
     final theme = Theme.of(context);
 
     return Card(
@@ -107,13 +108,13 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () => _addComment(provider),
+                  onPressed: _addComment,
                   child: const Text('Adicionar'),
                 ),
               ],
             ),
             // Exibe erro se houver
-            if (provider.errorMessage.isNotEmpty) ...[
+            if (data.errorMessage?.isNotEmpty ?? false) ...[
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
@@ -129,7 +130,7 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        provider.errorMessage,
+                        data.errorMessage ?? '',
                         style: TextStyle(color: Colors.red.shade700, fontSize: 14),
                       ),
                     ),
@@ -143,9 +144,9 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
     );
   }
 
-  Widget _buildPremiumContent(DetalheDefensivoProvider provider) {
+  Widget _buildPremiumContent(DetalheDefensivoState data) {
     // Comments list (sem estado vazio)
-    if (provider.isLoadingComments) {
+    if (data.isLoadingComments) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32),
@@ -154,29 +155,29 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
       );
     }
 
-    if (provider.comentarios.isEmpty) {
+    if (data.comentarios.isEmpty) {
       // Não mostra mais estado vazio aqui, pois usuários podem adicionar comentários acima
       return const SizedBox.shrink();
     }
 
-    return _buildCommentsList(provider);
+    return _buildCommentsList(data);
   }
 
   /// Constrói lista de comentários
-  Widget _buildCommentsList(DetalheDefensivoProvider provider) {
+  Widget _buildCommentsList(DetalheDefensivoState data) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: provider.comentarios.length,
+      itemCount: data.comentarios.length,
       itemBuilder: (context, index) {
-        final comentario = provider.comentarios[index];
-        return _buildCommentCard(comentario, provider);
+        final comentario = data.comentarios[index];
+        return _buildCommentCard(comentario);
       },
     );
   }
 
   /// Constrói card de comentário individual
-  Widget _buildCommentCard(dynamic comentario, DetalheDefensivoProvider provider) {
+  Widget _buildCommentCard(dynamic comentario) {
     final theme = Theme.of(context);
 
     return Dismissible(
@@ -193,7 +194,9 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
         ),
       ),
       confirmDismiss: (direction) => _showDeleteConfirmation(context),
-      onDismissed: (direction) => provider.deleteComment((comentario.id ?? '').toString()),
+      onDismissed: (direction) {
+        ref.read(detalheDefensivoNotifierProvider.notifier).deleteComment((comentario.id ?? '').toString());
+      },
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
         child: Padding(
@@ -298,7 +301,7 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
   }
 
   /// Adiciona comentário
-  Future<void> _addComment(DetalheDefensivoProvider provider) async {
+  Future<void> _addComment() async {
     final content = _commentController.text.trim();
 
     if (content.isEmpty) {
@@ -311,7 +314,7 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
       return;
     }
 
-    final success = await provider.addComment(content);
+    final success = await ref.read(detalheDefensivoNotifierProvider.notifier).addComment(content);
     if (success) {
       _commentController.clear();
       // Mostra sucesso
@@ -324,14 +327,17 @@ class _ComentariosTabWidgetState extends State<ComentariosTabWidget> {
         );
       }
     } else {
-      // Erro já é gerenciado pelo provider
+      // Erro já é gerenciado pelo notifier
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Erro ao adicionar comentário'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        final state = ref.read(detalheDefensivoNotifierProvider);
+        state.whenData((data) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text((data.errorMessage?.isNotEmpty ?? false) ? data.errorMessage! : 'Erro ao adicionar comentário'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        });
       }
     }
   }

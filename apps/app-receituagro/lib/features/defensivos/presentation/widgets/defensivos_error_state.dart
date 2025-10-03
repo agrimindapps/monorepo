@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/design_tokens.dart';
-import '../providers/home_defensivos_provider.dart';
 
 /// Error state component for Defensivos home page.
-/// 
+///
 /// Displays error message with retry functionality in a clean,
 /// centered layout following app design patterns.
-/// 
+///
 /// Performance: Lightweight component for error handling.
+/// Migrated to Riverpod - receives error message directly.
 class DefensivosErrorState extends StatelessWidget {
   const DefensivosErrorState({
     super.key,
-    required this.provider,
+    this.errorMessage,
     required this.onRetry,
   });
 
-  final HomeDefensivosProvider provider;
+  final String? errorMessage;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Limitar e limpar a mensagem de erro
-    String cleanErrorMessage = _getCleanErrorMessage(provider.errorMessage);
-    
+    String cleanErrorMessage = _getCleanErrorMessage(errorMessage);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
@@ -71,7 +71,7 @@ class DefensivosErrorState extends StatelessWidget {
   /// Limpa e encurta mensagens de erro muito longas
   String _getCleanErrorMessage(String? errorMessage) {
     if (errorMessage == null) return 'Erro desconhecido';
-    
+
     // Se a mensagem é muito longa, pegar apenas a primeira parte
     if (errorMessage.length > 200) {
       // Tentar extrair a primeira linha ou parte mais relevante
@@ -84,7 +84,7 @@ class DefensivosErrorState extends StatelessWidget {
         return firstLine.isEmpty ? 'Erro ao carregar dados' : firstLine;
       }
     }
-    
+
     return errorMessage;
   }
 }

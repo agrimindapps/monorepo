@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/data/models/diagnostico_hive.dart';
@@ -15,8 +15,8 @@ import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/standard_tab_bar_widget.dart';
 import 'domain/entities/defensivo_details_entity.dart';
-import 'presentation/providers/detalhe_defensivo_provider.dart';
-import 'presentation/providers/diagnosticos_provider.dart';
+import 'presentation/providers/detalhe_defensivo_notifier.dart';
+import '../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import 'presentation/widgets/comentarios_tab_widget.dart';
 import 'presentation/widgets/defensivo_info_cards_widget.dart';
 import 'presentation/widgets/diagnosticos_tab_widget.dart';
@@ -26,7 +26,8 @@ import 'presentation/widgets/tecnologia_tab_widget.dart';
 /// Página refatorada de detalhes do defensivo
 /// REFATORAÇÃO COMPLETA: De 2.379 linhas para menos de 300
 /// Responsabilidade: coordenar widgets e providers usando Clean Architecture
-class DetalheDefensivoPage extends StatefulWidget {
+/// Migrated to Riverpod - uses ConsumerStatefulWidget
+class DetalheDefensivoPage extends ConsumerStatefulWidget {
   final String defensivoName;
   final String fabricante;
 
@@ -37,14 +38,12 @@ class DetalheDefensivoPage extends StatefulWidget {
   });
 
   @override
-  State<DetalheDefensivoPage> createState() => _DetalheDefensivoPageState();
+  ConsumerState<DetalheDefensivoPage> createState() => _DetalheDefensivoPageState();
 }
 
-class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
+class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  late DetalheDefensivoProvider _defensivoProvider;
-  late DiagnosticosProvider _diagnosticosProvider;
   int _currentTabIndex = 0;
 
   @override
@@ -52,8 +51,11 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_handleTabChange);
-    _initializeProviders();
-    _loadData();
+
+    // Load data via Riverpod
+    Future.microtask(() {
+      _loadData();
+    });
   }
 
   void _handleTabChange() {
@@ -64,57 +66,50 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
     }
   }
 
-  void _initializeProviders() {
-    _defensivoProvider = DetalheDefensivoProvider(
-      favoritosRepository: sl(),
-      fitossanitarioRepository: sl(),
-      comentariosService: sl(),
-      premiumService: sl(),
-    );
-
-    // Usa o provider com filtros implementados
-    _diagnosticosProvider = DiagnosticosProvider();
-  }
-
   Future<void> _loadData() async {
     try {
       debugPrint('=== DETALHE DEFENSIVO: Iniciando carregamento ===');
       debugPrint('Defensivo: ${widget.defensivoName}');
       debugPrint('Fabricante: ${widget.fabricante}');
-      
+
       // FORCE DEBUG: Verificar diagnósticos antes de carregar
       await _debugDiagnosticosStatus();
-      
+
       final startTime = DateTime.now();
-      
-      await _defensivoProvider.initializeData(
-          widget.defensivoName, widget.fabricante);
+
+      await ref.read(detalheDefensivoNotifierProvider.notifier).initializeData(
+            widget.defensivoName,
+            widget.fabricante,
+          );
 
       // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
-      if (_defensivoProvider.defensivoData != null) {
-        final defensivoData = _defensivoProvider.defensivoData!;
-        final defensivoIdReg = defensivoData.idReg;
-        debugPrint('=== CARREGANDO DIAGNÓSTICOS ===');
-        debugPrint('ID Reg do defensivo encontrado: $defensivoIdReg');
-        debugPrint('Nome do defensivo: ${defensivoData.nomeComum}');
-        debugPrint('Fabricante: ${defensivoData.fabricante}');
-        
-        await _diagnosticosProvider.loadDiagnosticos(defensivoIdReg);
-        
-        // Record access to this defensivo for "Últimos Acessados"
-        await _recordDefensivoAccess(defensivoData);
-        
-        final endTime = DateTime.now();
-        final duration = endTime.difference(startTime);
-        debugPrint('=== CARREGAMENTO COMPLETO ===');
-        debugPrint('Tempo total: ${duration.inMilliseconds}ms');
-      } else {
-        debugPrint('⚠️ AVISO: Dados do defensivo não foram carregados!');
-      }
+      final state = ref.read(detalheDefensivoNotifierProvider);
+      state.whenData((data) async {
+        if (data.defensivoData != null) {
+          final defensivoData = data.defensivoData!;
+          final defensivoIdReg = defensivoData.idReg;
+          debugPrint('=== CARREGANDO DIAGNÓSTICOS ===');
+          debugPrint('ID Reg do defensivo encontrado: $defensivoIdReg');
+          debugPrint('Nome do defensivo: ${defensivoData.nomeComum}');
+          debugPrint('Fabricante: ${defensivoData.fabricante}');
+
+          await ref.read(diagnosticosNotifierProvider.notifier).getDiagnosticosByDefensivo(defensivoIdReg, nomeDefensivo: defensivoData.nomeComum);
+
+          // Record access to this defensivo for "Últimos Acessados"
+          await _recordDefensivoAccess(defensivoData);
+
+          final endTime = DateTime.now();
+          final duration = endTime.difference(startTime);
+          debugPrint('=== CARREGAMENTO COMPLETO ===');
+          debugPrint('Tempo total: ${duration.inMilliseconds}ms');
+        } else {
+          debugPrint('⚠️ AVISO: Dados do defensivo não foram carregados!');
+        }
+      });
     } catch (e) {
       debugPrint('❌ ERRO ao carregar dados: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
-      // O estado de erro será gerenciado pelos providers individuais
+      // O estado de erro será gerenciado pelos notifiers individuais
     }
   }
 
@@ -178,10 +173,16 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   Future<void> _investigateIdPatterns(DiagnosticoHiveRepository repository, List<dynamic> allDiagnosticos) async {
     try {
       // Quando chegar na parte de carregar o defensivo, investigar
-      if (_defensivoProvider.defensivoData == null) return;
-      
-      final defensivoId = _defensivoProvider.defensivoData!.idReg;
-      final defensivoNome = _defensivoProvider.defensivoData!.nomeComum;
+      final state = ref.read(detalheDefensivoNotifierProvider);
+      FitossanitarioHive? defensivoData;
+      state.whenData((data) {
+        defensivoData = data.defensivoData;
+      });
+
+      if (defensivoData == null) return;
+
+      final defensivoId = defensivoData!.idReg;
+      final defensivoNome = defensivoData!.nomeComum;
       
       debugPrint('🔍 [INVESTIGAÇÃO] ===== ANÁLISE DE CORRESPONDÊNCIA =====');
       debugPrint('Defensivo procurado:');
@@ -256,32 +257,26 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   void dispose() {
     _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
-    _defensivoProvider.dispose();
-    _diagnosticosProvider.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return provider.MultiProvider(
-      providers: [
-        provider.ChangeNotifierProvider.value(value: _defensivoProvider),
-        provider.ChangeNotifierProvider.value(value: _diagnosticosProvider),
-      ],
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1120),
-                child: Column(
-                  children: [
-                    _buildHeader(),
-                    Expanded(child: _buildBody()),
-                  ],
-                ),
+    final state = ref.watch(detalheDefensivoNotifierProvider);
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1120),
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(child: _buildBody()),
+                ],
               ),
             ),
           ),
@@ -291,43 +286,69 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildHeader() {
-    return provider.Consumer<DetalheDefensivoProvider>(
-      builder: (context, provider, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+    final state = ref.watch(detalheDefensivoNotifierProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-        return ModernHeaderWidget(
-          title: widget.defensivoName,
-          subtitle: widget.fabricante,
-          leftIcon: Icons.shield_outlined,
-          rightIcon:
-              provider.isFavorited ? Icons.favorite : Icons.favorite_border,
-          isDark: isDark,
-          showBackButton: true,
-          showActions: true,
-          onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
-          onRightIconPressed: () => _handleFavoriteToggle(provider),
-        );
-      },
+    return state.when(
+      data: (data) => ModernHeaderWidget(
+        title: widget.defensivoName,
+        subtitle: widget.fabricante,
+        leftIcon: Icons.shield_outlined,
+        rightIcon: data.isFavorited ? Icons.favorite : Icons.favorite_border,
+        isDark: isDark,
+        showBackButton: true,
+        showActions: true,
+        onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+        onRightIconPressed: _handleFavoriteToggle,
+      ),
+      loading: () => ModernHeaderWidget(
+        title: widget.defensivoName,
+        subtitle: widget.fabricante,
+        leftIcon: Icons.shield_outlined,
+        rightIcon: Icons.favorite_border,
+        isDark: isDark,
+        showBackButton: true,
+        showActions: true,
+        onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+      ),
+      error: (_, __) => ModernHeaderWidget(
+        title: widget.defensivoName,
+        subtitle: widget.fabricante,
+        leftIcon: Icons.shield_outlined,
+        rightIcon: Icons.favorite_border,
+        isDark: isDark,
+        showBackButton: true,
+        showActions: true,
+        onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+      ),
     );
   }
 
   Widget _buildBody() {
-    return provider.Consumer<DetalheDefensivoProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
+    final state = ref.watch(detalheDefensivoNotifierProvider);
+
+    return state.when(
+      data: (data) {
+        if (data.isLoading) {
           return LoadingErrorWidgets.buildLoadingState(context);
         }
 
-        if (provider.hasError) {
+        if (data.hasError) {
           return LoadingErrorWidgets.buildErrorState(
             context,
-            provider.errorMessage,
+            data.errorMessage ?? 'Erro desconhecido',
             () => _loadData(),
           );
         }
 
         return _buildContent();
       },
+      loading: () => LoadingErrorWidgets.buildLoadingState(context),
+      error: (error, _) => LoadingErrorWidgets.buildErrorState(
+        context,
+        error.toString(),
+        () => _loadData(),
+      ),
     );
   }
 
@@ -391,9 +412,11 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
   }
 
   Widget _buildInformacoesTab() {
-    return provider.Consumer<DetalheDefensivoProvider>(
-      builder: (context, provider, child) {
-        if (provider.defensivoData == null) {
+    final state = ref.watch(detalheDefensivoNotifierProvider);
+
+    return state.when(
+      data: (data) {
+        if (data.defensivoData == null) {
           return LoadingErrorWidgets.buildEmptyState(
             context,
             title: 'Dados não encontrados',
@@ -401,7 +424,7 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           );
         }
 
-        final entity = DefensivoDetailsEntity.fromHive(provider.defensivoData!);
+        final entity = DefensivoDetailsEntity.fromHive(data.defensivoData!);
 
         return SingleChildScrollView(
           child: Column(
@@ -413,41 +436,50 @@ class _DetalheDefensivoPageState extends State<DetalheDefensivoPage>
           ),
         );
       },
+      loading: () => LoadingErrorWidgets.buildLoadingState(context),
+      error: (_, __) => LoadingErrorWidgets.buildEmptyState(
+        context,
+        title: 'Erro ao carregar',
+        description: 'Não foi possível carregar os dados do defensivo',
+      ),
     );
   }
 
-  Future<void> _handleFavoriteToggle(DetalheDefensivoProvider provider) async {
+  Future<void> _handleFavoriteToggle() async {
     // Adicionar haptic feedback inicial
     unawaited(HapticFeedback.lightImpact());
 
     debugPrint('🔄 [UI] Usuário clicou em favorito - defensivo: ${widget.defensivoName}');
 
-    final success =
-        await provider.toggleFavorito(widget.defensivoName, widget.fabricante);
+    final success = await ref.read(detalheDefensivoNotifierProvider.notifier).toggleFavorito(
+          widget.defensivoName,
+          widget.fabricante,
+        );
 
     if (!mounted) return;
 
     // Feedback com SnackBar para melhor UX
-    if (success) {
-      unawaited(HapticFeedback.selectionClick());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.isFavorited
-              ? 'Adicionado aos favoritos'
-              : 'Removido dos favoritos'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } else {
-      unawaited(HapticFeedback.heavyImpact());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Erro ao alterar favorito'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
+    final state = ref.read(detalheDefensivoNotifierProvider);
+    state.whenData((data) {
+      if (success) {
+        unawaited(HapticFeedback.selectionClick());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data.isFavorited ? 'Adicionado aos favoritos' : 'Removido dos favoritos'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        unawaited(HapticFeedback.heavyImpact());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text((data.errorMessage?.isNotEmpty ?? false) ? data.errorMessage! : 'Erro ao alterar favorito'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    });
   }
 }

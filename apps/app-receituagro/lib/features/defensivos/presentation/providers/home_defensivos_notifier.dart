@@ -81,7 +81,13 @@ class HomeDefensivosState {
   bool get hasRecentDefensivos => recentDefensivos.isNotEmpty;
   bool get hasNewDefensivos => newDefensivos.isNotEmpty;
   String get subtitleText => isLoading ? 'Carregando...' : '$totalDefensivos Registros Disponíveis';
+  String get headerSubtitle => subtitleText;
   bool get shouldShowContent => !isLoading || hasData;
+
+  /// Get formatted count for UI display
+  String getFormattedCount(int count) {
+    return isLoading ? '...' : '$count';
+  }
 }
 
 /// Statistics data

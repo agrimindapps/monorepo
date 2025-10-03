@@ -125,21 +125,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       child: Column(
         children: [
           // Status da subscription ativa
-          SubscriptionStatusWidget(provider: provider),
+          const SubscriptionStatusWidget(),
 
           const SizedBox(height: 24),
 
           // Lista de recursos/benefícios
-          SubscriptionBenefitsWidget(
-            provider: provider,
+          const SubscriptionBenefitsWidget(
             showModernStyle: false, // Estilo card para subscription ativa
           ),
 
           const SizedBox(height: 24),
 
           // Ações de gerenciamento
-          PaymentActionsWidget(
-            provider: provider,
+          const PaymentActionsWidget(
             showSubscriptionManagement: true,
           ),
         ],
@@ -174,29 +172,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             const SizedBox(height: 24),
 
             // Seleção de planos
-            SubscriptionPlansWidget(provider: provider),
+            const SubscriptionPlansWidget(),
 
             const SizedBox(height: 24),
 
             // Lista de benefícios/recursos
-            SubscriptionBenefitsWidget(
-              provider: provider,
+            const SubscriptionBenefitsWidget(
               showModernStyle: true, // Estilo moderno para marketing
             ),
 
             const SizedBox(height: 32),
 
             // Botão principal de compra
-            PaymentActionsWidget(
-              provider: provider,
+            const PaymentActionsWidget(
               showPurchaseButton: true,
             ),
 
             const SizedBox(height: 16),
 
             // Links de rodapé (Termos, Privacidade, Restaurar)
-            PaymentActionsWidget(
-              provider: provider,
+            const PaymentActionsWidget(
               showFooterLinks: true,
             ),
 

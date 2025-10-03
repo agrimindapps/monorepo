@@ -329,7 +329,7 @@ class FeatureFlagsSection extends StatelessWidget {
   Future<void> _openFeatureFlagsAdminPanel(BuildContext context, FeatureFlagsProvider featureFlagsProvider) async {
     await showDialog<void>(
       context: context,
-      builder: (context) => FeatureFlagsAdminDialog(provider: featureFlagsProvider),
+      builder: (context) => const FeatureFlagsAdminDialog(),
     );
   }
 

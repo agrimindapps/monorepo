@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../core/providers/auth_provider.dart';
+import '../../core/providers/receituagro_auth_notifier.dart';
 import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'constants/settings_design_tokens.dart';
-import 'presentation/providers/settings_provider.dart';
+import 'presentation/providers/settings_notifier.dart';
 import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/development_section.dart';
@@ -17,89 +17,85 @@ import 'widgets/sections/premium_section.dart';
 import 'widgets/sections/support_section.dart';
 
 /// Refactored Settings Page with Clean Architecture
-/// Uses modular components and unified provider
-class SettingsPage extends StatefulWidget {
+/// Uses modular components and unified notifier
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
-  late SettingsProvider _settingsProvider;
-  
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  bool _initialized = false;
+
   @override
   void initState() {
     super.initState();
-    _settingsProvider = di.sl<SettingsProvider>();
-    // Initialize provider only once
-    _initializeProvider(_settingsProvider);
+    // Initialization will be done in build with WidgetsBinding
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return provider_lib.ChangeNotifierProvider.value(
-      value: _settingsProvider,
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            child: ResponsiveContentWrapper(
-              child: Column(
-                children: [
-                  _buildModernHeader(context, isDark),
+    final settingsState = ref.watch(settingsNotifierProvider);
+
+    // Initialize settings on first build
+    if (!_initialized) {
+      _initialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeSettings();
+      });
+    }
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: ResponsiveContentWrapper(
+            child: Column(
+              children: [
+                _buildModernHeader(context, isDark),
                 Expanded(
-                  child: provider_lib.Consumer<SettingsProvider>(
-                    builder: (context, provider, child) {
-                      if (provider.isLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-
-                      if (provider.error != null) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: theme.colorScheme.error,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Erro ao carregar configurações',
-                                style: theme.textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                provider.error!,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed: () => provider.refresh(),
-                                child: const Text('Tentar Novamente'),
-                              ),
-                            ],
+                  child: settingsState.when(
+                    data: (state) => _buildSettingsContent(),
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    error: (error, _) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: theme.colorScheme.error,
                           ),
-                        );
-                      }
-
-                      return _buildSettingsContent();
-                    },
+                          const SizedBox(height: 16),
+                          Text(
+                            'Erro ao carregar configurações',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            error.toString(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () => ref.read(settingsNotifierProvider.notifier).refresh(),
+                            child: const Text('Tentar Novamente'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -108,39 +104,35 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSettingsContent() {
-    return provider_lib.Consumer<ReceitaAgroAuthProvider>(
-      builder: (context, authProvider, child) {
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-          children: const [
-            SizedBox(height: 12),
-            
-            // 👤 SEÇÃO DE CONTA/LOGIN (primeiro item - sempre visível)
-            AuthSection(),
-            SizedBox(height: 12),
-            
-            // 💎 PREMIUM/ASSINATURA (sempre visível)
-            PremiumSection(),
-            SizedBox(height: 12),
-            
-            // 🔔 NOTIFICAÇÕES (sempre visível)
-            NotificationsSection(),
-            SizedBox(height: 12),
-            
-            // 🔧 SEÇÕES DE DESENVOLVIMENTO (condicional)
-            FeatureFlagsSection(),
-            SizedBox(height: 12),
-            DevelopmentSection(),
-            SizedBox(height: 12),
-            
-            // 🆘 SUPORTE (sempre visível)
-            SupportSection(),
-            
-            // Espaço extra para melhor rolagem
-            SizedBox(height: 24),
-          ],
-        );
-      },
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+      children: const [
+        SizedBox(height: 12),
+
+        // 👤 SEÇÃO DE CONTA/LOGIN (primeiro item - sempre visível)
+        AuthSection(),
+        SizedBox(height: 12),
+
+        // 💎 PREMIUM/ASSINATURA (sempre visível)
+        PremiumSection(),
+        SizedBox(height: 12),
+
+        // 🔔 NOTIFICAÇÕES (sempre visível)
+        NotificationsSection(),
+        SizedBox(height: 12),
+
+        // 🔧 SEÇÕES DE DESENVOLVIMENTO (condicional)
+        FeatureFlagsSection(),
+        SizedBox(height: 12),
+        DevelopmentSection(),
+        SizedBox(height: 12),
+
+        // 🆘 SUPORTE (sempre visível)
+        SupportSection(),
+
+        // Espaço extra para melhor rolagem
+        SizedBox(height: 24),
+      ],
     );
   }
 
@@ -184,20 +176,15 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _initializeProvider(SettingsProvider provider) async {
-    // Avoid multiple initializations if provider is already loaded
-    if (provider.hasSettings && !provider.isLoading) {
-      return;
-    }
-    
+  Future<void> _initializeSettings() async {
     try {
       final deviceService = di.sl<DeviceIdentityService>();
       final deviceId = await deviceService.getDeviceUuid();
-      await provider.initialize(deviceId);
+      await ref.read(settingsNotifierProvider.notifier).initialize(deviceId);
     } catch (e) {
       debugPrint('Error initializing settings: $e');
       // Fallback to anonymous user
-      await provider.initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
+      await ref.read(settingsNotifierProvider.notifier).initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
     }
   }
 }

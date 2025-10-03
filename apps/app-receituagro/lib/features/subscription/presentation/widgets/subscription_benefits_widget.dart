@@ -1,37 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/subscription_provider.dart';
+import '../providers/subscription_notifier.dart';
 
 /// Widget responsável pela exibição dos benefícios/recursos premium
-/// 
+///
 /// Funcionalidades:
 /// - Listar recursos premium disponíveis
 /// - Dois estilos: moderno (marketing) e card (subscription ativa)
 /// - Icons de check customizados
-/// - Integração com provider para lista de recursos
-/// 
+/// - Integração com notifier para lista de recursos
+///
 /// Estilos:
 /// - Modern: Para marketing/conversão (fundo transparente)
 /// - Card: Para usuários ativos (background card)
-class SubscriptionBenefitsWidget extends StatelessWidget {
-  final SubscriptionProvider provider;
+class SubscriptionBenefitsWidget extends ConsumerWidget {
   final bool showModernStyle;
 
   const SubscriptionBenefitsWidget({
     super.key,
-    required this.provider,
     this.showModernStyle = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return showModernStyle 
-        ? _buildModernFeaturesList()
-        : _buildCardFeaturesList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final subscriptionNotifier = ref.read(subscriptionNotifierProvider.notifier);
+
+    return showModernStyle
+        ? _buildModernFeaturesList(subscriptionNotifier)
+        : _buildCardFeaturesList(subscriptionNotifier);
   }
 
   /// Estilo moderno para marketing/conversão
-  Widget _buildModernFeaturesList() {
+  Widget _buildModernFeaturesList(SubscriptionNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -46,14 +47,14 @@ class SubscriptionBenefitsWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...provider.modernPremiumFeatures.map((feature) => _buildModernFeatureItem(feature)),
+          ...notifier.modernPremiumFeatures.map((feature) => _buildModernFeatureItem(feature)),
         ],
       ),
     );
   }
 
   /// Estilo card para usuários com subscription ativa
-  Widget _buildCardFeaturesList() {
+  Widget _buildCardFeaturesList(SubscriptionNotifier notifier) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -73,7 +74,7 @@ class SubscriptionBenefitsWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...provider.premiumFeatures.map((feature) => _buildCardFeatureItem(feature)),
+            ...notifier.premiumFeatures.map((feature) => _buildCardFeatureItem(feature)),
           ],
         ),
       ),

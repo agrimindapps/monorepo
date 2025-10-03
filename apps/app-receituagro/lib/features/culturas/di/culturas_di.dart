@@ -6,7 +6,7 @@ import '../data/repositories/culturas_repository_impl.dart';
 import '../domain/repositories/i_culturas_repository.dart';
 import '../domain/usecases/get_culturas_usecase.dart';
 // Presentation
-import '../presentation/providers/culturas_provider.dart';
+import '../presentation/providers/culturas_notifier.dart';
 
 /// Configuração de injeção de dependências para o módulo Culturas
 /// Segue padrão Clean Architecture + GetIt para DI

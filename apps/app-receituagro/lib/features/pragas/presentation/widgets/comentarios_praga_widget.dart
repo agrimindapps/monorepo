@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/views/widgets/premium_upgrade_widget.dart';
-import '../providers/detalhe_praga_provider.dart';
+import '../providers/detalhe_praga_notifier.dart';
 
 /// Widget responsável por exibir comentários da praga
 /// Responsabilidade única: renderizar sistema de comentários
-class ComentariosPragaWidget extends StatefulWidget {
+class ComentariosPragaWidget extends ConsumerStatefulWidget {
   const ComentariosPragaWidget({super.key});
 
   @override
-  State<ComentariosPragaWidget> createState() => _ComentariosPragaWidgetState();
+  ConsumerState<ComentariosPragaWidget> createState() => _ComentariosPragaWidgetState();
 }
 
-class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
+class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget> {
   final TextEditingController _commentController = TextEditingController();
 
   @override
@@ -25,17 +25,19 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.Consumer<DetalhePragaProvider>(
-      builder: (context, provider, child) {
+    final state = ref.watch(detalhePragaNotifierProvider);
+
+    return state.when(
+      data: (data) {
         // Para usuários free, mostra apenas o card premium centralizado
-        if (!provider.isPremium) {
+        if (!data.isPremium) {
           return Column(
             children: [
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(8.0),
-                    child: _buildPremiumRestrictionCard(provider),
+                    child: _buildPremiumRestrictionCard(),
                   ),
                 ),
               ),
@@ -52,37 +54,41 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Add new comment section (campo de cadastro)
-              _buildAddCommentSection(provider),
+              _buildAddCommentSection(data),
               const SizedBox(height: 24),
 
               // Comments list (sem estado vazio)
-              if (provider.isLoadingComments)
+              if (data.isLoadingComments)
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32),
                     child: CircularProgressIndicator(),
                   ),
                 )
-              else if (provider.comentarios.isNotEmpty)
-                _buildCommentsList(provider),
+              else if (data.comentarios.isNotEmpty)
+                _buildCommentsList(data),
 
               const SizedBox(height: 80), // Espaço para bottom navigation
             ],
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Erro: $error')),
     );
   }
 
   /// Constrói card de restrição premium
-  Widget _buildPremiumRestrictionCard(DetalhePragaProvider provider) {
+  Widget _buildPremiumRestrictionCard() {
     return PremiumUpgradeWidget.noPermission(
-      onUpgrade: provider.navigateToPremium,
+      onUpgrade: () {
+        ref.read(detalhePragaNotifierProvider.notifier).navigateToPremium();
+      },
     );
   }
 
   /// Constrói seção para adicionar comentário
-  Widget _buildAddCommentSection(DetalhePragaProvider provider) {
+  Widget _buildAddCommentSection(dynamic data) {
     final theme = Theme.of(context);
 
     return Card(
@@ -133,13 +139,13 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () => _addComment(provider),
+                  onPressed: () => _addComment(),
                   child: const Text('Adicionar'),
                 ),
               ],
             ),
             // Exibe erro se houver
-            if (provider.errorMessage != null) ...[
+            if (data.errorMessage != null) ...[
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
@@ -155,13 +161,15 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        provider.errorMessage!,
+                        (data.errorMessage ?? '').toString(),
                         style: TextStyle(color: Colors.red.shade700, fontSize: 14),
                       ),
                     ),
                     IconButton(
                       icon: Icon(Icons.close, color: Colors.red.shade700, size: 16),
-                      onPressed: provider.clearError,
+                      onPressed: () {
+                        ref.read(detalhePragaNotifierProvider.notifier).clearError();
+                      },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -176,20 +184,20 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
   }
 
   /// Constrói lista de comentários
-  Widget _buildCommentsList(DetalhePragaProvider provider) {
+  Widget _buildCommentsList(DetalhePragaState data) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: provider.comentarios.length,
+      itemCount: data.comentarios.length,
       itemBuilder: (context, index) {
-        final comentario = provider.comentarios[index];
-        return _buildCommentCard(comentario, provider);
+        final comentario = data.comentarios[index];
+        return _buildCommentCard(comentario);
       },
     );
   }
 
   /// Constrói card de comentário individual
-  Widget _buildCommentCard(ComentarioModel comentario, DetalhePragaProvider provider) {
+  Widget _buildCommentCard(ComentarioModel comentario) {
     final theme = Theme.of(context);
 
     return Dismissible(
@@ -206,7 +214,9 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
         ),
       ),
       confirmDismiss: (direction) => _showDeleteConfirmation(context),
-      onDismissed: (direction) => provider.deleteComentario(comentario.id),
+      onDismissed: (direction) {
+        ref.read(detalhePragaNotifierProvider.notifier).deleteComentario(comentario.id);
+      },
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
         child: Padding(
@@ -273,10 +283,10 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
   }
 
   /// Adiciona comentário
-  Future<void> _addComment(DetalhePragaProvider provider) async {
+  Future<void> _addComment() async {
     final content = _commentController.text.trim();
 
-    final success = await provider.addComentario(content);
+    final success = await ref.read(detalhePragaNotifierProvider.notifier).addComentario(content);
     if (success) {
       _commentController.clear();
       // Mostra sucesso
@@ -289,11 +299,12 @@ class _ComentariosPragaWidgetState extends State<ComentariosPragaWidget> {
         );
       }
     } else {
-      // Erro já é gerenciado pelo provider
+      // Erro já é gerenciado pelo notifier
       if (mounted) {
+        final state = ref.read(detalhePragaNotifierProvider).value;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.errorMessage ?? 'Erro ao adicionar comentário'),
+            content: Text(state?.errorMessage ?? 'Erro ao adicionar comentário'),
             backgroundColor: Colors.red,
           ),
         );

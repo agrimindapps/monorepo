@@ -1,15 +1,15 @@
 import 'package:core/core.dart';
 
-import '../../../core/providers/auth_provider.dart';
+import '../../../core/providers/receituagro_auth_notifier.dart';
 import '../data/repositories/profile_repository_impl.dart';
 import '../data/repositories/user_settings_repository_impl.dart';
 import '../domain/repositories/i_user_settings_repository.dart';
 import '../domain/repositories/profile_repository.dart';
 import '../domain/usecases/get_user_settings_usecase.dart';
 import '../domain/usecases/update_user_settings_usecase.dart';
-import '../presentation/providers/profile_provider.dart';
-import '../presentation/providers/settings_provider.dart';
-import '../presentation/providers/user_settings_provider.dart';
+import '../presentation/providers/profile_notifier.dart';
+import '../presentation/providers/settings_notifier.dart';
+import '../presentation/providers/user_settings_notifier.dart';
 
 /// Dependency Injection setup for Settings module following Clean Architecture.
 /// Registers all dependencies required for the settings feature.

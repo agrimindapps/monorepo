@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/feature_flags_notifier.dart';
-import '../providers/subscription_provider.dart';
+import '../providers/subscription_notifier.dart';
 
 /// Advanced Premium Features Showcase Widget
 ///
@@ -14,13 +14,11 @@ import '../providers/subscription_provider.dart';
 /// - Premium feature usage statistics
 /// - Interactive feature previews
 class PremiumFeaturesShowcaseWidget extends ConsumerStatefulWidget {
-  final SubscriptionProvider subscriptionProvider;
   final bool showFullDetails;
   final VoidCallback? onUpgradePressed;
 
   const PremiumFeaturesShowcaseWidget({
     super.key,
-    required this.subscriptionProvider,
     this.showFullDetails = true,
     this.onUpgradePressed,
   });
@@ -62,54 +60,61 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
 
   @override
   Widget build(BuildContext context) {
-    // Watch feature flags from Riverpod
+    // Watch both providers from Riverpod
     final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
 
-    return featureFlagsAsync.when(
-      data: (featureFlagsState) {
-        final featureFlags = ref.read(featureFlagsNotifierProvider.notifier);
+    return subscriptionAsync.when(
+      data: (subscriptionState) {
+        return featureFlagsAsync.when(
+          data: (featureFlagsState) {
+            final featureFlags = ref.read(featureFlagsNotifierProvider.notifier);
 
-        return FadeTransition(
-          opacity: _fadeAnimation,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with Premium Status
-              _buildHeader(context, featureFlags),
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with Premium Status
+                  _buildHeader(context, featureFlags, subscriptionState.hasActiveSubscription),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-              // Feature Categories Tabs
-              _buildFeatureTabs(context),
+                  // Feature Categories Tabs
+                  _buildFeatureTabs(context),
 
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // Feature Content
-              SizedBox(
-                height: widget.showFullDetails ? 400 : 300,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildCoreFeatures(context, featureFlags),
-                    _buildAdvancedFeatures(context, featureFlags),
-                    _buildExclusiveFeatures(context, featureFlags),
+                  // Feature Content
+                  SizedBox(
+                    height: widget.showFullDetails ? 400 : 300,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildCoreFeatures(context, featureFlags, subscriptionState.hasActiveSubscription),
+                        _buildAdvancedFeatures(context, featureFlags, subscriptionState.hasActiveSubscription),
+                        _buildExclusiveFeatures(context, featureFlags, subscriptionState.hasActiveSubscription),
+                      ],
+                    ),
+                  ),
+
+                  // Cross-platform Sync Indicator
+                  if (widget.showFullDetails) ...[
+                    const SizedBox(height: 24),
+                    _buildCrossPlatformIndicator(context, featureFlags),
                   ],
-                ),
+
+                  // Upgrade CTA
+                  if (!subscriptionState.hasActiveSubscription) ...[
+                    const SizedBox(height: 24),
+                    _buildUpgradeCTA(context),
+                  ],
+                ],
               ),
-
-              // Cross-platform Sync Indicator
-              if (widget.showFullDetails) ...[
-                const SizedBox(height: 24),
-                _buildCrossPlatformIndicator(context, featureFlags),
-              ],
-
-              // Upgrade CTA
-              if (!widget.subscriptionProvider.hasActiveSubscription) ...[
-                const SizedBox(height: 24),
-                _buildUpgradeCTA(context),
-              ],
-            ],
-          ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error: $error')),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -118,9 +123,8 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
   }
 
   /// Header with Premium Status and Validation
-  Widget _buildHeader(BuildContext context, FeatureFlagsNotifier featureFlags) {
+  Widget _buildHeader(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
     final theme = Theme.of(context);
-    final hasActiveSubscription = widget.subscriptionProvider.hasActiveSubscription;
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -250,7 +254,7 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
   }
 
   /// Core Features Tab
-  Widget _buildCoreFeatures(BuildContext context, FeatureFlagsNotifier featureFlags) {
+  Widget _buildCoreFeatures(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
     final coreFeatures = [
       const PremiumFeature(
         icon: Icons.favorite,
@@ -275,11 +279,11 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
     ];
 
-    return _buildFeatureGrid(context, coreFeatures, 'Recursos fundamentais para diagnósticos eficientes');
+    return _buildFeatureGrid(context, coreFeatures, 'Recursos fundamentais para diagnósticos eficientes', hasActiveSubscription);
   }
 
   /// Advanced Features Tab
-  Widget _buildAdvancedFeatures(BuildContext context, FeatureFlagsNotifier featureFlags) {
+  Widget _buildAdvancedFeatures(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
     final advancedFeatures = [
       PremiumFeature(
         icon: Icons.cloud_download,
@@ -304,11 +308,11 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
     ];
 
-    return _buildFeatureGrid(context, advancedFeatures, 'Funcionalidades avançadas para usuários experientes');
+    return _buildFeatureGrid(context, advancedFeatures, 'Funcionalidades avançadas para usuários experientes', hasActiveSubscription);
   }
 
   /// Exclusive Features Tab
-  Widget _buildExclusiveFeatures(BuildContext context, FeatureFlagsNotifier featureFlags) {
+  Widget _buildExclusiveFeatures(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
     final exclusiveFeatures = [
       const PremiumFeature(
         icon: Icons.support_agent,
@@ -333,11 +337,11 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
     ];
 
-    return _buildFeatureGrid(context, exclusiveFeatures, 'Benefícios exclusivos para membros Premium');
+    return _buildFeatureGrid(context, exclusiveFeatures, 'Benefícios exclusivos para membros Premium', hasActiveSubscription);
   }
 
   /// Build Feature Grid
-  Widget _buildFeatureGrid(BuildContext context, List<PremiumFeature> features, String description) {
+  Widget _buildFeatureGrid(BuildContext context, List<PremiumFeature> features, String description, bool hasActiveSubscription) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -350,16 +354,16 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
             ),
           ),
           const SizedBox(height: 16),
-          ...features.map((feature) => _buildFeatureCard(context, feature)),
+          ...features.map((feature) => _buildFeatureCard(context, feature, hasActiveSubscription)),
         ],
       ),
     );
   }
 
   /// Individual Feature Card
-  Widget _buildFeatureCard(BuildContext context, PremiumFeature feature) {
+  Widget _buildFeatureCard(BuildContext context, PremiumFeature feature, bool hasActiveSubscription) {
     final theme = Theme.of(context);
-    final isEnabled = feature.isAvailable && widget.subscriptionProvider.hasActiveSubscription;
+    final isEnabled = feature.isAvailable && hasActiveSubscription;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -423,16 +427,15 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
           ),
           
           // Status Indicator
-          _buildFeatureStatusIndicator(context, feature),
+          _buildFeatureStatusIndicator(context, feature, hasActiveSubscription),
         ],
       ),
     );
   }
 
   /// Feature Status Indicator
-  Widget _buildFeatureStatusIndicator(BuildContext context, PremiumFeature feature) {
+  Widget _buildFeatureStatusIndicator(BuildContext context, PremiumFeature feature, bool hasSubscription) {
     final theme = Theme.of(context);
-    final hasSubscription = widget.subscriptionProvider.hasActiveSubscription;
     
     if (hasSubscription && feature.isAvailable) {
       return const Icon(

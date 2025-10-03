@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
-import '../providers/detalhe_praga_provider.dart';
+import '../providers/detalhe_praga_notifier.dart';
 
 /// Widget responsável por exibir informações da praga
 /// Responsabilidade única: renderizar seção de informações básicas
-class PragaInfoWidget extends StatelessWidget {
+class PragaInfoWidget extends ConsumerWidget {
   final String pragaName;
   final String pragaScientificName;
 
@@ -18,10 +18,11 @@ class PragaInfoWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.Consumer<DetalhePragaProvider>(
-      builder: (context, provider, child) {
-        return SingleChildScrollView(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(detalhePragaNotifierProvider);
+
+    return state.when(
+      data: (data) => SingleChildScrollView(
           padding: const EdgeInsets.only(
             top: 0,      // Remove top padding para economizar espaço
             bottom: SpacingTokens.bottomNavSpace, // Espaço para bottom nav
@@ -31,18 +32,19 @@ class PragaInfoWidget extends StatelessWidget {
             children: [
               _buildPragaImage(),
               SpacingTokens.gapSM,
-              ..._buildInfoSections(provider),
+              ..._buildInfoSections(data),
               // Espaço já incluído no scrollPadding
             ],
           ),
-        );
-      },
+        ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Erro: $error')),
     );
   }
 
   /// Constrói seções de informação baseado no tipo da praga
-  List<Widget> _buildInfoSections(DetalhePragaProvider provider) {
-    final pragaData = provider.pragaData;
+  List<Widget> _buildInfoSections(dynamic data) {
+    final pragaData = data.pragaData;
     
     if (pragaData == null) {
       return [_buildLoadingWidget()];
@@ -50,20 +52,20 @@ class PragaInfoWidget extends StatelessWidget {
 
     // Para pragas do tipo "inseto" (tipoPraga = "1") ou "doença" (tipoPraga = "2")
     if (pragaData.tipoPraga == '1' || pragaData.tipoPraga == '2') {
-      return _buildInsectoInfoSections(provider);
+      return _buildInsectoInfoSections(data);
     }
-    
+
     // Para pragas do tipo "planta" (tipoPraga = "3")
     if (pragaData.tipoPraga == '3') {
-      return _buildPlantaInfoSections(provider);
+      return _buildPlantaInfoSections(data);
     }
-    
+
     return [_buildNoInfoWidget()];
   }
 
   /// Seções de informação para insetos/doenças (usa PragasInfo)
-  List<Widget> _buildInsectoInfoSections(DetalhePragaProvider provider) {
-    final pragaInfo = provider.pragaInfo;
+  List<Widget> _buildInsectoInfoSections(dynamic data) {
+    final pragaInfo = data.pragaInfo;
     
     return [
       _buildInfoSection(
@@ -72,7 +74,7 @@ class PragaInfoWidget extends StatelessWidget {
         [
           _buildInfoItem(
             'Informações Gerais',
-            pragaInfo?.descrisao ?? 'Informação não disponível',
+            (pragaInfo?.descrisao ?? 'Informação não disponível') as String,
           ),
         ],
       ),
@@ -83,7 +85,7 @@ class PragaInfoWidget extends StatelessWidget {
         [
           _buildInfoItem(
             'Danos Causados',
-            pragaInfo?.sintomas ?? 'Informação não disponível',
+            (pragaInfo?.sintomas ?? 'Informação não disponível') as String,
           ),
         ],
       ),
@@ -94,7 +96,7 @@ class PragaInfoWidget extends StatelessWidget {
         [
           _buildInfoItem(
             'Características Biológicas',
-            pragaInfo?.bioecologia ?? 'Informação não disponível',
+            (pragaInfo?.bioecologia ?? 'Informação não disponível') as String,
           ),
         ],
       ),
@@ -105,7 +107,7 @@ class PragaInfoWidget extends StatelessWidget {
         [
           _buildInfoItem(
             'Métodos de Controle',
-            pragaInfo?.controle ?? 'Informação não disponível',
+            (pragaInfo?.controle ?? 'Informação não disponível') as String,
           ),
         ],
       ),
@@ -113,19 +115,19 @@ class PragaInfoWidget extends StatelessWidget {
   }
 
   /// Seções de informação para plantas (usa PlantasInfo)
-  List<Widget> _buildPlantaInfoSections(DetalhePragaProvider provider) {
-    final plantaInfo = provider.plantaInfo;
-    
+  List<Widget> _buildPlantaInfoSections(dynamic data) {
+    final plantaInfo = data.plantaInfo;
+
     return [
       _buildInfoSection(
         'Informações da Planta',
         Icons.eco,
         [
-          _buildInfoItem('Ciclo', plantaInfo?.ciclo ?? '-'),
-          _buildInfoItem('Reprodução', plantaInfo?.reproducao ?? '-'),
-          _buildInfoItem('Habitat', plantaInfo?.habitat ?? '-'),
-          _buildInfoItem('Adaptações', plantaInfo?.adaptacoes ?? '-'),
-          _buildInfoItem('Altura', plantaInfo?.altura ?? '-'),
+          _buildInfoItem('Ciclo', (plantaInfo?.ciclo ?? '-') as String),
+          _buildInfoItem('Reprodução', (plantaInfo?.reproducao ?? '-') as String),
+          _buildInfoItem('Habitat', (plantaInfo?.habitat ?? '-') as String),
+          _buildInfoItem('Adaptações', (plantaInfo?.adaptacoes ?? '-') as String),
+          _buildInfoItem('Altura', (plantaInfo?.altura ?? '-') as String),
         ],
       ),
       SpacingTokens.gapMD,
@@ -133,7 +135,7 @@ class PragaInfoWidget extends StatelessWidget {
         'Informações das Flores',
         Icons.local_florist,
         [
-          _buildInfoItem('Inflorescência', plantaInfo?.inflorescencia ?? '-'),
+          _buildInfoItem('Inflorescência', (plantaInfo?.inflorescencia ?? '-') as String),
         ],
       ),
       SpacingTokens.gapMD,
@@ -141,12 +143,12 @@ class PragaInfoWidget extends StatelessWidget {
         'Informações das Folhas',
         Icons.park,
         [
-          _buildInfoItem('Filotaxia', plantaInfo?.filotaxia ?? '-'),
-          _buildInfoItem('Forma do Limbo', plantaInfo?.formaLimbo ?? '-'),
-          _buildInfoItem('Superfície', plantaInfo?.superficie ?? '-'),
-          _buildInfoItem('Consistência', plantaInfo?.consistencia ?? '-'),
-          _buildInfoItem('Nervação', plantaInfo?.nervacao ?? '-'),
-          _buildInfoItem('Comprimento da Nervação', plantaInfo?.nervacaoComprimento ?? '-'),
+          _buildInfoItem('Filotaxia', (plantaInfo?.filotaxia ?? '-') as String),
+          _buildInfoItem('Forma do Limbo', (plantaInfo?.formaLimbo ?? '-') as String),
+          _buildInfoItem('Superfície', (plantaInfo?.superficie ?? '-') as String),
+          _buildInfoItem('Consistência', (plantaInfo?.consistencia ?? '-') as String),
+          _buildInfoItem('Nervação', (plantaInfo?.nervacao ?? '-') as String),
+          _buildInfoItem('Comprimento da Nervação', (plantaInfo?.nervacaoComprimento ?? '-') as String),
         ],
       ),
       SpacingTokens.gapMD,
@@ -154,7 +156,7 @@ class PragaInfoWidget extends StatelessWidget {
         'Fruto',
         null,
         [
-          _buildInfoItem('Fruto', plantaInfo?.tipologiaFruto ?? '-'),
+          _buildInfoItem('Fruto', (plantaInfo?.tipologiaFruto ?? '-') as String),
         ],
       ),
     ];

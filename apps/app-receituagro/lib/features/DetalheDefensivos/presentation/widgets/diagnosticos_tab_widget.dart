@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as flutter_provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../providers/detalhe_defensivo_provider.dart';
-import '../providers/diagnosticos_provider.dart';
+import '../providers/detalhe_defensivo_notifier.dart';
+import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import 'diagnosticos_defensivos_components.dart';
 
 /// Widget principal responsável por exibir diagnósticos relacionados ao defensivo
-/// 
+///
 /// Responsabilidade única: orquestrar componentes para exibir diagnósticos
 /// - Filtros de pesquisa e cultura
 /// - Lista agrupada de diagnósticos
 /// - Estados de loading, erro e vazio
 /// - Modal de detalhes do diagnóstico
-/// 
+///
 /// **Arquitetura Decomposta:**
 /// - `DiagnosticoDefensivoFilterWidget`: Filtros de pesquisa
 /// - `DiagnosticoDefensivoStateManager`: Gerenciamento de estados
 /// - `DiagnosticoDefensivoListItemWidget`: Itens da lista
 /// - `DiagnosticoDefensivoDialogWidget`: Modal de detalhes
-/// 
+///
 /// **Performance Otimizada:**
 /// - RepaintBoundary para evitar rebuilds desnecessários
 /// - Componentes reutilizáveis e modulares
 /// - Estados gerenciados de forma eficiente
-class DiagnosticosTabWidget extends StatelessWidget {
+/// Migrated to Riverpod - uses ConsumerWidget
+class DiagnosticosTabWidget extends ConsumerWidget {
   final String defensivoName;
 
   const DiagnosticosTabWidget({
@@ -35,7 +36,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return RepaintBoundary(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -52,7 +53,7 @@ class DiagnosticosTabWidget extends StatelessWidget {
               child: DiagnosticoDefensivoStateManager(
                 defensivoName: defensivoName,
                 builder: _buildDiagnosticsList,
-                onRetry: () => _retryLoadDiagnostics(context),
+                onRetry: () => _retryLoadDiagnostics(ref),
               ),
             ),
           ),
@@ -62,16 +63,16 @@ class DiagnosticosTabWidget extends StatelessWidget {
   }
 
   /// Callback para retry quando houver erro
-  void _retryLoadDiagnostics(BuildContext context) {
-    // Implementação depende de como o provider é inicializado
-    // Por enquanto, limpa o erro para permitir nova tentativa
-    final diagnosticosProvider = flutter_provider.Provider.of<DiagnosticosProvider>(context, listen: false);
-    final defensivoProvider = flutter_provider.Provider.of<DetalheDefensivoProvider>(context, listen: false);
-    
-    final idReg = defensivoProvider.defensivoData?.idReg;
-    if (idReg != null) {
-      diagnosticosProvider.loadDiagnosticos(idReg);
-    }
+  void _retryLoadDiagnostics(WidgetRef ref) {
+    // Reload diagnostics using Riverpod
+    final defensivoState = ref.read(detalheDefensivoNotifierProvider);
+    defensivoState.whenData((data) {
+      final idReg = data.defensivoData?.idReg;
+      final nomeDefensivo = data.defensivoData?.nomeComum;
+      if (idReg != null) {
+        ref.read(diagnosticosNotifierProvider.notifier).getDiagnosticosByDefensivo(idReg, nomeDefensivo: nomeDefensivo);
+      }
+    });
   }
 
   /// Constrói lista de diagnósticos agrupados por cultura

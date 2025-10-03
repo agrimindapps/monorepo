@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/interfaces/i_premium_service.dart';
-import '../providers/diagnosticos_praga_provider.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 import 'diagnostico_mockup_tokens.dart';
 
 /// Widget que replica EXATAMENTE o design do card do mockup IMG_3186.PNG

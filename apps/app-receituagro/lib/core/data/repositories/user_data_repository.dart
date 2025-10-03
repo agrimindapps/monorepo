@@ -1,16 +1,16 @@
 import 'package:core/core.dart';
 
+import '../../providers/auth_provider.dart' as app_auth;
+import '../models/app_settings_model.dart';
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/favoritos/data/favorito_defensivo_model.dart';
-import '../models/app_settings_model.dart';
-import '../../providers/auth_provider.dart' as app_auth;
 
 /// Repository para gerenciar dados específicos do usuário com sincronização
 class UserDataRepository {
   static const String _appSettingsBoxName = 'app_settings';
   static const String _subscriptionDataBoxName = 'subscription_data';
 
-  final app_auth.AuthProvider _authProvider;
+  final app_auth.ReceitaAgroAuthProvider _authProvider;
 
   UserDataRepository(this._authProvider);
 

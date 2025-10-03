@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as flutter_provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
-import '../../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_provider.dart';
-import '../providers/diagnosticos_praga_provider.dart';
+import '../../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_notifier.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
-/// 
+///
 /// Responsabilidade única: exibir detalhes completos de um diagnóstico em modal
 /// - Layout responsivo com constraints adequados
 /// - Informações detalhadas do diagnóstico
 /// - Ações para navegar para defensivo ou diagnóstico detalhado
 /// - Premium badges para features pagas
-class DiagnosticoDialogWidget extends StatelessWidget {
+class DiagnosticoDialogWidget extends ConsumerWidget {
   final DiagnosticoModel diagnostico;
   final String pragaName;
 
@@ -39,9 +39,9 @@ class DiagnosticoDialogWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     return Dialog(
       backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
       shape: RoundedRectangleBorder(
@@ -59,7 +59,7 @@ class DiagnosticoDialogWidget extends StatelessWidget {
             Flexible(
               child: _buildContent(context),
             ),
-            _buildActions(context),
+            _buildActions(context, ref),
           ],
         ),
       ),
@@ -163,16 +163,7 @@ class DiagnosticoDialogWidget extends StatelessWidget {
   }
 
   /// Ações do modal (botões defensivo e diagnóstico)
-  Widget _buildActions(BuildContext context) {
-    // Tenta obter provider, mas não falha se não estiver disponível
-    DiagnosticosPragaProvider? provider;
-    try {
-      provider = flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
-    } catch (e) {
-      // Provider não disponível - continuamos sem ele
-      provider = null;
-    }
-    
+  Widget _buildActions(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -180,7 +171,7 @@ class DiagnosticoDialogWidget extends StatelessWidget {
           Expanded(
             child: _DefensivoButton(
               diagnostico: diagnostico,
-              provider: provider,
+              ref: ref,
             ),
           ),
           const SizedBox(width: 12),
@@ -284,33 +275,34 @@ class _DiagnosticoInfoRow extends StatelessWidget {
 }
 
 /// Botão para navegar ao defensivo
-class _DefensivoButton extends StatelessWidget {
+class _DefensivoButton extends ConsumerWidget {
   final DiagnosticoModel diagnostico;
-  final DiagnosticosPragaProvider? provider;
+  final WidgetRef ref;
 
   const _DefensivoButton({
     required this.diagnostico,
-    this.provider,
+    required this.ref,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return OutlinedButton(
       onPressed: () {
-        // Tenta obter dados do provider, senão usa valores padrão
-        final defensivoData = provider?.getDefensivoData(diagnostico.nome);
-        final fabricante = defensivoData?['fabricante'] as String? ?? 'Fabricante Desconhecido';
-        
-        Navigator.of(context).pop();
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => DetalheDefensivoPage(
-              defensivoName: diagnostico.nome,
-              fabricante: fabricante,
+        // Usa valores padrão (mock data - método do notifier retorna sempre os mesmos valores)
+        const fabricante = 'Fabricante Desconhecido';
+
+        if (context.mounted) Navigator.of(context).pop();
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => DetalheDefensivoPage(
+                defensivoName: diagnostico.nome,
+                fabricante: fabricante,
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -324,7 +316,7 @@ class _DefensivoButton extends StatelessWidget {
 }
 
 /// Botão para navegar ao diagnóstico detalhado
-class _DiagnosticoButton extends StatelessWidget {
+class _DiagnosticoButton extends ConsumerWidget {
   final DiagnosticoModel diagnostico;
   final String pragaName;
 
@@ -334,26 +326,25 @@ class _DiagnosticoButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     return ElevatedButton(
       onPressed: () {
-        Navigator.of(context).pop();
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => flutter_provider.ChangeNotifierProvider(
-              create: (_) => DetalheDiagnosticoProvider(),
-              child: DetalheDiagnosticoPage(
+        if (context.mounted) Navigator.of(context).pop();
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => DetalheDiagnosticoPage(
                 diagnosticoId: diagnostico.id,
                 nomeDefensivo: diagnostico.nome,
                 nomePraga: pragaName,
                 cultura: diagnostico.cultura,
               ),
             ),
-          ),
-        );
+          );
+        }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: theme.colorScheme.primary,

@@ -6,7 +6,7 @@ import '../pages/detalhe_praga_page.dart';
 import '../providers/home_pragas_provider.dart';
 
 /// Widget para exibir seção de sugestões com carrossel na home de pragas
-/// 
+///
 /// Responsabilidades:
 /// - Exibir carrossel de pragas sugeridas
 /// - Controlar indicadores de página (dots)
@@ -36,7 +36,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -67,12 +67,12 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Carrossel
         _buildCarousel(context),
-        
+
         const SizedBox(height: 12),
-        
+
         // Indicadores de página
         _buildDotIndicators(context),
       ],
@@ -81,7 +81,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
 
   Widget _buildCarousel(BuildContext context) {
     final suggestions = widget.provider.getSuggestionsList();
-    
+
     if (suggestions.isEmpty) {
       return _buildEmptyCarousel(context);
     }
@@ -124,7 +124,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
 
   Widget _buildItemBackground(BuildContext context, Map<String, dynamic> suggestion) {
     final theme = Theme.of(context);
-    
+
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
@@ -234,7 +234,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
   Widget _buildTypeTag(BuildContext context, Map<String, dynamic> suggestion) {
     IconData icon;
     Color backgroundColor;
-    
+
     switch (suggestion['type'] as String) {
       case 'Inseto':
         icon = Icons.bug_report;
@@ -252,7 +252,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
         icon = Icons.help;
         backgroundColor = Colors.grey.withValues(alpha: 0.9);
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: ReceitaAgroSpacing.sm,
@@ -318,7 +318,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
 
   Widget _buildDotIndicators(BuildContext context) {
     final suggestions = widget.provider.getSuggestionsList();
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: suggestions.asMap().entries.map((entry) {
@@ -348,7 +348,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
 
   Widget _buildEmptyCarousel(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 280,
       margin: const EdgeInsets.symmetric(

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../../features/culturas/lista_culturas_page.dart';
 import '../../features/defensivos/home_defensivos_page.dart';
 import '../../features/defensivos/presentation/pages/defensivos_unificado_page.dart';
-import '../../features/defensivos/presentation/providers/defensivos_unificado_provider.dart';
+import '../../features/defensivos/presentation/providers/defensivos_unificado_notifier.dart';
 import '../../features/pragas/lista_pragas_page.dart';
 import '../../features/pragas/presentation/pages/detalhe_praga_page.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart';
@@ -29,14 +29,11 @@ class AppRouter {
       case '/defensivos':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => provider.ChangeNotifierProvider<DefensivosUnificadoProvider>(
-            create: (_) => sl<DefensivosUnificadoProvider>(),
-            child: DefensivosUnificadoPage(
-              tipoAgrupamento: args?['categoria'] as String?,
-              textoFiltro: args?['textoFiltro'] as String?,
-              modoCompleto: true, // Lista completa de defensivos
-              isAgrupados: false, // Lista simples, não agrupada
-            ),
+          builder: (_) => DefensivosUnificadoPage(
+            tipoAgrupamento: args?['categoria'] as String?,
+            textoFiltro: args?['textoFiltro'] as String?,
+            modoCompleto: true, // Lista completa de defensivos
+            isAgrupados: false, // Lista simples, não agrupada
           ),
           settings: settings,
         );
@@ -44,14 +41,11 @@ class AppRouter {
       case '/defensivos-unificado':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => provider.ChangeNotifierProvider<DefensivosUnificadoProvider>(
-            create: (_) => sl<DefensivosUnificadoProvider>(),
-            child: DefensivosUnificadoPage(
-              tipoAgrupamento: args?['tipoAgrupamento'] as String?,
-              textoFiltro: args?['textoFiltro'] as String?,
-              modoCompleto: args?['modoCompleto'] as bool? ?? false,
-              isAgrupados: args?['isAgrupados'] as bool? ?? false,
-            ),
+          builder: (_) => DefensivosUnificadoPage(
+            tipoAgrupamento: args?['tipoAgrupamento'] as String?,
+            textoFiltro: args?['textoFiltro'] as String?,
+            modoCompleto: args?['modoCompleto'] as bool? ?? false,
+            isAgrupados: args?['isAgrupados'] as bool? ?? false,
           ),
           settings: settings,
         );
@@ -59,14 +53,11 @@ class AppRouter {
       case '/defensivos-agrupados':
         final args = arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => provider.ChangeNotifierProvider<DefensivosUnificadoProvider>(
-            create: (_) => sl<DefensivosUnificadoProvider>(),
-            child: DefensivosUnificadoPage(
-              tipoAgrupamento: args?['tipoAgrupamento'] as String?,
-              textoFiltro: args?['textoFiltro'] as String?,
-              modoCompleto: args?['modoCompleto'] as bool? ?? false,
-              isAgrupados: true, // Força modo agrupado
-            ),
+          builder: (_) => DefensivosUnificadoPage(
+            tipoAgrupamento: args?['tipoAgrupamento'] as String?,
+            textoFiltro: args?['textoFiltro'] as String?,
+            modoCompleto: args?['modoCompleto'] as bool? ?? false,
+            isAgrupados: true, // Força modo agrupado
           ),
           settings: settings,
         );

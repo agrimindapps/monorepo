@@ -7,7 +7,7 @@ import '../domain/repositories/i_comentarios_repository.dart';
 import '../domain/usecases/add_comentario_usecase.dart';
 import '../domain/usecases/delete_comentario_usecase.dart';
 import '../domain/usecases/get_comentarios_usecase.dart';
-import '../presentation/providers/comentarios_provider.dart';
+import '../presentation/providers/comentarios_notifier.dart';
 
 /// Dependency Injection setup for Comentarios module following Clean Architecture.
 /// Registers all dependencies required for the comentarios feature.

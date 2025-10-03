@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/diagnosticos_praga_provider.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widgets para diferentes estados da lista de diagnósticos
-/// 
+///
 /// Responsabilidade única: renderizar estados específicos da UI
 /// - Loading: indicador de carregamento
 /// - Error: mensagem de erro com retry
@@ -84,45 +84,49 @@ class DiagnosticoErrorWidget extends StatelessWidget {
 }
 
 /// Widget para estado vazio
-class DiagnosticoEmptyWidget extends StatelessWidget {
+class DiagnosticoEmptyWidget extends ConsumerWidget {
   const DiagnosticoEmptyWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(diagnosticosPragaNotifierProvider);
+
     return RepaintBoundary(
-      child: provider_lib.Consumer<DiagnosticosPragaProvider>(
-        builder: (context, provider, child) => Center(
+      child: state.when(
+        data: (data) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  provider.diagnosticos.isEmpty 
-                      ? Icons.bug_report_outlined 
+                  data.diagnosticos.isEmpty
+                      ? Icons.bug_report_outlined
                       : Icons.search_off,
                   size: 64,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  provider.diagnosticos.isEmpty 
+                  data.diagnosticos.isEmpty
                       ? 'Nenhum diagnóstico disponível'
                       : 'Nenhum diagnóstico encontrado',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  provider.diagnosticos.isEmpty
+                  data.diagnosticos.isEmpty
                       ? 'Esta praga ainda não possui diagnósticos cadastrados ou os dados estão sendo carregados'
                       : 'Tente ajustar os filtros de pesquisa',
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
-                if (provider.diagnosticos.isNotEmpty) ...[
+                if (data.diagnosticos.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   OutlinedButton(
-                    onPressed: provider.clearFilters,
+                    onPressed: () {
+                      ref.read(diagnosticosPragaNotifierProvider.notifier).clearFilters();
+                    },
                     child: const Text('Limpar Filtros'),
                   ),
                 ],
@@ -130,13 +134,15 @@ class DiagnosticoEmptyWidget extends StatelessWidget {
             ),
           ),
         ),
+        loading: () => const SizedBox.shrink(),
+        error: (error, _) => const SizedBox.shrink(),
       ),
     );
   }
 }
 
 /// Widget wrapper que gerencia automaticamente os estados
-class DiagnosticoStateManager extends StatelessWidget {
+class DiagnosticoStateManager extends ConsumerWidget {
   final Widget Function(List<DiagnosticoModel> diagnosticos) builder;
   final VoidCallback? onRetry;
 
@@ -147,30 +153,24 @@ class DiagnosticoStateManager extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.Consumer<DiagnosticosPragaProvider>(
-      builder: (context, provider, child) {
-        // Estado de carregamento
-        if (provider.isLoading) {
-          return const DiagnosticoLoadingWidget();
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(diagnosticosPragaNotifierProvider);
 
-        // Estado de erro
-        if (provider.errorMessage != null) {
-          return DiagnosticoErrorWidget(
-            errorMessage: provider.errorMessage!,
-            onRetry: onRetry,
-          );
-        }
-
+    return state.when(
+      data: (data) {
         // Estado vazio
-        if (provider.groupedDiagnosticos.isEmpty) {
+        if (data.groupedDiagnosticos.isEmpty) {
           return const DiagnosticoEmptyWidget();
         }
 
         // Estado com dados - delega para o builder
-        return builder(provider.filteredDiagnosticos);
+        return builder(data.filteredDiagnosticos);
       },
+      loading: () => const DiagnosticoLoadingWidget(),
+      error: (error, _) => DiagnosticoErrorWidget(
+        errorMessage: error.toString(),
+        onRetry: onRetry,
+      ),
     );
   }
 }

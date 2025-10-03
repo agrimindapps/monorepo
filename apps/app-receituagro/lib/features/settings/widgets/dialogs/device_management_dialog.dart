@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/device_identity_service.dart';
-import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/providers/settings_notifier.dart';
 import '../items/device_list_item.dart';
 
 /// Device Management Dialog
-/// 
+///
 /// Features:
 /// - Full list of connected devices
 /// - Device details and management
 /// - Revoke multiple devices at once
 /// - Device limit information
-class DeviceManagementDialog extends StatelessWidget {
-  final SettingsProvider provider;
+class DeviceManagementDialog extends ConsumerWidget {
+  final dynamic settingsData;
 
   const DeviceManagementDialog({
     super.key,
-    required this.provider,
+    required this.settingsData,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final devices = provider.connectedDevicesInfo;
-    final currentDevice = provider.currentDeviceInfo;
+    final devices = (settingsData?.connectedDevicesInfo is List<DeviceInfo>)
+        ? (settingsData.connectedDevicesInfo as List<DeviceInfo>)
+        : <DeviceInfo>[];
+    final currentDevice = (settingsData?.currentDeviceInfo is DeviceInfo)
+        ? (settingsData.currentDeviceInfo as DeviceInfo?)
+        : null;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -71,7 +76,7 @@ class DeviceManagementDialog extends StatelessWidget {
                     ],
                     
                     // Other Devices
-                    if (devices.length > 1) ...[
+                    if (devices.isNotEmpty && devices.length > 1) ...[
                       Text(
                         'Outros Dispositivos',
                         style: theme.textTheme.titleSmall?.copyWith(
@@ -85,7 +90,7 @@ class DeviceManagementDialog extends StatelessWidget {
                           child: DeviceListItem(
                             device: device,
                             isPrimary: false,
-                            onRevoke: () => _revokeDevice(context, device),
+                            onRevoke: () => _revokeDevice(context, ref, device),
                           ),
                         );
                       }),
@@ -158,7 +163,8 @@ class DeviceManagementDialog extends StatelessWidget {
   }
 
   /// Device limit information
-  Widget _buildDeviceLimitInfo(ThemeData theme, int deviceCount) {
+  Widget _buildDeviceLimitInfo(ThemeData theme, dynamic deviceCountDynamic) {
+    final int deviceCount = (deviceCountDynamic is int) ? deviceCountDynamic : 0;
     final isNearLimit = deviceCount >= 2;
     final isAtLimit = deviceCount >= 3;
     
@@ -243,7 +249,7 @@ class DeviceManagementDialog extends StatelessWidget {
   }
 
   /// Revoke device with confirmation
-  Future<void> _revokeDevice(BuildContext context, DeviceInfo device) async {
+  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, DeviceInfo device) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -270,12 +276,12 @@ class DeviceManagementDialog extends StatelessWidget {
 
     if (confirmed == true) {
       try {
-        await provider.revokeDevice(device.uuid);
-        
+        await ref.read(settingsNotifierProvider.notifier).revokeDevice(device.uuid);
+
         if (context.mounted) {
           // Close the dialog
           Navigator.of(context).pop();
-          
+
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

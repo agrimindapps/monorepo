@@ -1,60 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/tab_controller_provider.dart';
+import '../providers/tab_controller_notifier.dart';
 
 /// Widget otimizado para TabBar sem AnimatedBuilder desnecessário
 /// Foca em performance usando apenas mudanças de estado necessárias
-class OptimizedTabBarWidget extends StatelessWidget {
+/// Migrated to Riverpod - uses ConsumerWidget
+class OptimizedTabBarWidget extends ConsumerWidget {
   const OptimizedTabBarWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider.Consumer<TabControllerProvider>(
-      builder: (context, tabProvider, child) {
-        return Container(
-          height: 44,
-          margin: const EdgeInsets.only(
-            top: 8,
-            bottom: 4,
-            left: 8,
-            right: 8,
-          ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.green.shade100,
-                Colors.green.shade200,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.green.shade200.withValues(alpha: 0.5),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(tabControllerNotifierProvider);
+    final notifier = ref.read(tabControllerNotifierProvider.notifier);
+
+    return state.when(
+      data: (data) => Container(
+        height: 44,
+        margin: const EdgeInsets.only(
+          top: 8,
+          bottom: 4,
+          left: 8,
+          right: 8,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.green.shade100,
+              Colors.green.shade200,
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: TabBar(
-            controller: tabProvider.tabController,
-            tabs: _buildTabs(tabProvider.selectedTabIndex),
-            indicator: BoxDecoration(
-              color: Colors.green.shade700,
-              borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.shade200.withValues(alpha: 0.5),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.green.shade800,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-            dividerColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.tab,
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-          ),
-        );
-      },
+          ],
+        ),
+        child: notifier.tabController != null
+            ? TabBar(
+                controller: notifier.tabController,
+                tabs: _buildTabs(data.selectedTabIndex),
+                indicator: BoxDecoration(
+                  color: Colors.green.shade700,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.green.shade800,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                overlayColor: WidgetStateProperty.all(Colors.transparent),
+              )
+            : const SizedBox.shrink(),
+      ),
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

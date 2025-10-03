@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as flutter_provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/spacing_tokens.dart';
-import '../providers/detalhe_praga_provider.dart';
-import '../providers/diagnosticos_praga_provider.dart';
+import '../providers/detalhe_praga_notifier.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 import 'diagnostico_dialog_widget.dart';
 import 'diagnostico_filter_widget.dart';
 import 'diagnostico_list_item_widget.dart';
 import 'diagnostico_state_widgets.dart';
 
 /// Widget principal responsável por exibir diagnósticos relacionados à praga
-/// 
+///
 /// Responsabilidade única: orquestrar componentes para exibir diagnósticos
 /// - Filtros de pesquisa e cultura
 /// - Lista agrupada de diagnósticos
 /// - Estados de loading, erro e vazio
 /// - Modal de detalhes do diagnóstico
-/// 
+///
 /// **Arquitetura Decomposta:**
 /// - `DiagnosticoFilterWidget`: Filtros de pesquisa
 /// - `DiagnosticoStateManager`: Gerenciamento de estados
 /// - `DiagnosticoListItemWidget`: Itens da lista
 /// - `DiagnosticoDialogWidget`: Modal de detalhes
-/// 
+///
 /// **Performance Otimizada:**
 /// - RepaintBoundary para evitar rebuilds desnecessários
 /// - Componentes reutilizáveis e modulares
 /// - Estados gerenciados de forma eficiente
-class DiagnosticosPragaWidget extends StatelessWidget {
+class DiagnosticosPragaWidget extends ConsumerWidget {
   final String pragaName;
 
   const DiagnosticosPragaWidget({
@@ -36,7 +36,7 @@ class DiagnosticosPragaWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return RepaintBoundary(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -52,7 +52,7 @@ class DiagnosticosPragaWidget extends StatelessWidget {
               ),
               child: DiagnosticoStateManager(
                 builder: _buildDiagnosticsList,
-                onRetry: () => _retryLoadDiagnostics(context),
+                onRetry: () => _retryLoadDiagnostics(context, ref),
               ),
             ),
           ),
@@ -62,16 +62,15 @@ class DiagnosticosPragaWidget extends StatelessWidget {
   }
 
   /// Callback para retry quando houver erro
-  void _retryLoadDiagnostics(BuildContext context) {
-    final diagnosticosProvider = flutter_provider.Provider.of<DiagnosticosPragaProvider>(context, listen: false);
-    final pragaProvider = flutter_provider.Provider.of<DetalhePragaProvider>(context, listen: false);
+  void _retryLoadDiagnostics(BuildContext context, WidgetRef ref) {
+    final pragaState = ref.read(detalhePragaNotifierProvider).value;
 
-    diagnosticosProvider.clearError();
+    ref.read(diagnosticosPragaNotifierProvider.notifier).clearError();
 
     // Recarregar diagnósticos se temos os dados da praga
-    if (pragaProvider.pragaData != null && pragaProvider.pragaData!.idReg.isNotEmpty) {
-      diagnosticosProvider.loadDiagnosticos(
-        pragaProvider.pragaData!.idReg,
+    if (pragaState?.pragaData != null && pragaState!.pragaData!.idReg.isNotEmpty) {
+      ref.read(diagnosticosPragaNotifierProvider.notifier).loadDiagnosticos(
+        pragaState.pragaData!.idReg,
         pragaName: pragaName,
       );
     }

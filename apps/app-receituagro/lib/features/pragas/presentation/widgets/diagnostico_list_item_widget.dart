@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../providers/diagnosticos_praga_provider.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widget responsável por renderizar um item de diagnóstico na lista
-/// 
+///
 /// Responsabilidade única: exibir dados de um diagnóstico específico
 /// - Layout consistente com card design
 /// - Informações principais visíveis (nome, ingrediente ativo, dosagem)
@@ -46,7 +46,7 @@ class DiagnosticoListItemWidget extends StatelessWidget {
   /// Decoração do card do item
   BoxDecoration _buildCardDecoration(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return BoxDecoration(
       color: theme.cardColor,
       borderRadius: BorderRadius.circular(12),
@@ -64,7 +64,7 @@ class DiagnosticoListItemWidget extends StatelessWidget {
   /// Ícone representativo do diagnóstico
   Widget _buildIcon(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: 48,
       height: 48,
@@ -83,7 +83,7 @@ class DiagnosticoListItemWidget extends StatelessWidget {
   /// Conteúdo principal com informações do diagnóstico
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,7 +119,7 @@ class DiagnosticoListItemWidget extends StatelessWidget {
   /// Ações à direita (ícones de aviso e navegação)
   Widget _buildTrailingActions(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Icon(
@@ -139,7 +139,7 @@ class DiagnosticoListItemWidget extends StatelessWidget {
 }
 
 /// Widget para seção de cultura que agrupa diagnósticos
-/// 
+///
 /// Responsabilidade única: exibir cabeçalho de agrupamento por cultura
 class DiagnosticoCultureSectionWidget extends StatelessWidget {
   final String cultura;
@@ -155,7 +155,7 @@ class DiagnosticoCultureSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final diagnosticText = '$diagnosticCount diagnóstico${diagnosticCount > 1 ? 's' : ''}';
-    
+
     return RepaintBoundary(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

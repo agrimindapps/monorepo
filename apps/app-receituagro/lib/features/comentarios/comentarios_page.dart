@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../core/interfaces/i_premium_service.dart';
@@ -7,10 +7,10 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'constants/comentarios_design_tokens.dart';
 import 'domain/entities/comentario_entity.dart';
-import 'presentation/providers/comentarios_provider.dart';
+import 'presentation/providers/comentarios_notifier.dart';
 import 'views/widgets/premium_upgrade_widget.dart';
 
-class ComentariosPage extends StatelessWidget {
+class ComentariosPage extends ConsumerWidget {
   final String? pkIdentificador;
   final String? ferramenta;
 
@@ -21,31 +21,28 @@ class ComentariosPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return provider.ChangeNotifierProvider.value(
-      value: di.sl<ComentariosProvider>(),
-      child: _ComentariosPageContent(
-        pkIdentificador: pkIdentificador,
-        ferramenta: ferramenta,
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _ComentariosPageContent(
+      pkIdentificador: pkIdentificador,
+      ferramenta: ferramenta,
     );
   }
 }
 
-class _ComentariosPageContent extends StatefulWidget {
+class _ComentariosPageContent extends ConsumerStatefulWidget {
   final String? pkIdentificador;
   final String? ferramenta;
-  
+
   const _ComentariosPageContent({
     this.pkIdentificador,
     this.ferramenta,
   });
 
   @override
-  State<_ComentariosPageContent> createState() => _ComentariosPageContentState();
+  ConsumerState<_ComentariosPageContent> createState() => _ComentariosPageContentState();
 }
 
-class _ComentariosPageContentState extends State<_ComentariosPageContent> {
+class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent> {
   bool _dataInitialized = false;
 
   @override
@@ -61,13 +58,13 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
 
   Future<void> _initializeData() async {
     if (_dataInitialized) return;
-    
-    final commentProvider = provider.Provider.of<ComentariosProvider>(context, listen: false);
-    await commentProvider.ensureDataLoaded(
+
+    final commentNotifier = ref.read(comentariosNotifierProvider.notifier);
+    await commentNotifier.ensureDataLoaded(
       context: widget.pkIdentificador,
       tool: widget.ferramenta,
     );
-    
+
     if (mounted) {
       setState(() {
         _dataInitialized = true;
@@ -88,35 +85,47 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
             children: [
               _buildModernHeader(context, isDark),
               Expanded(
-                child: provider.Consumer<ComentariosProvider>(
-                  builder: (context, commentProvider, child) {
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final comentariosAsync = ref.watch(comentariosNotifierProvider);
+
                     // Verificar se o usuário é premium usando o service real
                     final premiumService = di.sl<IPremiumService>();
                     final isPremium = premiumService.isPremium;
-                    
+
                     if (!isPremium) {
                       return PremiumUpgradeWidget.noPermission(
                         onUpgrade: () => premiumService.navigateToPremium(),
                       );
                     }
-                    
-                    if (commentProvider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    
-                    if (commentProvider.error != null) {
-                      return Center(
-                        child: Text('Erro: ${commentProvider.error}'),
-                      );
-                    }
-                    
-                    final comentariosParaMostrar = commentProvider.comentarios;
-                    
-                    if (comentariosParaMostrar.isEmpty) {
-                      return _buildEmptyState();
-                    }
-                    
-                    return _buildComentariosList(comentariosParaMostrar);
+
+                    return comentariosAsync.when(
+                      data: (comentariosState) {
+                        if (comentariosState.isLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        if (comentariosState.errorMessage != null) {
+                          return Center(
+                            child: Text('Erro: ${comentariosState.errorMessage}'),
+                          );
+                        }
+
+                        final comentariosParaMostrar = comentariosState.filteredComentarios.isNotEmpty
+                            ? comentariosState.filteredComentarios
+                            : comentariosState.comentarios;
+
+                        if (comentariosParaMostrar.isEmpty) {
+                          return _buildEmptyState();
+                        }
+
+                        return _buildComentariosList(comentariosParaMostrar);
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) => Center(
+                        child: Text('Erro: $error'),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -125,14 +134,24 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
           ),
         ),
       ),
-      floatingActionButton: provider.Consumer<ComentariosProvider>(
-        builder: (context, commentProvider, child) {
+      floatingActionButton: Consumer(
+        builder: (context, ref, child) {
+          final comentariosAsync = ref.watch(comentariosNotifierProvider);
+
           // Verificar se o usuário é premium usando o service real
           final premiumService = di.sl<IPremiumService>();
           final isPremium = premiumService.isPremium;
-          
+
           return FloatingActionButton(
-            onPressed: commentProvider.isOperating || !isPremium ? null : () => _onAddComentario(context, commentProvider),
+            onPressed: () {
+              if (!isPremium) return;
+
+              comentariosAsync.whenData((comentariosState) {
+                if (!comentariosState.isOperating) {
+                  _onAddComentario(context);
+                }
+              });
+            },
             backgroundColor: !isPremium ? Colors.grey : null,
             child: !isPremium ? const Icon(Icons.lock) : const Icon(Icons.add),
           );
@@ -142,33 +161,63 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
   }
 
   Widget _buildModernHeader(BuildContext context, bool isDark) {
-    return provider.Consumer<ComentariosProvider>(
-      builder: (context, commentProvider, child) {
-        String subtitle;
-        if (commentProvider.isLoading) {
-          subtitle = 'Carregando comentários...';
-        } else {
-          final total = commentProvider.totalCount;
-          final filtered = commentProvider.comentarios.length;
-          
-          if (widget.pkIdentificador != null || widget.ferramenta != null) {
-            // Comentários filtrados por contexto
-            subtitle = filtered > 0 ? '$filtered comentários para este contexto' : 'Nenhum comentário neste contexto';
-          } else {
-            // Todos os comentários
-            subtitle = total > 0 ? '$total comentários' : 'Suas anotações pessoais';
-          }
-        }
-        
-        return ModernHeaderWidget(
-          title: 'Comentários',
-          subtitle: subtitle,
-          leftIcon: Icons.comment_outlined,
-          showBackButton: false,
-          showActions: true,
-          isDark: isDark,
-          rightIcon: Icons.info_outline,
-          onRightIconPressed: () => _showInfoDialog(context),
+    return Consumer(
+      builder: (context, ref, child) {
+        final comentariosAsync = ref.watch(comentariosNotifierProvider);
+
+        return comentariosAsync.when(
+          data: (comentariosState) {
+            String subtitle;
+            if (comentariosState.isLoading) {
+              subtitle = 'Carregando comentários...';
+            } else {
+              final total = comentariosState.totalCount;
+              final filtered = comentariosState.filteredComentarios.isNotEmpty
+                  ? comentariosState.filteredComentarios.length
+                  : comentariosState.comentarios.length;
+
+              if (widget.pkIdentificador != null || widget.ferramenta != null) {
+                // Comentários filtrados por contexto
+                subtitle = filtered > 0
+                    ? '$filtered comentários para este contexto'
+                    : 'Nenhum comentário neste contexto';
+              } else {
+                // Todos os comentários
+                subtitle = total > 0 ? '$total comentários' : 'Suas anotações pessoais';
+              }
+            }
+
+            return ModernHeaderWidget(
+              title: 'Comentários',
+              subtitle: subtitle,
+              leftIcon: Icons.comment_outlined,
+              showBackButton: false,
+              showActions: true,
+              isDark: isDark,
+              rightIcon: Icons.info_outline,
+              onRightIconPressed: () => _showInfoDialog(context),
+            );
+          },
+          loading: () => ModernHeaderWidget(
+            title: 'Comentários',
+            subtitle: 'Carregando...',
+            leftIcon: Icons.comment_outlined,
+            showBackButton: false,
+            showActions: true,
+            isDark: isDark,
+            rightIcon: Icons.info_outline,
+            onRightIconPressed: () => _showInfoDialog(context),
+          ),
+          error: (_, __) => ModernHeaderWidget(
+            title: 'Comentários',
+            subtitle: 'Erro ao carregar',
+            leftIcon: Icons.comment_outlined,
+            showBackButton: false,
+            showActions: true,
+            isDark: isDark,
+            rightIcon: Icons.info_outline,
+            onRightIconPressed: () => _showInfoDialog(context),
+          ),
         );
       },
     );
@@ -387,10 +436,10 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
     }
   }
 
-  void _onAddComentario(BuildContext context, ComentariosProvider commentProvider) {
+  void _onAddComentario(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AddCommentDialog(
+      builder: (dialogContext) => AddCommentDialog(
         origem: widget.ferramenta ?? 'Comentários',
         itemName: widget.pkIdentificador != null ? 'Item ${widget.pkIdentificador}' : 'Comentário direto',
         pkIdentificador: widget.pkIdentificador,
@@ -398,7 +447,7 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
         onSave: (content) async {
           // Criar entidade a partir do conteúdo
           final comentario = _createComentarioFromContent(content);
-          await commentProvider.addComentario(comentario);
+          await ref.read(comentariosNotifierProvider.notifier).addComentario(comentario);
         },
         onCancel: () {
           // Callback opcional para cancelamento
@@ -410,20 +459,19 @@ class _ComentariosPageContentState extends State<_ComentariosPageContent> {
   void _deleteComentario(BuildContext context, ComentarioEntity comentario) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Excluir Comentário'),
         content: const Text('Tem certeza que deseja excluir este comentário? Esta ação não pode ser desfeita.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              // Busca o provider atual
-              final commentProvider = provider.Provider.of<ComentariosProvider>(context, listen: false);
-              commentProvider.deleteComentario(comentario.id);
+              Navigator.of(dialogContext).pop();
+              // Delete comentario usando notifier
+              ref.read(comentariosNotifierProvider.notifier).deleteComentario(comentario.id);
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,

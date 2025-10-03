@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/diagnosticos_praga_provider.dart';
+import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widget responsável pelos filtros de diagnósticos
-/// 
+///
 /// Responsabilidade única: renderizar e gerenciar filtros de pesquisa e cultura
 /// - Campo de busca por texto
 /// - Dropdown de seleção de cultura
 /// - Layout responsivo e design consistente
-class DiagnosticoFilterWidget extends StatelessWidget {
+class DiagnosticoFilterWidget extends ConsumerWidget {
   const DiagnosticoFilterWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(diagnosticosPragaNotifierProvider);
+
     return RepaintBoundary(
-      child: provider_lib.Consumer<DiagnosticosPragaProvider>(
-        builder: (context, provider, child) {
-          return Container(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: _SearchField(
-                    onChanged: provider.updateSearchQuery,
-                  ),
+      child: state.when(
+        data: (data) => Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: _SearchField(
+                  onChanged: (value) {
+                    ref.read(diagnosticosPragaNotifierProvider.notifier).updateSearchQuery(value);
+                  },
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 1,
-                  child: _CultureDropdown(
-                    value: provider.selectedCultura,
-                    cultures: provider.culturas,
-                    onChanged: provider.updateSelectedCultura,
-                  ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 1,
+                child: _CultureDropdown(
+                  value: data.selectedCultura,
+                  cultures: data.culturas,
+                  onChanged: (value) {
+                    ref.read(diagnosticosPragaNotifierProvider.notifier).updateSelectedCultura(value);
+                  },
                 ),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
+        loading: () => const SizedBox(height: 48),
+        error: (error, _) => const SizedBox(height: 48),
       ),
     );
   }

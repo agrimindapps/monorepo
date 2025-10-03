@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers/auth_provider.dart';
-import '../../../core/services/user_action_service.dart';
+import '../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
 import '../constants/settings_design_tokens.dart';
-import '../presentation/providers/settings_provider.dart';
+import '../presentation/providers/settings_notifier.dart';
 import '../widgets/dialogs/clear_data_dialog.dart';
 import '../widgets/dialogs/delete_account_dialog.dart';
 import '../widgets/dialogs/device_management_dialog.dart';
@@ -16,49 +15,22 @@ import '../widgets/dialogs/logout_confirmation_dialog.dart';
 /// Página de perfil do usuário
 /// Funciona tanto para visitantes quanto usuários logados
 /// VERSÃO ATUALIZADA: Reage automaticamente a mudanças de autenticação
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   late TextEditingController _nameController;
   bool _settingsInitialized = false;
-  late UserActionService _userActionService;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
   }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    
-    // Initialize UserActionService
-    final authProvider = provider_lib.Provider.of<ReceitaAgroAuthProvider>(context, listen: false);
-    _userActionService = UserActionService(authProvider);
-    
-    // Initialize SettingsProvider once when authenticated
-    final settingsProvider = provider_lib.Provider.of<SettingsProvider>(context, listen: false);
-    
-    if (!_settingsInitialized && 
-        authProvider.isAuthenticated && 
-        !authProvider.isAnonymous &&
-        authProvider.currentUser?.id != null) {
-      
-      _settingsInitialized = true;
-      
-      // Initialize settings provider with user ID
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        settingsProvider.initialize(authProvider.currentUser!.id);
-      });
-    }
-  }
-
 
   @override
   void dispose() {
@@ -69,15 +41,28 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return provider_lib.Consumer2<ReceitaAgroAuthProvider, SettingsProvider>(
-      builder: (context, authProvider, settingsProvider, child) {
-        final isAuthenticated = authProvider.isAuthenticated && !authProvider.isAnonymous;
-        final user = authProvider.currentUser;
-        
+    final authState = ref.watch(receitaAgroAuthNotifierProvider);
+    final settingsState = ref.watch(settingsNotifierProvider);
+
+    return authState.when(
+      data: (authData) {
+        final isAuthenticated = authData.isAuthenticated && !authData.isAnonymous;
+        final user = authData.currentUser;
+
+        // Initialize settings once when authenticated
+        if (!_settingsInitialized && isAuthenticated && user?.id != null) {
+          _settingsInitialized = true;
+          final userId = user?.id;
+          if (userId != null && userId is String) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(settingsNotifierProvider.notifier).initialize(userId);
+            });
+          }
+        }
+
         // Debug: Log auth state changes para monitoramento
         debugPrint('🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}');
-        
+
         return Scaffold(
           body: SafeArea(
             child: Padding(
@@ -102,41 +87,45 @@ class _ProfilePageState extends State<ProfilePage> {
                     
                     // Content
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          children: [
-                            // Seção do Usuário (estilo Plantis)
-                            _buildUserSection(context, authProvider),
-                            const SizedBox(height: 12),
-                            
-                            // Informações da Conta (apenas para usuários logados)
-                            if (isAuthenticated) ...[
-                              _buildAccountInfoSection(context, authProvider),
+                      child: settingsState.when(
+                        data: (settingsData) => SingleChildScrollView(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            children: [
+                              // Seção do Usuário (estilo Plantis)
+                              _buildUserSection(context, authData),
                               const SizedBox(height: 12),
+
+                              // Informações da Conta (apenas para usuários logados)
+                              if (isAuthenticated) ...[
+                                _buildAccountInfoSection(context, authData),
+                                const SizedBox(height: 12),
+                              ],
+
+                              // Seção de Dispositivos Conectados
+                              if (isAuthenticated) ...[
+                                _buildDevicesSection(context, settingsData),
+                                const SizedBox(height: 12),
+                              ],
+
+                              // Dados e Sincronização
+                              if (isAuthenticated) ...[
+                                _buildDataSyncSection(context, authData),
+                                const SizedBox(height: 12),
+                              ],
+
+                              // Ações do Usuário (nova seção)
+                              if (isAuthenticated) ...[
+                                _buildUserActionsSection(context, authData),
+                                const SizedBox(height: 12),
+                              ],
+
+                              const SizedBox(height: 24),
                             ],
-                            
-                            // Seção de Dispositivos Conectados
-                            if (isAuthenticated) ...[
-                              _buildDevicesSection(context, settingsProvider),
-                              const SizedBox(height: 12),
-                            ],
-                            
-                            // Dados e Sincronização
-                            if (isAuthenticated) ...[
-                              _buildDataSyncSection(context, authProvider),
-                              const SizedBox(height: 12),
-                            ],
-                            
-                            // Ações do Usuário (nova seção)
-                            if (isAuthenticated) ...[
-                              _buildUserActionsSection(context, authProvider),
-                              const SizedBox(height: 12),
-                            ],
-                            
-                            const SizedBox(height: 24),
-                          ],
+                          ),
                         ),
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (error, _) => Center(child: Text('Erro: $error')),
                       ),
                     ),
                   ],
@@ -146,14 +135,22 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         );
       },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        body: Center(child: Text('Erro: $error')),
+      ),
     );
   }
 
   /// Seção do usuário estilo Plantis
-  Widget _buildUserSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildUserSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
-    final isAuthenticated = authProvider.isAuthenticated && !authProvider.isAnonymous;
-    final user = authProvider.currentUser;
+    final bool isAuthBool = authData?.isAuthenticated == true;
+    final bool isAnonBool = authData?.isAnonymous == true;
+    final isAuthenticated = isAuthBool && !isAnonBool;
+    final user = authData?.currentUser;
     
     return Container(
       decoration: _getCardDecoration(context),
@@ -191,7 +188,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ? SettingsDesignTokens.primaryColor 
                       : Colors.grey.shade400,
                   child: Text(
-                    _getInitials(user?.displayName ?? user?.email ?? 'Usuário'),
+                    _getInitials(_getUserDisplayTitle(user)),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -224,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 4),
                     Text(
                       isAuthenticated
-                          ? (user?.email ?? 'email@usuario.com')
+                          ? ((user?.email is String) ? (user?.email as String) : 'email@usuario.com')
                           : 'Faça login para acessar recursos completos',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -287,18 +284,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Obter título para exibição do usuário
   String _getUserDisplayTitle(dynamic user) {
-    if (user?.displayName != null && (user.displayName as String).isNotEmpty) {
-      return user.displayName as String;
+    final displayName = user?.displayName;
+    if (displayName != null && displayName is String && displayName.isNotEmpty) {
+      return displayName;
     }
-    return (user?.email as String?) ?? 'Usuário';
+    final email = user?.email;
+    return (email is String ? email : null) ?? 'Usuário';
   }
 
 
   /// Mostrar gerenciamento de dispositivos
-  void _showDeviceManagement(BuildContext context, SettingsProvider settingsProvider) {
+  void _showDeviceManagement(BuildContext context, dynamic settingsData) {
     showDialog<void>(
       context: context,
-      builder: (context) => DeviceManagementDialog(provider: settingsProvider),
+      builder: (context) => DeviceManagementDialog(settingsData: settingsData),
     );
   }
 
@@ -309,33 +308,67 @@ class _ProfilePageState extends State<ProfilePage> {
   /// Handler para logout
   Future<void> _handleLogout(BuildContext context) async {
     final shouldLogout = await LogoutConfirmationDialog.show(context);
-    
+
     if (shouldLogout == true && context.mounted) {
-      await _userActionService.performLogout(context);
+      try {
+        await ref.read(receitaAgroAuthNotifierProvider.notifier).signOut();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Logout realizado com sucesso!'), backgroundColor: Colors.green),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao sair: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
     }
   }
 
   /// Handler para limpeza de dados
   Future<void> _handleClearData(BuildContext context) async {
     final shouldClear = await ClearDataDialog.show(context);
-    
+
     if (shouldClear == true && context.mounted) {
-      await _userActionService.clearLocalData(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Funcionalidade de limpeza em desenvolvimento'), backgroundColor: Colors.orange),
+      );
     }
   }
 
   /// Handler para exclusão de conta
-  Future<void> _handleDeleteAccount(BuildContext context, ReceitaAgroAuthProvider authProvider) async {
+  Future<void> _handleDeleteAccount(BuildContext context) async {
     if (!context.mounted) return;
-    
+
     final shouldDelete = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => DeleteAccountDialog(authProvider: authProvider),
+      builder: (context) => const DeleteAccountDialog(),
     );
-    
+
     if (shouldDelete == true && context.mounted) {
-      await _userActionService.deleteAccount(context);
+      try {
+        final result = await ref.read(receitaAgroAuthNotifierProvider.notifier).deleteAccount();
+        if (context.mounted) {
+          if (result.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Conta excluída com sucesso'), backgroundColor: Colors.green),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro: ${result.errorMessage}'), backgroundColor: Colors.red),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao excluir conta: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
     }
   }
 
@@ -364,7 +397,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
   /// Seção de Dispositivos Conectados
-  Widget _buildDevicesSection(BuildContext context, SettingsProvider settingsProvider) {
+  Widget _buildDevicesSection(BuildContext context, dynamic settingsData) {
     final theme = Theme.of(context);
     
     return Column(
@@ -402,7 +435,7 @@ class _ProfilePageState extends State<ProfilePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextButton(
-                  onPressed: () => _showDeviceManagement(context, settingsProvider),
+                  onPressed: () => _showDeviceManagement(context, settingsData),
                   child: const Text('Gerenciar'),
                 ),
                 const SizedBox(width: 8),
@@ -445,11 +478,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Helper: Obter tempo de membro
-  String _getMemberSince(DateTime? createdAt) {
+  String _getMemberSince(dynamic createdAt) {
     if (createdAt == null) return 'Membro desde 10 dias';
 
+    // Convert to DateTime if needed
+    final DateTime date = createdAt is DateTime ? createdAt : DateTime.now();
+
     final now = DateTime.now();
-    final difference = now.difference(createdAt);
+    final difference = now.difference(date);
 
     if (difference.inDays < 30) {
       return 'Membro desde ${difference.inDays} dias';
@@ -468,9 +504,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
   /// Seção de informações da conta (estilo Plantis)
-  Widget _buildAccountInfoSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildAccountInfoSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
-    final user = authProvider.currentUser;
+    final user = authData.currentUser;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,7 +541,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Seção de dados e sincronização (estilo Plantis)
-  Widget _buildDataSyncSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildDataSyncSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
     
     return Column(
@@ -543,9 +579,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 subtitle: const Text('Todos os dados estão atualizados'),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),
-                  onPressed: () => _showSyncRefresh(context, authProvider),
+                  onPressed: () => _showSyncRefresh(context),
                 ),
-                onTap: () => _showSyncRefresh(context, authProvider),
+                onTap: () => _showSyncRefresh(context),
               ),
               ListTile(
                 leading: Container(
@@ -593,7 +629,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Seção de Ações do Usuário (nova seção)
-  Widget _buildUserActionsSection(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  Widget _buildUserActionsSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
     
     return Column(
@@ -649,7 +685,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: const Text('Excluir Conta'),
                 subtitle: const Text('Remove permanentemente sua conta'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _handleDeleteAccount(context, authProvider),
+                onTap: () => _handleDeleteAccount(context),
               ),
               ListTile(
                 leading: Container(
@@ -700,9 +736,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Formatar data para exibição
-  String _formatDate(DateTime? date) {
+  String _formatDate(dynamic date) {
     if (date == null) return 'N/A';
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final DateTime dateTime = date is DateTime ? date : DateTime.now();
+    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
   /// Mostrar diálogo de exportação de dados em JSON
@@ -824,7 +861,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Mostrar feedback de sincronização
-  void _showSyncRefresh(BuildContext context, ReceitaAgroAuthProvider authProvider) {
+  void _showSyncRefresh(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(

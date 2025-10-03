@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../../../core/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/receituagro_auth_notifier.dart';
 
 /// Diálogo simplificado de confirmação para exclusão de conta
-class DeleteAccountDialog extends StatefulWidget {
-  final ReceitaAgroAuthProvider authProvider;
-
-  const DeleteAccountDialog({
-    super.key,
-    required this.authProvider,
-  });
+class DeleteAccountDialog extends ConsumerStatefulWidget {
+  const DeleteAccountDialog({super.key});
 
   @override
-  State<DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+  ConsumerState<DeleteAccountDialog> createState() => _DeleteAccountDialogState();
 }
 
-class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
+class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
 
@@ -216,16 +213,11 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   /// Método estático para mostrar o diálogo
   // ignore: unused_element
-  static Future<bool?> show(
-    BuildContext context,
-    ReceitaAgroAuthProvider authProvider,
-  ) async {
+  static Future<bool?> show(BuildContext context) async {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => DeleteAccountDialog(
-        authProvider: authProvider,
-      ),
+      builder: (context) => const DeleteAccountDialog(),
     );
   }
 }

@@ -1,53 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/subscription_provider.dart';
+import '../providers/subscription_notifier.dart';
 
 /// Widget responsável pelas ações relacionadas a pagamento e subscription
-/// 
+///
 /// Funcionalidades:
 /// - Botão principal de compra
 /// - Botão de gerenciamento de subscription
 /// - Links de rodapé (Termos, Privacidade, Restaurar)
 /// - Configuração flexível via parâmetros
-/// 
+///
 /// Modes:
 /// - Purchase: Botão principal para compra
 /// - Management: Botão para gerenciar subscription ativa
 /// - Footer: Links de termos, privacidade e restaurar
-class PaymentActionsWidget extends StatelessWidget {
-  final SubscriptionProvider provider;
+class PaymentActionsWidget extends ConsumerWidget {
   final bool showPurchaseButton;
   final bool showSubscriptionManagement;
   final bool showFooterLinks;
 
   const PaymentActionsWidget({
     super.key,
-    required this.provider,
     this.showPurchaseButton = false,
     this.showSubscriptionManagement = false,
     this.showFooterLinks = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    if (showPurchaseButton) {
-      return _buildPurchaseButton();
-    } else if (showSubscriptionManagement) {
-      return _buildManagementButton();
-    } else if (showFooterLinks) {
-      return _buildFooterLinks();
-    }
-    
-    return const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+
+    return subscriptionAsync.when(
+      data: (subscriptionState) {
+        if (showPurchaseButton) {
+          return _buildPurchaseButton(ref, subscriptionState.isLoading);
+        } else if (showSubscriptionManagement) {
+          return _buildManagementButton(ref, subscriptionState.isLoading);
+        } else if (showFooterLinks) {
+          return _buildFooterLinks(ref, subscriptionState.isLoading);
+        }
+
+        return const SizedBox.shrink();
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => const SizedBox.shrink(),
+    );
   }
 
   /// Botão principal para compra do plano selecionado
-  Widget _buildPurchaseButton() {
+  Widget _buildPurchaseButton(WidgetRef ref, bool isLoading) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: ElevatedButton(
-        onPressed: provider.isLoading ? null : provider.purchaseSelectedPlan,
+        onPressed: isLoading
+            ? null
+            : () => ref.read(subscriptionNotifierProvider.notifier).purchaseSelectedPlan(),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: const Color(0xFF1B4332),  // Dark green text
@@ -58,7 +67,7 @@ class PaymentActionsWidget extends StatelessWidget {
           elevation: 0,
           shadowColor: Colors.transparent,
         ),
-        child: provider.isLoading
+        child: isLoading
             ? const SizedBox(
                 height: 20,
                 width: 20,
@@ -79,11 +88,13 @@ class PaymentActionsWidget extends StatelessWidget {
   }
 
   /// Botão para gerenciamento de subscription ativa
-  Widget _buildManagementButton() {
+  Widget _buildManagementButton(WidgetRef ref, bool isLoading) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: provider.isLoading ? null : provider.openManagementUrl,
+        onPressed: isLoading
+            ? null
+            : () => ref.read(subscriptionNotifierProvider.notifier).openManagementUrl(),
         icon: const Icon(Icons.settings),
         label: const Text('Gerenciar Assinatura'),
         style: ElevatedButton.styleFrom(
@@ -99,7 +110,7 @@ class PaymentActionsWidget extends StatelessWidget {
   }
 
   /// Links de rodapé (Termos, Privacidade, Restaurar)
-  Widget _buildFooterLinks() {
+  Widget _buildFooterLinks(WidgetRef ref, bool isLoading) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -108,21 +119,24 @@ class PaymentActionsWidget extends StatelessWidget {
           Expanded(
             child: _buildFooterLink(
               'Termos de Uso',
-              provider.openTermsOfUse,
+              () => ref.read(subscriptionNotifierProvider.notifier).openTermsOfUse(),
+              isLoading,
             ),
           ),
           _buildFooterDivider(),
           Expanded(
             child: _buildFooterLink(
               'Política de Privacidade',
-              provider.openPrivacyPolicy,
+              () => ref.read(subscriptionNotifierProvider.notifier).openPrivacyPolicy(),
+              isLoading,
             ),
           ),
           _buildFooterDivider(),
           Expanded(
             child: _buildFooterLink(
               'Restaurar',
-              provider.restorePurchases,
+              () => ref.read(subscriptionNotifierProvider.notifier).restorePurchases(),
+              isLoading,
             ),
           ),
         ],
@@ -131,9 +145,9 @@ class PaymentActionsWidget extends StatelessWidget {
   }
 
   /// Link individual do rodapé
-  Widget _buildFooterLink(String text, VoidCallback onPressed) {
+  Widget _buildFooterLink(String text, VoidCallback onPressed, bool isLoading) {
     return TextButton(
-      onPressed: provider.isLoading ? null : onPressed,
+      onPressed: isLoading ? null : onPressed,
       child: Text(
         text,
         textAlign: TextAlign.center,

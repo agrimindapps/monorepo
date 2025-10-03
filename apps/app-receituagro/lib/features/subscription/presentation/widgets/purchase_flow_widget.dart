@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/feature_flags_provider.dart';
-import '../providers/subscription_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
+import '../providers/subscription_notifier.dart';
 
 /// Advanced Purchase Flow Widget with RevenueCat Integration
-/// 
+///
 /// Features:
 /// - Multi-step purchase flow
 /// - Plan comparison with A/B testing
@@ -13,7 +13,7 @@ import '../providers/subscription_provider.dart';
 /// - Purchase success/error handling
 /// - Promotional pricing display
 /// - Trial period management
-class PurchaseFlowWidget extends StatefulWidget {
+class PurchaseFlowWidget extends ConsumerStatefulWidget {
   final bool showTrialFirst;
   final String? promoCode;
   final VoidCallback? onPurchaseSuccess;
@@ -30,10 +30,10 @@ class PurchaseFlowWidget extends StatefulWidget {
   });
 
   @override
-  State<PurchaseFlowWidget> createState() => _PurchaseFlowWidgetState();
+  ConsumerState<PurchaseFlowWidget> createState() => _PurchaseFlowWidgetState();
 }
 
-class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
+class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late AnimationController _slideController;
@@ -69,32 +69,46 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.Consumer2<SubscriptionProvider, FeatureFlagsProvider>(
-      builder: (context, subscriptionProvider, featureFlags, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Progress Indicator
-            _buildProgressIndicator(context),
-            
-            const SizedBox(height: 24),
-            
-            // Purchase Flow Content
-            SizedBox(
-              height: 500,
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _buildPlanSelectionStep(context, subscriptionProvider, featureFlags),
-                  _buildConfirmationStep(context, subscriptionProvider),
-                  _buildProcessingStep(context),
-                ],
-              ),
-            ),
-          ],
+    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+
+    return subscriptionAsync.when(
+      data: (subscriptionState) {
+        return featureFlagsAsync.when(
+          data: (featureFlagsState) {
+            final subscriptionNotifier = ref.read(subscriptionNotifierProvider.notifier);
+            final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Progress Indicator
+                _buildProgressIndicator(context),
+
+                const SizedBox(height: 24),
+
+                // Purchase Flow Content
+                SizedBox(
+                  height: 500,
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _buildPlanSelectionStep(context, subscriptionNotifier, subscriptionState, featureFlagsNotifier),
+                      _buildConfirmationStep(context, subscriptionNotifier, subscriptionState),
+                      _buildProcessingStep(context),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error: $error')),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
     );
   }
 
@@ -149,8 +163,9 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   /// Step 1: Plan Selection
   Widget _buildPlanSelectionStep(
     BuildContext context,
-    SubscriptionProvider subscriptionProvider,
-    FeatureFlagsProvider featureFlags,
+    SubscriptionNotifier subscriptionNotifier,
+    SubscriptionState subscriptionState,
+    FeatureFlagsNotifier featureFlagsNotifier,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -158,11 +173,11 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Trial Offer (if enabled)
-          if (widget.showTrialFirst && subscriptionProvider.hasTrialAvailable)
-            _buildTrialOfferCard(context, subscriptionProvider),
-          
+          if (widget.showTrialFirst && subscriptionState.hasTrialAvailable)
+            _buildTrialOfferCard(context, subscriptionNotifier),
+
           const SizedBox(height: 24),
-          
+
           // Plan Options
           Text(
             'Planos Disponíveis',
@@ -171,10 +186,10 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Premium Plans
-          ...subscriptionProvider.availablePlans.map((plan) {
-            return _buildPlanCard(context, plan, subscriptionProvider);
+          ...subscriptionNotifier.availablePlans.map((plan) {
+            return _buildPlanCard(context, plan, subscriptionNotifier);
           }),
           
           const SizedBox(height: 24),
@@ -206,9 +221,9 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   }
 
   /// Step 2: Purchase Confirmation
-  Widget _buildConfirmationStep(BuildContext context, SubscriptionProvider subscriptionProvider) {
-    final selectedPlan = subscriptionProvider.availablePlans
-        .firstWhere((plan) => (plan as Map<String, dynamic>)['id'] == _selectedPlanId) as Map<String, dynamic>;
+  Widget _buildConfirmationStep(BuildContext context, SubscriptionNotifier subscriptionNotifier, SubscriptionState subscriptionState) {
+    final selectedPlan = subscriptionNotifier.availablePlans
+        .firstWhere((plan) => plan['id'] == _selectedPlanId);
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -394,7 +409,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   }
 
   /// Trial Offer Card
-  Widget _buildTrialOfferCard(BuildContext context, SubscriptionProvider subscriptionProvider) {
+  Widget _buildTrialOfferCard(BuildContext context, SubscriptionNotifier subscriptionNotifier) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -432,7 +447,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => _startTrial(subscriptionProvider),
+              onPressed: () => _startTrial(subscriptionNotifier),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.orange.shade600,
@@ -452,7 +467,7 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   }
 
   /// Individual Plan Card
-  Widget _buildPlanCard(BuildContext context, dynamic plan, SubscriptionProvider subscriptionProvider) {
+  Widget _buildPlanCard(BuildContext context, dynamic plan, SubscriptionNotifier subscriptionNotifier) {
     final isSelected = _selectedPlanId == plan.id;
     final theme = Theme.of(context);
     
@@ -605,25 +620,25 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   }
 
   /// Start Trial
-  Future<void> _startTrial(SubscriptionProvider subscriptionProvider) async {
+  Future<void> _startTrial(SubscriptionNotifier subscriptionNotifier) async {
     try {
       setState(() {
         _isPurchasing = true;
         _currentStep = 2;
       });
-      
+
       await _pageController.animateToPage(
         2,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-      
-      await subscriptionProvider.startFreeTrial();
-      
+
+      await subscriptionNotifier.startFreeTrial();
+
       if (widget.onPurchaseSuccess != null) {
         widget.onPurchaseSuccess!();
       }
-      
+
     } catch (e) {
       if (widget.onPurchaseError != null) {
         widget.onPurchaseError!();
@@ -640,27 +655,27 @@ class _PurchaseFlowWidgetState extends State<PurchaseFlowWidget>
   /// Process Purchase
   Future<void> _processPurchase() async {
     if (_selectedPlanId == null) return;
-    
+
     try {
       setState(() {
         _isPurchasing = true;
         _currentStep = 2;
       });
-      
+
       await _pageController.animateToPage(
         2,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-      
+
       if (!mounted) return;
-      final subscriptionProvider = provider_lib.Provider.of<SubscriptionProvider>(context, listen: false);
-      await subscriptionProvider.purchasePlan(_selectedPlanId!);
-      
+      final subscriptionNotifier = ref.read(subscriptionNotifierProvider.notifier);
+      await subscriptionNotifier.purchasePlan(_selectedPlanId!);
+
       if (widget.onPurchaseSuccess != null) {
         widget.onPurchaseSuccess!();
       }
-      
+
     } catch (e) {
       if (widget.onPurchaseError != null) {
         widget.onPurchaseError!();

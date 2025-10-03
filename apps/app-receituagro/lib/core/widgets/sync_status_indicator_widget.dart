@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/feature_flags_provider.dart';
+import '../providers/feature_flags_notifier.dart';
 
 /// Global Sync Status Indicator Widget
-/// 
+///
 /// Features:
 /// - Real-time sync status display
 /// - Progress indicators for ongoing sync
@@ -15,7 +15,7 @@ import '../providers/feature_flags_provider.dart';
 /// - Error state indicators
 /// - Manual sync trigger
 /// - Floating and inline variants
-class SyncStatusIndicatorWidget extends StatefulWidget {
+class SyncStatusIndicatorWidget extends ConsumerStatefulWidget {
   /// Display variant: floating (FAB-like) or inline (embedded in UI)
   final SyncIndicatorVariant variant;
   
@@ -45,10 +45,10 @@ class SyncStatusIndicatorWidget extends StatefulWidget {
   });
 
   @override
-  State<SyncStatusIndicatorWidget> createState() => _SyncStatusIndicatorWidgetState();
+  ConsumerState<SyncStatusIndicatorWidget> createState() => _SyncStatusIndicatorWidgetState();
 }
 
-class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
+class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorWidget>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _rotationController;
@@ -156,10 +156,17 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
 
   @override
   Widget build(BuildContext context) {
-    return provider_lib.Consumer<FeatureFlagsProvider>(
-      builder: (BuildContext context, FeatureFlagsProvider featureFlags, Widget? child) {
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+
+    return featureFlagsAsync.when(
+      data: (featureFlagsState) {
+        if (!featureFlagsState.isInitialized) {
+          return const SizedBox.shrink();
+        }
+
+        final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
         // Don't show if sync is disabled
-        if (!featureFlags.isContentSynchronizationEnabled) {
+        if (!featureFlagsNotifier.isContentSynchronizationEnabled) {
           return const SizedBox.shrink();
         }
 
@@ -170,6 +177,8 @@ class _SyncStatusIndicatorWidgetState extends State<SyncStatusIndicatorWidget>
             return _buildInlineIndicator(context);
         }
       },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

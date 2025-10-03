@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/feature_flags_provider.dart';
+import '../providers/feature_flags_notifier.dart';
 import '../services/remote_config_service.dart';
 
 /// A/B Testing Widget for Dynamic UI Components
-/// 
+///
 /// Features:
 /// - Dynamic widget switching based on A/B test flags
 /// - Fallback widget support
 /// - Analytics event tracking for variant exposure
 /// - Performance optimized with widget caching
 /// - Debug mode indicators
-class ABTestingWidget extends StatefulWidget {
+class ABTestingWidget extends ConsumerStatefulWidget {
   /// The feature flag to check for A/B test variant
   final ReceitaAgroFeatureFlag featureFlag;
   
@@ -42,31 +42,34 @@ class ABTestingWidget extends StatefulWidget {
   });
 
   @override
-  State<ABTestingWidget> createState() => _ABTestingWidgetState();
+  ConsumerState<ABTestingWidget> createState() => _ABTestingWidgetState();
 }
 
-class _ABTestingWidgetState extends State<ABTestingWidget> {
+class _ABTestingWidgetState extends ConsumerState<ABTestingWidget> {
   bool _hasTrackedExposure = false;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FeatureFlagsProvider>(
-      builder: (context, featureFlags, child) {
-        if (!featureFlags.isInitialized) {
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+
+    return featureFlagsAsync.when(
+      data: (featureFlagsState) {
+        if (!featureFlagsState.isInitialized) {
           // Return fallback or control while loading
           return widget.fallbackWidget ?? widget.controlWidget;
         }
 
-        final isVariantActive = featureFlags.isFeatureEnabled(widget.featureFlag);
-        
+        final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+        final isVariantActive = featureFlagsNotifier.isFeatureEnabled(widget.featureFlag);
+
         // Track analytics exposure (only once per widget lifecycle)
         if (!_hasTrackedExposure && widget.analyticsEventName != null) {
           _trackVariantExposure(isVariantActive);
         }
 
         // Select appropriate widget
-        final selectedWidget = isVariantActive 
-            ? widget.variantWidget 
+        final selectedWidget = isVariantActive
+            ? widget.variantWidget
             : widget.controlWidget;
 
         // Wrap with debug indicator if enabled
@@ -76,6 +79,8 @@ class _ABTestingWidgetState extends State<ABTestingWidget> {
 
         return selectedWidget;
       },
+      loading: () => widget.fallbackWidget ?? widget.controlWidget,
+      error: (_, __) => widget.fallbackWidget ?? widget.controlWidget,
     );
   }
 
@@ -194,7 +199,7 @@ class ConditionalABWidget extends StatelessWidget {
 }
 
 /// Feature Flag Guard - shows widget only if feature is enabled
-class FeatureFlagGuard extends StatelessWidget {
+class FeatureFlagGuard extends ConsumerWidget {
   final ReceitaAgroFeatureFlag featureFlag;
   final Widget child;
   final Widget? fallbackWidget;
@@ -207,16 +212,21 @@ class FeatureFlagGuard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<FeatureFlagsProvider>(
-      builder: (context, featureFlags, _) {
-        if (!featureFlags.isInitialized) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+
+    return featureFlagsAsync.when(
+      data: (featureFlagsState) {
+        if (!featureFlagsState.isInitialized) {
           return fallbackWidget ?? const SizedBox.shrink();
         }
 
-        final isEnabled = featureFlags.isFeatureEnabled(featureFlag);
+        final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+        final isEnabled = featureFlagsNotifier.isFeatureEnabled(featureFlag);
         return isEnabled ? child : (fallbackWidget ?? const SizedBox.shrink());
       },
+      loading: () => fallbackWidget ?? const SizedBox.shrink(),
+      error: (_, __) => fallbackWidget ?? const SizedBox.shrink(),
     );
   }
 }

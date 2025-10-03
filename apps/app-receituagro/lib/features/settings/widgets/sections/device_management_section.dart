@@ -173,7 +173,7 @@ class DeviceManagementSection extends StatelessWidget {
   Future<void> _openDeviceManagementDialog(BuildContext context, SettingsProvider provider) async {
     await showDialog<void>(
       context: context,
-      builder: (context) => DeviceManagementDialog(provider: provider),
+      builder: (context) => DeviceManagementDialog(settingsData: provider),
     );
   }
 }

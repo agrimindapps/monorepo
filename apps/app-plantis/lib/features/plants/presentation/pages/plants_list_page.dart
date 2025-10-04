@@ -565,27 +565,16 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
         return plantsAsync.when(
           data: (plantsState) {
-            if (kDebugMode) {
-              print('🔍 PlantsListPage._buildPlantsContent:');
-              print('   - allPlants: ${plantsState.allPlants.length}');
-              print('   - searchQuery: "${plantsState.searchQuery}"');
-              print('   - searchResults: ${plantsState.searchResults.length}');
-              print('   - filteredPlants: ${plantsState.filteredPlants.length}');
-              print('   - filterBySpace: ${plantsState.filterBySpace}');
-            }
-
             final displayData = PlantsDisplayData(
               plants:
                   plantsState.searchQuery.isNotEmpty
                       ? plantsState.searchResults
-                      : plantsState.filteredPlants,
+                      : (plantsState.filterBySpace != null
+                          ? plantsState.filteredPlants
+                          : plantsState.allPlants),
               isSearching: plantsState.searchQuery.isNotEmpty,
               searchQuery: plantsState.searchQuery,
             );
-
-            if (kDebugMode) {
-              print('   - displayData.plants: ${displayData.plants.length}');
-            }
 
             // Estado vazio
             if (displayData.plants.isEmpty) {

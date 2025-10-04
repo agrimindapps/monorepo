@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
-import '../../core/providers/auth_provider.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../features/auth/presentation/notifiers/auth_notifier.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
 class ResponsiveSidebar extends ConsumerWidget {
@@ -416,9 +416,9 @@ class _SidebarFooter extends StatelessWidget {
   }
   
   void _showUserMenu(BuildContext context) {
-    final authState = ref.read(authNotifierProvider);
+    final authState = ref.read(authProvider);
     final isAnonymous = authState.isAnonymous;
-    
+
     showMenu(
       context: context,
       position: const RelativeRect.fromLTRB(0, 0, 0, 80),
@@ -451,7 +451,7 @@ class _SidebarFooter extends StatelessWidget {
 
   /// Handle logout with enhanced dialog
   Future<void> _handleLogout(BuildContext context) async {
-    final authNotifier = ref.read(authNotifierProvider.notifier);
+    final authNotifier = ref.read(authProvider.notifier);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => _buildEnhancedLogoutDialog(context),
@@ -459,7 +459,7 @@ class _SidebarFooter extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       await authNotifier.logoutWithLoadingDialog(context);
-      final authState = ref.read(authNotifierProvider);
+      final authState = ref.read(authProvider);
       if (context.mounted && authState.errorMessage != null) {
         _showSnackBar(context, authState.errorMessage!);
       } else if (context.mounted) {

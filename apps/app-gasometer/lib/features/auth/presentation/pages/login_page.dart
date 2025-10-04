@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 
 // TODO: Replace with Riverpod providers
 // import '../controllers/login_controller.dart';
-// import '../providers/auth_provider.dart';
+// import '../../features/auth/presentation/state/auth_state.dart';
+import '../notifiers/notifiers.dart';
 import '../widgets/auth_tabs_widget.dart';
 import '../widgets/login_background_widget.dart';
 import '../widgets/login_form_widget.dart';

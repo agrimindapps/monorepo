@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/app_error.dart' as local_error;
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/usecases/add_vehicle.dart';

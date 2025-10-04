@@ -1,23 +1,25 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../providers/premium_provider.dart';
+import '../providers/premium_notifier.dart';
 
-class PremiumDevControls extends StatelessWidget {
+class PremiumDevControls extends core.ConsumerWidget {
   const PremiumDevControls({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, core.WidgetRef ref) {
     // Só mostrar em modo debug
     if (!kDebugMode) {
       return const SizedBox.shrink();
     }
 
-    return Consumer<PremiumProvider>(
-      builder: (context, premiumProvider, child) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
         return DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.warning.withValues(alpha: 0.1),
@@ -80,9 +82,9 @@ class PremiumDevControls extends StatelessWidget {
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: premiumProvider.isLoading 
-                              ? null 
-                              : () => _generateLicense(context, premiumProvider, 7),
+                            onPressed: state.isLoadingProducts || state.isProcessingPurchase
+                              ? null
+                              : () => _generateLicense(context, ref, 7),
                             icon: const Icon(Icons.play_arrow, size: 18),
                             label: const Text('7 dias'),
                             style: ElevatedButton.styleFrom(
@@ -95,9 +97,9 @@ class PremiumDevControls extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: premiumProvider.isLoading 
-                              ? null 
-                              : () => _generateLicense(context, premiumProvider, 30),
+                            onPressed: state.isLoadingProducts || state.isProcessingPurchase
+                              ? null
+                              : () => _generateLicense(context, ref, 30),
                             icon: const Icon(Icons.calendar_month, size: 18),
                             label: const Text('30 dias'),
                             style: ElevatedButton.styleFrom(
@@ -115,9 +117,9 @@ class PremiumDevControls extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: premiumProvider.isLoading 
-                          ? null 
-                          : () => _revokeLicense(context, premiumProvider),
+                        onPressed: state.isLoadingProducts || state.isProcessingPurchase
+                          ? null
+                          : () => _revokeLicense(context, ref),
                         icon: const Icon(
                           Icons.block,
                           size: 18,
@@ -151,9 +153,9 @@ class PremiumDevControls extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: premiumProvider.isLoading 
-                              ? null 
-                              : () => _refreshStatus(context, premiumProvider),
+                            onPressed: state.isLoadingProducts || state.isProcessingPurchase
+                              ? null
+                              : () => _refreshStatus(context, ref),
                             icon: const Icon(Icons.refresh, size: 18),
                             label: const Text('Atualizar Status'),
                             style: OutlinedButton.styleFrom(
@@ -164,9 +166,9 @@ class PremiumDevControls extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: premiumProvider.isLoading 
-                              ? null 
-                              : () => _restorePurchases(context, premiumProvider),
+                            onPressed: state.isLoadingProducts || state.isProcessingPurchase
+                              ? null
+                              : () => _restorePurchases(context, ref),
                             icon: const Icon(Icons.restore, size: 18),
                             label: const Text('Restaurar'),
                             style: OutlinedButton.styleFrom(
@@ -198,16 +200,16 @@ class PremiumDevControls extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Premium: ${premiumProvider.isPremium ? "Ativo" : "Inativo"}',
+                            'Premium: ${state.isPremium ? "Ativo" : "Inativo"}',
                             style: AppTextStyles.bodySmall,
                           ),
                           Text(
-                            'Fonte: ${premiumProvider.premiumSource}',
+                            'Fonte: ${state.premiumSource}',
                             style: AppTextStyles.bodySmall,
                           ),
-                          if (premiumProvider.expirationDate != null)
+                          if (state.expirationDate != null)
                             Text(
-                              'Expira: ${_formatDate(premiumProvider.expirationDate!)}',
+                              'Expira: ${_formatDate(state.expirationDate!)}',
                               style: AppTextStyles.bodySmall,
                             ),
                         ],
@@ -220,16 +222,21 @@ class PremiumDevControls extends StatelessWidget {
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Erro: $error', style: const TextStyle(color: AppColors.error)),
+      ),
     );
   }
 
   Future<void> _generateLicense(
     BuildContext context,
-    PremiumProvider provider,
+    core.WidgetRef ref,
     int days,
   ) async {
     try {
-      await provider.generateLocalLicense(days: days);
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      await notifier.generateLocalLicense(days: days);
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -252,7 +259,7 @@ class PremiumDevControls extends StatelessWidget {
 
   Future<void> _revokeLicense(
     BuildContext context,
-    PremiumProvider provider,
+    core.WidgetRef ref,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -281,7 +288,8 @@ class PremiumDevControls extends StatelessWidget {
     if (confirmed != true) return;
 
     try {
-      await provider.revokeLocalLicense();
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      await notifier.revokeLocalLicense();
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -304,10 +312,11 @@ class PremiumDevControls extends StatelessWidget {
 
   Future<void> _refreshStatus(
     BuildContext context,
-    PremiumProvider provider,
+    core.WidgetRef ref,
   ) async {
     try {
-      await provider.refreshPremiumStatus();
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      await notifier.refreshPremiumStatus();
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -330,10 +339,11 @@ class PremiumDevControls extends StatelessWidget {
 
   Future<void> _restorePurchases(
     BuildContext context,
-    PremiumProvider provider,
+    core.WidgetRef ref,
   ) async {
     try {
-      final success = await provider.restorePurchases();
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final success = await notifier.restorePurchases();
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(

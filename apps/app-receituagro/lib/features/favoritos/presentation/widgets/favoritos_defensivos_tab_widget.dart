@@ -3,39 +3,40 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../domain/entities/favorito_entity.dart';
-import '../providers/favoritos_provider_simplified.dart';
+import '../notifiers/favoritos_notifier.dart';
 
 /// Widget especializado para aba de Defensivos favoritos
 /// Gerencia listagem e ações específicas para defensivos
-class FavoritosDefensivosTabWidget extends StatelessWidget {
-  final FavoritosProviderSimplified provider;
+class FavoritosDefensivosTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
   const FavoritosDefensivosTabWidget({
     super.key,
-    required this.provider,
     required this.onReload,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoritosState = ref.watch(favoritosNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return _buildTabContent(
       context: context,
-      provider: provider,
-      viewState: provider.getViewStateForType(TipoFavorito.defensivo),
-      emptyMessage: provider.getEmptyMessageForType(TipoFavorito.defensivo),
-      items: provider.defensivos,
+      ref: ref,
+      favoritosState: favoritosState,
+      viewState: favoritosState.getViewStateForType(TipoFavorito.defensivo),
+      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.defensivo),
+      items: favoritosState.defensivos,
       itemBuilder:
-          (defensivo) => _buildDefensivoItem(context, defensivo, provider),
+          (defensivo) => _buildDefensivoItem(context, ref, defensivo),
       isDark: isDark,
     );
   }
 
   Widget _buildTabContent<T extends FavoritoEntity>({
     required BuildContext context,
-    required FavoritosProviderSimplified provider,
+    required WidgetRef ref,
+    required FavoritosState favoritosState,
     required FavoritosViewState viewState,
     required String emptyMessage,
     required List<T> items,
@@ -47,7 +48,7 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
 
       case FavoritosViewState.error:
-        return _buildErrorState(context, provider, isDark);
+        return _buildErrorState(context, favoritosState, isDark);
 
       case FavoritosViewState.empty:
         return _buildEmptyState(context, emptyMessage, isDark);
@@ -55,7 +56,7 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
-            await provider.loadAllFavoritos();
+            await ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -97,8 +98,8 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
 
   Widget _buildDefensivoItem(
     BuildContext context,
+    WidgetRef ref,
     FavoritoDefensivoEntity defensivo,
-    FavoritosProviderSimplified provider,
   ) {
     return Dismissible(
       key: Key('favorito_defensivo_${defensivo.id}'),
@@ -108,7 +109,7 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
         return await _showRemoveDialog(context, defensivo.nomeComum);
       },
       onDismissed: (direction) async {
-        await _removeFavorito(context, provider, defensivo);
+        await _removeFavorito(context, ref, defensivo);
       },
       child: ListTile(
         onTap: () => _navigateToDefensivoDetails(context, defensivo),
@@ -231,11 +232,11 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
   /// Remove o favorito e mostra feedback
   Future<void> _removeFavorito(
     BuildContext context,
-    FavoritosProviderSimplified provider,
+    WidgetRef ref,
     FavoritoDefensivoEntity defensivo,
   ) async {
     try {
-      await provider.toggleFavorito(
+      await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(
         TipoFavorito.defensivo,
         defensivo.id,
       );
@@ -248,7 +249,7 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
 
   Widget _buildErrorState(
     BuildContext context,
-    FavoritosProviderSimplified provider,
+    FavoritosState favoritosState,
     bool isDark,
   ) {
     return Center(
@@ -269,10 +270,10 @@ class FavoritosDefensivosTabWidget extends StatelessWidget {
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          if (provider.errorMessage != null) ...[
+          if (favoritosState.errorMessage != null) ...[
             const SizedBox(height: 8),
             Text(
-              provider.errorMessage!,
+              favoritosState.errorMessage!,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,

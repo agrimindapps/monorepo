@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
-import '../../../../core/providers/vehicles_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -18,7 +18,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesProvider);
+    final vehiclesState = ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(

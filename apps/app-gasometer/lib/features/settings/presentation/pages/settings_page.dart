@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
-import '../../../../core/providers/vehicles_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../providers/settings_notifier.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -15,7 +15,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesProvider);
+    final vehiclesState = ref.watch(vehiclesNotifierProvider);
     final settingsAsync = ref.watch(settingsNotifierProvider);
     final themeMode = ref.watch(themeModeProvider);
 

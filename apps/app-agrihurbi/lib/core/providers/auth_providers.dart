@@ -1,5 +1,6 @@
-import 'package:core/core.dart' hide Provider, StateNotifier, Consumer, ProviderContainer;
+import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart' as app_auth;
@@ -7,6 +8,8 @@ import '../../features/auth/domain/usecases/login_usecase.dart' as app_auth;
 import '../../features/auth/domain/usecases/logout_usecase.dart' as app_auth;
 import '../../features/auth/domain/usecases/refresh_user_usecase.dart' as app_auth;
 import '../../features/auth/domain/usecases/register_usecase.dart' as app_auth;
+
+part 'auth_providers.g.dart';
 
 // === AUTH STATE ===
 
@@ -41,25 +44,30 @@ class AuthState {
   }
 }
 
-// === AUTH NOTIFIER ===
+// === AUTH NOTIFIER (MODERN RIVERPOD) ===
 
-/// StateNotifier para autenticação
-class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(
-    this._loginUseCase,
-    this._registerUseCase,
-    this._logoutUseCase,
-    this._getCurrentUserUseCase,
-    this._refreshUserUseCase,
-  ) : super(const AuthState()) {
+/// Notifier para autenticação
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  late final app_auth.LoginUseCase _loginUseCase;
+  late final app_auth.RegisterUseCase _registerUseCase;
+  late final app_auth.LogoutUseCase _logoutUseCase;
+  late final app_auth.GetCurrentUserUseCase _getCurrentUserUseCase;
+  late final app_auth.RefreshUserUseCase _refreshUserUseCase;
+
+  @override
+  AuthState build() {
+    _loginUseCase = di.getIt<app_auth.LoginUseCase>();
+    _registerUseCase = di.getIt<app_auth.RegisterUseCase>();
+    _logoutUseCase = di.getIt<app_auth.LogoutUseCase>();
+    _getCurrentUserUseCase = di.getIt<app_auth.GetCurrentUserUseCase>();
+    _refreshUserUseCase = di.getIt<app_auth.RefreshUserUseCase>();
+
+    // Initialize auth state
     _initialize();
-  }
 
-  final app_auth.LoginUseCase _loginUseCase;
-  final app_auth.RegisterUseCase _registerUseCase;
-  final app_auth.LogoutUseCase _logoutUseCase;
-  final app_auth.GetCurrentUserUseCase _getCurrentUserUseCase;
-  final app_auth.RefreshUserUseCase _refreshUserUseCase;
+    return const AuthState();
+  }
 
   Future<void> _initialize() async {
     await getCurrentUser();
@@ -197,25 +205,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-// === PROVIDERS ===
-
-/// Provider para autenticação
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(
-    di.getIt<app_auth.LoginUseCase>(),
-    di.getIt<app_auth.RegisterUseCase>(),
-    di.getIt<app_auth.LogoutUseCase>(),
-    di.getIt<app_auth.GetCurrentUserUseCase>(),
-    di.getIt<app_auth.RefreshUserUseCase>(),
-  );
-});
+// === DERIVED PROVIDERS ===
 
 /// Provider derivado para verificar se o usuário está autenticado
-final isAuthenticatedProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).isAuthenticated;
-});
+@riverpod
+bool isAuthenticated(Ref ref) {
+  return ref.watch(authNotifierProvider).isAuthenticated;
+}
 
 /// Provider derivado para obter o usuário atual
-final currentUserProvider = Provider<UserEntity?>((ref) {
-  return ref.watch(authProvider).user;
-});
+@riverpod
+UserEntity? currentUser(Ref ref) {
+  return ref.watch(authNotifierProvider).user;
+}

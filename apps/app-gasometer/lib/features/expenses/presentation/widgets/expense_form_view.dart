@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/form_section_widget.dart';
@@ -8,24 +9,24 @@ import '../../../../core/widgets/money_form_field.dart';
 import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
 import '../../../../core/widgets/receipt_section.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../core/constants/expense_constants.dart';
-import '../providers/expense_form_provider.dart';
+import '../../domain/entities/expense_entity.dart';
+import '../notifiers/expense_form_notifier.dart';
+import '../notifiers/expense_form_state.dart';
 import 'expense_type_selector.dart';
 
 /// Widget principal do formulário de despesas
-class ExpenseFormView extends StatelessWidget {
+class ExpenseFormView extends ConsumerWidget {
 
-  const ExpenseFormView({super.key, required this.formProvider});
-  final ExpenseFormProvider formProvider;
+  const ExpenseFormView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<ExpenseFormProvider>(
-      builder: (context, provider, child) {
-        return Form(
-          key: provider.formKey,
-          child: Column(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(expenseFormNotifierProvider);
+    final notifier = ref.read(expenseFormNotifierProvider.notifier);
+
+    return Form(
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1ª Seção: Informações da Despesa (O QUE foi gasto e QUANDO)
@@ -36,21 +37,21 @@ class ExpenseFormView extends StatelessWidget {
                   children: [
                     // Seletor de tipo de despesa
                     ExpenseTypeSelector(
-                      selectedType: provider.formModel.expenseType,
-                      onTypeSelected: provider.updateExpenseType,
-                      error: provider.formModel.getFieldError('expenseType'),
+                      selectedType: state.expenseType,
+                      onTypeSelected: notifier.updateExpenseType,
+                      error: state.getFieldError('expenseType'),
                     ),
 
                     const SizedBox(height: GasometerDesignTokens.spacingMd),
 
                     // Descrição com validação em tempo real
                     DescriptionField(
-                      controller: provider.descriptionController,
+                      controller: notifier.descriptionController,
                       label: 'Descrição da Despesa',
                       hint: ExpenseConstants.descriptionPlaceholder,
                       required: true,
                       onChanged: (value) {
-                        // O provider já está conectado ao controller
+                        // O notifier já está conectado ao controller
                       },
                     ),
 
@@ -58,8 +59,8 @@ class ExpenseFormView extends StatelessWidget {
 
                     // Data e Hora unified
                     DateTimeField(
-                      value: provider.formModel.date,
-                      onChanged: (newDate) => provider.updateDate(newDate),
+                      value: state.date ?? DateTime.now(),
+                      onChanged: (newDate) => notifier.updateDate(newDate),
                       label: 'Data e Hora',
                     ),
                   ],
@@ -78,21 +79,21 @@ class ExpenseFormView extends StatelessWidget {
                       children: [
                         // Valor com validação monetária
                         AmountFormField(
-                          controller: provider.amountController,
+                          controller: notifier.amountController,
                           label: 'Valor Total',
                           required: true,
                           onChanged: (value) {
-                            // O provider já está conectado ao controller
+                            // O notifier já está conectado ao controller
                           },
                         ),
                         // Odômetro
                         OdometerField(
-                          controller: provider.odometerController,
+                          controller: notifier.odometerController,
                           label: 'Quilometragem Atual',
                           hint: ExpenseConstants.odometerPlaceholder,
-                          currentOdometer: provider.formModel.vehicle?.currentOdometer,
+                          currentOdometer: state.vehicle?.currentOdometer,
                           onChanged: (value) {
-                            // Provider já está conectado ao controller
+                            // Notifier já está conectado ao controller
                           },
                         ),
                       ],
@@ -111,12 +112,12 @@ class ExpenseFormView extends StatelessWidget {
                   children: [
                     // Localização (opcional)
                     LocationField(
-                      controller: provider.locationController,
+                      controller: notifier.locationController,
                       label: 'Local da Despesa',
                       hint: ExpenseConstants.locationPlaceholder,
                       required: false,
                       onChanged: (value) {
-                        // O provider já está conectado ao controller
+                        // O notifier já está conectado ao controller
                       },
                     ),
 
@@ -124,12 +125,12 @@ class ExpenseFormView extends StatelessWidget {
 
                     // Observações
                     ObservationsField(
-                      controller: provider.notesController,
+                      controller: notifier.notesController,
                       label: 'Observações Adicionais',
                       hint: ExpenseConstants.notesPlaceholder,
                       required: false,
                       onChanged: (value) {
-                        // O provider já está conectado ao controller
+                        // O notifier já está conectado ao controller
                       },
                     ),
                   ],
@@ -140,13 +141,13 @@ class ExpenseFormView extends StatelessWidget {
 
               // 4ª Seção: Comprovante da Despesa
               OptionalReceiptSection(
-                imagePath: provider.receiptImagePath,
-                hasImage: provider.hasReceiptImage,
-                isUploading: provider.isUploadingImage,
-                uploadError: provider.imageUploadError,
-                onCameraSelected: () => provider.captureReceiptImage(),
-                onGallerySelected: () => provider.selectReceiptImageFromGallery(),
-                onImageRemoved: () => provider.removeReceiptImage(),
+                imagePath: state.receiptImagePath,
+                hasImage: state.hasReceiptImage,
+                isUploading: state.isUploadingImage,
+                uploadError: state.imageUploadError,
+                onCameraSelected: () => notifier.captureReceiptImage(),
+                onGallerySelected: () => notifier.selectReceiptImageFromGallery(),
+                onImageRemoved: () => notifier.removeReceiptImage(),
                 title: 'Comprovante da Despesa',
                 description: 'Anexe uma foto do comprovante da despesa (opcional)',
               ),
@@ -154,17 +155,14 @@ class ExpenseFormView extends StatelessWidget {
               const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
 
               // Resumo do formulário (se tem dados válidos)
-              if (provider.formModel.hasMinimumData)
-                _buildFormSummary(context, provider),
+              if (state.hasMinimumData)
+                _buildFormSummary(context, state),
             ],
           ),
-        );
-      },
     );
   }
 
-  Widget _buildFormSummary(BuildContext context, ExpenseFormProvider provider) {
-    final model = provider.formModel;
+  Widget _buildFormSummary(BuildContext context, ExpenseFormState state) {
 
     return Card(
       color: Colors.white,
@@ -195,21 +193,21 @@ class ExpenseFormView extends StatelessWidget {
             ),
             const SizedBox(height: GasometerDesignTokens.spacingMd),
 
-            _buildSummaryRow('Tipo:', model.expenseType.displayName),
+            _buildSummaryRow('Tipo:', state.expenseType.displayName),
             _buildSummaryRow(
               'Valor:',
-              'R\$ ${model.amount.toStringAsFixed(2)}',
+              'R\$ ${state.amount.toStringAsFixed(2)}',
             ),
-            _buildSummaryRow('Data:', _formatDate(model.date)),
+            _buildSummaryRow('Data:', _formatDate(state.date ?? DateTime.now())),
             _buildSummaryRow(
               'Odômetro:',
-              '${model.odometer.toStringAsFixed(0)} km',
+              '${state.odometer.toStringAsFixed(0)} km',
             ),
 
-            if (model.location.isNotEmpty)
-              _buildSummaryRow('Local:', model.location),
+            if (state.location.isNotEmpty)
+              _buildSummaryRow('Local:', state.location),
 
-            if (model.hasReceipt) ...[
+            if (state.hasReceiptImage) ...[
               const SizedBox(height: GasometerDesignTokens.spacingSm),
               Row(
                 children: [
@@ -242,7 +240,7 @@ class ExpenseFormView extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color:
-                        model.canSubmit
+                        state.canSubmit
                             ? Colors.green.withValues(alpha: 0.2)
                             : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
@@ -251,15 +249,15 @@ class ExpenseFormView extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        model.canSubmit ? Icons.check_circle : Icons.warning,
+                        state.canSubmit ? Icons.check_circle : Icons.warning,
                         size: 14,
-                        color: model.canSubmit ? Colors.green : Colors.orange,
+                        color: state.canSubmit ? Colors.green : Colors.orange,
                       ),
                       const SizedBox(width: GasometerDesignTokens.spacingXs),
                       Text(
-                        model.canSubmit ? 'Pronto' : 'Pendente',
+                        state.canSubmit ? 'Pronto' : 'Pendente',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: model.canSubmit ? Colors.green : Colors.orange,
+                          color: state.canSubmit ? Colors.green : Colors.orange,
                         ),
                       ),
                     ],
@@ -269,7 +267,7 @@ class ExpenseFormView extends StatelessWidget {
                 const SizedBox(width: GasometerDesignTokens.spacingSm),
 
                 // Indicador de valor alto
-                if (model.isHighValue)
+                if (state.isHighValue)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: GasometerDesignTokens.spacingSm,
@@ -298,8 +296,9 @@ class ExpenseFormView extends StatelessWidget {
                     ),
                   ),
 
-                // Indicador de recorrente
-                if (model.isRecurring) ...[
+                // Indicador de recorrente (baseado no tipo de despesa)
+                if (state.expenseType == ExpenseType.maintenance ||
+                    state.expenseType == ExpenseType.insurance) ...[
                   const SizedBox(width: GasometerDesignTokens.spacingSm),
                   Container(
                     padding: const EdgeInsets.symmetric(

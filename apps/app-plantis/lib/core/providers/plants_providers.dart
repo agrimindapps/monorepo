@@ -371,7 +371,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
     // Setup cleanup when provider is disposed
     ref.onDispose(() {
-      debugPrint('🧹 PlantsNotifier: Disposing subscriptions...');
       _authSubscription?.cancel();
       _realtimeDataSubscription?.cancel();
     });
@@ -380,16 +379,11 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     // Isso resolve o problema de plantas não aparecerem ao abrir a página
     if (_authStateNotifier.isInitialized &&
         _authStateNotifier.currentUser != null) {
-      debugPrint('🌱 PlantsNotifier: Usuário já autenticado, carregando plantas...');
       // Load initial data immediately
       final result = await _getPlantsUseCase.call(const NoParams());
       return result.fold(
-        (failure) {
-          debugPrint('❌ Erro ao carregar plantas iniciais: ${failure.message}');
-          return PlantsState(error: failure.message);
-        },
+        (failure) => PlantsState(error: failure.message),
         (plants) {
-          debugPrint('✅ ${plants.length} plantas carregadas inicialmente');
           final sortedPlants = _sortPlants(plants, SortBy.newest);
           return PlantsState(
             allPlants: sortedPlants,
@@ -406,17 +400,10 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   /// Initializes the authentication state listener
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      debugPrint(
-        '🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
-      );
       // Only load plants if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
-        debugPrint('✅ PlantsProvider: Auth is stable, loading plants...');
         loadInitialData();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        debugPrint(
-          '🔄 PlantsProvider: No user but auth initialized - clearing plants',
-        );
         // Clear plants when user logs out
         final currentState = state.valueOrNull ?? const PlantsState();
         state = AsyncData(
@@ -439,10 +426,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       if (dataStream != null) {
         _realtimeDataSubscription = dataStream.listen(
           (List<dynamic> plants) {
-            debugPrint(
-              '🔄 PlantsProvider: Dados em tempo real recebidos - ${plants.length} plantas',
-            );
-
             // Convert from sync entities to domain entities
             final domainPlants =
                 plants
@@ -470,29 +453,28 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
                   filteredPlants: filteredPlants,
                 ),
               );
-
-              debugPrint(
-                '✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas',
-              );
             }
           },
           onError: (dynamic error) {
-            debugPrint(
-              '❌ PlantsProvider: Erro no stream de dados em tempo real: $error',
-            );
+            if (kDebugMode) {
+              print('PlantsProvider stream error: $error');
+            }
           },
         );
-
-        debugPrint(
-          '✅ PlantsProvider: Stream de dados em tempo real configurado',
-        );
       } else {
-        debugPrint(
-          '⚠️ PlantsProvider: Stream de dados não disponível - usando polling',
-        );
+        // FALLBACK: Se stream não está disponível, força carregamento manual
+        Future.delayed(const Duration(milliseconds: 500), () {
+          loadInitialData();
+        });
       }
     } catch (e) {
-      debugPrint('❌ PlantsProvider: Erro ao configurar stream de dados: $e');
+      if (kDebugMode) {
+        print('PlantsProvider stream initialization error: $e');
+      }
+      // FALLBACK: Em caso de erro, tenta carregar dados manualmente
+      Future.delayed(const Duration(milliseconds: 500), () {
+        loadInitialData();
+      });
     }
   }
 
@@ -517,9 +499,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
       return null;
     } catch (e) {
-      debugPrint(
-        '❌ PlantsProvider: Erro ao converter plant de sync para domínio: $e',
-      );
+      if (kDebugMode) {
+        print('Error converting plant: $e');
+      }
       return null;
     }
   }

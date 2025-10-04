@@ -4,58 +4,59 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/favorito_entity.dart';
-import '../providers/favoritos_provider_simplified.dart';
+import '../notifiers/favoritos_notifier.dart';
 
 /// Widget especializado para aba de Pragas favoritas
 /// Gerencia listagem e ações específicas para pragas
-class FavoritosPragasTabWidget extends StatelessWidget {
-  final FavoritosProviderSimplified provider;
+class FavoritosPragasTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
   const FavoritosPragasTabWidget({
     super.key,
-    required this.provider,
     required this.onReload,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoritosState = ref.watch(favoritosNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return _buildTabContent(
       context: context,
-      provider: provider,
-      viewState: provider.getViewStateForType(TipoFavorito.praga),
-      emptyMessage: provider.getEmptyMessageForType(TipoFavorito.praga),
-      items: provider.pragas,
-      itemBuilder: (praga) => _buildPragaItem(context, praga, provider),
+      ref: ref,
+      viewState: favoritosState.getViewStateForType(TipoFavorito.praga),
+      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.praga),
+      items: favoritosState.pragas,
+      itemBuilder: (praga) => _buildPragaItem(context, ref, praga),
       isDark: isDark,
+      errorMessage: favoritosState.errorMessage,
     );
   }
 
   Widget _buildTabContent<T extends FavoritoEntity>({
     required BuildContext context,
-    required FavoritosProviderSimplified provider,
+    required WidgetRef ref,
     required FavoritosViewState viewState,
     required String emptyMessage,
     required List<T> items,
     required Widget Function(T) itemBuilder,
     required bool isDark,
+    required String? errorMessage,
   }) {
     switch (viewState) {
       case FavoritosViewState.loading:
         return const Center(child: CircularProgressIndicator());
-      
+
       case FavoritosViewState.error:
-        return _buildErrorState(context, provider, isDark);
-      
+        return _buildErrorState(context, errorMessage, isDark);
+
       case FavoritosViewState.empty:
         return _buildEmptyState(context, emptyMessage, isDark);
-      
+
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
-            await provider.loadAllFavoritos();
+            await ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -89,7 +90,7 @@ class FavoritosPragasTabWidget extends StatelessWidget {
             ),
           ),
         );
-      
+
       default:
         return const SizedBox.shrink();
     }
@@ -97,8 +98,8 @@ class FavoritosPragasTabWidget extends StatelessWidget {
 
   Widget _buildPragaItem(
     BuildContext context,
+    WidgetRef ref,
     FavoritoPragaEntity praga,
-    FavoritosProviderSimplified provider
   ) {
     return Dismissible(
       key: Key('favorito_praga_${praga.id}'),
@@ -108,7 +109,7 @@ class FavoritosPragasTabWidget extends StatelessWidget {
         return await _showRemoveDialog(context, praga.nomeComum);
       },
       onDismissed: (direction) async {
-        await _removeFavorito(context, provider, praga);
+        await _removeFavorito(context, ref, praga);
       },
       child: ListTile(
         onTap: () => _navigateToPragaDetails(context, praga),
@@ -134,13 +135,13 @@ class FavoritosPragasTabWidget extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: praga.nomeCientifico.isNotEmpty
-          ? Text(
-              praga.nomeCientifico,
-              style: const TextStyle(fontStyle: FontStyle.italic),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
+            ? Text(
+                praga.nomeCientifico,
+                style: const TextStyle(fontStyle: FontStyle.italic),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
+            : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
@@ -241,11 +242,14 @@ class FavoritosPragasTabWidget extends StatelessWidget {
   /// Remove o favorito e mostra feedback
   Future<void> _removeFavorito(
     BuildContext context,
-    FavoritosProviderSimplified provider,
+    WidgetRef ref,
     FavoritoPragaEntity praga,
   ) async {
     try {
-      await provider.toggleFavorito(TipoFavorito.praga, praga.id);
+      await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(
+        TipoFavorito.praga,
+        praga.id,
+      );
       // Remover favorito sem feedback de SnackBar
     } catch (e) {
       // Erro silencioso
@@ -254,7 +258,7 @@ class FavoritosPragasTabWidget extends StatelessWidget {
 
   Widget _buildErrorState(
     BuildContext context,
-    FavoritosProviderSimplified provider,
+    String? errorMessage,
     bool isDark,
   ) {
     return Center(
@@ -275,10 +279,10 @@ class FavoritosPragasTabWidget extends StatelessWidget {
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          if (provider.errorMessage != null) ...[
+          if (errorMessage != null) ...[
             const SizedBox(height: 8),
             Text(
-              provider.errorMessage!,
+              errorMessage,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import '../providers/vehicle_device_provider.dart';
+import '../providers/vehicle_device_notifier.dart';
 import '../widgets/device_actions_dialog.dart';
 import '../widgets/device_list_widget.dart';
 
 /// Página principal de gerenciamento de dispositivos
-class DeviceManagementPage extends StatefulWidget {
+class DeviceManagementPage extends ConsumerStatefulWidget {
   const DeviceManagementPage({super.key});
 
   @override
-  State<DeviceManagementPage> createState() => _DeviceManagementPageState();
+  ConsumerState<DeviceManagementPage> createState() => _DeviceManagementPageState();
 }
 
-class _DeviceManagementPageState extends State<DeviceManagementPage> {
+class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
   @override
   void initState() {
     super.initState();
@@ -24,12 +24,13 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   void _loadDevices() {
-    final provider = context.read<VehicleDeviceProvider>();
-    provider.loadUserDevices();
+    ref.read(vehicleDeviceNotifierProvider.notifier).loadUserDevices();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(vehicleDeviceNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dispositivos Conectados'),
@@ -64,33 +65,29 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
           ),
         ],
       ),
-      body: Consumer<VehicleDeviceProvider>(
-        builder: (context, provider, child) {
-          return RefreshIndicator(
-            onRefresh: _handleRefresh,
-            child: CustomScrollView(
-              slivers: [
-                // Header com informações gerais
-                SliverToBoxAdapter(
-                  child: _buildHeader(provider),
-                ),
-                
-                // Lista de dispositivos
-                _buildDevicesList(provider),
-                
-                // Footer com informações adicionais
-                SliverToBoxAdapter(
-                  child: _buildFooter(provider),
-                ),
-              ],
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: CustomScrollView(
+          slivers: [
+            // Header com informações gerais
+            SliverToBoxAdapter(
+              child: _buildHeader(state),
             ),
-          );
-        },
+
+            // Lista de dispositivos
+            _buildDevicesList(state),
+
+            // Footer com informações adicionais
+            SliverToBoxAdapter(
+              child: _buildFooter(state),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader(VehicleDeviceProvider provider) {
+  Widget _buildHeader(VehicleDeviceState state) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -129,19 +126,19 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildDeviceStats(provider),
+          _buildDeviceStats(state),
         ],
       ),
     );
   }
 
-  Widget _buildDeviceStats(VehicleDeviceProvider provider) {
+  Widget _buildDeviceStats(VehicleDeviceState state) {
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             'Conectados',
-            '${provider.activeDeviceCount}',
+            '${state.activeDeviceCount}',
             Icons.check_circle,
             Colors.green,
           ),
@@ -150,7 +147,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
         Expanded(
           child: _buildStatCard(
             'Total',
-            '${provider.devices.length}',
+            '${state.devices.length}',
             Icons.devices_other,
             GasometerColors.primary,
           ),
@@ -211,8 +208,8 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     );
   }
 
-  Widget _buildDevicesList(VehicleDeviceProvider provider) {
-    if (provider.isLoading) {
+  Widget _buildDevicesList(VehicleDeviceState state) {
+    if (state.isLoading) {
       return const SliverFillRemaining(
         child: Center(
           child: Column(
@@ -227,7 +224,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
       );
     }
 
-    if (provider.hasError) {
+    if (state.hasError) {
       return SliverFillRemaining(
         child: Center(
           child: Column(
@@ -246,7 +243,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                provider.errorMessage ?? 'Erro desconhecido',
+                state.errorMessage ?? 'Erro desconhecido',
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -266,7 +263,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
       );
     }
 
-    if (!provider.hasDevices) {
+    if (!state.hasDevices) {
       return SliverFillRemaining(
         child: Center(
           child: Column(
@@ -296,13 +293,13 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     }
 
     return DeviceListWidget(
-      devices: provider.devices,
-      currentDeviceUuid: provider.currentDevice?.uuid,
+      devices: state.devices,
+      currentDeviceUuid: state.currentDevice?.uuid,
       onDeviceAction: _handleDeviceAction,
     );
   }
 
-  Widget _buildFooter(VehicleDeviceProvider provider) {
+  Widget _buildFooter(VehicleDeviceState state) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -348,16 +345,13 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   Future<void> _handleRefresh() async {
-    final provider = context.read<VehicleDeviceProvider>();
-    await provider.refresh();
+    await ref.read(vehicleDeviceNotifierProvider.notifier).refresh();
   }
 
   void _handleMenuAction(String action) {
-    final provider = context.read<VehicleDeviceProvider>();
-    
     switch (action) {
       case 'logout_all':
-        _showRevokeAllDialog(provider);
+        _showRevokeAllDialog();
         break;
       case 'info':
         _showInfoDialog();
@@ -366,27 +360,27 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   void _handleDeviceAction(String deviceUuid, String action) {
-    final provider = context.read<VehicleDeviceProvider>();
-    final device = provider.getDeviceByUuid(deviceUuid);
-    
+    final notifier = ref.read(vehicleDeviceNotifierProvider.notifier);
+    final device = notifier.getDeviceByUuid(deviceUuid);
+
     if (device == null) return;
-    
-    showDialog(
+
+    showDialog<void>(
       context: context,
       builder: (context) => DeviceActionsDialog(
         device: device,
-        isCurrentDevice: provider.isCurrentDevice(deviceUuid),
+        isCurrentDevice: notifier.isCurrentDevice(deviceUuid),
         onAction: (actionType) => _executeDeviceAction(deviceUuid, actionType),
       ),
     );
   }
 
   Future<void> _executeDeviceAction(String deviceUuid, String action) async {
-    final provider = context.read<VehicleDeviceProvider>();
-    
+    final notifier = ref.read(vehicleDeviceNotifierProvider.notifier);
+
     switch (action) {
       case 'revoke':
-        final success = await provider.revokeDevice(deviceUuid);
+        final success = await notifier.revokeDevice(deviceUuid);
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -402,10 +396,10 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
     }
   }
 
-  void _showRevokeAllDialog(VehicleDeviceProvider provider) {
-    showDialog(
+  void _showRevokeAllDialog() {
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Desconectar Outros Dispositivos'),
         content: const Text(
           'Isso irá desconectar todos os outros dispositivos, '
@@ -413,20 +407,23 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.of(context).pop();
-              final success = await provider.revokeAllOtherDevices();
+              Navigator.of(dialogContext).pop();
+              final notifier = ref.read(vehicleDeviceNotifierProvider.notifier);
+              final success = await notifier.revokeAllOtherDevices();
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Outros dispositivos desconectados'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Outros dispositivos desconectados'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(
@@ -441,7 +438,7 @@ class _DeviceManagementPageState extends State<DeviceManagementPage> {
   }
 
   void _showInfoDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Gerenciamento de Dispositivos'),

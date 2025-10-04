@@ -33,6 +33,7 @@ class MaintenanceFormState extends Equatable {
     this.isLoading = false,
     this.isUploadingImage = false,
     this.hasChanges = false,
+    this.isInitialized = false,
     this.errorMessage,
     this.imageUploadError,
     this.fieldErrors = const {},
@@ -114,6 +115,7 @@ class MaintenanceFormState extends Equatable {
   final bool isLoading;
   final bool isUploadingImage;
   final bool hasChanges;
+  final bool isInitialized;
   final String? errorMessage;
   final String? imageUploadError;
   final Map<String, String> fieldErrors;
@@ -147,6 +149,7 @@ class MaintenanceFormState extends Equatable {
         isLoading,
         isUploadingImage,
         hasChanges,
+        isInitialized,
         errorMessage,
         imageUploadError,
         fieldErrors,
@@ -258,6 +261,7 @@ class MaintenanceFormState extends Equatable {
     bool? isLoading,
     bool? isUploadingImage,
     bool? hasChanges,
+    bool? isInitialized,
     String? Function()? errorMessage,
     String? Function()? imageUploadError,
     Map<String, String>? fieldErrors,
@@ -296,6 +300,7 @@ class MaintenanceFormState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
       hasChanges: hasChanges ?? this.hasChanges,
+      isInitialized: isInitialized ?? this.isInitialized,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
       imageUploadError: imageUploadError != null ? imageUploadError() : this.imageUploadError,
       fieldErrors: fieldErrors ?? this.fieldErrors,

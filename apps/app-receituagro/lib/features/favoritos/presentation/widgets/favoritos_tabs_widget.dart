@@ -1,14 +1,12 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../providers/favoritos_provider_simplified.dart';
 import 'favoritos_defensivos_tab_widget.dart';
 import 'favoritos_diagnosticos_tab_widget.dart';
 import 'favoritos_pragas_tab_widget.dart';
 
 /// Widget especializado para sistema de abas dos favoritos
-/// Gerencia navegação entre diferentes tipos de favoritos
+/// Gerencia navegação entre diferentes tipos de favoritos usando Riverpod
 class FavoritosTabsWidget extends StatelessWidget {
   final TabController tabController;
   final VoidCallback onReload;
@@ -27,26 +25,19 @@ class FavoritosTabsWidget extends StatelessWidget {
       children: [
         _buildTabBar(context, theme),
         Expanded(
-          child: provider.Consumer<FavoritosProviderSimplified>(
-            builder: (context, provider, child) {
-              return TabBarView(
-                controller: tabController,
-                children: [
-                  FavoritosDefensivosTabWidget(
-                    provider: provider,
-                    onReload: onReload,
-                  ),
-                  FavoritosPragasTabWidget(
-                    provider: provider,
-                    onReload: onReload,
-                  ),
-                  FavoritosDiagnosticosTabWidget(
-                    provider: provider,
-                    onReload: onReload,
-                  ),
-                ],
-              );
-            },
+          child: TabBarView(
+            controller: tabController,
+            children: [
+              FavoritosDefensivosTabWidget(
+                onReload: onReload,
+              ),
+              FavoritosPragasTabWidget(
+                onReload: onReload,
+              ),
+              FavoritosDiagnosticosTabWidget(
+                onReload: onReload,
+              ),
+            ],
           ),
         ),
       ],

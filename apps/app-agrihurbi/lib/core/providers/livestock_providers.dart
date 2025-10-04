@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/livestock/domain/entities/animal_base_entity.dart';
@@ -11,6 +12,8 @@ import '../../features/livestock/domain/usecases/get_bovines.dart';
 import '../../features/livestock/domain/usecases/get_equines.dart';
 import '../../features/livestock/domain/usecases/search_animals.dart' as search_use_case;
 import '../../features/livestock/domain/usecases/update_bovine.dart';
+
+part 'livestock_providers.g.dart';
 
 // === LIVESTOCK STATE CLASSES ===
 
@@ -162,23 +165,24 @@ class LivestockSearchState {
 // === STATE NOTIFIERS ===
 
 /// StateNotifier para gerenciamento de bovinos
-class BovinesNotifier extends StateNotifier<BovinesState> {
-  BovinesNotifier(
-    this._getAllBovines,
-    this._createBovine,
-    this._updateBovine,
-    this._deleteBovine,
-  ) : super(const BovinesState()) {
-    _initialize();
-  }
+@riverpod
+class BovinesNotifier extends _$BovinesNotifier {
+  late final GetAllBovinesUseCase _getAllBovines;
+  late final CreateBovineUseCase _createBovine;
+  late final UpdateBovineUseCase _updateBovine;
+  late final DeleteBovineUseCase _deleteBovine;
 
-  final GetAllBovinesUseCase _getAllBovines;
-  final CreateBovineUseCase _createBovine;
-  final UpdateBovineUseCase _updateBovine;
-  final DeleteBovineUseCase _deleteBovine;
+  @override
+  BovinesState build() {
+    _getAllBovines = di.getIt<GetAllBovinesUseCase>();
+    _createBovine = di.getIt<CreateBovineUseCase>();
+    _updateBovine = di.getIt<UpdateBovineUseCase>();
+    _deleteBovine = di.getIt<DeleteBovineUseCase>();
 
-  Future<void> _initialize() async {
-    await loadBovines();
+    // Initialize data loading
+    Future.microtask(() => loadBovines());
+
+    return const BovinesState();
   }
 
   Future<void> loadBovines() async {
@@ -312,15 +316,18 @@ class BovinesNotifier extends StateNotifier<BovinesState> {
 }
 
 /// StateNotifier para gerenciamento de equinos
-class EquinesNotifier extends StateNotifier<EquinesState> {
-  EquinesNotifier(this._getEquines) : super(const EquinesState()) {
-    _initialize();
-  }
+@riverpod
+class EquinesNotifier extends _$EquinesNotifier {
+  late final GetEquinesUseCase _getEquines;
 
-  final GetEquinesUseCase _getEquines;
+  @override
+  EquinesState build() {
+    _getEquines = di.getIt<GetEquinesUseCase>();
 
-  Future<void> _initialize() async {
-    await loadEquines();
+    // Initialize data loading
+    Future.microtask(() => loadEquines());
+
+    return const EquinesState();
   }
 
   Future<void> loadEquines() async {
@@ -353,8 +360,12 @@ class EquinesNotifier extends StateNotifier<EquinesState> {
 }
 
 /// StateNotifier para filtros de livestock
-class LivestockFiltersNotifier extends StateNotifier<LivestockFiltersState> {
-  LivestockFiltersNotifier() : super(const LivestockFiltersState());
+@riverpod
+class LivestockFiltersNotifier extends _$LivestockFiltersNotifier {
+  @override
+  LivestockFiltersState build() {
+    return const LivestockFiltersState();
+  }
 
   void updateSearchQuery(String query) {
     state = state.copyWith(searchQuery: query);
@@ -416,10 +427,15 @@ class LivestockFiltersNotifier extends StateNotifier<LivestockFiltersState> {
 }
 
 /// StateNotifier para busca de livestock
-class LivestockSearchNotifier extends StateNotifier<LivestockSearchState> {
-  LivestockSearchNotifier(this._searchAnimals) : super(const LivestockSearchState());
+@riverpod
+class LivestockSearchNotifier extends _$LivestockSearchNotifier {
+  late final search_use_case.SearchAnimalsUseCase _searchAnimals;
 
-  final search_use_case.SearchAnimalsUseCase _searchAnimals;
+  @override
+  LivestockSearchState build() {
+    _searchAnimals = di.getIt<search_use_case.SearchAnimalsUseCase>();
+    return const LivestockSearchState();
+  }
 
   Future<void> searchAllAnimals(String query) async {
     state = state.copyWith(isSearching: true, errorMessage: null);
@@ -452,68 +468,41 @@ class LivestockSearchNotifier extends StateNotifier<LivestockSearchState> {
   }
 }
 
-// === PROVIDERS ===
-
-/// Provider para bovines StateNotifier
-final bovinesProvider = StateNotifierProvider<BovinesNotifier, BovinesState>((ref) {
-  return BovinesNotifier(
-    di.getIt<GetAllBovinesUseCase>(),
-    di.getIt<CreateBovineUseCase>(),
-    di.getIt<UpdateBovineUseCase>(),
-    di.getIt<DeleteBovineUseCase>(),
-  );
-});
-
-/// Provider para equines StateNotifier
-final equinesProvider = StateNotifierProvider<EquinesNotifier, EquinesState>((ref) {
-  return EquinesNotifier(
-    di.getIt<GetEquinesUseCase>(),
-  );
-});
-
-/// Provider para filtros de livestock
-final livestockFiltersProvider = StateNotifierProvider<LivestockFiltersNotifier, LivestockFiltersState>((ref) {
-  return LivestockFiltersNotifier();
-});
-
-/// Provider para busca de livestock
-final livestockSearchProvider = StateNotifierProvider<LivestockSearchNotifier, LivestockSearchState>((ref) {
-  return LivestockSearchNotifier(
-    di.getIt<search_use_case.SearchAnimalsUseCase>(),
-  );
-});
+// === DERIVED PROVIDERS ===
 
 /// Provider derivado para bovinos filtrados
-final filteredBovinesProvider = Provider<List<BovineEntity>>((ref) {
-  final bovines = ref.watch(bovinesProvider).bovines;
-
-  return ref.read(livestockFiltersProvider.notifier).applyFilters(bovines);
-});
+@riverpod
+List<BovineEntity> filteredBovines(Ref ref) {
+  final bovines = ref.watch(bovinesNotifierProvider).bovines;
+  return ref.read(livestockFiltersNotifierProvider.notifier).applyFilters(bovines);
+}
 
 /// Provider derivado para total de animais
-final totalAnimalsProvider = Provider<int>((ref) {
-  final bovinesCount = ref.watch(bovinesProvider).totalBovines;
-  final equinesCount = ref.watch(equinesProvider).totalEquines;
-
+@riverpod
+int totalAnimals(Ref ref) {
+  final bovinesCount = ref.watch(bovinesNotifierProvider).totalBovines;
+  final equinesCount = ref.watch(equinesNotifierProvider).totalEquines;
   return bovinesCount + equinesCount;
-});
+}
 
 /// Provider para verificar se há operações em andamento
-final isAnyLivestockOperationInProgressProvider = Provider<bool>((ref) {
-  final bovinesState = ref.watch(bovinesProvider);
-  final equinesState = ref.watch(equinesProvider);
-  final searchState = ref.watch(livestockSearchProvider);
+@riverpod
+bool isAnyLivestockOperationInProgress(Ref ref) {
+  final bovinesState = ref.watch(bovinesNotifierProvider);
+  final equinesState = ref.watch(equinesNotifierProvider);
+  final searchState = ref.watch(livestockSearchNotifierProvider);
 
   return bovinesState.isAnyOperationInProgress ||
          equinesState.isLoading ||
          searchState.isSearching;
-});
+}
 
 /// Provider para erros consolidados
-final consolidatedLivestockErrorProvider = Provider<String?>((ref) {
-  final bovinesError = ref.watch(bovinesProvider).errorMessage;
-  final equinesError = ref.watch(equinesProvider).errorMessage;
-  final searchError = ref.watch(livestockSearchProvider).errorMessage;
+@riverpod
+String? consolidatedLivestockError(Ref ref) {
+  final bovinesError = ref.watch(bovinesNotifierProvider).errorMessage;
+  final equinesError = ref.watch(equinesNotifierProvider).errorMessage;
+  final searchError = ref.watch(livestockSearchNotifierProvider).errorMessage;
 
   final errors = <String>[];
 
@@ -522,7 +511,7 @@ final consolidatedLivestockErrorProvider = Provider<String?>((ref) {
   if (searchError != null) errors.add('Busca: $searchError');
 
   return errors.isEmpty ? null : errors.join('\n');
-});
+}
 
 // === STATISTICS STATE & NOTIFIER ===
 
@@ -552,10 +541,15 @@ class LivestockStatisticsState {
 }
 
 /// StateNotifier para estatísticas de livestock
-class LivestockStatisticsNotifier extends StateNotifier<LivestockStatisticsState> {
-  LivestockStatisticsNotifier(this._repository) : super(const LivestockStatisticsState());
+@riverpod
+class LivestockStatisticsNotifier extends _$LivestockStatisticsNotifier {
+  late final LivestockRepository _repository;
 
-  final LivestockRepository _repository;
+  @override
+  LivestockStatisticsState build() {
+    _repository = di.getIt<LivestockRepository>();
+    return const LivestockStatisticsState();
+  }
 
   Future<void> loadStatistics() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -619,10 +613,15 @@ class LivestockSyncState {
 }
 
 /// StateNotifier para sincronização de livestock
-class LivestockSyncNotifier extends StateNotifier<LivestockSyncState> {
-  LivestockSyncNotifier(this._repository) : super(const LivestockSyncState());
+@riverpod
+class LivestockSyncNotifier extends _$LivestockSyncNotifier {
+  late final LivestockRepository _repository;
 
-  final LivestockRepository _repository;
+  @override
+  LivestockSyncState build() {
+    _repository = di.getIt<LivestockRepository>();
+    return const LivestockSyncState();
+  }
 
   Future<bool> forceSyncNow({void Function(double)? onProgress}) async {
     state = state.copyWith(isSyncing: true, errorMessage: null, syncProgress: 0.0);
@@ -665,42 +664,30 @@ class LivestockSyncNotifier extends StateNotifier<LivestockSyncState> {
 
 // === ADDITIONAL PROVIDERS ===
 
-/// Provider para estatísticas de livestock
-final livestockStatisticsProvider = StateNotifierProvider<LivestockStatisticsNotifier, LivestockStatisticsState>((ref) {
-  return LivestockStatisticsNotifier(
-    di.getIt<LivestockRepository>(),
-  );
-});
-
-/// Provider para sincronização de livestock
-final livestockSyncProvider = StateNotifierProvider<LivestockSyncNotifier, LivestockSyncState>((ref) {
-  return LivestockSyncNotifier(
-    di.getIt<LivestockRepository>(),
-  );
-});
-
 /// Provider atualizado para verificar se há operações em andamento (incluindo stats e sync)
-final isAnyLivestockOperationInProgressProviderComplete = Provider<bool>((ref) {
-  final bovinesState = ref.watch(bovinesProvider);
-  final equinesState = ref.watch(equinesProvider);
-  final searchState = ref.watch(livestockSearchProvider);
-  final statsState = ref.watch(livestockStatisticsProvider);
-  final syncState = ref.watch(livestockSyncProvider);
+@riverpod
+bool isAnyLivestockOperationInProgressComplete(Ref ref) {
+  final bovinesState = ref.watch(bovinesNotifierProvider);
+  final equinesState = ref.watch(equinesNotifierProvider);
+  final searchState = ref.watch(livestockSearchNotifierProvider);
+  final statsState = ref.watch(livestockStatisticsNotifierProvider);
+  final syncState = ref.watch(livestockSyncNotifierProvider);
 
   return bovinesState.isAnyOperationInProgress ||
          equinesState.isLoading ||
          searchState.isSearching ||
          statsState.isLoading ||
          syncState.isSyncing;
-});
+}
 
 /// Provider atualizado para erros consolidados (incluindo stats e sync)
-final consolidatedLivestockErrorProviderComplete = Provider<String?>((ref) {
-  final bovinesError = ref.watch(bovinesProvider).errorMessage;
-  final equinesError = ref.watch(equinesProvider).errorMessage;
-  final searchError = ref.watch(livestockSearchProvider).errorMessage;
-  final statsError = ref.watch(livestockStatisticsProvider).errorMessage;
-  final syncError = ref.watch(livestockSyncProvider).errorMessage;
+@riverpod
+String? consolidatedLivestockErrorComplete(Ref ref) {
+  final bovinesError = ref.watch(bovinesNotifierProvider).errorMessage;
+  final equinesError = ref.watch(equinesNotifierProvider).errorMessage;
+  final searchError = ref.watch(livestockSearchNotifierProvider).errorMessage;
+  final statsError = ref.watch(livestockStatisticsNotifierProvider).errorMessage;
+  final syncError = ref.watch(livestockSyncNotifierProvider).errorMessage;
 
   final errors = <String>[];
 
@@ -711,7 +698,7 @@ final consolidatedLivestockErrorProviderComplete = Provider<String?>((ref) {
   if (syncError != null) errors.add('Sincronização: $syncError');
 
   return errors.isEmpty ? null : errors.join('\n');
-});
+}
 
 // === COORDINATOR ACTIONS ===
 
@@ -724,24 +711,24 @@ class LivestockCoordinatorActions {
   /// Inicialização completa do sistema livestock
   Future<void> initializeSystem() async {
     await Future.wait([
-      ref.read(bovinesProvider.notifier).loadBovines(),
-      ref.read(equinesProvider.notifier).loadEquines(),
-      ref.read(livestockStatisticsProvider.notifier).loadStatistics(),
+      ref.read(bovinesNotifierProvider.notifier).loadBovines(),
+      ref.read(equinesNotifierProvider.notifier).loadEquines(),
+      ref.read(livestockStatisticsNotifierProvider.notifier).loadStatistics(),
     ]);
   }
 
   /// Refresh completo de todos os dados
   Future<void> refreshAllData() async {
     await Future.wait([
-      ref.read(bovinesProvider.notifier).loadBovines(),
-      ref.read(equinesProvider.notifier).loadEquines(),
-      ref.read(livestockStatisticsProvider.notifier).loadStatistics(),
+      ref.read(bovinesNotifierProvider.notifier).loadBovines(),
+      ref.read(equinesNotifierProvider.notifier).loadEquines(),
+      ref.read(livestockStatisticsNotifierProvider.notifier).loadStatistics(),
     ]);
   }
 
   /// Sincronização completa com callback de progresso
   Future<bool> performCompleteSync({void Function(double)? onProgress}) async {
-    final syncSuccess = await ref.read(livestockSyncProvider.notifier).forceSyncNow(onProgress: onProgress);
+    final syncSuccess = await ref.read(livestockSyncNotifierProvider.notifier).forceSyncNow(onProgress: onProgress);
 
     if (syncSuccess) {
       await refreshAllData();
@@ -752,25 +739,26 @@ class LivestockCoordinatorActions {
 
   /// Limpa todos os erros dos providers especializados
   void clearAllErrors() {
-    ref.read(bovinesProvider.notifier).clearError();
-    ref.read(equinesProvider.notifier).clearError();
-    ref.read(livestockSearchProvider.notifier).clearError();
-    ref.read(livestockStatisticsProvider.notifier).clearError();
-    ref.read(livestockSyncProvider.notifier).clearError();
+    ref.read(bovinesNotifierProvider.notifier).clearError();
+    ref.read(equinesNotifierProvider.notifier).clearError();
+    ref.read(livestockSearchNotifierProvider.notifier).clearError();
+    ref.read(livestockStatisticsNotifierProvider.notifier).clearError();
+    ref.read(livestockSyncNotifierProvider.notifier).clearError();
   }
 
   /// Reset completo do sistema
   void resetSystem() {
-    ref.read(bovinesProvider.notifier).clearSelection();
-    ref.read(equinesProvider.notifier).clearError();
-    ref.read(livestockFiltersProvider.notifier).clearFilters();
-    ref.read(livestockSearchProvider.notifier).clearSearchResults();
-    ref.read(livestockStatisticsProvider.notifier).clearStatistics();
-    ref.read(livestockSyncProvider.notifier).resetSyncState();
+    ref.read(bovinesNotifierProvider.notifier).clearSelection();
+    ref.read(equinesNotifierProvider.notifier).clearError();
+    ref.read(livestockFiltersNotifierProvider.notifier).clearFilters();
+    ref.read(livestockSearchNotifierProvider.notifier).clearSearchResults();
+    ref.read(livestockStatisticsNotifierProvider.notifier).clearStatistics();
+    ref.read(livestockSyncNotifierProvider.notifier).resetSyncState();
   }
 }
 
 /// Provider para ações coordenadas
-final livestockCoordinatorActionsProvider = Provider<LivestockCoordinatorActions>((ref) {
+@riverpod
+LivestockCoordinatorActions livestockCoordinatorActions(Ref ref) {
   return LivestockCoordinatorActions(ref);
-});
+}

@@ -1,7 +1,7 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../providers/premium_provider.dart';
+import '../providers/premium_notifier.dart';
 
 /// Widget que exibe o status de sincronização premium
 ///
@@ -9,22 +9,24 @@ import '../providers/premium_provider.dart';
 /// - Status de sincronização em tempo real
 /// - Botão para força sincronização
 /// - Indicadores de erro/sucesso
-class PremiumSyncStatusWidget extends StatelessWidget {
-
+class PremiumSyncStatusWidget extends core.ConsumerWidget {
   const PremiumSyncStatusWidget({
     super.key,
     this.showSyncButton = true,
     this.compact = false,
   });
+
   final bool showSyncButton;
   final bool compact;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, premiumProvider, child) {
+  Widget build(BuildContext context, core.WidgetRef ref) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
         if (compact) {
-          return _buildCompactView(context, premiumProvider);
+          return _buildCompactView(context, state);
         }
 
         return Card(
@@ -50,22 +52,26 @@ class PremiumSyncStatusWidget extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildStatusInfo(context, premiumProvider),
+                _buildStatusInfo(context, ref, state),
                 if (showSyncButton) ...[
                   const SizedBox(height: 16),
-                  _buildSyncButton(context, premiumProvider),
+                  _buildSyncButton(context, ref, state),
                 ],
               ],
             ),
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Erro: $error'),
+      ),
     );
   }
 
-  Widget _buildCompactView(BuildContext context, PremiumProvider provider) {
-    final isPremium = provider.isPremium;
-    final isLoading = provider.isLoading;
+  Widget _buildCompactView(BuildContext context, PremiumNotifierState state) {
+    final isPremium = state.isPremium;
+    final isLoading = state.isLoadingProducts || state.isProcessingPurchase;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -96,7 +102,7 @@ class PremiumSyncStatusWidget extends StatelessWidget {
             ),
           const SizedBox(width: 6),
           Text(
-            provider.subscriptionStatus,
+            state.subscriptionStatus,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -108,26 +114,30 @@ class PremiumSyncStatusWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusInfo(BuildContext context, PremiumProvider provider) {
+  Widget _buildStatusInfo(
+    BuildContext context,
+    core.WidgetRef ref,
+    PremiumNotifierState state,
+  ) {
     return Column(
       children: [
-        _buildStatusRow('Status:', provider.subscriptionStatus),
-        if (provider.isPremium) ...[
+        _buildStatusRow('Status:', state.subscriptionStatus),
+        if (state.isPremium) ...[
           const SizedBox(height: 8),
           _buildStatusRow(
             'Fonte:',
-            _getPremiumSourceLabel(provider.premiumSource),
+            _getPremiumSourceLabel(state.premiumSource),
           ),
-          if (provider.expirationDate != null) ...[
+          if (state.expirationDate != null) ...[
             const SizedBox(height: 8),
             _buildStatusRow(
               'Expira em:',
-              _formatDate(provider.expirationDate!),
+              _formatDate(state.expirationDate!),
             ),
           ],
         ],
         const SizedBox(height: 16),
-        _buildSyncStatusStream(context, provider),
+        _buildSyncStatusStream(context, ref),
       ],
     );
   }
@@ -157,9 +167,10 @@ class PremiumSyncStatusWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSyncStatusStream(BuildContext context, PremiumProvider provider) {
+  Widget _buildSyncStatusStream(BuildContext context, core.WidgetRef ref) {
+    final notifier = ref.read(premiumNotifierProvider.notifier);
     return StreamBuilder<String>(
-      stream: provider.syncStatus,
+      stream: notifier.syncStatus,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
@@ -197,12 +208,19 @@ class PremiumSyncStatusWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSyncButton(BuildContext context, PremiumProvider provider) {
+  Widget _buildSyncButton(
+    BuildContext context,
+    core.WidgetRef ref,
+    PremiumNotifierState state,
+  ) {
+    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final isLoading = state.isLoadingProducts || state.isProcessingPurchase;
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: provider.isLoading ? null : provider.syncAcrossDevices,
-        icon: provider.isLoading
+        onPressed: isLoading ? null : notifier.syncAcrossDevices,
+        icon: isLoading
             ? const SizedBox(
                 width: 16,
                 height: 16,
@@ -210,7 +228,7 @@ class PremiumSyncStatusWidget extends StatelessWidget {
               )
             : const Icon(Icons.sync),
         label: Text(
-          provider.isLoading ? 'Sincronizando...' : 'Sincronizar Agora',
+          isLoading ? 'Sincronizando...' : 'Sincronizar Agora',
         ),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -240,21 +258,25 @@ class PremiumSyncStatusWidget extends StatelessWidget {
 }
 
 /// Widget minimalista para mostrar status de sync na AppBar
-class PremiumSyncIndicator extends StatelessWidget {
+class PremiumSyncIndicator extends core.ConsumerWidget {
   const PremiumSyncIndicator({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, provider, child) {
+  Widget build(BuildContext context, core.WidgetRef ref) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
+        final notifier = ref.read(premiumNotifierProvider.notifier);
+
         return GestureDetector(
           onTap: () {
-            _showSyncDialog(context, provider);
+            _showSyncDialog(context, ref);
           },
           child: Container(
             margin: const EdgeInsets.only(right: 8),
             child: StreamBuilder<String>(
-              stream: provider.syncStatus,
+              stream: notifier.syncStatus,
               builder: (context, snapshot) {
                 final isSync = snapshot.hasData &&
                     snapshot.data!.contains('Sincronização');
@@ -262,8 +284,8 @@ class PremiumSyncIndicator extends StatelessWidget {
                 return Stack(
                   children: [
                     Icon(
-                      provider.isPremium ? Icons.verified : Icons.sync,
-                      color: provider.isPremium ? Colors.green : Colors.grey,
+                      state.isPremium ? Icons.verified : Icons.sync,
+                      color: state.isPremium ? Colors.green : Colors.grey,
                     ),
                     if (isSync)
                       Positioned(
@@ -285,18 +307,26 @@ class PremiumSyncIndicator extends StatelessWidget {
           ),
         );
       },
+      loading: () => const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      error: (error, stack) => const Icon(Icons.error_outline, color: Colors.red),
     );
   }
 
-  void _showSyncDialog(BuildContext context, PremiumProvider provider) {
-    showDialog(
+  void _showSyncDialog(BuildContext context, core.WidgetRef ref) {
+    final notifier = ref.read(premiumNotifierProvider.notifier);
+
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Status de Sincronização'),
         content: const PremiumSyncStatusWidget(showSyncButton: false),
         actions: [
           TextButton(
-            onPressed: provider.syncAcrossDevices,
+            onPressed: notifier.syncAcrossDevices,
             child: const Text('Sincronizar'),
           ),
           TextButton(

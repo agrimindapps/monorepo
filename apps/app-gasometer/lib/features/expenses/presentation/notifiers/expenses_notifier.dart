@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
 import '../../domain/services/expense_statistics_service.dart';
@@ -531,12 +531,12 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     }
   }
 
-  /// Obtém veículo por ID (via VehiclesProvider)
+  /// Obtém veículo por ID (via VehiclesNotifier)
   Future<VehicleEntity?> _getVehicleById(String vehicleId) async {
     try {
-      // Acessa o VehiclesProvider via GetIt
-      final vehiclesProvider = getIt<VehiclesProvider>();
-      return vehiclesProvider.getVehicleById(vehicleId);
+      // Acessa o VehiclesNotifier via Riverpod
+      final vehiclesNotifier = ref.read(vehiclesNotifierProvider.notifier);
+      return await vehiclesNotifier.getVehicleById(vehicleId);
     } catch (e) {
       debugPrint('[ExpensesNotifier] Error getting vehicle: $e');
       return null;

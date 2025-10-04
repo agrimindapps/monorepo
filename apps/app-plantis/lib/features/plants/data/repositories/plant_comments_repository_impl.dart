@@ -36,7 +36,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
       // Handle error case
       if (result.isLeft()) {
-        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
+        final failure = result.fold(
+          (l) => l,
+          (r) => throw Exception('Unreachable'),
+        );
 
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
@@ -46,37 +49,38 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
           final retryResult = await UnifiedSyncManager.instance
               .findAll<ComentarioModel>(_appName);
 
-          return retryResult.fold(
-            (retryFailure) => Left(retryFailure),
-            (comments) {
-              final filteredComments =
-                  comments
-                      .where(
-                        (comment) =>
-                            !comment.isDeleted && comment.plantId == plantId,
-                      )
-                      .toList()
-                    ..sort(
-                      (a, b) => (b.dataCriacao ?? DateTime.now()).compareTo(
-                        a.dataCriacao ?? DateTime.now(),
-                      ),
-                    );
-              return Right(filteredComments);
-            },
-          );
+          return retryResult.fold((retryFailure) => Left(retryFailure), (
+            comments,
+          ) {
+            final filteredComments =
+                comments
+                    .where(
+                      (comment) =>
+                          !comment.isDeleted && comment.plantId == plantId,
+                    )
+                    .toList()
+                  ..sort(
+                    (a, b) => (b.dataCriacao ?? DateTime.now()).compareTo(
+                      a.dataCriacao ?? DateTime.now(),
+                    ),
+                  );
+            return Right(filteredComments);
+          });
         }
         return Left(failure);
       }
 
       // Handle success case
-      final comments = result.fold((l) => throw Exception('Unreachable'), (r) => r);
+      final comments = result.fold(
+        (l) => throw Exception('Unreachable'),
+        (r) => r,
+      );
 
       // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
       final filteredComments =
           comments
               .where(
-                (comment) =>
-                    !comment.isDeleted && comment.plantId == plantId,
+                (comment) => !comment.isDeleted && comment.plantId == plantId,
               )
               .toList()
             ..sort(
@@ -98,19 +102,11 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     String content,
   ) async {
     try {
-      // BUGFIX: Adicionar logs detalhados para debug
-      print('📝 PlantCommentsRepository.addComment:');
-      print('   Plant ID: $plantId');
-      print('   Content: $content');
-
       // Create new comment with plant association
       final comment = ComentarioModel.create(
         conteudo: content,
         plantId: plantId,
       );
-
-      print('   Created Comment ID: ${comment.id}');
-      print('   Created Comment Date: ${comment.dataCriacao}');
 
       final result = await UnifiedSyncManager.instance.create<ComentarioModel>(
         _appName,
@@ -119,40 +115,55 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
       // Handle error case
       if (result.isLeft()) {
-        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
-        print('   ❌ Create failed: ${failure.message}');
+        final failure = result.fold(
+          (l) => l,
+          (r) => throw Exception('Unreachable'),
+        );
 
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
-          print('   🔄 Sync not initialized, initializing...');
           await _ensureSyncInitialized();
           // Try again after initialization
-          print('   🔄 Retrying create...');
           final retryResult = await UnifiedSyncManager.instance
               .create<ComentarioModel>(_appName, comment);
+
+          // Force immediate sync after retry
+          if (retryResult.isRight()) {
+            _forceImmediateSync();
+          }
+
           return retryResult.fold(
-            (retryFailure) {
-              print('   ❌ Retry failed: ${retryFailure.message}');
-              return Left(retryFailure);
-            },
-            (commentId) {
-              print('   ✅ Retry succeeded, comment ID: $commentId');
-              return Right(comment);
-            },
+            (retryFailure) => Left(retryFailure),
+            (commentId) => Right(comment),
           );
         }
         return Left(failure);
       }
 
+      // Force immediate sync to Firebase after successful creation
+      _forceImmediateSync();
+
       // Handle success case
-      print('   ✅ Comment created successfully');
       return Right(comment);
     } catch (e, stack) {
-      print('   ❌ Exception in addComment: $e');
-      print('   Stack: $stack');
+      print('Failed to add comment: $e\n$stack');
       return Left(CacheFailure('Failed to add comment: $e'));
     }
+  }
+
+  /// Forces immediate sync of comments to Firebase
+  void _forceImmediateSync() {
+    // Fire and forget - não bloqueia a resposta ao usuário
+    UnifiedSyncManager.instance.forceSyncEntity<ComentarioModel>(_appName).then(
+      (Either<Failure, void> result) {
+        result.fold(
+          (Failure failure) =>
+              print('Background sync failed: ${failure.message}'),
+          (_) => print('Comment synced to Firebase successfully'),
+        );
+      },
+    );
   }
 
   @override
@@ -171,7 +182,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
       // Handle error case
       if (result.isLeft()) {
-        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
+        final failure = result.fold(
+          (l) => l,
+          (r) => throw Exception('Unreachable'),
+        );
 
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
@@ -205,7 +219,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
       // Handle error case
       if (result.isLeft()) {
-        final failure = result.fold((l) => l, (r) => throw Exception('Unreachable'));
+        final failure = result.fold(
+          (l) => l,
+          (r) => throw Exception('Unreachable'),
+        );
 
         // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||

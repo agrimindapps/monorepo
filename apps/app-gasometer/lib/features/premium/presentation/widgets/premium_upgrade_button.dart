@@ -1,18 +1,20 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../providers/premium_provider.dart';
+import '../providers/premium_notifier.dart';
 
-class PremiumUpgradeButton extends StatelessWidget {
+class PremiumUpgradeButton extends core.ConsumerWidget {
   const PremiumUpgradeButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, premiumProvider, child) {
-        if (premiumProvider.isPremium) {
+  Widget build(BuildContext context, core.WidgetRef ref) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
+        if (state.isPremium) {
           return const SizedBox.shrink();
         }
 
@@ -33,7 +35,7 @@ class PremiumUpgradeButton extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
-              onTap: () => _onUpgradePressed(context, premiumProvider),
+              onTap: () => _onUpgradePressed(context, ref),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -98,16 +100,18 @@ class PremiumUpgradeButton extends StatelessWidget {
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 
-  void _onUpgradePressed(BuildContext context, PremiumProvider provider) {
+  void _onUpgradePressed(BuildContext context, core.WidgetRef ref) {
     // Scrollar para a seção de produtos ou abrir modal
-    _showUpgradeOptions(context, provider);
+    _showUpgradeOptions(context, ref);
   }
 
-  void _showUpgradeOptions(BuildContext context, PremiumProvider provider) {
-    showModalBottomSheet(
+  void _showUpgradeOptions(BuildContext context, core.WidgetRef ref) {
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -192,7 +196,8 @@ class PremiumUpgradeButton extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        provider.loadAvailableProducts();
+                        final notifier = ref.read(premiumNotifierProvider.notifier);
+                        notifier.loadAvailableProducts();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../constants/settings_design_tokens.dart';
 
 /// Seção simplificada de sincronização de dados na ProfilePage
@@ -22,10 +21,10 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
 
-    // Get AuthProvider from DI (ChangeNotifier - not yet migrated to Riverpod)
-    final authProvider = di.sl<ReceitaAgroAuthProvider>();
+    // Get auth state from Riverpod
+    final authState = ref.read(receitaAgroAuthNotifierProvider).value;
 
-    if (!authProvider.isAuthenticated) {
+    if (authState == null || !authState.isAuthenticated) {
       _showMessage('Faça login para sincronizar seus dados', isError: true);
       return;
     }
@@ -35,8 +34,8 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
     });
 
     try {
-      // Usar sincronização real do AuthProvider
-      final success = await authProvider.forceSyncUserData();
+      // Usar sincronização real do AuthNotifier
+      final success = await ref.read(receitaAgroAuthNotifierProvider.notifier).forceSyncUserData();
 
       if (mounted) {
         setState(() {
@@ -77,20 +76,20 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Get AuthProvider from DI (ChangeNotifier - not yet migrated to Riverpod)
-    final authProvider = di.sl<ReceitaAgroAuthProvider>();
+    // Watch auth state from Riverpod
+    final authAsync = ref.watch(receitaAgroAuthNotifierProvider);
 
-    // Listen to changes using ListenableBuilder
-    return ListenableBuilder(
-      listenable: authProvider,
-      builder: (context, child) {
+    return authAsync.when(
+      data: (authState) {
         // Só mostra seção para usuários autenticados
-        if (!authProvider.isAuthenticated || authProvider.isAnonymous) {
+        if (!authState.isAuthenticated || authState.isAnonymous) {
           return const SizedBox.shrink();
         }
 
         return _buildSyncCard(context, theme);
       },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

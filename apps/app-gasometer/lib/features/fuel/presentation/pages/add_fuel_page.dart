@@ -2,14 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/providers/base_provider.dart';
 import '../../../../core/widgets/form_dialog.dart';
-import '../providers/fuel_form_provider.dart';
-import '../providers/fuel_provider.dart';
-import '../widgets/fuel_form_view.dart';
+import '../../../auth/presentation/notifiers/auth_notifier.dart';
+import '../providers/fuel_form_notifier.dart';
+import '../providers/fuel_riverpod_notifier.dart';
 
 class AddFuelPage extends ConsumerStatefulWidget {
   
@@ -26,14 +23,12 @@ class AddFuelPage extends ConsumerStatefulWidget {
 }
 
 class _AddFuelPageState extends ConsumerState<AddFuelPage> {
-  late FuelFormProvider _formProvider;
-  
   // Rate limiting and loading state
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
-  
+
   // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
@@ -45,7 +40,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     super.initState();
     // Initialization will be done in didChangeDependencies
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -54,23 +49,27 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       _isInitialized = true;
     }
   }
-  
+
   void _initializeProviders() async {
-    _formProvider = provider.Provider.of<FuelFormProvider>(context, listen: false);
-    final authState = ref.read(authNotifierProvider);
+    final authState = ref.read(authProvider);
+    final vehicleId = widget.vehicleId ?? '';
 
-    // Set context for dependency injection access
-    _formProvider.setContext(context);
+    if (vehicleId.isEmpty) {
+      debugPrint('[FUEL DEBUG] No vehicle selected');
+      return;
+    }
 
-    await _formProvider.initialize(
-      vehicleId: widget.vehicleId,
+    // Initialize form notifier
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    await notifier.initialize(
+      vehicleId: vehicleId,
       userId: authState.userId,
     );
-    
+
     if (widget.editFuelRecordId != null) {
-      await _loadFuelRecordForEdit(_formProvider);
+      await _loadFuelRecordForEdit(vehicleId);
     }
-    
+
     // Notify changes after current build completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -81,16 +80,16 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     });
   }
 
-  Future<void> _loadFuelRecordForEdit(FuelFormProvider prov) async {
+  Future<void> _loadFuelRecordForEdit(String vehicleId) async {
     try {
-      final fuelProvider = provider.Provider.of<FuelProvider>(context, listen: false);
-      // Primeiro garantir que os dados foram carregados
-      await fuelProvider.loadAllFuelRecords();
-      
-      final record = fuelProvider.getFuelRecordById(widget.editFuelRecordId!);
+      final fuelNotifier = ref.read(fuelRiverpodProvider.notifier);
+
+      // Get fuel record by ID
+      final record = fuelNotifier.getFuelRecordById(widget.editFuelRecordId!);
 
       if (record != null) {
-        await prov.loadFromFuelRecord(record);
+        final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+        await formNotifier.loadFromFuelRecord(record);
       } else {
         throw Exception('Registro de abastecimento não encontrado');
       }
@@ -109,32 +108,42 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
 
   @override
   Widget build(BuildContext context) {
-    return provider.Consumer<FuelFormProvider>(
-      builder: (context, formProvider, child) {
-        // Generate subtitle based on vehicle information
-        String subtitle = 'Registre o abastecimento do seu veículo';
-        if (formProvider.isInitialized && formProvider.formModel.vehicle != null) {
-          final vehicle = formProvider.formModel.vehicle!;
-          final odometer = vehicle.currentOdometer;
-          subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
-        }
+    final vehicleId = widget.vehicleId ?? '';
 
-        return FormDialog(
-          title: 'Abastecimento',
-          subtitle: subtitle,
-          headerIcon: Icons.local_gas_station,
-          isLoading: formProvider.isLoading || _isSubmitting,
-          confirmButtonText: 'Salvar',
-          onCancel: () => Navigator.of(context).pop(),
-          onConfirm: _submitFormWithRateLimit,
-          content: !formProvider.isInitialized
-              ? const Center(child: CircularProgressIndicator())
-              : FuelFormView(
-                  formProvider: formProvider,
-                  onSubmit: _submitFormWithRateLimit,
-                ),
-        );
-      },
+    if (vehicleId.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Nenhum veículo selecionado'),
+        ),
+      );
+    }
+
+    final formState = ref.watch(fuelFormNotifierProvider(vehicleId));
+
+    // Generate subtitle based on vehicle information
+    String subtitle = 'Registre o abastecimento do seu veículo';
+    if (formState.isInitialized && formState.formModel.vehicle != null) {
+      final vehicle = formState.formModel.vehicle!;
+      final odometer = vehicle.currentOdometer;
+      subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+    }
+
+    return FormDialog(
+      title: 'Abastecimento',
+      subtitle: subtitle,
+      headerIcon: Icons.local_gas_station,
+      isLoading: formState.isLoading || _isSubmitting,
+      confirmButtonText: 'Salvar',
+      onCancel: () => Navigator.of(context).pop(),
+      onConfirm: _submitFormWithRateLimit,
+      content: !formState.isInitialized
+          ? const Center(child: CircularProgressIndicator())
+          : const Center(
+              child: Text(
+                'FuelFormView precisa ser migrado para Riverpod.\nMigração pendente.',
+                textAlign: TextAlign.center,
+              ),
+            ),
     );
   }
 
@@ -173,13 +182,21 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
     debugPrint('[FUEL DEBUG] _submitForm() called - Starting validation');
-    
+
+    final vehicleId = widget.vehicleId ?? '';
+    if (vehicleId.isEmpty) {
+      debugPrint('[FUEL DEBUG] No vehicle selected - submission aborted');
+      return;
+    }
+
+    final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+
     // Double-check form validation
-    if (!_formProvider.validateForm()) {
+    if (!formNotifier.validateForm()) {
       debugPrint('[FUEL DEBUG] Form validation FAILED - submission aborted');
       return;
     }
-    
+
     debugPrint('[FUEL DEBUG] Form validation PASSED - proceeding with submission');
 
     // Prevent concurrent submissions
@@ -193,8 +210,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       _isSubmitting = true;
     });
 
-    final formProvider = _formProvider;
-    final fuelProvider = provider.Provider.of<FuelProvider>(context, listen: false);
+    final fuelNotifier = ref.read(fuelRiverpodProvider.notifier);
 
     try {
       // Setup timeout protection
@@ -211,20 +227,19 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
         }
       });
 
-      // Provider will handle its own loading state
-
-      final fuelRecord = formProvider.formModel.toFuelRecord();
+      final formState = ref.read(fuelFormNotifierProvider(vehicleId));
+      final fuelRecord = formState.formModel.toFuelRecord();
       debugPrint('[FUEL DEBUG] Created fuel record: ${fuelRecord.toString()}');
-      
+
       bool success;
       if (widget.editFuelRecordId != null) {
         debugPrint('[FUEL DEBUG] Calling updateFuelRecord()');
-        success = await fuelProvider.updateFuelRecord(fuelRecord);
+        success = await fuelNotifier.updateFuelRecord(fuelRecord);
       } else {
         debugPrint('[FUEL DEBUG] Calling addFuelRecord()');
-        success = await fuelProvider.addFuelRecord(fuelRecord);
+        success = await fuelNotifier.addFuelRecord(fuelRecord);
       }
-      
+
       debugPrint('[FUEL DEBUG] Provider operation result: $success');
 
       if (success) {
@@ -238,12 +253,10 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
         }
       } else {
         debugPrint('[FUEL DEBUG] FAILURE - Showing error dialog');
-        debugPrint('[FUEL DEBUG] Provider error message: ${fuelProvider.errorMessage}');
         if (mounted) {
-          // Show error in dialog context (before closing)
-          final errorMessage = fuelProvider.errorMessage.isNotEmpty
-              ? fuelProvider.errorMessage
-              : 'Erro ao salvar abastecimento';
+          final fuelState = await ref.read(fuelRiverpodProvider.future);
+          final errorMessage = fuelState.errorMessage ?? 'Erro ao salvar abastecimento';
+          debugPrint('[FUEL DEBUG] Provider error message: $errorMessage');
           _showErrorDialog('Erro', errorMessage);
         }
       }
@@ -258,7 +271,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     } finally {
       // Clean up timeout timer
       _timeoutTimer?.cancel();
-      
+
       // Loading state managed by provider
       if (mounted) {
         setState(() {

@@ -11,7 +11,8 @@ import 'package:go_router/go_router.dart';
 
 // import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
 // import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -1049,14 +1050,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         },
         (base64String) async {
           // Atualizar avatar via AuthNotifier
-          final success = await ref.read(authNotifierProvider.notifier).updateAvatar(base64String);
+          final success = await ref.read(authProvider.notifier).updateAvatar(base64String);
 
           Navigator.of(context).pop(); // Remove loading dialog
 
           if (success) {
             _showSuccessSnackBar(context, 'Foto do perfil atualizada com sucesso!');
           } else {
-            final errorMsg = ref.read(authNotifierProvider).errorMessage;
+            final errorMsg = ref.read(authProvider).errorMessage;
             _showErrorSnackBar(context, errorMsg ?? 'Erro ao atualizar foto');
           }
         },
@@ -1089,14 +1090,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       _showImageProcessingDialog(context);
 
       // Remover avatar via AuthNotifier
-      final success = await ref.read(authNotifierProvider.notifier).removeAvatar();
+      final success = await ref.read(authProvider.notifier).removeAvatar();
 
       Navigator.of(context).pop(); // Remove loading dialog
 
       if (success) {
         _showSuccessSnackBar(context, 'Foto do perfil removida com sucesso!');
       } else {
-        final errorMsg = ref.read(authNotifierProvider).errorMessage;
+        final errorMsg = ref.read(authProvider).errorMessage;
         _showErrorSnackBar(context, errorMsg ?? 'Erro ao remover foto');
       }
     } catch (e) {
@@ -1404,7 +1405,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       await Future<void>.delayed(const Duration(milliseconds: 800));
 
       // Executar logout real via AuthNotifier
-      await ref.read(authNotifierProvider.notifier).logout();
+      await ref.read(authProvider.notifier).logout();
 
       // Fechar progress dialog
       if (context.mounted) {

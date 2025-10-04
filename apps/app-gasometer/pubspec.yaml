@@ -25,7 +25,6 @@ dependencies:
   shared_preferences: any
   firebase_analytics: any
   firebase_crashlytics: any
-  provider: any
   flutter_riverpod: any
   riverpod_annotation: any
   hive_flutter: any
@@ -48,6 +47,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: any
+  hive_generator: any
   injectable_generator: any
   riverpod_generator: any
   riverpod_lint: any

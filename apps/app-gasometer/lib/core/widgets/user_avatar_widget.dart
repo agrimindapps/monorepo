@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart' as gasometer_entities;
-import '../providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../services/avatar_service.dart';
 import 'avatar_selection_dialog.dart';
 

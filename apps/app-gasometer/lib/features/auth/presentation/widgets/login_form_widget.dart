@@ -2,8 +2,9 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/auth_provider.dart';
-import '../providers/login_form_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
+import '../notifiers/login_form_notifier.dart';
 import 'auth_button_widget.dart';
 import 'auth_text_field_widget.dart';
 import 'social_login_buttons_widget.dart';
@@ -20,8 +21,8 @@ class LoginFormWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(loginFormProvider);
-    final formNotifier = ref.watch(loginFormProvider.notifier);
+    final formState = ref.watch(loginFormNotifierProvider);
+    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
 
     return Form(
       child: Column(
@@ -37,7 +38,7 @@ class LoginFormWidget extends ConsumerWidget {
 
           // Campo de email
           AuthTextFieldWidget(
-            controller: formState.emailController!,
+            controller: formNotifier.emailController!,
             label: 'Email',
             hint: 'Insira seu email',
             prefixIcon: Icons.email_outlined,
@@ -51,7 +52,7 @@ class LoginFormWidget extends ConsumerWidget {
 
           // Campo de senha
           AuthTextFieldWidget(
-            controller: formState.passwordController!,
+            controller: formNotifier.passwordController!,
             label: 'Senha',
             hint: 'Insira sua senha',
             prefixIcon: Icons.lock_outline,
@@ -124,8 +125,8 @@ class LoginFormWidget extends ConsumerWidget {
   }
 
   Widget _buildRememberMeAndForgotPassword(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(loginFormProvider);
-    final formNotifier = ref.watch(loginFormProvider.notifier);
+    final formState = ref.watch(loginFormNotifierProvider);
+    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -169,7 +170,7 @@ class LoginFormWidget extends ConsumerWidget {
   }
 
   Widget _buildErrorMessage(BuildContext context, WidgetRef ref, String message) {
-    final formNotifier = ref.watch(loginFormProvider.notifier);
+    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -213,8 +214,8 @@ class LoginFormWidget extends ConsumerWidget {
   }
 
   Widget _buildAnonymousLoginButton(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
-    final formNotifier = ref.watch(loginFormProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
 
     return SizedBox(
       width: double.infinity,
@@ -276,7 +277,7 @@ class LoginFormWidget extends ConsumerWidget {
       print('🎯 LoginFormWidget: Chamando login com Riverpod');
     }
 
-    final formNotifier = ref.watch(loginFormProvider.notifier);
+    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
     final success = await formNotifier.signInWithEmail();
 
     if (kDebugMode) {

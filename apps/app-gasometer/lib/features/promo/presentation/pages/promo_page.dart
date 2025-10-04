@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../widgets/call_to_action.dart';
 import '../widgets/faq_section.dart';
 import '../widgets/features_carousel.dart';
@@ -47,7 +48,7 @@ class _PromoPageState extends ConsumerState<PromoPage> {
     // Verificar se o widget ainda está montado antes de acessar o context
     if (!mounted) return;
 
-    final authState = ref.read(authNotifierProvider);
+    final authState = ref.read(authProvider);
 
     // Se o usuário estiver autenticado (incluindo anônimo), redirecionar para a página interna
     if (authState.isAuthenticated) {

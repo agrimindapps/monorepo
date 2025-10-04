@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/ui_constants.dart';
 import '../../features/vehicles/domain/entities/vehicle_entity.dart';
-import '../../features/vehicles/presentation/providers/vehicles_provider.dart';
+import '../../features/vehicles/presentation/providers/vehicles_notifier.dart';
 
 /// Seletor de veículos aprimorado com dropdown, persistência e melhorias visuais
-class EnhancedVehicleSelector extends StatefulWidget {
+class EnhancedVehicleSelector extends ConsumerStatefulWidget {
   const EnhancedVehicleSelector({
     super.key,
     required this.selectedVehicleId,
@@ -23,11 +23,11 @@ class EnhancedVehicleSelector extends StatefulWidget {
   final bool enabled;
 
   @override
-  State<EnhancedVehicleSelector> createState() =>
+  ConsumerState<EnhancedVehicleSelector> createState() =>
       _EnhancedVehicleSelectorState();
 }
 
-class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
+class _EnhancedVehicleSelectorState extends ConsumerState<EnhancedVehicleSelector>
     with TickerProviderStateMixin {
   static const String _selectedVehicleKey = 'selected_vehicle_id';
   String? _currentSelectedVehicleId;
@@ -72,43 +72,42 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedVehicleId = prefs.getString(_selectedVehicleKey);
-      // Removed verbose vehicle loading log
 
       if (mounted) {
-        final vehiclesProvider =
-            Provider.of<VehiclesProvider>(context, listen: false);
+        final vehiclesAsync = ref.read(vehiclesNotifierProvider);
 
-        // Aguarda a inicialização do provider se necessário
-        if (!vehiclesProvider.isInitialized) {
-          debugPrint('⏳ Provider não inicializado, aguardando...');
-          await vehiclesProvider.initialize();
-        }
+        // Aguarda os dados se ainda estiver carregando
+        final vehicles = await vehiclesAsync.when<Future<List<VehicleEntity>>>(
+          data: (data) async => data,
+          loading: () async {
+            debugPrint('⏳ Aguardando carregamento de veículos...');
+            // Aguarda até que os dados estejam disponíveis
+            await Future.delayed(const Duration(milliseconds: 100));
+            return ref.read(vehiclesNotifierProvider).value ?? [];
+          },
+          error: (_, __) async => <VehicleEntity>[],
+        );
 
         // Se há um veículo salvo, verifica se ele ainda existe
         if (savedVehicleId != null) {
-          final vehicleExists =
-              vehiclesProvider.vehicles.any((v) => v.id == savedVehicleId);
-          // Removed verbose vehicle existence log
+          final vehicleExists = vehicles.any((v) => v.id == savedVehicleId);
 
           if (vehicleExists) {
             setState(() {
               _currentSelectedVehicleId = savedVehicleId;
             });
             widget.onVehicleChanged(savedVehicleId);
-            // Removed verbose vehicle restoration log
-            return; // Sai da função se encontrou o veículo salvo
+            return;
           } else {
             // Remove a preferência se o veículo não existe mais
             await prefs.remove(_selectedVehicleKey);
-            debugPrint(
-                '🗑️ Veículo removido das preferências: $savedVehicleId');
+            debugPrint('🗑️ Veículo removido das preferências: $savedVehicleId');
           }
         }
 
         // Auto-seleção: se não há veículo selecionado mas há veículos disponíveis
-        if (_currentSelectedVehicleId == null &&
-            vehiclesProvider.vehicles.isNotEmpty) {
-          final vehicleToSelect = _selectBestVehicle(vehiclesProvider.vehicles);
+        if (_currentSelectedVehicleId == null && vehicles.isNotEmpty) {
+          final vehicleToSelect = _selectBestVehicle(vehicles);
           if (vehicleToSelect != null) {
             setState(() {
               _currentSelectedVehicleId = vehicleToSelect.id;
@@ -196,33 +195,17 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<VehiclesProvider>(
-      builder: (context, vehiclesProvider, _) {
-        // Removed verbose VehicleSelector rebuild log
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
 
-        if (vehiclesProvider.isLoading) {
-          return _buildLoadingState(context);
-        }
-
-        if (!vehiclesProvider.isInitialized &&
-            vehiclesProvider.vehicles.isEmpty) {
-          // Provider ainda não foi inicializado, força a inicialização
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              vehiclesProvider.initialize();
-            }
-          });
-          return _buildLoadingState(context);
-        }
-
-        if (vehiclesProvider.vehicles.isEmpty) {
+    return vehiclesAsync.when(
+      data: (vehicles) {
+        if (vehicles.isEmpty) {
           return _buildEmptyState(context);
         }
 
         // Auto-seleção quando há veículos disponíveis mas nenhum selecionado
-        if (vehiclesProvider.vehicles.isNotEmpty &&
-            _currentSelectedVehicleId == null) {
-          final vehicleToSelect = _selectBestVehicle(vehiclesProvider.vehicles);
+        if (vehicles.isNotEmpty && _currentSelectedVehicleId == null) {
+          final vehicleToSelect = _selectBestVehicle(vehicles);
           if (vehicleToSelect != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _onVehicleSelected(vehicleToSelect.id);
@@ -230,8 +213,10 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
           }
         }
 
-        return _buildDropdown(context, vehiclesProvider);
+        return _buildDropdown(context, vehicles);
       },
+      loading: () => _buildLoadingState(context),
+      error: (error, _) => _buildEmptyState(context),
     );
   }
 
@@ -376,11 +361,11 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
   }
 
   Widget _buildDropdown(
-      BuildContext context, VehiclesProvider vehiclesProvider) {
+      BuildContext context, List<VehicleEntity> vehicles) {
     final selectedVehicle = _currentSelectedVehicleId != null
-        ? vehiclesProvider.vehicles.firstWhere(
+        ? vehicles.firstWhere(
             (v) => v.id == _currentSelectedVehicleId,
-            orElse: () => vehiclesProvider.vehicles.first,
+            orElse: () => vehicles.first,
           )
         : null;
 
@@ -466,7 +451,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
                         ),
                       ),
                       selectedItemBuilder: (BuildContext context) {
-                        return vehiclesProvider.vehicles
+                        return vehicles
                             .map<Widget>((VehicleEntity vehicle) {
                           final isSelected =
                               vehicle.id == _currentSelectedVehicleId;
@@ -584,7 +569,7 @@ class _EnhancedVehicleSelectorState extends State<EnhancedVehicleSelector>
                           );
                         }).toList();
                       },
-                      items: vehiclesProvider.vehicles
+                      items: vehicles
                           .map<DropdownMenuItem<String>>(
                               (VehicleEntity vehicle) {
                         final isCurrentlySelected =

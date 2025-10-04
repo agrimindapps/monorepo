@@ -1,8 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider_lib;
 
-import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../dialogs/feature_flags_admin_dialog.dart';
 
@@ -14,15 +13,19 @@ import '../dialogs/feature_flags_admin_dialog.dart';
 /// - Admin panel access (debug mode)
 /// - Remote config sync status
 /// - Dynamic UI based on flags
-class FeatureFlagsSection extends StatelessWidget {
+class FeatureFlagsSection extends ConsumerWidget {
   const FeatureFlagsSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return provider_lib.Consumer<FeatureFlagsProvider>(
-      builder: (context, featureFlagsProvider, child) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+
+    return featureFlagsAsync.when(
+      data: (featureFlagsState) {
+        final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+
         // Only show if feature flags indicate production display
-        if (!_shouldShowInProduction(featureFlagsProvider)) {
+        if (!_shouldShowInProduction(notifier)) {
           return const SizedBox.shrink();
         }
 
@@ -36,36 +39,38 @@ class FeatureFlagsSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
-              _buildSectionHeader(context, featureFlagsProvider),
-              
+              _buildSectionHeader(context, featureFlagsState),
+
               // Feature Flags Overview
-              _buildFeatureFlagsOverview(context, featureFlagsProvider),
-              
+              _buildFeatureFlagsOverview(context, notifier),
+
               // A/B Testing Status
-              _buildABTestingStatus(context, featureFlagsProvider),
-              
+              _buildABTestingStatus(context, notifier),
+
               // Admin Actions (show for development builds)
               if (EnvironmentConfig.isDebugMode)
-                _buildAdminActions(context, featureFlagsProvider),
+                _buildAdminActions(context, ref, featureFlagsState),
             ],
           ),
         );
       },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
   /// Determine if section should show in production
-  bool _shouldShowInProduction(FeatureFlagsProvider featureFlagsProvider) {
+  bool _shouldShowInProduction(FeatureFlagsNotifier notifier) {
     // Show if any user-visible A/B tests are active
-    return featureFlagsProvider.isNewUiDesignEnabled ||
-           featureFlagsProvider.isImprovedOnboardingEnabled ||
-           featureFlagsProvider.isGamificationEnabled;
+    return notifier.isNewUiDesignEnabled ||
+           notifier.isImprovedOnboardingEnabled ||
+           notifier.isGamificationEnabled;
   }
 
   /// Section Header
-  Widget _buildSectionHeader(BuildContext context, FeatureFlagsProvider featureFlagsProvider) {
+  Widget _buildSectionHeader(BuildContext context, FeatureFlagsState featureFlagsState) {
     final theme = Theme.of(context);
-    final isInitialized = featureFlagsProvider.isInitialized;
+    final isInitialized = featureFlagsState.isInitialized;
 
     return Padding(
       padding: SettingsDesignTokens.sectionHeaderPadding,
@@ -120,14 +125,14 @@ class FeatureFlagsSection extends StatelessWidget {
   }
 
   /// Feature Flags Overview
-  Widget _buildFeatureFlagsOverview(BuildContext context, FeatureFlagsProvider featureFlagsProvider) {
+  Widget _buildFeatureFlagsOverview(BuildContext context, FeatureFlagsNotifier notifier) {
     final theme = Theme.of(context);
-    
+
     final coreFeatures = [
-      _FeatureFlagItem('Premium Features', featureFlagsProvider.isPremiumFeaturesEnabled, Icons.workspace_premium),
-      _FeatureFlagItem('Advanced Diagnostics', featureFlagsProvider.isAdvancedDiagnosticsEnabled, Icons.science),
-      _FeatureFlagItem('Offline Mode', featureFlagsProvider.isOfflineModeEnabled, Icons.cloud_off),
-      _FeatureFlagItem('Push Notifications', featureFlagsProvider.isPushNotificationsEnabled, Icons.notifications),
+      _FeatureFlagItem('Premium Features', notifier.isPremiumFeaturesEnabled, Icons.workspace_premium),
+      _FeatureFlagItem('Advanced Diagnostics', notifier.isAdvancedDiagnosticsEnabled, Icons.science),
+      _FeatureFlagItem('Offline Mode', notifier.isOfflineModeEnabled, Icons.cloud_off),
+      _FeatureFlagItem('Push Notifications', notifier.isPushNotificationsEnabled, Icons.notifications),
     ];
 
     return Padding(
@@ -158,13 +163,13 @@ class FeatureFlagsSection extends StatelessWidget {
   }
 
   /// A/B Testing Status
-  Widget _buildABTestingStatus(BuildContext context, FeatureFlagsProvider featureFlagsProvider) {
+  Widget _buildABTestingStatus(BuildContext context, FeatureFlagsNotifier notifier) {
     final theme = Theme.of(context);
-    
+
     final abTests = [
-      _ABTestItem('New UI Design', featureFlagsProvider.isNewUiDesignEnabled, 'Variant B'),
-      _ABTestItem('Improved Onboarding', featureFlagsProvider.isImprovedOnboardingEnabled, 'Test Group'),
-      _ABTestItem('Gamification', featureFlagsProvider.isGamificationEnabled, 'Experimental'),
+      _ABTestItem('New UI Design', notifier.isNewUiDesignEnabled, 'Variant B'),
+      _ABTestItem('Improved Onboarding', notifier.isImprovedOnboardingEnabled, 'Test Group'),
+      _ABTestItem('Gamification', notifier.isGamificationEnabled, 'Experimental'),
     ];
 
     // Only show if any A/B tests are active
@@ -241,19 +246,19 @@ class FeatureFlagsSection extends StatelessWidget {
   }
 
   /// Admin Actions (Development Mode Only)
-  Widget _buildAdminActions(BuildContext context, FeatureFlagsProvider featureFlagsProvider) {
+  Widget _buildAdminActions(BuildContext context, WidgetRef ref, FeatureFlagsState featureFlagsState) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         children: [
           const Divider(),
           const SizedBox(height: 8),
-          
+
           // Admin Panel Button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _openFeatureFlagsAdminPanel(context, featureFlagsProvider),
+              onPressed: () => _openFeatureFlagsAdminPanel(context),
               icon: const Icon(Icons.admin_panel_settings, size: 16),
               label: const Text('Admin Panel'),
               style: OutlinedButton.styleFrom(
@@ -264,14 +269,14 @@ class FeatureFlagsSection extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Refresh Remote Config Button
           SizedBox(
             width: double.infinity,
             child: TextButton.icon(
-              onPressed: () => _refreshRemoteConfig(context, featureFlagsProvider),
+              onPressed: () => _refreshRemoteConfig(context, ref),
               icon: const Icon(Icons.refresh, size: 16),
               label: const Text('Atualizar Remote Config'),
               style: TextButton.styleFrom(
@@ -326,7 +331,7 @@ class FeatureFlagsSection extends StatelessWidget {
   }
 
   /// Open Feature Flags Admin Panel
-  Future<void> _openFeatureFlagsAdminPanel(BuildContext context, FeatureFlagsProvider featureFlagsProvider) async {
+  Future<void> _openFeatureFlagsAdminPanel(BuildContext context) async {
     await showDialog<void>(
       context: context,
       builder: (context) => const FeatureFlagsAdminDialog(),
@@ -334,10 +339,10 @@ class FeatureFlagsSection extends StatelessWidget {
   }
 
   /// Refresh Remote Config
-  Future<void> _refreshRemoteConfig(BuildContext context, FeatureFlagsProvider featureFlagsProvider) async {
+  Future<void> _refreshRemoteConfig(BuildContext context, WidgetRef ref) async {
     try {
-      await featureFlagsProvider.refresh();
-      
+      await ref.read(featureFlagsNotifierProvider.notifier).refresh();
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

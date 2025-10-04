@@ -8,10 +8,15 @@
 # Herdar configurações empresariais do root
 include: ../../analysis_options.yaml
 
+# Riverpod Linting
+analyzer:
+  plugins:
+    - custom_lint
+
 linter:
   rules:
     # Overrides específicos para app_agrihurbi se necessário
     # (manter mínimo possível para consistência)
-    
+
     # Permitir prints em desenvolvimento (será removido em produção)
     avoid_print: false

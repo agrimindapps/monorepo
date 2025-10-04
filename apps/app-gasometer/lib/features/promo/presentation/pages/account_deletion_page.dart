@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 
 class AccountDeletionPage extends ConsumerStatefulWidget {
   const AccountDeletionPage({super.key});
@@ -39,8 +40,8 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
   Future<void> _handleAccountDeletion() async {
     if (!_confirmationChecked || _isDeleting) return;
 
-    final authState = ref.read(authNotifierProvider);
-    final authNotifier = ref.read(authNotifierProvider.notifier);
+    final authState = ref.read(authProvider);
+    final authNotifier = ref.read(authProvider.notifier);
     String? currentPassword;
 
     // For authenticated (non-anonymous) users, request current password
@@ -92,7 +93,7 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
       await authNotifier.deleteAccount(currentPassword: currentPassword);
 
       // Check if there was an error
-      final errorMessage = ref.read(authNotifierProvider).errorMessage;
+      final errorMessage = ref.read(authProvider).errorMessage;
       if (errorMessage != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // TODO: Replace with Riverpod providers
-// import '../providers/data_migration_provider.dart';
+// import '../notifiers/data_migration_notifier.dart';
 
 /// Widget that handles the integration of data migration into the authentication flow
 /// 

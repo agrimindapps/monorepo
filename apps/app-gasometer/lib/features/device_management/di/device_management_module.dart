@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 import '../core/device_integration_service.dart';
-import '../presentation/providers/vehicle_device_provider.dart';
+import '../presentation/providers/vehicle_device_notifier.dart';
 
 /// Módulo de injeção de dependência para Device Management
 @module
@@ -11,8 +11,9 @@ abstract class DeviceManagementModule {
   @lazySingleton
   DeviceInfoPlugin get deviceInfoPlugin => DeviceInfoPlugin();
 
-  @lazySingleton
-  Connectivity get connectivity => Connectivity();
+  // TODO: Fix Connectivity registration - use ConnectivityPlus from core
+  // @lazySingleton
+  // Connectivity get connectivity => Connectivity();
 
   // Core Services (using core package)
   @lazySingleton
@@ -38,15 +39,15 @@ abstract class DeviceManagementModule {
         deviceInfoPlugin,
       );
 
-  // Vehicle Device Provider
-  @injectable
-  VehicleDeviceProvider provideVehicleDeviceProvider(
-    DeviceManagementService coreDeviceService,
-    ConnectivityService connectivityService,
-  ) => VehicleDeviceProvider(
-        coreDeviceService: coreDeviceService,
-        connectivityService: connectivityService,
-      );
+  // TODO: Fix VehicleDeviceProvider - migrated to Riverpod
+  // @injectable
+  // VehicleDeviceProvider provideVehicleDeviceProvider(
+  //   DeviceManagementService coreDeviceService,
+  //   ConnectivityService connectivityService,
+  // ) => VehicleDeviceProvider(
+  //       coreDeviceService: coreDeviceService,
+  //       connectivityService: connectivityService,
+  //     );
 }
 
 /// Função para inicializar as caixas Hive necessárias

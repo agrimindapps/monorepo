@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
-import '../../../vehicles/presentation/providers/vehicles_provider.dart';
+import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/services/odometer_validator.dart';
 import '../constants/odometer_constants.dart';
@@ -12,14 +12,14 @@ import '../constants/odometer_constants.dart';
 /// such as validating against the vehicle's initial and current odometer readings.
 class OdometerValidationService {
 
-  OdometerValidationService(this._vehiclesProvider);
+  OdometerValidationService(this._vehiclesNotifier);
   // Validation constants
   static const double maxAllowedRollbackKm = 100.0;
   static const double maxDailyIncreaseKm = 2000.0;
   static const int maxHistoryYears = 5;
   static const double significantOdometerDifferenceThreshold = 1000.0;
   static const double typicalKmPerYear = 15000.0;
-  final VehiclesProvider _vehiclesProvider;
+  final VehiclesNotifier _vehiclesNotifier;
 
   /// Validates odometer value with complete vehicle context
   ///
@@ -35,7 +35,7 @@ class OdometerValidationService {
   }) async {
     try {
       // Get vehicle data
-      final vehicle = await _vehiclesProvider.getVehicleById(vehicleId);
+      final vehicle = await _vehiclesNotifier.getVehicleById(vehicleId);
       if (vehicle == null) {
         return OdometerContextValidationResult(
           isValid: false,
@@ -261,7 +261,7 @@ class OdometerValidationService {
     final suggestions = <ValidationSuggestion>[];
     
     try {
-      final vehicle = await _vehiclesProvider.getVehicleById(vehicleId);
+      final vehicle = await _vehiclesNotifier.getVehicleById(vehicleId);
       if (vehicle == null) return suggestions;
 
       // Suggest typical values based on vehicle age

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../pages/profile_page.dart';
@@ -14,23 +13,23 @@ class AuthSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get AuthProvider from DI (ChangeNotifier - not yet migrated to Riverpod)
-    final authProvider = di.sl<ReceitaAgroAuthProvider>();
+    // Watch auth state from Riverpod
+    final authAsync = ref.watch(receitaAgroAuthNotifierProvider);
 
-    // Listen to changes using addListener pattern
-    return ListenableBuilder(
-      listenable: authProvider,
-      builder: (context, child) {
-        if (authProvider.isLoading) {
+    return authAsync.when(
+      data: (authState) {
+        if (authState.isLoading) {
           return _buildLoadingSection(context);
         }
 
-        if (!authProvider.isAuthenticated || authProvider.isAnonymous) {
+        if (!authState.isAuthenticated || authState.isAnonymous) {
           return _buildGuestSummary(context);
         }
 
-        return _buildUserSummary(context, authProvider);
+        return _buildUserSummary(context, authState);
       },
+      loading: () => _buildLoadingSection(context),
+      error: (error, _) => _buildErrorSection(context, error),
     );
   }
 
@@ -193,9 +192,9 @@ class AuthSection extends ConsumerWidget {
 
   Widget _buildUserSummary(
     BuildContext context,
-    ReceitaAgroAuthProvider authProvider,
+    ReceitaAgroAuthState authState,
   ) {
-    final user = authProvider.currentUser!;
+    final user = authState.currentUser!;
     final theme = Theme.of(context);
     final createdDate =
         user.createdAt != null
@@ -387,5 +386,32 @@ class AuthSection extends ConsumerWidget {
     ];
 
     return '${date.day} de ${months[date.month - 1]} de ${date.year}';
+  }
+
+  Widget _buildErrorSection(BuildContext context, Object error) {
+    return Container(
+      decoration: SettingsDesignTokens.getCardDecoration(context),
+      margin: SettingsDesignTokens.sectionMargin,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar dados do usuário',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

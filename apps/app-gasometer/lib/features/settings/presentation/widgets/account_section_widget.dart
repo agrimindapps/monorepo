@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/user_avatar_widget.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../auth/domain/entities/user_entity.dart' as gasometer_entities;
 
@@ -14,7 +15,7 @@ class AccountSectionWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final user = ref.watch(currentUserProvider);
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
     final isAnonymous = ref.watch(isAnonymousProvider);
@@ -221,7 +222,7 @@ class AccountSectionWidget extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => ref.read(authNotifierProvider.notifier).clearError(),
+                    onPressed: () => ref.read(authProvider.notifier).clearError(),
                     icon: const Icon(Icons.close, size: 16),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -600,8 +601,8 @@ class AccountSectionWidget extends ConsumerWidget {
 
   // Auth handling methods
   Future<void> _handleAnonymousLogin(BuildContext context, WidgetRef ref) async {
-    await ref.read(authNotifierProvider.notifier).signInAnonymously();
-    final authState = ref.read(authNotifierProvider);
+    await ref.read(authProvider.notifier).signInAnonymously();
+    final authState = ref.read(authProvider);
     if (context.mounted && authState.errorMessage != null) {
       _showSnackBar(context, authState.errorMessage!);
     } else if (context.mounted) {

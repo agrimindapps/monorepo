@@ -23,8 +23,11 @@ dependencies:
   injectable: any
   shared_preferences: any
   dartz: any
-  flutter_riverpod: any
-  provider: any
+
+  # Riverpod State Management (Modern)
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
   go_router: any
   equatable: any
   intl: any
@@ -38,6 +41,9 @@ dev_dependencies:
   # Code Generation
   build_runner: any
   injectable_generator: any
+  riverpod_generator: ^2.6.1
+  riverpod_lint: ^2.6.1
+  custom_lint: ^0.7.6
 
 flutter:
   uses-material-design: true

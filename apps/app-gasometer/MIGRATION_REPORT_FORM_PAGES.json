@@ -1,0 +1,270 @@
+{
+  "migrationDate": "2025-10-03",
+  "agent": "task-intelligence",
+  "executionModel": "Sonnet (Complex)",
+  "scope": "Migração das últimas 2 páginas de formulário para Riverpod",
+
+  "summary": {
+    "totalPagesMigrated": 2,
+    "totalFilesChanged": 2,
+    "totalLinesChanged": "~400 linhas",
+    "compilationErrors": 0,
+    "criticalWarnings": 0,
+    "infoWarnings": 1
+  },
+
+  "pagesMigrated": {
+    "addFuelPage": {
+      "path": "lib/features/fuel/presentation/pages/add_fuel_page.dart",
+      "status": "PARCIALMENTE_MIGRADA",
+      "migrationType": "Provider misto → Riverpod puro",
+      "beforeState": {
+        "widgets": "ConsumerStatefulWidget (já migrado)",
+        "imports": [
+          "package:flutter_riverpod/flutter_riverpod.dart",
+          "package:provider/provider.dart as provider (MISTO)"
+        ],
+        "providers": [
+          "ref.read(authNotifierProvider) - indefinido",
+          "provider.Consumer<FuelFormProvider> - Provider antigo",
+          "provider.Provider.of<FuelProvider> - Provider antigo"
+        ],
+        "issues": [
+          "Uso misto de Provider e Riverpod",
+          "FuelFormProvider do Provider (removido)",
+          "FuelProvider do Provider (removido)",
+          "FuelFormView ainda usa Provider"
+        ]
+      },
+      "afterState": {
+        "widgets": "ConsumerStatefulWidget ✓",
+        "imports": [
+          "package:flutter_riverpod/flutter_riverpod.dart ✓",
+          "Removido: package:provider/provider.dart ✓"
+        ],
+        "providers": [
+          "ref.read(authProvider) ✓",
+          "ref.watch(fuelFormNotifierProvider(vehicleId)) ✓",
+          "ref.read(fuelRiverpodProvider.notifier) ✓"
+        ],
+        "implementationStatus": {
+          "initialization": "COMPLETO - usa fuelFormNotifierProvider",
+          "formState": "COMPLETO - ref.watch(fuelFormNotifierProvider)",
+          "submission": "COMPLETO - usa fuelRiverpodProvider.notifier",
+          "formView": "PENDENTE - FuelFormView precisa migração"
+        }
+      },
+      "pendingWork": [
+        "Migrar FuelFormView de Provider para Riverpod",
+        "Implementar formulário completo usando fuelFormNotifierProvider",
+        "Remover placeholder 'Migração pendente'"
+      ],
+      "errors": 0,
+      "warnings": 0
+    },
+
+    "addOdometerPage": {
+      "path": "lib/features/odometer/presentation/pages/add_odometer_page.dart",
+      "status": "MIGRADA_COM_TODO",
+      "migrationType": "StatefulWidget + Provider → ConsumerStatefulWidget + Riverpod",
+      "beforeState": {
+        "widgets": "StatefulWidget",
+        "imports": [
+          "package:provider/provider.dart"
+        ],
+        "providers": [
+          "Provider.of<OdometerFormProvider>",
+          "Provider.of<VehiclesProvider>",
+          "Provider.of<OdometerProvider>",
+          "Consumer<OdometerFormProvider>"
+        ],
+        "formControllers": "Gerenciados localmente com listeners complexos",
+        "validation": "OdometerValidationService com dependências Provider"
+      },
+      "afterState": {
+        "widgets": "ConsumerStatefulWidget ✓",
+        "imports": [
+          "package:flutter_riverpod/flutter_riverpod.dart ✓",
+          "Removido: package:provider/provider.dart ✓"
+        ],
+        "providers": [
+          "ref.read(authProvider) ✓",
+          "ref.watch(odometerFormNotifierProvider) ✓",
+          "ref.read(odometerFormNotifierProvider.notifier) ✓"
+        ],
+        "formControllers": "Gerenciados por odometerFormNotifier (notifier.odometerController, notifier.descriptionController)",
+        "validation": "odometerFormNotifier.validateForm()"
+      },
+      "changeSummary": {
+        "removedComplexity": [
+          "Removido: _setupFormControllers() com listeners manuais",
+          "Removido: _cleanupListeners() com flags de controle",
+          "Removido: _updateControllersFromProvider()",
+          "Removido: _onOdometerChanged() e _onDescriptionChanged()",
+          "Removido: OdometerValidationService (lógica migrada para notifier)"
+        ],
+        "simplifiedLogic": [
+          "Controllers agora gerenciados pelo notifier (auto-dispose)",
+          "Validação centralizada no notifier",
+          "Sem listeners manuais (Riverpod reativo)",
+          "Inicialização simplificada"
+        ]
+      },
+      "pendingWork": [
+        "Criar odometerRiverpodProvider (provider global de odômetros)",
+        "Implementar métodos addOdometer e updateOdometer no provider global",
+        "Substituir placeholder de 'Implementação Pendente' por save real"
+      ],
+      "errors": 0,
+      "warnings": 1,
+      "warningDetails": [
+        "info - Sort directive sections alphabetically (não crítico)"
+      ]
+    }
+  },
+
+  "architecturalChanges": {
+    "addFuelPage": {
+      "before": "Provider misto (Riverpod + Provider)",
+      "after": "Riverpod puro (auth + form + data)",
+      "stateManagement": "Migrado para fuelFormNotifierProvider (family provider)",
+      "dataLayer": "Migrado para fuelRiverpodProvider"
+    },
+    "addOdometerPage": {
+      "before": "StatefulWidget + Provider + listeners manuais complexos",
+      "after": "ConsumerStatefulWidget + Riverpod + controllers gerenciados",
+      "stateManagement": "Migrado para odometerFormNotifierProvider",
+      "dataLayer": "PENDENTE - precisa odometerRiverpodProvider"
+    }
+  },
+
+  "providersUsed": [
+    "authProvider (auth_notifier.dart)",
+    "fuelFormNotifierProvider (fuel_form_notifier.dart - family)",
+    "fuelRiverpodProvider (fuel_riverpod_notifier.dart)",
+    "odometerFormNotifierProvider (odometer_form_notifier.dart)"
+  ],
+
+  "providersPending": [
+    "odometerRiverpodProvider - precisa ser criado para salvar/atualizar odômetros"
+  ],
+
+  "codeQualityMetrics": {
+    "beforeMigration": {
+      "addFuelPage": {
+        "mixedStateManagement": true,
+        "providerConflicts": true,
+        "complexityScore": "Alta"
+      },
+      "addOdometerPage": {
+        "manualListeners": 7,
+        "cleanupComplexity": "Alta (flags de controle)",
+        "validationService": "Externa com dependências Provider",
+        "complexityScore": "Muito Alta"
+      }
+    },
+    "afterMigration": {
+      "addFuelPage": {
+        "mixedStateManagement": false,
+        "providerConflicts": false,
+        "complexityScore": "Média (FuelFormView pendente)"
+      },
+      "addOdometerPage": {
+        "manualListeners": 0,
+        "cleanupComplexity": "Baixa (auto-dispose Riverpod)",
+        "validationService": "Integrada no notifier",
+        "complexityScore": "Baixa"
+      }
+    }
+  },
+
+  "validationResults": {
+    "compilation": {
+      "status": "SUCCESS",
+      "errors": 0,
+      "criticalWarnings": 0,
+      "infoWarnings": 1
+    },
+    "functionality": {
+      "addFuelPage": {
+        "formDisplay": "PENDENTE (placeholder)",
+        "formValidation": "IMPLEMENTADO",
+        "formSubmission": "IMPLEMENTADO",
+        "editMode": "IMPLEMENTADO"
+      },
+      "addOdometerPage": {
+        "formDisplay": "IMPLEMENTADO",
+        "formValidation": "IMPLEMENTADO",
+        "formSubmission": "PENDENTE (placeholder)",
+        "editMode": "IMPLEMENTADO"
+      }
+    }
+  },
+
+  "remainingWork": {
+    "fuelFeature": [
+      {
+        "task": "Migrar FuelFormView para Riverpod",
+        "priority": "ALTA",
+        "estimatedTime": "2-4 horas",
+        "description": "Substituir Consumer<FuelFormProvider> por ref.watch(fuelFormNotifierProvider)",
+        "files": ["lib/features/fuel/presentation/widgets/fuel_form_view.dart"]
+      }
+    ],
+    "odometerFeature": [
+      {
+        "task": "Criar odometerRiverpodProvider",
+        "priority": "ALTA",
+        "estimatedTime": "3-5 horas",
+        "description": "Provider global Riverpod para gerenciar odômetros (CRUD + state)",
+        "files": ["lib/features/odometer/presentation/providers/odometer_riverpod_notifier.dart (novo)"]
+      },
+      {
+        "task": "Implementar save/update em add_odometer_page",
+        "priority": "ALTA",
+        "estimatedTime": "1 hora",
+        "description": "Substituir placeholder por chamadas reais ao odometerRiverpodProvider",
+        "files": ["lib/features/odometer/presentation/pages/add_odometer_page.dart"]
+      }
+    ]
+  },
+
+  "lessonsLearned": [
+    "FuelFormView tem dependência forte com Provider antigo - precisa refatoração completa",
+    "Odometer feature não tinha provider global Riverpod (só form notifier)",
+    "Controllers gerenciados pelo notifier reduzem drasticamente complexidade (7 listeners → 0)",
+    "authProvider é o provider correto (não authNotifierProvider)",
+    "Family providers (fuelFormNotifierProvider) requerem vehicleId como parâmetro"
+  ],
+
+  "recommendations": [
+    "PRIORIDADE 1: Migrar FuelFormView para Riverpod (bloqueador do add_fuel_page)",
+    "PRIORIDADE 2: Criar odometerRiverpodProvider (bloqueador do add_odometer_page)",
+    "PRIORIDADE 3: Após criar odometerRiverpodProvider, implementar save/update",
+    "Considerar criar um padrão comum para FormView widgets (Riverpod-first)",
+    "Documentar padrão de family providers para formulários específicos de entidade"
+  ],
+
+  "executionTime": {
+    "totalMinutes": 45,
+    "analysisMinutes": 10,
+    "migrationMinutes": 30,
+    "validationMinutes": 5
+  },
+
+  "conclusion": {
+    "status": "PARCIALMENTE_CONCLUÍDA",
+    "pagesFullyMigrated": 0,
+    "pagesPartiallyMigrated": 2,
+    "blockers": [
+      "FuelFormView usa Provider (bloqueador add_fuel_page)",
+      "Falta odometerRiverpodProvider (bloqueador add_odometer_page)"
+    ],
+    "nextSteps": [
+      "1. Migrar FuelFormView para Riverpod",
+      "2. Criar odometerRiverpodProvider com CRUD completo",
+      "3. Implementar save real nos formulários",
+      "4. Testar fluxo completo create/edit para ambas features"
+    ]
+  }
+}

@@ -10,7 +10,9 @@
 /// - Use cases injetados via GetIt
 library;
 
+export 'auth_notifier.dart';
 export 'login_form_notifier.dart';
 export 'login_form_state.dart';
 export 'social_login_notifier.dart';
 export 'social_login_state.dart';
+export '../providers/auth_providers.dart';

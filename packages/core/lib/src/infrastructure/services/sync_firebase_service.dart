@@ -569,9 +569,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }
 
   bool _canSync() {
-    return _currentUserId != null && 
-           _currentStatus != SyncStatus.offline && 
-           config.enableRealtimeSync;
+    // Allow manual sync even if realtime is disabled
+    // Only check if user is authenticated and not offline
+    return _currentUserId != null &&
+           _currentStatus != SyncStatus.offline;
   }
 
   Future<Either<Failure, void>> _saveLocal(T item) async {

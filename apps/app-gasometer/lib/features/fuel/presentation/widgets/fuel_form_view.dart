@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/centralized_loading_widget.dart';
 import '../../../../core/widgets/datetime_field.dart';
 import '../../../../core/widgets/form_section_header.dart';
@@ -13,52 +14,49 @@ import '../../../../core/widgets/validated_dropdown_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
 import '../../../../core/widgets/validated_switch_field.dart';
 import '../../../../core/widgets/validated_text_field.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/fuel_constants.dart';
 import '../../domain/services/fuel_formatter_service.dart';
-import '../providers/fuel_form_provider.dart';
+import '../providers/fuel_form_notifier.dart';
 
-class FuelFormView extends StatelessWidget {
+class FuelFormView extends ConsumerWidget {
 
   const FuelFormView({
     super.key,
-    required this.formProvider,
+    required this.vehicleId,
     this.onSubmit,
   });
-  final FuelFormProvider formProvider;
+  final String vehicleId;
   final VoidCallback? onSubmit;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<FuelFormProvider>(
-      builder: (context, provider, _) {
-        if (!provider.isInitialized) {
-          return const CentralizedLoadingWidget(
-            message: FuelConstants.loadingFormMessage,
-          );
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
 
-        final model = provider.formModel;
-        final vehicle = model.vehicle;
+    if (!state.isInitialized) {
+      return const CentralizedLoadingWidget(
+        message: FuelConstants.loadingFormMessage,
+      );
+    }
 
-        if (vehicle == null) {
-          return _buildNoVehicleView(context);
-        }
+    final model = state.formModel;
+    final vehicle = model.vehicle;
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildFuelInfoSection(context, provider),
-              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-              _buildAdditionalInfoSection(context, provider),
-              const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-              _buildReceiptImageSection(context, provider),
-            ],
-          ),
-        );
-      },
+    if (vehicle == null) {
+      return _buildNoVehicleView(context);
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildFuelInfoSection(context, ref),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          _buildAdditionalInfoSection(context, ref),
+          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+          _buildReceiptImageSection(context, ref),
+        ],
+      ),
     );
   }
 
@@ -94,27 +92,30 @@ class FuelFormView extends StatelessWidget {
 
 
 
-  Widget _buildFuelInfoSection(BuildContext context, FuelFormProvider provider) {
+  Widget _buildFuelInfoSection(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+
     return FormSectionHeader(
       title: 'Informações Básicas',
       icon: Icons.calendar_today,
       child: Column(
         children: [
-          _buildFuelTypeDropdown(context, provider),
+          _buildFuelTypeDropdown(context, ref),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           DateTimeField(
-            value: provider.formModel.date,
-            onChanged: (newDate) => provider.updateDate(newDate),
+            value: state.formModel.date,
+            onChanged: (newDate) => notifier.updateDate(newDate),
             label: FuelConstants.dateLabel,
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildFullTankSwitch(context, provider),
+          _buildFullTankSwitch(context, ref),
         ],
       ),
     );
   }
 
-  Widget _buildAdditionalInfoSection(BuildContext context, FuelFormProvider provider) {
+  Widget _buildAdditionalInfoSection(BuildContext context, WidgetRef ref) {
     return FormSectionHeader(
       title: 'Adicionais',
       icon: Icons.more_horiz,
@@ -122,52 +123,57 @@ class FuelFormView extends StatelessWidget {
         children: [
           FormFieldRow.standard(
             children: [
-              _buildLitersField(context, provider),
-              _buildPricePerLiterField(context, provider),
+              _buildLitersField(context, ref),
+              _buildPricePerLiterField(context, ref),
             ],
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildTotalPriceField(context, provider),
+          _buildTotalPriceField(context, ref),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildOdometerField(context, provider),
+          _buildOdometerField(context, ref),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildNotesField(context, provider),
+          _buildNotesField(context, ref),
         ],
       ),
     );
   }
 
-  Widget _buildFuelTypeDropdown(BuildContext context, FuelFormProvider provider) {
-    final vehicle = provider.formModel.vehicle!;
+  Widget _buildFuelTypeDropdown(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final vehicle = state.formModel.vehicle!;
     final supportedFuels = vehicle.supportedFuels;
-    
+
     return ValidatedDropdownField<FuelType>(
-      items: supportedFuels.map((fuelType) => 
+      items: supportedFuels.map((fuelType) =>
         ValidatedDropdownItem.text(fuelType, fuelType.displayName)
       ).toList(),
-      value: provider.formModel.fuelType,
+      value: state.formModel.fuelType,
       label: FuelConstants.fuelTypeLabel,
       hint: 'Selecione o tipo de combustível',
       prefixIcon: Icons.local_gas_station,
       required: true,
       onChanged: (fuelType) {
         if (fuelType != null) {
-          provider.updateFuelType(fuelType);
+          notifier.updateFuelType(fuelType);
         }
       },
-      validator: (value) => provider.validateField('fuelType', value?.name),
+      validator: (value) => notifier.validateField('fuelType', value?.name),
     );
   }
 
   // Campo de data removido - agora usa DateTimeField
 
-  Widget _buildFullTankSwitch(BuildContext context, FuelFormProvider provider) {
+  Widget _buildFullTankSwitch(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+
     return ValidatedSwitchField(
-      value: provider.formModel.fullTank,
+      value: state.formModel.fullTank,
       label: FuelConstants.fullTankLabel,
       labelPosition: SwitchLabelPosition.start,
       showValidationIcon: false,
-      onChanged: (value) => provider.updateFullTank(value),
+      onChanged: (value) => notifier.updateFullTank(value),
       validator: (value) {
         // Optional validation if needed
         return null;
@@ -175,11 +181,13 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildLitersField(BuildContext context, FuelFormProvider provider) {
-    final vehicle = provider.formModel.vehicle;
+  Widget _buildLitersField(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final vehicle = state.formModel.vehicle;
 
     return ValidatedFormField(
-      controller: provider.litersController,
+      controller: notifier.litersController,
       label: FuelConstants.litersLabel,
       hint: FuelConstants.litersPlaceholder,
       prefixIcon: Icons.local_gas_station,
@@ -196,21 +204,24 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildPricePerLiterField(BuildContext context, FuelFormProvider provider) {
+  Widget _buildPricePerLiterField(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+
     return PriceFormField(
-      controller: provider.pricePerLiterController,
+      controller: notifier.pricePerLiterController,
       label: FuelConstants.pricePerLiterLabel,
       required: true,
       onChanged: (value) {
-        // O provider já está conectado ao controller
+        // O notifier já está conectado ao controller
       },
     );
   }
 
-  Widget _buildTotalPriceField(BuildContext context, FuelFormProvider provider) {
+  Widget _buildTotalPriceField(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
     final formatter = FuelFormatterService();
-    final totalPrice = provider.formModel.totalPrice;
-    
+    final totalPrice = state.formModel.totalPrice;
+
     return ValidatedTextField(
       controller: TextEditingController(
         text: totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : '',
@@ -231,46 +242,53 @@ class FuelFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildOdometerField(BuildContext context, FuelFormProvider provider) {
-    final vehicle = provider.formModel.vehicle;
+  Widget _buildOdometerField(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final vehicle = state.formModel.vehicle;
 
     return OdometerField(
-      controller: provider.odometerController,
+      controller: notifier.odometerController,
       label: FuelConstants.odometerLabel,
       hint: FuelConstants.odometerPlaceholder,
       currentOdometer: vehicle?.currentOdometer,
-      lastReading: provider.lastOdometerReading,
+      lastReading: state.lastOdometerReading,
       onChanged: (value) {
-        // O provider já está conectado ao controller
+        // O notifier já está conectado ao controller
         // Não precisamos fazer nada aqui
       },
     );
   }
 
 
-  Widget _buildNotesField(BuildContext context, FuelFormProvider provider) {
+  Widget _buildNotesField(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+
     return ObservationsField(
-      controller: provider.notesController,
+      controller: notifier.notesController,
       label: FuelConstants.notesLabel,
       hint: FuelConstants.notesHint,
       required: false,
       onChanged: (value) {
-        // O provider já está conectado ao controller
+        // O notifier já está conectado ao controller
       },
     );
   }
 
   // Método de seleção de data removido - agora é tratado pelo DateTimeField
 
-  Widget _buildReceiptImageSection(BuildContext context, FuelFormProvider provider) {
+  Widget _buildReceiptImageSection(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+
     return OptionalReceiptSection(
-      imagePath: provider.receiptImagePath,
-      hasImage: provider.hasReceiptImage,
-      isUploading: provider.isUploadingImage,
-      uploadError: provider.imageUploadError,
-      onCameraSelected: () => provider.captureReceiptImage(),
-      onGallerySelected: () => provider.selectReceiptImageFromGallery(),
-      onImageRemoved: () => provider.removeReceiptImage(),
+      imagePath: state.receiptImagePath,
+      hasImage: state.hasReceiptImage,
+      isUploading: state.isUploadingImage,
+      uploadError: state.imageUploadError,
+      onCameraSelected: () => notifier.captureReceiptImage(),
+      onGallerySelected: () => notifier.selectReceiptImageFromGallery(),
+      onImageRemoved: () => notifier.removeReceiptImage(),
       title: 'Comprovante',
       description: 'Anexe uma foto do comprovante de abastecimento (opcional)',
     );

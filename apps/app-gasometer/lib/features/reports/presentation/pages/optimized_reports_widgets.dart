@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
-import '../providers/reports_provider.dart';
+import '../providers/reports_notifier.dart';
 import '../widgets/enhanced_stats_card.dart';
 
 /// ✅ PERFORMANCE FIX: Single Consumer with optimized sections
-class OptimizedReportsContent extends StatelessWidget {
+class OptimizedReportsContent extends ConsumerWidget {
 
   const OptimizedReportsContent({
     super.key,
@@ -19,45 +19,44 @@ class OptimizedReportsContent extends StatelessWidget {
   final void Function(String?) onVehicleChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<ReportsProvider>(
-      builder: (context, reportsProvider, child) {
-        return Column(
-          children: [
-            EnhancedVehicleSelector(
-              selectedVehicleId: selectedVehicleId,
-              onVehicleChanged: (String? vehicleId) {
-                onVehicleChanged(vehicleId);
-                
-                // Load new reports data when vehicle changes
-                if (vehicleId != null) {
-                  reportsProvider.loadAllReportsForVehicle(vehicleId);
-                }
-              },
-            ),
-            const SizedBox(height: 24),
-            
-            if (reportsProvider.isLoading)
-              StandardLoadingView.initial(
-                message: 'Carregando estatísticas...',
-                height: 400,
-              )
-            else if (reportsProvider.hasError)
-              _buildErrorState(
-                context,
-                reportsProvider.errorMessage!,
-                () => reportsProvider.loadAllReportsForVehicle(selectedVehicleId!),
-              )
-            else ...[
-              EnhancedFuelSection(provider: reportsProvider),
-              const SizedBox(height: 16),
-              EnhancedConsumptionSection(provider: reportsProvider),
-              const SizedBox(height: 16),
-              EnhancedDistanceSection(provider: reportsProvider),
-            ],
-          ],
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reportsState = ref.watch(reportsNotifierProvider);
+    final reportsNotifier = ref.read(reportsNotifierProvider.notifier);
+
+    return Column(
+      children: [
+        EnhancedVehicleSelector(
+          selectedVehicleId: selectedVehicleId,
+          onVehicleChanged: (String? vehicleId) {
+            onVehicleChanged(vehicleId);
+
+            // Load new reports data when vehicle changes
+            if (vehicleId != null) {
+              reportsNotifier.loadAllReportsForVehicle(vehicleId);
+            }
+          },
+        ),
+        const SizedBox(height: 24),
+
+        if (reportsState.isLoading)
+          StandardLoadingView.initial(
+            message: 'Carregando estatísticas...',
+            height: 400,
+          )
+        else if (reportsState.errorMessage != null)
+          _buildErrorState(
+            context,
+            reportsState.errorMessage!,
+            () => reportsNotifier.loadAllReportsForVehicle(selectedVehicleId!),
+          )
+        else ...[
+          const EnhancedFuelSection(),
+          const SizedBox(height: 16),
+          const EnhancedConsumptionSection(),
+          const SizedBox(height: 16),
+          const EnhancedDistanceSection(),
+        ],
+      ],
     );
   }
   
@@ -115,17 +114,16 @@ class OptimizedReportsContent extends StatelessWidget {
 }
 
 /// Enhanced fuel section with performance indicators
-class EnhancedFuelSection extends StatelessWidget {
-  
-  const EnhancedFuelSection({super.key, required this.provider});
-  final ReportsProvider provider;
-  
+class EnhancedFuelSection extends ConsumerWidget {
+
+  const EnhancedFuelSection({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    final currentMonthStats = provider.getCurrentMonthStats();
-    final currentYearStats = provider.getCurrentYearStats();
-    final monthlyComparisons = provider.getMonthlyComparisons();
-    final yearlyComparisons = provider.getYearlyComparisons();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentMonthStats = ref.watch(currentMonthStatsProvider);
+    final currentYearStats = ref.watch(currentYearStatsProvider);
+    final monthlyComparisons = ref.watch(monthlyComparisonsProvider);
+    final yearlyComparisons = ref.watch(yearlyComparisonsProvider);
     
     return EnhancedStatsCard(
       title: 'Abastecimento',
@@ -151,17 +149,16 @@ class EnhancedFuelSection extends StatelessWidget {
 }
 
 /// Enhanced consumption section with performance indicators
-class EnhancedConsumptionSection extends StatelessWidget {
-  
-  const EnhancedConsumptionSection({super.key, required this.provider});
-  final ReportsProvider provider;
-  
+class EnhancedConsumptionSection extends ConsumerWidget {
+
+  const EnhancedConsumptionSection({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    final currentMonthStats = provider.getCurrentMonthStats();
-    final currentYearStats = provider.getCurrentYearStats();
-    final monthlyComparisons = provider.getMonthlyComparisons();
-    final yearlyComparisons = provider.getYearlyComparisons();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentMonthStats = ref.watch(currentMonthStatsProvider);
+    final currentYearStats = ref.watch(currentYearStatsProvider);
+    final monthlyComparisons = ref.watch(monthlyComparisonsProvider);
+    final yearlyComparisons = ref.watch(yearlyComparisonsProvider);
     
     return EnhancedStatsCard(
       title: 'Combustível',
@@ -187,17 +184,16 @@ class EnhancedConsumptionSection extends StatelessWidget {
 }
 
 /// Enhanced distance section with performance indicators
-class EnhancedDistanceSection extends StatelessWidget {
-  
-  const EnhancedDistanceSection({super.key, required this.provider});
-  final ReportsProvider provider;
-  
+class EnhancedDistanceSection extends ConsumerWidget {
+
+  const EnhancedDistanceSection({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    final currentMonthStats = provider.getCurrentMonthStats();
-    final currentYearStats = provider.getCurrentYearStats();
-    final monthlyComparisons = provider.getMonthlyComparisons();
-    final yearlyComparisons = provider.getYearlyComparisons();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentMonthStats = ref.watch(currentMonthStatsProvider);
+    final currentYearStats = ref.watch(currentYearStatsProvider);
+    final monthlyComparisons = ref.watch(monthlyComparisonsProvider);
+    final yearlyComparisons = ref.watch(yearlyComparisonsProvider);
     
     return EnhancedStatsCard(
       title: 'Distância',

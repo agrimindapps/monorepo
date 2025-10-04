@@ -31,7 +31,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       // Simple auth redirect logic
       try {
-        final authState = ref.read(authProvider);
+        final authState = ref.read(authNotifierProvider);
         final isAuthenticated = authState.isAuthenticated;
         final isOnAuthPage = state.matchedLocation.startsWith('/login') || state.matchedLocation.startsWith('/register');
         final isOnPromo = state.matchedLocation == '/promo';
@@ -48,7 +48,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
         return null; // No redirect needed
       } catch (e) {
-        // If authProvider not ready, allow current navigation
+        // If authNotifierProvider not ready, allow current navigation
         return null;
       }
     },

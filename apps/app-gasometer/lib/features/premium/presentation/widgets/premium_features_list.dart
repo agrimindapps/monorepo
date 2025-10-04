@@ -1,19 +1,21 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../providers/premium_provider.dart';
+import '../providers/premium_notifier.dart';
 
-class PremiumFeaturesList extends StatelessWidget {
+class PremiumFeaturesList extends core.ConsumerWidget {
   const PremiumFeaturesList({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, premiumProvider, child) {
+  Widget build(BuildContext context, core.WidgetRef ref) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
         final features = _getPremiumFeatures();
-        
+
         return DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -32,7 +34,7 @@ class PremiumFeaturesList extends StatelessWidget {
             itemBuilder: (context, index) {
               final feature = features[index];
               return FutureBuilder<bool>(
-                future: _checkFeatureAccess(premiumProvider, feature['id'] as String? ?? ''),
+                future: _checkFeatureAccess(ref, feature['id'] as String? ?? ''),
                 builder: (context, snapshot) {
                   final hasAccess = snapshot.data ?? false;
                   
@@ -97,6 +99,10 @@ class PremiumFeaturesList extends StatelessWidget {
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Erro: $error', style: const TextStyle(color: AppColors.error)),
+      ),
     );
   }
 
@@ -177,26 +183,29 @@ class PremiumFeaturesList extends StatelessWidget {
     ];
   }
 
-  Future<bool> _checkFeatureAccess(PremiumProvider provider, String featureId) async {
+  Future<bool> _checkFeatureAccess(core.WidgetRef ref, String featureId) async {
+    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final state = ref.read(premiumNotifierProvider).valueOrNull;
+
     switch (featureId) {
       case 'unlimited_vehicles':
-        return provider.isPremium;
+        return state?.isPremium ?? false;
       case 'advanced_reports':
-        return await provider.canAccessAdvancedReports();
+        return await notifier.canAccessAdvancedReports();
       case 'export_data':
-        return await provider.canExportData();
+        return await notifier.canExportData();
       case 'custom_categories':
-        return await provider.canUseCustomCategories();
+        return await notifier.canUseCustomCategories();
       case 'premium_themes':
-        return await provider.canAccessPremiumThemes();
+        return await notifier.canAccessPremiumThemes();
       case 'cloud_backup':
-        return await provider.canBackupToCloud();
+        return await notifier.canBackupToCloud();
       case 'location_history':
-        return await provider.canUseLocationHistory();
+        return await notifier.canUseLocationHistory();
       case 'advanced_analytics':
-        return await provider.canAccessAdvancedAnalytics();
+        return await notifier.canAccessAdvancedAnalytics();
       default:
-        return provider.isPremium;
+        return state?.isPremium ?? false;
     }
   }
 }

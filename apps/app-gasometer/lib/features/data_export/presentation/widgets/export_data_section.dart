@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../providers/data_export_provider.dart';
+import '../notifiers/data_export_notifier.dart';
+import '../state/data_export_state.dart';
 
 /// Seção de exportação de dados para a ProfilePage
 class ExportDataSection extends ConsumerStatefulWidget {
@@ -25,38 +25,35 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   }
 
   void _loadInitialData() {
-    final authState = ref.read(authNotifierProvider);
-    final exportProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
+    final authState = ref.read(authProvider);
+    final exportNotifier = ref.read(dataExportNotifierProvider.notifier);
 
     final userId = authState.currentUser?.id;
     if (userId != null) {
-      exportProvider.checkCanExport(userId);
-      exportProvider.loadExportHistory(userId);
+      exportNotifier.checkCanExport(userId);
+      exportNotifier.loadExportHistory(userId);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
+    final exportState = ref.watch(dataExportNotifierProvider);
 
-    return provider.Consumer<DataExportProvider>(
-      builder: (context, exportProvider, child) {
-        final user = authState.currentUser;
-        final isAnonymous = authState.isAnonymous;
+    final user = authState.currentUser;
+    final isAnonymous = authState.isAnonymous;
 
-        if (isAnonymous || user == null) {
-          return const SizedBox.shrink();
-        }
+    if (isAnonymous || user == null) {
+      return const SizedBox.shrink();
+    }
 
-        return _buildSection(
-          context,
-          title: 'Meus Dados',
-          icon: Icons.download,
-          children: [
-            _buildDataActionsContainer(context, exportProvider, user.id),
-          ],
-        );
-      },
+    return _buildSection(
+      context,
+      title: 'Meus Dados',
+      icon: Icons.download,
+      children: [
+        _buildDataActionsContainer(context, exportState, user.id),
+      ],
     );
   }
 
@@ -112,8 +109,8 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   }
 
   Widget _buildDataActionsContainer(
-    BuildContext context, 
-    DataExportProvider exportProvider, 
+    BuildContext context,
+    DataExportState exportState,
     String userId,
   ) {
     return DecoratedBox(
@@ -128,7 +125,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
             icon: Icons.code,
             title: 'Exportar JSON',
             subtitle: 'Baixar dados em formato JSON',
-            onTap: () => _handleExportJson(context, userId, exportProvider),
+            onTap: () => _handleExportJson(context, userId, exportState),
             isFirst: true,
           ),
           _buildDataActionItem(
@@ -136,7 +133,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
             icon: Icons.table_chart,
             title: 'Exportar CSV',
             subtitle: 'Baixar dados em formato CSV',
-            onTap: () => _handleExportCsv(context, userId, exportProvider),
+            onTap: () => _handleExportCsv(context, userId, exportState),
             isLast: true,
           ),
         ],
@@ -234,19 +231,20 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   // Métodos de ação
 
   Future<void> _handleExportJson(
-    BuildContext context, 
-    String userId, 
-    DataExportProvider exportProvider,
+    BuildContext context,
+    String userId,
+    DataExportState exportState,
   ) async {
     HapticFeedback.lightImpact();
-    
-    if (!exportProvider.canExport) {
+
+    if (!exportState.canExport) {
       _showLimitMessage(context);
       return;
     }
 
     try {
-      final success = await exportProvider.startExport(
+      final exportNotifier = ref.read(dataExportNotifierProvider.notifier);
+      final success = await exportNotifier.startExport(
         userId: userId,
         categories: ['all'], // Exportar todas as categorias
         startDate: null,
@@ -264,7 +262,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
               label: 'Compartilhar',
               textColor: Colors.white,
               onPressed: () {
-                final result = exportProvider.lastResult;
+                final result = ref.read(dataExportNotifierProvider).lastResult;
                 if (result?.filePath != null) {
                   _shareFile(result!.filePath!, 'dados_json');
                 }
@@ -287,13 +285,13 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   }
 
   Future<void> _handleExportCsv(
-    BuildContext context, 
-    String userId, 
-    DataExportProvider exportProvider,
+    BuildContext context,
+    String userId,
+    DataExportState exportState,
   ) async {
     HapticFeedback.lightImpact();
-    
-    if (!exportProvider.canExport) {
+
+    if (!exportState.canExport) {
       _showLimitMessage(context);
       return;
     }
@@ -319,7 +317,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   }
 
   Future<void> _shareFile(String filePath, String fileName) async {
-    final exportProvider = provider.Provider.of<DataExportProvider>(context, listen: false);
-    await exportProvider.shareExportFile(filePath, '$fileName.json');
+    final exportNotifier = ref.read(dataExportNotifierProvider.notifier);
+    await exportNotifier.shareExportFile(filePath, '$fileName.json');
   }
 }

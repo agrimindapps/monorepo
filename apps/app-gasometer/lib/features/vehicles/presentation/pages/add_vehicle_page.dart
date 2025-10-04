@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/providers/auth_provider.dart';
-import '../../../../core/providers/base_provider.dart';
+import '../../../auth/presentation/notifiers/auth_notifier.dart';
+import '../../../auth/presentation/state/auth_state.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/validation/form_validator.dart';
 import '../../../../core/widgets/error_header.dart';
@@ -18,8 +17,8 @@ import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
-import '../providers/vehicle_form_provider.dart';
-import '../providers/vehicles_provider.dart';
+import '../providers/vehicle_form_notifier.dart';
+import '../providers/vehicles_notifier.dart';
 
 // ✅ ARCHITECTURE FIX: Document refactoring needed for this 800+ line monolithic widget
 // TODO: Extract image picker, form sections, and validation into separate components
@@ -34,36 +33,33 @@ class AddVehiclePage extends ConsumerStatefulWidget {
 }
 
 class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorHandlerMixin {
-  VehicleFormProvider? formProvider;
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _observacoesController = TextEditingController();
 
   // Novo sistema de validação centralizada
   late final FormValidator _formValidator;
   final Map<String, GlobalKey> _fieldKeys = {};
+  bool _isInitialized = false;
 
-  void _initializeFormProvider(String userId) {
-    if (formProvider != null) return; // Já inicializado
+  void _initializeFormNotifier() {
+    if (_isInitialized) return; // Já inicializado
 
-    formProvider = VehicleFormProvider(userId);
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
 
     if (widget.vehicle != null) {
-      formProvider!.initializeForEdit(widget.vehicle!);
+      notifier.initializeForEdit(widget.vehicle!);
       // Inicializar observações se editando
       _observacoesController.text = widget.vehicle!.metadata['observacoes'] as String? ?? '';
     }
 
-    // Add listeners para atualizar contadores
-    formProvider!.placaController.addListener(_updateUI);
-    formProvider!.chassiController.addListener(_updateUI);
-    formProvider!.renavamController.addListener(_updateUI);
-
     // Inicializar FormValidator centralizado
     _initializeFormValidator();
+    _isInitialized = true;
   }
 
   void _initializeFormValidator() {
     _formValidator = FormValidator();
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
 
     // Gerar keys para scroll automático
     _fieldKeys['marca'] = GlobalKey();
@@ -80,7 +76,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     _formValidator.addFields([
       FormFieldConfig(
         fieldId: 'marca',
-        controller: formProvider!.marcaController,
+        controller: notifier.brandController,
         validationType: ValidationType.length,
         required: true,
         minLength: 2,
@@ -90,7 +86,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'modelo',
-        controller: formProvider!.modeloController,
+        controller: notifier.modelController,
         validationType: ValidationType.length,
         required: true,
         minLength: 2,
@@ -100,7 +96,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'ano',
-        controller: formProvider!.anoController,
+        controller: notifier.yearController,
         validationType: ValidationType.required,
         required: true,
         label: 'Ano',
@@ -108,7 +104,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'cor',
-        controller: formProvider!.corController,
+        controller: notifier.colorController,
         validationType: ValidationType.length,
         required: true,
         minLength: 3,
@@ -118,7 +114,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'odometro',
-        controller: formProvider!.odometroController,
+        controller: notifier.odometerController,
         validationType: ValidationType.decimal,
         required: true,
         minValue: 0.0,
@@ -128,7 +124,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'placa',
-        controller: formProvider!.placaController,
+        controller: notifier.plateController,
         validationType: ValidationType.licensePlate,
         required: true,
         label: 'Placa',
@@ -136,7 +132,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'chassi',
-        controller: formProvider!.chassiController,
+        controller: notifier.chassisController,
         validationType: ValidationType.chassis,
         required: false,
         label: 'Chassi',
@@ -144,7 +140,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
       FormFieldConfig(
         fieldId: 'renavam',
-        controller: formProvider!.renavamController,
+        controller: notifier.renavamController,
         validationType: ValidationType.renavam,
         required: false,
         label: 'Renavam',
@@ -165,19 +161,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     // Validação customizada para combustível será feita no submit
   }
 
-  void _updateUI() {
-    setState(() {});
-  }
-
   @override
   void dispose() {
     _observacoesController.dispose();
-    if (formProvider != null) {
-      formProvider!.placaController.removeListener(_updateUI);
-      formProvider!.chassiController.removeListener(_updateUI);
-      formProvider!.renavamController.removeListener(_updateUI);
-      formProvider!.dispose();
-    }
     // Limpar FormValidator
     _formValidator.clear();
     super.dispose();
@@ -186,11 +172,12 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.vehicle != null;
-    final authState = ref.watch(authNotifierProvider);
-    final userId = ref.watch(userIdProvider);
+    final authState = ref.watch(authProvider);
+    final formState = ref.watch(vehicleFormNotifierProvider);
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
 
     // Aguarda a inicialização do AuthState
-    if (authState.isLoading) {
+    if (authState.status == AuthStatus.authenticating || !authState.isInitialized) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -198,68 +185,52 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       );
     }
 
-    // Inicializa o form provider quando o auth estiver pronto
-    _initializeFormProvider(userId);
+    // Inicializa o form notifier quando o auth estiver pronto
+    _initializeFormNotifier();
 
-    if (formProvider == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
+    return FormDialog(
+      title: 'Veículos',
+      subtitle: 'Gerencie seus veículos cadastrados',
+      headerIcon: Icons.directions_car,
+      isLoading: formState.isLoading,
+      confirmButtonText: isEditing ? 'Salvar' : 'Salvar',
+      onCancel: () => Navigator.of(context).pop(),
+      onConfirm: _submitForm,
+      content: Form(
+        key: notifier.formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ErrorHeader para exibir erros de validação
+            buildFormErrorHeader(),
+            if (formErrorMessage != null)
+              const SizedBox(height: GasometerDesignTokens.spacingMd),
+            _buildIdentificationSection(),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            _buildTechnicalSection(),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            _buildDocumentationSection(),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            _buildAdditionalInfoSection(),
+          ],
         ),
-      );
-    }
-
-    return provider.MultiProvider(
-      providers: [
-        provider.ChangeNotifierProvider.value(value: formProvider!),
-      ],
-      child: provider.Consumer<VehicleFormProvider>(builder: (context, formProviderConsumer, _) {
-        // Use formProvider! já verificado antes
-        final provider = formProvider!;
-        return FormDialog(
-          title: 'Veículos',
-          subtitle: 'Gerencie seus veículos cadastrados',
-          headerIcon: Icons.directions_car,
-          isLoading: provider.isLoading,
-          confirmButtonText: isEditing ? 'Salvar' : 'Salvar',
-          onCancel: () => Navigator.of(context).pop(),
-          onConfirm: _submitForm,
-          content: Form(
-            key: provider.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ErrorHeader para exibir erros de validação
-                buildFormErrorHeader(),
-                if (formErrorMessage != null)
-                  const SizedBox(height: GasometerDesignTokens.spacingMd),
-                _buildIdentificationSection(provider),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                _buildTechnicalSection(provider),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                _buildDocumentationSection(provider),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                _buildAdditionalInfoSection(provider),
-              ],
-            ),
-          ),
-        );
-      }),
+      ),
     );
   }
 
-  Widget _buildIdentificationSection(VehicleFormProvider provider) {
+  Widget _buildIdentificationSection() {
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
     return FormSectionHeader(
       title: 'Identificação do Veículo',
       icon: Icons.directions_car,
       child: Column(
         children: [
-        _buildPhotoUploadSection(provider),
+        _buildPhotoUploadSection(),
         const SizedBox(height: GasometerDesignTokens.spacingLg),
         Container(
           key: _fieldKeys['marca'],
           child: ValidatedFormField(
-            controller: provider.marcaController,
+            controller: notifier.brandController,
             label: 'Marca',
             hint: 'Ex: Ford, Volkswagen, etc.',
             required: true,
@@ -275,7 +246,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         Container(
           key: _fieldKeys['modelo'],
           child: ValidatedFormField(
-            controller: provider.modeloController,
+            controller: notifier.modelController,
             label: 'Modelo',
             hint: 'Ex: Gol, Fiesta, etc.',
             required: true,
@@ -292,7 +263,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
             Expanded(
               child: Container(
                 key: _fieldKeys['ano'],
-                child: _buildYearDropdown(provider),
+                child: _buildYearDropdown(notifier),
               ),
             ),
             const SizedBox(width: GasometerDesignTokens.spacingMd),
@@ -300,7 +271,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
               child: Container(
                 key: _fieldKeys['cor'],
                 child: ValidatedFormField(
-                  controller: provider.corController,
+                  controller: notifier.colorController,
                   label: 'Cor',
                   hint: 'Ex: Branco, Preto, etc.',
                   required: true,
@@ -319,19 +290,21 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     );
   }
 
-  Widget _buildTechnicalSection(VehicleFormProvider provider) {
+  Widget _buildTechnicalSection() {
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
     return FormSectionHeader(
       title: 'Informações Técnicas',
       icon: Icons.speed,
       child: Column(
         children: [
-          _buildCombustivelSelector(provider),
+          _buildCombustivelSelector(notifier),
         ],
       ),
     );
   }
 
-  Widget _buildDocumentationSection(VehicleFormProvider provider) {
+  Widget _buildDocumentationSection() {
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
     return FormSectionHeader(
       title: 'Documentação',
       icon: Icons.description,
@@ -340,7 +313,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         Container(
           key: _fieldKeys['odometro'],
           child: ValidatedFormField(
-            controller: provider.odometroController,
+            controller: notifier.odometerController,
             label: 'Odômetro Atual',
             hint: '0,00',
             required: true,
@@ -365,7 +338,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         Container(
           key: _fieldKeys['placa'],
           child: ValidatedFormField(
-            controller: provider.placaController,
+            controller: notifier.plateController,
             label: 'Placa',
             hint: 'Ex: ABC1234 ou ABC1D23',
             required: true,
@@ -386,7 +359,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         Container(
           key: _fieldKeys['chassi'],
           child: ValidatedFormField(
-            controller: provider.chassiController,
+            controller: notifier.chassisController,
             label: 'Chassi (opcional)',
             hint: 'Ex: 9BWZZZ377VT004251',
             required: false,
@@ -407,7 +380,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         Container(
           key: _fieldKeys['renavam'],
           child: ValidatedFormField(
-            controller: provider.renavamController,
+            controller: notifier.renavamController,
             label: 'Renavam (opcional)',
             hint: 'Ex: 12345678901',
             required: false,
@@ -429,7 +402,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     );
   }
 
-  Widget _buildAdditionalInfoSection(VehicleFormProvider provider) {
+  Widget _buildAdditionalInfoSection() {
     return FormSectionHeader(
       title: 'Informações Adicionais',
       icon: Icons.more_horiz,
@@ -452,8 +425,10 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     );
   }
 
-  Widget _buildPhotoUploadSection(VehicleFormProvider provider) {
-    final hasPhoto = provider.vehicleImage != null && provider.vehicleImage!.existsSync();
+  Widget _buildPhotoUploadSection() {
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final formState = ref.watch(vehicleFormNotifierProvider);
+    final hasPhoto = formState.vehicleImage != null && formState.vehicleImage!.existsSync();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -495,7 +470,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
                         top: Radius.circular(GasometerDesignTokens.radiusLg),
                       ),
                       child: _buildOptimizedImage(
-                        provider.vehicleImage!,
+                        formState.vehicleImage!,
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -508,7 +483,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
                         backgroundColor: Theme.of(context).colorScheme.error,
                         radius: GasometerDesignTokens.spacingLg,
                         child: IconButton(
-                          onPressed: () => provider.removeVehicleImage(),
+                          onPressed: () => notifier.removeVehicleImage(),
                           icon: Icon(
                             Icons.close,
                             color: Theme.of(context).colorScheme.onError,
@@ -715,7 +690,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       );
 
       if (image != null) {
-        formProvider!.updateVehicleImage(File(image.path));
+        final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+        notifier.updateVehicleImage(File(image.path));
       }
     } catch (e) {
       if (mounted) {
@@ -730,12 +706,18 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
   }
 
 
-  Widget _buildYearDropdown(VehicleFormProvider provider) {
+  Widget _buildYearDropdown(dynamic notifier) {
     final currentYear = DateTime.now().year;
     final years = List.generate(currentYear - 1900 + 1, (index) => currentYear - index);
-    
+
+    // Parse text to int, handling empty string
+    final yearText = notifier.yearController.text as String;
+    final currentValue = yearText.trim().isNotEmpty
+        ? int.tryParse(yearText)
+        : null;
+
     return DropdownButtonFormField<int>(
-      value: provider.anoController.text.isNotEmpty ? int.tryParse(provider.anoController.text) : null,
+      value: currentValue,
       decoration: InputDecoration(
         labelText: 'Ano',
         border: OutlineInputBorder(
@@ -762,13 +744,14 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         );
       }).toList(),
       onChanged: (value) {
-        provider.anoController.text = value?.toString() ?? '';
-        provider.markAsChanged();
+        notifier.yearController.text = value?.toString() ?? '';
+        notifier.markAsChanged();
       },
     );
   }
 
-  Widget _buildCombustivelSelector(VehicleFormProvider provider) {
+  Widget _buildCombustivelSelector(dynamic notifier) {
+    final formState = ref.watch(vehicleFormNotifierProvider);
     // Usar FuelTypeMapper para gerar lista de combustíveis dinamicamente
     final combustiveis = FuelTypeMapper.availableFuelStrings.map((fuelName) {
       IconData icon;
@@ -818,9 +801,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
           spacing: 8,
           runSpacing: 8,
           children: combustiveis.map((combustivel) {
-            final isSelected = provider.selectedCombustivel == combustivel['name'];
+            final isSelected = formState.selectedFuel == combustivel['name'];
             return GestureDetector(
-              onTap: () => provider.updateSelectedCombustivel(combustivel['name'] as String),
+              onTap: () => notifier.updateSelectedFuel(combustivel['name'] as String),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
@@ -863,7 +846,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
 
 
   Future<void> _submitForm() async {
-    if (formProvider == null) return;
+    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final formState = ref.read(vehicleFormNotifierProvider);
 
     // Limpar erro anterior
     clearFormError();
@@ -872,7 +856,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     final validationResult = await _formValidator.validateAll();
 
     // Validação customizada para combustível (não incluída no FormValidator)
-    if (formProvider!.selectedCombustivel.isEmpty) {
+    if (formState.selectedFuel.isEmpty) {
       setFormError('Selecione o tipo de combustível');
       return;
     }
@@ -885,14 +869,14 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       return;
     }
 
-    formProvider!.setLoading(true);
+    notifier.setLoading(true);
 
     try {
       if (!mounted) return;
-      final vehiclesProvider = provider.Provider.of<VehiclesProvider>(context, listen: false);
-      
-      // Criar entidade do veículo usando o FormProvider
-      final vehicleEntity = formProvider!.createVehicleEntity();
+      final vehiclesNotifier = ref.read(vehiclesNotifierProvider.notifier);
+
+      // Criar entidade do veículo usando o FormNotifier
+      final vehicleEntity = notifier.createVehicleEntity();
       
       // Adicionar observações aos metadados
       final updatedMetadata = Map<String, dynamic>.from(vehicleEntity.metadata);
@@ -915,25 +899,17 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         metadata: updatedMetadata,
       );
       
-      // Salvar via provider
-      bool success;
+      // Salvar via notifier
       if (widget.vehicle != null) {
-        success = await vehiclesProvider.updateVehicle(updatedVehicleEntity);
+        await vehiclesNotifier.updateVehicle(updatedVehicleEntity);
       } else {
-        success = await vehiclesProvider.addVehicle(updatedVehicleEntity);
+        await vehiclesNotifier.addVehicle(updatedVehicleEntity);
       }
-      
+
+      // Se chegou aqui, a operação foi bem-sucedida
       if (mounted) {
-        if (success) {
-          // Fechar o dialog imediatamente após sucesso local
-          Navigator.of(context).pop(true);
-        } else {
-          // Se falhou, mostrar o erro no header
-          final errorMessage = vehiclesProvider.errorMessage.isNotEmpty
-              ? vehiclesProvider.errorMessage
-              : 'Erro desconhecido ao salvar veículo';
-          setFormError('Erro ao salvar veículo: $errorMessage');
-        }
+        // Fechar o dialog imediatamente após sucesso local
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
@@ -941,7 +917,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       }
     } finally {
       if (mounted) {
-        formProvider!.setLoading(false);
+        notifier.setLoading(false);
       }
     }
   }

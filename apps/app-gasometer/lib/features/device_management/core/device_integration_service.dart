@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
-import '../presentation/providers/vehicle_device_provider.dart';
+import '../presentation/providers/vehicle_device_notifier.dart';
 
 /// Serviço de integração do Device Management com o fluxo de autenticação
 class DeviceIntegrationService {
@@ -78,7 +78,7 @@ class DeviceIntegrationService {
 
   /// Configura o provider de device management após login
   void setupDeviceManagementProvider(
-    VehicleDeviceProvider provider,
+    VehicleDeviceNotifier provider,
     String userId,
     DeviceEntity currentDevice,
   ) {

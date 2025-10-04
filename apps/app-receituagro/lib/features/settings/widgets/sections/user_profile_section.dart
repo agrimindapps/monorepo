@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
 
-import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
 import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_notifier.dart';
 import '../items/sync_status_item.dart';
 import '../shared/settings_list_tile.dart';
-
-// Provider accessor for FeatureFlagsProvider (ChangeNotifier from DI)
-final featureFlagsProviderProvider = Provider<FeatureFlagsProvider>((ref) => GetIt.instance<FeatureFlagsProvider>());
 
 /// User Profile & Account Management Section
 ///
@@ -64,12 +60,13 @@ class _UserProfileCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Access Riverpod SettingsNotifier state
     final settingsAsync = ref.watch(settingsNotifierProvider);
-    final featureFlags = ref.read(featureFlagsProviderProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
 
     return settingsAsync.when(
-      data: (settingsState) => ListenableBuilder(
-        listenable: featureFlags,
-        builder: (context, _) {
+      data: (settingsState) => featureFlagsAsync.when(
+        data: (featureFlagsState) {
+          final featureFlags = ref.read(featureFlagsNotifierProvider.notifier);
+
           return Card(
             margin: SettingsDesignTokens.sectionMargin,
             elevation: SettingsDesignTokens.cardElevation,
@@ -99,6 +96,24 @@ class _UserProfileCard extends ConsumerWidget {
             ),
           );
         },
+        loading: () => const Card(
+          margin: SettingsDesignTokens.sectionMargin,
+          elevation: SettingsDesignTokens.cardElevation,
+          child: Padding(
+            padding: EdgeInsets.all(24.0),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+        error: (error, _) => Card(
+          margin: SettingsDesignTokens.sectionMargin,
+          elevation: SettingsDesignTokens.cardElevation,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: Text('Erro ao carregar feature flags: $error'),
+            ),
+          ),
+        ),
       ),
       loading: () => const Card(
         margin: SettingsDesignTokens.sectionMargin,
@@ -278,7 +293,7 @@ class _UserProfileCard extends ConsumerWidget {
   }
 
   /// Settings Sync Status
-  Widget _buildSyncStatus(BuildContext context, SettingsState settingsState, FeatureFlagsProvider featureFlags) {
+  Widget _buildSyncStatus(BuildContext context, SettingsState settingsState, FeatureFlagsNotifier featureFlags) {
     final theme = Theme.of(context);
 
     return Padding(

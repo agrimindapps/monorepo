@@ -1,8 +1,7 @@
+import 'package:core/core.dart' hide SubscriptionState;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider_lib;
 
-import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
 import '../providers/subscription_notifier.dart';
 
 /// Premium Validation Widget for Cross-platform Premium Status
@@ -61,33 +60,37 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
   @override
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
-    final featureFlags = provider_lib.Provider.of<FeatureFlagsProvider>(context);
+    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
 
     return subscriptionState.when(
-      data: (state) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Main Validation Card
-          _buildValidationCard(context, state, featureFlags),
+      data: (state) => featureFlagsAsync.when(
+        data: (featureFlagsState) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Main Validation Card
+            _buildValidationCard(context, state, featureFlagsState),
 
-          if (widget.showFullDetails) ...[
-            const SizedBox(height: 16),
+            if (widget.showFullDetails) ...[
+              const SizedBox(height: 16),
 
-            // Device-specific Premium Status
-            _buildDeviceStatusCard(context, state),
+              // Device-specific Premium Status
+              _buildDeviceStatusCard(context, state),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Cross-platform Sync Status
-            _buildSyncStatusCard(context, state, featureFlags),
+              // Cross-platform Sync Status
+              _buildSyncStatusCard(context, state, featureFlagsState),
+            ],
+
+            // Action Buttons
+            if (widget.showFullDetails) ...[
+              const SizedBox(height: 16),
+              _buildActionButtons(context),
+            ],
           ],
-
-          // Action Buttons
-          if (widget.showFullDetails) ...[
-            const SizedBox(height: 16),
-            _buildActionButtons(context),
-          ],
-        ],
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Erro: $error')),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
@@ -100,11 +103,12 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
   Widget _buildValidationCard(
     BuildContext context,
     SubscriptionState subscriptionState,
-    FeatureFlagsProvider featureFlags,
+    FeatureFlagsState featureFlagsState,
   ) {
     final theme = Theme.of(context);
     final hasActiveSubscription = subscriptionState.hasActiveSubscription;
-    final isValidationEnabled = featureFlags.isSubscriptionValidationEnabled;
+    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+    final isValidationEnabled = notifier.isSubscriptionValidationEnabled;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -309,11 +313,18 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
   Widget _buildSyncStatusCard(
     BuildContext context,
     SubscriptionState subscriptionState,
-    FeatureFlagsProvider featureFlags,
+    FeatureFlagsState featureFlagsState,
   ) {
     final theme = Theme.of(context);
-    final isSyncEnabled = featureFlags.isContentSynchronizationEnabled;
-    
+    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+    final isSyncEnabled = notifier.isContentSynchronizationEnabled;
+
+    // Sincronização cross-platform ainda não implementada no SubscriptionState
+    // Usar valores padrão por enquanto
+    final isIOSPremiumActive = subscriptionState.hasActiveSubscription;
+    final isAndroidPremiumActive = subscriptionState.hasActiveSubscription;
+    final isWebPremiumActive = false; // Web ainda não tem subscription
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -357,27 +368,27 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
               ],
             ),
             const SizedBox(height: 12),
-            
+
             if (isSyncEnabled) ...[
               // Sync Status Items
               _buildSyncItem(
                 context,
                 'iOS',
-                subscriptionState.isIOSPremiumActive,
+                isIOSPremiumActive,
                 Icons.phone_iphone,
               ),
               const SizedBox(height: 8),
               _buildSyncItem(
                 context,
                 'Android',
-                subscriptionState.isAndroidPremiumActive,
+                isAndroidPremiumActive,
                 Icons.android,
               ),
               const SizedBox(height: 8),
               _buildSyncItem(
                 context,
                 'Web',
-                subscriptionState.isWebPremiumActive,
+                isWebPremiumActive,
                 Icons.web,
               ),
             ] else ...[

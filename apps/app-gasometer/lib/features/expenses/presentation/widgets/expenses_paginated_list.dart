@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 import '../../domain/entities/expense_entity.dart';
-import '../providers/expenses_paginated_provider.dart';
+import '../notifiers/expenses_paginated_notifier.dart';
+import '../notifiers/expenses_paginated_state.dart';
 
 /// Widget de lista paginada eficiente para despesas
 /// Implementa infinite scrolling com lazy loading real
-class ExpensesPaginatedList extends StatefulWidget {
+class ExpensesPaginatedList extends ConsumerStatefulWidget {
   
   const ExpensesPaginatedList({
     super.key,
@@ -35,10 +36,10 @@ class ExpensesPaginatedList extends StatefulWidget {
   final ScrollController? controller;
 
   @override
-  State<ExpensesPaginatedList> createState() => _ExpensesPaginatedListState();
+  ConsumerState<ExpensesPaginatedList> createState() => _ExpensesPaginatedListState();
 }
 
-class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
+class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
   late ScrollController _scrollController;
   
   @override
@@ -61,35 +62,30 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
   void _onScroll() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
       // User reached the bottom, load next page
-      final provider = context.read<ExpensesPaginatedProvider>();
-      if (provider.hasNextPage && !provider.isLoadingMore) {
-        provider.loadNextPage();
+      final asyncState = ref.read(expensesPaginatedNotifierProvider);
+      final state = asyncState.valueOrNull;
+      if (state != null && state.hasNextPage && !state.isLoadingMore) {
+        ref.read(expensesPaginatedNotifierProvider.notifier).loadNextPage();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ExpensesPaginatedProvider>(
-      builder: (context, provider, child) {
-        // Initial loading state
-        if (provider.isInitial && provider.isLoading) {
-          return _buildInitialLoading();
-        }
+    final asyncState = ref.watch(expensesPaginatedNotifierProvider);
 
-        // Error state
-        if (provider.hasError) {
-          return _buildError(provider);
-        }
-
+    return asyncState.when(
+      data: (state) {
         // Empty state
-        if (provider.isEmpty) {
+        if (state.items.isEmpty) {
           return _buildEmpty();
         }
 
         // Main list with items
-        return _buildList(provider);
+        return _buildList(state);
       },
+      loading: () => _buildInitialLoading(),
+      error: (error, stackTrace) => _buildError(error),
     );
   }
 
@@ -110,15 +106,15 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
     );
   }
 
-  Widget _buildError(ExpensesPaginatedProvider provider) {
+  Widget _buildError(Object error) {
     if (widget.errorBuilder != null) {
       return widget.errorBuilder!;
     }
 
     return ErrorStateWidget(
       title: 'Erro ao carregar despesas',
-      message: provider.error?.displayMessage ?? 'Erro desconhecido',
-      onRetry: provider.hasError ? provider.retry : null,
+      message: error.toString(),
+      onRetry: () => ref.read(expensesPaginatedNotifierProvider.notifier).refresh(),
     );
   }
 
@@ -127,8 +123,9 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
       return widget.emptyBuilder!;
     }
 
-    final hasFilters = context.read<ExpensesPaginatedProvider>().hasActiveFilters;
-    
+    final asyncState = ref.read(expensesPaginatedNotifierProvider);
+    final hasFilters = asyncState.valueOrNull?.hasActiveFilters ?? false;
+
     return EmptyStateWidget(
       icon: Icons.receipt_long,
       title: hasFilters ? 'Nenhuma despesa encontrada' : 'Nenhuma despesa cadastrada',
@@ -136,16 +133,16 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
           ? 'Tente ajustar os filtros para encontrar despesas'
           : 'Adicione sua primeira despesa para começar a acompanhar os gastos',
       onAction: hasFilters
-          ? () => context.read<ExpensesPaginatedProvider>().clearFilters()
+          ? () => ref.read(expensesPaginatedNotifierProvider.notifier).clearFilters()
           : null,
     );
   }
 
-  Widget _buildList(ExpensesPaginatedProvider provider) {
-    final itemCount = provider.itemCount + (provider.hasNextPage ? 1 : 0);
-    
+  Widget _buildList(ExpensesPaginatedState state) {
+    final itemCount = state.itemCount + (state.hasNextPage ? 1 : 0);
+
     return RefreshIndicator(
-      onRefresh: provider.refresh,
+      onRefresh: () => ref.read(expensesPaginatedNotifierProvider.notifier).refresh(),
       child: ListView.builder(
         controller: _scrollController,
         padding: widget.padding ?? const EdgeInsets.all(16),
@@ -155,20 +152,20 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
         itemCount: itemCount,
         itemBuilder: (context, index) {
           // Loading more indicator at the bottom
-          if (index >= provider.itemCount) {
-            return _buildLoadMoreIndicator(provider);
+          if (index >= state.itemCount) {
+            return _buildLoadMoreIndicator(state);
           }
 
           // Regular expense item
-          final expense = provider.items[index];
+          final expense = state.items[index];
           return widget.itemBuilder(context, expense, index);
         },
       ),
     );
   }
 
-  Widget _buildLoadMoreIndicator(ExpensesPaginatedProvider provider) {
-    if (provider.isLoadingMore) {
+  Widget _buildLoadMoreIndicator(ExpensesPaginatedState state) {
+    if (state.isLoadingMore) {
       return Container(
         padding: const EdgeInsets.all(16),
         alignment: Alignment.center,
@@ -207,8 +204,8 @@ class _ExpensesPaginatedListState extends State<ExpensesPaginatedList> {
 }
 
 /// Widget de filtros para a lista paginada
-class ExpensesPaginatedFilters extends StatelessWidget {
-  
+class ExpensesPaginatedFilters extends ConsumerWidget {
+
   const ExpensesPaginatedFilters({
     super.key,
     this.showStats = true,
@@ -218,32 +215,36 @@ class ExpensesPaginatedFilters extends StatelessWidget {
   final VoidCallback? onFiltersChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<ExpensesPaginatedProvider>(
-      builder: (context, provider, child) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncState = ref.watch(expensesPaginatedNotifierProvider);
+
+    return asyncState.when(
+      data: (state) {
         return Column(
           children: [
             // Sort controls
-            _buildSortControls(context, provider),
-            
+            _buildSortControls(context, ref, state),
+
             // Stats summary if available
-            if (showStats && provider.stats != null) ...[
+            if (showStats && state.cachedStats != null) ...[
               const SizedBox(height: 8),
-              _buildStatsCard(provider.stats!),
+              _buildStatsCard(state.cachedStats!),
             ],
-            
+
             // Active filters indicator
-            if (provider.hasActiveFilters) ...[
+            if (state.hasActiveFilters) ...[
               const SizedBox(height: 8),
-              _buildActiveFiltersIndicator(context, provider),
+              _buildActiveFiltersIndicator(context, ref, state),
             ],
           ],
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
-  Widget _buildSortControls(BuildContext context, ExpensesPaginatedProvider provider) {
+  Widget _buildSortControls(BuildContext context, WidgetRef ref, ExpensesPaginatedState state) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -257,14 +258,14 @@ class ExpensesPaginatedFilters extends StatelessWidget {
               child: Wrap(
                 spacing: 8,
                 children: ExpenseSortBy.values.map((sortBy) {
-                  final isActive = provider.sortBy == sortBy;
+                  final isActive = state.sortBy == sortBy;
                   return FilterChip(
                     label: Text(_getSortLabel(sortBy)),
                     selected: isActive,
-                    onSelected: (_) => provider.toggleSortOrder(sortBy),
-                    avatar: isActive && provider.sortOrder == SortOrder.ascending
+                    onSelected: (_) => ref.read(expensesPaginatedNotifierProvider.notifier).toggleSortOrder(sortBy),
+                    avatar: isActive && state.sortOrder == SortOrder.ascending
                         ? const Icon(Icons.keyboard_arrow_up, size: 16)
-                        : isActive && provider.sortOrder == SortOrder.descending
+                        : isActive && state.sortOrder == SortOrder.descending
                         ? const Icon(Icons.keyboard_arrow_down, size: 16)
                         : null,
                   );
@@ -323,8 +324,9 @@ class ExpensesPaginatedFilters extends StatelessWidget {
   }
 
   Widget _buildActiveFiltersIndicator(
-    BuildContext context, 
-    ExpensesPaginatedProvider provider,
+    BuildContext context,
+    WidgetRef ref,
+    ExpensesPaginatedState state,
   ) {
     return Card(
       color: AppTheme.colors.primary.withValues(alpha: 0.1),
@@ -340,7 +342,7 @@ class ExpensesPaginatedFilters extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Filtros ativos - ${provider.itemCount} resultado(s)',
+                'Filtros ativos - ${state.itemCount} resultado(s)',
                 style: AppTheme.textStyles.bodySmall?.copyWith(
                   color: AppTheme.colors.onSurface,
                 ),
@@ -348,7 +350,7 @@ class ExpensesPaginatedFilters extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                provider.clearFilters();
+                ref.read(expensesPaginatedNotifierProvider.notifier).clearFilters();
                 onFiltersChanged?.call();
               },
               child: Text(

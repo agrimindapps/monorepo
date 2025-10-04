@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/i_premium_service.dart';
-import '../../../../core/providers/feature_flags_provider.dart';
+import '../../../../core/providers/feature_flags_notifier.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../../../core/services/promotional_notification_manager.dart';
 import '../../../../core/services/receituagro_notification_service.dart';
@@ -125,7 +125,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   late final IAppRatingRepository _appRatingRepository;
   // DeviceIdentityService not currently used
   // late final DeviceIdentityService _deviceIdentityService;
-  late final FeatureFlagsProvider _featureFlagsProvider;
+  late final FeatureFlagsNotifier _featureFlagsNotifier;
   DeviceManagementService? _deviceManagementService;
 
   @override
@@ -159,7 +159,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
       _appRatingRepository = di.sl<IAppRatingRepository>();
       // _deviceIdentityService = di.sl<DeviceIdentityService>(); // Not currently used
-      _featureFlagsProvider = di.sl<FeatureFlagsProvider>();
+      _featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
 
       // DeviceManagementService may not be available on Web
       if (di.sl.isRegistered<DeviceManagementService>()) {
@@ -672,5 +672,5 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Check if device management is enabled
   bool get isDeviceManagementEnabled =>
-      _featureFlagsProvider.isDeviceManagementEnabled;
+      _featureFlagsNotifier.isDeviceManagementEnabled;
 }

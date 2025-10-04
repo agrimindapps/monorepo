@@ -1,33 +1,34 @@
 import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../providers/premium_provider.dart';
+import '../providers/premium_notifier.dart';
 
-class PremiumProductsList extends StatefulWidget {
+class PremiumProductsList extends core.ConsumerStatefulWidget {
   const PremiumProductsList({super.key});
 
   @override
-  State<PremiumProductsList> createState() => _PremiumProductsListState();
+  core.ConsumerState<PremiumProductsList> createState() => _PremiumProductsListState();
 }
 
-class _PremiumProductsListState extends State<PremiumProductsList> {
+class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<PremiumProvider>(context, listen: false);
-      provider.loadAvailableProducts();
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      notifier.loadAvailableProducts();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, premiumProvider, child) {
-        if (premiumProvider.isLoading) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
+        if (state.isLoadingProducts) {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(32.0),
@@ -36,7 +37,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
           );
         }
 
-        if (premiumProvider.errorMessage != null) {
+        if (state.errorMessage != null) {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -60,7 +61,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  premiumProvider.errorMessage!,
+                  state.errorMessage!,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.error,
@@ -68,7 +69,10 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => premiumProvider.loadAvailableProducts(),
+                  onPressed: () {
+                    final notifier = ref.read(premiumNotifierProvider.notifier);
+                    notifier.loadAvailableProducts();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.error,
                     foregroundColor: Colors.white,
@@ -80,7 +84,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
           );
         }
 
-        if (premiumProvider.availableProducts.isEmpty) {
+        if (state.availableProducts.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -116,20 +120,24 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
         }
 
         return Column(
-          children: premiumProvider.availableProducts.map((product) {
+          children: state.availableProducts.map((product) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _buildProductCard(context, premiumProvider, product),
+              child: _buildProductCard(context, state, product),
             );
           }).toList(),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Erro: $error', style: const TextStyle(color: AppColors.error)),
+      ),
     );
   }
 
   Widget _buildProductCard(
     BuildContext context,
-    PremiumProvider provider,
+    PremiumNotifierState state,
     core.ProductInfo product,
   ) {
     final isMonthly = product.productId.contains('monthly');
@@ -246,12 +254,12 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: provider.isLoading 
-                      ? null 
-                      : () => _onPurchasePressed(context, provider, product),
+                    onPressed: state.isProcessingPurchase
+                      ? null
+                      : () => _onPurchasePressed(context, product),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isRecommended 
-                        ? AppColors.primary 
+                      backgroundColor: isRecommended
+                        ? AppColors.primary
                         : AppColors.grey700,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -259,7 +267,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: provider.isLoading
+                    child: state.isProcessingPurchase
                       ? const SizedBox(
                           width: 20,
                           height: 20,
@@ -331,7 +339,6 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
 
   Future<void> _onPurchasePressed(
     BuildContext context,
-    PremiumProvider provider,
     core.ProductInfo product,
   ) async {
     // Show confirmation dialog
@@ -339,9 +346,12 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
     if (!confirmed) return;
 
     // Attempt purchase
-    final success = await provider.purchaseProduct(product.productId);
-    
+    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final success = await notifier.purchaseProduct(product.productId);
+
     if (!mounted) return;
+
+    final state = ref.read(premiumNotifierProvider).valueOrNull;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -355,7 +365,7 @@ class _PremiumProductsListState extends State<PremiumProductsList> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            provider.errorMessage ?? 'Erro na compra. Tente novamente.',
+            state?.errorMessage ?? 'Erro na compra. Tente novamente.',
           ),
           backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),

@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/auth_provider.dart';
+import '../../../auth/presentation/state/auth_state.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import 'rate_limit_info_widget.dart';
 
 /// Formulário de login aprimorado com rate limiting de segurança
@@ -36,8 +37,8 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
-    final authNotifier = ref.read(authNotifierProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final authNotifier = ref.read(authProvider.notifier);
 
     return Form(
       key: _formKey,
@@ -201,7 +202,7 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authNotifier = ref.read(authNotifierProvider.notifier);
+    final authNotifier = ref.read(authProvider.notifier);
 
     // Verifica rate limiting antes de tentar login
     final canAttempt = await authNotifier.canAttemptLogin();

@@ -181,7 +181,15 @@ class HiveStorageService implements ILocalStorageRepository {
       await _ensureInitialized();
       final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
 
-      final values = targetBox.values.cast<T>().toList();
+      // Handle Map conversion properly to avoid LinkedMap issues
+      final values = targetBox.values.map((dynamic value) {
+        // Convert LinkedMap to Map<String, dynamic> if needed
+        if (value is Map && value is! Map<String, dynamic>) {
+          return Map<String, dynamic>.from(value) as T;
+        }
+        return value as T;
+      }).toList();
+
       return Right(values);
     } catch (e) {
       return Left(CacheFailure('Erro ao obter valores: $e'));

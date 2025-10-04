@@ -4,22 +4,21 @@ import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/interfaces/i_premium_service.dart';
 import '../../domain/entities/favorito_entity.dart';
-import '../providers/favoritos_provider_simplified.dart';
+import '../notifiers/favoritos_notifier.dart';
 
 /// Widget especializado para aba de Diagnósticos favoritos
 /// Gerencia listagem e ações específicas para diagnósticos + verificação premium
-class FavoritosDiagnosticosTabWidget extends StatelessWidget {
-  final FavoritosProviderSimplified provider;
+class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
   const FavoritosDiagnosticosTabWidget({
     super.key,
-    required this.provider,
     required this.onReload,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoritosState = ref.watch(favoritosNotifierProvider);
     final premiumService = sl<IPremiumService>();
     final isPremium = premiumService.isPremium;
     
@@ -31,18 +30,18 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
     
     return _buildTabContent(
       context: context,
-      provider: provider,
-      viewState: provider.getViewStateForType(TipoFavorito.diagnostico),
-      emptyMessage: provider.getEmptyMessageForType(TipoFavorito.diagnostico),
-      items: provider.diagnosticos,
-      itemBuilder: (diagnostico) => _buildDiagnosticoItem(context, diagnostico, provider),
+      ref: ref,
+      viewState: favoritosState.getViewStateForType(TipoFavorito.diagnostico),
+      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.diagnostico),
+      items: favoritosState.diagnosticos,
+      itemBuilder: (diagnostico) => _buildDiagnosticoItem(context, diagnostico, ref),
       isDark: isDark,
     );
   }
 
   Widget _buildTabContent<T extends FavoritoEntity>({
     required BuildContext context,
-    required FavoritosProviderSimplified provider,
+    required WidgetRef ref,
     required FavoritosViewState viewState,
     required String emptyMessage,
     required List<T> items,
@@ -54,7 +53,7 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       
       case FavoritosViewState.error:
-        return _buildErrorState(context, provider, isDark);
+        return _buildErrorState(context, ref, isDark);
       
       case FavoritosViewState.empty:
         return _buildEmptyState(context, emptyMessage, isDark);
@@ -62,7 +61,7 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
-            await provider.loadAllFavoritos();
+            await ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -105,7 +104,7 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
   Widget _buildDiagnosticoItem(
     BuildContext context,
     FavoritoDiagnosticoEntity diagnostico,
-    FavoritosProviderSimplified provider
+    WidgetRef ref
   ) {
     return Dismissible(
       key: Key('favorito_diagnostico_${diagnostico.id}'),
@@ -115,7 +114,7 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
         return await _showRemoveDialog(context, '${diagnostico.nomeDefensivo} → ${diagnostico.nomePraga}');
       },
       onDismissed: (direction) async {
-        await _removeFavorito(context, provider, diagnostico);
+        await _removeFavorito(context, ref, diagnostico);
       },
       child: ListTile(
         onTap: () => _navigateToDiagnosticoDetails(context, diagnostico),
@@ -246,11 +245,11 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
   /// Remove o favorito e mostra feedback
   Future<void> _removeFavorito(
     BuildContext context,
-    FavoritosProviderSimplified provider,
+    WidgetRef ref,
     FavoritoDiagnosticoEntity diagnostico,
   ) async {
     try {
-      await provider.toggleFavorito(TipoFavorito.diagnostico, diagnostico.id);
+      await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(TipoFavorito.diagnostico, diagnostico.id);
       // Remover favorito sem feedback de SnackBar
     } catch (e) {
       // Erro silencioso
@@ -338,9 +337,10 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
 
   Widget _buildErrorState(
     BuildContext context,
-    FavoritosProviderSimplified provider,
+    WidgetRef ref,
     bool isDark,
   ) {
+    final favoritosState = ref.watch(favoritosNotifierProvider);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -359,10 +359,10 @@ class FavoritosDiagnosticosTabWidget extends StatelessWidget {
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          if (provider.errorMessage != null) ...[
+          if (favoritosState.errorMessage != null) ...[
             const SizedBox(height: 8),
             Text(
-              provider.errorMessage!,
+              favoritosState.errorMessage!,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,

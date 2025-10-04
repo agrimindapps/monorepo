@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
-import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/widgets/form_dialog.dart';
-import '../providers/expense_form_provider.dart';
-import '../providers/expenses_provider.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
+import '../models/expense_form_model.dart';
+import '../notifiers/expense_form_notifier.dart';
+import '../notifiers/expense_form_state.dart';
+import '../notifiers/expenses_notifier.dart';
 import '../widgets/expense_form_view.dart';
 
 /// Dialog modal para adicionar/editar despesas
@@ -26,14 +27,12 @@ class AddExpensePage extends ConsumerStatefulWidget {
 }
 
 class _AddExpensePageState extends ConsumerState<AddExpensePage> {
-  late ExpenseFormProvider _formProvider;
-  
   // Rate limiting and loading state
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
-  
+
   // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
@@ -54,43 +53,39 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       _isInitialized = true;
     }
   }
-  
-  void _initializeProviders() {
-    _formProvider = provider.Provider.of<ExpenseFormProvider>(context, listen: false);
-    final authState = ref.read(authNotifierProvider);
 
-    // Set context for dependency injection access
-    _formProvider.setContext(context);
+  void _initializeProviders() {
+    final authState = ref.read(authProvider);
+    final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
 
     // Use addPostFrameCallback to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _formProvider.initialize(
-        vehicleId: widget.vehicleId,
+      await formNotifier.initialize(
+        vehicleId: widget.vehicleId ?? '',
         userId: authState.userId,
       );
-      
-        if (widget.editExpenseId != null) {
-          await _loadExpenseForEdit(_formProvider);
-        }
-      });
-    
-    // No need for manual setState here - providers will handle notifications
-    // The Consumer<ExpenseFormProvider> will automatically rebuild when provider state changes
+
+      if (widget.editExpenseId != null) {
+        await _loadExpenseForEdit();
+      }
+    });
   }
 
-  Future<void> _loadExpenseForEdit(ExpenseFormProvider prov) async {
+  Future<void> _loadExpenseForEdit() async {
     try {
-      final expensesProvider = provider.Provider.of<ExpensesProvider>(context, listen: false);
-      // Primeiro garantir que os dados foram carregados
-      await expensesProvider.loadExpenses();
-      
-      final expense = expensesProvider.getExpenseById(widget.editExpenseId!);
+      final expensesNotifier = ref.read(expensesNotifierProvider.notifier);
+      final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
 
-      if (expense != null) {
-        await prov.initializeWithExpense(expense);
-      } else {
-        throw Exception('Registro de despesa não encontrado');
-      }
+      // Primeiro garantir que os dados foram carregados
+      await expensesNotifier.loadExpenses();
+
+      final expensesState = ref.read(expensesNotifierProvider);
+      final expense = expensesState.expenses.firstWhere(
+        (e) => e.id == widget.editExpenseId,
+        orElse: () => throw Exception('Registro de despesa não encontrado'),
+      );
+
+      await formNotifier.initializeWithExpense(expense);
     } catch (e) {
       throw Exception('Erro ao carregar registro para edição: $e');
     }
@@ -107,29 +102,28 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
 
   @override
   Widget build(BuildContext context) {
-    return provider.Consumer<ExpenseFormProvider>(
-      builder: (context, formProvider, child) {
-        // Generate subtitle based on vehicle information
-        String subtitle = 'Registre uma despesa do seu veículo';
-        if (formProvider.isInitialized && formProvider.formModel.vehicle != null) {
-          final vehicle = formProvider.formModel.vehicle!;
-          final odometer = vehicle.currentOdometer;
-          subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
-        }
+    final formState = ref.watch(expenseFormNotifierProvider);
+    final isInitialized = formState.vehicle != null;
 
-        return FormDialog(
-          title: 'Despesa',
-          subtitle: subtitle,
-          headerIcon: Icons.attach_money,
-          isLoading: formProvider.isLoading || _isSubmitting,
-          confirmButtonText: 'Salvar',
-          onCancel: () => Navigator.of(context).pop(),
-          onConfirm: _submitFormWithRateLimit,
-          content: !formProvider.isInitialized
-              ? const Center(child: CircularProgressIndicator())
-              : ExpenseFormView(formProvider: formProvider),
-        );
-      },
+    // Generate subtitle based on vehicle information
+    String subtitle = 'Registre uma despesa do seu veículo';
+    if (isInitialized && formState.vehicle != null) {
+      final vehicle = formState.vehicle!;
+      final odometer = vehicle.currentOdometer;
+      subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+    }
+
+    return FormDialog(
+      title: 'Despesa',
+      subtitle: subtitle,
+      headerIcon: Icons.attach_money,
+      isLoading: formState.isLoading || _isSubmitting,
+      confirmButtonText: 'Salvar',
+      onCancel: () => Navigator.of(context).pop(),
+      onConfirm: _submitFormWithRateLimit,
+      content: !isInitialized
+          ? const Center(child: CircularProgressIndicator())
+          : const ExpenseFormView(),
     );
   }
 
@@ -161,8 +155,10 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
 
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
+    final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+
     // Double-check form validation
-    if (!_formProvider.validateForm()) {
+    if (!formNotifier.validateForm()) {
       return;
     }
 
@@ -177,8 +173,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       _isSubmitting = true;
     });
 
-    final formProvider = _formProvider;
-    final expensesProvider = provider.Provider.of<ExpensesProvider>(context, listen: false);
+    final expensesNotifier = ref.read(expensesNotifierProvider.notifier);
 
     try {
       // Setup timeout protection
@@ -197,13 +192,16 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
 
       // Provider will handle its own loading state
 
-      final expenseModel = formProvider.formModel;
-      
+      final formState = ref.read(expenseFormNotifierProvider);
+
+      // Converter ExpenseFormState para ExpenseFormModel
+      final formModel = _stateToModel(formState);
+
       bool success;
       if (widget.editExpenseId != null) {
-        success = await expensesProvider.updateExpense(expenseModel);
+        success = await expensesNotifier.updateExpense(formModel);
       } else {
-        success = await expensesProvider.addExpense(expenseModel);
+        success = await expensesNotifier.addExpense(formModel);
       }
 
       if (success) {
@@ -217,7 +215,8 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       } else {
         if (mounted) {
           // Show error in dialog context (before closing)
-          final errorMessage = expensesProvider.error?.displayMessage ?? 'Erro ao salvar despesa';
+          final expensesState = ref.read(expensesNotifierProvider);
+          final errorMessage = expensesState.error ?? 'Erro ao salvar despesa';
           _showErrorDialog('Erro', errorMessage);
         }
       }
@@ -232,7 +231,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     } finally {
       // Clean up timeout timer
       _timeoutTimer?.cancel();
-      
+
       // Loading state managed by provider
       if (mounted) {
         setState(() {
@@ -258,6 +257,25 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     );
   }
 
-
-
+  /// Converte ExpenseFormState para ExpenseFormModel
+  ExpenseFormModel _stateToModel(ExpenseFormState state) {
+    return ExpenseFormModel(
+      id: state.id,
+      userId: state.userId,
+      vehicleId: state.vehicleId,
+      vehicle: state.vehicle,
+      expenseType: state.expenseType,
+      description: state.description,
+      amount: state.amount,
+      odometer: state.odometer,
+      date: state.date ?? DateTime.now(),
+      location: state.location,
+      notes: state.notes,
+      receiptImagePath: state.receiptImagePath,
+      isLoading: state.isLoading,
+      hasChanges: state.hasChanges,
+      errors: state.fieldErrors,
+      lastError: state.errorMessage,
+    );
+  }
 }

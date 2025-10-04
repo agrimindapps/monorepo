@@ -1,7 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../providers/auth_provider.dart';
+import '../../features/auth/presentation/notifiers/auth_notifier.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../services/avatar_service.dart';
 
 /// Dialog for avatar selection with camera, gallery and remove options
@@ -228,9 +229,9 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
     if (_previewResult?.base64Data == null) return;
 
     try {
-      final authNotifier = ref.read(authNotifierProvider.notifier);
+      final authNotifier = ref.read(authProvider.notifier);
       final success = await authNotifier.updateAvatar(_previewResult!.base64Data!);
-      
+
       if (success) {
         if (mounted) {
           Navigator.of(context).pop();
@@ -251,9 +252,9 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
 
   Future<void> _removeAvatar() async {
     try {
-      final authNotifier = ref.read(authNotifierProvider.notifier);
+      final authNotifier = ref.read(authProvider.notifier);
       final success = await authNotifier.removeAvatar();
-      
+
       if (success) {
         if (mounted) {
           Navigator.of(context).pop();

@@ -1,21 +1,23 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../providers/premium_provider.dart';
+import '../providers/premium_notifier.dart';
 
-class PremiumStatusCard extends StatelessWidget {
+class PremiumStatusCard extends core.ConsumerWidget {
   const PremiumStatusCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProvider>(
-      builder: (context, premiumProvider, child) {
-        final isPremium = premiumProvider.isPremium;
-        final status = premiumProvider.subscriptionStatus;
-        final expirationDate = premiumProvider.expirationDate;
-        final source = premiumProvider.premiumSource;
+  Widget build(BuildContext context, core.WidgetRef ref) {
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+
+    return premiumAsync.when(
+      data: (state) {
+        final isPremium = state.isPremium;
+        final status = state.subscriptionStatus;
+        final expirationDate = state.expirationDate;
+        final source = state.premiumSource;
 
         return Container(
           width: double.infinity,
@@ -143,6 +145,10 @@ class PremiumStatusCard extends StatelessWidget {
           ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('Erro: $error', style: const TextStyle(color: AppColors.error)),
+      ),
     );
   }
 

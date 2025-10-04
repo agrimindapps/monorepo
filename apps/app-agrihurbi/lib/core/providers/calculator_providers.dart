@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/calculators/domain/entities/calculation_history.dart';
@@ -13,6 +14,8 @@ import '../../features/calculators/domain/usecases/get_calculators.dart';
 import '../../features/calculators/domain/usecases/manage_calculation_history.dart';
 import '../../features/calculators/domain/usecases/manage_favorites.dart';
 import '../../features/calculators/domain/usecases/save_calculation_to_history.dart';
+
+part 'calculator_providers.g.dart';
 
 // === CALCULATOR STATE CLASSES ===
 
@@ -151,25 +154,75 @@ class CalculatorExecutionState {
   }
 }
 
-// === CALCULATOR STATE NOTIFIERS ===
+/// State para funcionalidades avançadas das calculadoras
+class CalculatorFeaturesState {
+  const CalculatorFeaturesState({
+    this.favoriteIds = const [],
+    this.isLoadingFavorites = false,
+    this.templates = const [],
+    this.filteredTemplates = const [],
+    this.isLoadingTemplates = false,
+    this.templateSearchQuery = '',
+    this.errorMessage,
+  });
 
-/// StateNotifier principal para gerenciamento de calculadoras
-class CalculatorStateNotifier extends StateNotifier<CalculatorState> {
-  CalculatorStateNotifier(
-    this._getCalculators,
-    this._getCalculatorById,
-    this._executeCalculation,
-    this._getCalculationHistory,
-    this._saveCalculationToHistory,
-    this._manageFavorites,
-  ) : super(const CalculatorState());
+  final List<String> favoriteIds;
+  final bool isLoadingFavorites;
+  final List<CalculationTemplate> templates;
+  final List<CalculationTemplate> filteredTemplates;
+  final bool isLoadingTemplates;
+  final String templateSearchQuery;
+  final String? errorMessage;
 
-  final GetCalculators _getCalculators;
-  final GetCalculatorById _getCalculatorById;
-  final ExecuteCalculation _executeCalculation;
-  final GetCalculationHistory _getCalculationHistory;
-  final SaveCalculationToHistory _saveCalculationToHistory;
-  final ManageFavorites _manageFavorites;
+  bool isFavorite(String calculatorId) => favoriteIds.contains(calculatorId);
+  bool get hasError => errorMessage != null;
+  int get totalFavorites => favoriteIds.length;
+  int get totalTemplates => templates.length;
+
+  CalculatorFeaturesState copyWith({
+    List<String>? favoriteIds,
+    bool? isLoadingFavorites,
+    List<CalculationTemplate>? templates,
+    List<CalculationTemplate>? filteredTemplates,
+    bool? isLoadingTemplates,
+    String? templateSearchQuery,
+    String? errorMessage,
+  }) {
+    return CalculatorFeaturesState(
+      favoriteIds: favoriteIds ?? this.favoriteIds,
+      isLoadingFavorites: isLoadingFavorites ?? this.isLoadingFavorites,
+      templates: templates ?? this.templates,
+      filteredTemplates: filteredTemplates ?? this.filteredTemplates,
+      isLoadingTemplates: isLoadingTemplates ?? this.isLoadingTemplates,
+      templateSearchQuery: templateSearchQuery ?? this.templateSearchQuery,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
+// === RIVERPOD NOTIFIERS (MODERN) ===
+
+/// Notifier principal para gerenciamento de calculadoras
+@riverpod
+class CalculatorNotifier extends _$CalculatorNotifier {
+  late final GetCalculators _getCalculators;
+  late final GetCalculatorById _getCalculatorById;
+  late final ExecuteCalculation _executeCalculation;
+  late final GetCalculationHistory _getCalculationHistory;
+  late final SaveCalculationToHistory _saveCalculationToHistory;
+  late final ManageFavorites _manageFavorites;
+
+  @override
+  CalculatorState build() {
+    _getCalculators = di.getIt<GetCalculators>();
+    _getCalculatorById = di.getIt<GetCalculatorById>();
+    _executeCalculation = di.getIt<ExecuteCalculation>();
+    _getCalculationHistory = di.getIt<GetCalculationHistory>();
+    _saveCalculationToHistory = di.getIt<SaveCalculationToHistory>();
+    _manageFavorites = di.getIt<ManageFavorites>();
+
+    return const CalculatorState();
+  }
 
   /// Carrega todas as calculadoras
   Future<void> loadCalculators() async {
@@ -472,13 +525,16 @@ class CalculatorStateNotifier extends StateNotifier<CalculatorState> {
   }
 }
 
-/// StateNotifier para execução de cálculos
-class CalculatorExecutionStateNotifier extends StateNotifier<CalculatorExecutionState> {
-  CalculatorExecutionStateNotifier(
-    this._executeCalculation,
-  ) : super(const CalculatorExecutionState());
+/// Notifier para execução de cálculos
+@riverpod
+class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
+  late final ExecuteCalculation _executeCalculation;
 
-  final ExecuteCalculation _executeCalculation;
+  @override
+  CalculatorExecutionState build() {
+    _executeCalculation = di.getIt<ExecuteCalculation>();
+    return const CalculatorExecutionState();
+  }
 
   /// Define calculadora ativa
   void setActiveCalculator(CalculatorEntity? calculator) {
@@ -616,61 +672,18 @@ class CalculatorExecutionStateNotifier extends StateNotifier<CalculatorExecution
   }
 }
 
-/// State para funcionalidades avançadas das calculadoras
-class CalculatorFeaturesState {
-  const CalculatorFeaturesState({
-    this.favoriteIds = const [],
-    this.isLoadingFavorites = false,
-    this.templates = const [],
-    this.filteredTemplates = const [],
-    this.isLoadingTemplates = false,
-    this.templateSearchQuery = '',
-    this.errorMessage,
-  });
+/// Notifier para funcionalidades avançadas das calculadoras
+@riverpod
+class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
+  late final CalculatorFavoritesService _favoritesService;
+  late final CalculatorTemplateService _templateService;
 
-  final List<String> favoriteIds;
-  final bool isLoadingFavorites;
-  final List<CalculationTemplate> templates;
-  final List<CalculationTemplate> filteredTemplates;
-  final bool isLoadingTemplates;
-  final String templateSearchQuery;
-  final String? errorMessage;
-
-  bool isFavorite(String calculatorId) => favoriteIds.contains(calculatorId);
-  bool get hasError => errorMessage != null;
-  int get totalFavorites => favoriteIds.length;
-  int get totalTemplates => templates.length;
-
-  CalculatorFeaturesState copyWith({
-    List<String>? favoriteIds,
-    bool? isLoadingFavorites,
-    List<CalculationTemplate>? templates,
-    List<CalculationTemplate>? filteredTemplates,
-    bool? isLoadingTemplates,
-    String? templateSearchQuery,
-    String? errorMessage,
-  }) {
-    return CalculatorFeaturesState(
-      favoriteIds: favoriteIds ?? this.favoriteIds,
-      isLoadingFavorites: isLoadingFavorites ?? this.isLoadingFavorites,
-      templates: templates ?? this.templates,
-      filteredTemplates: filteredTemplates ?? this.filteredTemplates,
-      isLoadingTemplates: isLoadingTemplates ?? this.isLoadingTemplates,
-      templateSearchQuery: templateSearchQuery ?? this.templateSearchQuery,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
+  @override
+  CalculatorFeaturesState build() {
+    _favoritesService = di.getIt<CalculatorFavoritesService>();
+    _templateService = di.getIt<CalculatorTemplateService>();
+    return const CalculatorFeaturesState();
   }
-}
-
-/// StateNotifier para funcionalidades avançadas das calculadoras
-class CalculatorFeaturesStateNotifier extends StateNotifier<CalculatorFeaturesState> {
-  CalculatorFeaturesStateNotifier(
-    this._favoritesService,
-    this._templateService,
-  ) : super(const CalculatorFeaturesState());
-
-  final CalculatorFavoritesService _favoritesService;
-  final CalculatorTemplateService _templateService;
 
   /// Inicializa os serviços
   Future<void> initialize() async {
@@ -892,97 +905,81 @@ class CalculatorFeaturesStateNotifier extends StateNotifier<CalculatorFeaturesSt
   }
 }
 
-// === PROVIDER DEFINITIONS ===
-
-/// Provider principal para gerenciamento de calculadoras
-final calculatorProvider = StateNotifierProvider<CalculatorStateNotifier, CalculatorState>((ref) {
-  return CalculatorStateNotifier(
-    di.getIt<GetCalculators>(),
-    di.getIt<GetCalculatorById>(),
-    di.getIt<ExecuteCalculation>(),
-    di.getIt<GetCalculationHistory>(),
-    di.getIt<SaveCalculationToHistory>(),
-    di.getIt<ManageFavorites>(),
-  );
-});
-
-/// Provider para execução de cálculos
-final calculatorExecutionProvider = StateNotifierProvider<CalculatorExecutionStateNotifier, CalculatorExecutionState>((ref) {
-  return CalculatorExecutionStateNotifier(
-    di.getIt<ExecuteCalculation>(),
-  );
-});
-
-/// Provider para funcionalidades avançadas das calculadoras
-final calculatorFeaturesProvider = StateNotifierProvider<CalculatorFeaturesStateNotifier, CalculatorFeaturesState>((ref) {
-  return CalculatorFeaturesStateNotifier(
-    di.getIt<CalculatorFavoritesService>(),
-    di.getIt<CalculatorTemplateService>(),
-  );
-});
+// === DERIVED PROVIDERS ===
 
 /// Provider para lista filtrada de calculadoras
-final filteredCalculatorsProvider = Provider<List<CalculatorEntity>>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+List<CalculatorEntity> filteredCalculators(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.filteredCalculators;
-});
+}
 
 /// Provider para calculadoras favoritas
-final favoriteCalculatorsProvider = Provider<List<CalculatorEntity>>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+List<CalculatorEntity> favoriteCalculators(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.favoriteCalculators;
-});
+}
 
 /// Provider para histórico de cálculos
-final calculationHistoryProvider = Provider<List<CalculationHistory>>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+List<CalculationHistory> calculationHistory(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.calculationHistory;
-});
+}
 
 /// Provider para resultado atual de cálculo
-final currentCalculationResultProvider = Provider<CalculationResult?>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+CalculationResult? currentCalculationResult(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.currentResult;
-});
+}
 
 /// Provider para inputs atuais
-final currentCalculationInputsProvider = Provider<Map<String, dynamic>>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+Map<String, dynamic> currentCalculationInputs(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.currentInputs;
-});
+}
 
 /// Provider para status de loading das calculadoras
-final calculatorsLoadingProvider = Provider<bool>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+bool calculatorsLoading(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.isLoading;
-});
+}
 
 /// Provider para status de execução de cálculo
-final calculationExecutingProvider = Provider<bool>((ref) {
-  final state = ref.watch(calculatorProvider);
+@riverpod
+bool calculationExecuting(Ref ref) {
+  final state = ref.watch(calculatorNotifierProvider);
   return state.isCalculating;
-});
+}
 
 /// Provider para templates filtrados
-final filteredTemplatesProvider = Provider<List<CalculationTemplate>>((ref) {
-  final state = ref.watch(calculatorFeaturesProvider);
+@riverpod
+List<CalculationTemplate> filteredTemplates(Ref ref) {
+  final state = ref.watch(calculatorFeaturesNotifierProvider);
   return state.filteredTemplates;
-});
+}
 
 /// Provider para IDs de favoritos
-final favoriteCalculatorIdsProvider = Provider<List<String>>((ref) {
-  final state = ref.watch(calculatorFeaturesProvider);
+@riverpod
+List<String> favoriteCalculatorIds(Ref ref) {
+  final state = ref.watch(calculatorFeaturesNotifierProvider);
   return state.favoriteIds;
-});
+}
 
 /// Provider para status de loading de templates
-final templatesLoadingProvider = Provider<bool>((ref) {
-  final state = ref.watch(calculatorFeaturesProvider);
+@riverpod
+bool templatesLoading(Ref ref) {
+  final state = ref.watch(calculatorFeaturesNotifierProvider);
   return state.isLoadingTemplates;
-});
+}
 
 /// Provider para status de loading de favoritos
-final favoritesLoadingProvider = Provider<bool>((ref) {
-  final state = ref.watch(calculatorFeaturesProvider);
+@riverpod
+bool favoritesLoading(Ref ref) {
+  final state = ref.watch(calculatorFeaturesNotifierProvider);
   return state.isLoadingFavorites;
-});
+}

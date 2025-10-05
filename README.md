@@ -1,6 +1,6 @@
 # 🌱🚜 Monorepo Plantis & ReceitaAgro
 
-Monorepo Flutter contendo dois aplicativos: **Plantis** (plantas domésticas) e **ReceitaAgro** (pragas agrícolas), compartilhando uma infraestrutura comum através do package **Core**.
+Monorepo Flutter contendo seis aplicativos: **AgriHurbi**, **Gasometer**, **Petiveti**, **Plantis**, **ReceitaAgro**, e **ReceituAgro Web**, compartilhando uma infraestrutura comum através do package **Core**.
 
 ## 📱 Aplicativos
 

@@ -4,9 +4,10 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/financial_sync_service.dart';
+import '../../core/services/financial_core.dart';
 
 /// Types of financial warnings
 enum FinancialWarningType {
@@ -50,8 +51,9 @@ class FinancialWarningBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (warningType == null && customMessage == null) {
-      return Consumer<FinancialSyncService>(
-        builder: (context, syncService, child) {
+return Consumer(
+          builder: (context, ref, child) {
+            final syncService = FinancialModule.syncService;
           final autoWarning = _detectWarning(syncService);
           if (autoWarning == null) return const SizedBox.shrink();
 

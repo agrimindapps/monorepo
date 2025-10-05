@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/base_provider.dart';
 import '../widgets/form_dialog.dart';
 import 'base_form_page.dart';
 import 'form_mixins.dart';
+
+// Provider used to expose the form instance to Riverpod tree
+final _formProviderOverride = Provider<dynamic>((ref) => null);
 
 /// Abstract base class for form dialogs with common functionality
 /// 
@@ -123,13 +125,14 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
       return _buildLoadingDialog();
     }
     
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _formProvider),
-      ],
-      child: Consumer<T>(builder: (context, formProvider, _) {
-        return _buildFormDialog(context, formProvider);
-      }),
+return ProviderScope(
+        overrides: [
+          _formProviderOverride.overrideWithValue(_formProvider),
+        ],
+        child: Consumer(builder: (context, ref, _) {
+          final formProvider = ref.watch(_formProviderOverride) as T;
+          return _buildFormDialog(context, formProvider);
+        }),
     );
   }
   

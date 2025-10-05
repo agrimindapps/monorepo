@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 import '../../domain/entities/export_request.dart';
-import '../providers/data_export_provider.dart';
+import '../notifiers/data_export_notifier.dart';
 
 /// Widget that displays data export availability information for Plantis
-class ExportAvailabilityWidget extends StatefulWidget {
+class ExportAvailabilityWidget extends ConsumerStatefulWidget {
   final Set<DataType> requestedDataTypes;
   final VoidCallback? onAvailabilityChecked;
 
@@ -17,11 +17,11 @@ class ExportAvailabilityWidget extends StatefulWidget {
   });
 
   @override
-  State<ExportAvailabilityWidget> createState() =>
+  ConsumerState<ExportAvailabilityWidget> createState() =>
       _ExportAvailabilityWidgetState();
 }
 
-class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
+class _ExportAvailabilityWidgetState extends ConsumerState<ExportAvailabilityWidget> {
   @override
   void initState() {
     super.initState();
@@ -31,8 +31,7 @@ class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
   }
 
   Future<void> _checkAvailability() async {
-    final provider = context.read<DataExportProvider>();
-    await provider.checkExportAvailability(
+    await ref.read(dataExportNotifierProvider.notifier).checkExportAvailability(
       requestedDataTypes: widget.requestedDataTypes,
     );
 
@@ -43,24 +42,11 @@ class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DataExportProvider>(
-      builder: (
-        BuildContext context,
-        DataExportProvider provider,
-        Widget? child,
-      ) {
-        if (provider.isLoading) {
-          return const _LoadingWidget();
-        }
+    final asyncValue = ref.watch(dataExportNotifierProvider);
 
-        if (provider.error != null) {
-          return _ErrorWidget(
-            error: provider.error!,
-            onRetry: _checkAvailability,
-          );
-        }
-
-        final availability = provider.availabilityResult;
+    return asyncValue.when(
+      data: (state) {
+        final availability = state.availabilityResult;
         if (availability == null) {
           return const _NoDataWidget();
         }
@@ -70,6 +56,11 @@ class _ExportAvailabilityWidgetState extends State<ExportAvailabilityWidget> {
           requestedDataTypes: widget.requestedDataTypes,
         );
       },
+      loading: () => const _LoadingWidget(),
+      error: (error, _) => _ErrorWidget(
+        error: error.toString(),
+        onRetry: _checkAvailability,
+      ),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../providers/settings_provider.dart';
+import '../providers/settings_notifier.dart';
 
 // Data classes for granular Selector optimization
 class NotificationStatusData {
@@ -127,420 +126,344 @@ class TaskTypeSettingsData {
   }
 }
 
-class NotificationsSettingsPage extends StatelessWidget {
+class NotificationsSettingsPage extends ConsumerWidget {
   const NotificationsSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final settingsState = ref.watch(settingsNotifierProvider);
 
-    return ChangeNotifierProvider<SettingsProvider>.value(
-      value: di.sl<SettingsProvider>(), // Using pre-initialized singleton
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Configurações de Notificações'),
-          backgroundColor: theme.colorScheme.surface,
-        ),
-        body: ResponsiveLayout(
-          child: Selector<SettingsProvider, bool>(
-            selector: (context, provider) => provider.isLoading,
-            builder: (context, isLoading, child) {
-              if (isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Configurações de Notificações'),
+        backgroundColor: theme.colorScheme.surface,
+      ),
+      body: ResponsiveLayout(
+        child: settingsState.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Erro: $error')),
+          data: (settings) => SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Status das notificações
+                _buildNotificationStatusCard(context, ref, settings),
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Status das notificações
-                    _buildNotificationStatusCard(context),
+                const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
+                // Configurações gerais
+                _buildGeneralSettings(context, ref, settings),
 
-                    // Configurações gerais
-                    _buildGeneralSettings(context),
+                const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
+                // Configurações de horários
+                _buildTimeSettings(context, ref, settings),
 
-                    // Configurações de horários
-                    _buildTimeSettings(context),
+                const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
+                // Configurações por tipo de tarefa
+                _buildTaskTypeSettings(context, ref, settings),
 
-                    // Configurações por tipo de tarefa
-                    _buildTaskTypeSettings(context),
+                const SizedBox(height: 32),
 
-                    const SizedBox(height: 32),
-
-                    // Ações
-                    _buildActions(context),
-                  ],
-                ),
-              );
-            },
+                // Ações
+                _buildActions(context, ref, settings),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNotificationStatusCard(BuildContext context) {
+  Widget _buildNotificationStatusCard(BuildContext context, WidgetRef ref, SettingsState settingsData) {
     final theme = Theme.of(context);
 
-    return Selector<SettingsProvider, NotificationStatusData>(
-      selector:
-          (context, provider) => NotificationStatusData(
-            icon: provider.notificationStatusIcon,
-            color: provider.notificationStatusColor,
-            text: provider.notificationStatusText,
-            hasPermissions: provider.hasPermissionsGranted,
-          ),
-      builder: (context, statusData, child) {
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(statusData.icon, color: statusData.color),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Status das Notificações',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  statusData.text,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: statusData.color,
-                  ),
-                ),
-
-                Selector<SettingsProvider, bool>(
-                  selector: (context, provider) => provider.isWebPlatform,
-                  builder: (context, isWeb, child) {
-                    if (!statusData.hasPermissions && !isWeb) {
-                      return Column(
-                        children: [
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              final provider = context.read<SettingsProvider>();
-                              provider.openNotificationSettings();
-                            },
-                            icon: const Icon(Icons.settings),
-                            label: const Text('Abrir Configurações'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary,
-                              foregroundColor: theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    if (isWeb) {
-                      return Column(
-                        children: [
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Use o aplicativo móvel para receber notificações',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    final statusData = NotificationStatusData(
+      icon: settingsData.notificationStatusIcon,
+      color: settingsData.notificationStatusColor,
+      text: settingsData.notificationStatusText,
+      hasPermissions: settingsData.hasPermissionsGranted,
     );
-  }
 
-  Widget _buildGeneralSettings(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Selector<SettingsProvider, GeneralSettingsData>(
-      selector:
-          (context, provider) => GeneralSettingsData(
-            taskRemindersEnabled:
-                provider.notificationSettings.taskRemindersEnabled,
-            overdueNotificationsEnabled:
-                provider.notificationSettings.overdueNotificationsEnabled,
-            dailySummaryEnabled:
-                provider.notificationSettings.dailySummaryEnabled,
-            hasPermissions:
-                provider.hasPermissionsGranted && !provider.isWebPlatform,
-          ),
-      builder: (context, settingsData, child) {
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Configurações Gerais',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                SwitchListTile(
-                  title: const Text('Lembretes de Tarefas'),
-                  subtitle: const Text(
-                    'Receber notificações antes das tarefas vencerem',
-                  ),
-                  value: settingsData.taskRemindersEnabled,
-                  onChanged:
-                      settingsData.hasPermissions
-                          ? (value) {
-                            final provider = context.read<SettingsProvider>();
-                            provider.toggleTaskReminders(value);
-                          }
-                          : null,
-                  secondary: const Icon(Icons.task_alt),
-                ),
-
-                SwitchListTile(
-                  title: const Text('Tarefas em Atraso'),
-                  subtitle: const Text(
-                    'Notificações para tarefas que passaram do prazo',
-                  ),
-                  value: settingsData.overdueNotificationsEnabled,
-                  onChanged:
-                      settingsData.hasPermissions
-                          ? (value) {
-                            final provider = context.read<SettingsProvider>();
-                            provider.toggleOverdueNotifications(value);
-                          }
-                          : null,
-                  secondary: const Icon(Icons.warning),
-                ),
-
-                SwitchListTile(
-                  title: const Text('Resumo Diário'),
-                  subtitle: const Text('Resumo matinal das tarefas do dia'),
-                  value: settingsData.dailySummaryEnabled,
-                  onChanged:
-                      settingsData.hasPermissions
-                          ? (value) {
-                            final provider = context.read<SettingsProvider>();
-                            provider.toggleDailySummary(value);
-                          }
-                          : null,
-                  secondary: const Icon(Icons.today),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTimeSettings(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Selector<SettingsProvider, TimeSettingsData>(
-      selector:
-          (context, provider) => TimeSettingsData(
-            reminderMinutesBefore:
-                provider.notificationSettings.reminderMinutesBefore,
-            dailySummaryTime: provider.notificationSettings.dailySummaryTime,
-            dailySummaryEnabled:
-                provider.notificationSettings.dailySummaryEnabled,
-            hasPermissions:
-                provider.hasPermissionsGranted && !provider.isWebPlatform,
-          ),
-      builder: (context, timeData, child) {
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Horários',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ListTile(
-                  leading: const Icon(Icons.access_time),
-                  title: const Text('Antecedência dos Lembretes'),
-                  subtitle: Text(
-                    '${timeData.reminderMinutesBefore} minutos antes',
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap:
-                      timeData.hasPermissions
-                          ? () {
-                            final provider = context.read<SettingsProvider>();
-                            _showReminderTimeDialog(context, provider);
-                          }
-                          : null,
-                ),
-
-                const Divider(),
-
-                ListTile(
-                  leading: const Icon(Icons.schedule),
-                  title: const Text('Horário do Resumo Diário'),
-                  subtitle: Text(timeData.dailySummaryTime.format(context)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap:
-                      timeData.hasPermissions && timeData.dailySummaryEnabled
-                          ? () {
-                            final provider = context.read<SettingsProvider>();
-                            _showDailySummaryTimeDialog(context, provider);
-                          }
-                          : null,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTaskTypeSettings(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Selector<SettingsProvider, TaskTypeSettingsData>(
-      selector:
-          (context, provider) => TaskTypeSettingsData(
-            taskTypeSettings: provider.notificationSettings.taskTypeSettings,
-            hasPermissions:
-                provider.hasPermissionsGranted && !provider.isWebPlatform,
-          ),
-      builder: (context, taskTypeData, child) {
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Notificações por Tipo de Tarefa',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ...taskTypeData.taskTypeSettings.entries.map((entry) {
-                  return SwitchListTile(
-                    title: Text(entry.key),
-                    value: entry.value,
-                    onChanged:
-                        taskTypeData.hasPermissions
-                            ? (value) {
-                              final provider = context.read<SettingsProvider>();
-                              provider.toggleTaskType(entry.key, value);
-                            }
-                            : null,
-                    secondary: _getTaskTypeIcon(entry.key),
-                  );
-                }),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildActions(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Selector<SettingsProvider, bool>(
-      selector:
-          (context, provider) =>
-              provider.hasPermissionsGranted && !provider.isWebPlatform,
-      builder: (context, hasPermissions, child) {
-        return Column(
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed:
-                    hasPermissions
-                        ? () {
-                          final provider = context.read<SettingsProvider>();
-                          _showTestNotification(context, provider);
-                        }
-                        : null,
-                icon: const Icon(Icons.notifications_active),
-                label: const Text('Testar Notificação'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.secondary,
-                  foregroundColor: theme.colorScheme.onSecondary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+            Row(
+              children: [
+                Icon(statusData.icon, color: statusData.color),
+                const SizedBox(width: 8),
+                Text(
+                  'Status das Notificações',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              statusData.text,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: statusData.color,
               ),
             ),
 
-            const SizedBox(height: 12),
-
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  final provider = context.read<SettingsProvider>();
-                  _showClearNotificationsDialog(context, provider);
-                },
-                icon: const Icon(Icons.clear_all),
-                label: const Text('Limpar Todas as Notificações'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
+            if (!statusData.hasPermissions && !settingsData.isWebPlatform)
+              Column(
+                children: [
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      ref.read(settingsNotifierProvider.notifier).openNotificationSettings();
+                    },
+                    icon: const Icon(Icons.settings),
+                    label: const Text('Abrir Configurações'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ],
               ),
+
+            if (settingsData.isWebPlatform)
+              Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Use o aplicativo móvel para receber notificações',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGeneralSettings(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+    final theme = Theme.of(context);
+    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Configurações Gerais',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            SwitchListTile(
+              title: const Text('Lembretes de Tarefas'),
+              subtitle: const Text(
+                'Receber notificações antes das tarefas vencerem',
+              ),
+              value: settingsData.notificationSettings.taskRemindersEnabled,
+              onChanged: hasPermissions
+                  ? (value) {
+                      ref.read(settingsNotifierProvider.notifier).toggleTaskReminders(value);
+                    }
+                  : null,
+              secondary: const Icon(Icons.task_alt),
+            ),
+
+            SwitchListTile(
+              title: const Text('Tarefas em Atraso'),
+              subtitle: const Text(
+                'Notificações para tarefas que passaram do prazo',
+              ),
+              value: settingsData.notificationSettings.overdueNotificationsEnabled,
+              onChanged: hasPermissions
+                  ? (value) {
+                      ref.read(settingsNotifierProvider.notifier).toggleOverdueNotifications(value);
+                    }
+                  : null,
+              secondary: const Icon(Icons.warning),
+            ),
+
+            SwitchListTile(
+              title: const Text('Resumo Diário'),
+              subtitle: const Text('Resumo matinal das tarefas do dia'),
+              value: settingsData.notificationSettings.dailySummaryEnabled,
+              onChanged: hasPermissions
+                  ? (value) {
+                      ref.read(settingsNotifierProvider.notifier).toggleDailySummary(value);
+                    }
+                  : null,
+              secondary: const Icon(Icons.today),
             ),
           ],
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeSettings(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+    final theme = Theme.of(context);
+    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Horários',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            ListTile(
+              leading: const Icon(Icons.access_time),
+              title: const Text('Antecedência dos Lembretes'),
+              subtitle: Text(
+                '${settingsData.notificationSettings.reminderMinutesBefore} minutos antes',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: hasPermissions
+                  ? () {
+                      _showReminderTimeDialog(context, ref);
+                    }
+                  : null,
+            ),
+
+            const Divider(),
+
+            ListTile(
+              leading: const Icon(Icons.schedule),
+              title: const Text('Horário do Resumo Diário'),
+              subtitle: Text(settingsData.notificationSettings.dailySummaryTime.format(context)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: hasPermissions && settingsData.notificationSettings.dailySummaryEnabled
+                  ? () {
+                      _showDailySummaryTimeDialog(context, ref);
+                    }
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskTypeSettings(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+    final theme = Theme.of(context);
+    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Notificações por Tipo de Tarefa',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            ...settingsData.notificationSettings.taskTypeSettings.entries.map((entry) {
+              return SwitchListTile(
+                title: Text(entry.key),
+                value: entry.value,
+                onChanged: hasPermissions
+                    ? (value) {
+                        ref.read(settingsNotifierProvider.notifier).toggleTaskType(entry.key, value);
+                      }
+                    : null,
+                secondary: _getTaskTypeIcon(entry.key),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActions(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+    final theme = Theme.of(context);
+    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: hasPermissions
+                ? () {
+                    _showTestNotification(context, ref);
+                  }
+                : null,
+            icon: const Icon(Icons.notifications_active),
+            label: const Text('Testar Notificação'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.secondary,
+              foregroundColor: theme.colorScheme.onSecondary,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              _showClearNotificationsDialog(context, ref);
+            },
+            icon: const Icon(Icons.clear_all),
+            label: const Text('Limpar Todas as Notificações'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -569,82 +492,82 @@ class NotificationsSettingsPage extends StatelessWidget {
 
   void _showReminderTimeDialog(
     BuildContext context,
-    SettingsProvider provider,
+    WidgetRef ref,
   ) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Antecedência dos Lembretes'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  [15, 30, 60, 120, 180].map((minutes) {
-                    return RadioListTile<int>(
-                      title: Text('$minutes minutos'),
-                      value: minutes,
-                      groupValue:
-                          provider.notificationSettings.reminderMinutesBefore,
-                      onChanged: (value) {
-                        if (value != null) {
-                          provider.setReminderMinutesBefore(value);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    );
-                  }).toList(),
-            ),
-          ),
+      builder: (context) => AlertDialog(
+        title: const Text('Antecedência dos Lembretes'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [15, 30, 60, 120, 180].map((minutes) {
+            return RadioListTile<int>(
+              title: Text('$minutes minutos'),
+              value: minutes,
+              groupValue: ref.read(settingsNotifierProvider).maybeWhen(
+                  data: (state) => state.notificationSettings.reminderMinutesBefore,
+                  orElse: () => 30),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(settingsNotifierProvider.notifier).setReminderMinutesBefore(value);
+                  Navigator.of(context).pop();
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
   void _showDailySummaryTimeDialog(
     BuildContext context,
-    SettingsProvider provider,
+    WidgetRef ref,
   ) async {
     final TimeOfDay? time = await showTimePicker(
       context: context,
-      initialTime: provider.notificationSettings.dailySummaryTime,
+      initialTime: ref.read(settingsNotifierProvider).maybeWhen(
+          data: (state) => state.notificationSettings.dailySummaryTime,
+          orElse: () => const TimeOfDay(hour: 8, minute: 0)),
     );
 
     if (time != null) {
-      await provider.setDailySummaryTime(time);
+      await ref.read(settingsNotifierProvider.notifier).setDailySummaryTime(time);
     }
   }
 
   Future<void> _showTestNotification(
     BuildContext context,
-    SettingsProvider provider,
+    WidgetRef ref,
   ) async {
-    await provider.sendTestNotification();
+    await ref.read(settingsNotifierProvider.notifier).sendTestNotification();
   }
 
   void _showClearNotificationsDialog(
     BuildContext context,
-    SettingsProvider provider,
+    WidgetRef ref,
   ) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Limpar Notificações'),
-            content: const Text(
-              'Isso cancelará todas as notificações agendadas. Deseja continuar?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  provider.clearAllNotifications();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Limpar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Limpar Notificações'),
+        content: const Text(
+          'Isso cancelará todas as notificações agendadas. Deseja continuar?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(settingsNotifierProvider.notifier).clearAllNotifications();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Limpar'),
+          ),
+        ],
+      ),
     );
   }
 }

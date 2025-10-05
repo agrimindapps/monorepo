@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 import '../../domain/entities/export_request.dart';
-import '../providers/data_export_provider.dart';
+import '../notifiers/data_export_notifier.dart';
 
 /// Dialog that shows export progress for Plantis data
-class ExportProgressDialog extends StatefulWidget {
+class ExportProgressDialog extends ConsumerStatefulWidget {
   final ExportRequest request;
 
   const ExportProgressDialog({super.key, required this.request});
 
   @override
-  State<ExportProgressDialog> createState() => _ExportProgressDialogState();
+  ConsumerState<ExportProgressDialog> createState() => _ExportProgressDialogState();
 }
 
-class _ExportProgressDialogState extends State<ExportProgressDialog>
+class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -50,10 +50,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           width: MediaQuery.of(context).size.width * 0.85,
           constraints: const BoxConstraints(maxWidth: 400),
           padding: const EdgeInsets.all(24),
-          child: Consumer<DataExportProvider>(
-            builder: (context, provider, child) {
-              final progress = provider.currentProgress;
-              return Column(
+          child: Builder(
+            builder: (context) {
+              final asyncValue = ref.watch(dataExportNotifierProvider);
+
+              return asyncValue.when(
+                data: (state) {
+                  final progress = state.currentProgress;
+                  return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Header with plant icon
@@ -125,18 +129,23 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
                     _buildErrorContent(
                       context,
                       progress.errorMessage!,
-                      provider,
                     )
                   else if (progress.isCompleted)
-                    _buildCompletedContent(context, widget.request, provider)
+                    _buildCompletedContent(context, widget.request)
                   else
                     _buildProgressContent(context, progress),
 
                   const SizedBox(height: 24),
 
                   // Action buttons
-                  _buildActionButtons(context, progress, provider),
+                  _buildActionButtons(context, progress),
                 ],
+              );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(
+                  child: Text('Erro: $error'),
+                ),
               );
             },
           ),
@@ -223,7 +232,6 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
   Widget _buildCompletedContent(
     BuildContext context,
     ExportRequest request,
-    DataExportProvider provider,
   ) {
     return Column(
       children: [
@@ -347,7 +355,6 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
   Widget _buildErrorContent(
     BuildContext context,
     String errorMessage,
-    DataExportProvider provider,
   ) {
     return Column(
       children: [
@@ -402,7 +409,6 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
   Widget _buildActionButtons(
     BuildContext context,
     ExportProgress progress,
-    DataExportProvider provider,
   ) {
     if (progress.errorMessage != null) {
       return Row(
@@ -417,7 +423,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                provider.resetProgress();
+                ref.read(dataExportNotifierProvider.notifier).resetProgress();
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
@@ -444,7 +450,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog>
           Expanded(
             child: ElevatedButton(
               onPressed: () async {
-                final success = await provider.downloadExport(
+                final success = await ref.read(dataExportNotifierProvider.notifier).downloadExport(
                   widget.request.id,
                 );
                 if (success && context.mounted) {

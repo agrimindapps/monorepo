@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../providers/plant_details_provider.dart';
-import '../providers/plant_task_provider.dart';
 import '../widgets/plant_details/plant_details_view.dart';
 
-/// Plant details page with proper dependency injection
+/// Plant details page - fully migrated to Riverpod
 /// Uses clean architecture with modular components for better maintainability
 ///
 /// ARCHITECTURAL IMPROVEMENTS:
@@ -18,27 +15,14 @@ import '../widgets/plant_details/plant_details_view.dart';
 /// - PlantTasksSection: Task management
 /// - PlantNotesSection: Observations and comments
 /// - PlantDetailsView: Main visual structure
-/// - FIXED: Proper DI injection using ChangeNotifierProvider.value instead of antipattern
-/// - PlantCommentsProvider migrado para Riverpod (PlantCommentsNotifier)
-class PlantDetailsPage extends StatelessWidget {
+/// - MIGRATED: All providers now accessed via Riverpod (ref.watch/ref.read)
+class PlantDetailsPage extends ConsumerWidget {
   final String plantId;
 
   const PlantDetailsPage({super.key, required this.plantId});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<PlantDetailsProvider>.value(
-          value: di.sl<PlantDetailsProvider>(),
-        ),
-        ChangeNotifierProvider<PlantTaskProvider>.value(
-          value: di.sl<PlantTaskProvider>(),
-        ),
-        // PlantCommentsProvider migrado para Riverpod
-        // Acesso via ref.read(plantCommentsNotifierProvider.notifier)
-      ],
-      child: PlantDetailsView(plantId: plantId),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PlantDetailsView(plantId: plantId);
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 
 import '../../../core/theme/gasometer_colors.dart';
 import 'form_mixins.dart';
@@ -126,20 +126,14 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
       return _buildLoadingScaffold();
     }
     
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _formProvider),
-      ],
-      child: Consumer<T>(builder: (context, formProvider, _) {
-        return Stack(
-          children: [
-            _buildFormScaffold(context, formProvider),
-            if (isLoading(formProvider as IFormProvider))
-              const FormLoadingOverlay(),
-          ],
-        );
-      }),
-    );
+// Directly use the form provider without Provider package
+      return Stack(
+        children: [
+          _buildFormScaffold(context, _formProvider),
+          if (isLoading(_formProvider as IFormProvider))
+            const FormLoadingOverlay(),
+        ],
+      );
   }
   
   Widget _buildLoadingScaffold() {

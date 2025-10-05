@@ -24,21 +24,19 @@ class _PlantTasksSectionState extends State<PlantTasksSection>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PlantTaskProvider>(
-      builder: (context, taskProvider, child) {
-        if (taskProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    final taskProvider = context.watch<PlantTaskProvider>();
 
-        final tasks = taskProvider.getTasksForPlant(widget.plant.id);
+    if (taskProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (tasks.isEmpty) {
-          return _buildEmptyTasksState(context);
-        }
+    final tasks = taskProvider.getTasksForPlant(widget.plant.id);
 
-        return _buildTasksList(context, tasks, taskProvider);
-      },
-    );
+    if (tasks.isEmpty) {
+      return _buildEmptyTasksState(context);
+    }
+
+    return _buildTasksList(context, tasks, taskProvider);
   }
 
   Widget _buildEmptyTasksState(BuildContext context) {

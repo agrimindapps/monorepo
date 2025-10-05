@@ -1,23 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/plantis_colors.dart';
 import '../../../shared/widgets/base_page_scaffold.dart';
 import '../../../shared/widgets/responsive_layout.dart';
-import '../providers/license_provider.dart';
+import '../providers/license_notifier.dart';
 
 /// Page to display license status and management options
-class LicenseStatusPage extends StatefulWidget {
+class LicenseStatusPage extends ConsumerWidget {
   const LicenseStatusPage({super.key});
 
   @override
-  State<LicenseStatusPage> createState() => _LicenseStatusPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final licenseState = ref.watch(licenseNotifierProvider);
 
-class _LicenseStatusPageState extends State<LicenseStatusPage> {
-  @override
-  Widget build(BuildContext context) {
     return BasePageScaffold(
       appBar: AppBar(
         title: const Text('Status da Licença'),
@@ -25,20 +22,25 @@ class _LicenseStatusPageState extends State<LicenseStatusPage> {
         foregroundColor: Colors.white,
       ),
       body: ResponsiveLayout(
-        child: Consumer<LicenseProvider>(
-          builder: (context, licenseProvider, child) {
-            if (licenseProvider.isLoading) {
+        child: licenseState.when(
+          loading: () => const _LoadingView(),
+          error: (error, stack) => _ErrorView(
+            error: error.toString(),
+            onRetry: () => ref.refresh(licenseNotifierProvider),
+          ),
+          data: (state) {
+            if (state.isLoading) {
               return const _LoadingView();
             }
 
-            if (licenseProvider.error != null) {
+            if (state.error != null) {
               return _ErrorView(
-                error: licenseProvider.error!,
-                onRetry: () => licenseProvider.refreshLicenseInfo(),
+                error: state.error!,
+                onRetry: () => ref.read(licenseNotifierProvider.notifier).refreshLicenseInfo(),
               );
             }
 
-            return _LicenseStatusView(licenseProvider: licenseProvider);
+            return _LicenseStatusView(licenseState: state, ref: ref);
           },
         ),
       ),
@@ -48,9 +50,10 @@ class _LicenseStatusPageState extends State<LicenseStatusPage> {
 
 /// Main license status view
 class _LicenseStatusView extends StatelessWidget {
-  final LicenseProvider licenseProvider;
+  final LicenseState licenseState;
+  final WidgetRef ref;
 
-  const _LicenseStatusView({required this.licenseProvider});
+  const _LicenseStatusView({required this.licenseState, required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -60,20 +63,20 @@ class _LicenseStatusView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // License status card
-          _LicenseStatusCard(licenseProvider: licenseProvider),
+          _LicenseStatusCard(licenseState: licenseState),
           const SizedBox(height: 24),
 
           // Features overview
-          _FeaturesOverviewCard(licenseProvider: licenseProvider),
+          _FeaturesOverviewCard(licenseState: licenseState, ref: ref),
           const SizedBox(height: 24),
 
           // Actions section
-          _ActionsSection(licenseProvider: licenseProvider),
+          _ActionsSection(licenseState: licenseState, ref: ref),
 
           // Development tools (debug mode only)
           if (kDebugMode) ...[
             const SizedBox(height: 24),
-            _DevelopmentTools(licenseProvider: licenseProvider),
+            _DevelopmentTools(licenseState: licenseState, ref: ref),
           ],
         ],
       ),
@@ -83,15 +86,15 @@ class _LicenseStatusView extends StatelessWidget {
 
 /// License status information card
 class _LicenseStatusCard extends StatelessWidget {
-  final LicenseProvider licenseProvider;
+  final LicenseState licenseState;
 
-  const _LicenseStatusCard({required this.licenseProvider});
+  const _LicenseStatusCard({required this.licenseState});
 
   @override
   Widget build(BuildContext context) {
     // ignore: unused_local_variable
     final theme = Theme.of(context);
-    final licenseInfo = licenseProvider.licenseInfo;
+    final licenseInfo = licenseState.licenseInfo;
 
     return Card(
       elevation: 4,
@@ -103,10 +106,10 @@ class _LicenseStatusCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              licenseProvider.hasValidLicense
+              licenseState.hasValidLicense
                   ? PlantisColors.primary
                   : Colors.orange,
-              licenseProvider.hasValidLicense
+              licenseState.hasValidLicense
                   ? PlantisColors.primaryDark
                   : Colors.orange.shade700,
             ],
@@ -126,7 +129,7 @@ class _LicenseStatusCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      licenseProvider.hasValidLicense
+                      licenseState.hasValidLicense
                           ? Icons.verified
                           : Icons.schedule,
                       color: Colors.white,
@@ -139,7 +142,7 @@ class _LicenseStatusCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          licenseProvider.typeText,
+                          licenseState.typeText,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -148,7 +151,7 @@ class _LicenseStatusCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          licenseProvider.statusText,
+                          licenseState.statusText,
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
@@ -165,16 +168,16 @@ class _LicenseStatusCard extends StatelessWidget {
               _buildDetailRow(
                 context,
                 'Status',
-                licenseProvider.statusText,
+                licenseState.statusText,
                 Icons.info,
               ),
               const SizedBox(height: 12),
 
-              if (licenseProvider.isTrialActive) ...[
+              if (licenseState.isTrialActive) ...[
                 _buildDetailRow(
                   context,
                   'Tempo restante',
-                  licenseProvider.remainingText,
+                  licenseState.remainingText,
                   Icons.access_time,
                 ),
                 const SizedBox(height: 12),
@@ -244,9 +247,10 @@ class _LicenseStatusCard extends StatelessWidget {
 
 /// Features overview card
 class _FeaturesOverviewCard extends StatelessWidget {
-  final LicenseProvider licenseProvider;
+  final LicenseState licenseState;
+  final WidgetRef ref;
 
-  const _FeaturesOverviewCard({required this.licenseProvider});
+  const _FeaturesOverviewCard({required this.licenseState, required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -276,32 +280,32 @@ class _FeaturesOverviewCard extends StatelessWidget {
 
             _buildFeatureItem(
               'Plantas ilimitadas',
-              licenseProvider.hasValidLicense,
+              licenseState.hasValidLicense,
               Icons.eco,
             ),
             _buildFeatureItem(
               'Lembretes personalizados',
-              licenseProvider.hasValidLicense,
+              licenseState.hasValidLicense,
               Icons.notifications,
             ),
             _buildFeatureItem(
               'Análises avançadas',
-              licenseProvider.hasValidLicense,
+              licenseState.hasValidLicense,
               Icons.analytics,
             ),
             _buildFeatureItem(
               'Integração meteorológica',
-              licenseProvider.hasValidLicense,
+              licenseState.hasValidLicense,
               Icons.wb_sunny,
             ),
             _buildFeatureItem(
               'Identificação de plantas',
-              licenseProvider.hasValidLicense,
+              licenseState.hasValidLicense,
               Icons.camera_alt,
             ),
             _buildFeatureItem(
               'Suporte especializado',
-              licenseProvider.hasValidLicense,
+              licenseState.hasValidLicense,
               Icons.support_agent,
             ),
           ],
@@ -354,9 +358,10 @@ class _FeaturesOverviewCard extends StatelessWidget {
 
 /// Actions section
 class _ActionsSection extends StatelessWidget {
-  final LicenseProvider licenseProvider;
+  final LicenseState licenseState;
+  final WidgetRef ref;
 
-  const _ActionsSection({required this.licenseProvider});
+  const _ActionsSection({required this.licenseState, required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +382,7 @@ class _ActionsSection extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Upgrade to premium button
-            if (!licenseProvider.isPremiumActive) ...[
+            if (!licenseState.isPremiumActive) ...[
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -402,9 +407,9 @@ class _ActionsSection extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed:
-                    licenseProvider.isLoading
+                    licenseState.isLoading
                         ? null
-                        : () => licenseProvider.refreshLicenseInfo(),
+                        : () => ref.read(licenseNotifierProvider.notifier).refreshLicenseInfo(),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Atualizar Status'),
                 style: OutlinedButton.styleFrom(
@@ -437,9 +442,10 @@ class _ActionsSection extends StatelessWidget {
 
 /// Development tools section (debug mode only)
 class _DevelopmentTools extends StatelessWidget {
-  final LicenseProvider licenseProvider;
+  final LicenseState licenseState;
+  final WidgetRef ref;
 
-  const _DevelopmentTools({required this.licenseProvider});
+  const _DevelopmentTools({required this.licenseState, required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -515,14 +521,14 @@ class _DevelopmentTools extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  licenseProvider.extendTrial(30);
+                  ref.read(licenseNotifierProvider.notifier).extendTrial(30);
                 },
                 child: const Text('30 dias'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  licenseProvider.extendTrial(7);
+                  ref.read(licenseNotifierProvider.notifier).extendTrial(7);
                 },
                 child: const Text('7 dias'),
               ),
@@ -548,7 +554,7 @@ class _DevelopmentTools extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  licenseProvider.resetLicense();
+                  ref.read(licenseNotifierProvider.notifier).resetLicense();
                 },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text('Resetar'),

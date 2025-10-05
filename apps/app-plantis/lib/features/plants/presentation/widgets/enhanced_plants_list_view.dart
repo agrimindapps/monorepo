@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/plant.dart';
 import '../providers/plant_task_provider.dart';
+import '../providers/plants_notifier.dart';
 import '../providers/plants_provider.dart';
 import 'empty_plants_widget.dart';
 import 'enhanced_plant_card.dart';
@@ -212,27 +213,21 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ChangeNotifierProvider.value(
-      value: _plantsProvider,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: theme.colorScheme.surface,
         body: SafeArea(
           child: Column(
             children: [
-              // Enhanced App Bar - Optimized with Selector
-              Selector<PlantsProvider, Map<String, dynamic>>(
-                selector:
-                    (context, provider) => {
-                      'plantsCount': provider.plantsCount,
-                      'searchQuery': provider.searchQuery,
-                      'viewMode': provider.viewMode,
-                    },
-                builder: (context, appBarData, child) {
+              // Enhanced App Bar - Now using Riverpod Consumer
+              Consumer(
+                builder: (context, ref, child) {
+                  final state = ref.watch(plantsNotifierProvider);
+
                   return EnhancedPlantsAppBar(
-                    plantsCount: appBarData['plantsCount'] as int,
-                    searchQuery: appBarData['searchQuery'] as String,
+                    plantsCount: state.plants.length,
+                    searchQuery: state.searchQuery,
                     viewMode:
-                        (appBarData['viewMode'] as ViewMode) == ViewMode.grid
+                        state.viewMode == ViewMode.grid
                             ? AppBarViewMode.grid
                             : AppBarViewMode.list,
                     searchDelegate: this,
@@ -242,46 +237,36 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                 },
               ),
 
-              // Content Area - Optimized with Selector
+              // Content Area - Now using Riverpod Consumer
               Expanded(
-                child: Selector<PlantsProvider, Map<String, dynamic>>(
-                  selector:
-                      (context, provider) => {
-                        'isLoading': provider.isLoading,
-                        'error': provider.error,
-                        'plants': provider.plants,
-                        'searchResults': provider.searchResults,
-                        'searchQuery': provider.searchQuery,
-                        'viewMode': provider.viewMode,
-                      },
-                  builder: (context, contentData, child) {
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final state = ref.watch(plantsNotifierProvider);
+
                     // Loading state
-                    if ((contentData['isLoading'] as bool) &&
-                        (contentData['plants'] as List<Plant>).isEmpty) {
+                    if (state.isLoading && state.plants.isEmpty) {
                       return const PlantsLoadingWidget();
                     }
 
                     // Error state
-                    if (contentData['error'] != null &&
-                        (contentData['plants'] as List<Plant>).isEmpty) {
+                    if (state.error != null && state.plants.isEmpty) {
                       return PlantsErrorWidget(
-                        error: contentData['error'] as String,
+                        error: state.error!,
                         onRetry: _loadInitialData,
                       );
                     }
 
                     // Determine which plants to show
                     final plantsToShow =
-                        (contentData['searchQuery'] as String).isNotEmpty
-                            ? (contentData['searchResults'] as List<Plant>)
-                            : (contentData['plants'] as List<Plant>);
+                        state.searchQuery.isNotEmpty
+                            ? state.searchResults
+                            : state.plants;
 
                     // Empty state
                     if (plantsToShow.isEmpty) {
                       return EmptyPlantsWidget(
-                        isSearching:
-                            (contentData['searchQuery'] as String).isNotEmpty,
-                        searchQuery: contentData['searchQuery'] as String,
+                        isSearching: state.searchQuery.isNotEmpty,
+                        searchQuery: state.searchQuery,
                         onClearSearch: onClearSearch,
                         onAddPlant: _showAddPlantModal,
                       );
@@ -292,7 +277,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                       onRefresh: _onRefresh,
                       child: _EnhancedPlantsContent(
                         plants: plantsToShow,
-                        viewMode: contentData['viewMode'] as ViewMode,
+                        viewMode: state.viewMode,
                         scrollController: _scrollController,
                         actions: this,
                         taskProvider: this,
@@ -305,17 +290,16 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
           ),
         ),
 
-        // Enhanced FAB
-        floatingActionButton: _EnhancedFAB(
-          onAddPlant: _showAddPlantModal,
-          onScrollToTop: () {
-            _scrollController.animateTo(
-              0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          },
-        ),
+      // Enhanced FAB
+      floatingActionButton: _EnhancedFAB(
+        onAddPlant: _showAddPlantModal,
+        onScrollToTop: () {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        },
       ),
     );
   }

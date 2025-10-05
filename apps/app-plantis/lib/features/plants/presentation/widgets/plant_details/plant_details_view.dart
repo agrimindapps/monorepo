@@ -834,21 +834,19 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
     } catch (e) {
       if (kDebugMode) {
         print(
-          '⚠️ _syncPlantDeletion: Provider não encontrado, tentando Provider.of: $e',
+          '⚠️ _syncPlantDeletion: Provider não encontrado, tentando ref.read: $e',
         );
       }
 
-      // Tentar método alternativo se o read() falhar
+      // Tentar método alternativo usando delayed context.read()
       try {
-        final plantsProvider = Provider.of<PlantsProvider>(
-          context,
-          listen: false,
-        );
-        plantsProvider.refreshPlants();
-
-        if (kDebugMode) {
-          print('✅ _syncPlantDeletion: Refresh com Provider.of bem sucedido');
-        }
+        // Não usa ref.read() pois esta é uma StatefulWidget
+        Future.delayed(Duration.zero, () {
+          if (mounted) {
+            final plantsProvider = context.read<PlantsProvider>();
+            plantsProvider.refreshPlants();
+          }
+        });
       } catch (fallbackError) {
         if (kDebugMode) {
           print(
@@ -1328,11 +1326,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   Widget _buildTasksTab(BuildContext context, Plant plant) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-      child: Consumer<PlantTaskProvider>(
-        builder: (context, taskProvider, child) {
-          return PlantTasksSection(plant: plant);
-        },
-      ),
+      child: PlantTasksSection(plant: plant),
     );
   }
 

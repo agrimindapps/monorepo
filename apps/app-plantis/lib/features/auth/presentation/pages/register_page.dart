@@ -1,10 +1,9 @@
 import 'package:core/core.dart' hide Consumer, ChangeNotifierProvider;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
-import '../providers/register_provider.dart';
+import '../providers/register_notifier.dart';
 
 class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
@@ -38,9 +37,7 @@ class RegisterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return provider.ChangeNotifierProvider(
-      create: (_) => di.sl<RegisterProvider>()..goToStep(0),
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: PlantisColors.primary,
         body: SafeArea(
           child: Center(
@@ -145,9 +142,10 @@ class RegisterPage extends ConsumerWidget {
                     const SizedBox(height: 32),
 
                     // Progress indicator
-                    provider.Consumer<RegisterProvider>(
-                      builder: (context, registerProvider, _) {
-                        final steps = registerProvider.progressSteps;
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final registerState = ref.watch(registerNotifierProvider);
+                        final steps = registerState.progressSteps;
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children:
@@ -228,14 +226,14 @@ class RegisterPage extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Continue button
-                    provider.Consumer<RegisterProvider>(
-                      builder: (context, registerProvider, _) {
+                    Consumer(
+                      builder: (context, ref, _) {
                         return SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () {
-                              registerProvider.nextStep();
+                              ref.read(registerNotifierProvider.notifier).nextStep();
                               context.go('/register/personal-info');
                             },
                             style: ElevatedButton.styleFrom(
@@ -273,8 +271,7 @@ class RegisterPage extends ConsumerWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSocialButton(

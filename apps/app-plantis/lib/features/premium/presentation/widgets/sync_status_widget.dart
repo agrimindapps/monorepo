@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/premium_provider_improved.dart';
+import '../notifiers/premium_notifier_improved.dart';
 
 /// Widget que mostra o status de sincronização em tempo real
-class SyncStatusWidget extends StatelessWidget {
+class SyncStatusWidget extends ConsumerWidget {
   const SyncStatusWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProviderImproved>(
-      builder: (context, premiumProvider, child) {
-        // final syncStatus = premiumProvider.getSyncStatus();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(premiumImprovedNotifierProvider);
 
-        return Card(
+    return asyncValue.when(
+      data: (premiumState) => _buildContent(context, ref, premiumState),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Erro: $error')),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, WidgetRef ref, PremiumImprovedState premiumState) {
+    final premiumProvider = premiumState;
+
+    return Card(
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -70,9 +78,9 @@ class SyncStatusWidget extends StatelessWidget {
                 if (premiumProvider.plantLimits != null)
                   _buildStatusItem(
                     'Limite de Plantas',
-                    premiumProvider.canCreateUnlimitedPlants()
+                    ref.read(premiumImprovedNotifierProvider.notifier).canCreateUnlimitedPlants()
                         ? 'Ilimitado'
-                        : '${premiumProvider.getCurrentPlantLimit()}',
+                        : '${ref.read(premiumImprovedNotifierProvider.notifier).getCurrentPlantLimit()}',
                     Colors.teal,
                   ),
                 if (premiumProvider.hasSyncErrors) ...[
@@ -134,7 +142,7 @@ class SyncStatusWidget extends StatelessWidget {
                         onPressed:
                             premiumProvider.isSyncing
                                 ? null
-                                : premiumProvider.forceSyncSubscription,
+                                : () => ref.read(premiumImprovedNotifierProvider.notifier).forceSyncSubscription(),
                         icon: const Icon(Icons.refresh, size: 16),
                         label: const Text('Sincronizar'),
                       ),
@@ -143,7 +151,7 @@ class SyncStatusWidget extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: premiumProvider.clearSyncErrors,
+                          onPressed: () => ref.read(premiumImprovedNotifierProvider.notifier).clearSyncErrors(),
                           icon: const Icon(Icons.clear, size: 16),
                           label: const Text('Limpar Erros'),
                         ),
@@ -155,8 +163,6 @@ class SyncStatusWidget extends StatelessWidget {
             ),
           ),
         );
-      },
-    );
   }
 
   Widget _buildStatusItem(String label, String value, Color color) {
@@ -204,37 +210,41 @@ class SyncStatusWidget extends StatelessWidget {
 }
 
 /// Widget expandido que mostra informações detalhadas de debug
-class SyncDebugWidget extends StatelessWidget {
+class SyncDebugWidget extends ConsumerWidget {
   const SyncDebugWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProviderImproved>(
-      builder: (context, premiumProvider, child) {
-        final debugInfo = premiumProvider.getDebugInfo();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(premiumImprovedNotifierProvider);
 
-        return ExpansionTile(
-          title: const Text('Debug Info'),
-          leading: const Icon(Icons.bug_report),
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDebugSection('Subscription', debugInfo['subscription']),
-                  const SizedBox(height: 16),
-                  _buildDebugSection('Sync Status', debugInfo['sync']),
-                  const SizedBox(height: 16),
-                  _buildDebugSection('Features', debugInfo['features']),
-                  const SizedBox(height: 16),
-                  _buildDebugSection('Products', debugInfo['products']),
-                ],
-              ),
-            ),
-          ],
-        );
+    return asyncValue.when(
+      data: (premiumState) {
+        final debugInfo = ref.read(premiumImprovedNotifierProvider.notifier).getDebugInfo();
+
+    return ExpansionTile(
+      title: const Text('Debug Info'),
+      leading: const Icon(Icons.bug_report),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDebugSection('Subscription', debugInfo['subscription']),
+              const SizedBox(height: 16),
+              _buildDebugSection('Sync Status', debugInfo['sync']),
+              const SizedBox(height: 16),
+              _buildDebugSection('Features', debugInfo['features']),
+              const SizedBox(height: 16),
+              _buildDebugSection('Products', debugInfo['products']),
+            ],
+          ),
+        ),
+      ],
+    );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Erro: $error')),
     );
   }
 
@@ -265,78 +275,83 @@ class SyncDebugWidget extends StatelessWidget {
 }
 
 /// Widget para mostrar features premium disponíveis
-class PremiumFeaturesWidget extends StatelessWidget {
+class PremiumFeaturesWidget extends ConsumerWidget {
   const PremiumFeaturesWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<PremiumProviderImproved>(
-      builder: (context, premiumProvider, child) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(premiumImprovedNotifierProvider);
+
+    return asyncValue.when(
+      data: (premiumState) {
+        final notifier = ref.read(premiumImprovedNotifierProvider.notifier);
         final features = [
           _FeatureItem(
             'Plantas Ilimitadas',
             'unlimited_plants',
-            premiumProvider.canCreateUnlimitedPlants(),
+            notifier.canCreateUnlimitedPlants(),
           ),
           _FeatureItem(
             'Lembretes Avançados',
             'advanced_reminders',
-            premiumProvider.canUseCustomReminders(),
+            notifier.canUseCustomReminders(),
           ),
           _FeatureItem(
             'Exportar Dados',
             'export_data',
-            premiumProvider.canExportData(),
+            notifier.canExportData(),
           ),
           _FeatureItem(
             'Temas Personalizados',
             'custom_themes',
-            premiumProvider.canAccessPremiumThemes(),
+            notifier.canAccessPremiumThemes(),
           ),
           _FeatureItem(
             'Backup na Nuvem',
             'cloud_backup',
-            premiumProvider.canBackupToCloud(),
+            notifier.canBackupToCloud(),
           ),
           _FeatureItem(
             'Identificação de Plantas',
             'plant_identification',
-            premiumProvider.canIdentifyPlants(),
+            notifier.canIdentifyPlants(),
           ),
           _FeatureItem(
             'Diagnóstico de Doenças',
             'disease_diagnosis',
-            premiumProvider.canDiagnoseDiseases(),
+            notifier.canDiagnoseDiseases(),
           ),
           _FeatureItem(
             'Notificações Meteorológicas',
             'weather_based_notifications',
-            premiumProvider.canUseWeatherNotifications(),
+            notifier.canUseWeatherNotifications(),
           ),
           _FeatureItem(
             'Calendário de Cuidados',
             'care_calendar',
-            premiumProvider.canUseCareCalendar(),
+            notifier.canUseCareCalendar(),
           ),
-        ];
+    ];
 
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Features Premium',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                ...features.map((feature) => _buildFeatureItem(feature)),
-              ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Features Premium',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-          ),
-        );
+            const SizedBox(height: 12),
+            ...features.map((feature) => _buildFeatureItem(feature)),
+          ],
+        ),
+      ),
+    );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Erro: $error')),
     );
   }
 

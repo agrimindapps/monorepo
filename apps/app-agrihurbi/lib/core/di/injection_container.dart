@@ -52,6 +52,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Custom modules
+import 'hive_adapters_registration.dart';
 import 'modules/subscription_module.dart';
 
 // Import generated file (will be created by code generation)
@@ -328,6 +329,10 @@ Future<void> init() async {
 Future<void> configureAppDependencies() async {
   // === EXTERNAL DEPENDENCIES (not @injectable) ===
   
+  // === HIVE INITIALIZATION ===
+  // Register Hive adapters BEFORE initializing storage service
+  registerAgrihurbiHiveAdapters();
+
   // Core Services (cannot be @injectable due to external package)
   getIt.registerSingleton<core_lib.IBoxRegistryService>(core_lib.BoxRegistryService());
   getIt.registerSingleton<core_lib.HiveStorageService>(

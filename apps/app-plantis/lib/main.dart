@@ -7,10 +7,6 @@ import 'package:flutter/services.dart';
 
 import 'app.dart';
 
-import 'core/data/models/comentario_model.dart';
-import 'core/data/models/espaco_model.dart';
-
-import 'core/data/models/planta_config_model.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/plantis_sync_config.dart';

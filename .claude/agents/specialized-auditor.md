@@ -201,6 +201,16 @@ else:
 
 ## 📊 UNIFIED AUDIT REPORT FORMAT
 
+⚠️ **IMPORTANTE**: Gere relatório completo **APENAS quando explicitamente solicitado** pelo usuário.
+
+Após auditoria, forneça um **resumo EXECUTIVO CONCISO** (3-5 linhas):
+- Tipo de auditoria realizada (Security/Performance/Quality)
+- Número de findings críticos/importantes
+- Principais recomendações imediatas
+- Próximos passos sugeridos
+
+### **Relatório Completo (Quando Solicitado)**
+
 ```markdown
 # Specialized Audit Report - [Security/Performance/Quality]
 

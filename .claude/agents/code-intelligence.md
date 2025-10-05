@@ -98,6 +98,15 @@ else:
 
 ## 📊 FORMATO DE RELATÓRIO UNIFICADO
 
+⚠️ **IMPORTANTE**: Gere relatório completo **APENAS quando explicitamente solicitado** pelo usuário.
+
+Após análise e resolução, forneça um **resumo CONCISO** (2-4 linhas):
+- Número de issues identificadas e corrigidas
+- Principais mudanças realizadas
+- Próximos passos sugeridos (se relevante)
+
+### **Relatório Completo (Quando Solicitado)**
+
 ```markdown
 # Code Intelligence Report - [Arquivo/Módulo]
 

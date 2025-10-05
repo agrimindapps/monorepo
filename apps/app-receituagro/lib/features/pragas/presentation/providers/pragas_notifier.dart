@@ -123,7 +123,132 @@ class PragasNotifier extends _$PragasNotifier {
     _getPragasStatsUseCase = di.sl<GetPragasStatsUseCase>();
     _historyService = AccessHistoryService();
 
-    return PragasState.initial();
+    // Load initial data
+    return await _loadInitialData();
+  }
+
+  /// Load initial data
+  Future<PragasState> _loadInitialData() async {
+    try {
+      // Load data concurrently
+      final results = await Future.wait([
+        _loadRecentPragasData(),
+        _loadSuggestedPragasData(limit: 10),
+        _loadStatsData(),
+      ]);
+
+      final recentPragas = results[0] as List<PragaEntity>;
+      final suggestedPragas = results[1] as List<PragaEntity>;
+      final stats = results[2] as PragasStats?;
+
+      return PragasState(
+        pragas: const [],
+        recentPragas: recentPragas,
+        suggestedPragas: suggestedPragas,
+        stats: stats,
+        isLoading: false,
+      );
+    } catch (e) {
+      return PragasState(
+        pragas: const [],
+        recentPragas: const [],
+        suggestedPragas: const [],
+        stats: null,
+        isLoading: false,
+        errorMessage: 'Erro ao carregar dados das pragas: $e',
+      );
+    }
+  }
+
+  /// Load recent pragas data
+  Future<List<PragaEntity>> _loadRecentPragasData() async {
+    try {
+      final historyItems = await _historyService.getPragasHistory();
+
+      if (historyItems.isNotEmpty) {
+        final historicPragas = <PragaEntity>[];
+        final allPragasResult = await _getPragasUseCase.execute();
+
+        return allPragasResult.fold(
+          (failure) => <PragaEntity>[],
+          (allPragas) {
+            for (final historyItem in historyItems.take(10)) {
+              final praga = allPragas.firstWhere(
+                (p) => p.idReg == historyItem.id || p.nomeComum == historyItem.name,
+                orElse: () => const PragaEntity(
+                  idReg: '',
+                  nomeComum: '',
+                  nomeCientifico: '',
+                  tipoPraga: '1',
+                ),
+              );
+
+              if (praga.idReg.isNotEmpty) {
+                historicPragas.add(praga);
+              }
+            }
+
+            return RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
+              historicPragas,
+              allPragas,
+              RandomSelectionService.selectRandomPragas,
+              count: 10,
+            );
+          },
+        );
+      } else {
+        final result = await _getRecentPragasUseCase.execute();
+        return result.fold(
+          (failure) => <PragaEntity>[],
+          (pragas) => pragas,
+        );
+      }
+    } catch (e) {
+      return <PragaEntity>[];
+    }
+  }
+
+  /// Load suggested pragas data
+  Future<List<PragaEntity>> _loadSuggestedPragasData({int limit = 10}) async {
+    try {
+      final result = await _getSuggestedPragasUseCase.execute(limit: limit);
+      return await result.fold(
+        (failure) async {
+          // Fallback to random selection
+          final allPragasResult = await _getPragasUseCase.execute();
+          return allPragasResult.fold(
+            (failure) => <PragaEntity>[],
+            (allPragas) => RandomSelectionService.selectSuggestedPragas(allPragas, count: limit),
+          );
+        },
+        (pragas) async {
+          if (pragas.isEmpty) {
+            // Fallback to random selection
+            final allPragasResult = await _getPragasUseCase.execute();
+            return allPragasResult.fold(
+              (failure) => <PragaEntity>[],
+              (allPragas) => RandomSelectionService.selectSuggestedPragas(allPragas, count: limit),
+            );
+          }
+          return pragas;
+        },
+      );
+    } catch (e) {
+      return <PragaEntity>[];
+    }
+  }
+
+  /// Load stats data
+  Future<PragasStats?> _loadStatsData() async {
+    try {
+      final result = await _getPragasStatsUseCase.execute();
+      return result.fold(
+        (failure) => null,
+        (stats) => stats,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Inicialização

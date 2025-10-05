@@ -2,7 +2,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/services/app_data_manager.dart';
 import '../../domain/entities/praga_entity.dart';
 import 'pragas_notifier.dart';
 
@@ -136,13 +135,11 @@ class HomePragasState {
 @riverpod
 class HomePragasNotifier extends _$HomePragasNotifier {
   late final CulturaHiveRepository _culturaRepository;
-  late final IAppDataManager _appDataManager;
 
   @override
   Future<HomePragasState> build() async {
     // Get dependencies from DI
     _culturaRepository = di.sl<CulturaHiveRepository>();
-    _appDataManager = di.sl<IAppDataManager>();
 
     // Initialize and return initial state
     return await _initialize();
@@ -154,11 +151,8 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       // Carrega dados de culturas
       final totalCulturas = await _loadCulturaData();
 
-      // Inicializa pragas com retry logic
-      await _initializePragasWithRetry();
-
-      // Get data from pragas notifier
-      final pragasState = ref.read(pragasNotifierProvider).value;
+      // Wait for pragas notifier to load (it loads automatically now)
+      final pragasState = await ref.watch(pragasNotifierProvider.future);
 
       return HomePragasState(
         isInitializing: false,
@@ -166,11 +160,11 @@ class HomePragasNotifier extends _$HomePragasNotifier {
         initializationError: null,
         totalCulturas: totalCulturas,
         currentCarouselIndex: 0,
-        isLoading: pragasState?.isLoading ?? false,
-        errorMessage: pragasState?.errorMessage,
-        stats: pragasState?.stats,
-        suggestedPragas: pragasState?.suggestedPragas ?? [],
-        recentPragas: pragasState?.recentPragas ?? [],
+        isLoading: false,
+        errorMessage: pragasState.errorMessage,
+        stats: pragasState.stats,
+        suggestedPragas: pragasState.suggestedPragas,
+        recentPragas: pragasState.recentPragas,
         onRecordPragaAccess: (praga) => recordPragaAccess(praga),
         onUpdateCarouselIndex: (index) => updateCarouselIndex(index),
       );
@@ -193,46 +187,6 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       );
     } catch (e) {
       return 0;
-    }
-  }
-
-  /// Inicializa pragas com retry logic para aguardar dados estarem prontos
-  Future<void> _initializePragasWithRetry([int attempts = 0]) async {
-    const int maxAttempts = 10;
-    const Duration delayBetweenAttempts = Duration(milliseconds: 500);
-
-    try {
-      // Aguarda dados estarem prontos
-      final isDataReady = await _appDataManager.isDataReady();
-
-      if (isDataReady) {
-        await ref.read(pragasNotifierProvider.notifier).initialize();
-        return;
-      }
-
-      // Verifica se atingiu o limite de tentativas
-      if (attempts >= maxAttempts - 1) {
-        // Fallback: inicializa mesmo sem dados prontos
-        await ref.read(pragasNotifierProvider.notifier).initialize();
-        return;
-      }
-
-      // Se dados não estão prontos, aguarda e tenta novamente
-      await Future<void>.delayed(delayBetweenAttempts);
-      await _initializePragasWithRetry(attempts + 1);
-    } catch (e) {
-      // Se ainda há tentativas, tenta novamente
-      if (attempts < maxAttempts - 1) {
-        await Future<void>.delayed(delayBetweenAttempts);
-        await _initializePragasWithRetry(attempts + 1);
-      } else {
-        // Último recurso: inicializa diretamente
-        try {
-          await ref.read(pragasNotifierProvider.notifier).initialize();
-        } catch (finalError) {
-          rethrow;
-        }
-      }
     }
   }
 

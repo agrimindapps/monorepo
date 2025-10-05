@@ -116,10 +116,17 @@ Quando invocado para desenvolvimento, você seguirá este processo COMPLETO:
 - Confirme funcionamento em diferentes dispositivos
 
 ### 6. **Documentação e Finalização (5min)**
-- Documente decisões técnicas importantes
-- Adicione comentários em código complexo
-- Atualize README se necessário
-- Liste melhorias futuras identificadas
+- Documente decisões técnicas importantes APENAS em comentários inline para código complexo
+- Atualize README **APENAS se explicitamente solicitado**
+- Liste melhorias futuras **APENAS quando perguntado**
+
+⚠️ **IMPORTANTE - Reporting**:
+- **NÃO gere relatórios** detalhados automaticamente após implementação
+- Forneça um **resumo CONCISO** (2-4 linhas) confirmando:
+  - O que foi implementado
+  - Arquivos modificados
+  - Status dos testes (se executados)
+- Gere relatório completo **APENAS quando explicitamente solicitado**
 
 ## 🏗️ Padrões Riverpod (MONOREPO - Padrão Único)
 

@@ -221,7 +221,15 @@ feature-planner: Planejamento rápido e quebra de tarefas
 
 ## 🎯 OUTPUTS PADRONIZADOS
 
-### **Summary Executivo**
+⚠️ **IMPORTANTE**: Gere relatório completo de orquestração **APENAS quando explicitamente solicitado** pelo usuário.
+
+Após coordenação, forneça um **resumo EXECUTIVO CONCISO** (3-6 linhas):
+- Especialistas utilizados e sequência
+- Principais resultados entregues
+- Status de conclusão
+- Próximos passos (se necessário)
+
+### **Summary Executivo Completo (Quando Solicitado)**
 ```markdown
 # Resultado da Orquestração
 

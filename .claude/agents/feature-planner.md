@@ -63,7 +63,17 @@ Quando invocado para planejamento, você seguirá este processo OTIMIZADO:
 
 ## 📊 Estrutura de Plano de Feature
 
-Você sempre gerará planos neste formato conciso:
+⚠️ **IMPORTANTE**: Gere plano completo **APENAS quando explicitamente solicitado** ou quando planejamento detalhado for necessário.
+
+Para solicitações simples, forneça um **plano RESUMIDO** (5-10 linhas):
+- Principais tarefas em ordem de prioridade
+- Estimativa total de esforço
+- Ordem recomendada de implementação
+- Principais riscos/dependências
+
+### **Plano Completo (Quando Necessário)**
+
+Você gerará planos completos neste formato:
 
 ```markdown
 # Plano de Feature - [Nome da Feature]

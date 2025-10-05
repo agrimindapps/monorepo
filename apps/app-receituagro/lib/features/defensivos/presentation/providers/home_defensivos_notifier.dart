@@ -122,6 +122,17 @@ enum HomeDefensivosViewState {
   error,
 }
 
+/// History data container
+class _HistoryData {
+  final List<FitossanitarioHive> recentDefensivos;
+  final List<FitossanitarioHive> newDefensivos;
+
+  _HistoryData({
+    required this.recentDefensivos,
+    required this.newDefensivos,
+  });
+}
+
 /// Notifier para gerenciar estado da Home Defensivos (Presentation Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
 @riverpod
@@ -135,7 +146,131 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     _repository = di.sl<FitossanitarioHiveRepository>();
     _historyService = AccessHistoryService();
 
-    return HomeDefensivosState.initial();
+    // Load data automatically on build
+    return _loadInitialData();
+  }
+
+  /// Load initial data
+  Future<HomeDefensivosState> _loadInitialData() async {
+    try {
+      // Load statistics and history concurrently
+      final results = await Future.wait([
+        _loadStatisticsData(),
+        _loadHistoryData(),
+      ]);
+
+      final stats = results[0] as DefensivosStatistics;
+      final historyData = results[1] as _HistoryData;
+
+      return HomeDefensivosState(
+        totalDefensivos: stats.totalDefensivos,
+        totalFabricantes: stats.totalFabricantes,
+        totalModoAcao: stats.totalModoAcao,
+        totalIngredienteAtivo: stats.totalIngredienteAtivo,
+        totalClasseAgronomica: stats.totalClasseAgronomica,
+        recentDefensivos: historyData.recentDefensivos,
+        newDefensivos: historyData.newDefensivos,
+        isLoading: false,
+      );
+    } catch (e) {
+      return HomeDefensivosState(
+        recentDefensivos: const [],
+        newDefensivos: const [],
+        totalDefensivos: 0,
+        totalFabricantes: 0,
+        totalModoAcao: 0,
+        totalIngredienteAtivo: 0,
+        totalClasseAgronomica: 0,
+        isLoading: false,
+        errorMessage: 'Erro ao carregar dados: $e',
+      );
+    }
+  }
+
+  /// Load statistics data
+  Future<DefensivosStatistics> _loadStatisticsData() async {
+    try {
+      var defensivos = await _repository.getActiveDefensivos();
+
+      if (defensivos.isEmpty) {
+        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
+
+        if (!isDataLoaded) {
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+          defensivos = await _repository.getActiveDefensivos();
+
+          if (defensivos.isEmpty) {
+            return DefensivosStatistics.empty();
+          }
+        }
+      }
+
+      return _calculateStatistics(defensivos);
+    } catch (e) {
+      return DefensivosStatistics.empty();
+    }
+  }
+
+  /// Load history data
+  Future<_HistoryData> _loadHistoryData() async {
+    try {
+      final allDefensivos = await _repository.getActiveDefensivos();
+
+      if (allDefensivos.isEmpty) {
+        return _HistoryData(
+          recentDefensivos: [],
+          newDefensivos: [],
+        );
+      }
+
+      final historyItems = await _historyService.getDefensivosHistory();
+      final historicDefensivos = <FitossanitarioHive>[];
+
+      for (final historyItem in historyItems.take(10)) {
+        final defensivo = allDefensivos.firstWhere(
+          (d) => d.idReg == historyItem.id,
+          orElse: () => allDefensivos.firstWhere(
+            (d) => d.displayName == historyItem.name,
+            orElse: () => FitossanitarioHive(
+              idReg: '',
+              status: false,
+              nomeComum: '',
+              nomeTecnico: '',
+              comercializado: 0,
+              elegivel: false,
+            ),
+          ),
+        );
+
+        if (defensivo.idReg.isNotEmpty) {
+          historicDefensivos.add(defensivo);
+        }
+      }
+
+      final recentDefensivos = historicDefensivos.isEmpty
+          ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10)
+          : historicDefensivos;
+
+      final newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
+
+      return _HistoryData(
+        recentDefensivos: recentDefensivos,
+        newDefensivos: newDefensivos,
+      );
+    } catch (e) {
+      final allDefensivos = await _repository.getActiveDefensivos();
+      final recentDefensivos = allDefensivos.isNotEmpty
+          ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10)
+          : <FitossanitarioHive>[];
+      final newDefensivos = allDefensivos.isNotEmpty
+          ? RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10)
+          : <FitossanitarioHive>[];
+
+      return _HistoryData(
+        recentDefensivos: recentDefensivos,
+        newDefensivos: newDefensivos,
+      );
+    }
   }
 
   /// Load all data
@@ -231,7 +366,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
         return;
       }
 
-      await _loadHistoryData(allDefensivos);
+      await _loadHistoryIntoState(allDefensivos);
     } catch (e) {
       // Use random selection as fallback
       final allDefensivos = await _repository.getActiveDefensivos();
@@ -252,7 +387,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
   }
 
   /// Load history data and combine with random selection
-  Future<void> _loadHistoryData(List<FitossanitarioHive> allDefensivos) async {
+  Future<void> _loadHistoryIntoState(List<FitossanitarioHive> allDefensivos) async {
     final currentState = state.value;
     if (currentState == null) return;
 

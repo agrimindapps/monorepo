@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/theme/design_tokens.dart';
-import '../../core/di/injection_container.dart';
 import '../../core/data/models/fitossanitario_hive.dart';
 import '../../core/services/receituagro_navigation_service.dart';
+import '../../core/theme/design_tokens.dart';
 import 'presentation/providers/home_defensivos_notifier.dart';
 import 'presentation/widgets/defensivos_error_state.dart';
 import 'presentation/widgets/defensivos_new_items_section.dart';
@@ -34,15 +32,6 @@ class HomeDefensivosPage extends ConsumerStatefulWidget {
 }
 
 class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
-  @override
-  void initState() {
-    super.initState();
-    // Load data on initialization
-    Future.microtask(() {
-      ref.read(homeDefensivosNotifierProvider.notifier).loadData();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

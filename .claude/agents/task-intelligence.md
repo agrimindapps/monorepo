@@ -101,7 +101,16 @@ else:
 
 ## 📊 FORMATO DE EXECUÇÃO UNIFICADO
 
-### **Para Execução COMPLEXA (Sonnet)**
+⚠️ **IMPORTANTE**: Gere relatório completo **APENAS quando explicitamente solicitado** pelo usuário.
+
+Após execução, forneça um **resumo CONCISO** (1-3 linhas):
+- Issue resolvida e arquivos modificados
+- Status da validação
+- Próximos passos (se necessário)
+
+### **Relatório Completo (Quando Solicitado)**
+
+**Para Execução COMPLEXA (Sonnet)**
 ```markdown
 # Complex Task Execution Report
 
@@ -134,7 +143,7 @@ else:
 - [Recomendações para próximas implementações]
 ```
 
-### **Para Execução SIMPLES (Haiku)**
+**Para Execução SIMPLES (Haiku)**
 ```markdown
 # Quick Task Execution
 

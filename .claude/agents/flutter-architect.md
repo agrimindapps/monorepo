@@ -232,7 +232,17 @@ result.fold(
 
 ## 📊 Estrutura de Recomendação Arquitetural MONOREPO
 
-Você sempre gerará recomendações neste formato:
+⚠️ **IMPORTANTE**: Gere plano arquitetural completo **APENAS quando explicitamente solicitado** ou quando planejamento detalhado for necessário.
+
+Para consultas arquiteturais simples, forneça uma **recomendação CONCISA** (5-10 linhas):
+- Padrão arquitetural recomendado
+- Principais componentes e responsabilidades
+- Ordem de implementação sugerida
+- Riscos principais a considerar
+
+### **Plano Completo (Quando Necessário)**
+
+Você gerará recomendações completas neste formato:
 
 ```markdown
 # Consultoria Arquitetural - [Título da Feature/Problema]

@@ -11,13 +11,13 @@ import '../../domain/entities/database_record.dart';
 import '../../domain/entities/shared_preferences_record.dart';
 
 /// Sistema completo de inspeção e visualização de dados locais
-/// Permite visualizar, analisar e gerenciar dados armazenados em Hive Boxes 
-/// e SharedPreferences, oferecendo uma ferramenta essencial para debug, 
+/// Permite visualizar, analisar e gerenciar dados armazenados em Hive Boxes
+/// e SharedPreferences, oferecendo uma ferramenta essencial para debug,
 /// desenvolvimento e monitoramento de dados
 class DatabaseInspectorService {
   static DatabaseInspectorService? _instance;
   final List<CustomBoxType> _customBoxes = [];
-  
+
   DatabaseInspectorService._internal();
 
   /// Singleton instance
@@ -33,7 +33,7 @@ class DatabaseInspectorService {
   void registerCustomBoxes(List<CustomBoxType> boxes) {
     _customBoxes.clear();
     _customBoxes.addAll(boxes);
-    
+
     if (kDebugMode) {
       print('DatabaseInspector: Registered ${boxes.length} custom boxes');
       for (final box in boxes) {
@@ -72,19 +72,19 @@ class DatabaseInspectorService {
   /// Carrega dados de uma Hive Box específica
   Future<List<DatabaseRecord>> loadHiveBoxData(String boxKey) async {
     try {
-      late Box box;
+      late Box<dynamic> box;
       if (Hive.isBoxOpen(boxKey)) {
-        box = Hive.box(boxKey);
+        box = Hive.box<dynamic>(boxKey);
       } else {
         try {
-          box = await Hive.openBox(boxKey);
+          box = await Hive.openBox<dynamic>(boxKey);
         } catch (e) {
           if (kDebugMode) {
             print('Error loading Hive box $boxKey: $e');
           }
           if (e.toString().contains('already open')) {
             try {
-              box = Hive.box(boxKey);
+              box = Hive.box<dynamic>(boxKey);
             } catch (e2) {
               throw Exception('Box $boxKey cannot be accessed: $e2');
             }
@@ -93,32 +93,32 @@ class DatabaseInspectorService {
           }
         }
       }
-      
+
       final records = <DatabaseRecord>[];
 
       for (final key in box.keys) {
         try {
           final value = box.get(key);
           final data = _convertToMap(value, key.toString());
-          
-          records.add(DatabaseRecord(
-            id: key.toString(),
-            data: data,
-            boxKey: boxKey,
-          ));
+
+          records.add(
+            DatabaseRecord(id: key.toString(), data: data, boxKey: boxKey),
+          );
         } catch (e) {
           if (kDebugMode) {
             print('Error loading record $key from box $boxKey: $e');
           }
-          
-          records.add(DatabaseRecord(
-            id: key.toString(),
-            data: {
-              '_error': 'Failed to load record: $e',
-              '_originalKey': key.toString(),
-            },
-            boxKey: boxKey,
-          ));
+
+          records.add(
+            DatabaseRecord(
+              id: key.toString(),
+              data: {
+                '_error': 'Failed to load record: $e',
+                '_originalKey': key.toString(),
+              },
+              boxKey: boxKey,
+            ),
+          );
         }
       }
 
@@ -142,12 +142,10 @@ class DatabaseInspectorService {
         try {
           final value = _getSharedPreferencesValue(prefs, key);
           final type = _getSharedPreferencesType(prefs, key);
-          
-          records.add(SharedPreferencesRecord(
-            key: key,
-            value: value,
-            type: type,
-          ));
+
+          records.add(
+            SharedPreferencesRecord(key: key, value: value, type: type),
+          );
         } catch (e) {
           if (kDebugMode) {
             print('Error loading SharedPreferences key $key: $e');
@@ -169,11 +167,13 @@ class DatabaseInspectorService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final result = await prefs.remove(key);
-      
+
       if (kDebugMode) {
-        print('SharedPreferences key "$key" ${result ? 'removed' : 'not found'}');
+        print(
+          'SharedPreferences key "$key" ${result ? 'removed' : 'not found'}',
+        );
       }
-      
+
       return result;
     } catch (e) {
       if (kDebugMode) {
@@ -186,33 +186,33 @@ class DatabaseInspectorService {
   /// Extrai campos únicos de uma lista de registros
   Set<String> extractUniqueFields(List<DatabaseRecord> records) {
     final fields = <String>{};
-    
+
     for (final record in records) {
       fields.addAll(record.fields);
     }
-    
+
     return fields;
   }
 
   /// Converte registros para formato tabular
   List<List<String>> convertToTableFormat(List<DatabaseRecord> records) {
     if (records.isEmpty) return [];
-    
+
     final fields = extractUniqueFields(records).toList();
     fields.sort(); // Ordenar campos alfabeticamente
     final table = <List<String>>[];
     table.add(['ID', ...fields]);
     for (final record in records) {
       final row = <String>[record.id];
-      
+
       for (final field in fields) {
         final value = record.data[field];
         row.add(_formatValueForTable(value));
       }
-      
+
       table.add(row);
     }
-    
+
     return table;
   }
 
@@ -245,11 +245,11 @@ class DatabaseInspectorService {
       };
 
       await file.writeAsString(formatAsJsonString(exportData));
-      
+
       if (kDebugMode) {
         print('Box data exported to: ${file.path}');
       }
-      
+
       return file;
     } catch (e) {
       throw Exception('Failed to export box data: $e');
@@ -274,11 +274,11 @@ class DatabaseInspectorService {
       };
 
       await file.writeAsString(formatAsJsonString(exportData));
-      
+
       if (kDebugMode) {
         print('SharedPreferences data exported to: ${file.path}');
       }
-      
+
       return file;
     } catch (e) {
       throw Exception('Failed to export SharedPreferences data: $e');
@@ -293,10 +293,9 @@ class DatabaseInspectorService {
         if (Hive.isBoxOpen(customBox.key)) {
           boxNames.add(customBox.key);
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     }
-    
+
     return boxNames;
   }
 
@@ -312,10 +311,10 @@ class DatabaseInspectorService {
           'error': 'Box is not open',
         };
       }
-      
-      final box = Hive.box(boxKey);
+
+      final box = Hive.box<dynamic>(boxKey);
       final keys = box.keys.toList();
-      
+
       return {
         'boxKey': boxKey,
         'displayName': getBoxDisplayName(boxKey),
@@ -326,10 +325,7 @@ class DatabaseInspectorService {
         'sampleKeys': keys.take(5).toList(),
       };
     } catch (e) {
-      return {
-        'boxKey': boxKey,
-        'error': e.toString(),
-      };
+      return {'boxKey': boxKey, 'error': e.toString()};
     }
   }
 
@@ -338,17 +334,16 @@ class DatabaseInspectorService {
     final hiveBoxes = getAvailableHiveBoxes();
     final totalBoxes = hiveBoxes.length;
     int totalRecords = 0;
-    
+
     for (final boxKey in hiveBoxes) {
       try {
         if (Hive.isBoxOpen(boxKey)) {
-          final box = Hive.box(boxKey);
+          final box = Hive.box<dynamic>(boxKey);
           totalRecords += box.keys.length;
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     }
-    
+
     return {
       'totalHiveBoxes': totalBoxes,
       'totalHiveRecords': totalRecords,
@@ -363,7 +358,7 @@ class DatabaseInspectorService {
     if (value == null) {
       return {'_null': true, '_key': key};
     }
-    
+
     if (value is Map) {
       final result = <String, dynamic>{};
       for (final entry in value.entries) {
@@ -371,12 +366,14 @@ class DatabaseInspectorService {
       }
       return result;
     }
-    
+
     if (value is List) {
       return {
         '_type': 'List',
         '_length': value.length,
-        '_items': value.asMap().map((index, item) => MapEntry(index.toString(), item)),
+        '_items': value.asMap().map(
+          (index, item) => MapEntry(index.toString(), item),
+        ),
         '_key': key,
       };
     }
@@ -396,31 +393,31 @@ class DatabaseInspectorService {
   /// Obtém tipo do valor no SharedPreferences
   String _getSharedPreferencesType(SharedPreferences prefs, String key) {
     final value = prefs.get(key);
-    
+
     if (value is String) return 'String';
     if (value is int) return 'int';
     if (value is bool) return 'bool';
     if (value is double) return 'double';
     if (value is List<String>) return 'List<String>';
-    
+
     return 'unknown';
   }
 
   /// Formata valor para tabela
   String _formatValueForTable(dynamic value) {
     if (value == null) return '';
-    
+
     if (value is String) return value;
     if (value is num || value is bool) return value.toString();
-    
+
     if (value is List) {
       return '[${value.length} items]';
     }
-    
+
     if (value is Map) {
       return '{${value.keys.length} keys}';
     }
-    
+
     return value.toString();
   }
 }

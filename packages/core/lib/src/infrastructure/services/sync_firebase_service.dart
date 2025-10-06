@@ -16,11 +16,11 @@ import 'connectivity_service.dart';
 
 /// Serviço unificado de sincronização offline-first com Firebase
 /// Implementa padrão Singleton Generic para reutilização por tipo
-class SyncFirebaseService<T extends BaseSyncEntity> 
-    with SyncEntityMixin 
+class SyncFirebaseService<T extends BaseSyncEntity>
+    with SyncEntityMixin
     implements ISyncRepository<T> {
   static final Map<String, SyncFirebaseService> _instances = {};
-  
+
   /// Factory constructor para Singleton por coleção
   factory SyncFirebaseService.getInstance(
     String collectionName,
@@ -29,7 +29,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     SyncConfig? config,
   }) {
     final key = '${T.toString()}_$collectionName';
-    
+
     if (!_instances.containsKey(key)) {
       _instances[key] = SyncFirebaseService<T>._(
         collectionName,
@@ -38,7 +38,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         config ?? const SyncConfig(),
       );
     }
-    
+
     return _instances[key] as SyncFirebaseService<T>;
   }
 
@@ -61,8 +61,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   SyncStatus _currentStatus = SyncStatus.offline;
   String? _currentUserId;
   Timer? _syncTimer;
-  final StreamController<List<T>> _dataController = StreamController<List<T>>.broadcast();
-  final StreamController<SyncStatus> _statusController = StreamController<SyncStatus>.broadcast();
+  final StreamController<List<T>> _dataController =
+      StreamController<List<T>>.broadcast();
+  final StreamController<SyncStatus> _statusController =
+      StreamController<SyncStatus>.broadcast();
   StreamSubscription<bool>? _connectivitySubscription;
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription<QuerySnapshot>? _firestoreSubscription;
@@ -108,7 +110,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       final dirtyItem = itemWithId.markAsDirty() as T;
       final localResult = await _saveLocal(dirtyItem);
       if (localResult.isLeft()) {
-        return localResult.fold((failure) => Left(failure), (_) => const Right(''));
+        return localResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(''),
+        );
       }
       if (_canSync()) {
         _syncItemInBackground(dirtyItem);
@@ -133,14 +138,17 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         final id = item.id.isEmpty ? _generateId() : item.id;
         final itemWithId = item.copyWith(id: id) as T;
         final dirtyItem = itemWithId.markAsDirty() as T;
-        
+
         itemsToSave.add(dirtyItem);
         ids.add(id);
       }
       for (final item in itemsToSave) {
         final result = await _saveLocal(item);
         if (result.isLeft()) {
-          return result.fold((failure) => Left(failure), (_) => const Right([]));
+          return result.fold(
+            (failure) => Left(failure),
+            (_) => const Right([]),
+          );
         }
       }
       if (_canSync()) {
@@ -159,10 +167,8 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       await _ensureInitialized();
 
-      final updatedItem = item.copyWith(
-        id: id,
-        updatedAt: DateTime.now(),
-      ).markAsDirty() as T;
+      final updatedItem =
+          item.copyWith(id: id, updatedAt: DateTime.now()).markAsDirty() as T;
 
       final result = await _saveLocal(updatedItem);
       if (result.isLeft()) return result;
@@ -186,15 +192,20 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       final itemsToUpdate = <T>[];
 
       for (final entry in items.entries) {
-        final updatedItem = entry.value.copyWith(
-          id: entry.key,
-          updatedAt: DateTime.now(),
-        ).markAsDirty() as T;
-        
+        final updatedItem =
+            entry.value
+                    .copyWith(id: entry.key, updatedAt: DateTime.now())
+                    .markAsDirty()
+                as T;
+
         itemsToUpdate.add(updatedItem);
-        
+
         final result = await _saveLocal(updatedItem);
-        if (result.isLeft()) return result.fold((failure) => Left(failure), (_) => const Right(null));
+        if (result.isLeft())
+          return result.fold(
+            (failure) => Left(failure),
+            (_) => const Right(null),
+          );
       }
 
       if (_canSync()) {
@@ -214,8 +225,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       await _ensureInitialized();
 
       final existingResult = await _getLocal(id);
-      if (existingResult.isLeft()) return existingResult.fold((failure) => Left(failure), (_) => const Right(null));
-      
+      if (existingResult.isLeft())
+        return existingResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(null),
+        );
+
       final existing = existingResult.getOrElse(() => null);
       if (existing == null) {
         return Left(NotFoundFailure('Item não encontrado: $id'));
@@ -268,7 +283,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   Future<Either<Failure, List<T>>> findAll() async {
     try {
       await _ensureInitialized();
-      
+
       final activeItems = _localData.where((item) => !item.isDeleted).toList();
       return Right(activeItems);
     } catch (e) {
@@ -277,10 +292,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }
 
   @override
-  Future<Either<Failure, List<T>>> findWhere(Map<String, dynamic> filters) async {
+  Future<Either<Failure, List<T>>> findWhere(
+    Map<String, dynamic> filters,
+  ) async {
     try {
       await _ensureInitialized();
-      
+
       var results = _localData.where((item) => !item.isDeleted);
       for (final entry in filters.entries) {
         final key = entry.key;
@@ -297,7 +314,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
             break;
         }
       }
-      
+
       return Right(results.toList());
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar com filtros: $e'));
@@ -305,24 +322,32 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }
 
   @override
-  Future<Either<Failure, List<T>>> findRecent({Duration? since, int? limit}) async {
+  Future<Either<Failure, List<T>>> findRecent({
+    Duration? since,
+    int? limit,
+  }) async {
     try {
       await _ensureInitialized();
-      
-      final cutoff = since != null 
-          ? DateTime.now().subtract(since)
-          : DateTime.now().subtract(const Duration(days: 30));
 
-      var results = _localData
-          .where((item) => !item.isDeleted)
-          .where((item) {
+      final cutoff =
+          since != null
+              ? DateTime.now().subtract(since)
+              : DateTime.now().subtract(const Duration(days: 30));
+
+      var results =
+          _localData.where((item) => !item.isDeleted).where((item) {
             final updatedAt = item.updatedAt ?? item.createdAt;
             return updatedAt != null && updatedAt.isAfter(cutoff);
-          })
-          .toList();
+          }).toList();
       results.sort((a, b) {
-        final aDate = a.updatedAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bDate = b.updatedAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final aDate =
+            a.updatedAt ??
+            a.createdAt ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate =
+            b.updatedAt ??
+            b.createdAt ??
+            DateTime.fromMillisecondsSinceEpoch(0);
         return bDate.compareTo(aDate);
       });
 
@@ -343,7 +368,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }) async {
     try {
       await _ensureInitialized();
-      
+
       if (query.trim().isEmpty) {
         return findAll();
       }
@@ -390,14 +415,22 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       await _ensureInitialized();
 
       if (!_canSync()) {
-        return const Left(NetworkFailure('Não é possível sincronizar: offline ou não autenticado'));
+        return const Left(
+          NetworkFailure(
+            'Não é possível sincronizar: offline ou não autenticado',
+          ),
+        );
       }
 
       final unsyncedResult = await getUnsyncedItems();
-      if (unsyncedResult.isLeft()) return unsyncedResult.fold((failure) => Left(failure), (_) => const Right(null));
+      if (unsyncedResult.isLeft())
+        return unsyncedResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(null),
+        );
 
       final unsyncedItems = unsyncedResult.getOrElse(() => []);
-      
+
       if (unsyncedItems.isNotEmpty) {
         await _performBatchSync(unsyncedItems);
       }
@@ -406,8 +439,11 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       _lastSyncTime = DateTime.now();
       await _updateSyncStatus();
 
-      developer.log('Sincronização forçada concluída para $collectionName', name: 'SyncService');
-      
+      developer.log(
+        'Sincronização forçada concluída para $collectionName',
+        name: 'SyncService',
+      );
+
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure('Erro na sincronização forçada: $e'));
@@ -418,7 +454,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   Future<Either<Failure, List<T>>> getUnsyncedItems() async {
     try {
       await _ensureInitialized();
-      
+
       final unsyncedItems = _localData.where((item) => item.needsSync).toList();
       return Right(unsyncedItems);
     } catch (e) {
@@ -443,7 +479,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       final resolvedItem = resolution.incrementVersion().markAsDirty() as T;
       final result = await _saveLocal(resolvedItem);
-      
+
       if (result.isLeft()) return result;
 
       if (_canSync()) {
@@ -461,13 +497,16 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   Future<Either<Failure, void>> clearLocalData() async {
     try {
       await _ensureInitialized();
-      
+
       await _localStorage.clear(box: collectionName);
       _localData.clear();
       _dataController.add([]);
-      
-      developer.log('Dados locais limpos para $collectionName', name: 'SyncService');
-      
+
+      developer.log(
+        'Dados locais limpos para $collectionName',
+        name: 'SyncService',
+      );
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao limpar dados locais: $e'));
@@ -509,20 +548,25 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     if (!_isInitialized) {
       final result = await initialize();
       if (result.isLeft()) {
-        throw Exception(result.fold((failure) => failure.message, (_) => 'Unknown error'));
+        throw Exception(
+          result.fold((failure) => failure.message, (_) => 'Unknown error'),
+        );
       }
     }
   }
 
   String _generateId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final random = Random.secure();
-    return List.generate(13, (index) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(
+      13,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 
   bool _canSync() {
-    return _currentUserId != null &&
-           _currentStatus != SyncStatus.offline;
+    return _currentUserId != null && _currentStatus != SyncStatus.offline;
   }
 
   Future<Either<Failure, void>> _saveLocal(T item) async {
@@ -545,18 +589,15 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         box: collectionName,
       );
 
-      return result.fold(
-        (failure) => Left(failure),
-        (data) {
-          if (data == null) return const Right(null);
-          try {
-            final item = fromMap(data);
-            return Right(item);
-          } catch (e) {
-            return Left(CacheFailure('Erro ao deserializar item: $e'));
-          }
-        },
-      );
+      return result.fold((failure) => Left(failure), (data) {
+        if (data == null) return const Right(null);
+        try {
+          final item = fromMap(data);
+          return Right(item);
+        } catch (e) {
+          return Left(CacheFailure('Erro ao deserializar item: $e'));
+        }
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao obter localmente: $e'));
     }
@@ -564,21 +605,36 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
   Future<void> _loadLocalData() async {
     try {
-      final result = await _localStorage.getValues<Map<String, dynamic>>(box: collectionName);
-      
+      final result = await _localStorage.getValues<Map<String, dynamic>>(
+        box: collectionName,
+      );
+
       result.fold(
-        (failure) => developer.log('Erro ao carregar dados locais: ${failure.message}', name: 'SyncService'),
+        (failure) => developer.log(
+          'Erro ao carregar dados locais: ${failure.message}',
+          name: 'SyncService',
+        ),
         (dataMaps) {
-          _localData = dataMaps.map((dataMap) {
-            try {
-              return fromMap(dataMap);
-            } catch (e) {
-              developer.log('Erro ao deserializar item: $e', name: 'SyncService');
-              return null;
-            }
-          }).where((item) => item != null).cast<T>().toList();
-          
-          _dataController.add(_localData.where((item) => !item.isDeleted).toList());
+          _localData =
+              dataMaps
+                  .map((dataMap) {
+                    try {
+                      return fromMap(dataMap);
+                    } catch (e) {
+                      developer.log(
+                        'Erro ao deserializar item: $e',
+                        name: 'SyncService',
+                      );
+                      return null;
+                    }
+                  })
+                  .where((item) => item != null)
+                  .cast<T>()
+                  .toList();
+
+          _dataController.add(
+            _localData.where((item) => !item.isDeleted).toList(),
+          );
         },
       );
     } catch (e) {
@@ -594,13 +650,16 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     _connectivitySubscription = _connectivity.connectivityStream.listen(
       (isOnline) {
         _updateSyncStatus();
-        
+
         if (isOnline && _currentUserId != null) {
           _syncUnsyncedItemsInBackground();
         }
       },
-      onError: (error) {
-        developer.log('Erro no listener de conectividade: $error', name: 'SyncService');
+      onError: (Object? error) {
+        developer.log(
+          'Erro no listener de conectividade: $error',
+          name: 'SyncService',
+        );
       },
     );
   }
@@ -610,10 +669,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       (user) {
         final oldUserId = _currentUserId;
         _currentUserId = user?.uid;
-        
+
         if (_currentUserId != oldUserId) {
           _updateSyncStatus();
-          
+
           if (_currentUserId != null) {
             _setupFirestoreListener();
             _syncUnsyncedItemsInBackground();
@@ -622,7 +681,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           }
         }
       },
-      onError: (error) {
+      onError: (Object? error) {
         developer.log('Erro no listener de auth: $error', name: 'SyncService');
       },
     );
@@ -641,12 +700,18 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         (snapshot) {
           _handleFirestoreSnapshot(snapshot);
         },
-        onError: (error) {
-          developer.log('Erro no listener do Firestore: $error', name: 'SyncService');
+        onError: (Object? error) {
+          developer.log(
+            'Erro no listener do Firestore: $error',
+            name: 'SyncService',
+          );
         },
       );
     } catch (e) {
-      developer.log('Erro ao configurar listener do Firestore: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao configurar listener do Firestore: $e',
+        name: 'SyncService',
+      );
     }
   }
 
@@ -671,7 +736,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
               await _mergeRemoteItem(remoteItem);
               hasChanges = true;
             } catch (e) {
-              developer.log('Erro ao processar item remoto: $e', name: 'SyncService');
+              developer.log(
+                'Erro ao processar item remoto: $e',
+                name: 'SyncService',
+              );
             }
             break;
           case DocumentChangeType.removed:
@@ -685,22 +753,29 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         await _refreshLocalData();
       }
     } catch (e) {
-      developer.log('Erro ao processar snapshot do Firestore: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao processar snapshot do Firestore: $e',
+        name: 'SyncService',
+      );
     }
   }
 
   Future<void> _mergeRemoteItem(T remoteItem) async {
     try {
       final localResult = await _getLocal(remoteItem.id);
-      
+
       localResult.fold(
-        (failure) => developer.log('Erro ao obter item local para merge: ${failure.message}', name: 'SyncService'),
+        (failure) => developer.log(
+          'Erro ao obter item local para merge: ${failure.message}',
+          name: 'SyncService',
+        ),
         (localItem) async {
           T itemToSave = remoteItem;
 
           if (localItem != null) {
-            if (localItem.version > remoteItem.version || 
-                (localItem.version == remoteItem.version && localItem.isDirty)) {
+            if (localItem.version > remoteItem.version ||
+                (localItem.version == remoteItem.version &&
+                    localItem.isDirty)) {
               if (!localItem.isDirty) {
                 itemToSave = localItem.markAsSynced() as T;
               } else {
@@ -717,16 +792,22 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         },
       );
     } catch (e) {
-      developer.log('Erro ao fazer merge do item remoto: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao fazer merge do item remoto: $e',
+        name: 'SyncService',
+      );
     }
   }
 
   Future<void> _handleRemoteDelete(String id) async {
     try {
       final localResult = await _getLocal(id);
-      
+
       localResult.fold(
-        (failure) => developer.log('Item remoto deletado não existe localmente: $id', name: 'SyncService'),
+        (failure) => developer.log(
+          'Item remoto deletado não existe localmente: $id',
+          name: 'SyncService',
+        ),
         (localItem) async {
           if (localItem != null && !localItem.isDeleted) {
             final deletedItem = localItem.markAsDeleted().markAsSynced() as T;
@@ -745,7 +826,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       final isOnline = connectivityResult.getOrElse(() => false);
 
       SyncStatus newStatus;
-      
+
       if (!isOnline) {
         newStatus = SyncStatus.offline;
       } else if (_currentUserId == null) {
@@ -758,11 +839,17 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       if (_currentStatus != newStatus) {
         _currentStatus = newStatus;
         _statusController.add(newStatus);
-        
-        developer.log('Status de sincronização alterado para: ${newStatus.name}', name: 'SyncService');
+
+        developer.log(
+          'Status de sincronização alterado para: ${newStatus.name}',
+          name: 'SyncService',
+        );
       }
     } catch (e) {
-      developer.log('Erro ao atualizar status de sincronização: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao atualizar status de sincronização: $e',
+        name: 'SyncService',
+      );
     }
   }
 
@@ -789,7 +876,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     Future.microtask(() async {
       final unsyncedResult = await getUnsyncedItems();
       unsyncedResult.fold(
-        (failure) => developer.log('Erro ao obter itens não sincronizados: ${failure.message}', name: 'SyncService'),
+        (failure) => developer.log(
+          'Erro ao obter itens não sincronizados: ${failure.message}',
+          name: 'SyncService',
+        ),
         (unsyncedItems) {
           if (unsyncedItems.isNotEmpty) {
             _performBatchSync(unsyncedItems);
@@ -811,17 +901,25 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       if (item.isDeleted) {
         await docRef.delete();
-        developer.log('Item ${item.id} deletado do Firebase', name: 'SyncService');
+        developer.log(
+          'Item ${item.id} deletado do Firebase',
+          name: 'SyncService',
+        );
       } else {
         final firebaseData = item.toFirebaseMap();
         await docRef.set(firebaseData, SetOptions(merge: true));
-        developer.log('Item ${item.id} sincronizado com Firebase', name: 'SyncService');
+        developer.log(
+          'Item ${item.id} sincronizado com Firebase',
+          name: 'SyncService',
+        );
       }
       final syncedItem = item.markAsSynced(syncTime: DateTime.now()) as T;
       await _saveLocal(syncedItem);
-
     } catch (e) {
-      developer.log('Erro ao sincronizar item ${item.id}: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao sincronizar item ${item.id}: $e',
+        name: 'SyncService',
+      );
     }
   }
 
@@ -856,7 +954,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         await _saveLocal(syncedItem);
       }
 
-      developer.log('Lote de ${itemsToUpdate.length} itens sincronizado', name: 'SyncService');
+      developer.log(
+        'Lote de ${itemsToUpdate.length} itens sincronizado',
+        name: 'SyncService',
+      );
       if (items.length > config.batchSize) {
         final remainingItems = items.skip(config.batchSize).toList();
         await _performBatchSync(remainingItems);
@@ -864,7 +965,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       await _refreshLocalData();
       await _updateSyncStatus();
-
     } catch (e) {
       developer.log('Erro ao sincronizar lote: $e', name: 'SyncService');
     }
@@ -881,7 +981,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       Query query = collection;
       if (_lastSyncTime != null) {
-        query = query.where('updated_at', isGreaterThan: Timestamp.fromDate(_lastSyncTime!));
+        query = query.where(
+          'updated_at',
+          isGreaterThan: Timestamp.fromDate(_lastSyncTime!),
+        );
       }
 
       final snapshot = await query.get();
@@ -892,14 +995,16 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           final remoteItem = fromMap(data);
           await _mergeRemoteItem(remoteItem);
         } catch (e) {
-          developer.log('Erro ao processar documento ${doc.id}: $e', name: 'SyncService');
+          developer.log(
+            'Erro ao processar documento ${doc.id}: $e',
+            name: 'SyncService',
+          );
         }
       }
 
       if (snapshot.docs.isNotEmpty) {
         await _refreshLocalData();
       }
-
     } catch (e) {
       developer.log('Erro ao puxar dados do Firebase: $e', name: 'SyncService');
     }
@@ -914,28 +1019,35 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       await _firestoreSubscription?.cancel();
       await _dataController.close();
       await _statusController.close();
-      
+
       _isInitialized = false;
-      
+
       developer.log('SyncFirebaseService<$T> disposed', name: 'SyncService');
     } catch (e) {
-      developer.log('Erro ao fazer dispose do SyncFirebaseService: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao fazer dispose do SyncFirebaseService: $e',
+        name: 'SyncService',
+      );
     }
   }
 }
 
 /// Extensions para facilitar o uso
-extension SyncFirebaseServiceExtensions<T extends BaseSyncEntity> on SyncFirebaseService<T> {
+extension SyncFirebaseServiceExtensions<T extends BaseSyncEntity>
+    on SyncFirebaseService<T> {
   /// Obtém métricas de performance
   SyncMetrics get metrics {
     final debug = getDebugInfo();
     return SyncMetrics(
       collectionName: debug['collection_name'] as String,
       localItemsCount: debug['local_items_count'] as int,
-      lastSyncAt: debug['last_sync_time'] != null 
-          ? DateTime.parse(debug['last_sync_time'] as String)
-          : null,
-      syncStatus: SyncStatus.values.firstWhere((s) => s.name == debug['current_status']),
+      lastSyncAt:
+          debug['last_sync_time'] != null
+              ? DateTime.parse(debug['last_sync_time'] as String)
+              : null,
+      syncStatus: SyncStatus.values.firstWhere(
+        (s) => s.name == debug['current_status'],
+      ),
       isOnline: debug['can_sync'] as bool,
       canSync: debug['can_sync'] as bool,
       pendingSyncCount: debug['unsynced_items_count'] as int,

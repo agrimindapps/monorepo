@@ -23,7 +23,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
       StreamController<SyncEvent>.broadcast();
   bool _isDisposed = false;
   bool _isSyncingAll = false;
-  String? _currentSyncingService;
 
   SyncOrchestratorImpl({
     required ICacheManager cacheManager,
@@ -146,7 +145,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
       }
       for (int i = 0; i < services.length; i++) {
         final service = services[i];
-        _currentSyncingService = service.serviceId;
         _emitProgress(
           SyncProgress(
             current: i + 1,
@@ -164,14 +162,12 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
         }
       }
 
-      _currentSyncingService = null;
       _isSyncingAll = false;
 
       developer.log('Sync all completed', name: 'SyncOrchestrator');
 
       return const Right(null);
     } catch (e) {
-      _currentSyncingService = null;
       _isSyncingAll = false;
 
       developer.log('Error during sync all: $e', name: 'SyncOrchestrator');
@@ -318,7 +314,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
   @override
   Future<void> stopAllSync() async {
     _isSyncingAll = false;
-    _currentSyncingService = null;
     for (final service in _services.values) {
       try {
         await service.stopSync();
@@ -385,7 +380,7 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
           stopAllSync();
         }
       },
-      onError: (error) {
+      onError: (Object? error) {
         developer.log(
           'Network listener error: $error',
           name: 'SyncOrchestrator',
@@ -407,7 +402,7 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
           ),
         );
       },
-      onError: (error) {
+      onError: (Object? error) {
         developer.log(
           'Service status listener error for ${service.serviceId}: $error',
           name: 'SyncOrchestrator',

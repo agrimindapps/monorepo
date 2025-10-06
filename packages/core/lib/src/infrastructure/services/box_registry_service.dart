@@ -14,7 +14,7 @@ class BoxRegistryService implements IBoxRegistryService {
   final Map<String, BoxConfiguration> _boxConfigurations = {};
 
   /// Registry de boxes abertas
-  final Map<String, Box> _openBoxes = {};
+  final Map<String, Box<dynamic>> _openBoxes = {};
 
   /// Flag de inicialização
   bool _isInitialized = false;
@@ -72,7 +72,7 @@ class BoxRegistryService implements IBoxRegistryService {
   }
 
   @override
-  Future<Either<Failure, Box>> getBox(String boxName) async {
+  Future<Either<Failure, Box<dynamic>>> getBox(String boxName) async {
     try {
       await _ensureInitialized();
       if (!_boxConfigurations.containsKey(boxName)) {
@@ -187,9 +187,11 @@ class BoxRegistryService implements IBoxRegistryService {
   }
 
   /// Abre uma box com base na configuração
-  Future<Either<Failure, Box>> _openBox(BoxConfiguration config) async {
+  Future<Either<Failure, Box<dynamic>>> _openBox(
+    BoxConfiguration config,
+  ) async {
     try {
-      Box box;
+      Box<dynamic> box;
 
       if (config.encryption != null) {
         box = await Hive.openBox(

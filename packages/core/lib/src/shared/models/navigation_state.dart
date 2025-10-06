@@ -124,7 +124,7 @@ class NavigationConfiguration {
       'customAppBarTitle': customAppBarTitle,
       'showAppBar': showAppBar,
       'showLoading': showLoading,
-      'statusBarColor': statusBarColor?.value,
+      'statusBarColor': statusBarColor?.toARGB32(),
       'extensionData': extensionData,
     };
   }
@@ -137,9 +137,10 @@ class NavigationConfiguration {
       customAppBarTitle: json['customAppBarTitle'] as String?,
       showAppBar: json['showAppBar'] as bool? ?? true,
       showLoading: json['showLoading'] as bool? ?? false,
-      statusBarColor: json['statusBarColor'] != null
-          ? Color(json['statusBarColor'] as int)
-          : null,
+      statusBarColor:
+          json['statusBarColor'] != null
+              ? Color(json['statusBarColor'] as int)
+              : null,
       extensionData: json['extensionData'] as Map<String, dynamic>?,
     );
   }

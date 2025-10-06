@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import '../domain/repositories/i_local_storage_repository.dart';
 import '../shared/utils/failure.dart';
@@ -8,23 +7,18 @@ class WebhookProcessingResult {
   final bool success;
   final String? message;
 
-  const WebhookProcessingResult({
-    required this.success,
-    this.message,
-  });
+  const WebhookProcessingResult({required this.success, this.message});
 }
 
 /// Stub implementation of the webhook handler service
 /// This prevents compilation errors while the full service is being developed
 class WebhookHandlerService {
-  final ILocalStorageRepository _localStorage;
-
-  const WebhookHandlerService({
-    required ILocalStorageRepository localStorage,
-  }) : _localStorage = localStorage;
+  const WebhookHandlerService({required ILocalStorageRepository localStorage});
 
   /// Stub method for webhook validation
-  Future<Either<Failure, void>> validateWebhook(Map<String, dynamic> data) async {
+  Future<Either<Failure, void>> validateWebhook(
+    Map<String, dynamic> data,
+  ) async {
     if (data.isEmpty) {
       return const Left(ValidationFailure('Empty webhook data'));
     }
@@ -40,10 +34,12 @@ class WebhookHandlerService {
       return const Left(ValidationFailure('Webhook validation failed'));
     }
     try {
-      return const Right(WebhookProcessingResult(
-        success: true,
-        message: 'Webhook processed successfully',
-      ));
+      return const Right(
+        WebhookProcessingResult(
+          success: true,
+          message: 'Webhook processed successfully',
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure('Webhook processing failed: $e'));
     }

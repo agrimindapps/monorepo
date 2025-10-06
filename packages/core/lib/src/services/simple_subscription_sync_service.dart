@@ -435,6 +435,4 @@ class SimpleSubscriptionSyncService {
 }
 
 /// Extension para usar unawaited sem import adicional
-extension _Unawaited on Future {
-  void get unawaited {}
-}
+extension _Unawaited<T> on Future<T> {}

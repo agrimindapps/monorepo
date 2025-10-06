@@ -41,7 +41,7 @@ class PlantisSyncService implements ISyncService {
   final String version = '2.0.0';
 
   @override
-  final List<String> dependencies = [];
+  List<String> get dependencies => const [];
   bool _isInitialized = false;
   final bool _canSync = true;
   bool _hasPendingSync = false;
@@ -321,7 +321,6 @@ class PlantisSyncService implements ISyncService {
 
     try {
       _updateStatus(SyncServiceStatus.syncing);
-      final startTime = DateTime.now();
 
       logger.logInfo(
         message: 'Starting specific sync for Plantis items',

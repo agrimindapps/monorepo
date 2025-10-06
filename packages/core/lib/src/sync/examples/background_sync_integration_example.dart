@@ -88,7 +88,9 @@ class BackgroundSyncSetupExample {
           break;
 
         case BackgroundSyncEventType.syncFailed:
-          print('❌ Sync failed: ${event.serviceId} - ${event.failure?.message}');
+          print(
+            '❌ Sync failed: ${event.serviceId} - ${event.failure?.message}',
+          );
           break;
 
         case BackgroundSyncEventType.syncThrottled:
@@ -119,15 +121,22 @@ class ManualSyncTriggerExample {
     await backgroundSync.triggerSync(
       'gasometer',
       priority: SyncPriority.critical,
-      force: true, // Ignorar throttling - usar apenas para ações críticas do usuário
+      force:
+          true, // Ignorar throttling - usar apenas para ações críticas do usuário
     );
   }
 
   static Future<void> syncMultipleServicesWithPriority() async {
     final backgroundSync = BackgroundSyncManager.instance;
-    await backgroundSync.triggerSync('gasometer', priority: SyncPriority.critical);
+    await backgroundSync.triggerSync(
+      'gasometer',
+      priority: SyncPriority.critical,
+    );
     await backgroundSync.triggerSync('plantis', priority: SyncPriority.high);
-    await backgroundSync.triggerSync('receituagro', priority: SyncPriority.normal);
+    await backgroundSync.triggerSync(
+      'receituagro',
+      priority: SyncPriority.normal,
+    );
   }
 }
 
@@ -180,20 +189,7 @@ class BackgroundSyncControlExample {
 /// ============================================
 
 class AppLifecycleIntegrationExample {
-  static void handleAppLifecycle() {
-    final backgroundSync = BackgroundSyncManager.instance;
-    void onAppPaused() {
-      backgroundSync.pause('plantis');
-      backgroundSync.pause('receituagro');
-    }
-    void onAppResumed() {
-      backgroundSync.resumeAll();
-      backgroundSync.triggerSync('gasometer', priority: SyncPriority.high);
-    }
-    void onAppDetached() async {
-      await backgroundSync.dispose();
-    }
-  }
+  static void handleAppLifecycle() {}
 }
 
 /// ============================================
@@ -212,6 +208,7 @@ class CustomSyncServiceExample implements ISyncService {
 
   @override
   List<String> get dependencies => [];
+
   @override
   Future<Either<Failure, void>> initialize() async => const Right(null);
 
@@ -222,23 +219,27 @@ class CustomSyncServiceExample implements ISyncService {
   Future<bool> get hasPendingSync async => false;
 
   @override
-  Stream<SyncServiceStatus> get statusStream => Stream.value(SyncServiceStatus.idle);
+  Stream<SyncServiceStatus> get statusStream =>
+      Stream.value(SyncServiceStatus.idle);
 
   @override
   Stream<ServiceProgress> get progressStream => const Stream.empty();
 
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
-    return Right(ServiceSyncResult(
-      success: true,
-      itemsSynced: 10,
-      duration: const Duration(seconds: 2),
-    ));
+    return Right(
+      ServiceSyncResult(
+        success: true,
+        itemsSynced: 10,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
-  Future<Either<Failure, ServiceSyncResult>> syncSpecific(List<String> ids) async =>
-      sync();
+  Future<Either<Failure, ServiceSyncResult>> syncSpecific(
+    List<String> ids,
+  ) async => sync();
 
   @override
   Future<void> stopSync() async {}
@@ -251,11 +252,11 @@ class CustomSyncServiceExample implements ISyncService {
 
   @override
   Future<SyncStatistics> getStatistics() async => SyncStatistics(
-        serviceId: serviceId,
-        totalSyncs: 0,
-        successfulSyncs: 0,
-        failedSyncs: 0,
-      );
+    serviceId: serviceId,
+    totalSyncs: 0,
+    successfulSyncs: 0,
+    failedSyncs: 0,
+  );
 
   @override
   Future<void> dispose() async {}

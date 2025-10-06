@@ -11,7 +11,7 @@ class CommentsListWidget extends StatelessWidget {
   final Function(ComentarioModel, String)? onEdit;
   final ValueChanged<ComentarioModel>? onDelete;
   final ValueChanged<String>? onCancelEdit;
-  final Function(String, String)? onContentChanged;
+  final void Function(String, String)? onContentChanged;
 
   const CommentsListWidget({
     super.key,
@@ -44,7 +44,8 @@ class CommentsListWidget extends StatelessWidget {
           onEdit: (content) => onEdit?.call(comentario, content),
           onDelete: () => onDelete?.call(comentario),
           onCancelEdit: () => onCancelEdit?.call(comentario.id),
-          onContentChanged: (content) => onContentChanged?.call(comentario.id, content),
+          onContentChanged:
+              (content) => onContentChanged?.call(comentario.id, content),
         );
       },
     );

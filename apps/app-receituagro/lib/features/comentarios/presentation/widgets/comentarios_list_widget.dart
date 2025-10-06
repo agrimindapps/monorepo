@@ -4,12 +4,12 @@ import '../../domain/entities/comentario_entity.dart';
 import 'comentario_item_widget.dart';
 
 /// **COMENTARIOS LIST WIDGET**
-/// 
+///
 /// Displays a scrollable list of comentarios with optimized performance.
 /// Handles the rendering of individual comentario cards in a ListView.
-/// 
+///
 /// ## Features:
-/// 
+///
 /// - **Performance Optimized**: Uses ListView.builder for large lists
 /// - **Custom Spacing**: Consistent spacing between items
 /// - **Delegate Pattern**: Delegates item interactions to parent
@@ -18,8 +18,8 @@ import 'comentario_item_widget.dart';
 
 class ComentariosListWidget extends StatelessWidget {
   final List<ComentarioEntity> comentarios;
-  final Function(ComentarioEntity) onComentarioTap;
-  final Function(ComentarioEntity) onComentarioDelete;
+  final ValueChanged<ComentarioEntity> onComentarioTap;
+  final ValueChanged<ComentarioEntity> onComentarioDelete;
   final ScrollController? scrollController;
   final EdgeInsets? padding;
 
@@ -48,7 +48,7 @@ class ComentariosListWidget extends StatelessWidget {
 
   Widget _buildComentarioItem(BuildContext context, int index) {
     final comentario = comentarios[index];
-    
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: index < comentarios.length - 1 ? 12.0 : 0.0,
@@ -64,8 +64,8 @@ class ComentariosListWidget extends StatelessWidget {
   /// Factory constructor for optimized performance
   static ComentariosListWidget optimized({
     required List<ComentarioEntity> comentarios,
-    required Function(ComentarioEntity) onComentarioTap,
-    required Function(ComentarioEntity) onComentarioDelete,
+    required ValueChanged<ComentarioEntity> onComentarioTap,
+    required ValueChanged<ComentarioEntity> onComentarioDelete,
     ScrollController? scrollController,
   }) {
     return ComentariosListWidget(
@@ -80,8 +80,8 @@ class ComentariosListWidget extends StatelessWidget {
   /// Factory constructor for compact display
   static ComentariosListWidget compact({
     required List<ComentarioEntity> comentarios,
-    required Function(ComentarioEntity) onComentarioTap,
-    required Function(ComentarioEntity) onComentarioDelete,
+    required ValueChanged<ComentarioEntity> onComentarioTap,
+    required ValueChanged<ComentarioEntity> onComentarioDelete,
   }) {
     return ComentariosListWidget(
       comentarios: comentarios,

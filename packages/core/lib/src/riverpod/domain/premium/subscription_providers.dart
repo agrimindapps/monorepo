@@ -423,7 +423,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<bool> purchasePackage(dynamic package) async {
     try {
       state = const SubscriptionLoading();
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
       final info = SubscriptionInfo(
         productId: 'premium_monthly',
         isPremium: true,
@@ -478,6 +478,7 @@ bool _hasFeatureAccess(String appId, String featureName, bool isPremium) {
 
   return freeFeatures[appId]?.contains(featureName) ?? false;
 }
+
 /// Provider temporário para app atual - será substituído por router integration
 final currentAppIdProvider = Provider<String>((ref) {
   return 'plantis';

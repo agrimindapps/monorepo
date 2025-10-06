@@ -45,7 +45,8 @@ abstract class AppError extends Equatable {
   }
 
   /// Factory method para erro desconhecido
-  factory AppError.unknown(String message, {
+  factory AppError.unknown(
+    String message, {
     String? code,
     dynamic originalError,
     StackTrace? stackTrace,
@@ -108,7 +109,6 @@ abstract class AppError extends Equatable {
       case ErrorCategory.external:
         return 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.';
       case ErrorCategory.general:
-      default:
         return 'Ocorreu um erro inesperado. Tente novamente.';
     }
   }
@@ -136,20 +136,21 @@ abstract class AppError extends Equatable {
   ];
 
   @override
-  String toString() => 'AppError(message: $message, code: $code, category: ${category.name})';
+  String toString() =>
+      'AppError(message: $message, code: $code, category: ${category.name})';
 }
 
 /// Severidade do erro
 enum ErrorSeverity {
   /// Avisos, informações não críticas
   low,
-  
+
   /// Erros que não impedem o funcionamento
   medium,
-  
+
   /// Erros críticos que afetam funcionalidades
   high,
-  
+
   /// Erros que podem causar crash ou perda de dados
   critical,
 }
@@ -158,25 +159,25 @@ enum ErrorSeverity {
 enum ErrorCategory {
   /// Erros gerais
   general,
-  
+
   /// Problemas de rede/conectividade
   network,
-  
+
   /// Problemas de autenticação
   authentication,
-  
+
   /// Erros de validação de dados
   validation,
-  
+
   /// Problemas de armazenamento
   storage,
-  
+
   /// Problemas de permissão
   permission,
-  
+
   /// Regras de negócio violadas
   business,
-  
+
   /// Erros de serviços externos
   external,
 }
@@ -535,7 +536,7 @@ extension AppErrorExtensions on AppError {
       case ErrorCategory.permission:
         return PermissionFailure(message, code: code, details: details);
       case ErrorCategory.business:
-        if (this is BusinessError && 
+        if (this is BusinessError &&
             (this as BusinessError).businessRule == 'RESOURCE_NOT_FOUND') {
           return NotFoundFailure(message, code: code, details: details);
         }

@@ -6,7 +6,7 @@ class DefensivoSearchField extends StatefulWidget {
   final bool isDark;
   final bool isSearching;
   final ViewMode selectedViewMode;
-  final Function(ViewMode) onToggleViewMode;
+  final void Function(ViewMode) onToggleViewMode;
   final VoidCallback? onClear;
   final VoidCallback? onSubmitted;
   final Function(String)? onChanged;
@@ -50,21 +50,13 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    );
 
-    _elevationAnimation = Tween<double>(
-      begin: 5.0,
-      end: 15.0,
-    ).animate(CurvedAnimation(
-      parent: _focusController,
-      curve: Curves.easeInOut,
-    ));
+    _elevationAnimation = Tween<double>(begin: 5.0, end: 15.0).animate(
+      CurvedAnimation(parent: _focusController, curve: Curves.easeInOut),
+    );
 
     _focusNode.addListener(_onFocusChange);
     _animationController.forward();
@@ -110,9 +102,10 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.isDark
-                            ? Colors.black.withValues(alpha: 0.3)
-                            : Colors.green.shade100.withValues(alpha: 0.5),
+                        color:
+                            widget.isDark
+                                ? Colors.black.withValues(alpha: 0.3)
+                                : Colors.green.shade100.withValues(alpha: 0.5),
                         blurRadius: _elevationAnimation.value,
                         offset: Offset(0, _elevationAnimation.value / 3),
                       ),
@@ -124,8 +117,10 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                       children: [
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
+                          transitionBuilder: (
+                            Widget child,
+                            Animation<double> animation,
+                          ) {
                             return RotationTransition(
                               turns: animation,
                               child: FadeTransition(
@@ -134,35 +129,37 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                               ),
                             );
                           },
-                          child: widget.isSearching
-                              ? SizedBox(
-                                  key: const ValueKey('loading'),
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      widget.isDark
-                                          ? Colors.green.shade300
-                                          : Colors.green.shade700,
+                          child:
+                              widget.isSearching
+                                  ? SizedBox(
+                                    key: const ValueKey('loading'),
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        widget.isDark
+                                            ? Colors.green.shade300
+                                            : Colors.green.shade700,
+                                      ),
+                                    ),
+                                  )
+                                  : AnimatedContainer(
+                                    key: const ValueKey('search'),
+                                    duration: const Duration(milliseconds: 200),
+                                    child: Icon(
+                                      Icons.search,
+                                      color:
+                                          _isFocused
+                                              ? (widget.isDark
+                                                  ? Colors.green.shade300
+                                                  : Colors.green.shade700)
+                                              : (widget.isDark
+                                                  ? Colors.grey.shade500
+                                                  : Colors.grey.shade400),
+                                      size: 20,
                                     ),
                                   ),
-                                )
-                              : AnimatedContainer(
-                                  key: const ValueKey('search'),
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Icon(
-                                    Icons.search,
-                                    color: _isFocused
-                                        ? (widget.isDark
-                                            ? Colors.green.shade300
-                                            : Colors.green.shade700)
-                                        : (widget.isDark
-                                            ? Colors.grey.shade500
-                                            : Colors.grey.shade400),
-                                    size: 20,
-                                  ),
-                                ),
                         ),
                         Expanded(
                           child: TextField(
@@ -173,36 +170,41 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
                             decoration: InputDecoration(
                               hintText: 'Localizar defensivos...',
                               hintStyle: TextStyle(
-                                color: widget.isDark
-                                    ? Colors.grey.shade500
-                                    : Colors.grey.shade400,
+                                color:
+                                    widget.isDark
+                                        ? Colors.grey.shade500
+                                        : Colors.grey.shade400,
                                 fontSize: 14,
                               ),
-                              suffixIcon: widget.controller.text.isNotEmpty
-                                  ? IconButton(
-                                      onPressed: widget.onClear,
-                                      icon: Icon(
-                                        Icons.clear_rounded,
-                                        color: widget.isDark
-                                            ? Colors.grey.shade400
-                                            : Colors.grey.shade500,
-                                        size: 20,
-                                      ),
-                                    )
-                                  : null,
+                              suffixIcon:
+                                  widget.controller.text.isNotEmpty
+                                      ? IconButton(
+                                        onPressed: widget.onClear,
+                                        icon: Icon(
+                                          Icons.clear_rounded,
+                                          color:
+                                              widget.isDark
+                                                  ? Colors.grey.shade400
+                                                  : Colors.grey.shade500,
+                                          size: 20,
+                                        ),
+                                      )
+                                      : null,
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               errorBorder: InputBorder.none,
                               focusedErrorBorder: InputBorder.none,
                               disabledBorder: InputBorder.none,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
                             ),
                             style: TextStyle(
-                              color: widget.isDark
-                                  ? Colors.grey.shade300
-                                  : Colors.grey.shade800,
+                              color:
+                                  widget.isDark
+                                      ? Colors.grey.shade300
+                                      : Colors.grey.shade800,
                               fontSize: 15,
                             ),
                           ),
@@ -226,9 +228,10 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
       margin: const EdgeInsets.only(right: 0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: widget.isDark
-            ? Colors.grey.shade800.withValues(alpha: 0.3)
-            : Colors.grey.shade100.withValues(alpha: 0.7),
+        color:
+            widget.isDark
+                ? Colors.grey.shade800.withValues(alpha: 0.3)
+                : Colors.grey.shade100.withValues(alpha: 0.7),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -253,11 +256,12 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (widget.isDark
-                  ? Colors.green.withValues(alpha: 0.15)
-                  : Colors.green.shade50)
-              : Colors.transparent,
+          color:
+              isSelected
+                  ? (widget.isDark
+                      ? Colors.green.withValues(alpha: 0.15)
+                      : Colors.green.shade50)
+                  : Colors.transparent,
           borderRadius: BorderRadius.horizontal(
             left: Radius.circular(isFirstButton ? 20 : 0),
             right: Radius.circular(!isFirstButton ? 20 : 0),
@@ -266,9 +270,14 @@ class _DefensivoSearchFieldState extends State<DefensivoSearchField>
         child: Icon(
           icon,
           size: 18,
-          color: isSelected
-              ? (widget.isDark ? Colors.green.shade300 : Colors.green.shade700)
-              : (widget.isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+          color:
+              isSelected
+                  ? (widget.isDark
+                      ? Colors.green.shade300
+                      : Colors.green.shade700)
+                  : (widget.isDark
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600),
         ),
       ),
     );

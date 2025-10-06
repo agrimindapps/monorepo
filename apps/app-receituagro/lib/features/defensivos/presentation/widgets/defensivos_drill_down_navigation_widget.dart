@@ -20,7 +20,7 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -48,9 +48,7 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
             ),
             const SizedBox(width: 8),
           ],
-          Expanded(
-            child: _buildBreadcrumbs(context),
-          ),
+          Expanded(child: _buildBreadcrumbs(context)),
           _buildLevelIndicator(context),
         ],
       ),
@@ -81,14 +79,12 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
 
   Widget _buildBreadcrumbItem(
     BuildContext context,
-    String text,
-    {
-      required bool isLast,
-      required bool isFirst,
-    }
-  ) {
+    String text, {
+    required bool isLast,
+    required bool isFirst,
+  }) {
     final theme = Theme.of(context);
-    
+
     return InkWell(
       onTap: isFirst && !isLast ? onRootPressed : null,
       borderRadius: BorderRadius.circular(6),
@@ -99,9 +95,10 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isLast ? FontWeight.w600 : FontWeight.w500,
-            color: isLast
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.primary,
+            color:
+                isLast
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.primary,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -122,7 +119,7 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
   }
 
   Widget _buildLevelIndicator(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -133,11 +130,7 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getLevelIcon(),
-            size: 12,
-            color: _getLevelColor(),
-          ),
+          Icon(_getLevelIcon(), size: 12, color: _getLevelColor()),
           const SizedBox(width: 4),
           Text(
             _getLevelText(),
@@ -196,7 +189,7 @@ class DefensivosDrillDownNavigationCompactWidget extends StatelessWidget {
     if (!navigationState.canGoBack) {
       return const SizedBox.shrink();
     }
-    
+
     final theme = Theme.of(context);
 
     return Padding(

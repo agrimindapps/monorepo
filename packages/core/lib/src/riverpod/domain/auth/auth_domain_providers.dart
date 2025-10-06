@@ -95,10 +95,11 @@ final userPermissionsProvider = Provider<Set<String>>((ref) {
 /// Provider para limitações do usuário (premium vs free)
 final userLimitationsProvider = Provider<UserLimitations>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
-  const isPremium =
-      false; // Temporário - será integrado com subscription providers
+  // Determine premium status from user attributes (fallback to false).
+  // This should be replaced/integrated with actual subscription providers later.
+  final bool isPremium = user?.email.contains('premium') ?? false;
 
-  return const UserLimitations(
+  return UserLimitations(
     isPremium: isPremium,
     maxDevices: isPremium ? 10 : 2,
     maxSyncItems: isPremium ? -1 : 100, // -1 = unlimited

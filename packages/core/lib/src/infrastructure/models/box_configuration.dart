@@ -28,7 +28,7 @@ class BoxConfiguration extends Equatable {
 
   /// Adapters customizados para tipos específicos desta box
   /// Registrados automaticamente quando a box é aberta
-  final List<TypeAdapter>? customAdapters;
+  final List<TypeAdapter<dynamic>>? customAdapters;
 
   /// Se a box deve ser persistente ou apenas em memória
   /// Por padrão, todas as boxes são persistentes
@@ -100,7 +100,7 @@ class BoxConfiguration extends Equatable {
   BoxConfiguration copyWith({
     String? name,
     String? appId,
-    List<TypeAdapter>? customAdapters,
+    List<TypeAdapter<dynamic>>? customAdapters,
     bool? persistent,
     BoxEncryptionConfig? encryption,
     String? customPath,

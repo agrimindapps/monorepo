@@ -27,7 +27,6 @@ class EnhancedSecurityService {
   static const String _keyPrefix = 'security_key_';
   static const String _saltKey = 'security_salt';
   static const int _defaultKeyLength = 32;
-  static const int _defaultSaltLength = 16;
   static const int _defaultIterations = 100000; // PBKDF2 iterations
   static const String _encryptionVersion =
       'v2'; // Version for new AES encryption

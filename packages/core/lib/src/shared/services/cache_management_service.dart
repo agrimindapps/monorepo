@@ -26,17 +26,23 @@ class CacheEntry<T> {
   Duration get age => DateTime.now().difference(createdAt);
 
   Map<String, dynamic> toJson() => {
-        'data': data,
-        'created_at': createdAt.toIso8601String(),
-        'expires_at': expiresAt?.toIso8601String(),
-        'metadata': metadata,
-      };
+    'data': data,
+    'created_at': createdAt.toIso8601String(),
+    'expires_at': expiresAt?.toIso8601String(),
+    'metadata': metadata,
+  };
 
-  factory CacheEntry.fromJson(Map<String, dynamic> json, T Function(dynamic) dataParser) {
+  factory CacheEntry.fromJson(
+    Map<String, dynamic> json,
+    T Function(dynamic) dataParser,
+  ) {
     return CacheEntry<T>(
       data: dataParser(json['data']),
       createdAt: DateTime.parse(json['created_at'] as String),
-      expiresAt: json['expires_at'] != null ? DateTime.parse(json['expires_at'] as String) : null,
+      expiresAt:
+          json['expires_at'] != null
+              ? DateTime.parse(json['expires_at'] as String)
+              : null,
       metadata: json['metadata'] as Map<String, dynamic>? ?? {},
     );
   }
@@ -46,12 +52,16 @@ class CacheEntry<T> {
 enum CacheStrategy {
   /// Cache never expires
   permanent,
+
   /// Cache expires after TTL
   ttl,
+
   /// Cache expires when app restarts
   session,
+
   /// Cache expires when memory pressure is high
   memory,
+
   /// Cache uses LRU eviction
   lru,
 }
@@ -94,27 +104,28 @@ class CacheStats {
   });
 
   Map<String, dynamic> toJson() => {
-        'cache_key': cacheKey,
-        'hit_count': hitCount,
-        'miss_count': missCount,
-        'eviction_count': evictionCount,
-        'current_size': currentSize,
-        'avg_hit_time_ms': avgHitTime.inMilliseconds,
-        'hit_ratio': hitRatio,
-      };
+    'cache_key': cacheKey,
+    'hit_count': hitCount,
+    'miss_count': missCount,
+    'eviction_count': evictionCount,
+    'current_size': currentSize,
+    'avg_hit_time_ms': avgHitTime.inMilliseconds,
+    'hit_ratio': hitRatio,
+  };
 }
 
 /// Advanced Cache Management Service for ReceitauAgro
 /// Provides intelligent caching with multiple strategies and persistence
 class CacheManagementService {
   static CacheManagementService? _instance;
-  static CacheManagementService get instance => _instance ??= CacheManagementService._();
+  static CacheManagementService get instance =>
+      _instance ??= CacheManagementService._();
 
   CacheManagementService._();
 
   late ILocalStorageRepository _localStorage;
   bool _isInitialized = false;
-  final Map<String, Map<String, CacheEntry>> _memoryCaches = {};
+  final Map<String, Map<String, CacheEntry<dynamic>>> _memoryCaches = {};
   final Map<String, CacheConfig> _cacheConfigs = {};
   final Map<String, List<String>> _lruOrders = {};
   final Map<String, int> _hitCounts = {};
@@ -204,7 +215,7 @@ class CacheManagementService {
 
   /// Create a new cache with configuration
   Future<void> createCache(String cacheKey, CacheConfig config) async {
-    _memoryCaches[cacheKey] = <String, CacheEntry>{};
+    _memoryCaches[cacheKey] = <String, CacheEntry<dynamic>>{};
     _cacheConfigs[cacheKey] = config;
     _lruOrders[cacheKey] = [];
     _hitCounts[cacheKey] = 0;
@@ -272,7 +283,7 @@ class CacheManagementService {
     try {
       final cache = _memoryCaches[cacheKey];
       final config = _cacheConfigs[cacheKey];
-      
+
       if (cache == null || config == null) {
         throw Exception('Cache $cacheKey not found');
       }
@@ -325,7 +336,7 @@ class CacheManagementService {
     if (cache != null) {
       cache.clear();
       _lruOrders[cacheKey]?.clear();
-      
+
       final config = _cacheConfigs[cacheKey];
       if (config?.persistToDisk == true && config?.storageKey != null) {
         await _localStorage.remove(key: config!.storageKey!);
@@ -342,7 +353,7 @@ class CacheManagementService {
     for (final cacheKey in _memoryCaches.keys.toList()) {
       await clear(cacheKey);
     }
-    
+
     if (kDebugMode) {
       print('📦 Cleared all caches');
     }
@@ -354,19 +365,21 @@ class CacheManagementService {
     final missCount = _missCounts[cacheKey] ?? 0;
     final evictionCount = _evictionCounts[cacheKey] ?? 0;
     final currentSize = _memoryCaches[cacheKey]?.length ?? 0;
-    
+
     final totalRequests = hitCount + missCount;
     final hitRatio = totalRequests > 0 ? hitCount / totalRequests : 0.0;
-    
+
     final hitTimes = _hitTimes[cacheKey] ?? [];
-    final avgHitTime = hitTimes.isEmpty 
-        ? Duration.zero 
-        : Duration(
-            microseconds: hitTimes
-                .map((d) => d.inMicroseconds)
-                .reduce((a, b) => a + b) ~/
-                hitTimes.length,
-          );
+    final avgHitTime =
+        hitTimes.isEmpty
+            ? Duration.zero
+            : Duration(
+              microseconds:
+                  hitTimes
+                      .map((d) => d.inMicroseconds)
+                      .reduce((a, b) => a + b) ~/
+                  hitTimes.length,
+            );
 
     return CacheStats(
       cacheKey: cacheKey,
@@ -449,7 +462,7 @@ class CacheManagementService {
   Future<void> _ensureCacheSize(String cacheKey) async {
     final config = _cacheConfigs[cacheKey];
     final cache = _memoryCaches[cacheKey];
-    
+
     if (config?.maxSize == null || cache == null) return;
 
     while (cache.length >= config!.maxSize!) {
@@ -462,7 +475,7 @@ class CacheManagementService {
     if (lruOrder != null && lruOrder.isNotEmpty) {
       final oldestKey = lruOrder.removeAt(0);
       await _removeFromCache(cacheKey, oldestKey);
-      
+
       final count = _evictionCounts[cacheKey] ?? 0;
       _evictionCounts[cacheKey] = count + 1;
     }
@@ -506,19 +519,19 @@ class CacheManagementService {
           if (data != null) {
             final cacheData = json.decode(data) as Map<String, dynamic>;
             final cache = _memoryCaches[cacheKey]!;
-            
+
             for (final entry in cacheData.entries) {
               final cacheEntry = CacheEntry.fromJson(
                 entry.value as Map<String, dynamic>,
                 (data) => data,
               );
-              
+
               if (!cacheEntry.isExpired) {
                 cache[entry.key] = cacheEntry;
                 _lruOrders[cacheKey]?.add(entry.key);
               }
             }
-            
+
             if (kDebugMode) {
               print('📦 Loaded ${cache.length} items from disk for $cacheKey');
             }
@@ -538,10 +551,7 @@ class CacheManagementService {
       if (cache == null || cache.isEmpty) return;
 
       final cacheData = Map<String, dynamic>.fromEntries(
-        cache.entries.map((entry) => MapEntry(
-          entry.key,
-          entry.value.toJson(),
-        )),
+        cache.entries.map((entry) => MapEntry(entry.key, entry.value.toJson())),
       );
 
       await _localStorage.save<String>(
@@ -578,7 +588,7 @@ class CacheManagementService {
     if (cache == null) return;
 
     final expiredKeys = <String>[];
-    
+
     for (final entry in cache.entries) {
       if (entry.value.isExpired) {
         expiredKeys.add(entry.key);
@@ -598,12 +608,14 @@ class CacheManagementService {
     if (kDebugMode) {
       final stats = getAllStats();
       print('📦 Cache Statistics:');
-      
+
       for (final entry in stats.entries) {
         final stat = entry.value;
-        print('  ${entry.key}: ${stat.currentSize} items, '
-            '${(stat.hitRatio * 100).toStringAsFixed(1)}% hit ratio, '
-            '${stat.avgHitTime.inMicroseconds}μs avg');
+        print(
+          '  ${entry.key}: ${stat.currentSize} items, '
+          '${(stat.hitRatio * 100).toStringAsFixed(1)}% hit ratio, '
+          '${stat.avgHitTime.inMicroseconds}μs avg',
+        );
       }
     }
   }
@@ -620,20 +632,26 @@ class CacheManagementService {
 
   Future<void> _preloadFrequentImages() async {
     final commonImages = ['logo.png', 'placeholder.png', 'default_avatar.png'];
-    
+
     for (final image in commonImages) {
-      await put('images', image, Uint8List.fromList([1, 2, 3])); // Mock image data
+      await put(
+        'images',
+        image,
+        Uint8List.fromList([1, 2, 3]),
+      ); // Mock image data
     }
   }
 
-  Future<void> _optimizeCacheSize(String cacheKey, {required bool increase}) async {
+  Future<void> _optimizeCacheSize(
+    String cacheKey, {
+    required bool increase,
+  }) async {
     final config = _cacheConfigs[cacheKey];
     if (config?.maxSize == null) return;
 
     final currentSize = config!.maxSize!;
-    final newSize = increase 
-        ? (currentSize * 1.2).round() 
-        : (currentSize * 0.8).round();
+    final newSize =
+        increase ? (currentSize * 1.2).round() : (currentSize * 0.8).round();
     _cacheConfigs[cacheKey] = CacheConfig(
       ttl: config.ttl,
       maxSize: newSize,

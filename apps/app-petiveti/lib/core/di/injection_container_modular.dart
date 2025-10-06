@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../storage/hive_service.dart';
 import 'di_module.dart';
@@ -11,13 +11,13 @@ import 'modules/subscription_module.dart';
 import 'modules/vaccines_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
-/// 
+///
 /// Follows SRP: Single responsibility of coordinating module registration
 /// Follows OCP: Open for extension via new modules
 /// Follows DIP: High-level coordination depending on abstraction
 class ModularInjectionContainer {
   static final GetIt _getIt = GetIt.instance;
-  
+
   static GetIt get instance => _getIt;
 
   /// Initialize all dependencies using modular approach
@@ -30,7 +30,7 @@ class ModularInjectionContainer {
 
     // Register additional modules in dependency order
     final modules = _createModules();
-    
+
     for (final module in modules) {
       await module.register(_getIt);
     }
@@ -44,12 +44,12 @@ class ModularInjectionContainer {
   /// Follows Dependency Inversion Principle - high level depends on abstraction
   static List<DIModule> _createModules() {
     return [
-      CoreModule(),              // External services and core infrastructure
-      SubscriptionModule(),      // Subscription services (uses core ISubscriptionRepository)
-      AnimalsModule(),           // Animals feature
-      ExpensesModule(),          // Expenses feature
-      MedicationsModule(),       // Medications feature
-      VaccinesModule(),          // Vaccines feature
+      CoreModule(), // External services and core infrastructure
+      SubscriptionModule(), // Subscription services (uses core ISubscriptionRepository)
+      AnimalsModule(), // Animals feature
+      ExpensesModule(), // Expenses feature
+      MedicationsModule(), // Medications feature
+      VaccinesModule(), // Vaccines feature
       // TODO: Add more modules as features are migrated
       // CalculatorsModule(),
       // AppointmentsModule(),
@@ -69,12 +69,12 @@ class ModularInjectionContainer {
 }
 
 /// Legacy support - maintains backward compatibility during transition
-/// 
+///
 /// This allows existing code to continue working while we migrate
 final getIt = ModularInjectionContainer.instance;
 
 /// Legacy initialization function - delegates to modular container
-/// 
+///
 /// Maintains backward compatibility during Phase 1
 Future<void> init() async {
   await ModularInjectionContainer.init();

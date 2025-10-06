@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Entidade que representa as features premium disponíveis no GasOMeter
 class PremiumFeatures extends Equatable {
@@ -179,21 +179,21 @@ class PremiumFeatures extends Equatable {
 
   @override
   List<Object?> get props => [
-        unlimitedVehicles,
-        advancedReports,
-        exportData,
-        customCategories,
-        premiumThemes,
-        cloudBackup,
-        locationHistory,
-        advancedAnalytics,
-        costPredictions,
-        maintenanceAlerts,
-        fuelPriceAlerts,
-        detailedCharts,
-        premiumSupport,
-        offlineMode,
-      ];
+    unlimitedVehicles,
+    advancedReports,
+    exportData,
+    customCategories,
+    premiumThemes,
+    cloudBackup,
+    locationHistory,
+    advancedAnalytics,
+    costPredictions,
+    maintenanceAlerts,
+    fuelPriceAlerts,
+    detailedCharts,
+    premiumSupport,
+    offlineMode,
+  ];
 
   @override
   String toString() {
@@ -254,7 +254,8 @@ class UsageLimits extends Equatable {
 
   /// Se pode adicionar mais registros de manutenção
   bool canAddMaintenanceRecord(int currentCount) {
-    return isUnlimited(maxMaintenanceRecords) || currentCount < maxMaintenanceRecords;
+    return isUnlimited(maxMaintenanceRecords) ||
+        currentCount < maxMaintenanceRecords;
   }
 
   /// Se pode exportar dados
@@ -265,11 +266,11 @@ class UsageLimits extends Equatable {
 
   @override
   List<Object?> get props => [
-        maxVehicles,
-        maxFuelRecords,
-        maxMaintenanceRecords,
-        maxExportSize,
-        maxBackupSize,
-        maxCategories,
-      ];
+    maxVehicles,
+    maxFuelRecords,
+    maxMaintenanceRecords,
+    maxExportSize,
+    maxBackupSize,
+    maxCategories,
+  ];
 }

@@ -1,7 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// News Article Entity for Agriculture News System
-/// 
+///
 /// Represents a news article with complete information
 /// for RSS feeds and agriculture news display
 class NewsArticleEntity extends Equatable {
@@ -35,19 +35,19 @@ class NewsArticleEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        content,
-        author,
-        sourceUrl,
-        imageUrl,
-        publishedAt,
-        category,
-        tags,
-        isPremium,
-        readTimeMinutes,
-      ];
+    id,
+    title,
+    description,
+    content,
+    author,
+    sourceUrl,
+    imageUrl,
+    publishedAt,
+    category,
+    tags,
+    isPremium,
+    readTimeMinutes,
+  ];
 }
 
 /// News Categories for Agriculture Content
@@ -99,10 +99,10 @@ class NewsFilter extends Equatable {
 
   @override
   List<Object?> get props => [
-        categories,
-        showOnlyPremium,
-        fromDate,
-        toDate,
-        searchQuery,
-      ];
+    categories,
+    showOnlyPremium,
+    fromDate,
+    toDate,
+    searchQuery,
+  ];
 }

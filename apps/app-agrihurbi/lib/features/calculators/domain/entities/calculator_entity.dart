@@ -1,14 +1,10 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import 'calculation_result.dart';
 import 'calculator_category.dart';
 import 'calculator_parameter.dart';
 
-enum CalculatorComplexity {
-  low,
-  medium,
-  high,
-}
+enum CalculatorComplexity { low, medium, high }
 
 abstract class CalculatorEntity extends Equatable {
   final String id;
@@ -52,7 +48,7 @@ abstract class CalculatorEntity extends Equatable {
   /// Retorna lista de erros de validação
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-    
+
     for (final parameter in parameters) {
       final value = inputs[parameter.id];
       if (!parameter.isValid(value)) {
@@ -65,20 +61,20 @@ abstract class CalculatorEntity extends Equatable {
         }
       }
     }
-    
+
     return errors;
   }
 
   /// Aplica valores padrão para parâmetros não preenchidos
   Map<String, dynamic> applyDefaults(Map<String, dynamic> inputs) {
     final result = Map<String, dynamic>.from(inputs);
-    
+
     for (final parameter in parameters) {
       if (!result.containsKey(parameter.id) && parameter.defaultValue != null) {
         result[parameter.id] = parameter.defaultValue;
       }
     }
-    
+
     return result;
   }
 
@@ -87,7 +83,7 @@ abstract class CalculatorEntity extends Equatable {
     try {
       // Aplica valores padrão
       final processedInputs = applyDefaults(inputs);
-      
+
       // Valida inputs
       if (!validateInputs(processedInputs)) {
         final errors = getValidationErrors(processedInputs);
@@ -100,7 +96,7 @@ abstract class CalculatorEntity extends Equatable {
 
       // Executa o cálculo
       final result = calculate(processedInputs);
-      
+
       // Verifica se o resultado é válido
       if (!result.isValid) {
         return result;
@@ -118,15 +114,15 @@ abstract class CalculatorEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        category,
-        parameters,
-        formula,
-        references,
-        isActive,
-        tags,
-        complexity,
-      ];
+    id,
+    name,
+    description,
+    category,
+    parameters,
+    formula,
+    references,
+    isActive,
+    tags,
+    complexity,
+  ];
 }

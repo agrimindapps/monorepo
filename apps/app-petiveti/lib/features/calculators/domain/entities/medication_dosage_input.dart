@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Enumeração para espécies suportadas
 enum Species {
@@ -130,11 +130,13 @@ class MedicationDosageInput extends Equatable {
       frequency: AdministrationFrequency.values.firstWhere(
         (e) => e.name == map['frequency'],
       ),
-      specialConditions: (map['specialConditions'] as List<dynamic>?)
-          ?.map((e) => SpecialCondition.values.firstWhere(
-                (sc) => sc.name == e,
-              ))
-          .toList() ?? [],
+      specialConditions:
+          (map['specialConditions'] as List<dynamic>?)
+              ?.map(
+                (e) => SpecialCondition.values.firstWhere((sc) => sc.name == e),
+              )
+              .toList() ??
+          [],
       isEmergency: map['isEmergency'] as bool? ?? false,
       veterinarianNotes: map['veterinarianNotes'] as String?,
     );
@@ -142,17 +144,17 @@ class MedicationDosageInput extends Equatable {
 
   @override
   List<Object?> get props => [
-        species,
-        weight,
-        ageGroup,
-        medicationId,
-        concentration,
-        pharmaceuticalForm,
-        frequency,
-        specialConditions,
-        isEmergency,
-        veterinarianNotes,
-      ];
+    species,
+    weight,
+    ageGroup,
+    medicationId,
+    concentration,
+    pharmaceuticalForm,
+    frequency,
+    specialConditions,
+    isEmergency,
+    veterinarianNotes,
+  ];
 
   @override
   String toString() {

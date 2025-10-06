@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../../domain/repositories/auth_repository.dart';
 
@@ -12,7 +12,8 @@ class SocialLoginButtonsWidget extends StatefulWidget {
   final VoidCallback? onLoginSuccess;
 
   @override
-  State<SocialLoginButtonsWidget> createState() => _SocialLoginButtonsWidgetState();
+  State<SocialLoginButtonsWidget> createState() =>
+      _SocialLoginButtonsWidgetState();
 }
 
 class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
@@ -196,7 +197,10 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Tooltip(
-      message: onPressed != null ? 'Login com $label' : 'Login com $label (Em breve)',
+      message:
+          onPressed != null
+              ? 'Login com $label'
+              : 'Login com $label (Em breve)',
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: Icon(
@@ -207,9 +211,10 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
         label: Text(
           label,
           style: TextStyle(
-            color: onPressed != null
-                ? (isDark ? Colors.white : Colors.black87)
-                : (isDark ? Colors.grey[500] : Colors.grey[600]),
+            color:
+                onPressed != null
+                    ? (isDark ? Colors.white : Colors.black87)
+                    : (isDark ? Colors.grey[500] : Colors.grey[600]),
           ),
         ),
         style: OutlinedButton.styleFrom(
@@ -217,9 +222,7 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
           side: BorderSide(
             color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
       ),

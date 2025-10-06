@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -124,41 +124,42 @@ class MaintenanceFormState extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        vehicleId,
-        vehicle,
-        type,
-        status,
-        title,
-        description,
-        cost,
-        serviceDate,
-        odometer,
-        workshopName,
-        workshopPhone,
-        workshopAddress,
-        nextServiceDate,
-        nextServiceOdometer,
-        photosPaths,
-        invoicesPaths,
-        parts,
-        notes,
-        receiptImagePath,
-        receiptImageUrl,
-        isLoading,
-        isUploadingImage,
-        hasChanges,
-        isInitialized,
-        errorMessage,
-        imageUploadError,
-        fieldErrors,
-      ];
+    id,
+    userId,
+    vehicleId,
+    vehicle,
+    type,
+    status,
+    title,
+    description,
+    cost,
+    serviceDate,
+    odometer,
+    workshopName,
+    workshopPhone,
+    workshopAddress,
+    nextServiceDate,
+    nextServiceOdometer,
+    photosPaths,
+    invoicesPaths,
+    parts,
+    notes,
+    receiptImagePath,
+    receiptImageUrl,
+    isLoading,
+    isUploadingImage,
+    hasChanges,
+    isInitialized,
+    errorMessage,
+    imageUploadError,
+    fieldErrors,
+  ];
 
   // ==================== Computed Properties ====================
 
   /// Verifica se tem comprovante (local ou remoto)
-  bool get hasReceiptImage => receiptImagePath != null || receiptImageUrl != null;
+  bool get hasReceiptImage =>
+      receiptImagePath != null || receiptImageUrl != null;
 
   /// Verifica se está em algum estado de loading
   bool get isProcessing => isLoading || isUploadingImage;
@@ -210,7 +211,8 @@ class MaintenanceFormState extends Equatable {
       workshopAddress.trim().isNotEmpty;
 
   /// Verifica se tem próximo serviço configurado
-  bool get hasNextService => nextServiceDate != null || nextServiceOdometer != null;
+  bool get hasNextService =>
+      nextServiceDate != null || nextServiceOdometer != null;
 
   /// Verifica se tem fotos
   bool get hasPhotos => photosPaths.isNotEmpty;
@@ -284,25 +286,31 @@ class MaintenanceFormState extends Equatable {
       odometer: odometer ?? this.odometer,
       workshopName: clearWorkshop ? '' : (workshopName ?? this.workshopName),
       workshopPhone: clearWorkshop ? '' : (workshopPhone ?? this.workshopPhone),
-      workshopAddress: clearWorkshop ? '' : (workshopAddress ?? this.workshopAddress),
-      nextServiceDate: clearNextService ? null : (nextServiceDate ?? this.nextServiceDate),
-      nextServiceOdometer: clearNextService ? null : (nextServiceOdometer ?? this.nextServiceOdometer),
+      workshopAddress:
+          clearWorkshop ? '' : (workshopAddress ?? this.workshopAddress),
+      nextServiceDate:
+          clearNextService ? null : (nextServiceDate ?? this.nextServiceDate),
+      nextServiceOdometer:
+          clearNextService
+              ? null
+              : (nextServiceOdometer ?? this.nextServiceOdometer),
       photosPaths: photosPaths ?? this.photosPaths,
       invoicesPaths: invoicesPaths ?? this.invoicesPaths,
       parts: parts ?? this.parts,
       notes: notes ?? this.notes,
-      receiptImagePath: clearReceiptImage
-          ? null
-          : (receiptImagePath ?? this.receiptImagePath),
-      receiptImageUrl: clearReceiptUrl
-          ? null
-          : (receiptImageUrl ?? this.receiptImageUrl),
+      receiptImagePath:
+          clearReceiptImage
+              ? null
+              : (receiptImagePath ?? this.receiptImagePath),
+      receiptImageUrl:
+          clearReceiptUrl ? null : (receiptImageUrl ?? this.receiptImageUrl),
       isLoading: isLoading ?? this.isLoading,
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
       hasChanges: hasChanges ?? this.hasChanges,
       isInitialized: isInitialized ?? this.isInitialized,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
-      imageUploadError: imageUploadError != null ? imageUploadError() : this.imageUploadError,
+      imageUploadError:
+          imageUploadError != null ? imageUploadError() : this.imageUploadError,
       fieldErrors: fieldErrors ?? this.fieldErrors,
     );
   }

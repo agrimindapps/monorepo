@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../core/usecases/usecase.dart';
 import '../../../core/utils/typedef.dart';

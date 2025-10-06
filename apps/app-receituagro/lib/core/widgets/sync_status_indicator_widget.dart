@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/feature_flags_notifier.dart';
 
@@ -18,20 +17,20 @@ import '../providers/feature_flags_notifier.dart';
 class SyncStatusIndicatorWidget extends ConsumerStatefulWidget {
   /// Display variant: floating (FAB-like) or inline (embedded in UI)
   final SyncIndicatorVariant variant;
-  
+
   /// Position when using floating variant
   final FloatingPosition? floatingPosition;
-  
+
   /// Whether to show detailed status text
   final bool showStatusText;
-  
+
   /// Whether to allow manual sync trigger
   final bool allowManualSync;
-  
+
   /// Custom sync action callback
   final VoidCallback? onSyncPressed;
-  
-  /// Custom error action callback  
+
+  /// Custom error action callback
   final VoidCallback? onErrorPressed;
 
   const SyncStatusIndicatorWidget({
@@ -45,16 +44,18 @@ class SyncStatusIndicatorWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SyncStatusIndicatorWidget> createState() => _SyncStatusIndicatorWidgetState();
+  ConsumerState<SyncStatusIndicatorWidget> createState() =>
+      _SyncStatusIndicatorWidgetState();
 }
 
-class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorWidget>
+class _SyncStatusIndicatorWidgetState
+    extends ConsumerState<SyncStatusIndicatorWidget>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _rotationController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _rotationAnimation;
-  
+
   // Mock sync state - in real implementation, this would come from a sync service
   SyncStatus _currentSyncStatus = SyncStatus.idle;
   double _syncProgress = 0.0;
@@ -64,19 +65,15 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   @override
   void initState() {
     super.initState();
-    
+
     // Pulse animation for syncing state
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     // Rotation animation for syncing spinner
     _rotationController = AnimationController(
@@ -121,11 +118,11 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
         timer.cancel();
         return;
       }
-      
+
       setState(() {
         _syncProgress += 0.05;
       });
-      
+
       if (_syncProgress >= 1.0) {
         timer.cancel();
         _completeSyncSimulation();
@@ -137,13 +134,13 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   void _completeSyncSimulation() {
     _rotationController.stop();
     _rotationController.reset();
-    
+
     setState(() {
       _currentSyncStatus = SyncStatus.success;
       _syncProgress = 1.0;
       _lastSyncTime = 'Agora';
     });
-    
+
     // Return to idle after showing success
     Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
@@ -164,7 +161,9 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
           return const SizedBox.shrink();
         }
 
-        final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+        final featureFlagsNotifier = ref.read(
+          featureFlagsNotifierProvider.notifier,
+        );
         // Don't show if sync is disabled
         if (!featureFlagsNotifier.isContentSynchronizationEnabled) {
           return const SizedBox.shrink();
@@ -185,7 +184,7 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   /// Build floating sync indicator
   Widget _buildFloatingIndicator(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Positioned(
       bottom: widget.floatingPosition?.bottom ?? 16,
       right: widget.floatingPosition?.right ?? 16,
@@ -193,7 +192,10 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
         animation: _pulseAnimation,
         builder: (context, child) {
           return Transform.scale(
-            scale: _currentSyncStatus == SyncStatus.syncing ? _pulseAnimation.value : 1.0,
+            scale:
+                _currentSyncStatus == SyncStatus.syncing
+                    ? _pulseAnimation.value
+                    : 1.0,
             child: FloatingActionButton.small(
               onPressed: _getSyncAction(),
               backgroundColor: _getSyncColor(theme),
@@ -202,9 +204,10 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
                 animation: _rotationAnimation,
                 builder: (context, child) {
                   return Transform.rotate(
-                    angle: _currentSyncStatus == SyncStatus.syncing 
-                        ? _rotationAnimation.value * 2.0 * 3.14159
-                        : 0.0,
+                    angle:
+                        _currentSyncStatus == SyncStatus.syncing
+                            ? _rotationAnimation.value * 2.0 * 3.14159
+                            : 0.0,
                     child: Icon(_getSyncIcon(), size: 20),
                   );
                 },
@@ -219,7 +222,7 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   /// Build inline sync indicator
   Widget _buildInlineIndicator(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -237,9 +240,10 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
             animation: _rotationAnimation,
             builder: (context, child) {
               return Transform.rotate(
-                angle: _currentSyncStatus == SyncStatus.syncing 
-                    ? _rotationAnimation.value * 2.0 * 3.14159
-                    : 0.0,
+                angle:
+                    _currentSyncStatus == SyncStatus.syncing
+                        ? _rotationAnimation.value * 2.0 * 3.14159
+                        : 0.0,
                 child: Icon(
                   _getSyncIcon(),
                   color: _getSyncColor(theme),
@@ -248,9 +252,9 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
               );
             },
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Status Text and Progress
           Expanded(
             child: Column(
@@ -266,12 +270,14 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
                   ),
                   const SizedBox(height: 2),
                 ],
-                
+
                 // Progress Bar (when syncing)
                 if (_currentSyncStatus == SyncStatus.syncing) ...[
                   LinearProgressIndicator(
                     value: _syncProgress,
-                    backgroundColor: _getSyncColor(theme).withValues(alpha: 0.2),
+                    backgroundColor: _getSyncColor(
+                      theme,
+                    ).withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation(_getSyncColor(theme)),
                     minHeight: 3,
                   ),
@@ -295,7 +301,7 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
               ],
             ),
           ),
-          
+
           // Action Button
           if (_getSyncAction() != null) ...[
             const SizedBox(width: 8),
@@ -378,7 +384,7 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   String _getStatusSubtext() {
     switch (_currentSyncStatus) {
       case SyncStatus.idle:
-        return _lastSyncTime.isNotEmpty 
+        return _lastSyncTime.isNotEmpty
             ? 'Última sincronização: $_lastSyncTime'
             : 'Toque para sincronizar';
       case SyncStatus.syncing:
@@ -394,11 +400,15 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   VoidCallback? _getSyncAction() {
     switch (_currentSyncStatus) {
       case SyncStatus.idle:
-        return widget.allowManualSync ? (widget.onSyncPressed ?? _startManualSync) : null;
+        return widget.allowManualSync
+            ? (widget.onSyncPressed ?? _startManualSync)
+            : null;
       case SyncStatus.syncing:
         return _stopSync;
       case SyncStatus.success:
-        return widget.allowManualSync ? (widget.onSyncPressed ?? _startManualSync) : null;
+        return widget.allowManualSync
+            ? (widget.onSyncPressed ?? _startManualSync)
+            : null;
       case SyncStatus.error:
         return widget.onErrorPressed ?? _retrySync;
     }
@@ -408,16 +418,15 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
   void _startManualSync() async {
     // Check connectivity first
     final connectivityResult = await ConnectivityService.instance.isOnline();
-    connectivityResult.fold(
-      (failure) => _showConnectivityError(failure),
-      (isOnline) {
-        if (isOnline) {
-          _performSync();
-        } else {
-          _showOfflineMessage();
-        }
-      },
-    );
+    connectivityResult.fold((failure) => _showConnectivityError(failure), (
+      isOnline,
+    ) {
+      if (isOnline) {
+        _performSync();
+      } else {
+        _showOfflineMessage();
+      }
+    });
   }
 
   /// Show connectivity error
@@ -445,7 +454,9 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Sem conexão com a internet. Verifique sua conectividade.'),
+          content: Text(
+            'Sem conexão com a internet. Verifique sua conectividade.',
+          ),
           backgroundColor: Colors.orange,
         ),
       );
@@ -479,18 +490,10 @@ class _SyncStatusIndicatorWidgetState extends ConsumerState<SyncStatusIndicatorW
 }
 
 /// Sync Status Enum
-enum SyncStatus {
-  idle,
-  syncing,
-  success,
-  error,
-}
+enum SyncStatus { idle, syncing, success, error }
 
 /// Sync Indicator Variant
-enum SyncIndicatorVariant {
-  floating,
-  inline,
-}
+enum SyncIndicatorVariant { floating, inline }
 
 /// Floating Position Configuration
 class FloatingPosition {
@@ -499,10 +502,5 @@ class FloatingPosition {
   final double? left;
   final double? right;
 
-  const FloatingPosition({
-    this.top,
-    this.bottom,
-    this.left,
-    this.right,
-  });
+  const FloatingPosition({this.top, this.bottom, this.left, this.right});
 }

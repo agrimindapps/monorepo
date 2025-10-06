@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import 'calculation_result.dart';
 import 'calorie_input.dart';
 
@@ -30,7 +30,7 @@ class CalorieOutput extends CalculationResult {
   /// Necessidade Energética de Repouso (RER) em kcal/dia
   final double restingEnergyRequirement;
 
-  /// Necessidade Energética Diária (DER) em kcal/dia  
+  /// Necessidade Energética Diária (DER) em kcal/dia
   final double dailyEnergyRequirement;
 
   /// Necessidade de proteína em gramas/dia
@@ -61,11 +61,11 @@ class CalorieOutput extends CalculationResult {
   final CalculationDetails calculationDetails;
 
   /// Verifica se as necessidades calóricas estão elevadas
-  bool get hasElevatedCalorieNeeds => 
+  bool get hasElevatedCalorieNeeds =>
       dailyEnergyRequirement > (restingEnergyRequirement * 2.5);
 
   /// Verifica se é necessário monitoramento especializado
-  bool get requiresSpecializedMonitoring => 
+  bool get requiresSpecializedMonitoring =>
       input.medicalCondition != MedicalCondition.none ||
       input.isPregnant ||
       input.isLactating ||
@@ -74,7 +74,7 @@ class CalorieOutput extends CalculationResult {
   /// Obtém a classificação do nível calórico
   String get calorieNeedsClassification {
     final ratio = dailyEnergyRequirement / restingEnergyRequirement;
-    
+
     if (ratio < 1.2) return 'Baixo';
     if (ratio < 1.6) return 'Moderado';
     if (ratio < 2.5) return 'Alto';
@@ -83,20 +83,20 @@ class CalorieOutput extends CalculationResult {
 
   @override
   List<Object?> get props => [
-        input,
-        restingEnergyRequirement,
-        dailyEnergyRequirement,
-        proteinRequirement,
-        fatRequirement,
-        carbohydrateRequirement,
-        waterRequirement,
-        feedingRecommendations,
-        weightManagementAdvice,
-        nutritionalAdjustments,
-        specialConsiderations,
-        calculationDetails,
-        ...super.props,
-      ];
+    input,
+    restingEnergyRequirement,
+    dailyEnergyRequirement,
+    proteinRequirement,
+    fatRequirement,
+    carbohydrateRequirement,
+    waterRequirement,
+    feedingRecommendations,
+    weightManagementAdvice,
+    nutritionalAdjustments,
+    specialConsiderations,
+    calculationDetails,
+    ...super.props,
+  ];
 
   /// Converte para Map para serialização
   Map<String, dynamic> toJson() {
@@ -114,20 +114,30 @@ class CalorieOutput extends CalculationResult {
       'specialConsiderations': specialConsiderations,
       'calculationDetails': calculationDetails.toJson(),
       'calculatorId': calculatorId,
-      'results': results.map((r) => {
-        'label': r.label,
-        'value': r.value,
-        'unit': r.unit,
-        'severity': r.severity.code,
-        'description': r.description,
-      }).toList(),
-      'recommendations': recommendations.map((r) => {
-        'title': r.title,
-        'message': r.message,
-        'severity': r.severity.code,
-        'actionLabel': r.actionLabel,
-        'actionUrl': r.actionUrl,
-      }).toList(),
+      'results':
+          results
+              .map(
+                (r) => {
+                  'label': r.label,
+                  'value': r.value,
+                  'unit': r.unit,
+                  'severity': r.severity.code,
+                  'description': r.description,
+                },
+              )
+              .toList(),
+      'recommendations':
+          recommendations
+              .map(
+                (r) => {
+                  'title': r.title,
+                  'message': r.message,
+                  'severity': r.severity.code,
+                  'actionLabel': r.actionLabel,
+                  'actionUrl': r.actionUrl,
+                },
+              )
+              .toList(),
       'summary': summary,
       'calculatedAt': calculatedAt?.toIso8601String(),
     };
@@ -165,13 +175,13 @@ class FeedingRecommendations extends Equatable {
 
   @override
   List<Object?> get props => [
-        mealsPerDay,
-        gramsPerMeal,
-        feedingSchedule,
-        foodType,
-        treatAllowance,
-        supplementNeeds,
-      ];
+    mealsPerDay,
+    gramsPerMeal,
+    feedingSchedule,
+    foodType,
+    treatAllowance,
+    supplementNeeds,
+  ];
 
   Map<String, dynamic> toJson() {
     return {
@@ -216,13 +226,13 @@ class WeightManagementAdvice extends Equatable {
 
   @override
   List<Object?> get props => [
-        targetWeight,
-        weightGoal,
-        timeToTarget,
-        weeklyWeightChange,
-        monitoringFrequency,
-        exerciseRecommendations,
-      ];
+    targetWeight,
+    weightGoal,
+    timeToTarget,
+    weeklyWeightChange,
+    monitoringFrequency,
+    exerciseRecommendations,
+  ];
 
   Map<String, dynamic> toJson() {
     return {
@@ -267,13 +277,13 @@ class NutritionalAdjustments extends Equatable {
 
   @override
   List<Object?> get props => [
-        macronutrientRatios,
-        restrictedIngredients,
-        recommendedIngredients,
-        vitaminSupplements,
-        mineralSupplements,
-        digestibilityFactor,
-      ];
+    macronutrientRatios,
+    restrictedIngredients,
+    recommendedIngredients,
+    vitaminSupplements,
+    mineralSupplements,
+    digestibilityFactor,
+  ];
 
   Map<String, dynamic> toJson() {
     return {
@@ -326,15 +336,15 @@ class CalculationDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-        rerFormula,
-        physiologicalFactor,
-        activityFactor,
-        bodyConditionFactor,
-        environmentalFactor,
-        medicalFactor,
-        totalMultiplier,
-        adjustmentsApplied,
-      ];
+    rerFormula,
+    physiologicalFactor,
+    activityFactor,
+    bodyConditionFactor,
+    environmentalFactor,
+    medicalFactor,
+    totalMultiplier,
+    adjustmentsApplied,
+  ];
 
   Map<String, dynamic> toJson() {
     return {

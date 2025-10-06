@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 class Appointment extends Equatable {
   final String id;
@@ -60,7 +60,8 @@ class Appointment extends Equatable {
   }
 
   bool get isUpcoming {
-    return date.isAfter(DateTime.now()) && status == AppointmentStatus.scheduled;
+    return date.isAfter(DateTime.now()) &&
+        status == AppointmentStatus.scheduled;
   }
 
   bool get isPast {
@@ -96,9 +97,4 @@ class Appointment extends Equatable {
   List<Object?> get props => [id];
 }
 
-enum AppointmentStatus {
-  scheduled,
-  completed,
-  cancelled,
-  inProgress,
-}
+enum AppointmentStatus { scheduled, completed, cancelled, inProgress }

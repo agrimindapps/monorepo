@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
@@ -117,13 +116,15 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     // Usar navegação direta do Flutter - mais confiável para páginas secundárias
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => DetalhePragaPage(
-          pragaName: praga.nomeComum,
-          pragaId: praga.idReg, // Use ID for better precision
-          pragaScientificName: praga.nomeCientifico.isNotEmpty
-              ? praga.nomeCientifico
-              : 'Nome científico não disponível',
-        ),
+        builder:
+            (context) => DetalhePragaPage(
+              pragaName: praga.nomeComum,
+              pragaId: praga.idReg, // Use ID for better precision
+              pragaScientificName:
+                  praga.nomeCientifico.isNotEmpty
+                      ? praga.nomeCientifico
+                      : 'Nome científico não disponível',
+            ),
       ),
     );
   }
@@ -143,18 +144,16 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1120),
                 child: pragasState.when(
-                  data: (state) => Column(
-                    children: [
-                      _buildModernHeader(isDark, state),
-                      Expanded(
-                        child: _buildBody(isDark, state),
+                  data:
+                      (state) => Column(
+                        children: [
+                          _buildModernHeader(isDark, state),
+                          Expanded(child: _buildBody(isDark, state)),
+                        ],
                       ),
-                    ],
-                  ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Text('Erro: $error'),
-                  ),
+                  loading:
+                      () => const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text('Erro: $error')),
                 ),
               ),
             ),
@@ -169,9 +168,10 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       title: _getHeaderTitle(),
       subtitle: _getHeaderSubtitle(state),
       leftIcon: Icons.pest_control_outlined,
-      rightIcon: _isAscending
-          ? Icons.arrow_upward_outlined
-          : Icons.arrow_downward_outlined,
+      rightIcon:
+          _isAscending
+              ? Icons.arrow_upward_outlined
+              : Icons.arrow_downward_outlined,
       isDark: isDark,
       showBackButton: true,
       showActions: true,
@@ -209,11 +209,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       children: [
         const SizedBox(height: ReceitaAgroSpacing.sm),
         Expanded(
-          child: CustomScrollView(
-            slivers: [
-              _buildPragasSliver(isDark, state),
-            ],
-          ),
+          child: CustomScrollView(slivers: [_buildPragasSliver(isDark, state)]),
         ),
       ],
     );
@@ -331,8 +327,9 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
           margin: EdgeInsets.zero,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final crossAxisCount =
-                  _calculateCrossAxisCount(constraints.maxWidth);
+              final crossAxisCount = _calculateCrossAxisCount(
+                constraints.maxWidth,
+              );
 
               return CustomScrollView(
                 shrinkWrap: true,
@@ -387,8 +384,8 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
                 padding: const EdgeInsets.all(0),
                 sliver: SliverList.separated(
                   itemCount: state.pragas.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 4),
+                  separatorBuilder:
+                      (context, index) => const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     final praga = state.pragas[index];
                     return PragaCardWidget(

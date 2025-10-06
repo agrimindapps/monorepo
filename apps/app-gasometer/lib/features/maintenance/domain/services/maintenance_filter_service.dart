@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../entities/maintenance_entity.dart';
 
 /// Filters for maintenance records
 class MaintenanceFilters {
-  
   const MaintenanceFilters({
     this.vehicleId,
     this.type,
@@ -57,14 +56,14 @@ class MaintenanceFilters {
 
   bool get hasActiveFilters {
     return vehicleId != null ||
-           type != null ||
-           status != null ||
-           startDate != null ||
-           endDate != null ||
-           searchQuery.isNotEmpty ||
-           minCost != null ||
-           maxCost != null ||
-           urgencyLevel != 'all';
+        type != null ||
+        status != null ||
+        startDate != null ||
+        endDate != null ||
+        searchQuery.isNotEmpty ||
+        minCost != null ||
+        maxCost != null ||
+        urgencyLevel != 'all';
   }
 
   /// Empty filters (no filtering applied)
@@ -83,7 +82,6 @@ enum MaintenanceSortField {
 }
 
 class MaintenanceSorting {
-  
   const MaintenanceSorting({
     this.field = MaintenanceSortField.serviceDate,
     this.ascending = false, // Most recent first by default
@@ -91,10 +89,7 @@ class MaintenanceSorting {
   final MaintenanceSortField field;
   final bool ascending;
 
-  MaintenanceSorting copyWith({
-    MaintenanceSortField? field,
-    bool? ascending,
-  }) {
+  MaintenanceSorting copyWith({MaintenanceSortField? field, bool? ascending}) {
     return MaintenanceSorting(
       field: field ?? this.field,
       ascending: ascending ?? this.ascending,
@@ -134,7 +129,6 @@ class MaintenanceSorting {
 /// Service for filtering and sorting maintenance records
 @injectable
 class MaintenanceFilterService {
-  
   /// Apply filters to a list of maintenance records
   List<MaintenanceEntity> applyFilters(
     List<MaintenanceEntity> records,
@@ -144,23 +138,26 @@ class MaintenanceFilterService {
 
     // Filter by vehicle
     if (filters.vehicleId != null) {
-      filteredRecords = filteredRecords
-          .where((record) => record.vehicleId == filters.vehicleId)
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.vehicleId == filters.vehicleId)
+              .toList();
     }
 
     // Filter by type
     if (filters.type != null) {
-      filteredRecords = filteredRecords
-          .where((record) => record.type == filters.type)
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.type == filters.type)
+              .toList();
     }
 
     // Filter by status
     if (filters.status != null) {
-      filteredRecords = filteredRecords
-          .where((record) => record.status == filters.status)
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.status == filters.status)
+              .toList();
     }
 
     // Filter by date range
@@ -170,9 +167,14 @@ class MaintenanceFilterService {
         filters.startDate!.month,
         filters.startDate!.day,
       );
-      filteredRecords = filteredRecords
-          .where((record) => record.serviceDate.isAfter(startOfDay.subtract(const Duration(days: 1))))
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where(
+                (record) => record.serviceDate.isAfter(
+                  startOfDay.subtract(const Duration(days: 1)),
+                ),
+              )
+              .toList();
     }
 
     if (filters.endDate != null) {
@@ -184,41 +186,46 @@ class MaintenanceFilterService {
         59,
         59,
       );
-      filteredRecords = filteredRecords
-          .where((record) => record.serviceDate.isBefore(endOfDay))
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.serviceDate.isBefore(endOfDay))
+              .toList();
     }
 
     // Filter by cost range
     if (filters.minCost != null) {
-      filteredRecords = filteredRecords
-          .where((record) => record.cost >= filters.minCost!)
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.cost >= filters.minCost!)
+              .toList();
     }
 
     if (filters.maxCost != null) {
-      filteredRecords = filteredRecords
-          .where((record) => record.cost <= filters.maxCost!)
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.cost <= filters.maxCost!)
+              .toList();
     }
 
     // Filter by urgency level
     if (filters.urgencyLevel != 'all') {
-      filteredRecords = filteredRecords
-          .where((record) => record.urgencyLevel == filters.urgencyLevel)
-          .toList();
+      filteredRecords =
+          filteredRecords
+              .where((record) => record.urgencyLevel == filters.urgencyLevel)
+              .toList();
     }
 
     // Filter by search query
     if (filters.searchQuery.isNotEmpty) {
       final query = filters.searchQuery.toLowerCase();
-      filteredRecords = filteredRecords.where((record) {
-        return record.title.toLowerCase().contains(query) ||
-               record.description.toLowerCase().contains(query) ||
-               record.type.displayName.toLowerCase().contains(query) ||
-               (record.workshopName?.toLowerCase().contains(query) == true) ||
-               (record.notes?.toLowerCase().contains(query) == true);
-      }).toList();
+      filteredRecords =
+          filteredRecords.where((record) {
+            return record.title.toLowerCase().contains(query) ||
+                record.description.toLowerCase().contains(query) ||
+                record.type.displayName.toLowerCase().contains(query) ||
+                (record.workshopName?.toLowerCase().contains(query) == true) ||
+                (record.notes?.toLowerCase().contains(query) == true);
+          }).toList();
     }
 
     return filteredRecords;
@@ -230,10 +237,10 @@ class MaintenanceFilterService {
     MaintenanceSorting sorting,
   ) {
     final sortedRecords = List<MaintenanceEntity>.from(records);
-    
+
     sortedRecords.sort((a, b) {
       int comparison = 0;
-      
+
       switch (sorting.field) {
         case MaintenanceSortField.serviceDate:
           comparison = a.serviceDate.compareTo(b.serviceDate);
@@ -293,7 +300,9 @@ class MaintenanceFilterService {
     List<MaintenanceEntity> records,
     String urgencyLevel,
   ) {
-    return records.where((record) => record.urgencyLevel == urgencyLevel).toList();
+    return records
+        .where((record) => record.urgencyLevel == urgencyLevel)
+        .toList();
   }
 
   List<MaintenanceEntity> getHighCostRecords(
@@ -319,10 +328,12 @@ class MaintenanceFilterService {
   }) {
     final cutoff = DateTime.now().add(Duration(days: days));
     return records
-        .where((record) => 
-            record.nextServiceDate != null && 
-            record.nextServiceDate!.isBefore(cutoff) &&
-            record.nextServiceDate!.isAfter(DateTime.now()))
+        .where(
+          (record) =>
+              record.nextServiceDate != null &&
+              record.nextServiceDate!.isBefore(cutoff) &&
+              record.nextServiceDate!.isAfter(DateTime.now()),
+        )
         .toList();
   }
 
@@ -333,17 +344,18 @@ class MaintenanceFilterService {
     final now = DateTime.now();
     return records.where((record) {
       // Check date-based overdue
-      if (record.nextServiceDate != null && record.nextServiceDate!.isBefore(now)) {
+      if (record.nextServiceDate != null &&
+          record.nextServiceDate!.isBefore(now)) {
         return true;
       }
-      
+
       // Check odometer-based overdue (if current odometer is provided)
-      if (currentOdometer != null && 
-          record.nextServiceOdometer != null && 
+      if (currentOdometer != null &&
+          record.nextServiceOdometer != null &&
           currentOdometer >= record.nextServiceOdometer!) {
         return true;
       }
-      
+
       return false;
     }).toList();
   }
@@ -354,15 +366,15 @@ class MaintenanceFilterService {
     String query,
   ) {
     if (query.trim().isEmpty) return records;
-    
+
     final lowerQuery = query.toLowerCase().trim();
     return records.where((record) {
       return record.title.toLowerCase().contains(lowerQuery) ||
-             record.description.toLowerCase().contains(lowerQuery) ||
-             record.type.displayName.toLowerCase().contains(lowerQuery) ||
-             record.status.displayName.toLowerCase().contains(lowerQuery) ||
-             (record.workshopName?.toLowerCase().contains(lowerQuery) == true) ||
-             (record.notes?.toLowerCase().contains(lowerQuery) == true);
+          record.description.toLowerCase().contains(lowerQuery) ||
+          record.type.displayName.toLowerCase().contains(lowerQuery) ||
+          record.status.displayName.toLowerCase().contains(lowerQuery) ||
+          (record.workshopName?.toLowerCase().contains(lowerQuery) == true) ||
+          (record.notes?.toLowerCase().contains(lowerQuery) == true);
     }).toList();
   }
 
@@ -373,8 +385,10 @@ class MaintenanceFilterService {
     DateTime endDate,
   ) {
     return records.where((record) {
-      return record.serviceDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-             record.serviceDate.isBefore(endDate.add(const Duration(days: 1)));
+      return record.serviceDate.isAfter(
+            startDate.subtract(const Duration(days: 1)),
+          ) &&
+          record.serviceDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
   }
 
@@ -390,7 +404,7 @@ class MaintenanceFilterService {
   }
 
   // Helper methods
-  
+
   int _compareUrgency(String a, String b) {
     const urgencyOrder = {
       'overdue': 0,
@@ -399,10 +413,10 @@ class MaintenanceFilterService {
       'normal': 3,
       'none': 4,
     };
-    
+
     final aOrder = urgencyOrder[a] ?? 5;
     final bOrder = urgencyOrder[b] ?? 5;
-    
+
     return aOrder.compareTo(bOrder);
   }
 
@@ -419,7 +433,10 @@ class MaintenanceFilterService {
       };
     }
 
-    final totalCost = records.fold<double>(0, (sum, record) => sum + record.cost);
+    final totalCost = records.fold<double>(
+      0,
+      (sum, record) => sum + record.cost,
+    );
     final averageCost = totalCost / records.length;
 
     // Group by type
@@ -428,9 +445,12 @@ class MaintenanceFilterService {
     final byUrgency = <String, int>{};
 
     for (final record in records) {
-      byType[record.type.displayName] = (byType[record.type.displayName] ?? 0) + 1;
-      byStatus[record.status.displayName] = (byStatus[record.status.displayName] ?? 0) + 1;
-      byUrgency[record.urgencyLevel] = (byUrgency[record.urgencyLevel] ?? 0) + 1;
+      byType[record.type.displayName] =
+          (byType[record.type.displayName] ?? 0) + 1;
+      byStatus[record.status.displayName] =
+          (byStatus[record.status.displayName] ?? 0) + 1;
+      byUrgency[record.urgencyLevel] =
+          (byUrgency[record.urgencyLevel] ?? 0) + 1;
     }
 
     return {

@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 /// Interface for DI modules following Interface Segregation Principle
 ///

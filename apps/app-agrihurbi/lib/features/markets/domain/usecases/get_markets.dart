@@ -2,10 +2,10 @@ import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Get Markets Use Case
-/// 
+///
 /// Retrieves list of markets with optional filtering and pagination
 @injectable
 class GetMarkets {
@@ -39,10 +39,7 @@ class GetMarketsByType {
     required MarketType type,
     int limit = 20,
   }) async {
-    return await _repository.getMarketsByType(
-      type: type,
-      limit: limit,
-    );
+    return await _repository.getMarketsByType(type: type, limit: limit);
   }
 }
 

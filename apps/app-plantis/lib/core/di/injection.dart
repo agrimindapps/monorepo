@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 import 'package:injectable/injectable.dart';
 
 import 'injection.config.dart';

@@ -48,7 +48,7 @@ import 'package:core/core.dart' as core_lib;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Custom modules

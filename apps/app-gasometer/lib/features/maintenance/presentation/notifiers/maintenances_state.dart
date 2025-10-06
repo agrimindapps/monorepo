@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../domain/entities/maintenance_entity.dart';
 
@@ -122,9 +122,13 @@ class MaintenancesState extends Equatable {
       filteredMaintenances: filteredMaintenances ?? this.filteredMaintenances,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
-      selectedVehicleId: selectedVehicleId != null ? selectedVehicleId() : this.selectedVehicleId,
+      selectedVehicleId:
+          selectedVehicleId != null
+              ? selectedVehicleId()
+              : this.selectedVehicleId,
       selectedType: selectedType != null ? selectedType() : this.selectedType,
-      selectedStatus: selectedStatus != null ? selectedStatus() : this.selectedStatus,
+      selectedStatus:
+          selectedStatus != null ? selectedStatus() : this.selectedStatus,
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -136,9 +140,7 @@ class MaintenancesState extends Equatable {
 
   /// Limpa mensagem de erro
   MaintenancesState clearError() {
-    return copyWith(
-      errorMessage: () => null,
-    );
+    return copyWith(errorMessage: () => null);
   }
 
   /// Limpa todos os filtros
@@ -157,18 +159,18 @@ class MaintenancesState extends Equatable {
 
   @override
   List<Object?> get props => [
-        maintenances,
-        filteredMaintenances,
-        isLoading,
-        errorMessage,
-        selectedVehicleId,
-        selectedType,
-        selectedStatus,
-        startDate,
-        endDate,
-        searchQuery,
-        sortBy,
-        sortAscending,
-        stats,
-      ];
+    maintenances,
+    filteredMaintenances,
+    isLoading,
+    errorMessage,
+    selectedVehicleId,
+    selectedType,
+    selectedStatus,
+    startDate,
+    endDate,
+    searchQuery,
+    sortBy,
+    sortAscending,
+    stats,
+  ];
 }

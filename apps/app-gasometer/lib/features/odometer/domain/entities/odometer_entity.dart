@@ -1,8 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Represents an odometer reading record
 class OdometerEntity extends Equatable {
-
   const OdometerEntity({
     required this.id,
     required this.vehicleId,
@@ -24,7 +23,8 @@ class OdometerEntity extends Equatable {
       userId: map['userId']?.toString() ?? '',
       value: (map['value'] as num?)?.toDouble() ?? 0.0,
       registrationDate: DateTime.fromMillisecondsSinceEpoch(
-        (map['registrationDate'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+        (map['registrationDate'] as int?) ??
+            DateTime.now().millisecondsSinceEpoch,
       ),
       description: map['description']?.toString() ?? '',
       type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
@@ -93,17 +93,17 @@ class OdometerEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        vehicleId,
-        userId,
-        value,
-        registrationDate,
-        description,
-        type,
-        createdAt,
-        updatedAt,
-        metadata,
-      ];
+    id,
+    vehicleId,
+    userId,
+    value,
+    registrationDate,
+    description,
+    type,
+    createdAt,
+    updatedAt,
+    metadata,
+  ];
 
   @override
   String toString() {
@@ -142,6 +142,6 @@ enum OdometerType {
   static List<OdometerType> get allTypes => OdometerType.values;
 
   /// Gets display names for all types
-  static List<String> get displayNames => 
+  static List<String> get displayNames =>
       OdometerType.values.map((type) => type.displayName).toList();
 }

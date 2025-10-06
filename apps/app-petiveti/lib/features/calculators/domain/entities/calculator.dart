@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import 'calculation_result.dart';
 import 'input_field.dart';
@@ -12,7 +12,7 @@ enum CalculatorCategory {
   conversion('Conversão', 'Conversões de unidades e medidas');
 
   const CalculatorCategory(this.name, this.description);
-  
+
   final String name;
   final String description;
 }
@@ -24,39 +24,39 @@ abstract class Calculator extends Equatable {
 
   /// Identificador único da calculadora
   String get id;
-  
+
   /// Nome da calculadora exibido na interface
   String get name;
-  
+
   /// Descrição detalhada da calculadora
   String get description;
-  
+
   /// Categoria da calculadora
   CalculatorCategory get category;
-  
+
   /// Lista de campos de entrada necessários para o cálculo
   List<InputField> get inputFields;
-  
+
   /// Ícone associado à calculadora (nome do ícone do Material Design)
   String get iconName;
-  
+
   /// Versão da calculadora (para controle de mudanças)
   String get version;
 
   /// Executa o cálculo baseado nos inputs fornecidos
-  /// 
+  ///
   /// [inputs] - Mapa com os valores dos campos de entrada
   /// Retorna o resultado do cálculo ou lança exceção em caso de erro
   CalculationResult calculate(Map<String, dynamic> inputs);
-  
+
   /// Valida se os inputs fornecidos são válidos para o cálculo
-  /// 
+  ///
   /// [inputs] - Mapa com os valores dos campos de entrada
   /// Retorna true se todos os inputs são válidos, false caso contrário
   bool validateInputs(Map<String, dynamic> inputs);
-  
+
   /// Obtém mensagens de erro para inputs inválidos
-  /// 
+  ///
   /// [inputs] - Mapa com os valores dos campos de entrada
   /// Retorna lista de mensagens de erro, vazia se todos os inputs são válidos
   List<String> getValidationErrors(Map<String, dynamic> inputs);

@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/diagnostico_integration_service.dart';
 import '../../../detalhes_diagnostico/widgets/diagnostico_relacional_card_widget.dart';
@@ -21,7 +20,9 @@ class ResultadosBuscaWidget extends ConsumerWidget {
         }
 
         if (state.hasError) {
-          return SliverToBoxAdapter(child: _buildErrorState(context, state, ref));
+          return SliverToBoxAdapter(
+            child: _buildErrorState(context, state, ref),
+          );
         }
 
         if (!state.hasSearched) {
@@ -29,21 +30,24 @@ class ResultadosBuscaWidget extends ConsumerWidget {
         }
 
         if (state.resultados.isEmpty) {
-          return SliverToBoxAdapter(child: _buildEstadoSemResultados(context, ref));
+          return SliverToBoxAdapter(
+            child: _buildEstadoSemResultados(context, ref),
+          );
         }
 
         return _buildListaResultados(state);
       },
       loading: () => SliverToBoxAdapter(child: _buildLoadingState(context)),
-      error: (error, _) => SliverToBoxAdapter(
-        child: _buildErrorStateFromException(context, error),
-      ),
+      error:
+          (error, _) => SliverToBoxAdapter(
+            child: _buildErrorStateFromException(context, error),
+          ),
     );
   }
 
   Widget _buildLoadingState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -130,11 +134,7 @@ class ResultadosBuscaWidget extends ConsumerWidget {
               color: Colors.red.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.error_outline,
-              size: 40,
-              color: Colors.red,
-            ),
+            child: const Icon(Icons.error_outline, size: 40, color: Colors.red),
           ),
           const SizedBox(height: 24),
           Text(
@@ -198,7 +198,7 @@ class ResultadosBuscaWidget extends ConsumerWidget {
 
   Widget _buildEstadoInicial(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -255,7 +255,8 @@ class ResultadosBuscaWidget extends ConsumerWidget {
     final exemplos = [
       {
         'titulo': 'Por Cultura',
-        'descricao': 'Encontre todas as pragas que atacam uma cultura específica',
+        'descricao':
+            'Encontre todas as pragas que atacam uma cultura específica',
         'icon': FontAwesomeIcons.seedling,
         'color': Colors.green,
       },
@@ -347,11 +348,7 @@ class ResultadosBuscaWidget extends ConsumerWidget {
               color: Colors.orange.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.search_off,
-              size: 40,
-              color: Colors.orange,
-            ),
+            child: const Icon(Icons.search_off, size: 40, color: Colors.orange),
           ),
           const SizedBox(height: 24),
           Text(
@@ -390,23 +387,23 @@ class ResultadosBuscaWidget extends ConsumerWidget {
 
   Widget _buildListaResultados(BuscaAvancadaState state) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final diagnostico = state.resultados[index];
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: DiagnosticoRelacionalCardWidget(
-              diagnosticoDetalhado: diagnostico,
-              onTap: () => _navegarParaDetalhes(context, diagnostico),
-            ),
-          );
-        },
-        childCount: state.resultados.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final diagnostico = state.resultados[index];
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: DiagnosticoRelacionalCardWidget(
+            diagnosticoDetalhado: diagnostico,
+            onTap: () => _navegarParaDetalhes(context, diagnostico),
+          ),
+        );
+      }, childCount: state.resultados.length),
     );
   }
 
-  void _navegarParaDetalhes(BuildContext context, DiagnosticoDetalhado diagnostico) {
+  void _navegarParaDetalhes(
+    BuildContext context,
+    DiagnosticoDetalhado diagnostico,
+  ) {
     // Navigator.pushNamed(
     //   context,
     //   '/diagnostico-detalhado',

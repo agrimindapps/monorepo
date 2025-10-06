@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 import 'app_error.dart';
 import 'error_logger.dart';
 
 /// Result wrapper for operations that can fail
 class Result<T> {
-
   const Result._({this.data, this.error, required this.isSuccess});
 
   /// Create a successful result
@@ -64,34 +63,31 @@ class Result<T> {
   }
 
   /// Execute success or error callback
-  U fold<U>(
-    U Function(AppError error) onError,
-    U Function(T data) onSuccess,
-  ) {
+  U fold<U>(U Function(AppError error) onError, U Function(T data) onSuccess) {
     if (isSuccess && data != null) {
       return onSuccess(data as T);
     }
-    
+
     // Ensure we have a valid error before calling onError
-    final errorToUse = error ?? const UnexpectedError(
-      message: 'Unknown error occurred in Result.fold',
-      technicalDetails: 'Result was marked as failure but no error was provided',
-    );
-    
+    final errorToUse =
+        error ??
+        const UnexpectedError(
+          message: 'Unknown error occurred in Result.fold',
+          technicalDetails:
+              'Result was marked as failure but no error was provided',
+        );
+
     return onError(errorToUse);
   }
 
   @override
   String toString() {
-    return isSuccess 
-        ? 'Result.success($data)' 
-        : 'Result.failure($error)';
+    return isSuccess ? 'Result.success($data)' : 'Result.failure($error)';
   }
 }
 
 /// Configuration for retry policies
 class RetryPolicy {
-
   const RetryPolicy({
     this.maxAttempts = 3,
     this.initialDelay = const Duration(milliseconds: 500),
@@ -139,30 +135,27 @@ class RetryPolicy {
     }
 
     // Default retry conditions
-    return error is NetworkError || 
-           error is TimeoutError || 
-           error is ServerError && 
-           error.statusCode != null && 
-           error.statusCode! >= 500;
+    return error is NetworkError ||
+        error is TimeoutError ||
+        error is ServerError &&
+            error.statusCode != null &&
+            error.statusCode! >= 500;
   }
 
   /// Calculate delay for attempt
   Duration getDelay(int attemptNumber) {
     if (attemptNumber <= 1) return initialDelay;
 
-    final delay = initialDelay.inMilliseconds * 
-                 pow(backoffMultiplier, attemptNumber - 1);
-    
-    return Duration(
-      milliseconds: min(delay.round(), maxDelay.inMilliseconds),
-    );
+    final delay =
+        initialDelay.inMilliseconds * pow(backoffMultiplier, attemptNumber - 1);
+
+    return Duration(milliseconds: min(delay.round(), maxDelay.inMilliseconds));
   }
 }
 
 /// Main error handler service
 @injectable
 class ErrorHandler {
-
   const ErrorHandler(this._logger);
   final ErrorLogger _logger;
 
@@ -174,7 +167,7 @@ class ErrorHandler {
     Map<String, dynamic>? context,
   }) async {
     AppError? lastError;
-    
+
     for (int attempt = 1; attempt <= policy.maxAttempts; attempt++) {
       try {
         // Log retry attempts (except first)
@@ -189,7 +182,6 @@ class ErrorHandler {
 
         final result = await operation();
         return Result.success(result);
-        
       } catch (e, stackTrace) {
         lastError = _convertToAppError(e, stackTrace);
 
@@ -228,8 +220,12 @@ class ErrorHandler {
     return execute(
       () => Future.any([
         operation(),
-        Future<void>.delayed(timeout).then((_) => 
-          throw TimeoutException('Operation timed out after ${timeout.inSeconds}s')),
+        Future<void>.delayed(timeout).then(
+          (_) =>
+              throw TimeoutException(
+                'Operation timed out after ${timeout.inSeconds}s',
+              ),
+        ),
       ]),
       policy: policy,
       operationName: operationName,
@@ -243,23 +239,24 @@ class ErrorHandler {
     String? operationName,
     Map<String, dynamic>? context,
   }) {
-    return source
-        .map<Result<T>>((data) => Result.success(data))
-        .handleError((Object error, StackTrace stackTrace) {
-          final appError = _convertToAppError(error, stackTrace);
-          
-          _logger.logError(
-            appError,
-            stackTrace: stackTrace,
-            additionalContext: {
-              'operation': operationName,
-              'type': 'stream_error',
-              ...?context,
-            },
-          );
+    return source.map<Result<T>>((data) => Result.success(data)).handleError((
+      Object error,
+      StackTrace stackTrace,
+    ) {
+      final appError = _convertToAppError(error, stackTrace);
 
-          return Result<T>.failure(appError);
-        });
+      _logger.logError(
+        appError,
+        stackTrace: stackTrace,
+        additionalContext: {
+          'operation': operationName,
+          'type': 'stream_error',
+          ...?context,
+        },
+      );
+
+      return Result<T>.failure(appError);
+    });
   }
 
   /// Convert exception to AppError

@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 /// Módulo de Dependency Injection para sincronização do Petiveti
 /// Integra PetivetiSyncService com repositories existentes
@@ -25,7 +25,9 @@ abstract class PetivetiSyncDIModule {
 
     // Inicialização é lazy, service só é criado quando solicitado
     if (kDebugMode) {
-      print('PetivetiSyncDIModule: Sync service registration skipped (awaiting implementation)');
+      print(
+        'PetivetiSyncDIModule: Sync service registration skipped (awaiting implementation)',
+      );
     }
   }
 

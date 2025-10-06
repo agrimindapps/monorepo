@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../storage/hive_service.dart';
 import 'di_module.dart';
@@ -21,7 +21,7 @@ class ModularInjectionContainer {
   static Future<void> init() async {
     try {
       print('🚀 Starting GasOMeter dependency initialization...');
-      
+
       // Initialize Hive with all adapters and boxes
       print('📦 Initializing Hive...');
       await HiveService.instance.init();

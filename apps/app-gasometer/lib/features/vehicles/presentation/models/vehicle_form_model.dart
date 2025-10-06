@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../../core/services/input_sanitizer.dart';
 import '../../domain/entities/vehicle_entity.dart';
@@ -95,25 +95,25 @@ class VehicleFormModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        name,
-        brand,
-        model,
-        year,
-        color,
-        licensePlate,
-        type,
-        supportedFuels,
-        currentOdometer,
-        chassis,
-        renavam,
-        imagePath,
-        isLoading,
-        hasChanges,
-        errors,
-        lastError,
-      ];
+    id,
+    userId,
+    name,
+    brand,
+    model,
+    year,
+    color,
+    licensePlate,
+    type,
+    supportedFuels,
+    currentOdometer,
+    chassis,
+    renavam,
+    imagePath,
+    isLoading,
+    hasChanges,
+    errors,
+    lastError,
+  ];
 
   /// Creates new instance with updated values
   VehicleFormModel copyWith({
@@ -174,10 +174,7 @@ class VehicleFormModel extends Equatable {
   bool get hasErrors => errors.isNotEmpty;
 
   /// Checks if form is ready to submit
-  bool get canSubmit =>
-      hasMinimumData &&
-      !hasErrors &&
-      !isLoading;
+  bool get canSubmit => hasMinimumData && !hasErrors && !isLoading;
 
   /// Checks if this is an edit (has ID)
   bool get isEditing => id.isNotEmpty;
@@ -281,13 +278,16 @@ class VehicleFormModel extends Equatable {
     if (licensePlate.trim().isEmpty) {
       validationErrors['licensePlate'] = 'Placa é obrigatória';
     } else {
-      final cleanPlate = licensePlate.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
+      final cleanPlate =
+          licensePlate.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
       if (cleanPlate.length != 7) {
         validationErrors['licensePlate'] = 'Placa deve ter 7 caracteres';
       } else {
         // Brazilian plate format: ABC-1234 or ABC1D234 (Mercosul)
         final isOldFormat = RegExp(r'^[A-Z]{3}\d{4}$').hasMatch(cleanPlate);
-        final isMercosulFormat = RegExp(r'^[A-Z]{3}\d[A-Z]\d{2}$').hasMatch(cleanPlate);
+        final isMercosulFormat = RegExp(
+          r'^[A-Z]{3}\d[A-Z]\d{2}$',
+        ).hasMatch(cleanPlate);
 
         if (!isOldFormat && !isMercosulFormat) {
           validationErrors['licensePlate'] = 'Formato de placa inválido';
@@ -304,7 +304,8 @@ class VehicleFormModel extends Equatable {
 
     // Validate chassis (optional)
     if (chassis.trim().isNotEmpty) {
-      final cleanChassis = chassis.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
+      final cleanChassis =
+          chassis.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
       if (cleanChassis.length != 17) {
         validationErrors['chassis'] = 'Chassi deve ter 17 caracteres';
       }
@@ -320,7 +321,8 @@ class VehicleFormModel extends Equatable {
 
     // Validate supported fuels
     if (supportedFuels.isEmpty) {
-      validationErrors['supportedFuels'] = 'Selecione pelo menos um tipo de combustível';
+      validationErrors['supportedFuels'] =
+          'Selecione pelo menos um tipo de combustível';
     }
 
     return validationErrors;
@@ -335,18 +337,20 @@ class VehicleFormModel extends Equatable {
     final sanitizedBrand = InputSanitizer.sanitizeName(brand);
     final sanitizedModel = InputSanitizer.sanitizeName(model);
     final sanitizedColor = InputSanitizer.sanitizeName(color);
-    final sanitizedLicensePlate = InputSanitizer.sanitize(licensePlate).toUpperCase();
-    final sanitizedChassis = chassis.trim().isEmpty
-        ? ''
-        : InputSanitizer.sanitize(chassis).toUpperCase();
-    final sanitizedRenavam = renavam.trim().isEmpty
-        ? ''
-        : InputSanitizer.sanitizeNumeric(renavam);
+    final sanitizedLicensePlate =
+        InputSanitizer.sanitize(licensePlate).toUpperCase();
+    final sanitizedChassis =
+        chassis.trim().isEmpty
+            ? ''
+            : InputSanitizer.sanitize(chassis).toUpperCase();
+    final sanitizedRenavam =
+        renavam.trim().isEmpty ? '' : InputSanitizer.sanitizeNumeric(renavam);
 
     // Generate name from brand and model if not explicitly set
-    final finalName = name.trim().isEmpty
-        ? '$sanitizedBrand $sanitizedModel'
-        : InputSanitizer.sanitizeName(name);
+    final finalName =
+        name.trim().isEmpty
+            ? '$sanitizedBrand $sanitizedModel'
+            : InputSanitizer.sanitizeName(name);
 
     return VehicleEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
@@ -388,18 +392,18 @@ class VehicleFormModel extends Equatable {
 
   /// Form statistics for debugging
   Map<String, dynamic> get stats => {
-        'isValid': canSubmit,
-        'hasErrors': hasErrors,
-        'hasChanges': hasChanges,
-        'isEditing': isEditing,
-        'hasImage': hasImage,
-        'isCar': isCar,
-        'isMotorcycle': isMotorcycle,
-        'isTruck': isTruck,
-        'isFlexFuel': isFlexFuel,
-        'hasHighMileage': hasHighMileage,
-        'hasChassis': hasChassis,
-        'hasRenavam': hasRenavam,
-        'errorCount': errors.length,
-      };
+    'isValid': canSubmit,
+    'hasErrors': hasErrors,
+    'hasChanges': hasChanges,
+    'isEditing': isEditing,
+    'hasImage': hasImage,
+    'isCar': isCar,
+    'isMotorcycle': isMotorcycle,
+    'isTruck': isTruck,
+    'isFlexFuel': isFlexFuel,
+    'hasHighMileage': hasHighMileage,
+    'hasChassis': hasChassis,
+    'hasRenavam': hasRenavam,
+    'errorCount': errors.length,
+  };
 }

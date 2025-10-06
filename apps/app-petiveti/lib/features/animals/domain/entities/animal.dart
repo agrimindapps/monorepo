@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import 'animal_enums.dart';
 
 // Backwards compatibility aliases for test files
@@ -24,7 +24,14 @@ class PetImageEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, petId, imageUrl, description, isProfile, createdAt];
+  List<Object?> get props => [
+    id,
+    petId,
+    imageUrl,
+    description,
+    isProfile,
+    createdAt,
+  ];
 }
 
 class OwnerEntity extends Equatable {
@@ -70,7 +77,16 @@ class VetEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, name, clinic, phone, email, address, specialty, createdAt];
+  List<Object?> get props => [
+    id,
+    name,
+    clinic,
+    phone,
+    email,
+    address,
+    specialty,
+    createdAt,
+  ];
 }
 
 class Animal extends Equatable {
@@ -172,28 +188,28 @@ class Animal extends Equatable {
     }
   }
 
-  // Helper getter for backwards compatibility  
+  // Helper getter for backwards compatibility
   double get currentWeight => weight ?? 0.0;
   String? get photo => photoUrl;
   bool get isDeleted => !isActive;
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        name,
-        species,
-        breed,
-        gender,
-        birthDate,
-        weight,
-        size,
-        color,
-        microchipNumber,
-        notes,
-        photoUrl,
-        isActive,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    name,
+    species,
+    breed,
+    gender,
+    birthDate,
+    weight,
+    size,
+    color,
+    microchipNumber,
+    notes,
+    photoUrl,
+    isActive,
+    createdAt,
+    updatedAt,
+  ];
 }

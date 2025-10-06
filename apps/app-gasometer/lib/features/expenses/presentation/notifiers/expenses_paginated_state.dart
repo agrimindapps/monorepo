@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../core/constants/expense_constants.dart';
@@ -35,16 +35,16 @@ class ExpensesPaginatedState extends Equatable {
 
   /// Obtém contexto de paginação para debug/logging
   Map<String, dynamic> get paginationContext => {
-        'currentPage': currentPage,
-        'itemCount': itemCount,
-        'hasNextPage': hasNextPage,
-        'isLoadingMore': isLoadingMore,
-        'pageSize': ExpenseConstants.defaultPageSize,
-        'sortBy': sortBy.name,
-        'sortOrder': sortOrder.name,
-        'activeFilters': hasActiveFilters,
-        'filterDetails': filtersConfig.toString(),
-      };
+    'currentPage': currentPage,
+    'itemCount': itemCount,
+    'hasNextPage': hasNextPage,
+    'isLoadingMore': isLoadingMore,
+    'pageSize': ExpenseConstants.defaultPageSize,
+    'sortBy': sortBy.name,
+    'sortOrder': sortOrder.name,
+    'activeFilters': hasActiveFilters,
+    'filterDetails': filtersConfig.toString(),
+  };
 
   ExpensesPaginatedState copyWith({
     List<ExpenseEntity>? items,
@@ -70,13 +70,13 @@ class ExpensesPaginatedState extends Equatable {
 
   @override
   List<Object?> get props => [
-        items,
-        currentPage,
-        hasNextPage,
-        isLoadingMore,
-        filtersConfig,
-        sortBy,
-        sortOrder,
-        cachedStats,
-      ];
+    items,
+    currentPage,
+    hasNextPage,
+    isLoadingMore,
+    filtersConfig,
+    sortBy,
+    sortOrder,
+    cachedStats,
+  ];
 }

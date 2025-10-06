@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -6,7 +6,6 @@ import '../../domain/entities/expense_entity.dart';
 
 /// Model reativo para o formulário de despesas
 class ExpenseFormModel extends Equatable {
-
   const ExpenseFormModel({
     required this.id,
     required this.userId,
@@ -88,23 +87,23 @@ class ExpenseFormModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        vehicleId,
-        vehicle,
-        expenseType,
-        description,
-        amount,
-        odometer,
-        date,
-        location,
-        notes,
-        receiptImagePath,
-        isLoading,
-        hasChanges,
-        errors,
-        lastError,
-      ];
+    id,
+    userId,
+    vehicleId,
+    vehicle,
+    expenseType,
+    description,
+    amount,
+    odometer,
+    date,
+    location,
+    notes,
+    receiptImagePath,
+    isLoading,
+    hasChanges,
+    errors,
+    lastError,
+  ];
 
   /// Cria nova instância com valores atualizados
   ExpenseFormModel copyWith({
@@ -139,7 +138,10 @@ class ExpenseFormModel extends Equatable {
       date: date ?? this.date,
       location: location ?? this.location,
       notes: notes ?? this.notes,
-      receiptImagePath: clearReceiptImage ? null : (receiptImagePath ?? this.receiptImagePath),
+      receiptImagePath:
+          clearReceiptImage
+              ? null
+              : (receiptImagePath ?? this.receiptImagePath),
       isLoading: isLoading ?? this.isLoading,
       hasChanges: hasChanges ?? this.hasChanges,
       errors: errors ?? this.errors,
@@ -148,9 +150,9 @@ class ExpenseFormModel extends Equatable {
   }
 
   /// Verifica se o modelo tem dados válidos mínimos
-  bool get hasMinimumData => 
-      vehicleId.isNotEmpty && 
-      description.trim().isNotEmpty && 
+  bool get hasMinimumData =>
+      vehicleId.isNotEmpty &&
+      description.trim().isNotEmpty &&
       amount > 0 &&
       odometer >= 0;
 
@@ -158,16 +160,14 @@ class ExpenseFormModel extends Equatable {
   bool get hasErrors => errors.isNotEmpty;
 
   /// Verifica se o formulário está pronto para ser submetido
-  bool get canSubmit => 
-      hasMinimumData && 
-      !hasErrors && 
-      !isLoading;
+  bool get canSubmit => hasMinimumData && !hasErrors && !isLoading;
 
   /// Verifica se é uma edição (tem ID)
   bool get isEditing => id.isNotEmpty;
 
   /// Verifica se tem comprovante
-  bool get hasReceipt => receiptImagePath != null && receiptImagePath!.isNotEmpty;
+  bool get hasReceipt =>
+      receiptImagePath != null && receiptImagePath!.isNotEmpty;
 
   /// Verifica se é uma despesa de alto valor
   bool get isHighValue => amount >= 500.0;
@@ -191,7 +191,7 @@ class ExpenseFormModel extends Equatable {
   /// Remove erro de um campo específico
   ExpenseFormModel clearFieldError(String field) {
     if (!errors.containsKey(field)) return this;
-    
+
     final newErrors = Map<String, String>.from(errors);
     newErrors.remove(field);
     return copyWith(errors: newErrors);
@@ -220,9 +220,11 @@ class ExpenseFormModel extends Equatable {
     if (description.trim().isEmpty) {
       validationErrors['description'] = 'Descrição é obrigatória';
     } else if (description.trim().length < 3) {
-      validationErrors['description'] = 'Descrição muito curta (mínimo 3 caracteres)';
+      validationErrors['description'] =
+          'Descrição muito curta (mínimo 3 caracteres)';
     } else if (description.trim().length > 100) {
-      validationErrors['description'] = 'Descrição muito longa (máximo 100 caracteres)';
+      validationErrors['description'] =
+          'Descrição muito longa (máximo 100 caracteres)';
     }
 
     // Validar valor
@@ -256,7 +258,8 @@ class ExpenseFormModel extends Equatable {
 
     // Validar observações (opcional)
     if (notes.trim().isNotEmpty && notes.trim().length > 300) {
-      validationErrors['notes'] = 'Observação muito longa (máximo 300 caracteres)';
+      validationErrors['notes'] =
+          'Observação muito longa (máximo 300 caracteres)';
     }
 
     return validationErrors;
@@ -266,16 +269,16 @@ class ExpenseFormModel extends Equatable {
   /// Aplica sanitização em todos os campos de texto para segurança
   ExpenseEntity toExpenseEntity() {
     final now = DateTime.now();
-    
+
     // Sanitizar todos os campos de texto antes da persistência
-    final sanitizedDescription = InputSanitizer.sanitizeDescription(description);
-    final sanitizedLocation = location.trim().isEmpty 
-        ? null 
-        : InputSanitizer.sanitize(location);
-    final sanitizedNotes = notes.trim().isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeDescription(notes);
-    
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(
+      description,
+    );
+    final sanitizedLocation =
+        location.trim().isEmpty ? null : InputSanitizer.sanitize(location);
+    final sanitizedNotes =
+        notes.trim().isEmpty ? null : InputSanitizer.sanitizeDescription(notes);
+
     return ExpenseEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
       userId: userId,
@@ -288,7 +291,12 @@ class ExpenseFormModel extends Equatable {
       location: sanitizedLocation,
       notes: sanitizedNotes,
       receiptImagePath: receiptImagePath,
-      createdAt: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
+      createdAt:
+          id.isEmpty
+              ? now
+              : DateTime.fromMillisecondsSinceEpoch(
+                int.tryParse(id) ?? now.millisecondsSinceEpoch,
+              ),
       updatedAt: now,
       metadata: const {},
     );
@@ -296,9 +304,10 @@ class ExpenseFormModel extends Equatable {
 
   /// Reseta formulário para estado inicial
   ExpenseFormModel reset() {
-    return ExpenseFormModel.initial(vehicleId, userId).copyWith(
-      vehicle: vehicle,
-    );
+    return ExpenseFormModel.initial(
+      vehicleId,
+      userId,
+    ).copyWith(vehicle: vehicle);
   }
 
   /// Cria cópia limpa sem alterações ou erros

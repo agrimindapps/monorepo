@@ -1,18 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
-enum UserRole {
-  user,
-  premium,
-  admin,
-}
+enum UserRole { user, premium, admin }
 
-enum AuthProvider {
-  email,
-  google,
-  apple,
-  facebook,
-  anonymous,
-}
+enum AuthProvider { email, google, apple, facebook, anonymous }
 
 class User extends Equatable {
   final String id;
@@ -83,7 +73,8 @@ class User extends Equatable {
     return DateTime.now().isBefore(premiumExpiresAt!);
   }
 
-  bool get needsEmailVerification => !isEmailVerified && provider == AuthProvider.email;
+  bool get needsEmailVerification =>
+      !isEmailVerified && provider == AuthProvider.email;
 
   bool get isAnonymous => provider == AuthProvider.anonymous;
 
@@ -95,18 +86,18 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        email,
-        name,
-        photoUrl,
-        role,
-        provider,
-        isEmailVerified,
-        isPremium,
-        premiumExpiresAt,
-        metadata,
-        createdAt,
-        updatedAt,
-        lastLoginAt,
-      ];
+    id,
+    email,
+    name,
+    photoUrl,
+    role,
+    provider,
+    isEmailVerified,
+    isPremium,
+    premiumExpiresAt,
+    metadata,
+    createdAt,
+    updatedAt,
+    lastLoginAt,
+  ];
 }

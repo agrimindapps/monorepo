@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../../../core/network/firebase_service.dart';
 import '../../../features/vaccines/data/datasources/vaccine_local_datasource.dart';

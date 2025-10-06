@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 enum ParameterType {
   number,
@@ -11,7 +11,7 @@ enum ParameterType {
   percentage,
   area,
   volume,
-  weight
+  weight,
 }
 
 enum ParameterUnit {
@@ -61,15 +61,15 @@ enum ParameterUnit {
   litroha,
   // Distance units
   milimetro,
-  mmh,  // mm/h
+  mmh, // mm/h
   // Soil/Chemistry units
-  cmolcdm3,  // cmolc/dm³
-  gcm3,      // g/cm³
-  dsm,       // dS/m
+  cmolcdm3, // cmolc/dm³
+  gcm3, // g/cm³
+  dsm, // dS/m
   // Ratios
   ratio,
-  // Type extension for integers  
-  integer
+  // Type extension for integers
+  integer,
 }
 
 class CalculatorParameter extends Equatable {
@@ -140,13 +140,13 @@ class CalculatorParameter extends Equatable {
 
   String getDisplayValue(dynamic value) {
     if (value == null) return '';
-    
+
     String displayValue = value.toString();
-    
+
     if (unit != ParameterUnit.none) {
       displayValue += ' ${_getUnitSymbol()}';
     }
-    
+
     return displayValue;
   }
 
@@ -267,9 +267,10 @@ class CalculatorParameter extends Equatable {
       defaultValue: json['defaultValue'],
       minValue: json['minValue'],
       maxValue: json['maxValue'],
-      options: json['options'] != null 
-          ? List<String>.from(json['options'] as List)
-          : null,
+      options:
+          json['options'] != null
+              ? List<String>.from(json['options'] as List)
+              : null,
       validationMessage: json['validationMessage'] as String?,
     );
   }
@@ -305,16 +306,16 @@ class CalculatorParameter extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        type,
-        unit,
-        required,
-        defaultValue,
-        minValue,
-        maxValue,
-        options,
-        validationMessage,
-      ];
+    id,
+    name,
+    description,
+    type,
+    unit,
+    required,
+    defaultValue,
+    minValue,
+    maxValue,
+    options,
+    validationMessage,
+  ];
 }

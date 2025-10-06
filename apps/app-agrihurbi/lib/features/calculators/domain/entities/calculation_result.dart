@@ -1,12 +1,6 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
-enum ResultType {
-  single,
-  multiple,
-  table,
-  chart,
-  recommendations
-}
+enum ResultType { single, multiple, table, chart, recommendations }
 
 class CalculationResultValue extends Equatable {
   final String label;
@@ -127,13 +121,18 @@ class CalculationResult extends Equatable {
       'calculatedAt': calculatedAt.toIso8601String(),
       'inputs': inputs,
       'type': type.name,
-      'values': values.map((v) => {
-        'label': v.label,
-        'value': v.value,
-        'unit': v.unit,
-        'description': v.description,
-        'isPrimary': v.isPrimary,
-      }).toList(),
+      'values':
+          values
+              .map(
+                (v) => {
+                  'label': v.label,
+                  'value': v.value,
+                  'unit': v.unit,
+                  'description': v.description,
+                  'isPrimary': v.isPrimary,
+                },
+              )
+              .toList(),
       'recommendations': recommendations,
       'chartData': chartData,
       'tableData': tableData,
@@ -154,46 +153,54 @@ class CalculationResult extends Equatable {
         (e) => e.name == json['type'],
         orElse: () => ResultType.single,
       ),
-      values: (json['values'] as List).map((v) => CalculationResultValue(
-        label: v['label'] as String,
-        value: v['value'],
-        unit: v['unit'] as String,
-        description: v['description'] as String?,
-        isPrimary: v['isPrimary'] as bool? ?? false,
-      )).toList(),
-      recommendations: json['recommendations'] != null 
-          ? List<String>.from(json['recommendations'] as List)
-          : null,
+      values:
+          (json['values'] as List)
+              .map(
+                (v) => CalculationResultValue(
+                  label: v['label'] as String,
+                  value: v['value'],
+                  unit: v['unit'] as String,
+                  description: v['description'] as String?,
+                  isPrimary: v['isPrimary'] as bool? ?? false,
+                ),
+              )
+              .toList(),
+      recommendations:
+          json['recommendations'] != null
+              ? List<String>.from(json['recommendations'] as List)
+              : null,
       chartData: json['chartData'] as Map<String, dynamic>?,
-      tableData: json['tableData'] != null
-          ? List<Map<String, dynamic>>.from(json['tableData'] as List)
-          : null,
+      tableData:
+          json['tableData'] != null
+              ? List<Map<String, dynamic>>.from(json['tableData'] as List)
+              : null,
       isValid: json['isValid'] as bool? ?? true,
       errorMessage: json['errorMessage'] as String?,
       interpretation: json['interpretation'] as String?,
-      warnings: json['warnings'] != null
-          ? List<String>.from(json['warnings'] as List)
-          : null,
+      warnings:
+          json['warnings'] != null
+              ? List<String>.from(json['warnings'] as List)
+              : null,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
 
   @override
   List<Object?> get props => [
-        calculatorId,
-        calculatedAt,
-        inputs,
-        type,
-        values,
-        recommendations,
-        chartData,
-        tableData,
-        isValid,
-        errorMessage,
-        interpretation,
-        warnings,
-        metadata,
-      ];
+    calculatorId,
+    calculatedAt,
+    inputs,
+    type,
+    values,
+    recommendations,
+    chartData,
+    tableData,
+    isValid,
+    errorMessage,
+    interpretation,
+    warnings,
+    metadata,
+  ];
 }
 
 class CalculationError extends CalculationResult {
@@ -202,9 +209,9 @@ class CalculationError extends CalculationResult {
     required String super.errorMessage,
     required super.inputs,
   }) : super(
-          calculatedAt: DateTime.now(),
-          type: ResultType.single,
-          values: const [],
-          isValid: false,
-        );
+         calculatedAt: DateTime.now(),
+         type: ResultType.single,
+         values: const [],
+         isValid: false,
+       );
 }

@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/busca_avancada_notifier.dart';
 
@@ -34,7 +33,7 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
     WidgetRef ref,
   ) {
     final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -189,9 +188,10 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selectedValue != null 
-                ? iconColor.withValues(alpha: 0.5)
-                : theme.colorScheme.outline.withValues(alpha: 0.3),
+              color:
+                  selectedValue != null
+                      ? iconColor.withValues(alpha: 0.5)
+                      : theme.colorScheme.outline.withValues(alpha: 0.3),
               width: selectedValue != null ? 2 : 1,
             ),
           ),
@@ -221,21 +221,22 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
                 color: theme.colorScheme.onSurface,
               ),
               dropdownColor: theme.cardColor,
-              items: items.map((item) {
-                return DropdownMenuItem<String>(
-                  value: item['id'],
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      item['nome']!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurface,
+              items:
+                  items.map((item) {
+                    return DropdownMenuItem<String>(
+                      value: item['id'],
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          item['nome']!,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
               onChanged: onChanged,
             ),
           ),
@@ -251,22 +252,20 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
           flex: 2,
           child: ElevatedButton.icon(
             onPressed: state.isLoading ? null : onBuscarPressed,
-            icon: state.isLoading
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  )
-                : const Icon(Icons.search, size: 20),
+            icon:
+                state.isLoading
+                    ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    )
+                    : const Icon(Icons.search, size: 20),
             label: Text(
               state.isLoading ? 'Buscando...' : 'Buscar',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
@@ -285,10 +284,7 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
             icon: const Icon(Icons.clear, size: 18),
             label: const Text(
               'Limpar',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: theme.colorScheme.onSurfaceVariant,
@@ -313,9 +309,7 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 

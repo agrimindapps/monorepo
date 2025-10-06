@@ -1,6 +1,6 @@
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../../services/data_cleaner_service.dart';
 import '../di_module.dart';
@@ -31,9 +31,10 @@ class CoreModule implements DIModule {
       );
 
       getIt.registerLazySingleton<core.IAnalyticsRepository>(
-        () => kDebugMode
-            ? core.MockAnalyticsService()
-            : core.FirebaseAnalyticsService(),
+        () =>
+            kDebugMode
+                ? core.MockAnalyticsService()
+                : core.FirebaseAnalyticsService(),
       );
 
       getIt.registerLazySingleton<core.ICrashlyticsRepository>(
@@ -91,7 +92,8 @@ class CoreModule implements DIModule {
 
       // FirebaseAnalyticsService - reuse the IAnalyticsRepository instance
       getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
-        () => getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
+        () =>
+            getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
       );
 
       // Subscription Repository from core package
@@ -104,7 +106,9 @@ class CoreModule implements DIModule {
         () => DataCleanerService.instance,
       );
 
-      debugPrint('✅ Core package services registered for Injectable dependencies');
+      debugPrint(
+        '✅ Core package services registered for Injectable dependencies',
+      );
     } catch (e) {
       debugPrint('⚠️ Warning: Could not register additional core services: $e');
     }

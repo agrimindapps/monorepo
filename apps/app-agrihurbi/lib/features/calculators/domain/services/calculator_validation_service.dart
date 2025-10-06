@@ -1,11 +1,11 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../entities/calculator_parameter.dart';
 import '../interfaces/calculator_strategy.dart';
 import '../repositories/calculator_data_repository.dart';
 
 /// Service especializado em validação de parâmetros de calculadoras
-/// 
+///
 /// Implementa Single Responsibility Principle (SRP) - foca apenas em validação.
 /// Separado do Calculator Engine para maior modularidade e testabilidade.
 @injectable
@@ -33,22 +33,25 @@ class CalculatorValidationService {
 
     for (final param in parameters) {
       final result = await _validateSingleParameter(param, inputs[param.id]);
-      
+
       if (result.hasError) {
         errors[param.id] = result.errorMessage!;
       }
-      
+
       if (result.hasWarning) {
         warnings[param.id] = result.warningMessage!;
       }
-      
+
       if (result.isValid) {
         sanitizedInputs[param.id] = result.sanitizedValue;
       }
     }
 
     // Validações cruzadas
-    final crossValidation = await _performCrossValidation(parameters, sanitizedInputs);
+    final crossValidation = await _performCrossValidation(
+      parameters,
+      sanitizedInputs,
+    );
     errors.addAll(crossValidation.errors);
     warnings.addAll(crossValidation.warnings);
 
@@ -77,22 +80,27 @@ class CalculatorValidationService {
     }
 
     final isValid = numValue >= ranges.minValue && numValue <= ranges.maxValue;
-    final isOptimal = numValue >= ranges.optimalMin && numValue <= ranges.optimalMax;
+    final isOptimal =
+        numValue >= ranges.optimalMin && numValue <= ranges.optimalMax;
 
     String? errorMessage;
     String? warningMessage;
 
     if (!isValid) {
       if (numValue < ranges.minValue) {
-        errorMessage = 'Valor deve ser maior que ${ranges.minValue} ${ranges.unit}';
+        errorMessage =
+            'Valor deve ser maior que ${ranges.minValue} ${ranges.unit}';
       } else {
-        errorMessage = 'Valor deve ser menor que ${ranges.maxValue} ${ranges.unit}';
+        errorMessage =
+            'Valor deve ser menor que ${ranges.maxValue} ${ranges.unit}';
       }
     } else if (!isOptimal) {
       if (numValue < ranges.optimalMin) {
-        warningMessage = 'Valor baixo. Recomendado: ${ranges.optimalMin}-${ranges.optimalMax} ${ranges.unit}';
+        warningMessage =
+            'Valor baixo. Recomendado: ${ranges.optimalMin}-${ranges.optimalMax} ${ranges.unit}';
       } else {
-        warningMessage = 'Valor alto. Recomendado: ${ranges.optimalMin}-${ranges.optimalMax} ${ranges.unit}';
+        warningMessage =
+            'Valor alto. Recomendado: ${ranges.optimalMin}-${ranges.optimalMax} ${ranges.unit}';
       }
     }
 
@@ -111,11 +119,14 @@ class CalculatorValidationService {
     Map<String, dynamic> inputs,
   ) async {
     final warnings = <String>[];
-    
+
     // Verificar produtividade realística
-    final expectedYield = double.tryParse(inputs['expected_yield']?.toString() ?? '0') ?? 0;
+    final expectedYield =
+        double.tryParse(inputs['expected_yield']?.toString() ?? '0') ?? 0;
     if (await _isYieldUnrealistic(cropType, expectedYield)) {
-      warnings.add('Produtividade esperada (${expectedYield}t/ha) pode estar acima da média para $cropType');
+      warnings.add(
+        'Produtividade esperada (${expectedYield}t/ha) pode estar acima da média para $cropType',
+      );
     }
 
     // Verificar coerência entre solo e cultura
@@ -125,9 +136,12 @@ class CalculatorValidationService {
     }
 
     // Verificar matéria orgânica adequada
-    final organicMatter = double.tryParse(inputs['organic_matter']?.toString() ?? '0') ?? 0;
+    final organicMatter =
+        double.tryParse(inputs['organic_matter']?.toString() ?? '0') ?? 0;
     if (organicMatter < 2.0) {
-      warnings.add('Matéria orgânica baixa (${organicMatter.toStringAsFixed(1)}%) pode limitar produtividade de $cropType');
+      warnings.add(
+        'Matéria orgânica baixa (${organicMatter.toStringAsFixed(1)}%) pode limitar produtividade de $cropType',
+      );
     }
 
     return CompatibilityValidationResult(
@@ -149,32 +163,48 @@ class CalculatorValidationService {
 
     // Validar N
     if (soilN < 10) {
-      warnings.add('Nitrogênio muito baixo no solo (${soilN}mg/dm³). Considere adubação nitrogenada intensiva.');
+      warnings.add(
+        'Nitrogênio muito baixo no solo (${soilN}mg/dm³). Considere adubação nitrogenada intensiva.',
+      );
     } else if (soilN > 100) {
-      warnings.add('Nitrogênio muito alto no solo (${soilN}mg/dm³). Risco de lixiviação.');
+      warnings.add(
+        'Nitrogênio muito alto no solo (${soilN}mg/dm³). Risco de lixiviação.',
+      );
     }
 
     // Validar P
     if (soilP < 5) {
-      warnings.add('Fósforo muito baixo no solo (${soilP}mg/dm³). Pode limitar desenvolvimento radicular.');
+      warnings.add(
+        'Fósforo muito baixo no solo (${soilP}mg/dm³). Pode limitar desenvolvimento radicular.',
+      );
     } else if (soilP > 60) {
-      warnings.add('Fósforo muito alto no solo (${soilP}mg/dm³). Pode interferir na absorção de micronutrientes.');
+      warnings.add(
+        'Fósforo muito alto no solo (${soilP}mg/dm³). Pode interferir na absorção de micronutrientes.',
+      );
     }
 
     // Validar K
     if (soilK < 40) {
-      warnings.add('Potássio baixo no solo (${soilK}mg/dm³). Importante para qualidade e resistência.');
+      warnings.add(
+        'Potássio baixo no solo (${soilK}mg/dm³). Importante para qualidade e resistência.',
+      );
     } else if (soilK > 300) {
-      warnings.add('Potássio muito alto no solo (${soilK}mg/dm³). Pode causar desequilíbrio nutricional.');
+      warnings.add(
+        'Potássio muito alto no solo (${soilK}mg/dm³). Pode causar desequilíbrio nutricional.',
+      );
     }
 
     // Validar relações entre nutrientes
     if (soilP > 0 && soilK > 0) {
       final relacaoKP = soilK / soilP;
       if (relacaoKP < 2.0) {
-        warnings.add('Relação K/P baixa (${relacaoKP.toStringAsFixed(1)}). Ideal: 2-4.');
+        warnings.add(
+          'Relação K/P baixa (${relacaoKP.toStringAsFixed(1)}). Ideal: 2-4.',
+        );
       } else if (relacaoKP > 6.0) {
-        warnings.add('Relação K/P alta (${relacaoKP.toStringAsFixed(1)}). Pode reduzir absorção de P.');
+        warnings.add(
+          'Relação K/P alta (${relacaoKP.toStringAsFixed(1)}). Pode reduzir absorção de P.',
+        );
       }
     }
 
@@ -193,8 +223,8 @@ class CalculatorValidationService {
     final missingRequired = <String>[];
 
     for (final param in parameters.where((p) => p.required)) {
-      if (!inputs.containsKey(param.id) || 
-          inputs[param.id] == null || 
+      if (!inputs.containsKey(param.id) ||
+          inputs[param.id] == null ||
           inputs[param.id].toString().trim().isEmpty) {
         missingRequired.add(param.name);
       }
@@ -235,7 +265,8 @@ class CalculatorValidationService {
     }
 
     // Validar range se aplicável
-    if (param.type == ParameterType.decimal || param.type == ParameterType.number) {
+    if (param.type == ParameterType.decimal ||
+        param.type == ParameterType.number) {
       final rangeValidation = await validateParameterRange(param.id, value);
       if (!rangeValidation.isValid) {
         return SingleParameterValidationResult(
@@ -243,7 +274,7 @@ class CalculatorValidationService {
           errorMessage: rangeValidation.errorMessage,
         );
       }
-      
+
       if (rangeValidation.warningMessage != null) {
         return SingleParameterValidationResult(
           isValid: true,
@@ -267,7 +298,8 @@ class CalculatorValidationService {
     } else {
       return SingleParameterValidationResult(
         isValid: false,
-        errorMessage: param.validationMessage ?? 'Valor inválido para ${param.name}',
+        errorMessage:
+            param.validationMessage ?? 'Valor inválido para ${param.name}',
       );
     }
   }
@@ -292,10 +324,12 @@ class CalculatorValidationService {
         );
 
       case ParameterType.selection:
-        if (param.options == null || !param.options!.contains(value.toString())) {
+        if (param.options == null ||
+            !param.options!.contains(value.toString())) {
           return SingleParameterValidationResult(
             isValid: false,
-            errorMessage: '${param.name} deve ser uma das opções: ${param.options?.join(', ')}',
+            errorMessage:
+                '${param.name} deve ser uma das opções: ${param.options?.join(', ')}',
           );
         }
         return SingleParameterValidationResult(
@@ -308,7 +342,8 @@ class CalculatorValidationService {
         if (numValue == null || numValue < 0 || numValue > 100) {
           return SingleParameterValidationResult(
             isValid: false,
-            errorMessage: '${param.name} deve ser uma porcentagem entre 0 e 100',
+            errorMessage:
+                '${param.name} deve ser uma porcentagem entre 0 e 100',
           );
         }
         return SingleParameterValidationResult(
@@ -333,22 +368,25 @@ class CalculatorValidationService {
 
     // Exemplo: validar se área é coerente com produção total esperada
     final area = double.tryParse(inputs['area']?.toString() ?? '0') ?? 0;
-    final expectedYield = double.tryParse(inputs['expected_yield']?.toString() ?? '0') ?? 0;
-    
+    final expectedYield =
+        double.tryParse(inputs['expected_yield']?.toString() ?? '0') ?? 0;
+
     if (area > 0 && expectedYield > 0) {
       final totalProduction = area * expectedYield;
-      if (totalProduction > 10000) { // > 10 mil toneladas
-        warnings['area'] = 'Produção total muito alta (${totalProduction.toStringAsFixed(0)}t). Verifique área e produtividade.';
+      if (totalProduction > 10000) {
+        // > 10 mil toneladas
+        warnings['area'] =
+            'Produção total muito alta (${totalProduction.toStringAsFixed(0)}t). Verifique área e produtividade.';
       }
     }
 
-    return CrossValidationResult(
-      errors: errors,
-      warnings: warnings,
-    );
+    return CrossValidationResult(errors: errors, warnings: warnings);
   }
 
-  Future<bool> _isYieldUnrealistic(String cropType, double expectedYield) async {
+  Future<bool> _isYieldUnrealistic(
+    String cropType,
+    double expectedYield,
+  ) async {
     // Produtividades consideradas altas por cultura
     final Map<String, double> realisticYields = {
       'Milho': 15.0,
@@ -463,8 +501,5 @@ class CrossValidationResult {
   final Map<String, String> errors;
   final Map<String, String> warnings;
 
-  const CrossValidationResult({
-    required this.errors,
-    required this.warnings,
-  });
+  const CrossValidationResult({required this.errors, required this.warnings});
 }

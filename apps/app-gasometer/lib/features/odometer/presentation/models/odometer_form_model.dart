@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -72,19 +72,19 @@ class OdometerFormModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        vehicleId,
-        vehicle,
-        value,
-        registrationDate,
-        description,
-        type,
-        isLoading,
-        hasChanges,
-        errors,
-        lastError,
-      ];
+    id,
+    userId,
+    vehicleId,
+    vehicle,
+    value,
+    registrationDate,
+    description,
+    type,
+    isLoading,
+    hasChanges,
+    errors,
+    lastError,
+  ];
 
   /// Creates new instance with updated values
   OdometerFormModel copyWith({
@@ -120,18 +120,13 @@ class OdometerFormModel extends Equatable {
 
   /// Checks if model has minimum valid data
   bool get hasMinimumData =>
-      vehicleId.isNotEmpty &&
-      value > 0 &&
-      description.trim().isNotEmpty;
+      vehicleId.isNotEmpty && value > 0 && description.trim().isNotEmpty;
 
   /// Checks if there are validation errors
   bool get hasErrors => errors.isNotEmpty;
 
   /// Checks if form is ready to submit
-  bool get canSubmit =>
-      hasMinimumData &&
-      !hasErrors &&
-      !isLoading;
+  bool get canSubmit => hasMinimumData && !hasErrors && !isLoading;
 
   /// Checks if this is an edit (has ID)
   bool get isEditing => id.isNotEmpty;
@@ -197,9 +192,11 @@ class OdometerFormModel extends Equatable {
     if (description.trim().isEmpty) {
       validationErrors['description'] = 'Descrição é obrigatória';
     } else if (description.trim().length < 3) {
-      validationErrors['description'] = 'Descrição muito curta (mínimo 3 caracteres)';
+      validationErrors['description'] =
+          'Descrição muito curta (mínimo 3 caracteres)';
     } else if (description.trim().length > 100) {
-      validationErrors['description'] = 'Descrição muito longa (máximo 100 caracteres)';
+      validationErrors['description'] =
+          'Descrição muito longa (máximo 100 caracteres)';
     }
 
     // Validate registration date
@@ -211,7 +208,8 @@ class OdometerFormModel extends Equatable {
     // Check if date is too old (more than 10 years)
     final tenYearsAgo = now.subtract(const Duration(days: 365 * 10));
     if (registrationDate.isBefore(tenYearsAgo)) {
-      validationErrors['registrationDate'] = 'Data muito antiga (mais de 10 anos)';
+      validationErrors['registrationDate'] =
+          'Data muito antiga (mais de 10 anos)';
     }
 
     return validationErrors;
@@ -223,7 +221,9 @@ class OdometerFormModel extends Equatable {
     final now = DateTime.now();
 
     // Sanitize all text fields before persistence
-    final sanitizedDescription = InputSanitizer.sanitizeDescription(description);
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(
+      description,
+    );
 
     return OdometerEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
@@ -233,7 +233,12 @@ class OdometerFormModel extends Equatable {
       registrationDate: registrationDate,
       description: sanitizedDescription,
       type: type,
-      createdAt: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
+      createdAt:
+          id.isEmpty
+              ? now
+              : DateTime.fromMillisecondsSinceEpoch(
+                int.tryParse(id) ?? now.millisecondsSinceEpoch,
+              ),
       updatedAt: now,
       metadata: const {},
     );
@@ -241,9 +246,10 @@ class OdometerFormModel extends Equatable {
 
   /// Resets form to initial state
   OdometerFormModel reset() {
-    return OdometerFormModel.initial(vehicleId, userId).copyWith(
-      vehicle: vehicle,
-    );
+    return OdometerFormModel.initial(
+      vehicleId,
+      userId,
+    ).copyWith(vehicle: vehicle);
   }
 
   /// Creates clean copy without changes or errors

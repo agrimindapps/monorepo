@@ -1,10 +1,10 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Get Market Summary Use Case
-/// 
+///
 /// Retrieves market summary with top performers and statistics
 @injectable
 class GetMarketSummary {
@@ -30,10 +30,7 @@ class GetTopGainers {
     int limit = 10,
     MarketType? type,
   }) async {
-    return await _repository.getTopGainers(
-      limit: limit,
-      type: type,
-    );
+    return await _repository.getTopGainers(limit: limit, type: type);
   }
 }
 
@@ -49,10 +46,7 @@ class GetTopLosers {
     int limit = 10,
     MarketType? type,
   }) async {
-    return await _repository.getTopLosers(
-      limit: limit,
-      type: type,
-    );
+    return await _repository.getTopLosers(limit: limit, type: type);
   }
 }
 
@@ -68,9 +62,6 @@ class GetMostActive {
     int limit = 10,
     MarketType? type,
   }) async {
-    return await _repository.getMostActive(
-      limit: limit,
-      type: type,
-    );
+    return await _repository.getMostActive(limit: limit, type: type);
   }
 }

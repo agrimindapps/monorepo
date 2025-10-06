@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Base class for all weather-related failures
 abstract class WeatherFailure extends Equatable {

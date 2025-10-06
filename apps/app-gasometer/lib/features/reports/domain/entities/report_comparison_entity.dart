@@ -1,8 +1,9 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import 'report_summary_entity.dart';
 
-class ReportComparisonEntity extends Equatable { // 'month_to_month', 'year_to_year', etc.
-  
+class ReportComparisonEntity extends Equatable {
+  // 'month_to_month', 'year_to_year', etc.
+
   const ReportComparisonEntity({
     required this.vehicleId,
     required this.currentPeriod,
@@ -13,33 +14,47 @@ class ReportComparisonEntity extends Equatable { // 'month_to_month', 'year_to_y
   final ReportSummaryEntity currentPeriod;
   final ReportSummaryEntity previousPeriod;
   final String comparisonType;
-  
+
   @override
-  List<Object> get props => [vehicleId, currentPeriod, previousPeriod, comparisonType];
-  
+  List<Object> get props => [
+    vehicleId,
+    currentPeriod,
+    previousPeriod,
+    comparisonType,
+  ];
+
   // Growth calculations
-  double get fuelSpentGrowth => currentPeriod.calculateGrowthRate(previousPeriod, 'fuel_spent');
-  double get fuelLitersGrowth => currentPeriod.calculateGrowthRate(previousPeriod, 'fuel_liters');
-  double get distanceGrowth => currentPeriod.calculateGrowthRate(previousPeriod, 'distance');
-  double get consumptionGrowth => currentPeriod.calculateGrowthRate(previousPeriod, 'consumption');
-  
+  double get fuelSpentGrowth =>
+      currentPeriod.calculateGrowthRate(previousPeriod, 'fuel_spent');
+  double get fuelLitersGrowth =>
+      currentPeriod.calculateGrowthRate(previousPeriod, 'fuel_liters');
+  double get distanceGrowth =>
+      currentPeriod.calculateGrowthRate(previousPeriod, 'distance');
+  double get consumptionGrowth =>
+      currentPeriod.calculateGrowthRate(previousPeriod, 'consumption');
+
   // Comparison insights
   bool get isFuelSpentIncreasing => fuelSpentGrowth > 0;
   bool get isFuelLitersIncreasing => fuelLitersGrowth > 0;
   bool get isDistanceIncreasing => distanceGrowth > 0;
-  bool get isConsumptionImproving => consumptionGrowth > 0; // Higher km/L is better
-  
+  bool get isConsumptionImproving =>
+      consumptionGrowth > 0; // Higher km/L is better
+
   // Summary
   bool get hasImprovedEfficiency => isConsumptionImproving;
   bool get hasReducedCosts => !isFuelSpentIncreasing;
   bool get hasIncreasedUsage => isDistanceIncreasing;
-  
+
   // Formatted growth rates
-  String get formattedFuelSpentGrowth => '${fuelSpentGrowth.abs().toStringAsFixed(1)}%';
-  String get formattedFuelLitersGrowth => '${fuelLitersGrowth.abs().toStringAsFixed(1)}%';
-  String get formattedDistanceGrowth => '${distanceGrowth.abs().toStringAsFixed(1)}%';
-  String get formattedConsumptionGrowth => '${consumptionGrowth.abs().toStringAsFixed(1)}%';
-  
+  String get formattedFuelSpentGrowth =>
+      '${fuelSpentGrowth.abs().toStringAsFixed(1)}%';
+  String get formattedFuelLitersGrowth =>
+      '${fuelLitersGrowth.abs().toStringAsFixed(1)}%';
+  String get formattedDistanceGrowth =>
+      '${distanceGrowth.abs().toStringAsFixed(1)}%';
+  String get formattedConsumptionGrowth =>
+      '${consumptionGrowth.abs().toStringAsFixed(1)}%';
+
   // Comparison insights text
   String get fuelSpentInsight {
     if (fuelSpentGrowth > 5) {
@@ -54,7 +69,7 @@ class ReportComparisonEntity extends Equatable { // 'month_to_month', 'year_to_y
       return 'Gastos com combustível mantidos estáveis';
     }
   }
-  
+
   String get consumptionInsight {
     if (consumptionGrowth > 5) {
       return 'Eficiência de combustível melhorou significativamente';
@@ -68,7 +83,7 @@ class ReportComparisonEntity extends Equatable { // 'month_to_month', 'year_to_y
       return 'Eficiência de combustível mantida estável';
     }
   }
-  
+
   String get distanceInsight {
     if (distanceGrowth > 20) {
       return 'Uso do veículo aumentou muito este período';
@@ -82,17 +97,17 @@ class ReportComparisonEntity extends Equatable { // 'month_to_month', 'year_to_y
       return 'Uso do veículo mantido estável';
     }
   }
-  
+
   // Overall assessment
   String get overallAssessment {
     int positiveFactors = 0;
     int negativeFactors = 0;
-    
+
     if (hasImprovedEfficiency) positiveFactors++;
     if (hasReducedCosts) positiveFactors++;
     if (!isConsumptionImproving && consumptionGrowth < -5) negativeFactors++;
     if (isFuelSpentIncreasing && fuelSpentGrowth > 10) negativeFactors++;
-    
+
     if (positiveFactors > negativeFactors) {
       return 'Desempenho melhorou neste período';
     } else if (negativeFactors > positiveFactors) {

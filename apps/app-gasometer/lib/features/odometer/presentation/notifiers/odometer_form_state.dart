@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/odometer_entity.dart';
@@ -71,20 +71,20 @@ class OdometerFormState extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        vehicleId,
-        vehicle,
-        odometerValue,
-        registrationDate,
-        description,
-        registrationType,
-        currentOdometer,
-        isLoading,
-        hasChanges,
-        errorMessage,
-        fieldErrors,
-      ];
+    id,
+    userId,
+    vehicleId,
+    vehicle,
+    odometerValue,
+    registrationDate,
+    description,
+    registrationType,
+    currentOdometer,
+    isLoading,
+    hasChanges,
+    errorMessage,
+    fieldErrors,
+  ];
 
   // ==================== Computed Properties ====================
 
@@ -96,9 +96,7 @@ class OdometerFormState extends Equatable {
 
   /// Verifica se tem dados mínimos válidos
   bool get hasMinimumData =>
-      vehicleId.isNotEmpty &&
-      odometerValue > 0 &&
-      registrationDate != null;
+      vehicleId.isNotEmpty && odometerValue > 0 && registrationDate != null;
 
   /// Verifica se tem erros de validação
   bool get hasErrors => fieldErrors.isNotEmpty;

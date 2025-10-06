@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../../cache/cache_service.dart';
 import '../../logging/datasources/log_local_datasource.dart';
@@ -15,7 +15,7 @@ import '../../performance/performance_service.dart' as local_perf;
 import '../di_module.dart';
 
 /// Core module responsible for external services and core infrastructure
-/// 
+///
 /// Follows SRP: Single responsibility of core services registration
 /// Follows OCP: Open for extension via DI module interface
 class CoreModule implements DIModule {
@@ -41,9 +41,10 @@ class CoreModule implements DIModule {
       );
 
       getIt.registerLazySingleton<core.IAnalyticsRepository>(
-        () => kDebugMode
-          ? core.MockAnalyticsService()
-          : core.FirebaseAnalyticsService(),
+        () =>
+            kDebugMode
+                ? core.MockAnalyticsService()
+                : core.FirebaseAnalyticsService(),
       );
 
       getIt.registerLazySingleton<core.ICrashlyticsRepository>(
@@ -76,11 +77,9 @@ class CoreModule implements DIModule {
 
   Future<void> _registerCoreServices(GetIt getIt) async {
     // Cache Service
-    getIt.registerLazySingleton<CacheService>(
-      () => CacheService(),
-    );
+    getIt.registerLazySingleton<CacheService>(() => CacheService());
 
-    // Notification Service - register always except for web 
+    // Notification Service - register always except for web
     if (!kIsWeb) {
       getIt.registerLazySingleton<NotificationService>(
         () => NotificationService(),

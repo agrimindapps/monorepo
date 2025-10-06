@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../../../../core/error/failures.dart';
 
@@ -13,7 +13,6 @@ import '../../../../core/error/failures.dart';
 /// do status de assinatura entre dispositivos
 @injectable
 class PremiumWebhookDataSource {
-
   PremiumWebhookDataSource(this._firestore);
   final FirebaseFirestore _firestore;
 
@@ -78,7 +77,9 @@ class PremiumWebhookDataSource {
   }
 
   /// Trata ativação de assinatura
-  Future<void> _handleSubscriptionActivated(Map<String, dynamic> payload) async {
+  Future<void> _handleSubscriptionActivated(
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final appUserId = payload['app_user_id'] as String;
       final productId = _extractProductId(payload);
@@ -99,7 +100,9 @@ class PremiumWebhookDataSource {
   }
 
   /// Trata desativação de assinatura
-  Future<void> _handleSubscriptionDeactivated(Map<String, dynamic> payload) async {
+  Future<void> _handleSubscriptionDeactivated(
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final appUserId = payload['app_user_id'] as String;
 
@@ -116,7 +119,9 @@ class PremiumWebhookDataSource {
   }
 
   /// Trata reativação de assinatura
-  Future<void> _handleSubscriptionReactivated(Map<String, dynamic> payload) async {
+  Future<void> _handleSubscriptionReactivated(
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final appUserId = payload['app_user_id'] as String;
       final productId = _extractProductId(payload);
@@ -166,7 +171,9 @@ class PremiumWebhookDataSource {
           newUserId: newAppUserId,
         );
 
-        debugPrint('[WebhookDataSource] Migração de $oldAppUserId para $newAppUserId');
+        debugPrint(
+          '[WebhookDataSource] Migração de $oldAppUserId para $newAppUserId',
+        );
       }
     } catch (e) {
       debugPrint('[WebhookDataSource] Erro ao tratar alias: $e');
@@ -211,17 +218,23 @@ class PremiumWebhookDataSource {
   }) async {
     try {
       // Busca dados do usuário antigo
-      final oldDoc = await _firestore
-          .collection('user_subscriptions')
-          .doc(oldUserId)
-          .get();
+      final oldDoc =
+          await _firestore
+              .collection('user_subscriptions')
+              .doc(oldUserId)
+              .get();
 
-      final oldDataResult = oldDoc.exists && oldDoc.data() != null
-          ? Right<Failure, Map<String, dynamic>?>(oldDoc.data() as Map<String, dynamic>)
-          : const Right<Failure, Map<String, dynamic>?>(null);
+      final oldDataResult =
+          oldDoc.exists && oldDoc.data() != null
+              ? Right<Failure, Map<String, dynamic>?>(
+                oldDoc.data() as Map<String, dynamic>,
+              )
+              : const Right<Failure, Map<String, dynamic>?>(null);
 
       oldDataResult.fold(
-        (failure) => debugPrint('[WebhookDataSource] Erro ao buscar dados antigos: $failure'),
+        (failure) => debugPrint(
+          '[WebhookDataSource] Erro ao buscar dados antigos: $failure',
+        ),
         (oldData) async {
           if (oldData != null) {
             // Copia para novo usuário

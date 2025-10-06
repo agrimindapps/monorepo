@@ -1,26 +1,10 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
-enum ReminderType {
-  vaccine,
-  medication,
-  appointment,
-  weight,
-  general,
-}
+enum ReminderType { vaccine, medication, appointment, weight, general }
 
-enum ReminderPriority {
-  low,
-  medium,
-  high,
-  urgent,
-}
+enum ReminderPriority { low, medium, high, urgent }
 
-enum ReminderStatus {
-  active,
-  completed,
-  cancelled,
-  snoozed,
-}
+enum ReminderStatus { active, completed, cancelled, snoozed }
 
 class Reminder extends Equatable {
   final String id;
@@ -97,17 +81,16 @@ class Reminder extends Equatable {
     );
   }
 
-  bool get isOverdue => 
-      status == ReminderStatus.active && 
-      DateTime.now().isAfter(scheduledDate);
+  bool get isOverdue =>
+      status == ReminderStatus.active && DateTime.now().isAfter(scheduledDate);
 
   bool get isDueToday {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final scheduled = DateTime(
-      scheduledDate.year, 
-      scheduledDate.month, 
-      scheduledDate.day
+      scheduledDate.year,
+      scheduledDate.month,
+      scheduledDate.day,
     );
     return today.isAtSameMomentAs(scheduled);
   }
@@ -120,21 +103,21 @@ class Reminder extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        animalId,
-        userId,
-        title,
-        description,
-        scheduledDate,
-        type,
-        priority,
-        status,
-        isRecurring,
-        recurringDays,
-        completedAt,
-        snoozeUntil,
-        metadata,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    animalId,
+    userId,
+    title,
+    description,
+    scheduledDate,
+    type,
+    priority,
+    status,
+    isRecurring,
+    recurringDays,
+    completedAt,
+    snoozeUntil,
+    metadata,
+    createdAt,
+    updatedAt,
+  ];
 }

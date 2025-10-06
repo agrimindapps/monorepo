@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -78,31 +78,32 @@ class ExpenseFormState extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        vehicleId,
-        vehicle,
-        expenseType,
-        description,
-        amount,
-        odometer,
-        date,
-        location,
-        notes,
-        receiptImagePath,
-        receiptImageUrl,
-        isLoading,
-        isUploadingImage,
-        hasChanges,
-        errorMessage,
-        imageUploadError,
-        fieldErrors,
-      ];
+    id,
+    userId,
+    vehicleId,
+    vehicle,
+    expenseType,
+    description,
+    amount,
+    odometer,
+    date,
+    location,
+    notes,
+    receiptImagePath,
+    receiptImageUrl,
+    isLoading,
+    isUploadingImage,
+    hasChanges,
+    errorMessage,
+    imageUploadError,
+    fieldErrors,
+  ];
 
   // ==================== Computed Properties ====================
 
   /// Verifica se tem comprovante (local ou remoto)
-  bool get hasReceiptImage => receiptImagePath != null || receiptImageUrl != null;
+  bool get hasReceiptImage =>
+      receiptImagePath != null || receiptImageUrl != null;
 
   /// Verifica se está em algum estado de loading
   bool get isProcessing => isLoading || isUploadingImage;
@@ -169,17 +170,18 @@ class ExpenseFormState extends Equatable {
       date: date ?? this.date,
       location: location ?? this.location,
       notes: notes ?? this.notes,
-      receiptImagePath: clearReceiptImage
-          ? null
-          : (receiptImagePath ?? this.receiptImagePath),
-      receiptImageUrl: clearReceiptUrl
-          ? null
-          : (receiptImageUrl ?? this.receiptImageUrl),
+      receiptImagePath:
+          clearReceiptImage
+              ? null
+              : (receiptImagePath ?? this.receiptImagePath),
+      receiptImageUrl:
+          clearReceiptUrl ? null : (receiptImageUrl ?? this.receiptImageUrl),
       isLoading: isLoading ?? this.isLoading,
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
       hasChanges: hasChanges ?? this.hasChanges,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
-      imageUploadError: imageUploadError != null ? imageUploadError() : this.imageUploadError,
+      imageUploadError:
+          imageUploadError != null ? imageUploadError() : this.imageUploadError,
       fieldErrors: fieldErrors ?? this.fieldErrors,
     );
   }

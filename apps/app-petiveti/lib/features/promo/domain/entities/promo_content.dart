@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Entidade que representa o conteúdo promocional do app
 class PromoContent extends Equatable {
@@ -28,17 +28,17 @@ class PromoContent extends Equatable {
 
   @override
   List<Object?> get props => [
-        appName,
-        appVersion,
-        appDescription,
-        appTagline,
-        features,
-        testimonials,
-        faqs,
-        screenshots,
-        launchInfo,
-        contactInfo,
-      ];
+    appName,
+    appVersion,
+    appDescription,
+    appTagline,
+    features,
+    testimonials,
+    faqs,
+    screenshots,
+    launchInfo,
+    contactInfo,
+  ];
 }
 
 /// Entidade que representa uma funcionalidade do app
@@ -144,7 +144,12 @@ class LaunchInfo extends Equatable {
   });
 
   @override
-  List<Object?> get props => [isLaunched, launchDate, preRegistrationCount, betaAccessAvailable];
+  List<Object?> get props => [
+    isLaunched,
+    launchDate,
+    preRegistrationCount,
+    betaAccessAvailable,
+  ];
 }
 
 /// Entidade que representa informações de contato
@@ -175,15 +180,15 @@ class ContactInfo extends Equatable {
 
   @override
   List<Object?> get props => [
-        supportEmail,
-        supportPhone,
-        websiteUrl,
-        appStoreUrl,
-        googlePlayUrl,
-        facebookUrl,
-        instagramUrl,
-        twitterUrl,
-        privacyPolicyUrl,
-        termsOfServiceUrl,
-      ];
+    supportEmail,
+    supportPhone,
+    websiteUrl,
+    appStoreUrl,
+    googlePlayUrl,
+    facebookUrl,
+    instagramUrl,
+    twitterUrl,
+    privacyPolicyUrl,
+    termsOfServiceUrl,
+  ];
 }

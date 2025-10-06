@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Base class for all application errors
 /// Provides consistent error handling across the entire app
 abstract class AppError extends Equatable {
-  
   const AppError({
     required this.message,
     this.technicalDetails,
@@ -18,14 +17,13 @@ abstract class AppError extends Equatable {
   final ErrorSeverity severity;
   final bool isRecoverable;
   final Map<String, dynamic>? metadata;
-  
+
   /// Get user-friendly message with fallback
-  String get displayMessage => 
-    userFriendlyMessage ?? _getDefaultUserMessage();
-  
+  String get displayMessage => userFriendlyMessage ?? _getDefaultUserMessage();
+
   /// Get default user message based on error type
   String _getDefaultUserMessage();
-  
+
   /// Convert error to map for logging
   Map<String, dynamic> toMap() {
     return {
@@ -39,7 +37,7 @@ abstract class AppError extends Equatable {
       'timestamp': DateTime.now().toIso8601String(),
     };
   }
-  
+
   @override
   List<Object?> get props => [
     message,
@@ -52,13 +50,7 @@ abstract class AppError extends Equatable {
 }
 
 /// Error severity levels
-enum ErrorSeverity {
-  info,
-  warning,
-  error,
-  critical,
-  fatal,
-}
+enum ErrorSeverity { info, warning, error, critical, fatal }
 
 // ============================================================================
 // NETWORK ERRORS
@@ -70,14 +62,11 @@ class NetworkError extends AppError {
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.error,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.error, isRecoverable: true);
 
   @override
   String _getDefaultUserMessage() =>
-    'Problemas de conexão. Verifique sua internet e tente novamente.';
+      'Problemas de conexão. Verifique sua internet e tente novamente.';
 }
 
 class TimeoutError extends NetworkError {
@@ -86,8 +75,9 @@ class TimeoutError extends NetworkError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'A operação demorou muito para responder. Tente novamente.',
-  );
+         userFriendlyMessage:
+             'A operação demorou muito para responder. Tente novamente.',
+       );
 }
 
 class NoInternetError extends NetworkError {
@@ -96,8 +86,9 @@ class NoInternetError extends NetworkError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Sem conexão com a internet. Verifique sua conectividade.',
-  );
+         userFriendlyMessage:
+             'Sem conexão com a internet. Verifique sua conectividade.',
+       );
 }
 
 // ============================================================================
@@ -105,22 +96,18 @@ class NoInternetError extends NetworkError {
 // ============================================================================
 
 class ServerError extends AppError {
-  
   const ServerError({
     required super.message,
     this.statusCode,
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.error,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.error, isRecoverable: true);
   final int? statusCode;
 
   @override
   String _getDefaultUserMessage() =>
-    'Erro no servidor. Tente novamente em alguns minutos.';
+      'Erro no servidor. Tente novamente em alguns minutos.';
 }
 
 class BadRequestError extends ServerError {
@@ -128,10 +115,7 @@ class BadRequestError extends ServerError {
     required super.message,
     super.technicalDetails,
     super.metadata,
-  }) : super(
-    statusCode: 400,
-    userFriendlyMessage: 'Dados inválidos enviados.',
-  );
+  }) : super(statusCode: 400, userFriendlyMessage: 'Dados inválidos enviados.');
 }
 
 class UnauthorizedError extends ServerError {
@@ -140,9 +124,9 @@ class UnauthorizedError extends ServerError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    statusCode: 401,
-    userFriendlyMessage: 'Sessão expirada. Faça login novamente.',
-  );
+         statusCode: 401,
+         userFriendlyMessage: 'Sessão expirada. Faça login novamente.',
+       );
 }
 
 class ForbiddenError extends ServerError {
@@ -151,9 +135,9 @@ class ForbiddenError extends ServerError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    statusCode: 403,
-    userFriendlyMessage: 'Você não tem permissão para esta operação.',
-  );
+         statusCode: 403,
+         userFriendlyMessage: 'Você não tem permissão para esta operação.',
+       );
 }
 
 class NotFoundError extends ServerError {
@@ -161,10 +145,7 @@ class NotFoundError extends ServerError {
     required super.message,
     super.technicalDetails,
     super.metadata,
-  }) : super(
-    statusCode: 404,
-    userFriendlyMessage: 'Recurso não encontrado.',
-  );
+  }) : super(statusCode: 404, userFriendlyMessage: 'Recurso não encontrado.');
 }
 
 class InternalServerError extends ServerError {
@@ -173,9 +154,10 @@ class InternalServerError extends ServerError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    statusCode: 500,
-    userFriendlyMessage: 'Erro interno do servidor. Tente novamente mais tarde.',
-  );
+         statusCode: 500,
+         userFriendlyMessage:
+             'Erro interno do servidor. Tente novamente mais tarde.',
+       );
 }
 
 // ============================================================================
@@ -183,23 +165,19 @@ class InternalServerError extends ServerError {
 // ============================================================================
 
 class ValidationError extends AppError {
-  
   const ValidationError({
     required super.message,
     this.fieldErrors = const {},
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.warning,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.warning, isRecoverable: true);
   final Map<String, List<String>> fieldErrors;
 
   @override
   String _getDefaultUserMessage() =>
-    'Dados inválidos. Verifique os campos e tente novamente.';
-  
+      'Dados inválidos. Verifique os campos e tente novamente.';
+
   @override
   Map<String, dynamic> toMap() {
     final map = super.toMap();
@@ -218,10 +196,7 @@ class BusinessLogicError extends AppError {
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.warning,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.warning, isRecoverable: true);
 
   @override
   String _getDefaultUserMessage() => message;
@@ -232,9 +207,7 @@ class VehicleNotFoundError extends BusinessLogicError {
     super.message = 'Vehicle not found',
     super.technicalDetails,
     super.metadata,
-  }) : super(
-    userFriendlyMessage: 'Veículo não encontrado.',
-  );
+  }) : super(userFriendlyMessage: 'Veículo não encontrado.');
 }
 
 class ExpenseNotFoundError extends BusinessLogicError {
@@ -242,9 +215,7 @@ class ExpenseNotFoundError extends BusinessLogicError {
     super.message = 'Expense not found',
     super.technicalDetails,
     super.metadata,
-  }) : super(
-    userFriendlyMessage: 'Despesa não encontrada.',
-  );
+  }) : super(userFriendlyMessage: 'Despesa não encontrada.');
 }
 
 class DuplicateVehicleError extends BusinessLogicError {
@@ -253,8 +224,8 @@ class DuplicateVehicleError extends BusinessLogicError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Já existe um veículo com essas informações.',
-  );
+         userFriendlyMessage: 'Já existe um veículo com essas informações.',
+       );
 }
 
 class InvalidOdometerError extends BusinessLogicError {
@@ -263,8 +234,9 @@ class InvalidOdometerError extends BusinessLogicError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Quilometragem inválida. Deve ser maior que a anterior.',
-  );
+         userFriendlyMessage:
+             'Quilometragem inválida. Deve ser maior que a anterior.',
+       );
 }
 
 // ============================================================================
@@ -277,14 +249,10 @@ class StorageError extends AppError {
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.error,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.error, isRecoverable: true);
 
   @override
-  String _getDefaultUserMessage() =>
-    'Erro ao salvar dados. Tente novamente.';
+  String _getDefaultUserMessage() => 'Erro ao salvar dados. Tente novamente.';
 }
 
 class CacheError extends StorageError {
@@ -293,8 +261,9 @@ class CacheError extends StorageError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Erro de cache local. Os dados podem estar desatualizados.',
-  );
+         userFriendlyMessage:
+             'Erro de cache local. Os dados podem estar desatualizados.',
+       );
 }
 
 class DatabaseError extends StorageError {
@@ -303,8 +272,8 @@ class DatabaseError extends StorageError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Erro no banco de dados. Tente reiniciar o app.',
-  );
+         userFriendlyMessage: 'Erro no banco de dados. Tente reiniciar o app.',
+       );
 }
 
 // ============================================================================
@@ -317,14 +286,11 @@ class SyncError extends AppError {
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.warning,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.warning, isRecoverable: true);
 
   @override
   String _getDefaultUserMessage() =>
-    'Erro de sincronização. Seus dados locais estão seguros.';
+      'Erro de sincronização. Seus dados locais estão seguros.';
 }
 
 class ConflictError extends SyncError {
@@ -333,8 +299,9 @@ class ConflictError extends SyncError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Conflito de dados detectado. Resolução automática aplicada.',
-  );
+         userFriendlyMessage:
+             'Conflito de dados detectado. Resolução automática aplicada.',
+       );
 }
 
 // ============================================================================
@@ -347,14 +314,11 @@ class AuthenticationError extends AppError {
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.critical,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.critical, isRecoverable: true);
 
   @override
   String _getDefaultUserMessage() =>
-    'Erro de autenticação. Verifique suas credenciais.';
+      'Erro de autenticação. Verifique suas credenciais.';
 }
 
 class InvalidCredentialsError extends AuthenticationError {
@@ -362,9 +326,7 @@ class InvalidCredentialsError extends AuthenticationError {
     super.message = 'Invalid credentials',
     super.technicalDetails,
     super.metadata,
-  }) : super(
-    userFriendlyMessage: 'Email ou senha incorretos.',
-  );
+  }) : super(userFriendlyMessage: 'Email ou senha incorretos.');
 }
 
 class AccountDisabledError extends AuthenticationError {
@@ -373,8 +335,9 @@ class AccountDisabledError extends AuthenticationError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    userFriendlyMessage: 'Sua conta foi desabilitada. Entre em contato conosco.',
-  );
+         userFriendlyMessage:
+             'Sua conta foi desabilitada. Entre em contato conosco.',
+       );
 }
 
 // ============================================================================
@@ -382,23 +345,18 @@ class AccountDisabledError extends AuthenticationError {
 // ============================================================================
 
 class PermissionError extends AppError {
-  
   const PermissionError({
     required this.permission,
     required super.message,
     super.technicalDetails,
     super.userFriendlyMessage,
     super.metadata,
-  }) : super(
-    severity: ErrorSeverity.warning,
-    isRecoverable: true,
-  );
+  }) : super(severity: ErrorSeverity.warning, isRecoverable: true);
   final String permission;
 
   @override
-  String _getDefaultUserMessage() =>
-    'Permissão necessária para continuar.';
-  
+  String _getDefaultUserMessage() => 'Permissão necessária para continuar.';
+
   @override
   Map<String, dynamic> toMap() {
     final map = super.toMap();
@@ -417,12 +375,12 @@ class UnexpectedError extends AppError {
     super.technicalDetails,
     super.metadata,
   }) : super(
-    severity: ErrorSeverity.fatal,
-    isRecoverable: true,
-    userFriendlyMessage: 'Erro inesperado. Tente reiniciar o aplicativo.',
-  );
+         severity: ErrorSeverity.fatal,
+         isRecoverable: true,
+         userFriendlyMessage: 'Erro inesperado. Tente reiniciar o aplicativo.',
+       );
 
   @override
   String _getDefaultUserMessage() =>
-    'Algo deu errado. Tente novamente ou reinicie o aplicativo.';
+      'Algo deu errado. Tente novamente ou reinicie o aplicativo.';
 }

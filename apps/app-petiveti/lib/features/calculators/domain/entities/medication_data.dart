@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import 'medication_dosage_input.dart';
 
 /// Concentração disponível do medicamento
@@ -54,14 +54,14 @@ class DosageRange extends Equatable {
 
   @override
   List<Object?> get props => [
-        minDose,
-        maxDose,
-        toxicDose,
-        lethalDose,
-        species,
-        ageGroup,
-        applicableConditions,
-      ];
+    minDose,
+    maxDose,
+    toxicDose,
+    lethalDose,
+    species,
+    ageGroup,
+    applicableConditions,
+  ];
 }
 
 /// Contraindicação do medicamento
@@ -148,12 +148,18 @@ class MedicationData extends Equatable {
   }
 
   /// Verifica se o medicamento é contraindicado para as condições especificadas
-  List<Contraindication> getContraindications(List<SpecialCondition> conditions) {
-    return contraindications.where((contraindication) =>
-      conditions.any((condition) => 
-        contraindication.condition.toLowerCase().contains(condition.displayName.toLowerCase())
-      )
-    ).toList();
+  List<Contraindication> getContraindications(
+    List<SpecialCondition> conditions,
+  ) {
+    return contraindications
+        .where(
+          (contraindication) => conditions.any(
+            (condition) => contraindication.condition.toLowerCase().contains(
+              condition.displayName.toLowerCase(),
+            ),
+          ),
+        )
+        .toList();
   }
 
   /// Verifica se o medicamento é seguro para gestantes
@@ -179,27 +185,27 @@ class MedicationData extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        activeIngredient,
-        category,
-        indications,
-        dosageRanges,
-        concentrations,
-        pharmaceuticalForms,
-        recommendedFrequencies,
-        administrationRoutes,
-        contraindications,
-        sideEffects,
-        drugInteractions,
-        pregnancyCategory,
-        lactationSafety,
-        speciesSpecificWarnings,
-        storageInstructions,
-        clinicalNotes,
-        requiresPrescription,
-        lastUpdated,
-      ];
+    id,
+    name,
+    activeIngredient,
+    category,
+    indications,
+    dosageRanges,
+    concentrations,
+    pharmaceuticalForms,
+    recommendedFrequencies,
+    administrationRoutes,
+    contraindications,
+    sideEffects,
+    drugInteractions,
+    pregnancyCategory,
+    lactationSafety,
+    speciesSpecificWarnings,
+    storageInstructions,
+    clinicalNotes,
+    requiresPrescription,
+    lastUpdated,
+  ];
 
   @override
   String toString() {

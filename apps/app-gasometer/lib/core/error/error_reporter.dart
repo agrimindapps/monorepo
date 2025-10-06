@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 import 'package:core/core.dart' as core;
 
 import 'package:gasometer/core/services/gasometer_analytics_service.dart';
@@ -27,7 +27,7 @@ class _CrashlyticsHelper {
 
     // Don't check too frequently
     final now = DateTime.now();
-    if (_lastInitCheck != null && 
+    if (_lastInitCheck != null &&
         now.difference(_lastInitCheck!) < _initCheckCooldown) {
       return _isInitialized;
     }
@@ -37,11 +37,12 @@ class _CrashlyticsHelper {
     try {
       // Try to access Crashlytics instance with timeout
       final instance = FirebaseCrashlytics.instance;
-      
+
       // Try a simple operation to verify it's working with timeout
-      await instance.log('Crashlytics availability check')
+      await instance
+          .log('Crashlytics availability check')
           .timeout(const Duration(seconds: 2));
-      
+
       _isInitialized = true;
       return true;
     } catch (e) {
@@ -71,7 +72,6 @@ class _CrashlyticsHelper {
 /// Integrates with Firebase Crashlytics and Analytics
 @injectable
 class ErrorReporter {
-
   const ErrorReporter(this._analyticsService);
   final GasometerAnalyticsService _analyticsService;
 
@@ -154,7 +154,8 @@ class ErrorReporter {
       additionalData: {
         'endpoint': endpoint,
         'method': method,
-        'status_code': error is ServerError ? (error as ServerError).statusCode : null,
+        'status_code':
+            error is ServerError ? (error as ServerError).statusCode : null,
         'request_data': requestData,
       },
     );
@@ -196,9 +197,9 @@ class ErrorReporter {
       // Only set Crashlytics context if available (not in debug mode)
       if (!kDebugMode && await _CrashlyticsHelper.isAvailable()) {
         final crashlyticsInstance = FirebaseCrashlytics.instance;
-        
+
         await crashlyticsInstance.setUserIdentifier(userId ?? 'anonymous');
-        
+
         await Future.wait([
           crashlyticsInstance.setCustomKey('is_anonymous', isAnonymous ?? true),
           crashlyticsInstance.setCustomKey('is_premium', isPremium ?? false),
@@ -219,11 +220,7 @@ class ErrorReporter {
   /// Clear user context (for logout)
   Future<void> clearUserContext() async {
     try {
-      await setUserContext(
-        userId: null,
-        isAnonymous: true,
-        isPremium: false,
-      );
+      await setUserContext(userId: null, isAnonymous: true, isPremium: false);
     } catch (e) {
       print('Failed to clear user context: $e');
     }
@@ -247,7 +244,7 @@ class ErrorReporter {
       }
 
       final crashlyticsInstance = FirebaseCrashlytics.instance;
-      
+
       // Set context information
       if (context != null) {
         await crashlyticsInstance.setCustomKey('error_context', context);
@@ -264,9 +261,18 @@ class ErrorReporter {
       }
 
       // Set error type and severity
-      await crashlyticsInstance.setCustomKey('error_type', error.runtimeType.toString());
-      await crashlyticsInstance.setCustomKey('error_severity', error.severity.name);
-      await crashlyticsInstance.setCustomKey('is_recoverable', error.isRecoverable);
+      await crashlyticsInstance.setCustomKey(
+        'error_type',
+        error.runtimeType.toString(),
+      );
+      await crashlyticsInstance.setCustomKey(
+        'error_severity',
+        error.severity.name,
+      );
+      await crashlyticsInstance.setCustomKey(
+        'is_recoverable',
+        error.isRecoverable,
+      );
 
       if (fatal) {
         await FirebaseCrashlytics.instance.recordFlutterFatalError(
@@ -333,9 +339,9 @@ class ErrorReporter {
       // Only use Crashlytics in production and if available
       if (!kDebugMode && await _CrashlyticsHelper.isAvailable()) {
         final crashlyticsInstance = FirebaseCrashlytics.instance;
-        
+
         await crashlyticsInstance.log('[$category] $message');
-        
+
         if (data != null) {
           for (final entry in data.entries) {
             await crashlyticsInstance.setCustomKey(
@@ -391,12 +397,14 @@ extension AppErrorReporting on AppError {
     try {
       // This would normally use dependency injection
       // For now, we'll create a simple reporter
-      final reporter = ErrorReporter(GasometerAnalyticsService(
-        core.EnhancedAnalyticsService(
-          analytics: core.MockAnalyticsService(),
-          crashlytics: core.FirebaseCrashlyticsService(),
+      final reporter = ErrorReporter(
+        GasometerAnalyticsService(
+          core.EnhancedAnalyticsService(
+            analytics: core.MockAnalyticsService(),
+            crashlytics: core.FirebaseCrashlyticsService(),
+          ),
         ),
-      ));
+      );
       await reporter.reportError(
         this,
         stackTrace: stackTrace,

@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import 'expense.dart';
 
 class ExpenseSummary extends Equatable {
@@ -39,19 +39,28 @@ class ExpenseSummary extends Equatable {
       );
     }
 
-    final totalAmount = expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
-    
+    final totalAmount = expenses.fold<double>(
+      0,
+      (sum, expense) => sum + expense.amount,
+    );
+
     final now = DateTime.now();
     final monthlyExpenses = expenses.where((e) => e.isCurrentMonth).toList();
     final yearlyExpenses = expenses.where((e) => e.isCurrentYear).toList();
-    
-    final monthlyAmount = monthlyExpenses.fold<double>(0, (sum, expense) => sum + expense.amount);
-    final yearlyAmount = yearlyExpenses.fold<double>(0, (sum, expense) => sum + expense.amount);
+
+    final monthlyAmount = monthlyExpenses.fold<double>(
+      0,
+      (sum, expense) => sum + expense.amount,
+    );
+    final yearlyAmount = yearlyExpenses.fold<double>(
+      0,
+      (sum, expense) => sum + expense.amount,
+    );
 
     // Category breakdown
     final categoryBreakdown = <ExpenseCategory, double>{};
     for (final expense in expenses) {
-      categoryBreakdown[expense.category] = 
+      categoryBreakdown[expense.category] =
           (categoryBreakdown[expense.category] ?? 0) + expense.amount;
     }
 
@@ -60,9 +69,18 @@ class ExpenseSummary extends Equatable {
     for (int i = 0; i < 12; i++) {
       final date = DateTime(now.year, now.month - i, 1);
       final monthKey = '${date.year}-${date.month.toString().padLeft(2, '0')}';
-      final monthExpenses = expenses.where((e) => 
-          e.expenseDate.year == date.year && e.expenseDate.month == date.month).toList();
-      monthlyBreakdown[monthKey] = monthExpenses.fold<double>(0, (sum, expense) => sum + expense.amount);
+      final monthExpenses =
+          expenses
+              .where(
+                (e) =>
+                    e.expenseDate.year == date.year &&
+                    e.expenseDate.month == date.month,
+              )
+              .toList();
+      monthlyBreakdown[monthKey] = monthExpenses.fold<double>(
+        0,
+        (sum, expense) => sum + expense.amount,
+      );
     }
 
     // Most expensive category
@@ -78,10 +96,10 @@ class ExpenseSummary extends Equatable {
     // Most used payment method
     final paymentMethodCount = <PaymentMethod, int>{};
     for (final expense in expenses) {
-      paymentMethodCount[expense.paymentMethod] = 
+      paymentMethodCount[expense.paymentMethod] =
           (paymentMethodCount[expense.paymentMethod] ?? 0) + 1;
     }
-    
+
     var mostUsedPaymentMethod = PaymentMethod.cash;
     int maxMethodCount = 0;
     paymentMethodCount.forEach((method, count) {
@@ -106,14 +124,14 @@ class ExpenseSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalAmount,
-        monthlyAmount,
-        yearlyAmount,
-        categoryBreakdown,
-        monthlyBreakdown,
-        totalExpenses,
-        averageExpense,
-        mostExpensiveCategory,
-        mostUsedPaymentMethod,
-      ];
+    totalAmount,
+    monthlyAmount,
+    yearlyAmount,
+    categoryBreakdown,
+    monthlyBreakdown,
+    totalExpenses,
+    averageExpense,
+    mostExpensiveCategory,
+    mostUsedPaymentMethod,
+  ];
 }

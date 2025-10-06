@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Tipos de severidade para alertas e recomendações
 enum ResultSeverity {
@@ -8,7 +8,7 @@ enum ResultSeverity {
   success('success', 'Sucesso');
 
   const ResultSeverity(this.code, this.displayName);
-  
+
   final String code;
   final String displayName;
 }
@@ -25,16 +25,16 @@ class ResultItem extends Equatable {
 
   /// Label do resultado (ex: "Dosagem recomendada")
   final String label;
-  
+
   /// Valor do resultado
   final dynamic value;
-  
+
   /// Unidade do resultado (ex: "ml", "mg/kg")
   final String? unit;
-  
+
   /// Severidade do resultado
   final ResultSeverity severity;
-  
+
   /// Descrição adicional do resultado
   final String? description;
 
@@ -60,16 +60,16 @@ class Recommendation extends Equatable {
 
   /// Título da recomendação
   final String title;
-  
+
   /// Mensagem da recomendação
   final String message;
-  
+
   /// Severidade da recomendação
   final ResultSeverity severity;
-  
+
   /// Label de ação (ex: "Consultar veterinário")
   final String? actionLabel;
-  
+
   /// URL de ação (para mais informações)
   final String? actionUrl;
 
@@ -89,30 +89,38 @@ abstract class CalculationResult extends Equatable {
 
   /// ID da calculadora que gerou este resultado
   final String calculatorId;
-  
+
   /// Lista de resultados do cálculo
   final List<ResultItem> results;
-  
+
   /// Lista de recomendações baseadas no resultado
   final List<Recommendation> recommendations;
-  
+
   /// Resumo textual do resultado
   final String? summary;
-  
+
   /// Data/hora do cálculo
   final DateTime? calculatedAt;
 
   /// Verifica se há algum resultado com severidade de perigo
-  bool get hasCriticalResults => results.any((r) => r.severity == ResultSeverity.danger) ||
+  bool get hasCriticalResults =>
+      results.any((r) => r.severity == ResultSeverity.danger) ||
       recommendations.any((r) => r.severity == ResultSeverity.danger);
 
   /// Verifica se há algum resultado com severidade de aviso
-  bool get hasWarnings => results.any((r) => r.severity == ResultSeverity.warning) ||
+  bool get hasWarnings =>
+      results.any((r) => r.severity == ResultSeverity.warning) ||
       recommendations.any((r) => r.severity == ResultSeverity.warning);
 
   /// Retorna o resultado principal (primeiro da lista)
   ResultItem? get primaryResult => results.isNotEmpty ? results.first : null;
 
   @override
-  List<Object?> get props => [calculatorId, results, recommendations, summary, calculatedAt];
+  List<Object?> get props => [
+    calculatorId,
+    results,
+    recommendations,
+    summary,
+    calculatedAt,
+  ];
 }

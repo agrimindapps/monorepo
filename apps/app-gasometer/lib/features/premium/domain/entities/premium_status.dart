@@ -1,5 +1,5 @@
 import 'package:core/core.dart' as core;
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import 'premium_features.dart';
 
@@ -66,9 +66,7 @@ class PremiumStatus extends Equatable {
   );
 
   /// Status com licença local de desenvolvimento
-  static PremiumStatus localLicense({
-    required DateTime expiration,
-  }) {
+  static PremiumStatus localLicense({required DateTime expiration}) {
     return PremiumStatus(
       isPremium: true,
       features: PremiumFeatures.all,
@@ -95,8 +93,8 @@ class PremiumStatus extends Equatable {
 
   /// Se tem licença local ativa
   bool get hasActiveLocalLicense {
-    return localLicenseExpiration != null && 
-           DateTime.now().isBefore(localLicenseExpiration!);
+    return localLicenseExpiration != null &&
+        DateTime.now().isBefore(localLicenseExpiration!);
   }
 
   /// Se tem assinatura ativa
@@ -115,18 +113,18 @@ class PremiumStatus extends Equatable {
   /// Dias restantes até expiração
   int? get daysUntilExpiration {
     DateTime? expirationToCheck;
-    
+
     if (localLicenseExpiration != null) {
       expirationToCheck = localLicenseExpiration;
     } else if (expirationDate != null) {
       expirationToCheck = expirationDate;
     }
-    
+
     if (expirationToCheck == null) return null;
-    
+
     final now = DateTime.now();
     if (now.isAfter(expirationToCheck)) return 0;
-    
+
     return expirationToCheck.difference(now).inDays;
   }
 
@@ -170,21 +168,22 @@ class PremiumStatus extends Equatable {
       expirationDate: expirationDate ?? this.expirationDate,
       isInTrial: isInTrial ?? this.isInTrial,
       trialDaysRemaining: trialDaysRemaining ?? this.trialDaysRemaining,
-      localLicenseExpiration: localLicenseExpiration ?? this.localLicenseExpiration,
+      localLicenseExpiration:
+          localLicenseExpiration ?? this.localLicenseExpiration,
     );
   }
 
   @override
   List<Object?> get props => [
-        isPremium,
-        features,
-        limits,
-        subscription,
-        expirationDate,
-        isInTrial,
-        trialDaysRemaining,
-        localLicenseExpiration,
-      ];
+    isPremium,
+    features,
+    limits,
+    subscription,
+    expirationDate,
+    isInTrial,
+    trialDaysRemaining,
+    localLicenseExpiration,
+  ];
 
   @override
   String toString() {

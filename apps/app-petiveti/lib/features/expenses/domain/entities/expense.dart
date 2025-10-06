@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 enum ExpenseCategory {
   consultation,
@@ -24,11 +24,7 @@ enum PaymentMethod {
   other,
 }
 
-enum RecurrenceType {
-  weekly,
-  monthly,
-  yearly,
-}
+enum RecurrenceType { weekly, monthly, yearly }
 
 class Expense extends Equatable {
   final String id;
@@ -147,28 +143,28 @@ class Expense extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        animalId,
-        userId,
-        title,
-        description,
-        amount,
-        category,
-        paymentMethod,
-        expenseDate,
-        veterinaryClinic,
-        veterinarianName,
-        invoiceNumber,
-        notes,
-        veterinarian,
-        receiptNumber,
-        isPaid,
-        isRecurring,
-        recurrenceType,
-        isDeleted,
-        attachments,
-        metadata,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    animalId,
+    userId,
+    title,
+    description,
+    amount,
+    category,
+    paymentMethod,
+    expenseDate,
+    veterinaryClinic,
+    veterinarianName,
+    invoiceNumber,
+    notes,
+    veterinarian,
+    receiptNumber,
+    isPaid,
+    isRecurring,
+    recurrenceType,
+    isDeleted,
+    attachments,
+    metadata,
+    createdAt,
+    updatedAt,
+  ];
 }

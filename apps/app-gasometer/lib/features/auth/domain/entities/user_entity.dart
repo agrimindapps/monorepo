@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 enum UserType { anonymous, registered, premium }
 
 class UserEntity extends Equatable {
-
   const UserEntity({
     required this.id,
     this.email,
@@ -28,15 +27,16 @@ class UserEntity extends Equatable {
   final Map<String, dynamic> metadata;
 
   bool get isAnonymous => type == UserType.anonymous;
-  bool get isRegistered => type == UserType.registered || type == UserType.premium;
+  bool get isRegistered =>
+      type == UserType.registered || type == UserType.premium;
   bool get isPremium => type == UserType.premium;
-  
+
   // Compatibility getter
   String get uid => id;
   bool get hasDisplayName => displayName != null && displayName!.isNotEmpty;
   bool get hasProfilePhoto => photoUrl != null && photoUrl!.isNotEmpty;
   bool get hasLocalAvatar => avatarBase64 != null && avatarBase64!.isNotEmpty;
-  
+
   // Priority: local avatar over remote photoUrl
   String? get effectiveAvatar => hasLocalAvatar ? avatarBase64 : photoUrl;
 
@@ -68,17 +68,17 @@ class UserEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        email,
-        displayName,
-        photoUrl,
-        avatarBase64,
-        type,
-        isEmailVerified,
-        createdAt,
-        lastSignInAt,
-        metadata,
-      ];
+    id,
+    email,
+    displayName,
+    photoUrl,
+    avatarBase64,
+    type,
+    isEmailVerified,
+    createdAt,
+    lastSignInAt,
+    metadata,
+  ];
 
   @override
   String toString() {

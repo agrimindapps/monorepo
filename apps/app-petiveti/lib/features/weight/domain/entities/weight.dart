@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 class Weight extends Equatable {
   final String id;
@@ -6,7 +6,8 @@ class Weight extends Equatable {
   final double weight; // in kg
   final DateTime date;
   final String? notes;
-  final int? bodyConditionScore; // 1-9 scale (1 = underweight, 5 = ideal, 9 = obese)
+  final int?
+  bodyConditionScore; // 1-9 scale (1 = underweight, 5 = ideal, 9 = obese)
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isDeleted;
@@ -50,7 +51,7 @@ class Weight extends Equatable {
   /// Retorna a condição corporal baseada no score
   BodyCondition get bodyCondition {
     if (bodyConditionScore == null) return BodyCondition.unknown;
-    
+
     if (bodyConditionScore! <= 3) return BodyCondition.underweight;
     if (bodyConditionScore! <= 6) return BodyCondition.ideal;
     return BodyCondition.overweight;
@@ -76,17 +77,21 @@ class Weight extends Equatable {
   /// Calcula a diferença em relação a um peso anterior
   WeightDifference? calculateDifference(Weight? previousWeight) {
     if (previousWeight == null) return null;
-    
+
     final difference = weight - previousWeight.weight;
     final percentageChange = (difference / previousWeight.weight) * 100;
     final daysDifference = date.difference(previousWeight.date).inDays;
-    
+
     return WeightDifference(
       difference: difference,
       percentageChange: percentageChange,
       daysDifference: daysDifference,
-      trend: difference > 0 ? WeightTrend.gaining : 
-             difference < 0 ? WeightTrend.losing : WeightTrend.stable,
+      trend:
+          difference > 0
+              ? WeightTrend.gaining
+              : difference < 0
+              ? WeightTrend.losing
+              : WeightTrend.stable,
     );
   }
 
@@ -94,22 +99,22 @@ class Weight extends Equatable {
   bool hasSignificantChange(Weight? previousWeight, {double threshold = 0.1}) {
     final diff = calculateDifference(previousWeight);
     if (diff == null) return false;
-    
+
     return diff.difference.abs() >= threshold;
   }
 
   @override
   List<Object?> get props => [
-        id,
-        animalId,
-        weight,
-        date,
-        notes,
-        bodyConditionScore,
-        createdAt,
-        updatedAt,
-        isDeleted,
-      ];
+    id,
+    animalId,
+    weight,
+    date,
+    notes,
+    bodyConditionScore,
+    createdAt,
+    updatedAt,
+    isDeleted,
+  ];
 }
 
 enum BodyCondition {
@@ -203,7 +208,7 @@ class WeightDifference {
     if (difference.abs() < 0.05) {
       return 'Peso mantido';
     }
-    
+
     final changeDescription = difference > 0 ? 'ganhou' : 'perdeu';
     return 'O animal $changeDescription ${difference.abs().toStringAsFixed(2)} kg em $daysDifference dias';
   }

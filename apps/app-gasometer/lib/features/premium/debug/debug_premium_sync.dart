@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../data/services/premium_sync_service.dart';
 import '../test/premium_sync_test.dart';
@@ -103,8 +103,12 @@ class DebugPremiumSync {
 
     debugPrint('🚗 Teste de Limites:');
     debugPrint('   - Pode add 5º veículo: ${status.canAddVehicle(4)}');
-    debugPrint('   - Pode add 50º abastecimento: ${status.canAddFuelRecord(49)}');
-    debugPrint('   - Pode add 30ª manutenção: ${status.canAddMaintenanceRecord(29)}');
+    debugPrint(
+      '   - Pode add 50º abastecimento: ${status.canAddFuelRecord(49)}',
+    );
+    debugPrint(
+      '   - Pode add 30ª manutenção: ${status.canAddMaintenanceRecord(29)}',
+    );
   }
 
   /// Monitora eventos de sincronização (apenas debug)

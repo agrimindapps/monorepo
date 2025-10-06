@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Estado do formulário de login usando valores primitivos
 /// (TextEditingControllers gerenciados internamente pelo notifier)
@@ -50,7 +50,8 @@ class LoginFormState extends Equatable {
       confirmPassword: confirmPassword ?? this.confirmPassword,
       isLoading: isLoading ?? this.isLoading,
       obscurePassword: obscurePassword ?? this.obscurePassword,
-      obscureConfirmPassword: obscureConfirmPassword ?? this.obscureConfirmPassword,
+      obscureConfirmPassword:
+          obscureConfirmPassword ?? this.obscureConfirmPassword,
       rememberMe: rememberMe ?? this.rememberMe,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
       isSignUpMode: isSignUpMode ?? this.isSignUpMode,
@@ -65,16 +66,16 @@ class LoginFormState extends Equatable {
 
   @override
   List<Object?> get props => [
-        email,
-        password,
-        name,
-        confirmPassword,
-        isLoading,
-        obscurePassword,
-        obscureConfirmPassword,
-        rememberMe,
-        errorMessage,
-        isSignUpMode,
-        showRecoveryForm,
-      ];
+    email,
+    password,
+    name,
+    confirmPassword,
+    isLoading,
+    obscurePassword,
+    obscureConfirmPassword,
+    rememberMe,
+    errorMessage,
+    isSignUpMode,
+    showRecoveryForm,
+  ];
 }

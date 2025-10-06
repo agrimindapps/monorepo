@@ -1,9 +1,8 @@
 import 'package:core/core.dart';
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import '../repositories/maintenance_repository.dart';
 
 class GetMaintenanceAnalyticsParams extends Equatable {
-
   const GetMaintenanceAnalyticsParams({
     required this.vehicleId,
     this.startDate,
@@ -18,7 +17,6 @@ class GetMaintenanceAnalyticsParams extends Equatable {
 }
 
 class MaintenanceAnalytics {
-
   const MaintenanceAnalytics({
     required this.totalCost,
     required this.averageCost,
@@ -30,13 +28,15 @@ class MaintenanceAnalytics {
 }
 
 @injectable
-class GetMaintenanceAnalytics implements UseCase<MaintenanceAnalytics, GetMaintenanceAnalyticsParams> {
-
+class GetMaintenanceAnalytics
+    implements UseCase<MaintenanceAnalytics, GetMaintenanceAnalyticsParams> {
   GetMaintenanceAnalytics(this.repository);
   final MaintenanceRepository repository;
 
   @override
-  Future<Either<Failure, MaintenanceAnalytics>> call(GetMaintenanceAnalyticsParams params) async {
+  Future<Either<Failure, MaintenanceAnalytics>> call(
+    GetMaintenanceAnalyticsParams params,
+  ) async {
     try {
       final totalCostResult = await repository.getTotalMaintenanceCost(
         params.vehicleId,
@@ -44,9 +44,13 @@ class GetMaintenanceAnalytics implements UseCase<MaintenanceAnalytics, GetMainte
         endDate: params.endDate,
       );
 
-      final averageCostResult = await repository.getAverageMaintenanceCost(params.vehicleId);
-      
-      final countByTypeResult = await repository.getMaintenanceCountByType(params.vehicleId);
+      final averageCostResult = await repository.getAverageMaintenanceCost(
+        params.vehicleId,
+      );
+
+      final countByTypeResult = await repository.getMaintenanceCountByType(
+        params.vehicleId,
+      );
 
       // Combine all results
       return totalCostResult.fold(
@@ -55,11 +59,13 @@ class GetMaintenanceAnalytics implements UseCase<MaintenanceAnalytics, GetMainte
           (failure) => Left(failure),
           (averageCost) => countByTypeResult.fold(
             (failure) => Left(failure),
-            (countByType) => Right(MaintenanceAnalytics(
-              totalCost: totalCost,
-              averageCost: averageCost,
-              countByType: countByType,
-            )),
+            (countByType) => Right(
+              MaintenanceAnalytics(
+                totalCost: totalCost,
+                averageCost: averageCost,
+                countByType: countByType,
+              ),
+            ),
           ),
         ),
       );

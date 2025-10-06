@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import 'calculation_result.dart';
 
@@ -17,25 +17,25 @@ class CalculationHistory extends Equatable {
 
   /// ID único do histórico
   final String id;
-  
+
   /// ID da calculadora usada
   final String calculatorId;
-  
+
   /// Nome da calculadora (para exibição)
   final String calculatorName;
-  
+
   /// Inputs utilizados no cálculo
   final Map<String, dynamic> inputs;
-  
+
   /// Resultado do cálculo
   final CalculationResult result;
-  
+
   /// Data/hora da criação
   final DateTime createdAt;
-  
+
   /// ID do animal associado (opcional)
   final String? animalId;
-  
+
   /// Notas adicionais do usuário
   final String? notes;
 

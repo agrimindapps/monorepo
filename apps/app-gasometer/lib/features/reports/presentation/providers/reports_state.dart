@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../domain/entities/report_comparison_entity.dart';
 import '../../domain/entities/report_summary_entity.dart';
@@ -40,18 +40,18 @@ class ReportsState extends Equatable {
 
   @override
   List<Object?> get props => [
-        currentMonthReport,
-        currentYearReport,
-        customReport,
-        monthlyComparison,
-        yearlyComparison,
-        efficiencyTrends,
-        costAnalysis,
-        usagePatterns,
-        isLoading,
-        errorMessage,
-        selectedVehicleId,
-      ];
+    currentMonthReport,
+    currentYearReport,
+    customReport,
+    monthlyComparison,
+    yearlyComparison,
+    efficiencyTrends,
+    costAnalysis,
+    usagePatterns,
+    isLoading,
+    errorMessage,
+    selectedVehicleId,
+  ];
 
   ReportsState copyWith({
     ReportSummaryEntity? currentMonthReport,

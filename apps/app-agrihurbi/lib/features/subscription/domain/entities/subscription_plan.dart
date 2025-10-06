@@ -1,11 +1,6 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
-enum PlanType {
-  free,
-  monthly,
-  yearly,
-  lifetime,
-}
+enum PlanType { free, monthly, yearly, lifetime }
 
 extension PlanTypeExtension on PlanType {
   String get displayName {
@@ -22,23 +17,12 @@ extension PlanTypeExtension on PlanType {
   }
 }
 
-enum PlanStatus {
-  active,
-  expired,
-  cancelled,
-  paused,
-  pending,
-}
+enum PlanStatus { active, expired, cancelled, paused, pending }
 
 // Alias for backward compatibility
 typedef SubscriptionStatus = PlanStatus;
 
-enum PlanDuration {
-  weekly,
-  monthly,
-  yearly,
-  lifetime,
-}
+enum PlanDuration { weekly, monthly, yearly, lifetime }
 
 class SubscriptionPlan extends Equatable {
   final String id;
@@ -132,18 +116,18 @@ class SubscriptionPlan extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        productId,
-        title,
-        description,
-        price,
-        currency,
-        type,
-        durationInDays,
-        features,
-        isPopular,
-        originalPrice,
-        trialDays,
-        metadata,
-      ];
+    id,
+    productId,
+    title,
+    description,
+    price,
+    currency,
+    type,
+    durationInDays,
+    features,
+    isPopular,
+    originalPrice,
+    trialDays,
+    metadata,
+  ];
 }

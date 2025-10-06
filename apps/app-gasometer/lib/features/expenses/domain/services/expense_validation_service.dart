@@ -1,11 +1,11 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/expense_constants.dart';
 import '../entities/expense_entity.dart';
 
 /// Serviço avançado para validação contextual de registros de despesas
-/// 
+///
 /// Este serviço é stateless e pode ser injetado como dependency normal.
 /// Não utiliza singleton pattern pois não mantém estado interno.
 @injectable
@@ -26,7 +26,13 @@ class ExpenseValidationService {
     _validateVehicleCompatibility(record, vehicle, errors);
 
     // Validar sequência de odômetro
-    _validateOdometerSequence(record, vehicle, previousExpenses, errors, warnings);
+    _validateOdometerSequence(
+      record,
+      vehicle,
+      previousExpenses,
+      errors,
+      warnings,
+    );
 
     // Validar padrões de valor por tipo
     _validateValuePatterns(record, previousExpenses, warnings);
@@ -57,7 +63,7 @@ class ExpenseValidationService {
 
     // Verificar se o odômetro não regrediu muito
     if (record.odometer < vehicle.currentOdometer - 1000) {
-      errors['odometer'] = 
+      errors['odometer'] =
           'Odômetro muito abaixo do atual do veículo (${vehicle.currentOdometer.toStringAsFixed(0)} km)';
     }
   }
@@ -80,23 +86,26 @@ class ExpenseValidationService {
 
     // Verificar se odômetro não regrediu
     if (record.odometer < lastExpense.odometer) {
-      errors['odometer'] = 
+      errors['odometer'] =
           'Odômetro menor que a última despesa (${lastExpense.odometer.toStringAsFixed(0)} km)';
       return;
     }
 
     // Verificar diferença suspeita
     final difference = record.odometer - lastExpense.odometer;
-    final daysDifference = record.date.difference(lastExpense.date).inDays.abs();
+    final daysDifference =
+        record.date.difference(lastExpense.date).inDays.abs();
 
     if (difference > ExpenseConstants.maxOdometerDifference) {
-      warnings['odometer'] = 
+      warnings['odometer'] =
           'Diferença muito grande desde última despesa: ${difference.toStringAsFixed(0)} km';
     }
 
     // Alertar para rodagem muito alta em pouco tempo
-    if (daysDifference > 0 && daysDifference < 30 && difference / daysDifference > 300) {
-      warnings['odometer'] = 
+    if (daysDifference > 0 &&
+        daysDifference < 30 &&
+        difference / daysDifference > 300) {
+      warnings['odometer'] =
           'Média diária muito alta: ${(difference / daysDifference).toStringAsFixed(0)} km/dia';
     }
   }
@@ -107,33 +116,40 @@ class ExpenseValidationService {
     List<ExpenseEntity> previousExpenses,
     Map<String, String> warnings,
   ) {
-    final sameType = previousExpenses.where((expense) => 
-        expense.type == record.type && 
-        expense.id != record.id
-    ).toList();
+    final sameType =
+        previousExpenses
+            .where(
+              (expense) =>
+                  expense.type == record.type && expense.id != record.id,
+            )
+            .toList();
 
     if (sameType.isEmpty) return;
 
     // Para despesas recorrentes, verificar se o valor está muito diferente da média
     if (record.type.isRecurring && sameType.length >= 2) {
-      final avgAmount = sameType.fold<double>(0, (sum, expense) => sum + expense.amount) / sameType.length;
+      final avgAmount =
+          sameType.fold<double>(0, (sum, expense) => sum + expense.amount) /
+          sameType.length;
       final variation = (record.amount - avgAmount).abs() / avgAmount;
 
       if (variation > ExpenseConstants.maxAmountVariationPercent) {
         final percentDiff = (variation * 100).toStringAsFixed(0);
-        warnings['amount'] = 
+        warnings['amount'] =
             'Valor ${record.amount > avgAmount ? 'acima' : 'abaixo'} da média ($percentDiff% de diferença)';
       }
     }
 
     // Verificar valores extremos por categoria
     final typeProperties = record.type.properties;
-    if (typeProperties.maxExpectedValue != null && record.amount > typeProperties.maxExpectedValue!) {
-      warnings['amount'] = 
+    if (typeProperties.maxExpectedValue != null &&
+        record.amount > typeProperties.maxExpectedValue!) {
+      warnings['amount'] =
           'Valor alto para ${record.type.displayName} (esperado até R\$ ${typeProperties.maxExpectedValue!.toStringAsFixed(2)})';
     }
-    if (typeProperties.minExpectedValue != null && record.amount < typeProperties.minExpectedValue!) {
-      warnings['amount'] = 
+    if (typeProperties.minExpectedValue != null &&
+        record.amount < typeProperties.minExpectedValue!) {
+      warnings['amount'] =
           'Valor baixo para ${record.type.displayName} (esperado mínimo R\$ ${typeProperties.minExpectedValue!.toStringAsFixed(2)})';
     }
   }
@@ -145,27 +161,30 @@ class ExpenseValidationService {
     Map<String, String> errors,
     Map<String, String> warnings,
   ) {
-    final sameDate = previousExpenses.where((expense) => 
-        expense.type == record.type &&
-        expense.date.day == record.date.day &&
-        expense.date.month == record.date.month &&
-        expense.date.year == record.date.year &&
-        expense.id != record.id
+    final sameDate = previousExpenses.where(
+      (expense) =>
+          expense.type == record.type &&
+          expense.date.day == record.date.day &&
+          expense.date.month == record.date.month &&
+          expense.date.year == record.date.year &&
+          expense.id != record.id,
     );
 
     if (sameDate.isNotEmpty) {
       // Para despesas não recorrentes, isso pode ser um erro
       if (!record.type.isRecurring) {
-        warnings['date'] = 
+        warnings['date'] =
             'Já existe despesa de ${record.type.displayName} nesta data';
       }
-      
+
       // Para despesas de mesmo tipo, valor e data, pode ser duplicata
-      final exactDuplicates = sameDate.where((expense) => 
-          (expense.amount - record.amount).abs() < 0.01 &&
-          expense.description.toLowerCase() == record.description.toLowerCase()
+      final exactDuplicates = sameDate.where(
+        (expense) =>
+            (expense.amount - record.amount).abs() < 0.01 &&
+            expense.description.toLowerCase() ==
+                record.description.toLowerCase(),
       );
-      
+
       if (exactDuplicates.isNotEmpty) {
         errors['duplicate'] = 'Possível despesa duplicada encontrada';
       }
@@ -180,10 +199,13 @@ class ExpenseValidationService {
   ) {
     if (!record.type.isRecurring) return;
 
-    final sameType = previousExpenses.where((expense) => 
-        expense.type == record.type &&
-        expense.id != record.id
-    ).toList();
+    final sameType =
+        previousExpenses
+            .where(
+              (expense) =>
+                  expense.type == record.type && expense.id != record.id,
+            )
+            .toList();
 
     if (sameType.isEmpty) return;
 
@@ -191,7 +213,10 @@ class ExpenseValidationService {
     sameType.sort((a, b) => b.date.compareTo(a.date));
     final lastSameType = sameType.first;
 
-    final monthsDifference = _calculateMonthsDifference(record.date, lastSameType.date);
+    final monthsDifference = _calculateMonthsDifference(
+      record.date,
+      lastSameType.date,
+    );
 
     // Alertas baseados no tipo de despesa
     switch (record.type) {
@@ -200,19 +225,19 @@ class ExpenseValidationService {
           warnings['frequency'] = 'Seguro registrado há menos de 1 ano';
         }
         break;
-      
+
       case ExpenseType.ipva:
         if (monthsDifference < 11) {
           warnings['frequency'] = 'IPVA registrado há menos de 1 ano';
         }
         break;
-      
+
       case ExpenseType.licensing:
         if (monthsDifference < 11) {
           warnings['frequency'] = 'Licenciamento registrado há menos de 1 ano';
         }
         break;
-      
+
       default:
         break;
     }
@@ -231,9 +256,12 @@ class ExpenseValidationService {
       ..sort((a, b) => a.date.compareTo(b.date));
 
     // Calcular estatísticas gerais
-    final totalAmount = sortedExpenses.fold<double>(0, (sum, e) => sum + e.amount);
+    final totalAmount = sortedExpenses.fold<double>(
+      0,
+      (sum, e) => sum + e.amount,
+    );
     final averageAmount = totalAmount / sortedExpenses.length;
-    
+
     // Agrupar por tipo
     final expensesByType = <ExpenseType, List<ExpenseEntity>>{};
     for (final expense in sortedExpenses) {
@@ -242,10 +270,8 @@ class ExpenseValidationService {
 
     // Calcular gastos por tipo
     final expensesByTypeAmount = expensesByType.map(
-      (type, expenses) => MapEntry(
-        type, 
-        expenses.fold<double>(0, (sum, e) => sum + e.amount)
-      )
+      (type, expenses) =>
+          MapEntry(type, expenses.fold<double>(0, (sum, e) => sum + e.amount)),
     );
 
     // Detectar anomalias
@@ -270,61 +296,72 @@ class ExpenseValidationService {
   /// Detecta anomalias nos registros de despesas
   List<ExpenseAnomaly> _detectExpenseAnomalies(List<ExpenseEntity> expenses) {
     final anomalies = <ExpenseAnomaly>[];
-    
+
     // Calcular médias por tipo
     final typeAverages = <ExpenseType, double>{};
     final typeGroups = <ExpenseType, List<ExpenseEntity>>{};
-    
+
     for (final expense in expenses) {
       typeGroups.putIfAbsent(expense.type, () => []).add(expense);
     }
-    
+
     typeGroups.forEach((type, expenses) {
-      typeAverages[type] = expenses.fold<double>(0, (sum, e) => sum + e.amount) / expenses.length;
+      typeAverages[type] =
+          expenses.fold<double>(0, (sum, e) => sum + e.amount) /
+          expenses.length;
     });
 
     // Detectar outliers de valor
     for (final expense in expenses) {
       final average = typeAverages[expense.type]!;
       final deviation = (expense.amount - average).abs() / average;
-      
-      if (deviation > 1.0) { // Mais de 100% de desvio
-        anomalies.add(ExpenseAnomaly(
-          expenseId: expense.id,
-          type: AnomalyType.valueOutlier,
-          description: 'Valor muito ${expense.amount > average ? 'alto' : 'baixo'} '
-                      'para ${expense.type.displayName} (${deviation.toStringAsFixed(1)}x da média)',
-          severity: deviation > 2.0 ? AnomalySeverity.high : AnomalySeverity.medium,
-        ));
+
+      if (deviation > 1.0) {
+        // Mais de 100% de desvio
+        anomalies.add(
+          ExpenseAnomaly(
+            expenseId: expense.id,
+            type: AnomalyType.valueOutlier,
+            description:
+                'Valor muito ${expense.amount > average ? 'alto' : 'baixo'} '
+                'para ${expense.type.displayName} (${deviation.toStringAsFixed(1)}x da média)',
+            severity:
+                deviation > 2.0 ? AnomalySeverity.high : AnomalySeverity.medium,
+          ),
+        );
       }
     }
 
     // Detectar frequência anômala
     final recurringTypes = expenses.where((e) => e.type.isRecurring).toList();
     final frequencyMap = <ExpenseType, List<ExpenseEntity>>{};
-    
+
     for (final expense in recurringTypes) {
       frequencyMap.putIfAbsent(expense.type, () => []).add(expense);
     }
-    
+
     frequencyMap.forEach((type, typeExpenses) {
       if (typeExpenses.length < 2) return;
-      
+
       typeExpenses.sort((a, b) => a.date.compareTo(b.date));
-      
+
       for (int i = 1; i < typeExpenses.length; i++) {
         final monthsDiff = _calculateMonthsDifference(
-          typeExpenses[i].date, 
-          typeExpenses[i-1].date
+          typeExpenses[i].date,
+          typeExpenses[i - 1].date,
         );
-        
-        if (monthsDiff < 6) { // Menos de 6 meses entre despesas anuais
-          anomalies.add(ExpenseAnomaly(
-            expenseId: typeExpenses[i].id,
-            type: AnomalyType.frequencyAnomaly,
-            description: 'Despesa recorrente registrada muito cedo ($monthsDiff meses)',
-            severity: AnomalySeverity.medium,
-          ));
+
+        if (monthsDiff < 6) {
+          // Menos de 6 meses entre despesas anuais
+          anomalies.add(
+            ExpenseAnomaly(
+              expenseId: typeExpenses[i].id,
+              type: AnomalyType.frequencyAnomaly,
+              description:
+                  'Despesa recorrente registrada muito cedo ($monthsDiff meses)',
+              severity: AnomalySeverity.medium,
+            ),
+          );
         }
       }
     });
@@ -338,9 +375,10 @@ class ExpenseValidationService {
 
     // Agrupar por mês
     final monthlyTotals = <String, double>{};
-    
+
     for (final expense in expenses) {
-      final monthKey = '${expense.date.year}-${expense.date.month.toString().padLeft(2, '0')}';
+      final monthKey =
+          '${expense.date.year}-${expense.date.month.toString().padLeft(2, '0')}';
       monthlyTotals[monthKey] = (monthlyTotals[monthKey] ?? 0) + expense.amount;
     }
 
@@ -348,16 +386,40 @@ class ExpenseValidationService {
     if (months.length < 2) return {};
 
     // Calcular tendência (simples: comparar últimos 3 meses com 3 anteriores)
-    final recentMonths = months.length >= 6 ? months.sublist(months.length - 3) : months.sublist((months.length / 2).ceil());
-    final olderMonths = months.length >= 6 ? months.sublist(months.length - 6, months.length - 3) : months.sublist(0, (months.length / 2).floor());
+    final recentMonths =
+        months.length >= 6
+            ? months.sublist(months.length - 3)
+            : months.sublist((months.length / 2).ceil());
+    final olderMonths =
+        months.length >= 6
+            ? months.sublist(months.length - 6, months.length - 3)
+            : months.sublist(0, (months.length / 2).floor());
 
-    final recentAverage = recentMonths.fold<double>(0, (sum, month) => sum + monthlyTotals[month]!) / recentMonths.length;
-    final olderAverage = olderMonths.fold<double>(0, (sum, month) => sum + monthlyTotals[month]!) / olderMonths.length;
+    final recentAverage =
+        recentMonths.fold<double>(
+          0,
+          (sum, month) => sum + monthlyTotals[month]!,
+        ) /
+        recentMonths.length;
+    final olderAverage =
+        olderMonths.fold<double>(
+          0,
+          (sum, month) => sum + monthlyTotals[month]!,
+        ) /
+        olderMonths.length;
 
-    final trendPercentage = olderAverage > 0 ? ((recentAverage - olderAverage) / olderAverage) * 100 : 0;
+    final trendPercentage =
+        olderAverage > 0
+            ? ((recentAverage - olderAverage) / olderAverage) * 100
+            : 0;
 
     return {
-      'trend': trendPercentage > 5 ? 'increasing' : trendPercentage < -5 ? 'decreasing' : 'stable',
+      'trend':
+          trendPercentage > 5
+              ? 'increasing'
+              : trendPercentage < -5
+              ? 'decreasing'
+              : 'stable',
       'trendPercentage': trendPercentage,
       'recentAverage': recentAverage,
       'olderAverage': olderAverage,
@@ -389,7 +451,7 @@ class ExpenseValidationService {
     }
 
     final trimmed = value.trim();
-    
+
     if (trimmed.length < 3) {
       return 'Descrição muito curta (mínimo 3 caracteres)';
     }
@@ -416,7 +478,7 @@ class ExpenseValidationService {
         .replaceAll(RegExp(r'\s'), '')
         .replaceAll('.', '')
         .replaceAll(',', '.');
-    
+
     final amount = double.tryParse(cleanValue);
 
     if (amount == null) {
@@ -441,7 +503,8 @@ class ExpenseValidationService {
   }
 
   /// Valida odômetro com contexto do veículo
-  String? validateOdometer(String? value, {
+  String? validateOdometer(
+    String? value, {
     double? currentOdometer,
     double? initialOdometer,
     double? lastExpenseOdometer,
@@ -480,7 +543,7 @@ class ExpenseValidationService {
       if (odometer < lastExpenseOdometer) {
         return 'Odômetro menor que a última despesa';
       }
-      
+
       // Alerta para diferença muito grande (mais de 5000km)
       if (odometer - lastExpenseOdometer > 5000) {
         return 'Diferença muito grande desde a última despesa';
@@ -517,15 +580,15 @@ class ExpenseValidationService {
   String? validateLocation(String? value) {
     if (value != null && value.trim().isNotEmpty) {
       final trimmed = value.trim();
-      
+
       if (trimmed.length < 2) {
         return 'Localização muito curta';
       }
-      
+
       if (trimmed.length > 100) {
         return 'Localização muito longa';
       }
-      
+
       // Verificar caracteres válidos para endereços
       if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)\/]+$').hasMatch(trimmed)) {
         return 'Caracteres inválidos na localização';
@@ -605,22 +668,30 @@ class ExpenseValidationService {
     if (previousExpenses != null) {
       final sameDate = previousExpenses.where((expense) {
         return expense.type == expenseType &&
-               expense.date.day == date.day &&
-               expense.date.month == date.month &&
-               expense.date.year == date.year;
+            expense.date.day == date.day &&
+            expense.date.month == date.month &&
+            expense.date.year == date.year;
       });
 
       if (sameDate.isNotEmpty) {
-        warnings.add('Já existe despesa do tipo ${expenseType.displayName} nesta data');
+        warnings.add(
+          'Já existe despesa do tipo ${expenseType.displayName} nesta data',
+        );
       }
 
       // Verificar padrões suspeitos de valor
       if (expenseType.isRecurring) {
-        final sameType = previousExpenses.where((expense) => expense.type == expenseType);
+        final sameType = previousExpenses.where(
+          (expense) => expense.type == expenseType,
+        );
         if (sameType.isNotEmpty) {
-          final avgAmount = sameType.fold<double>(0, (sum, expense) => sum + expense.amount) / sameType.length;
+          final avgAmount =
+              sameType.fold<double>(0, (sum, expense) => sum + expense.amount) /
+              sameType.length;
           if ((amount - avgAmount).abs() / avgAmount > 0.5) {
-            warnings.add('Valor muito diferente da média para ${expenseType.displayName}');
+            warnings.add(
+              'Valor muito diferente da média para ${expenseType.displayName}',
+            );
           }
         }
       }
@@ -632,17 +703,22 @@ class ExpenseValidationService {
   /// Sugere categoria baseada na descrição
   ExpenseType suggestCategoryFromDescription(String description) {
     final descLower = description.toLowerCase();
-    
+
     if (descLower.contains('seguro')) return ExpenseType.insurance;
     if (descLower.contains('ipva')) return ExpenseType.ipva;
     if (descLower.contains('estacion')) return ExpenseType.parking;
-    if (descLower.contains('lavag') || descLower.contains('lav car')) return ExpenseType.carWash;
-    if (descLower.contains('multa') || descLower.contains('infra')) return ExpenseType.fine;
-    if (descLower.contains('pedágio') || descLower.contains('pedagio')) return ExpenseType.toll;
+    if (descLower.contains('lavag') || descLower.contains('lav car'))
+      return ExpenseType.carWash;
+    if (descLower.contains('multa') || descLower.contains('infra'))
+      return ExpenseType.fine;
+    if (descLower.contains('pedágio') || descLower.contains('pedagio'))
+      return ExpenseType.toll;
     if (descLower.contains('licen')) return ExpenseType.licensing;
-    if (descLower.contains('acess') || descLower.contains('equip')) return ExpenseType.accessories;
-    if (descLower.contains('document') || descLower.contains('papel')) return ExpenseType.documentation;
-    
+    if (descLower.contains('acess') || descLower.contains('equip'))
+      return ExpenseType.accessories;
+    if (descLower.contains('document') || descLower.contains('papel'))
+      return ExpenseType.documentation;
+
     return ExpenseType.other;
   }
 
@@ -654,37 +730,37 @@ class ExpenseValidationService {
           return 'Valor alto para combustível (máximo esperado: R\$ 500)';
         }
         break;
-      
+
       case ExpenseType.maintenance:
         if (amount > 2000.0) {
           return 'Valor alto para manutenção (máximo esperado: R\$ 2000)';
         }
         break;
-      
+
       case ExpenseType.parking:
         if (amount > 50.0) {
           return 'Valor alto para estacionamento (máximo esperado: R\$ 50)';
         }
         break;
-      
+
       case ExpenseType.carWash:
         if (amount > 100.0) {
           return 'Valor alto para lavagem (máximo esperado: R\$ 100)';
         }
         break;
-      
+
       case ExpenseType.toll:
         if (amount > 200.0) {
           return 'Valor alto para pedágio (máximo esperado: R\$ 200)';
         }
         break;
-      
+
       case ExpenseType.fine:
         if (amount > 2000.0) {
           return 'Valor muito alto para multa';
         }
         break;
-      
+
       case ExpenseType.insurance:
         if (amount < 100.0) {
           return 'Valor baixo para seguro (mínimo esperado: R\$ 100)';
@@ -693,7 +769,7 @@ class ExpenseValidationService {
           return 'Valor muito alto para seguro';
         }
         break;
-      
+
       case ExpenseType.ipva:
         if (amount < 50.0) {
           return 'Valor baixo para IPVA (mínimo esperado: R\$ 50)';
@@ -702,37 +778,36 @@ class ExpenseValidationService {
           return 'Valor muito alto para IPVA';
         }
         break;
-      
+
       case ExpenseType.licensing:
         if (amount > 500.0) {
           return 'Valor alto para licenciamento (máximo esperado: R\$ 500)';
         }
         break;
-      
+
       case ExpenseType.accessories:
         if (amount > 5000.0) {
           return 'Valor muito alto para acessórios';
         }
         break;
-      
+
       case ExpenseType.documentation:
         if (amount > ExpenseConstants.documentationMaxExpected) {
           return 'Valor alto para documentação (máximo esperado: R\$ ${ExpenseConstants.documentationMaxExpected.toStringAsFixed(0)})';
         }
         break;
-      
+
       case ExpenseType.other:
         // Sem validações específicas para "Outro"
         break;
     }
-    
+
     return null;
   }
 }
 
 /// Resultado de validação de despesa
 class ValidationResult {
-
   ValidationResult({
     required this.isValid,
     required this.errors,
@@ -748,7 +823,6 @@ class ValidationResult {
 
 /// Análise de padrões de despesas
 class ExpensePatternAnalysis {
-
   ExpensePatternAnalysis({
     required this.totalRecords,
     required this.totalAmount,
@@ -764,11 +838,18 @@ class ExpensePatternAnalysis {
   factory ExpensePatternAnalysis.empty() {
     final now = DateTime.now();
     final dummyExpense = ExpenseEntity(
-      id: '', userId: '', vehicleId: '', type: ExpenseType.other,
-      description: '', amount: 0, date: now, odometer: 0,
-      createdAt: now, updatedAt: now,
+      id: '',
+      userId: '',
+      vehicleId: '',
+      type: ExpenseType.other,
+      description: '',
+      amount: 0,
+      date: now,
+      odometer: 0,
+      createdAt: now,
+      updatedAt: now,
     );
-    
+
     return ExpensePatternAnalysis(
       totalRecords: 0,
       totalAmount: 0,
@@ -793,14 +874,15 @@ class ExpensePatternAnalysis {
 
   bool get hasAnomalies => anomalies.isNotEmpty;
   String get totalAmountFormatted => 'R\$ ${totalAmount.toStringAsFixed(2)}';
-  String get averageAmountFormatted => 'R\$ ${averageAmount.toStringAsFixed(2)}';
+  String get averageAmountFormatted =>
+      'R\$ ${averageAmount.toStringAsFixed(2)}';
   int get periodInDays => period.inDays;
-  double get monthlyAverage => periodInDays > 0 ? totalAmount / (periodInDays / 30.44) : 0;
+  double get monthlyAverage =>
+      periodInDays > 0 ? totalAmount / (periodInDays / 30.44) : 0;
 }
 
 /// Anomalia detectada em despesas
 class ExpenseAnomaly {
-
   ExpenseAnomaly({
     required this.expenseId,
     required this.type,
@@ -820,9 +902,4 @@ enum AnomalyType {
   duplicateExpense,
 }
 
-enum AnomalySeverity {
-  low,
-  medium,
-  high,
-  critical,
-}
+enum AnomalySeverity { low, medium, high, critical }

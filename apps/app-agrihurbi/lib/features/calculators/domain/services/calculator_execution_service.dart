@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../entities/calculation_result.dart';
 import '../entities/calculator_parameter.dart';
@@ -7,7 +7,7 @@ import '../registry/calculator_strategy_registry.dart';
 import 'calculator_validation_service.dart';
 
 /// Service especializado em execução de cálculos
-/// 
+///
 /// Implementa Single Responsibility Principle (SRP) - foca apenas na execução.
 /// Orquestra validação, seleção de estratégia e execução do cálculo.
 @injectable
@@ -15,10 +15,7 @@ class CalculatorExecutionService {
   final CalculatorStrategyRegistry _strategyRegistry;
   final CalculatorValidationService _validationService;
 
-  CalculatorExecutionService(
-    this._strategyRegistry,
-    this._validationService,
-  );
+  CalculatorExecutionService(this._strategyRegistry, this._validationService);
 
   /// Executa cálculo usando estratégia específica
   Future<CalculationExecutionResult> executeWithStrategy(
@@ -42,7 +39,10 @@ class CalculatorExecutionService {
 
       // Validação (se não foi pulada)
       if (!skipValidation) {
-        final validationResult = await _validationService.validateWithStrategy(strategy, inputs);
+        final validationResult = await _validationService.validateWithStrategy(
+          strategy,
+          inputs,
+        );
         if (!validationResult.isValid) {
           return CalculationExecutionResult.validationError(
             ValidationError(
@@ -55,16 +55,19 @@ class CalculatorExecutionService {
             ),
           );
         }
-        
+
         // Usar inputs sanitizados da validação
         inputs = validationResult.sanitizedInputs;
       }
 
       // Executar cálculo
       final calculationResult = await strategy.executeCalculation(inputs);
-      
+
       // Pós-processamento (se necessário)
-      final finalResult = await strategy.postProcessResults(calculationResult, inputs);
+      final finalResult = await strategy.postProcessResults(
+        calculationResult,
+        inputs,
+      );
 
       return CalculationExecutionResult.success(
         ExecutionSuccess(
@@ -74,7 +77,6 @@ class CalculatorExecutionService {
           inputsUsed: inputs,
         ),
       );
-
     } catch (e) {
       return CalculationExecutionResult.error(
         ExecutionError(
@@ -100,7 +102,8 @@ class CalculatorExecutionService {
         return CalculationExecutionResult.error(
           ExecutionError(
             type: ExecutionErrorType.noCompatibleStrategy,
-            message: 'Nenhuma estratégia compatível encontrada para os inputs fornecidos',
+            message:
+                'Nenhuma estratégia compatível encontrada para os inputs fornecidos',
             inputs: inputs,
           ),
         );
@@ -108,7 +111,6 @@ class CalculatorExecutionService {
 
       // Executar usando a estratégia encontrada
       return await executeWithStrategy(strategy.strategyId, inputs);
-
     } catch (e) {
       return CalculationExecutionResult.error(
         ExecutionError(
@@ -138,13 +140,12 @@ class CalculatorExecutionService {
         );
 
         results[request.id] = result;
-        
+
         if (result.isSuccess) {
           successCount++;
         } else {
           errors[request.id] = result.error!;
         }
-
       } catch (e) {
         final error = ExecutionError(
           type: ExecutionErrorType.batchItemFailed,
@@ -153,7 +154,7 @@ class CalculatorExecutionService {
           inputs: request.inputs,
           exception: e,
         );
-        
+
         errors[request.id] = error;
         results[request.id] = CalculationExecutionResult.error(error);
       }
@@ -175,7 +176,7 @@ class CalculatorExecutionService {
     Map<String, dynamic> inputs,
   ) async {
     final strategy = _strategyRegistry.getStrategy(strategyId);
-    
+
     if (strategy == null) {
       return StrategyCompatibilityResult(
         isCompatible: false,
@@ -194,14 +195,18 @@ class CalculatorExecutionService {
     }
 
     // Validação adicional
-    final validationResult = await _validationService.validateWithStrategy(strategy, inputs);
-    
+    final validationResult = await _validationService.validateWithStrategy(
+      strategy,
+      inputs,
+    );
+
     return StrategyCompatibilityResult(
       isCompatible: validationResult.isValid,
       strategyId: strategyId,
-      reason: validationResult.isValid 
-          ? 'Compatível' 
-          : 'Falha na validação: ${validationResult.errors.join(', ')}',
+      reason:
+          validationResult.isValid
+              ? 'Compatível'
+              : 'Falha na validação: ${validationResult.errors.join(', ')}',
       validationWarnings: validationResult.warnings,
     );
   }
@@ -209,20 +214,24 @@ class CalculatorExecutionService {
   /// Lista estratégias disponíveis com metadados
   List<StrategyInfo> getAvailableStrategies() {
     final strategies = _strategyRegistry.getAllStrategies();
-    
-    return strategies.map((strategy) => StrategyInfo(
-      id: strategy.strategyId,
-      name: strategy.strategyName,
-      description: strategy.description,
-      parameters: strategy.parameters,
-      metadata: strategy.metadata,
-    )).toList();
+
+    return strategies
+        .map(
+          (strategy) => StrategyInfo(
+            id: strategy.strategyId,
+            name: strategy.strategyName,
+            description: strategy.description,
+            parameters: strategy.parameters,
+            metadata: strategy.metadata,
+          ),
+        )
+        .toList();
   }
 
   /// Obtém estatísticas de execução
   ExecutionStatistics getExecutionStatistics() {
     final stats = _strategyRegistry.getStatistics();
-    
+
     return ExecutionStatistics(
       totalStrategiesAvailable: stats.totalStrategies,
       strategyTypes: stats.typeDistribution,
@@ -237,27 +246,32 @@ class CalculatorExecutionService {
     String? preferredType,
   ) {
     final allStrategies = _strategyRegistry.getAllStrategies();
-    
+
     // Primeiro, tentar estratégias do tipo preferido
     if (preferredType != null) {
-      final preferredStrategies = allStrategies
-          .where((s) => s.runtimeType.toString().toLowerCase().contains(preferredType.toLowerCase()))
-          .toList();
-      
+      final preferredStrategies =
+          allStrategies
+              .where(
+                (s) => s.runtimeType.toString().toLowerCase().contains(
+                  preferredType.toLowerCase(),
+                ),
+              )
+              .toList();
+
       for (final strategy in preferredStrategies) {
         if (strategy.canProcess(inputs)) {
           return strategy;
         }
       }
     }
-    
+
     // Se não encontrou no tipo preferido, buscar em todas
     for (final strategy in allStrategies) {
       if (strategy.canProcess(inputs)) {
         return strategy;
       }
     }
-    
+
     return null;
   }
 }
@@ -278,20 +292,16 @@ class CalculationExecutionResult {
   });
 
   factory CalculationExecutionResult.success(ExecutionSuccess success) {
-    return CalculationExecutionResult._(
-      isSuccess: true,
-      success: success,
-    );
+    return CalculationExecutionResult._(isSuccess: true, success: success);
   }
 
   factory CalculationExecutionResult.error(ExecutionError error) {
-    return CalculationExecutionResult._(
-      isSuccess: false,
-      error: error,
-    );
+    return CalculationExecutionResult._(isSuccess: false, error: error);
   }
 
-  factory CalculationExecutionResult.validationError(ValidationError validationError) {
+  factory CalculationExecutionResult.validationError(
+    ValidationError validationError,
+  ) {
     return CalculationExecutionResult._(
       isSuccess: false,
       validationError: validationError,
@@ -383,7 +393,8 @@ class BatchExecutionResult {
     required this.executedAt,
   });
 
-  double get successRate => totalRequests > 0 ? successCount / totalRequests : 0.0;
+  double get successRate =>
+      totalRequests > 0 ? successCount / totalRequests : 0.0;
   bool get hasErrors => errorCount > 0;
   bool get allSuccessful => errorCount == 0;
 }

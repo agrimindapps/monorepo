@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -6,7 +6,6 @@ import '../../domain/entities/fuel_record_entity.dart';
 
 /// Model reativo para o formulário de abastecimento
 class FuelFormModel extends Equatable {
-
   const FuelFormModel({
     required this.id,
     required this.userId,
@@ -96,25 +95,25 @@ class FuelFormModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        vehicleId,
-        vehicle,
-        fuelType,
-        liters,
-        pricePerLiter,
-        totalPrice,
-        odometer,
-        date,
-        gasStationName,
-        gasStationBrand,
-        fullTank,
-        notes,
-        isLoading,
-        hasChanges,
-        errors,
-        lastError,
-      ];
+    id,
+    userId,
+    vehicleId,
+    vehicle,
+    fuelType,
+    liters,
+    pricePerLiter,
+    totalPrice,
+    odometer,
+    date,
+    gasStationName,
+    gasStationBrand,
+    fullTank,
+    notes,
+    isLoading,
+    hasChanges,
+    errors,
+    lastError,
+  ];
 
   /// Cria nova instância com valores atualizados
   FuelFormModel copyWith({
@@ -161,26 +160,20 @@ class FuelFormModel extends Equatable {
   }
 
   /// Verifica se o modelo tem dados válidos mínimos
-  bool get hasMinimumData => 
-      vehicleId.isNotEmpty && 
-      liters > 0 && 
-      pricePerLiter > 0 &&
-      odometer >= 0;
+  bool get hasMinimumData =>
+      vehicleId.isNotEmpty && liters > 0 && pricePerLiter > 0 && odometer >= 0;
 
   /// Verifica se há erros de validação
   bool get hasErrors => errors.isNotEmpty;
 
   /// Verifica se o formulário está pronto para ser submetido
-  bool get canSubmit => 
-      hasMinimumData && 
-      !hasErrors && 
-      !isLoading;
+  bool get canSubmit => hasMinimumData && !hasErrors && !isLoading;
 
   /// Calcula o valor total baseado em litros e preço por litro
   double get calculatedTotalPrice => liters * pricePerLiter;
 
   /// Verifica se o valor total está correto (diferença menor que 1 centavo)
-  bool get isTotalPriceCorrect => 
+  bool get isTotalPriceCorrect =>
       (calculatedTotalPrice - totalPrice).abs() <= 0.01;
 
   /// Retorna mensagem de erro para um campo específico
@@ -199,7 +192,7 @@ class FuelFormModel extends Equatable {
   /// Remove erro de um campo específico
   FuelFormModel clearFieldError(String field) {
     if (!errors.containsKey(field)) return this;
-    
+
     final newErrors = Map<String, String>.from(errors);
     newErrors.remove(field);
     return copyWith(errors: newErrors);
@@ -219,20 +212,21 @@ class FuelFormModel extends Equatable {
   /// Aplica sanitização em todos os campos de texto para segurança
   FuelRecordEntity toFuelRecord() {
     final now = DateTime.now();
-    
+
     // Sanitizar campos de texto antes da persistência
-    final sanitizedGasStationName = gasStationName.isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeName(gasStationName);
-        
-    final sanitizedGasStationBrand = gasStationBrand.isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeName(gasStationBrand);
-        
-    final sanitizedNotes = notes.isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeDescription(notes);
-    
+    final sanitizedGasStationName =
+        gasStationName.isEmpty
+            ? null
+            : InputSanitizer.sanitizeName(gasStationName);
+
+    final sanitizedGasStationBrand =
+        gasStationBrand.isEmpty
+            ? null
+            : InputSanitizer.sanitizeName(gasStationBrand);
+
+    final sanitizedNotes =
+        notes.isEmpty ? null : InputSanitizer.sanitizeDescription(notes);
+
     return FuelRecordEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
       userId: userId,
@@ -247,7 +241,12 @@ class FuelFormModel extends Equatable {
       gasStationBrand: sanitizedGasStationBrand,
       fullTank: fullTank,
       notes: sanitizedNotes,
-      createdAt: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
+      createdAt:
+          id.isEmpty
+              ? now
+              : DateTime.fromMillisecondsSinceEpoch(
+                int.tryParse(id) ?? now.millisecondsSinceEpoch,
+              ),
       updatedAt: now,
     );
   }

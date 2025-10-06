@@ -2,11 +2,11 @@ import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:app_agrihurbi/core/network/dio_client.dart';
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 import 'package:xml/xml.dart';
 
 /// News Remote Data Source
-/// 
+///
 /// Handles RSS feed parsing and external API calls
 /// for agriculture news and commodity prices
 @injectable
@@ -76,17 +76,19 @@ class NewsRemoteDataSource {
 
       final articlesData = response.data['articles'];
       if (articlesData is! List) {
-        throw const ServerException('Invalid response format: articles should be a list');
+        throw const ServerException(
+          'Invalid response format: articles should be a list',
+        );
       }
       final List<dynamic> articlesJson = articlesData;
-      return articlesJson
-          .map((json) {
-            if (json is! Map<String, dynamic>) {
-              throw const ServerException('Invalid article format: expected Map<String, dynamic>');
-            }
-            return NewsArticleModel.fromJson(json);
-          })
-          .toList();
+      return articlesJson.map((json) {
+        if (json is! Map<String, dynamic>) {
+          throw const ServerException(
+            'Invalid article format: expected Map<String, dynamic>',
+          );
+        }
+        return NewsArticleModel.fromJson(json);
+      }).toList();
     } catch (e) {
       throw ServerException('Failed to search news: $e');
     }
@@ -100,25 +102,24 @@ class NewsRemoteDataSource {
     try {
       final response = await _client.get(
         '/api/v1/news/premium',
-        queryParameters: {
-          'limit': limit,
-          'offset': offset,
-        },
+        queryParameters: {'limit': limit, 'offset': offset},
       );
 
       final articlesData = response.data['articles'];
       if (articlesData is! List) {
-        throw const ServerException('Invalid response format: articles should be a list');
+        throw const ServerException(
+          'Invalid response format: articles should be a list',
+        );
       }
       final List<dynamic> articlesJson = articlesData;
-      return articlesJson
-          .map((json) {
-            if (json is! Map<String, dynamic>) {
-              throw const ServerException('Invalid article format: expected Map<String, dynamic>');
-            }
-            return NewsArticleModel.fromJson(json);
-          })
-          .toList();
+      return articlesJson.map((json) {
+        if (json is! Map<String, dynamic>) {
+          throw const ServerException(
+            'Invalid article format: expected Map<String, dynamic>',
+          );
+        }
+        return NewsArticleModel.fromJson(json);
+      }).toList();
     } catch (e) {
       throw ServerException('Failed to fetch premium news: $e');
     }
@@ -130,7 +131,7 @@ class NewsRemoteDataSource {
   }) async {
     try {
       final params = <String, dynamic>{};
-      
+
       if (types != null && types.isNotEmpty) {
         params['types'] = types.map((t) => t.name).join(',');
       }
@@ -142,17 +143,19 @@ class NewsRemoteDataSource {
 
       final commoditiesData = response.data['commodities'];
       if (commoditiesData is! List) {
-        throw const ServerException('Invalid response format: commodities should be a list');
+        throw const ServerException(
+          'Invalid response format: commodities should be a list',
+        );
       }
       final List<dynamic> pricesJson = commoditiesData;
-      return pricesJson
-          .map((json) {
-            if (json is! Map<String, dynamic>) {
-              throw const ServerException('Invalid commodity format: expected Map<String, dynamic>');
-            }
-            return CommodityPriceModel.fromJson(json);
-          })
-          .toList();
+      return pricesJson.map((json) {
+        if (json is! Map<String, dynamic>) {
+          throw const ServerException(
+            'Invalid commodity format: expected Map<String, dynamic>',
+          );
+        }
+        return CommodityPriceModel.fromJson(json);
+      }).toList();
     } catch (e) {
       throw ServerException('Failed to fetch commodity prices: $e');
     }
@@ -175,17 +178,19 @@ class NewsRemoteDataSource {
 
       final historyData = response.data['history'];
       if (historyData is! List) {
-        throw const ServerException('Invalid response format: history should be a list');
+        throw const ServerException(
+          'Invalid response format: history should be a list',
+        );
       }
       final List<dynamic> historyJson = historyData;
-      return historyJson
-          .map((json) {
-            if (json is! Map<String, dynamic>) {
-              throw const ServerException('Invalid history format: expected Map<String, dynamic>');
-            }
-            return HistoricalPriceModel.fromJson(json);
-          })
-          .toList();
+      return historyJson.map((json) {
+        if (json is! Map<String, dynamic>) {
+          throw const ServerException(
+            'Invalid history format: expected Map<String, dynamic>',
+          );
+        }
+        return HistoricalPriceModel.fromJson(json);
+      }).toList();
     } catch (e) {
       throw ServerException('Failed to fetch commodity history: $e');
     }
@@ -196,7 +201,9 @@ class NewsRemoteDataSource {
     try {
       final response = await _client.get('/api/v1/markets/summary');
       if (response.data is! Map<String, dynamic>) {
-        throw const ServerException('Invalid response format: expected Map<String, dynamic>');
+        throw const ServerException(
+          'Invalid response format: expected Map<String, dynamic>',
+        );
       }
       return MarketSummaryModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
@@ -231,15 +238,19 @@ class NewsRemoteDataSource {
   NewsArticleModel? _parseRSSItem(XmlElement item) {
     try {
       final title = item.findElements('title').first.innerText;
-      final description = item.findElements('description').firstOrNull?.innerText ?? '';
+      final description =
+          item.findElements('description').firstOrNull?.innerText ?? '';
       final link = item.findElements('link').firstOrNull?.innerText ?? '';
-      final pubDateStr = item.findElements('pubDate').firstOrNull?.innerText ?? '';
-      final category = item.findElements('category').firstOrNull?.innerText ?? 'agriculture';
+      final pubDateStr =
+          item.findElements('pubDate').firstOrNull?.innerText ?? '';
+      final category =
+          item.findElements('category').firstOrNull?.innerText ?? 'agriculture';
 
       // Extract image from content or enclosure
       String imageUrl = '';
       final enclosure = item.findElements('enclosure').firstOrNull;
-      if (enclosure != null && enclosure.getAttribute('type')?.startsWith('image/') == true) {
+      if (enclosure != null &&
+          enclosure.getAttribute('type')?.startsWith('image/') == true) {
         imageUrl = enclosure.getAttribute('url') ?? '';
       }
 

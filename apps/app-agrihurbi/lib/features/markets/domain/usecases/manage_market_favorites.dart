@@ -2,10 +2,10 @@ import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Manage Market Favorites Use Case
-/// 
+///
 /// Handles adding, removing, and retrieving favorite markets
 @injectable
 class ManageMarketFavorites {
@@ -36,24 +36,23 @@ class ManageMarketFavorites {
   /// Toggle favorite status
   ResultFuture<bool> toggleFavorite(String marketId) async {
     final isFavoriteResult = await _repository.isMarketFavorite(marketId);
-    
-    return isFavoriteResult.fold(
-      (failure) => Left(failure),
-      (isFavorite) async {
-        if (isFavorite) {
-          final removeResult = await _repository.removeFromFavorites(marketId);
-          return removeResult.fold(
-            (failure) => Left(failure),
-            (_) => const Right(false),
-          );
-        } else {
-          final addResult = await _repository.addToFavorites(marketId);
-          return addResult.fold(
-            (failure) => Left(failure),
-            (_) => const Right(true),
-          );
-        }
-      },
-    );
+
+    return isFavoriteResult.fold((failure) => Left(failure), (
+      isFavorite,
+    ) async {
+      if (isFavorite) {
+        final removeResult = await _repository.removeFromFavorites(marketId);
+        return removeResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(false),
+        );
+      } else {
+        final addResult = await _repository.addToFavorites(marketId);
+        return addResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(true),
+        );
+      }
+    });
   }
 }

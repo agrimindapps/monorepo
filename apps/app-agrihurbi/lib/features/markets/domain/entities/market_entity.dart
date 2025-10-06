@@ -1,7 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Market Entity for Agricultural Market Data
-/// 
+///
 /// Represents a specific agricultural commodity market
 /// with pricing, trends, and trading information
 class MarketEntity extends Equatable {
@@ -72,23 +72,23 @@ class MarketEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        symbol,
-        type,
-        currentPrice,
-        previousPrice,
-        changePercent,
-        volume,
-        currency,
-        unit,
-        exchange,
-        lastUpdated,
-        status,
-        history,
-        description,
-        imageUrl,
-      ];
+    id,
+    name,
+    symbol,
+    type,
+    currentPrice,
+    previousPrice,
+    changePercent,
+    volume,
+    currency,
+    unit,
+    exchange,
+    lastUpdated,
+    status,
+    history,
+    description,
+    imageUrl,
+  ];
 }
 
 /// Market Types for Agricultural Products
@@ -185,16 +185,16 @@ class MarketSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        marketName,
-        lastUpdated,
-        topGainers,
-        topLosers,
-        mostActive,
-        marketIndex,
-        marketIndexChange,
-        totalMarkets,
-        marketsUp,
-        marketsDown,
-        marketsUnchanged,
-      ];
+    marketName,
+    lastUpdated,
+    topGainers,
+    topLosers,
+    mostActive,
+    marketIndex,
+    marketIndexChange,
+    totalMarkets,
+    marketsUp,
+    marketsDown,
+    marketsUnchanged,
+  ];
 }

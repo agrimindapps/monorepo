@@ -1,7 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/calculation_template.dart';
 import '../../domain/services/calculator_favorites_service.dart';

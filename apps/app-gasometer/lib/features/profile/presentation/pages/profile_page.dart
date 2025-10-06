@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 import 'package:go_router/go_router.dart';
 
 // import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
@@ -42,41 +42,40 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final isAnonymous = ref.watch(isAnonymousProvider);
 
     return Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context, isAnonymous),
-                Expanded(
-                  child: Semantics(
-                    label: 'Página de perfil do usuário',
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      physics: const ClampingScrollPhysics(),
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1120),
-                          child: Padding(
-                            padding: EdgeInsets.all(
-                              GasometerDesignTokens.responsiveSpacing(context),
-                            ),
-                            child: _buildContent(context, user, isAnonymous),
-                          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context, isAnonymous),
+            Expanded(
+              child: Semantics(
+                label: 'Página de perfil do usuário',
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const ClampingScrollPhysics(),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                          GasometerDesignTokens.responsiveSpacing(context),
                         ),
+                        child: _buildContent(context, user, isAnonymous),
                       ),
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildHeader(BuildContext context, bool isAnonymous) {
@@ -90,7 +89,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: GasometerDesignTokens.colorHeaderBackground.withValues(alpha: 0.2),
+              color: GasometerDesignTokens.colorHeaderBackground.withValues(
+                alpha: 0.2,
+              ),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -159,35 +160,35 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         // Seção principal do perfil
         _buildProfileSection(context, user, isAnonymous),
-        
+
         // Seção de dispositivos conectados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const DevicesSectionWidget(),
         ],
-        
+
         // Informações da conta (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildAccountInfoSection(context, user),
         ],
-        
+
         // Sincronização (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildSyncSection(context),
         ],
-        
+
         // Configurações e privacidade
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildSettingsSection(context, isAnonymous),
-        
+
         // Exportação de dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const ExportDataSection(),
         ],
-        
+
         // Limpeza de Dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
@@ -201,7 +202,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildProfileSection(BuildContext context, dynamic user, bool isAnonymous) {
+  Widget _buildProfileSection(
+    BuildContext context,
+    dynamic user,
+    bool isAnonymous,
+  ) {
     final isPremium = ref.watch(isPremiumProvider);
 
     return _buildSection(
@@ -212,136 +217,152 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusDialog,
+            ),
           ),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
-            children: [
-              // Avatar section with edit functionality
-              _buildAvatarSection(context, user, isAnonymous),
-              const SizedBox(height: 20),
-              
-              if (isAnonymous) ...[
-                // Anonymous user info
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.info, color: Colors.orange.shade700),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Usuário Anônimo',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Seus dados estão salvos localmente. Para sincronizar entre dispositivos e ter acesso a recursos avançados, crie uma conta.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.orange.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      context.go('/login');
-                    },
-                    icon: const Icon(Icons.person_add),
-                    label: const Text('Criar Conta'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                      ),
-                    ),
-                  ),
-                ),
-              ] else ...[
-                // Registered user profile display
-                Column(
-                  children: [
-                    _buildProfileInfoRow(
-                      'Nome',
-                      DataSanitizationService.sanitizeDisplayName(user, false),
-                      icon: Icons.person,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildProfileInfoRow(
-                      'Email',
-                      DataSanitizationService.sanitizeEmail(user, false),
-                      icon: Icons.email,
-                    ),
-                    const SizedBox(height: 24),
+              children: [
+                // Avatar section with edit functionality
+                _buildAvatarSection(context, user, isAnonymous),
+                const SizedBox(height: 20),
 
-                    // Premium status
-                    if (isPremium) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: GasometerDesignTokens.getPremiumBackgroundWithOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.3),
+                if (isAnonymous) ...[
+                  // Anonymous user info
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.orange.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.info, color: Colors.orange.shade700),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Usuário Anônimo',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade700,
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: GasometerDesignTokens.colorPremiumAccent,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.star,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'Conta Premium Ativa',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: GasometerDesignTokens.colorPremiumAccent,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Seus dados estão salvos localmente. Para sincronizar entre dispositivos e ter acesso a recursos avançados, crie uma conta.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.orange.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.go('/login');
+                      },
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('Criar Conta'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: GasometerDesignTokens.borderRadius(
+                            GasometerDesignTokens.radiusButton,
+                          ),
                         ),
                       ),
+                    ),
+                  ),
+                ] else ...[
+                  // Registered user profile display
+                  Column(
+                    children: [
+                      _buildProfileInfoRow(
+                        'Nome',
+                        DataSanitizationService.sanitizeDisplayName(
+                          user,
+                          false,
+                        ),
+                        icon: Icons.person,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildProfileInfoRow(
+                        'Email',
+                        DataSanitizationService.sanitizeEmail(user, false),
+                        icon: Icons.email,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Premium status
+                      if (isPremium) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color:
+                                GasometerDesignTokens.getPremiumBackgroundWithOpacity(
+                                  0.1,
+                                ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: GasometerDesignTokens.colorPremiumAccent
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color:
+                                      GasometerDesignTokens.colorPremiumAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.star,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text(
+                                  'Conta Premium Ativa',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        GasometerDesignTokens
+                                            .colorPremiumAccent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
         ),
       ],
     );
@@ -358,7 +379,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusDialog,
+            ),
           ),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Padding(
@@ -368,9 +391,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 _buildInfoRow('Tipo', isPremium ? 'Premium' : 'Gratuita'),
                 if (user?.createdAt != null)
-                  _buildInfoRow('Criada em', _formatDate(user!.createdAt as DateTime)),
+                  _buildInfoRow(
+                    'Criada em',
+                    _formatDate(user!.createdAt as DateTime),
+                  ),
                 if (user?.lastSignInAt != null)
-                  _buildInfoRow('Último acesso', _formatDate(user!.lastSignInAt as DateTime)),
+                  _buildInfoRow(
+                    'Último acesso',
+                    _formatDate(user!.lastSignInAt as DateTime),
+                  ),
               ],
             ),
           ),
@@ -384,7 +413,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusDialog,
+        ),
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: ListTile(
@@ -514,7 +545,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusDialog,
+            ),
           ),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
@@ -556,7 +589,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusDialog,
+            ),
           ),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
@@ -590,7 +625,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusDialog,
+            ),
           ),
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
@@ -632,7 +669,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusCard,
+        ),
       ),
       color: Theme.of(context).colorScheme.surface,
       child: Padding(
@@ -645,8 +684,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
+                    ),
                   ),
                   child: Icon(
                     icon,
@@ -692,7 +735,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -711,7 +756,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -731,7 +778,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -745,7 +791,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -788,20 +836,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: !isLast ? Border(
-              bottom: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                width: 0.5,
-              ),
-            ) : null,
+            border:
+                !isLast
+                    ? Border(
+                      bottom: BorderSide(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withValues(alpha: 0.2),
+                        width: 0.5,
+                      ),
+                    )
+                    : null,
           ),
           child: Row(
             children: [
               Icon(
                 icon,
-                color: isDestructive 
-                    ? Theme.of(context).colorScheme.error
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color:
+                    isDestructive
+                        ? Theme.of(context).colorScheme.error
+                        : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
                 size: GasometerDesignTokens.iconSizeListItem,
               ),
               const SizedBox(width: 16),
@@ -814,9 +870,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: isDestructive 
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurface,
+                        color:
+                            isDestructive
+                                ? Theme.of(context).colorScheme.error
+                                : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -824,7 +881,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -832,7 +891,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
             ],
           ),
@@ -842,7 +903,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   /// Constrói a seção do avatar com funcionalidade de edição
-  Widget _buildAvatarSection(BuildContext context, dynamic user, bool isAnonymous) {
+  Widget _buildAvatarSection(
+    BuildContext context,
+    dynamic user,
+    bool isAnonymous,
+  ) {
     final photoUrl = user?.photoUrl as String?;
     final hasAvatar = photoUrl != null && photoUrl.isNotEmpty;
 
@@ -856,9 +921,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isAnonymous
-                  ? Colors.orange.withValues(alpha: 0.3)
-                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color:
+                  isAnonymous
+                      ? Colors.orange.withValues(alpha: 0.3)
+                      : Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.3),
               width: 3,
             ),
             boxShadow: [
@@ -870,9 +938,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ],
           ),
           child: ClipOval(
-            child: hasAvatar
-                ? _buildAvatarImage(photoUrl)
-                : _buildDefaultAvatar(context, user, isAnonymous),
+            child:
+                hasAvatar
+                    ? _buildAvatarImage(photoUrl)
+                    : _buildDefaultAvatar(context, user, isAnonymous),
           ),
         ),
 
@@ -891,11 +960,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildAvatarImage(String imageSource) {
     try {
       // Verifica se é base64 ou URL
-      if (imageSource.startsWith('data:image') || imageSource.startsWith('/9j/') || imageSource.startsWith('iVBOR')) {
+      if (imageSource.startsWith('data:image') ||
+          imageSource.startsWith('/9j/') ||
+          imageSource.startsWith('iVBOR')) {
         // É base64
-        final base64String = imageSource.contains(',') 
-            ? imageSource.split(',').last 
-            : imageSource;
+        final base64String =
+            imageSource.contains(',')
+                ? imageSource.split(',').last
+                : imageSource;
         final bytes = base64Decode(base64String);
         return Image.memory(
           bytes,
@@ -926,9 +998,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             if (loadingProgress == null) return child;
             return Center(
               child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                    : null,
+                value:
+                    loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
               ),
             );
           },
@@ -943,14 +1017,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   /// Constrói avatar padrão
-  Widget _buildDefaultAvatar(BuildContext context, dynamic user, bool isAnonymous) {
+  Widget _buildDefaultAvatar(
+    BuildContext context,
+    dynamic user,
+    bool isAnonymous,
+  ) {
     return Container(
       width: 120,
       height: 120,
       decoration: BoxDecoration(
-        color: isAnonymous 
-            ? Colors.orange.withValues(alpha: 0.1)
-            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        color:
+            isAnonymous
+                ? Colors.orange.withValues(alpha: 0.1)
+                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: _buildDefaultAvatarIcon(context, isAnonymous),
@@ -962,9 +1041,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Icon(
       isAnonymous ? Icons.person_outline : Icons.person,
       size: 48,
-      color: isAnonymous 
-          ? Colors.orange
-          : Theme.of(context).colorScheme.primary,
+      color:
+          isAnonymous ? Colors.orange : Theme.of(context).colorScheme.primary,
     );
   }
 
@@ -993,11 +1071,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () => _handleEditAvatar(context, hasAvatar),
-          child: const Icon(
-            Icons.edit,
-            color: Colors.white,
-            size: 18,
-          ),
+          child: const Icon(Icons.edit, color: Colors.white, size: 18),
         ),
       ),
     );
@@ -1042,7 +1116,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
       // Processar imagem
       final result = await imageService.processImageToBase64(imageFile);
-      
+
       result.fold(
         (failure) {
           Navigator.of(context).pop(); // Remove loading dialog
@@ -1050,12 +1124,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         },
         (base64String) async {
           // Atualizar avatar via AuthNotifier
-          final success = await ref.read(authProvider.notifier).updateAvatar(base64String);
+          final success = await ref
+              .read(authProvider.notifier)
+              .updateAvatar(base64String);
 
           Navigator.of(context).pop(); // Remove loading dialog
 
           if (success) {
-            _showSuccessSnackBar(context, 'Foto do perfil atualizada com sucesso!');
+            _showSuccessSnackBar(
+              context,
+              'Foto do perfil atualizada com sucesso!',
+            );
           } else {
             final errorMsg = ref.read(authProvider).errorMessage;
             _showErrorSnackBar(context, errorMsg ?? 'Erro ao atualizar foto');
@@ -1066,11 +1145,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (kDebugMode) {
         debugPrint('❌ ProfilePage: Error processing image: $e');
       }
-      
+
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop(); // Remove loading dialog
       }
-      
+
       _showErrorSnackBar(context, 'Erro inesperado ao processar imagem');
     }
   }
@@ -1104,11 +1183,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (kDebugMode) {
         debugPrint('❌ ProfilePage: Error removing image: $e');
       }
-      
+
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop(); // Remove loading dialog
       }
-      
+
       _showErrorSnackBar(context, 'Erro inesperado ao remover imagem');
     }
   }
@@ -1118,19 +1197,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Processando imagem...',
-              style: Theme.of(context).textTheme.bodyMedium,
+      builder:
+          (context) => AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(
+                  'Processando imagem...',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -1138,26 +1218,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<bool> _showRemoveConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remover Foto'),
-        content: const Text('Deseja realmente remover sua foto do perfil?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Remover Foto'),
+            content: const Text('Deseja realmente remover sua foto do perfil?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Remover'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Remover'),
-          ),
-        ],
-      ),
     );
-    
+
     return result ?? false;
   }
 
@@ -1295,95 +1376,119 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.logout,
-              color: Theme.of(context).colorScheme.primary,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Sair da Conta',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: GasometerDesignTokens.borderRadius(
+                GasometerDesignTokens.radiusDialog,
               ),
             ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Ao sair da sua conta, as seguintes ações serão realizadas:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildLogoutItem(context, Icons.cleaning_services, 'Limpeza de dados locais armazenados'),
-            _buildLogoutItem(context, Icons.sync_disabled, 'Interrupção da sincronização automática'),
-            _buildLogoutItem(context, Icons.login, 'Necessário fazer login novamente para acessar'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.cloud,
+            title: Row(
+              children: [
+                Icon(
+                  Icons.logout,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Sair da Conta',
+                  style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Seus dados na nuvem permanecem seguros e serão restaurados no próximo login',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ao sair da sua conta, as seguintes ações serão realizadas:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildLogoutItem(
+                  context,
+                  Icons.cleaning_services,
+                  'Limpeza de dados locais armazenados',
+                ),
+                _buildLogoutItem(
+                  context,
+                  Icons.sync_disabled,
+                  'Interrupção da sincronização automática',
+                ),
+                _buildLogoutItem(
+                  context,
+                  Icons.login,
+                  'Necessário fazer login novamente para acessar',
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
                     ),
                   ),
-                ],
-              ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.cloud,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Seus dados na nuvem permanecem seguros e serão restaurados no próximo login',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color:
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Cancelar',
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
               ),
-            ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
+                    ),
+                  ),
+                ),
+                child: const Text('Sair'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-              ),
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true && context.mounted) {
@@ -1394,11 +1499,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Executa logout com progress dialog animado
   Future<void> _performLogoutWithProgressDialog(BuildContext context) async {
     // Mostrar progress dialog
-    unawaited(showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => _LogoutProgressDialog(),
-    ));
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => _LogoutProgressDialog(),
+      ),
+    );
 
     try {
       // Simular processamento para melhor UX
@@ -1448,11 +1555,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: 20,
-          ),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -1478,22 +1581,23 @@ class _AccountDeletionDialog extends StatefulWidget {
 class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
-  
+
   @override
   void initState() {
     super.initState();
     _confirmationController.addListener(_validateConfirmation);
   }
-  
+
   @override
   void dispose() {
     _confirmationController.dispose();
     super.dispose();
   }
-  
+
   void _validateConfirmation() {
     setState(() {
-      _isConfirmationValid = _confirmationController.text.trim().toUpperCase() == 'CONCORDO';
+      _isConfirmationValid =
+          _confirmationController.text.trim().toUpperCase() == 'CONCORDO';
     });
   }
 
@@ -1501,7 +1605,9 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusDialog,
+        ),
       ),
       title: Row(
         children: [
@@ -1533,15 +1639,29 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDeletionItem(context, Icons.delete_forever, 'Exclusão permanente de todos os seus dados'),
-          _buildDeletionItem(context, Icons.history, 'Perda do histórico de atividades'),
-          _buildDeletionItem(context, Icons.cloud_off, 'Impossibilidade de recuperar informações'),
+          _buildDeletionItem(
+            context,
+            Icons.delete_forever,
+            'Exclusão permanente de todos os seus dados',
+          ),
+          _buildDeletionItem(
+            context,
+            Icons.history,
+            'Perda do histórico de atividades',
+          ),
+          _buildDeletionItem(
+            context,
+            Icons.cloud_off,
+            'Impossibilidade de recuperar informações',
+          ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+              borderRadius: GasometerDesignTokens.borderRadius(
+                GasometerDesignTokens.radiusButton,
+              ),
             ),
             child: Row(
               children: [
@@ -1578,21 +1698,26 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
             decoration: InputDecoration(
               hintText: 'Digite CONCORDO para confirmar',
               border: OutlineInputBorder(
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                borderRadius: GasometerDesignTokens.borderRadius(
+                  GasometerDesignTokens.radiusButton,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                borderRadius: GasometerDesignTokens.borderRadius(
+                  GasometerDesignTokens.radiusButton,
+                ),
                 borderSide: BorderSide(
                   color: Theme.of(context).colorScheme.primary,
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
             ),
             textCapitalization: TextCapitalization.characters,
-            inputFormatters: [
-              _UpperCaseTextFormatter(),
-            ],
+            inputFormatters: [_UpperCaseTextFormatter()],
             style: TextStyle(
               fontSize: 16,
               color: Theme.of(context).colorScheme.onSurface,
@@ -1606,24 +1731,37 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
           child: Text(
             'Cancelar',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ),
         ElevatedButton(
-          onPressed: _isConfirmationValid ? () {
-            Navigator.of(context).pop();
-            context.go('/account-deletion');
-          } : null,
+          onPressed:
+              _isConfirmationValid
+                  ? () {
+                    Navigator.of(context).pop();
+                    context.go('/account-deletion');
+                  }
+                  : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isConfirmationValid 
-                ? Theme.of(context).colorScheme.error
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
-            foregroundColor: _isConfirmationValid 
-                ? Colors.white
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+            backgroundColor:
+                _isConfirmationValid
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor:
+                _isConfirmationValid
+                    ? Colors.white
+                    : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
-              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+              borderRadius: GasometerDesignTokens.borderRadius(
+                GasometerDesignTokens.radiusButton,
+              ),
             ),
           ),
           child: const Text('Excluir Conta'),
@@ -1638,11 +1776,7 @@ class __AccountDeletionDialogState extends State<_AccountDeletionDialog> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.error,
-            size: 20,
-          ),
+          Icon(icon, color: Theme.of(context).colorScheme.error, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -1687,13 +1821,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _animationController.forward();
     _startProgressSteps();
@@ -1808,7 +1938,9 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -1845,7 +1977,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
 
 /// Dialog stateful para confirmação de limpeza de dados
 class _DataClearDialog extends ConsumerStatefulWidget {
-
   const _DataClearDialog();
 
   @override
@@ -1881,7 +2012,9 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
     final theme = Theme.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusDialog,
+        ),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1928,77 +2061,84 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-          const SizedBox(height: 16),
-          _buildClearItem(
-            context,
-            Icons.directions_car,
-            'Todos os seus veículos',
-          ),
-          _buildClearItem(
-            context,
-            Icons.local_gas_station,
-            'Todos os abastecimentos',
-          ),
-          _buildClearItem(
-            context,
-            Icons.build,
-            'Todas as manutenções',
-          ),
-          _buildClearItem(
-            context,
-            Icons.attach_money,
-            'Todas as despesas registradas',
-          ),
-          const SizedBox(height: 16),
-          const Row(
-            children: [
-              Icon(Icons.shield, color: GasometerDesignTokens.colorSuccess, size: 20),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Serão mantidos: perfil, configurações, tema e assinatura',
-                  style: TextStyle(
-                    fontSize: 14,
+              const SizedBox(height: 16),
+              _buildClearItem(
+                context,
+                Icons.directions_car,
+                'Todos os seus veículos',
+              ),
+              _buildClearItem(
+                context,
+                Icons.local_gas_station,
+                'Todos os abastecimentos',
+              ),
+              _buildClearItem(context, Icons.build, 'Todas as manutenções'),
+              _buildClearItem(
+                context,
+                Icons.attach_money,
+                'Todas as despesas registradas',
+              ),
+              const SizedBox(height: 16),
+              const Row(
+                children: [
+                  Icon(
+                    Icons.shield,
                     color: GasometerDesignTokens.colorSuccess,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Serão mantidos: perfil, configurações, tema e assinatura',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: GasometerDesignTokens.colorSuccess,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Para confirmar, digite LIMPAR abaixo:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _confirmationController,
+                enabled: !_isLoading,
+                decoration: InputDecoration(
+                  hintText: 'Digite LIMPAR para confirmar',
+                  border: OutlineInputBorder(
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
+                    ),
+                    borderSide: const BorderSide(
+                      color: GasometerDesignTokens.colorWarning,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Para confirmar, digite LIMPAR abaixo:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _confirmationController,
-            enabled: !_isLoading,
-            decoration: InputDecoration(
-              hintText: 'Digite LIMPAR para confirmar',
-              border: OutlineInputBorder(
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
-                borderSide: const BorderSide(
-                  color: GasometerDesignTokens.colorWarning,
-                  width: 2,
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [_UpperCaseTextFormatter()],
+                style: TextStyle(
+                  fontSize: 16,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
-            ),
-            textCapitalization: TextCapitalization.characters,
-            inputFormatters: [_UpperCaseTextFormatter()],
-            style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
-          ),
             ],
           ),
         ],
@@ -2029,10 +2169,14 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
                         Navigator.of(context).pop();
 
                         if (result['success'] as bool) {
-                          final vehiclesCleaned = result['vehiclesCleaned'] as int;
-                          final fuelRecordsCleaned = result['fuelRecordsCleaned'] as int;
-                          final maintenanceRecordsCleaned = result['maintenanceRecordsCleaned'] as int;
-                          final expensesCleaned = result['expensesCleaned'] as int;
+                          final vehiclesCleaned =
+                              result['vehiclesCleaned'] as int;
+                          final fuelRecordsCleaned =
+                              result['fuelRecordsCleaned'] as int;
+                          final maintenanceRecordsCleaned =
+                              result['maintenanceRecordsCleaned'] as int;
+                          final expensesCleaned =
+                              result['expensesCleaned'] as int;
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -2040,7 +2184,8 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
                                 'Dados limpos com sucesso!\n'
                                 'Veículos: $vehiclesCleaned | Abastecimentos: $fuelRecordsCleaned | Manutenções: $maintenanceRecordsCleaned | Despesas: $expensesCleaned',
                               ),
-                              backgroundColor: GasometerDesignTokens.colorSuccess,
+                              backgroundColor:
+                                  GasometerDesignTokens.colorSuccess,
                               behavior: SnackBarBehavior.floating,
                               duration: const Duration(seconds: 4),
                             ),
@@ -2088,19 +2233,22 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
                     ? Colors.white
                     : theme.colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
-              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+              borderRadius: GasometerDesignTokens.borderRadius(
+                GasometerDesignTokens.radiusButton,
+              ),
             ),
           ),
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text('Limpar Dados'),
+          child:
+              _isLoading
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                  : const Text('Limpar Dados'),
         ),
       ],
     );
@@ -2136,8 +2284,6 @@ class _UpperCaseTextFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    return newValue.copyWith(
-      text: newValue.text.toUpperCase(),
-    );
+    return newValue.copyWith(text: newValue.text.toUpperCase());
   }
 }

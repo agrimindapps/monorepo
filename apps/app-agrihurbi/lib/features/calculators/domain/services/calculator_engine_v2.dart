@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../entities/calculation_result.dart';
 import '../interfaces/calculator_strategy.dart';
@@ -8,7 +8,7 @@ import 'calculator_formatting_service.dart';
 import 'calculator_validation_service.dart';
 
 /// Calculator Engine moderno v2.0
-/// 
+///
 /// Implementa arquitetura SOLID usando composição de services especializados.
 /// Substitui o engine monolítico anterior, seguindo Single Responsibility Principle.
 @injectable
@@ -51,12 +51,16 @@ class CalculatorEngineV2 {
       // 2. Validação (se habilitada)
       ValidationResult? validationResult;
       if (opts.performValidation) {
-        validationResult = await _validationService.validateWithStrategy(strategy, inputs);
+        validationResult = await _validationService.validateWithStrategy(
+          strategy,
+          inputs,
+        );
         if (!validationResult.isValid && !opts.allowInvalidInputs) {
           return CompleteCalculationResult.error(
             EngineError(
               type: EngineErrorType.validationFailed,
-              message: 'Validação falhou: ${validationResult.errors.join(', ')}',
+              message:
+                  'Validação falhou: ${validationResult.errors.join(', ')}',
               strategyId: strategyId,
               phase: CalculationPhase.validation,
               validationErrors: validationResult.errors,
@@ -76,7 +80,8 @@ class CalculatorEngineV2 {
         return CompleteCalculationResult.error(
           EngineError(
             type: EngineErrorType.executionFailed,
-            message: 'Execução falhou: ${executionResult.error?.message ?? 'Erro desconhecido'}',
+            message:
+                'Execução falhou: ${executionResult.error?.message ?? 'Erro desconhecido'}',
             strategyId: strategyId,
             phase: CalculationPhase.execution,
             executionError: executionResult.error,
@@ -113,7 +118,6 @@ class CalculatorEngineV2 {
           ),
         ),
       );
-
     } catch (e) {
       return CompleteCalculationResult.error(
         EngineError(
@@ -135,12 +139,13 @@ class CalculatorEngineV2 {
   }) async {
     // Buscar estratégia compatível
     final compatibleStrategy = _findBestStrategy(inputs, preferredStrategyType);
-    
+
     if (compatibleStrategy == null) {
       return CompleteCalculationResult.error(
         const EngineError(
           type: EngineErrorType.noCompatibleStrategy,
-          message: 'Nenhuma estratégia compatível encontrada para os inputs fornecidos',
+          message:
+              'Nenhuma estratégia compatível encontrada para os inputs fornecidos',
           phase: CalculationPhase.initialization,
         ),
       );
@@ -170,7 +175,7 @@ class CalculatorEngineV2 {
           inputs: request.inputs,
           options: request.options,
         );
-        
+
         results[request.id] = result;
 
         // Parar em caso de erro se configurado
@@ -218,7 +223,7 @@ class CalculatorEngineV2 {
     required Map<String, dynamic> inputs,
   }) async {
     final strategy = _strategyRegistry.getStrategy(strategyId);
-    
+
     if (strategy == null) {
       return CalculationCompatibilityResult(
         isCompatible: false,
@@ -236,8 +241,11 @@ class CalculatorEngineV2 {
       );
     }
 
-    final validationResult = await _validationService.validateWithStrategy(strategy, inputs);
-    
+    final validationResult = await _validationService.validateWithStrategy(
+      strategy,
+      inputs,
+    );
+
     return CalculationCompatibilityResult(
       isCompatible: validationResult.isValid,
       strategyId: strategyId,
@@ -255,7 +263,7 @@ class CalculatorEngineV2 {
   /// Obtém estatísticas do engine
   EngineStatistics getStatistics() {
     final registryStats = _strategyRegistry.getStatistics();
-    
+
     return EngineStatistics(
       totalStrategiesAvailable: registryStats.totalStrategies,
       registryInitialized: registryStats.isInitialized,
@@ -311,27 +319,32 @@ class CalculatorEngineV2 {
     String? preferredType,
   ) {
     final allStrategies = _strategyRegistry.getAllStrategies();
-    
+
     // Primeiro, tentar estratégias do tipo preferido
     if (preferredType != null) {
-      final preferredStrategies = allStrategies
-          .where((s) => s.runtimeType.toString().toLowerCase().contains(preferredType.toLowerCase()))
-          .toList();
-      
+      final preferredStrategies =
+          allStrategies
+              .where(
+                (s) => s.runtimeType.toString().toLowerCase().contains(
+                  preferredType.toLowerCase(),
+                ),
+              )
+              .toList();
+
       for (final strategy in preferredStrategies) {
         if (strategy.canProcess(inputs)) {
           return strategy;
         }
       }
     }
-    
+
     // Se não encontrou no tipo preferido, buscar em todas
     for (final strategy in allStrategies) {
       if (strategy.canProcess(inputs)) {
         return strategy;
       }
     }
-    
+
     return null;
   }
 }
@@ -377,7 +390,9 @@ class CompleteCalculationResult {
     this.error,
   });
 
-  factory CompleteCalculationResult.success(CompleteCalculationSuccess success) {
+  factory CompleteCalculationResult.success(
+    CompleteCalculationSuccess success,
+  ) {
     return CompleteCalculationResult._(isSuccess: true, success: success);
   }
 
@@ -473,7 +488,8 @@ class BatchCalculationResult {
     required this.metadata,
   });
 
-  double get successRate => processedRequests > 0 ? successCount / processedRequests : 0.0;
+  double get successRate =>
+      processedRequests > 0 ? successCount / processedRequests : 0.0;
   bool get hasErrors => errorCount > 0;
   bool get allProcessed => processedRequests == totalRequests;
 }

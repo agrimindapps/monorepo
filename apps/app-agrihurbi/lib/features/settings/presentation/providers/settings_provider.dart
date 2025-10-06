@@ -3,7 +3,7 @@ import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.
 import 'package:app_agrihurbi/features/settings/domain/usecases/manage_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Provider Riverpod para SettingsProvider
 ///
@@ -47,14 +47,16 @@ class SettingsProvider with ChangeNotifier {
   String get language => _settings?.language ?? 'pt_BR';
 
   // Notification settings
-  NotificationSettings get notifications => _settings?.notifications ?? const NotificationSettings();
+  NotificationSettings get notifications =>
+      _settings?.notifications ?? const NotificationSettings();
   bool get pushNotificationsEnabled => notifications.pushNotifications;
   bool get newsNotificationsEnabled => notifications.newsNotifications;
   bool get marketAlertsEnabled => notifications.marketAlerts;
   bool get weatherAlertsEnabled => notifications.weatherAlerts;
 
   // Data settings
-  DataSettings get dataSettings => _settings?.dataSettings ?? const DataSettings();
+  DataSettings get dataSettings =>
+      _settings?.dataSettings ?? const DataSettings();
   bool get autoSyncEnabled => dataSettings.autoSync;
   bool get wifiOnlySyncEnabled => dataSettings.wifiOnlySync;
   bool get cacheImagesEnabled => dataSettings.cacheImages;
@@ -76,7 +78,8 @@ class SettingsProvider with ChangeNotifier {
   String get unitSystem => display.unitSystem;
 
   // Security settings
-  SecuritySettings get security => _settings?.security ?? const SecuritySettings();
+  SecuritySettings get security =>
+      _settings?.security ?? const SecuritySettings();
   bool get biometricAuthEnabled => security.biometricAuth;
   bool get requireAuthOnOpenEnabled => security.requireAuthOnOpen;
   int get autoLockMinutes => security.autoLockMinutes;
@@ -99,9 +102,10 @@ class SettingsProvider with ChangeNotifier {
 
     try {
       final result = await _manageSettings.getSettings();
-      
+
       result.fold(
-        (failure) => _setError('Erro ao carregar configurações: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar configurações: ${failure.message}'),
         (settings) {
           _settings = settings;
           notifyListeners();
@@ -123,7 +127,7 @@ class SettingsProvider with ChangeNotifier {
 
     try {
       final result = await _manageSettings.updateSettings(newSettings);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao salvar configurações: ${failure.message}');
@@ -153,7 +157,7 @@ class SettingsProvider with ChangeNotifier {
 
     try {
       final result = await _manageSettings.resetToDefaults();
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao resetar configurações: ${failure.message}');
@@ -203,7 +207,9 @@ class SettingsProvider with ChangeNotifier {
   // === NOTIFICATION SETTINGS ===
 
   /// Update notification settings
-  Future<bool> updateNotificationSettings(NotificationSettings newNotifications) async {
+  Future<bool> updateNotificationSettings(
+    NotificationSettings newNotifications,
+  ) async {
     if (_settings == null) return false;
 
     final updatedSettings = _settings!.copyWith(
@@ -455,7 +461,7 @@ class SettingsProvider with ChangeNotifier {
   Future<Map<String, dynamic>?> exportSettings() async {
     try {
       final result = await _manageSettings.exportSettings();
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao exportar configurações: ${failure.message}');
@@ -479,7 +485,7 @@ class SettingsProvider with ChangeNotifier {
 
     try {
       final result = await _manageSettings.importSettings(data);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao importar configurações: ${failure.message}');
@@ -554,5 +560,4 @@ class SettingsProvider with ChangeNotifier {
     _errorMessage = null;
     _successMessage = null;
   }
-
 }

@@ -144,7 +144,7 @@ final loginFormProvider = StateNotifierProvider...  // ❌ Não usar mais
 
 ### **Novo Provider (USE ESTE)**
 ```dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'notifiers/notifiers.dart';
 
 class LoginPage extends ConsumerWidget {

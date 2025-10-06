@@ -3,14 +3,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../../../../core/error/failures.dart';
 import 'package:gasometer/core/services/gasometer_analytics_service.dart';
 
 /// Alias para Result até encontrarmos o import correto
 class Result<T> {
-
   const Result._(this._data, this._failure);
 
   factory Result.success(T data) => Result._(data, null);
@@ -24,10 +23,7 @@ class Result<T> {
   T get data => _data!;
   Failure get failure => _failure!;
 
-  void fold(
-    void Function(Failure) onFailure,
-    void Function(T) onSuccess,
-  ) {
+  void fold(void Function(Failure) onFailure, void Function(T) onSuccess) {
     if (isFailure) {
       onFailure(_failure!);
     } else {
@@ -40,7 +36,6 @@ class Result<T> {
 /// Focado em operações locais com base64 encoding
 @injectable
 class GasometerProfileImageService {
-
   GasometerProfileImageService(this._analytics);
   final GasometerAnalyticsService _analytics;
 
@@ -48,7 +43,9 @@ class GasometerProfileImageService {
   Future<Result<String>> processImageToBase64(File imageFile) async {
     try {
       if (kDebugMode) {
-        debugPrint('🖼️ GasometerProfileImageService: Processing image to base64');
+        debugPrint(
+          '🖼️ GasometerProfileImageService: Processing image to base64',
+        );
       }
 
       // Validar arquivo
@@ -61,7 +58,7 @@ class GasometerProfileImageService {
       // Verificar tamanho do arquivo (máximo 5MB)
       final fileSizeInBytes = await imageFile.length();
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
-      
+
       if (fileSizeInBytes > maxSizeInBytes) {
         return Result.failure(
           const ValidationFailure('Imagem muito grande. Máximo permitido: 5MB'),
@@ -70,7 +67,7 @@ class GasometerProfileImageService {
 
       // Ler bytes da imagem
       final imageBytes = await imageFile.readAsBytes();
-      
+
       // Decodificar imagem
       final image = img.decodeImage(imageBytes);
       if (image == null) {
@@ -88,42 +85,52 @@ class GasometerProfileImageService {
           height: image.height > image.width ? 512 : null,
           interpolation: img.Interpolation.cubic,
         );
-        
+
         if (kDebugMode) {
-          debugPrint('🖼️ Image resized from ${image.width}x${image.height} to ${resizedImage.width}x${resizedImage.height}');
+          debugPrint(
+            '🖼️ Image resized from ${image.width}x${image.height} to ${resizedImage.width}x${resizedImage.height}',
+          );
         }
       }
 
       // Converter para JPEG com qualidade 85
       final jpegBytes = img.encodeJpg(resizedImage, quality: 85);
-      
+
       // Converter para base64
       final base64String = base64Encode(jpegBytes);
-      
+
       // Log de analytics
-      await _analytics.logUserAction('profile_image_processed', parameters: {
-        'original_size_kb': (fileSizeInBytes / 1024).round(),
-        'processed_size_kb': (jpegBytes.length / 1024).round(),
-        'original_dimensions': '${image.width}x${image.height}',
-        'processed_dimensions': '${resizedImage.width}x${resizedImage.height}',
-      });
+      await _analytics.logUserAction(
+        'profile_image_processed',
+        parameters: {
+          'original_size_kb': (fileSizeInBytes / 1024).round(),
+          'processed_size_kb': (jpegBytes.length / 1024).round(),
+          'original_dimensions': '${image.width}x${image.height}',
+          'processed_dimensions':
+              '${resizedImage.width}x${resizedImage.height}',
+        },
+      );
 
       if (kDebugMode) {
-        debugPrint('🖼️ Image processed successfully: ${jpegBytes.length} bytes');
+        debugPrint(
+          '🖼️ Image processed successfully: ${jpegBytes.length} bytes',
+        );
       }
 
       return Result.success(base64String);
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ GasometerProfileImageService: Error processing image: $e');
+        debugPrint(
+          '❌ GasometerProfileImageService: Error processing image: $e',
+        );
       }
-      
+
       await _analytics.recordError(
         e,
         StackTrace.current,
         reason: 'profile_image_processing_error',
       );
-      
+
       return Result.failure(
         ServerFailure('Erro ao processar imagem: ${e.toString()}'),
       );
@@ -143,18 +150,20 @@ class GasometerProfileImageService {
       // Verificar extensão
       final extension = imageFile.path.toLowerCase();
       final validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-      
+
       final bool hasValidExtension = validExtensions.any(extension.endsWith);
       if (!hasValidExtension) {
         return Result.failure(
-          const ValidationFailure('Formato não suportado. Use JPG, PNG ou WebP'),
+          const ValidationFailure(
+            'Formato não suportado. Use JPG, PNG ou WebP',
+          ),
         );
       }
 
       // Verificar tamanho do arquivo
       final fileSizeInBytes = imageFile.lengthSync();
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
-      
+
       if (fileSizeInBytes > maxSizeInBytes) {
         return Result.failure(
           const ValidationFailure('Arquivo muito grande. Máximo: 5MB'),
@@ -162,9 +171,7 @@ class GasometerProfileImageService {
       }
 
       if (fileSizeInBytes == 0) {
-        return Result.failure(
-          const ValidationFailure('Arquivo está vazio'),
-        );
+        return Result.failure(const ValidationFailure('Arquivo está vazio'));
       }
 
       return Result.success(null);
@@ -192,9 +199,9 @@ class GasometerProfileImageService {
     try {
       final bytes = base64Decode(base64String);
       final image = img.decodeImage(bytes);
-      
+
       if (image == null) return null;
-      
+
       return {
         'width': image.width,
         'height': image.height,
@@ -210,11 +217,14 @@ class GasometerProfileImageService {
   }
 
   /// Cria uma thumbnail da imagem
-  Future<Result<String>> createThumbnail(String base64String, {int size = 64}) async {
+  Future<Result<String>> createThumbnail(
+    String base64String, {
+    int size = 64,
+  }) async {
     try {
       final bytes = base64Decode(base64String);
       final image = img.decodeImage(bytes);
-      
+
       if (image == null) {
         return Result.failure(
           const ValidationFailure('Não foi possível decodificar a imagem'),
@@ -223,13 +233,13 @@ class GasometerProfileImageService {
 
       // Criar thumbnail quadrada
       final thumbnail = img.copyResizeCropSquare(image, size: size);
-      
+
       // Converter para JPEG
       final jpegBytes = img.encodeJpg(thumbnail, quality: 75);
-      
+
       // Converter para base64
       final thumbnailBase64 = base64Encode(jpegBytes);
-      
+
       return Result.success(thumbnailBase64);
     } catch (e) {
       return Result.failure(
@@ -241,7 +251,6 @@ class GasometerProfileImageService {
 
 /// Classe para representar resultado de processamento
 class ImageProcessingResult {
-
   ImageProcessingResult({
     required this.base64String,
     required this.originalSizeKB,
@@ -265,4 +274,3 @@ class ImageProcessingResult {
     };
   }
 }
-

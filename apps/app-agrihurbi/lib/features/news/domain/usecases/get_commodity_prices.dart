@@ -1,10 +1,10 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Get Commodity Prices Use Case
-/// 
+///
 /// Handles fetching current and historical commodity pricing data
 @injectable
 class GetCommodityPrices {
@@ -13,9 +13,7 @@ class GetCommodityPrices {
   const GetCommodityPrices(this._repository);
 
   /// Get current prices for all or specific commodity types
-  ResultFuture<List<CommodityPriceEntity>> call({
-    List<CommodityType>? types,
-  }) {
+  ResultFuture<List<CommodityPriceEntity>> call({List<CommodityType>? types}) {
     return _repository.getCommodityPrices(types: types);
   }
 }

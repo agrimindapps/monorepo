@@ -1,21 +1,12 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../entities/calculation_result.dart';
 import '../entities/calculator.dart';
 import '../entities/input_field.dart';
 
-enum InsulinType {
-  regular,
-  nph,
-  lente,
-  ultralente,
-}
+enum InsulinType { regular, nph, lente, ultralente }
 
-enum DiabetesType {
-  type1,
-  type2,
-  gestational,
-}
+enum DiabetesType { type1, type2, gestational }
 
 class DiabetesInsulinInput extends Equatable {
   final double weight;
@@ -40,15 +31,15 @@ class DiabetesInsulinInput extends Equatable {
 
   @override
   List<Object?> get props => [
-        weight,
-        glucoseLevel,
-        insulinType,
-        diabetesType,
-        isFirstDose,
-        previousDose,
-        timeSinceLastDose,
-        isEmergency,
-      ];
+    weight,
+    glucoseLevel,
+    insulinType,
+    diabetesType,
+    isFirstDose,
+    previousDose,
+    timeSinceLastDose,
+    isEmergency,
+  ];
 }
 
 class DiabetesInsulinResult extends CalculationResult {
@@ -66,22 +57,23 @@ class DiabetesInsulinCalculator extends Calculator {
 
   @override
   String get id => 'diabetes_insulin';
-  
+
   @override
   String get name => 'Calculadora de Insulina para Diabetes';
-  
+
   @override
-  String get description => 'Calcula dosagem de insulina baseada no peso, nível de glicose e tipo de diabetes';
-  
+  String get description =>
+      'Calcula dosagem de insulina baseada no peso, nível de glicose e tipo de diabetes';
+
   @override
   CalculatorCategory get category => CalculatorCategory.medication;
-  
+
   @override
   String get iconName => 'medication';
-  
+
   @override
   String get version => '1.0.0';
-  
+
   @override
   List<InputField> get inputFields => [
     const InputField(
@@ -207,28 +199,43 @@ class DiabetesInsulinCalculator extends Calculator {
       insulinType: _parseInsulinType(inputs['insulinType'] as String),
       diabetesType: _parseDiabetesType(inputs['diabetesType'] as String),
       isFirstDose: inputs['isFirstDose'] as bool? ?? false,
-      previousDose: inputs['previousDose'] != null ? (inputs['previousDose'] as num).toDouble() : null,
-      timeSinceLastDose: inputs['timeSinceLastDose'] != null ? (inputs['timeSinceLastDose'] as num).toInt() : null,
+      previousDose:
+          inputs['previousDose'] != null
+              ? (inputs['previousDose'] as num).toDouble()
+              : null,
+      timeSinceLastDose:
+          inputs['timeSinceLastDose'] != null
+              ? (inputs['timeSinceLastDose'] as num).toInt()
+              : null,
       isEmergency: inputs['isEmergency'] as bool? ?? false,
     );
   }
 
   InsulinType _parseInsulinType(String value) {
     switch (value.toLowerCase()) {
-      case 'regular': return InsulinType.regular;
-      case 'nph': return InsulinType.nph;
-      case 'lente': return InsulinType.lente;
-      case 'ultralente': return InsulinType.ultralente;
-      default: return InsulinType.regular;
+      case 'regular':
+        return InsulinType.regular;
+      case 'nph':
+        return InsulinType.nph;
+      case 'lente':
+        return InsulinType.lente;
+      case 'ultralente':
+        return InsulinType.ultralente;
+      default:
+        return InsulinType.regular;
     }
   }
 
   DiabetesType _parseDiabetesType(String value) {
     switch (value.toLowerCase()) {
-      case 'type1': return DiabetesType.type1;
-      case 'type2': return DiabetesType.type2;
-      case 'gestational': return DiabetesType.gestational;
-      default: return DiabetesType.type1;
+      case 'type1':
+        return DiabetesType.type1;
+      case 'type2':
+        return DiabetesType.type2;
+      case 'gestational':
+        return DiabetesType.gestational;
+      default:
+        return DiabetesType.type1;
     }
   }
 
@@ -237,16 +244,19 @@ class DiabetesInsulinCalculator extends Calculator {
 
     // Calcular dose base de insulina
     final baseDose = _calculateBaseDose(input);
-    
+
     // Ajustar dose baseada na glicemia
     final adjustedDose = _adjustDoseForGlucose(baseDose, input.glucoseLevel);
-    
+
     // Aplicar fatores do tipo de insulina
-    final finalDoseUnits = _applyInsulinTypeFactor(adjustedDose, input.insulinType);
-    
+    final finalDoseUnits = _applyInsulinTypeFactor(
+      adjustedDose,
+      input.insulinType,
+    );
+
     // Converter para mL (assumindo concentração padrão de 40 UI/mL)
     final doseML = finalDoseUnits / 40.0;
-    
+
     // Determinar via de administração
     final route = _determineAdministrationRoute(input);
 
@@ -262,40 +272,38 @@ class DiabetesInsulinCalculator extends Calculator {
         label: 'Dose de Insulina',
         value: finalDoseUnits.toStringAsFixed(2),
         unit: 'UI',
-        severity: finalDoseUnits > input.weight * 1.0 ? ResultSeverity.warning : ResultSeverity.info,
+        severity:
+            finalDoseUnits > input.weight * 1.0
+                ? ResultSeverity.warning
+                : ResultSeverity.info,
       ),
-      ResultItem(
-        label: 'Volume',
-        value: doseML.toStringAsFixed(2),
-        unit: 'mL',
-      ),
-      ResultItem(
-        label: 'Via de Administração',
-        value: route,
-      ),
-      ResultItem(
-        label: 'Próxima Dose',
-        value: nextDoseTime,
-      ),
+      ResultItem(label: 'Volume', value: doseML.toStringAsFixed(2), unit: 'mL'),
+      ResultItem(label: 'Via de Administração', value: route),
+      ResultItem(label: 'Próxima Dose', value: nextDoseTime),
     ];
 
     // Criar recomendações
-    final recommendations = warnings.map((warning) {
-      final severity = warning.contains('EMERGÊNCIA') ? ResultSeverity.danger :
-                       warning.contains('URGENTE') ? ResultSeverity.warning :
-                       ResultSeverity.info;
-      return Recommendation(
-        title: 'Aviso de Segurança',
-        message: warning,
-        severity: severity,
-      );
-    }).toList();
+    final recommendations =
+        warnings.map((warning) {
+          final severity =
+              warning.contains('EMERGÊNCIA')
+                  ? ResultSeverity.danger
+                  : warning.contains('URGENTE')
+                  ? ResultSeverity.warning
+                  : ResultSeverity.info;
+          return Recommendation(
+            title: 'Aviso de Segurança',
+            message: warning,
+            severity: severity,
+          );
+        }).toList();
 
     return DiabetesInsulinResult(
       calculatorId: 'diabetes_insulin',
       results: results,
       recommendations: recommendations,
-      summary: 'Dose de insulina: ${finalDoseUnits.toStringAsFixed(2)} UI ($route)',
+      summary:
+          'Dose de insulina: ${finalDoseUnits.toStringAsFixed(2)} UI ($route)',
       calculatedAt: DateTime.now(),
     );
   }
@@ -311,7 +319,9 @@ class DiabetesInsulinCalculator extends Calculator {
       throw ArgumentError('Nível de glicose muito alto (>1000 mg/dL)');
     }
     if (!input.isFirstDose && input.previousDose == null) {
-      throw ArgumentError('Dose anterior deve ser informada se não for primeira dose');
+      throw ArgumentError(
+        'Dose anterior deve ser informada se não for primeira dose',
+      );
     }
   }
 
@@ -319,7 +329,7 @@ class DiabetesInsulinCalculator extends Calculator {
     // Dose base: 0.25-0.5 UI/kg para cães, 0.25-1.0 UI/kg para gatos
     // Assumindo que é um cão (seria ideal ter a espécie como parâmetro)
     double baseDosePerKg;
-    
+
     switch (input.diabetesType) {
       case DiabetesType.type1:
         baseDosePerKg = 0.5; // Dose mais alta para tipo 1
@@ -331,11 +341,11 @@ class DiabetesInsulinCalculator extends Calculator {
         baseDosePerKg = 0.3; // Dose moderada para gestacional
         break;
     }
-    
+
     if (input.isFirstDose) {
       baseDosePerKg *= 0.7; // Reduzir 30% na primeira dose por segurança
     }
-    
+
     return input.weight * baseDosePerKg;
   }
 
@@ -392,38 +402,47 @@ class DiabetesInsulinCalculator extends Calculator {
     }
   }
 
-  static List<String> _generateWarnings(DiabetesInsulinInput input, double finalDose) {
+  static List<String> _generateWarnings(
+    DiabetesInsulinInput input,
+    double finalDose,
+  ) {
     final warnings = <String>[];
-    
+
     if (input.isFirstDose) {
       warnings.add('⚠️ PRIMEIRA DOSE: Monitorar glicemia a cada 2 horas');
     }
-    
+
     if (input.glucoseLevel > 500) {
-      warnings.add('🚨 EMERGÊNCIA: Glicemia muito alta, considerar hospitalização');
+      warnings.add(
+        '🚨 EMERGÊNCIA: Glicemia muito alta, considerar hospitalização',
+      );
     }
-    
+
     if (input.glucoseLevel < 80) {
-      warnings.add('⚠️ HIPOGLICEMIA: Não administrar insulina, tratar hipoglicemia primeiro');
+      warnings.add(
+        '⚠️ HIPOGLICEMIA: Não administrar insulina, tratar hipoglicemia primeiro',
+      );
     }
-    
+
     if (finalDose > input.weight * 1.0) {
       warnings.add('⚠️ DOSE ALTA: Dose superior a 1 UI/kg, revisar cálculo');
     }
-    
+
     if (input.timeSinceLastDose != null && input.timeSinceLastDose! < 6) {
       warnings.add('⚠️ INTERVALO CURTO: Menos de 6h desde última dose');
     }
-    
-    warnings.add('📋 SEMPRE confirmar dose com veterinário antes da administração');
-    
+
+    warnings.add(
+      '📋 SEMPRE confirmar dose com veterinário antes da administração',
+    );
+
     return warnings;
   }
 
   static String _calculateNextDoseTime(InsulinType type) {
     final now = DateTime.now();
     int hoursToAdd;
-    
+
     switch (type) {
       case InsulinType.regular:
         hoursToAdd = 8;
@@ -438,17 +457,19 @@ class DiabetesInsulinCalculator extends Calculator {
         hoursToAdd = 24;
         break;
     }
-    
+
     final nextDose = now.add(Duration(hours: hoursToAdd));
     return '${nextDose.hour.toString().padLeft(2, '0')}:${nextDose.minute.toString().padLeft(2, '0')}';
   }
 
-  static bool _requiresVeterinarySupervision(DiabetesInsulinInput input, double finalDose) {
-    return input.isFirstDose || 
-           input.isEmergency || 
-           input.glucoseLevel > 500 || 
-           input.glucoseLevel < 80 ||
-           finalDose > input.weight * 0.8;
+  static bool _requiresVeterinarySupervision(
+    DiabetesInsulinInput input,
+    double finalDose,
+  ) {
+    return input.isFirstDose ||
+        input.isEmergency ||
+        input.glucoseLevel > 500 ||
+        input.glucoseLevel < 80 ||
+        finalDose > input.weight * 0.8;
   }
-
 }

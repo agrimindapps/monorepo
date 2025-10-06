@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 class Medication extends Equatable {
   final String id;
@@ -90,7 +90,7 @@ class Medication extends Equatable {
     final now = DateTime.now();
     if (now.isBefore(startDate)) return 0.0;
     if (now.isAfter(endDate)) return 1.0;
-    
+
     final elapsed = now.difference(startDate).inDays;
     final total = totalDurationInDays;
     return total > 0 ? (elapsed / total).clamp(0.0, 1.0) : 1.0;
@@ -126,21 +126,21 @@ class Medication extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        animalId,
-        name,
-        dosage,
-        frequency,
-        duration,
-        startDate,
-        endDate,
-        notes,
-        prescribedBy,
-        type,
-        createdAt,
-        updatedAt,
-        isDeleted,
-      ];
+    id,
+    animalId,
+    name,
+    dosage,
+    frequency,
+    duration,
+    startDate,
+    endDate,
+    notes,
+    prescribedBy,
+    type,
+    createdAt,
+    updatedAt,
+    isDeleted,
+  ];
 }
 
 enum MedicationType {

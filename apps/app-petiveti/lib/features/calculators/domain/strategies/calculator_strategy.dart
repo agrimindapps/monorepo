@@ -1,35 +1,36 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import '../entities/calculation_result.dart';
 
 /// Interface base para Strategy Pattern das calculadoras
 /// Permite diferentes implementações de cálculo seguindo Clean Architecture
-abstract class CalculatorStrategy<TInput, TOutput extends CalculationResult> extends Equatable {
+abstract class CalculatorStrategy<TInput, TOutput extends CalculationResult>
+    extends Equatable {
   const CalculatorStrategy();
 
   /// Identificador único da estratégia
   String get id;
-  
+
   /// Nome da calculadora
   String get name;
-  
+
   /// Descrição da funcionalidade
   String get description;
-  
+
   /// Versão da implementação
   String get version;
 
   /// Executa o cálculo principal
-  /// 
+  ///
   /// [input] - Dados de entrada tipados
   /// Retorna resultado tipado ou lança exceção
   TOutput calculate(TInput input);
-  
+
   /// Valida entrada antes do cálculo
-  /// 
+  ///
   /// [input] - Dados de entrada para validação
   /// Retorna lista de erros (vazia se válido)
   List<String> validateInput(TInput input);
-  
+
   /// Verifica se entrada é válida
   bool isInputValid(TInput input) => validateInput(input).isEmpty;
 
@@ -41,7 +42,7 @@ abstract class CalculatorStrategy<TInput, TOutput extends CalculationResult> ext
 mixin SpeciesAwareStrategy {
   /// Obtém parâmetros específicos da espécie
   Map<String, dynamic> getSpeciesParameters(String species);
-  
+
   /// Lista de espécies suportadas
   List<String> get supportedSpecies;
 }
@@ -50,7 +51,7 @@ mixin SpeciesAwareStrategy {
 mixin AgeAwareStrategy {
   /// Aplica correções baseadas na idade
   double applyAgeCorrection(double baseValue, int ageInMonths, String species);
-  
+
   /// Define faixas etárias consideradas
   Map<String, int> get ageRanges;
 }
@@ -58,8 +59,12 @@ mixin AgeAwareStrategy {
 /// Mixin para estratégias que consideram peso
 mixin WeightAwareStrategy {
   /// Aplica correções baseadas no peso
-  double applyWeightCorrection(double baseValue, double weightKg, String species);
-  
+  double applyWeightCorrection(
+    double baseValue,
+    double weightKg,
+    String species,
+  );
+
   /// Limites de peso considerados normais
   Map<String, Map<String, double>> get weightLimits; // species -> {min, max}
 }
@@ -91,7 +96,8 @@ class InvalidInputException extends CalculationException {
   });
 
   @override
-  String toString() => 'InvalidInputException: $message\nErrors: ${validationErrors.join(', ')}';
+  String toString() =>
+      'InvalidInputException: $message\nErrors: ${validationErrors.join(', ')}';
 }
 
 /// Helper class para lookup tables comuns nas calculadoras
@@ -128,29 +134,29 @@ class CalculatorLookupTables {
 
   /// Multiplicadores metabólicos por idade (meses)
   static const Map<int, double> ageMetabolicMultipliers = {
-    3: 2.5,   // filhotes muito jovens
-    6: 2.0,   // filhotes
-    12: 1.8,  // juvenis
-    24: 1.6,  // adultos jovens
-    60: 1.4,  // adultos
-    84: 1.2,  // seniores
+    3: 2.5, // filhotes muito jovens
+    6: 2.0, // filhotes
+    12: 1.8, // juvenis
+    24: 1.6, // adultos jovens
+    60: 1.4, // adultos
+    84: 1.2, // seniores
     120: 1.0, // idosos
   };
 
   /// Fatores de correção para animais castrados
   static const Map<String, double> neuteredAdjustmentFactors = {
-    'dog': 0.9,   // redução de 10% no metabolismo
-    'cat': 0.85,  // redução de 15% no metabolismo
+    'dog': 0.9, // redução de 10% no metabolismo
+    'cat': 0.85, // redução de 15% no metabolismo
   };
 
   /// BCS para classificação de peso lookup
   static const Map<int, String> bcsClassifications = {
     1: 'Extremamente Magro',
-    2: 'Muito Magro', 
+    2: 'Muito Magro',
     3: 'Magro',
     4: 'Abaixo do Ideal',
     5: 'Ideal',
-    6: 'Acima do Ideal', 
+    6: 'Acima do Ideal',
     7: 'Sobrepeso',
     8: 'Obeso',
     9: 'Extremamente Obeso',
@@ -173,7 +179,7 @@ class CalculatorLookupTables {
   static double getIdealWeight(String species, String? breed) {
     final speciesTable = idealWeightRanges[species];
     if (speciesTable == null) return 25.0; // default genérico
-    
+
     return speciesTable[breed?.toLowerCase()] ?? speciesTable['default']!;
   }
 
@@ -181,13 +187,13 @@ class CalculatorLookupTables {
   static double getAgeMetabolicMultiplier(int ageInMonths) {
     // Encontra a faixa etária mais próxima
     final sortedAges = ageMetabolicMultipliers.keys.toList()..sort();
-    
+
     for (final age in sortedAges) {
       if (ageInMonths <= age) {
         return ageMetabolicMultipliers[age]!;
       }
     }
-    
+
     return 1.0; // default para idades muito avançadas
   }
 

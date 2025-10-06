@@ -7,7 +7,7 @@ import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart'
 import 'package:app_agrihurbi/features/markets/domain/usecases/manage_market_favorites.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Provider Riverpod para MarketProvider
 ///
@@ -59,7 +59,7 @@ class MarketProvider with ChangeNotifier {
   String? _errorMessage;
   MarketFilter _currentFilter = const MarketFilter();
   String _currentSearchQuery = '';
-  
+
   DateTime? _lastUpdate;
   List<String> _searchHistory = [];
 
@@ -82,7 +82,7 @@ class MarketProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   MarketFilter get currentFilter => _currentFilter;
   String get currentSearchQuery => _currentSearchQuery;
-  
+
   DateTime? get lastUpdate => _lastUpdate;
   List<String> get searchHistory => _searchHistory;
 
@@ -110,7 +110,7 @@ class MarketProvider with ChangeNotifier {
         limit: limit,
         offset: offset,
       );
-      
+
       result.fold(
         (failure) => _setError('Erro ao carregar mercados: ${failure.message}'),
         (markets) {
@@ -136,7 +136,7 @@ class MarketProvider with ChangeNotifier {
 
     try {
       final result = await _getMarketSummary();
-      
+
       result.fold(
         (failure) => _setError('Erro ao carregar resumo: ${failure.message}'),
         (summary) {
@@ -165,17 +165,20 @@ class MarketProvider with ChangeNotifier {
       ]);
 
       results[0].fold(
-        (failure) => _setError('Erro ao carregar maiores altas: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar maiores altas: ${failure.message}'),
         (gainers) => _topGainers = gainers,
       );
 
       results[1].fold(
-        (failure) => _setError('Erro ao carregar maiores quedas: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar maiores quedas: ${failure.message}'),
         (losers) => _topLosers = losers,
       );
 
       results[2].fold(
-        (failure) => _setError('Erro ao carregar mais negociados: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar mais negociados: ${failure.message}'),
         (active) => _mostActive = active,
       );
 
@@ -207,15 +210,14 @@ class MarketProvider with ChangeNotifier {
         filter: filter,
         limit: limit,
       );
-      
-      result.fold(
-        (failure) => _setError('Erro na busca: ${failure.message}'),
-        (results) {
-          _searchResults = results;
-          _currentSearchQuery = query;
-          notifyListeners();
-        },
-      );
+
+      result.fold((failure) => _setError('Erro na busca: ${failure.message}'), (
+        results,
+      ) {
+        _searchResults = results;
+        _currentSearchQuery = query;
+        notifyListeners();
+      });
     } catch (e) {
       _setError('Erro inesperado: $e');
     } finally {
@@ -234,13 +236,10 @@ class MarketProvider with ChangeNotifier {
   Future<MarketEntity?> getMarketById(String id) async {
     try {
       final result = await _repository.getMarketById(id);
-      return result.fold(
-        (failure) {
-          _setError('Erro ao carregar mercado: ${failure.message}');
-          return null;
-        },
-        (market) => market,
-      );
+      return result.fold((failure) {
+        _setError('Erro ao carregar mercado: ${failure.message}');
+        return null;
+      }, (market) => market);
     } catch (e) {
       _setError('Erro inesperado: $e');
       return null;
@@ -260,7 +259,7 @@ class MarketProvider with ChangeNotifier {
         type: type,
         limit: limit,
       );
-      
+
       result.fold(
         (failure) => _setError('Erro ao carregar mercados: ${failure.message}'),
         (markets) {
@@ -285,9 +284,10 @@ class MarketProvider with ChangeNotifier {
 
     try {
       final result = await _manageFavorites.getFavorites();
-      
+
       result.fold(
-        (failure) => _setError('Erro ao carregar favoritos: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar favoritos: ${failure.message}'),
         (favorites) {
           _favoriteMarkets = favorites;
           notifyListeners();
@@ -304,7 +304,7 @@ class MarketProvider with ChangeNotifier {
   Future<bool> addToFavorites(String marketId) async {
     try {
       final result = await _manageFavorites.addToFavorites(marketId);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao adicionar favorito: ${failure.message}');
@@ -326,7 +326,7 @@ class MarketProvider with ChangeNotifier {
   Future<bool> removeFromFavorites(String marketId) async {
     try {
       final result = await _manageFavorites.removeFromFavorites(marketId);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao remover favorito: ${failure.message}');
@@ -348,7 +348,7 @@ class MarketProvider with ChangeNotifier {
   Future<bool> toggleFavorite(String marketId) async {
     try {
       final result = await _manageFavorites.toggleFavorite(marketId);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao alterar favorito: ${failure.message}');
@@ -370,11 +370,8 @@ class MarketProvider with ChangeNotifier {
   Future<bool> isMarketFavorite(String marketId) async {
     try {
       final result = await _manageFavorites.isFavorite(marketId);
-      
-      return result.fold(
-        (failure) => false,
-        (isFavorite) => isFavorite,
-      );
+
+      return result.fold((failure) => false, (isFavorite) => isFavorite);
     } catch (e) {
       return false;
     }
@@ -428,7 +425,7 @@ class MarketProvider with ChangeNotifier {
   /// Refresh all data
   Future<void> refreshAll() async {
     _setRefreshing(true);
-    
+
     try {
       await _repository.refreshMarketData();
       await initialize();

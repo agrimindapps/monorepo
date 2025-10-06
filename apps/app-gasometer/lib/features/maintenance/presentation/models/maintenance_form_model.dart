@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -6,7 +6,6 @@ import '../../domain/entities/maintenance_entity.dart';
 
 /// Model reativo para o formulário de manutenção
 class MaintenanceFormModel extends Equatable {
-
   const MaintenanceFormModel({
     required this.id,
     required this.userId,
@@ -65,7 +64,9 @@ class MaintenanceFormModel extends Equatable {
   }
 
   /// Cria modelo a partir de uma manutenção existente para edição
-  factory MaintenanceFormModel.fromMaintenanceEntity(MaintenanceEntity maintenance) {
+  factory MaintenanceFormModel.fromMaintenanceEntity(
+    MaintenanceEntity maintenance,
+  ) {
     return MaintenanceFormModel(
       id: maintenance.id,
       userId: maintenance.userId ?? '',
@@ -104,24 +105,24 @@ class MaintenanceFormModel extends Equatable {
   final double cost;
   final DateTime serviceDate;
   final double odometer;
-  
+
   // Informações da oficina
   final String workshopName;
   final String workshopPhone;
   final String workshopAddress;
-  
+
   // Próximo serviço
   final DateTime? nextServiceDate;
   final double? nextServiceOdometer;
-  
+
   // Anexos
   final List<String> photosPaths;
   final List<String> invoicesPaths;
-  
+
   // Peças e informações técnicas
   final Map<String, String> parts;
   final String notes;
-  
+
   // Estado do formulário
   final bool isLoading;
   final bool hasChanges;
@@ -200,9 +201,14 @@ class MaintenanceFormModel extends Equatable {
       odometer: odometer ?? this.odometer,
       workshopName: clearWorkshop ? '' : (workshopName ?? this.workshopName),
       workshopPhone: clearWorkshop ? '' : (workshopPhone ?? this.workshopPhone),
-      workshopAddress: clearWorkshop ? '' : (workshopAddress ?? this.workshopAddress),
-      nextServiceDate: clearNextService ? null : (nextServiceDate ?? this.nextServiceDate),
-      nextServiceOdometer: clearNextService ? null : (nextServiceOdometer ?? this.nextServiceOdometer),
+      workshopAddress:
+          clearWorkshop ? '' : (workshopAddress ?? this.workshopAddress),
+      nextServiceDate:
+          clearNextService ? null : (nextServiceDate ?? this.nextServiceDate),
+      nextServiceOdometer:
+          clearNextService
+              ? null
+              : (nextServiceOdometer ?? this.nextServiceOdometer),
       photosPaths: photosPaths ?? this.photosPaths,
       invoicesPaths: invoicesPaths ?? this.invoicesPaths,
       parts: parts ?? this.parts,
@@ -226,10 +232,7 @@ class MaintenanceFormModel extends Equatable {
   bool get hasErrors => errors.isNotEmpty;
 
   /// Verifica se o formulário está pronto para ser submetido
-  bool get canSubmit => 
-      hasMinimumData && 
-      !hasErrors && 
-      !isLoading;
+  bool get canSubmit => hasMinimumData && !hasErrors && !isLoading;
 
   /// Verifica se é uma edição (tem ID)
   bool get isEditing => id.isNotEmpty;
@@ -259,13 +262,14 @@ class MaintenanceFormModel extends Equatable {
   bool get isEmergency => type == MaintenanceType.emergency;
 
   /// Verifica se tem informações da oficina
-  bool get hasWorkshopInfo => 
-      workshopName.trim().isNotEmpty || 
-      workshopPhone.trim().isNotEmpty || 
+  bool get hasWorkshopInfo =>
+      workshopName.trim().isNotEmpty ||
+      workshopPhone.trim().isNotEmpty ||
       workshopAddress.trim().isNotEmpty;
 
   /// Verifica se tem próximo serviço configurado
-  bool get hasNextService => nextServiceDate != null || nextServiceOdometer != null;
+  bool get hasNextService =>
+      nextServiceDate != null || nextServiceOdometer != null;
 
   /// Verifica se tem fotos
   bool get hasPhotos => photosPaths.isNotEmpty;
@@ -301,7 +305,7 @@ class MaintenanceFormModel extends Equatable {
   /// Remove erro de um campo específico
   MaintenanceFormModel clearFieldError(String field) {
     if (!errors.containsKey(field)) return this;
-    
+
     final newErrors = Map<String, String>.from(errors);
     newErrors.remove(field);
     return copyWith(errors: newErrors);
@@ -339,9 +343,11 @@ class MaintenanceFormModel extends Equatable {
     if (description.trim().isEmpty) {
       validationErrors['description'] = 'Descrição é obrigatória';
     } else if (description.trim().length < 5) {
-      validationErrors['description'] = 'Descrição muito curta (mínimo 5 caracteres)';
+      validationErrors['description'] =
+          'Descrição muito curta (mínimo 5 caracteres)';
     } else if (description.trim().length > 500) {
-      validationErrors['description'] = 'Descrição muito longa (máximo 500 caracteres)';
+      validationErrors['description'] =
+          'Descrição muito longa (máximo 500 caracteres)';
     }
 
     // Validar valor
@@ -368,26 +374,30 @@ class MaintenanceFormModel extends Equatable {
     if (workshopName.trim().isNotEmpty && workshopName.trim().length < 2) {
       validationErrors['workshopName'] = 'Nome da oficina muito curto';
     }
-    
+
     if (workshopPhone.trim().isNotEmpty) {
       final cleanPhone = workshopPhone.replaceAll(RegExp(r'[^\d]'), '');
       if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-        validationErrors['workshopPhone'] = 'Telefone deve ter 10 ou 11 dígitos';
+        validationErrors['workshopPhone'] =
+            'Telefone deve ter 10 ou 11 dígitos';
       }
     }
 
     // Validar próximo serviço
     if (nextServiceDate != null && nextServiceDate!.isBefore(serviceDate)) {
-      validationErrors['nextServiceDate'] = 'Data da próxima manutenção deve ser posterior';
+      validationErrors['nextServiceDate'] =
+          'Data da próxima manutenção deve ser posterior';
     }
-    
+
     if (nextServiceOdometer != null && nextServiceOdometer! <= odometer) {
-      validationErrors['nextServiceOdometer'] = 'Odômetro da próxima deve ser maior';
+      validationErrors['nextServiceOdometer'] =
+          'Odômetro da próxima deve ser maior';
     }
 
     // Validar observações (opcional)
     if (notes.trim().isNotEmpty && notes.trim().length > 1000) {
-      validationErrors['notes'] = 'Observação muito longa (máximo 1000 caracteres)';
+      validationErrors['notes'] =
+          'Observação muito longa (máximo 1000 caracteres)';
     }
 
     return validationErrors;
@@ -397,23 +407,27 @@ class MaintenanceFormModel extends Equatable {
   /// Aplica sanitização em todos os campos de texto para segurança
   MaintenanceEntity toMaintenanceEntity() {
     final now = DateTime.now();
-    
+
     // Sanitizar todos os campos de texto antes da persistência
     final sanitizedTitle = InputSanitizer.sanitize(title);
-    final sanitizedDescription = InputSanitizer.sanitizeDescription(description);
-    final sanitizedWorkshopName = workshopName.trim().isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeName(workshopName);
-    final sanitizedWorkshopPhone = workshopPhone.trim().isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeNumeric(workshopPhone);
-    final sanitizedWorkshopAddress = workshopAddress.trim().isEmpty 
-        ? null 
-        : InputSanitizer.sanitize(workshopAddress);
-    final sanitizedNotes = notes.trim().isEmpty 
-        ? null 
-        : InputSanitizer.sanitizeDescription(notes);
-    
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(
+      description,
+    );
+    final sanitizedWorkshopName =
+        workshopName.trim().isEmpty
+            ? null
+            : InputSanitizer.sanitizeName(workshopName);
+    final sanitizedWorkshopPhone =
+        workshopPhone.trim().isEmpty
+            ? null
+            : InputSanitizer.sanitizeNumeric(workshopPhone);
+    final sanitizedWorkshopAddress =
+        workshopAddress.trim().isEmpty
+            ? null
+            : InputSanitizer.sanitize(workshopAddress);
+    final sanitizedNotes =
+        notes.trim().isEmpty ? null : InputSanitizer.sanitizeDescription(notes);
+
     return MaintenanceEntity(
       id: id.isEmpty ? DateTime.now().millisecondsSinceEpoch.toString() : id,
       userId: userId,
@@ -434,7 +448,12 @@ class MaintenanceFormModel extends Equatable {
       invoicesPaths: invoicesPaths,
       parts: parts,
       notes: sanitizedNotes,
-      createdAt: id.isEmpty ? now : DateTime.fromMillisecondsSinceEpoch(int.tryParse(id) ?? now.millisecondsSinceEpoch),
+      createdAt:
+          id.isEmpty
+              ? now
+              : DateTime.fromMillisecondsSinceEpoch(
+                int.tryParse(id) ?? now.millisecondsSinceEpoch,
+              ),
       updatedAt: now,
       metadata: const {},
     );
@@ -442,9 +461,10 @@ class MaintenanceFormModel extends Equatable {
 
   /// Reseta formulário para estado inicial
   MaintenanceFormModel reset() {
-    return MaintenanceFormModel.initial(vehicleId, userId).copyWith(
-      vehicle: vehicle,
-    );
+    return MaintenanceFormModel.initial(
+      vehicleId,
+      userId,
+    ).copyWith(vehicle: vehicle);
   }
 
   /// Cria cópia limpa sem alterações ou erros
@@ -488,11 +508,11 @@ class MaintenanceFormModel extends Equatable {
       type.displayName,
       'R\$ ${cost.toStringAsFixed(2).replaceAll('.', ',')}',
     ];
-    
+
     if (hasWorkshopInfo && workshopName.trim().isNotEmpty) {
       parts.add(workshopName.trim());
     }
-    
+
     return parts.join(' • ');
   }
 }

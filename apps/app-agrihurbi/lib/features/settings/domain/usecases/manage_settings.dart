@@ -3,10 +3,10 @@ import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Manage Settings Use Case
-/// 
+///
 /// Handles all settings management operations
 @injectable
 class ManageSettings {
@@ -38,73 +38,72 @@ class ManageSettings {
   ResultFuture<Map<String, dynamic>> exportSettings() async {
     try {
       final settingsResult = await _repository.getSettings();
-      return settingsResult.fold(
-        (failure) => Left(failure),
-        (settings) {
-          final exportData = {
-            'version': '1.0',
-            'exportedAt': DateTime.now().toIso8601String(),
-            'settings': {
-              'userId': settings.userId,
-              'theme': settings.theme.name,
-              'language': settings.language,
-              'notifications': {
-                'pushNotifications': settings.notifications.pushNotifications,
-                'newsNotifications': settings.notifications.newsNotifications,
-                'marketAlerts': settings.notifications.marketAlerts,
-                'weatherAlerts': settings.notifications.weatherAlerts,
-                'animalReminders': settings.notifications.animalReminders,
-                'calculatorReminders': settings.notifications.calculatorReminders,
-                'quietHoursStart': settings.notifications.quietHoursStart,
-                'quietHoursEnd': settings.notifications.quietHoursEnd,
-              },
-              'dataSettings': {
-                'autoSync': settings.dataSettings.autoSync,
-                'wifiOnlySync': settings.dataSettings.wifiOnlySync,
-                'cacheImages': settings.dataSettings.cacheImages,
-                'cacheRetentionDays': settings.dataSettings.cacheRetentionDays,
-                'compressBackups': settings.dataSettings.compressBackups,
-                'exportFormat': settings.dataSettings.exportFormat.name,
-              },
-              'privacy': {
-                'analyticsEnabled': settings.privacy.analyticsEnabled,
-                'crashReportingEnabled': settings.privacy.crashReportingEnabled,
-                'shareUsageData': settings.privacy.shareUsageData,
-                'personalizedAds': settings.privacy.personalizedAds,
-                'locationTracking': settings.privacy.locationTracking,
-              },
-              'display': {
-                'fontSize': settings.display.fontSize,
-                'highContrast': settings.display.highContrast,
-                'animations': settings.display.animations,
-                'showTutorials': settings.display.showTutorials,
-                'dateFormat': settings.display.dateFormat,
-                'timeFormat': settings.display.timeFormat,
-                'currency': settings.display.currency,
-                'unitSystem': settings.display.unitSystem,
-              },
-              'security': {
-                'biometricAuth': settings.security.biometricAuth,
-                'requireAuthOnOpen': settings.security.requireAuthOnOpen,
-                'autoLockMinutes': settings.security.autoLockMinutes,
-                'hideDataInRecents': settings.security.hideDataInRecents,
-                'encryptBackups': settings.security.encryptBackups,
-              },
-              'backup': {
-                'autoBackup': settings.backup.autoBackup,
-                'frequency': settings.backup.frequency.name,
-                'includeImages': settings.backup.includeImages,
-                'lastBackupDate': settings.backup.lastBackupDate,
-                'storage': settings.backup.storage.name,
-              },
-              'lastUpdated': settings.lastUpdated.toIso8601String(),
+      return settingsResult.fold((failure) => Left(failure), (settings) {
+        final exportData = {
+          'version': '1.0',
+          'exportedAt': DateTime.now().toIso8601String(),
+          'settings': {
+            'userId': settings.userId,
+            'theme': settings.theme.name,
+            'language': settings.language,
+            'notifications': {
+              'pushNotifications': settings.notifications.pushNotifications,
+              'newsNotifications': settings.notifications.newsNotifications,
+              'marketAlerts': settings.notifications.marketAlerts,
+              'weatherAlerts': settings.notifications.weatherAlerts,
+              'animalReminders': settings.notifications.animalReminders,
+              'calculatorReminders': settings.notifications.calculatorReminders,
+              'quietHoursStart': settings.notifications.quietHoursStart,
+              'quietHoursEnd': settings.notifications.quietHoursEnd,
             },
-          };
-          return Right(exportData);
-        },
-      );
+            'dataSettings': {
+              'autoSync': settings.dataSettings.autoSync,
+              'wifiOnlySync': settings.dataSettings.wifiOnlySync,
+              'cacheImages': settings.dataSettings.cacheImages,
+              'cacheRetentionDays': settings.dataSettings.cacheRetentionDays,
+              'compressBackups': settings.dataSettings.compressBackups,
+              'exportFormat': settings.dataSettings.exportFormat.name,
+            },
+            'privacy': {
+              'analyticsEnabled': settings.privacy.analyticsEnabled,
+              'crashReportingEnabled': settings.privacy.crashReportingEnabled,
+              'shareUsageData': settings.privacy.shareUsageData,
+              'personalizedAds': settings.privacy.personalizedAds,
+              'locationTracking': settings.privacy.locationTracking,
+            },
+            'display': {
+              'fontSize': settings.display.fontSize,
+              'highContrast': settings.display.highContrast,
+              'animations': settings.display.animations,
+              'showTutorials': settings.display.showTutorials,
+              'dateFormat': settings.display.dateFormat,
+              'timeFormat': settings.display.timeFormat,
+              'currency': settings.display.currency,
+              'unitSystem': settings.display.unitSystem,
+            },
+            'security': {
+              'biometricAuth': settings.security.biometricAuth,
+              'requireAuthOnOpen': settings.security.requireAuthOnOpen,
+              'autoLockMinutes': settings.security.autoLockMinutes,
+              'hideDataInRecents': settings.security.hideDataInRecents,
+              'encryptBackups': settings.security.encryptBackups,
+            },
+            'backup': {
+              'autoBackup': settings.backup.autoBackup,
+              'frequency': settings.backup.frequency.name,
+              'includeImages': settings.backup.includeImages,
+              'lastBackupDate': settings.backup.lastBackupDate,
+              'storage': settings.backup.storage.name,
+            },
+            'lastUpdated': settings.lastUpdated.toIso8601String(),
+          },
+        };
+        return Right(exportData);
+      });
     } catch (e) {
-      return Left(GeneralFailure(message: 'Erro ao exportar configurações: $e'));
+      return Left(
+        GeneralFailure(message: 'Erro ao exportar configurações: $e'),
+      );
     }
   }
 
@@ -113,58 +112,64 @@ class ManageSettings {
     try {
       // Validate import data structure
       if (!data.containsKey('settings') || !data.containsKey('version')) {
-        return const Left(GeneralFailure(message: 'Formato de dados inválido para importação'));
+        return const Left(
+          GeneralFailure(message: 'Formato de dados inválido para importação'),
+        );
       }
 
       final settingsData = data['settings'] as Map<String, dynamic>;
 
       // Get current settings as base
       final currentSettingsResult = await _repository.getSettings();
-      return currentSettingsResult.fold(
-        (failure) => Left(failure),
-        (currentSettings) async {
-          try {
-            // Parse imported data
-            final importedSettings = SettingsEntity(
-              userId: settingsData['userId'] as String? ?? currentSettings.userId,
-              theme: _parseTheme(settingsData['theme'] as String?),
-              language: settingsData['language'] as String? ?? currentSettings.language,
-              notifications: _parseNotificationSettings(
-                settingsData['notifications'] as Map<String, dynamic>?,
-                currentSettings.notifications,
-              ),
-              dataSettings: _parseDataSettings(
-                settingsData['dataSettings'] as Map<String, dynamic>?,
-                currentSettings.dataSettings,
-              ),
-              privacy: _parsePrivacySettings(
-                settingsData['privacy'] as Map<String, dynamic>?,
-                currentSettings.privacy,
-              ),
-              display: _parseDisplaySettings(
-                settingsData['display'] as Map<String, dynamic>?,
-                currentSettings.display,
-              ),
-              security: _parseSecuritySettings(
-                settingsData['security'] as Map<String, dynamic>?,
-                currentSettings.security,
-              ),
-              backup: _parseBackupSettings(
-                settingsData['backup'] as Map<String, dynamic>?,
-                currentSettings.backup,
-              ),
-              lastUpdated: DateTime.now(),
-            );
+      return currentSettingsResult.fold((failure) => Left(failure), (
+        currentSettings,
+      ) async {
+        try {
+          // Parse imported data
+          final importedSettings = SettingsEntity(
+            userId: settingsData['userId'] as String? ?? currentSettings.userId,
+            theme: _parseTheme(settingsData['theme'] as String?),
+            language:
+                settingsData['language'] as String? ?? currentSettings.language,
+            notifications: _parseNotificationSettings(
+              settingsData['notifications'] as Map<String, dynamic>?,
+              currentSettings.notifications,
+            ),
+            dataSettings: _parseDataSettings(
+              settingsData['dataSettings'] as Map<String, dynamic>?,
+              currentSettings.dataSettings,
+            ),
+            privacy: _parsePrivacySettings(
+              settingsData['privacy'] as Map<String, dynamic>?,
+              currentSettings.privacy,
+            ),
+            display: _parseDisplaySettings(
+              settingsData['display'] as Map<String, dynamic>?,
+              currentSettings.display,
+            ),
+            security: _parseSecuritySettings(
+              settingsData['security'] as Map<String, dynamic>?,
+              currentSettings.security,
+            ),
+            backup: _parseBackupSettings(
+              settingsData['backup'] as Map<String, dynamic>?,
+              currentSettings.backup,
+            ),
+            lastUpdated: DateTime.now(),
+          );
 
-            // Save imported settings
-            return await _repository.updateSettings(importedSettings);
-          } catch (e) {
-            return Left(GeneralFailure(message: 'Erro ao processar dados importados: $e'));
-          }
-        },
-      );
+          // Save imported settings
+          return await _repository.updateSettings(importedSettings);
+        } catch (e) {
+          return Left(
+            GeneralFailure(message: 'Erro ao processar dados importados: $e'),
+          );
+        }
+      });
     } catch (e) {
-      return Left(GeneralFailure(message: 'Erro ao importar configurações: $e'));
+      return Left(
+        GeneralFailure(message: 'Erro ao importar configurações: $e'),
+      );
     }
   }
 
@@ -183,13 +188,18 @@ class ManageSettings {
   ) {
     if (data == null) return fallback;
     return NotificationSettings(
-      pushNotifications: data['pushNotifications'] as bool? ?? fallback.pushNotifications,
-      newsNotifications: data['newsNotifications'] as bool? ?? fallback.newsNotifications,
+      pushNotifications:
+          data['pushNotifications'] as bool? ?? fallback.pushNotifications,
+      newsNotifications:
+          data['newsNotifications'] as bool? ?? fallback.newsNotifications,
       marketAlerts: data['marketAlerts'] as bool? ?? fallback.marketAlerts,
       weatherAlerts: data['weatherAlerts'] as bool? ?? fallback.weatherAlerts,
-      animalReminders: data['animalReminders'] as bool? ?? fallback.animalReminders,
-      calculatorReminders: data['calculatorReminders'] as bool? ?? fallback.calculatorReminders,
-      quietHoursStart: data['quietHoursStart'] as String? ?? fallback.quietHoursStart,
+      animalReminders:
+          data['animalReminders'] as bool? ?? fallback.animalReminders,
+      calculatorReminders:
+          data['calculatorReminders'] as bool? ?? fallback.calculatorReminders,
+      quietHoursStart:
+          data['quietHoursStart'] as String? ?? fallback.quietHoursStart,
       quietHoursEnd: data['quietHoursEnd'] as String? ?? fallback.quietHoursEnd,
     );
   }
@@ -203,8 +213,10 @@ class ManageSettings {
       autoSync: data['autoSync'] as bool? ?? fallback.autoSync,
       wifiOnlySync: data['wifiOnlySync'] as bool? ?? fallback.wifiOnlySync,
       cacheImages: data['cacheImages'] as bool? ?? fallback.cacheImages,
-      cacheRetentionDays: data['cacheRetentionDays'] as int? ?? fallback.cacheRetentionDays,
-      compressBackups: data['compressBackups'] as bool? ?? fallback.compressBackups,
+      cacheRetentionDays:
+          data['cacheRetentionDays'] as int? ?? fallback.cacheRetentionDays,
+      compressBackups:
+          data['compressBackups'] as bool? ?? fallback.compressBackups,
       exportFormat: _parseExportFormat(data['exportFormat'] as String?),
     );
   }
@@ -223,11 +235,17 @@ class ManageSettings {
   ) {
     if (data == null) return fallback;
     return PrivacySettings(
-      analyticsEnabled: data['analyticsEnabled'] as bool? ?? fallback.analyticsEnabled,
-      crashReportingEnabled: data['crashReportingEnabled'] as bool? ?? fallback.crashReportingEnabled,
-      shareUsageData: data['shareUsageData'] as bool? ?? fallback.shareUsageData,
-      personalizedAds: data['personalizedAds'] as bool? ?? fallback.personalizedAds,
-      locationTracking: data['locationTracking'] as bool? ?? fallback.locationTracking,
+      analyticsEnabled:
+          data['analyticsEnabled'] as bool? ?? fallback.analyticsEnabled,
+      crashReportingEnabled:
+          data['crashReportingEnabled'] as bool? ??
+          fallback.crashReportingEnabled,
+      shareUsageData:
+          data['shareUsageData'] as bool? ?? fallback.shareUsageData,
+      personalizedAds:
+          data['personalizedAds'] as bool? ?? fallback.personalizedAds,
+      locationTracking:
+          data['locationTracking'] as bool? ?? fallback.locationTracking,
     );
   }
 
@@ -255,10 +273,14 @@ class ManageSettings {
     if (data == null) return fallback;
     return SecuritySettings(
       biometricAuth: data['biometricAuth'] as bool? ?? fallback.biometricAuth,
-      requireAuthOnOpen: data['requireAuthOnOpen'] as bool? ?? fallback.requireAuthOnOpen,
-      autoLockMinutes: data['autoLockMinutes'] as int? ?? fallback.autoLockMinutes,
-      hideDataInRecents: data['hideDataInRecents'] as bool? ?? fallback.hideDataInRecents,
-      encryptBackups: data['encryptBackups'] as bool? ?? fallback.encryptBackups,
+      requireAuthOnOpen:
+          data['requireAuthOnOpen'] as bool? ?? fallback.requireAuthOnOpen,
+      autoLockMinutes:
+          data['autoLockMinutes'] as int? ?? fallback.autoLockMinutes,
+      hideDataInRecents:
+          data['hideDataInRecents'] as bool? ?? fallback.hideDataInRecents,
+      encryptBackups:
+          data['encryptBackups'] as bool? ?? fallback.encryptBackups,
     );
   }
 
@@ -271,7 +293,8 @@ class ManageSettings {
       autoBackup: data['autoBackup'] as bool? ?? fallback.autoBackup,
       frequency: _parseBackupFrequency(data['frequency'] as String?),
       includeImages: data['includeImages'] as bool? ?? fallback.includeImages,
-      lastBackupDate: data['lastBackupDate'] as String? ?? fallback.lastBackupDate,
+      lastBackupDate:
+          data['lastBackupDate'] as String? ?? fallback.lastBackupDate,
       storage: _parseBackupStorage(data['storage'] as String?),
     );
   }
@@ -418,9 +441,7 @@ class ManageBackupSettings {
   }
 
   /// Create manual backup
-  ResultFuture<BackupInfo> createBackup({
-    bool includeImages = false,
-  }) async {
+  ResultFuture<BackupInfo> createBackup({bool includeImages = false}) async {
     return await _repository.createBackup(includeImages: includeImages);
   }
 

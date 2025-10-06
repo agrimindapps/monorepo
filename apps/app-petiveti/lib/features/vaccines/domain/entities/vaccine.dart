@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 class Vaccine extends Equatable {
   final String id;
@@ -82,31 +82,34 @@ class Vaccine extends Equatable {
   // Validation methods
   bool get isValid {
     return name.trim().isNotEmpty &&
-           veterinarian.trim().isNotEmpty &&
-           animalId.trim().isNotEmpty &&
-           date.isBefore(DateTime.now().add(const Duration(days: 1))); // Can't be in future
+        veterinarian.trim().isNotEmpty &&
+        animalId.trim().isNotEmpty &&
+        date.isBefore(
+          DateTime.now().add(const Duration(days: 1)),
+        ); // Can't be in future
   }
 
   bool get isPending {
     if (nextDueDate == null || isCompleted) return false;
-    return nextDueDate!.isAfter(DateTime.now()) && status == VaccineStatus.scheduled;
+    return nextDueDate!.isAfter(DateTime.now()) &&
+        status == VaccineStatus.scheduled;
   }
 
   bool get isOverdue {
     if (nextDueDate == null || isCompleted) return false;
-    return nextDueDate!.isBefore(DateTime.now()) && 
-           !isCompleted && 
-           isRequired && 
-           status != VaccineStatus.cancelled;
+    return nextDueDate!.isBefore(DateTime.now()) &&
+        !isCompleted &&
+        isRequired &&
+        status != VaccineStatus.cancelled;
   }
 
   bool get isDueToday {
     if (nextDueDate == null || isCompleted) return false;
     final now = DateTime.now();
     return nextDueDate!.year == now.year &&
-           nextDueDate!.month == now.month &&
-           nextDueDate!.day == now.day &&
-           !isCompleted;
+        nextDueDate!.month == now.month &&
+        nextDueDate!.day == now.day &&
+        !isCompleted;
   }
 
   bool get isDueSoon {
@@ -133,7 +136,7 @@ class Vaccine extends Equatable {
 
   String get displayStatus {
     if (isCompleted) return 'Concluída';
-    
+
     switch (status) {
       case VaccineStatus.applied:
         return 'Aplicada';
@@ -159,7 +162,7 @@ class Vaccine extends Equatable {
   String get nextDoseInfo {
     if (nextDueDate == null) return 'Dose única';
     if (isCompleted) return 'Vacina concluída';
-    
+
     if (isOverdue) {
       final days = DateTime.now().difference(nextDueDate!).inDays;
       return 'Atrasada há $days ${days == 1 ? 'dia' : 'dias'}';
@@ -170,14 +173,14 @@ class Vaccine extends Equatable {
     } else if (isPending) {
       return 'Vence em $daysUntilNextDose ${daysUntilNextDose == 1 ? 'dia' : 'dias'}';
     }
-    
+
     return 'Próxima dose programada';
   }
 
   String get reminderInfo {
     if (reminderDate == null) return 'Sem lembrete';
     if (needsReminder) return 'Lembrete ativo';
-    
+
     final days = reminderDate!.difference(DateTime.now()).inDays;
     if (days == 0) return 'Lembrete hoje';
     if (days > 0) return 'Lembrete em $days ${days == 1 ? 'dia' : 'dias'}';
@@ -186,9 +189,9 @@ class Vaccine extends Equatable {
 
   // Business logic methods
   bool canBeMarkedAsCompleted() {
-    return !isCompleted && 
-           status != VaccineStatus.cancelled &&
-           date.isBefore(DateTime.now().add(const Duration(days: 1)));
+    return !isCompleted &&
+        status != VaccineStatus.cancelled &&
+        date.isBefore(DateTime.now().add(const Duration(days: 1)));
   }
 
   bool requiresNextDose() {
@@ -197,7 +200,7 @@ class Vaccine extends Equatable {
 
   Vaccine markAsCompleted() {
     if (!canBeMarkedAsCompleted()) return this;
-    
+
     return copyWith(
       isCompleted: true,
       status: VaccineStatus.applied,
@@ -206,40 +209,37 @@ class Vaccine extends Equatable {
   }
 
   Vaccine scheduleReminder(DateTime reminderDateTime) {
-    return copyWith(
-      reminderDate: reminderDateTime,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(reminderDate: reminderDateTime, updatedAt: DateTime.now());
   }
 
   @override
   List<Object?> get props => [
-        id,
-        animalId,
-        name,
-        veterinarian,
-        date,
-        nextDueDate,
-        batch,
-        manufacturer,
-        dosage,
-        notes,
-        isRequired,
-        isCompleted,
-        reminderDate,
-        status,
-        createdAt,
-        updatedAt,
-        isDeleted,
-      ];
+    id,
+    animalId,
+    name,
+    veterinarian,
+    date,
+    nextDueDate,
+    batch,
+    manufacturer,
+    dosage,
+    notes,
+    isRequired,
+    isCompleted,
+    reminderDate,
+    status,
+    createdAt,
+    updatedAt,
+    isDeleted,
+  ];
 }
 
 enum VaccineStatus {
-  scheduled,  // Agendada (ex-pending)
-  applied,    // Aplicada
-  overdue,    // Atrasada (ex-expired)
-  completed,  // Completa
-  cancelled,  // Cancelada
+  scheduled, // Agendada (ex-pending)
+  applied, // Aplicada
+  overdue, // Atrasada (ex-expired)
+  completed, // Completa
+  cancelled, // Cancelada
 }
 
 extension VaccineStatusExtension on VaccineStatus {

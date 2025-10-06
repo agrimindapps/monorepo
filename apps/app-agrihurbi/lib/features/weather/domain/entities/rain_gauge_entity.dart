@@ -1,102 +1,102 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Rain gauge entity for tracking rainfall measurements
 /// Specialized entity for precipitation monitoring systems
 class RainGaugeEntity extends Equatable {
   /// Unique identifier for the rain gauge
   final String id;
-  
+
   /// Location identifier where gauge is installed
   final String locationId;
-  
+
   /// Human-readable location name
   final String locationName;
-  
+
   /// Rain gauge device/station identifier
   final String deviceId;
-  
+
   /// Device manufacturer and model
   final String deviceModel;
-  
+
   /// Installation date
   final DateTime installationDate;
-  
+
   /// Current rainfall measurement in mm
   final double currentRainfall;
-  
+
   /// Daily accumulated rainfall in mm
   final double dailyAccumulation;
-  
+
   /// Weekly accumulated rainfall in mm
   final double weeklyAccumulation;
-  
+
   /// Monthly accumulated rainfall in mm
   final double monthlyAccumulation;
-  
+
   /// Yearly accumulated rainfall in mm
   final double yearlyAccumulation;
-  
+
   /// Maximum rainfall rate recorded (mm/hour)
   final double maxRainfallRate;
-  
+
   /// Average rainfall rate for current period
   final double avgRainfallRate;
-  
+
   /// Last measurement timestamp
   final DateTime lastMeasurement;
-  
+
   /// Next scheduled measurement
   final DateTime nextMeasurement;
-  
+
   /// Measurement interval in minutes
   final int measurementInterval;
-  
+
   /// Geographic coordinates
   final double latitude;
   final double longitude;
-  
+
   /// Installation height above ground (meters)
   final double heightAboveGround;
-  
+
   /// Gauge calibration factor
   final double calibrationFactor;
-  
+
   /// Device status (active, maintenance, offline, etc.)
   final String status;
-  
+
   /// Battery level percentage (0-100) for wireless devices
   final double? batteryLevel;
-  
+
   /// Signal strength for wireless devices
   final double? signalStrength;
-  
+
   /// Temperature at gauge location
   final double? temperature;
-  
+
   /// Quality assessment of recent measurements
   final double dataQuality;
-  
+
   /// Whether gauge requires maintenance
   final bool needsMaintenance;
-  
+
   /// Last maintenance date
   final DateTime? lastMaintenance;
-  
+
   /// Next scheduled maintenance
   final DateTime? nextMaintenance;
-  
+
   /// Maintenance notes or issues
   final String? maintenanceNotes;
-  
+
   /// Data source type (automatic, manual, hybrid)
   final String sourceType;
-  
+
   /// Whether gauge is currently active and collecting data
   final bool isActive;
-  
+
   /// Record creation timestamp
   final DateTime createdAt;
-  
+
   /// Last update timestamp
   final DateTime updatedAt;
 
@@ -138,39 +138,39 @@ class RainGaugeEntity extends Equatable {
 
   /// Creates empty rain gauge for initialization
   RainGaugeEntity.empty()
-      : id = '',
-        locationId = '',
-        locationName = '',
-        deviceId = '',
-        deviceModel = '',
-        installationDate = DateTime.fromMillisecondsSinceEpoch(0),
-        currentRainfall = 0.0,
-        dailyAccumulation = 0.0,
-        weeklyAccumulation = 0.0,
-        monthlyAccumulation = 0.0,
-        yearlyAccumulation = 0.0,
-        maxRainfallRate = 0.0,
-        avgRainfallRate = 0.0,
-        lastMeasurement = DateTime.fromMillisecondsSinceEpoch(0),
-        nextMeasurement = DateTime.fromMillisecondsSinceEpoch(0),
-        measurementInterval = 60,
-        latitude = 0.0,
-        longitude = 0.0,
-        heightAboveGround = 0.0,
-        calibrationFactor = 1.0,
-        status = 'inactive',
-        batteryLevel = null,
-        signalStrength = null,
-        temperature = null,
-        dataQuality = 0.0,
-        needsMaintenance = false,
-        lastMaintenance = null,
-        nextMaintenance = null,
-        maintenanceNotes = null,
-        sourceType = 'automatic',
-        isActive = false,
-        createdAt = DateTime.fromMillisecondsSinceEpoch(0),
-        updatedAt = DateTime.fromMillisecondsSinceEpoch(0);
+    : id = '',
+      locationId = '',
+      locationName = '',
+      deviceId = '',
+      deviceModel = '',
+      installationDate = DateTime.fromMillisecondsSinceEpoch(0),
+      currentRainfall = 0.0,
+      dailyAccumulation = 0.0,
+      weeklyAccumulation = 0.0,
+      monthlyAccumulation = 0.0,
+      yearlyAccumulation = 0.0,
+      maxRainfallRate = 0.0,
+      avgRainfallRate = 0.0,
+      lastMeasurement = DateTime.fromMillisecondsSinceEpoch(0),
+      nextMeasurement = DateTime.fromMillisecondsSinceEpoch(0),
+      measurementInterval = 60,
+      latitude = 0.0,
+      longitude = 0.0,
+      heightAboveGround = 0.0,
+      calibrationFactor = 1.0,
+      status = 'inactive',
+      batteryLevel = null,
+      signalStrength = null,
+      temperature = null,
+      dataQuality = 0.0,
+      needsMaintenance = false,
+      lastMaintenance = null,
+      nextMaintenance = null,
+      maintenanceNotes = null,
+      sourceType = 'automatic',
+      isActive = false,
+      createdAt = DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Get status color for UI display
   String get statusColor {
@@ -195,11 +195,11 @@ class RainGaugeEntity extends Equatable {
 
   /// Check if gauge is operational
   bool get isOperational {
-    return status.toLowerCase() == 'active' && 
-           isActive && 
-           !needsMaintenance &&
-           dataQuality > 0.7 &&
-           DateTime.now().difference(lastMeasurement).inHours < 24;
+    return status.toLowerCase() == 'active' &&
+        isActive &&
+        !needsMaintenance &&
+        dataQuality > 0.7 &&
+        DateTime.now().difference(lastMeasurement).inHours < 24;
   }
 
   /// Check if battery is low (if applicable)
@@ -261,12 +261,12 @@ class RainGaugeEntity extends Equatable {
 
   /// Check if readings are within acceptable range
   bool get hasValidReadings {
-    return currentRainfall >= 0 && 
-           currentRainfall <= 500 && // Max reasonable daily rainfall
-           dailyAccumulation >= currentRainfall &&
-           weeklyAccumulation >= dailyAccumulation &&
-           monthlyAccumulation >= weeklyAccumulation &&
-           yearlyAccumulation >= monthlyAccumulation;
+    return currentRainfall >= 0 &&
+        currentRainfall <= 500 && // Max reasonable daily rainfall
+        dailyAccumulation >= currentRainfall &&
+        weeklyAccumulation >= dailyAccumulation &&
+        monthlyAccumulation >= weeklyAccumulation &&
+        yearlyAccumulation >= monthlyAccumulation;
   }
 
   /// Get maintenance priority level
@@ -353,40 +353,40 @@ class RainGaugeEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        locationId,
-        locationName,
-        deviceId,
-        deviceModel,
-        installationDate,
-        currentRainfall,
-        dailyAccumulation,
-        weeklyAccumulation,
-        monthlyAccumulation,
-        yearlyAccumulation,
-        maxRainfallRate,
-        avgRainfallRate,
-        lastMeasurement,
-        nextMeasurement,
-        measurementInterval,
-        latitude,
-        longitude,
-        heightAboveGround,
-        calibrationFactor,
-        status,
-        batteryLevel,
-        signalStrength,
-        temperature,
-        dataQuality,
-        needsMaintenance,
-        lastMaintenance,
-        nextMaintenance,
-        maintenanceNotes,
-        sourceType,
-        isActive,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    locationId,
+    locationName,
+    deviceId,
+    deviceModel,
+    installationDate,
+    currentRainfall,
+    dailyAccumulation,
+    weeklyAccumulation,
+    monthlyAccumulation,
+    yearlyAccumulation,
+    maxRainfallRate,
+    avgRainfallRate,
+    lastMeasurement,
+    nextMeasurement,
+    measurementInterval,
+    latitude,
+    longitude,
+    heightAboveGround,
+    calibrationFactor,
+    status,
+    batteryLevel,
+    signalStrength,
+    temperature,
+    dataQuality,
+    needsMaintenance,
+    lastMaintenance,
+    nextMaintenance,
+    maintenanceNotes,
+    sourceType,
+    isActive,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   String toString() {

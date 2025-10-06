@@ -1,14 +1,11 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Represents a date range with start and end dates
 class DateRange extends Equatable {
   final DateTime startDate;
   final DateTime endDate;
 
-  const DateRange({
-    required this.startDate,
-    required this.endDate,
-  });
+  const DateRange({required this.startDate, required this.endDate});
 
   /// Creates a date range for the current month
   factory DateRange.currentMonth() {
@@ -49,13 +46,13 @@ class DateRange extends Equatable {
   /// Check if a date falls within this range
   bool contains(DateTime date) {
     return date.isAfter(startDate.subtract(const Duration(days: 1))) &&
-           date.isBefore(endDate.add(const Duration(days: 1)));
+        date.isBefore(endDate.add(const Duration(days: 1)));
   }
 
   /// Check if this range overlaps with another range
   bool overlaps(DateRange other) {
     return startDate.isBefore(other.endDate.add(const Duration(days: 1))) &&
-           endDate.isAfter(other.startDate.subtract(const Duration(days: 1)));
+        endDate.isAfter(other.startDate.subtract(const Duration(days: 1)));
   }
 
   /// Format the date range as a string
@@ -68,29 +65,31 @@ class DateRange extends Equatable {
   /// Get a readable description of the range
   String get description {
     final now = DateTime.now();
-    
+
     // Check for special cases
-    if (startDate.year == now.year && startDate.month == now.month && 
-        endDate.year == now.year && endDate.month == now.month) {
+    if (startDate.year == now.year &&
+        startDate.month == now.month &&
+        endDate.year == now.year &&
+        endDate.month == now.month) {
       return 'Este mês';
     }
-    
+
     if (startDate.year == now.year && endDate.year == now.year) {
       return 'Este ano';
     }
-    
+
     if (dayCount == 1) {
       return '${startDate.day}/${startDate.month}/${startDate.year}';
     }
-    
+
     if (dayCount <= 7) {
       return 'Últimos $dayCount dias';
     }
-    
+
     if (dayCount <= 31) {
       return 'Últimas ${(dayCount / 7).round()} semanas';
     }
-    
+
     return format();
   }
 

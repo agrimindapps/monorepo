@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../../../features/animals/data/datasources/animal_local_datasource.dart';
 import '../../../features/animals/data/datasources/animal_remote_datasource.dart';

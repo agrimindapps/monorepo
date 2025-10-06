@@ -1,12 +1,14 @@
 import 'package:core/core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../features/auth/domain/usecases/get_current_user_usecase.dart' as app_auth;
+import '../../features/auth/domain/usecases/get_current_user_usecase.dart'
+    as app_auth;
 import '../../features/auth/domain/usecases/login_usecase.dart' as app_auth;
 import '../../features/auth/domain/usecases/logout_usecase.dart' as app_auth;
-import '../../features/auth/domain/usecases/refresh_user_usecase.dart' as app_auth;
+import '../../features/auth/domain/usecases/refresh_user_usecase.dart'
+    as app_auth;
 import '../../features/auth/domain/usecases/register_usecase.dart' as app_auth;
 
 part 'auth_providers.g.dart';
@@ -76,22 +78,16 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> getCurrentUser() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final result = await _getCurrentUserUseCase(const app_auth.GetCurrentUserParams());
+    final result = await _getCurrentUserUseCase(
+      const app_auth.GetCurrentUserParams(),
+    );
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          isLoggedIn: false,
-          user: null,
-        );
+        state = state.copyWith(isLoading: false, isLoggedIn: false, user: null);
       },
       (user) {
-        state = state.copyWith(
-          user: user,
-          isLoading: false,
-          isLoggedIn: true,
-        );
+        state = state.copyWith(user: user, isLoading: false, isLoggedIn: true);
       },
     );
   }
@@ -99,25 +95,17 @@ class AuthNotifier extends _$AuthNotifier {
   Future<bool> login({required String email, required String password}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final result = await _loginUseCase(app_auth.LoginParams(
-      email: email,
-      password: password,
-    ));
+    final result = await _loginUseCase(
+      app_auth.LoginParams(email: email, password: password),
+    );
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
         return false;
       },
       (user) {
-        state = state.copyWith(
-          user: user,
-          isLoading: false,
-          isLoggedIn: true,
-        );
+        state = state.copyWith(user: user, isLoading: false, isLoggedIn: true);
         return true;
       },
     );
@@ -130,26 +118,17 @@ class AuthNotifier extends _$AuthNotifier {
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final result = await _registerUseCase(app_auth.RegisterParams(
-      email: email,
-      password: password,
-      name: name,
-    ));
+    final result = await _registerUseCase(
+      app_auth.RegisterParams(email: email, password: password, name: name),
+    );
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
         return false;
       },
       (user) {
-        state = state.copyWith(
-          user: user,
-          isLoading: false,
-          isLoggedIn: true,
-        );
+        state = state.copyWith(user: user, isLoading: false, isLoggedIn: true);
         return true;
       },
     );
@@ -162,17 +141,10 @@ class AuthNotifier extends _$AuthNotifier {
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (_) {
-        state = state.copyWith(
-          user: null,
-          isLoading: false,
-          isLoggedIn: false,
-        );
+        state = state.copyWith(user: null, isLoading: false, isLoggedIn: false);
       },
     );
   }
@@ -182,20 +154,16 @@ class AuthNotifier extends _$AuthNotifier {
 
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final result = await _refreshUserUseCase(const app_auth.RefreshUserParams());
+    final result = await _refreshUserUseCase(
+      const app_auth.RefreshUserParams(),
+    );
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (user) {
-        state = state.copyWith(
-          user: user,
-          isLoading: false,
-        );
+        state = state.copyWith(user: user, isLoading: false);
       },
     );
   }

@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' show GetIt;
 
 import '../../../features/medications/data/datasources/medication_local_datasource.dart';
 import '../../../features/medications/data/datasources/medication_remote_datasource.dart';

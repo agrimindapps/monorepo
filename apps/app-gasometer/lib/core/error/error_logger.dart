@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 import 'app_error.dart';
 
 /// Service for structured error logging
@@ -10,7 +10,7 @@ class ErrorLogger {
   static const String _logPrefix = '🚨 [ERROR]';
   static const String _warningPrefix = '⚠️ [WARNING]';
   static const String _infoPrefix = 'ℹ️ [INFO]';
-  
+
   /// Logs an AppError with structured data
   void logError(
     AppError error, {
@@ -18,25 +18,25 @@ class ErrorLogger {
     Map<String, dynamic>? additionalContext,
   }) {
     final errorData = error.toMap();
-    
+
     // Add additional context
     if (additionalContext != null) {
       errorData['additionalContext'] = additionalContext;
     }
-    
+
     // Add stack trace if available
     if (stackTrace != null) {
       errorData['stackTrace'] = stackTrace.toString();
     }
-    
+
     _logWithSeverity(error.severity, errorData);
-    
+
     // In production, send to crash reporting service
     if (kReleaseMode && error.severity.index >= ErrorSeverity.error.index) {
       _sendToCrashReporting(error, stackTrace, additionalContext);
     }
   }
-  
+
   /// Logs a generic exception
   void logException(
     Exception exception, {
@@ -51,13 +51,13 @@ class ErrorLogger {
       'metadata': metadata,
       'timestamp': DateTime.now().toIso8601String(),
     };
-    
+
     if (stackTrace != null) {
       errorData['stackTrace'] = stackTrace.toString();
     }
-    
+
     _logWithSeverity(ErrorSeverity.error, errorData);
-    
+
     if (kReleaseMode) {
       _sendToCrashReporting(
         UnexpectedError(
@@ -70,7 +70,7 @@ class ErrorLogger {
       );
     }
   }
-  
+
   /// Logs warning messages
   void logWarning(
     String message, {
@@ -84,10 +84,10 @@ class ErrorLogger {
       'metadata': metadata,
       'timestamp': DateTime.now().toIso8601String(),
     };
-    
+
     _logWithSeverity(ErrorSeverity.warning, logData);
   }
-  
+
   /// Logs info messages
   void logInfo(
     String message, {
@@ -101,10 +101,10 @@ class ErrorLogger {
       'metadata': metadata,
       'timestamp': DateTime.now().toIso8601String(),
     };
-    
+
     _logWithSeverity(ErrorSeverity.info, logData);
   }
-  
+
   /// Logs provider state changes for debugging - DISABLED for cleaner console
   void logProviderStateChange(
     String providerName,
@@ -115,7 +115,7 @@ class ErrorLogger {
     // Only enable for specific debugging scenarios when needed
     return;
   }
-  
+
   /// Logs retry attempts
   void logRetryAttempt(
     String operation,
@@ -131,22 +131,22 @@ class ErrorLogger {
       'lastError': lastError?.toMap(),
       'timestamp': DateTime.now().toIso8601String(),
     };
-    
+
     _logWithSeverity(ErrorSeverity.warning, logData);
   }
-  
+
   /// Logs network requests for debugging
   void logNetworkRequest(
     String method,
     String url,
     int? statusCode,
-    Duration? duration,
-    {Map<String, dynamic>? requestData,
+    Duration? duration, {
+    Map<String, dynamic>? requestData,
     Map<String, dynamic>? responseData,
-    String? error}
-  ) {
+    String? error,
+  }) {
     if (!kDebugMode) return;
-    
+
     final logData = {
       'type': 'NETWORK_REQUEST',
       'method': method,
@@ -158,14 +158,14 @@ class ErrorLogger {
       'error': error,
       'timestamp': DateTime.now().toIso8601String(),
     };
-    
+
     final prefix = error != null ? '🌐❌ [NETWORK_ERROR]' : '🌐 [NETWORK]';
     debugPrint('$prefix ${_formatLogData(logData)}');
   }
-  
+
   void _logWithSeverity(ErrorSeverity severity, Map<String, dynamic> data) {
     final formattedLog = _formatLogData(data);
-    
+
     switch (severity) {
       case ErrorSeverity.info:
         debugPrint('$_infoPrefix $formattedLog');
@@ -183,14 +183,15 @@ class ErrorLogger {
         break;
     }
   }
-  
+
   String _formatLogData(Map<String, dynamic> data) {
     try {
       // Format for readability in debug mode
       if (kDebugMode) {
         final buffer = StringBuffer();
         data.forEach((key, value) {
-          if (key != 'stackTrace') { // Skip stack trace in main log
+          if (key != 'stackTrace') {
+            // Skip stack trace in main log
             buffer.write('$key: ${_formatValue(value)} ');
           }
         });
@@ -203,7 +204,7 @@ class ErrorLogger {
       return 'Error formatting log data: ${data.toString()}';
     }
   }
-  
+
   String _formatValue(dynamic value) {
     if (value == null) return 'null';
     if (value is String) return '"$value"';
@@ -216,7 +217,7 @@ class ErrorLogger {
     }
     return value.toString();
   }
-  
+
   void _sendToCrashReporting(
     AppError error,
     StackTrace? stackTrace,
@@ -224,7 +225,7 @@ class ErrorLogger {
   ) {
     // TODO: Implement integration with crash reporting service
     // Examples: Firebase Crashlytics, Sentry, Bugsnag
-    
+
     // For now, just print in release mode for debugging
     if (kReleaseMode) {
       print('CRASH_REPORT: ${error.toMap()}');
@@ -235,21 +236,22 @@ class ErrorLogger {
 /// Extension to easily log errors from any context
 extension AppErrorLogging on AppError {
   /// Log this error using the default logger
-  void log({
-    StackTrace? stackTrace,
-    Map<String, dynamic>? additionalContext,
-  }) {
+  void log({StackTrace? stackTrace, Map<String, dynamic>? additionalContext}) {
     // In a real implementation, you would get the logger from DI
     // For now, create a new instance
     final logger = ErrorLogger();
-    logger.logError(this, stackTrace: stackTrace, additionalContext: additionalContext);
+    logger.logError(
+      this,
+      stackTrace: stackTrace,
+      additionalContext: additionalContext,
+    );
   }
 }
 
 /// Utility class for common error scenarios
 class ErrorLoggerUtils {
   static final ErrorLogger _logger = ErrorLogger();
-  
+
   /// Log provider operation errors
   static void logProviderError(
     String providerName,
@@ -260,13 +262,10 @@ class ErrorLoggerUtils {
     _logger.logError(
       error,
       stackTrace: stackTrace,
-      additionalContext: {
-        'provider': providerName,
-        'operation': operation,
-      },
+      additionalContext: {'provider': providerName, 'operation': operation},
     );
   }
-  
+
   /// Log repository operation errors
   static void logRepositoryError(
     String repositoryName,
@@ -285,7 +284,7 @@ class ErrorLoggerUtils {
       },
     );
   }
-  
+
   /// Log UI interaction errors
   static void logUIError(
     String screenName,

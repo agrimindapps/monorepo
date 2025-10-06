@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/error/failures.dart';
@@ -18,7 +18,6 @@ import '../datasources/premium_webhook_data_source.dart';
 /// para fornecer sincronização em tempo real e cross-device
 @injectable
 class PremiumSyncService {
-
   PremiumSyncService(
     this._remoteDataSource,
     this._firebaseDataSource,
@@ -55,7 +54,8 @@ class PremiumSyncService {
   Timer? _retryTimer;
 
   // Getters públicos
-  Stream<PremiumStatus> get premiumStatusStream => _masterStatusController.stream.distinct();
+  Stream<PremiumStatus> get premiumStatusStream =>
+      _masterStatusController.stream.distinct();
   Stream<PremiumSyncEvent> get syncEvents => _syncEventController.stream;
   PremiumStatus get currentStatus => _masterStatusController.value;
 
@@ -65,16 +65,22 @@ class PremiumSyncService {
     _authSubscription = _authService.currentUser.listen(_onAuthStateChanged);
 
     // 2. Stream do RevenueCat
-    _revenueCatSubscription = _remoteDataSource.subscriptionStatus
-        .listen(_onRevenueCatStatusChanged, onError: _onRevenueCatError);
+    _revenueCatSubscription = _remoteDataSource.subscriptionStatus.listen(
+      _onRevenueCatStatusChanged,
+      onError: _onRevenueCatError,
+    );
 
     // 3. Stream do Firebase
-    _firebaseSubscription = _firebaseDataSource.premiumStatusStream
-        .listen(_onFirebaseStatusChanged, onError: _onFirebaseError);
+    _firebaseSubscription = _firebaseDataSource.premiumStatusStream.listen(
+      _onFirebaseStatusChanged,
+      onError: _onFirebaseError,
+    );
 
     // 4. Stream de Webhooks
-    _webhookSubscription = _webhookDataSource.webhookEvents
-        .listen(_onWebhookEvent, onError: _onWebhookError);
+    _webhookSubscription = _webhookDataSource.webhookEvents.listen(
+      _onWebhookEvent,
+      onError: _onWebhookError,
+    );
   }
 
   /// Handler para mudanças de autenticação
@@ -92,7 +98,9 @@ class PremiumSyncService {
 
   /// Handler para mudanças do RevenueCat
   void _onRevenueCatStatusChanged(core.SubscriptionEntity? subscription) {
-    debugPrint('[PremiumSyncService] RevenueCat atualizado: ${subscription?.isActive}');
+    debugPrint(
+      '[PremiumSyncService] RevenueCat atualizado: ${subscription?.isActive}',
+    );
 
     _debounceStatusUpdate(() async {
       final status = await _buildPremiumStatusFromSubscription(subscription);
@@ -120,9 +128,13 @@ class PremiumSyncService {
     final eventType = event['event_type'] as String?;
     final userId = event['app_user_id'] as String?;
 
-    debugPrint('[PremiumSyncService] Webhook recebido: $eventType para $userId');
+    debugPrint(
+      '[PremiumSyncService] Webhook recebido: $eventType para $userId',
+    );
 
-    _syncEventController.add(PremiumSyncEvent.webhookReceived(eventType ?? 'unknown'));
+    _syncEventController.add(
+      PremiumSyncEvent.webhookReceived(eventType ?? 'unknown'),
+    );
 
     // Força resync após webhook
     _scheduleForceSync();
@@ -147,11 +159,13 @@ class PremiumSyncService {
       if (!_areStatusesEqual(currentStatus, resolvedStatus)) {
         _masterStatusController.add(resolvedStatus);
 
-        _syncEventController.add(PremiumSyncEvent.statusUpdated(
-          oldStatus: currentStatus,
-          newStatus: resolvedStatus,
-          source: source,
-        ));
+        _syncEventController.add(
+          PremiumSyncEvent.statusUpdated(
+            oldStatus: currentStatus,
+            newStatus: resolvedStatus,
+            source: source,
+          ),
+        );
 
         // Sincroniza com outras fontes se necessário
         await _propagateStatusChange(resolvedStatus, source);
@@ -178,7 +192,8 @@ class PremiumSyncService {
 
       case PremiumSyncSource.firebase:
         // Firebase só ganha se não temos dados do RevenueCat
-        if (current.premiumSource == 'free' || current.premiumSource == 'local_license') {
+        if (current.premiumSource == 'free' ||
+            current.premiumSource == 'local_license') {
           return newStatus;
         }
         return current;
@@ -240,10 +255,14 @@ class PremiumSyncService {
       await revenueCatResult.fold(
         (failure) async {
           // Se RevenueCat falhar, log o erro
-          debugPrint('[PremiumSyncService] RevenueCat falhou: ${failure.message}');
+          debugPrint(
+            '[PremiumSyncService] RevenueCat falhou: ${failure.message}',
+          );
         },
         (subscription) async {
-          final status = await _buildPremiumStatusFromSubscription(subscription);
+          final status = await _buildPremiumStatusFromSubscription(
+            subscription,
+          );
           await _updateMasterStatus(
             newStatus: status,
             source: PremiumSyncSource.revenueCat,
@@ -263,10 +282,14 @@ class PremiumSyncService {
   Future<void> _performInitialSync(String userId) async {
     try {
       // Tenta buscar do cache primeiro
-      final cacheResult = await _firebaseDataSource.getCachedPremiumStatus(userId: userId);
+      final cacheResult = await _firebaseDataSource.getCachedPremiumStatus(
+        userId: userId,
+      );
 
       cacheResult.fold(
-        (failure) => debugPrint('[PremiumSyncService] Erro no cache: ${failure.message}'),
+        (failure) => debugPrint(
+          '[PremiumSyncService] Erro no cache: ${failure.message}',
+        ),
         (cachedStatus) {
           if (cachedStatus != null) {
             _masterStatusController.add(cachedStatus);
@@ -319,7 +342,9 @@ class PremiumSyncService {
       _retryCount++;
       final delay = Duration(seconds: _retryCount * 2); // Backoff exponencial
 
-      debugPrint('[PremiumSyncService] Retry $_retryCount/$_maxRetries em ${delay.inSeconds}s');
+      debugPrint(
+        '[PremiumSyncService] Retry $_retryCount/$_maxRetries em ${delay.inSeconds}s',
+      );
 
       _retryTimer?.cancel();
       _retryTimer = Timer(delay, () {
@@ -364,12 +389,7 @@ class PremiumSyncService {
 }
 
 /// Fontes de sincronização de premium status
-enum PremiumSyncSource {
-  revenueCat,
-  firebase,
-  local,
-  webhook,
-}
+enum PremiumSyncSource { revenueCat, firebase, local, webhook }
 
 /// Eventos de sincronização premium
 sealed class PremiumSyncEvent {
@@ -399,7 +419,6 @@ class _UserLoggedOut extends PremiumSyncEvent {
 }
 
 class _StatusUpdated extends PremiumSyncEvent {
-
   const _StatusUpdated({
     required this.oldStatus,
     required this.newStatus,

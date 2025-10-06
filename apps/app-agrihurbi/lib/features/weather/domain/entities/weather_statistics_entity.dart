@@ -1,93 +1,93 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Weather statistics entity for aggregated weather data analysis
 /// Provides historical analysis and trends for weather measurements
 class WeatherStatisticsEntity extends Equatable {
   /// Unique identifier for the statistics record
   final String id;
-  
+
   /// Location identifier
   final String locationId;
-  
+
   /// Location name
   final String locationName;
-  
+
   /// Statistical period (daily, weekly, monthly, yearly)
   final String period;
-  
+
   /// Start date for the statistical period
   final DateTime startDate;
-  
+
   /// End date for the statistical period
   final DateTime endDate;
-  
+
   /// Temperature statistics
   final double avgTemperature;
   final double minTemperature;
   final double maxTemperature;
   final double temperatureVariance;
-  
+
   /// Humidity statistics
   final double avgHumidity;
   final double minHumidity;
   final double maxHumidity;
   final double humidityVariance;
-  
+
   /// Pressure statistics
   final double avgPressure;
   final double minPressure;
   final double maxPressure;
   final double pressureVariance;
-  
+
   /// Wind statistics
   final double avgWindSpeed;
   final double maxWindSpeed;
   final double avgWindDirection;
   final String predominantWindDirection;
-  
+
   /// Precipitation statistics
   final double totalRainfall;
   final double avgDailyRainfall;
   final double maxDailyRainfall;
   final int rainyDays;
   final int dryDays;
-  
+
   /// UV and visibility statistics
   final double avgUVIndex;
   final double maxUVIndex;
   final double avgVisibility;
   final double minVisibility;
-  
+
   /// Weather condition distribution
   final Map<String, int> weatherConditionCounts;
   final String predominantCondition;
-  
+
   /// Agricultural relevance metrics
   final int favorableDays;
   final int unfavorableDays;
   final double avgHeatIndex;
   final double avgDewPoint;
-  
+
   /// Data quality metrics
   final int totalMeasurements;
   final int validMeasurements;
   final double dataCompleteness;
   final double avgDataQuality;
-  
+
   /// Trend analysis (compared to previous period)
   final double temperatureTrend;
   final double humidityTrend;
   final double pressureTrend;
   final double rainfallTrend;
-  
+
   /// Anomaly detection
   final List<String> detectedAnomalies;
   final double anomalyScore;
-  
+
   /// Seasonal patterns
   final bool isSeasonalDataAvailable;
   final double seasonalDeviationScore;
-  
+
   /// Record timestamps
   final DateTime calculatedAt;
   final DateTime createdAt;
@@ -150,66 +150,66 @@ class WeatherStatisticsEntity extends Equatable {
 
   /// Creates empty statistics for initialization
   WeatherStatisticsEntity.empty()
-      : id = '',
-        locationId = '',
-        locationName = '',
-        period = '',
-        startDate = DateTime.fromMillisecondsSinceEpoch(0),
-        endDate = DateTime.fromMillisecondsSinceEpoch(0),
-        avgTemperature = 0.0,
-        minTemperature = 0.0,
-        maxTemperature = 0.0,
-        temperatureVariance = 0.0,
-        avgHumidity = 0.0,
-        minHumidity = 0.0,
-        maxHumidity = 0.0,
-        humidityVariance = 0.0,
-        avgPressure = 0.0,
-        minPressure = 0.0,
-        maxPressure = 0.0,
-        pressureVariance = 0.0,
-        avgWindSpeed = 0.0,
-        maxWindSpeed = 0.0,
-        avgWindDirection = 0.0,
-        predominantWindDirection = '',
-        totalRainfall = 0.0,
-        avgDailyRainfall = 0.0,
-        maxDailyRainfall = 0.0,
-        rainyDays = 0,
-        dryDays = 0,
-        avgUVIndex = 0.0,
-        maxUVIndex = 0.0,
-        avgVisibility = 0.0,
-        minVisibility = 0.0,
-        weatherConditionCounts = const {},
-        predominantCondition = '',
-        favorableDays = 0,
-        unfavorableDays = 0,
-        avgHeatIndex = 0.0,
-        avgDewPoint = 0.0,
-        totalMeasurements = 0,
-        validMeasurements = 0,
-        dataCompleteness = 0.0,
-        avgDataQuality = 0.0,
-        temperatureTrend = 0.0,
-        humidityTrend = 0.0,
-        pressureTrend = 0.0,
-        rainfallTrend = 0.0,
-        detectedAnomalies = const [],
-        anomalyScore = 0.0,
-        isSeasonalDataAvailable = false,
-        seasonalDeviationScore = 0.0,
-        calculatedAt = DateTime.fromMillisecondsSinceEpoch(0),
-        createdAt = DateTime.fromMillisecondsSinceEpoch(0),
-        updatedAt = DateTime.fromMillisecondsSinceEpoch(0);
+    : id = '',
+      locationId = '',
+      locationName = '',
+      period = '',
+      startDate = DateTime.fromMillisecondsSinceEpoch(0),
+      endDate = DateTime.fromMillisecondsSinceEpoch(0),
+      avgTemperature = 0.0,
+      minTemperature = 0.0,
+      maxTemperature = 0.0,
+      temperatureVariance = 0.0,
+      avgHumidity = 0.0,
+      minHumidity = 0.0,
+      maxHumidity = 0.0,
+      humidityVariance = 0.0,
+      avgPressure = 0.0,
+      minPressure = 0.0,
+      maxPressure = 0.0,
+      pressureVariance = 0.0,
+      avgWindSpeed = 0.0,
+      maxWindSpeed = 0.0,
+      avgWindDirection = 0.0,
+      predominantWindDirection = '',
+      totalRainfall = 0.0,
+      avgDailyRainfall = 0.0,
+      maxDailyRainfall = 0.0,
+      rainyDays = 0,
+      dryDays = 0,
+      avgUVIndex = 0.0,
+      maxUVIndex = 0.0,
+      avgVisibility = 0.0,
+      minVisibility = 0.0,
+      weatherConditionCounts = const {},
+      predominantCondition = '',
+      favorableDays = 0,
+      unfavorableDays = 0,
+      avgHeatIndex = 0.0,
+      avgDewPoint = 0.0,
+      totalMeasurements = 0,
+      validMeasurements = 0,
+      dataCompleteness = 0.0,
+      avgDataQuality = 0.0,
+      temperatureTrend = 0.0,
+      humidityTrend = 0.0,
+      pressureTrend = 0.0,
+      rainfallTrend = 0.0,
+      detectedAnomalies = const [],
+      anomalyScore = 0.0,
+      isSeasonalDataAvailable = false,
+      seasonalDeviationScore = 0.0,
+      calculatedAt = DateTime.fromMillisecondsSinceEpoch(0),
+      createdAt = DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Get temperature range
   double get temperatureRange => maxTemperature - minTemperature;
-  
+
   /// Get humidity range
   double get humidityRange => maxHumidity - minHumidity;
-  
-  /// Get pressure range  
+
+  /// Get pressure range
   double get pressureRange => maxPressure - minPressure;
 
   /// Calculate period length in days
@@ -238,9 +238,9 @@ class WeatherStatisticsEntity extends Equatable {
 
   /// Check if data is reliable for decision making
   bool get isDataReliable {
-    return dataCompleteness >= 0.80 && 
-           avgDataQuality >= 0.70 && 
-           validMeasurements >= (periodLengthDays * 0.5);
+    return dataCompleteness >= 0.80 &&
+        avgDataQuality >= 0.70 &&
+        validMeasurements >= (periodLengthDays * 0.5);
   }
 
   /// Get most common weather condition
@@ -251,7 +251,7 @@ class WeatherStatisticsEntity extends Equatable {
     final tempVar = temperatureVariance / (temperatureRange + 1);
     final humVar = humidityVariance / (humidityRange + 1);
     final pressVar = pressureVariance / (pressureRange + 1);
-    
+
     return (tempVar + humVar + pressVar) / 3;
   }
 
@@ -271,12 +271,12 @@ class WeatherStatisticsEntity extends Equatable {
 
   /// Check if period had extreme weather
   bool get hasExtremeWeather {
-    return detectedAnomalies.isNotEmpty || 
-           anomalyScore > 0.7 ||
-           maxWindSpeed > 80 ||
-           maxDailyRainfall > 100 ||
-           maxTemperature > 45 ||
-           minTemperature < -10;
+    return detectedAnomalies.isNotEmpty ||
+        anomalyScore > 0.7 ||
+        maxWindSpeed > 80 ||
+        maxDailyRainfall > 100 ||
+        maxTemperature > 45 ||
+        minTemperature < -10;
   }
 
   /// Get seasonal alignment score
@@ -294,7 +294,8 @@ class WeatherStatisticsEntity extends Equatable {
       'days': periodLengthDays,
       'temperature': {
         'avg': avgTemperature.toStringAsFixed(1),
-        'range': '${minTemperature.toStringAsFixed(1)} - ${maxTemperature.toStringAsFixed(1)}°C',
+        'range':
+            '${minTemperature.toStringAsFixed(1)} - ${maxTemperature.toStringAsFixed(1)}°C',
         'trend': temperatureTrendDescription,
       },
       'precipitation': {
@@ -395,7 +396,8 @@ class WeatherStatisticsEntity extends Equatable {
       avgWindSpeed: avgWindSpeed ?? this.avgWindSpeed,
       maxWindSpeed: maxWindSpeed ?? this.maxWindSpeed,
       avgWindDirection: avgWindDirection ?? this.avgWindDirection,
-      predominantWindDirection: predominantWindDirection ?? this.predominantWindDirection,
+      predominantWindDirection:
+          predominantWindDirection ?? this.predominantWindDirection,
       totalRainfall: totalRainfall ?? this.totalRainfall,
       avgDailyRainfall: avgDailyRainfall ?? this.avgDailyRainfall,
       maxDailyRainfall: maxDailyRainfall ?? this.maxDailyRainfall,
@@ -405,7 +407,8 @@ class WeatherStatisticsEntity extends Equatable {
       maxUVIndex: maxUVIndex ?? this.maxUVIndex,
       avgVisibility: avgVisibility ?? this.avgVisibility,
       minVisibility: minVisibility ?? this.minVisibility,
-      weatherConditionCounts: weatherConditionCounts ?? this.weatherConditionCounts,
+      weatherConditionCounts:
+          weatherConditionCounts ?? this.weatherConditionCounts,
       predominantCondition: predominantCondition ?? this.predominantCondition,
       favorableDays: favorableDays ?? this.favorableDays,
       unfavorableDays: unfavorableDays ?? this.unfavorableDays,
@@ -421,8 +424,10 @@ class WeatherStatisticsEntity extends Equatable {
       rainfallTrend: rainfallTrend ?? this.rainfallTrend,
       detectedAnomalies: detectedAnomalies ?? this.detectedAnomalies,
       anomalyScore: anomalyScore ?? this.anomalyScore,
-      isSeasonalDataAvailable: isSeasonalDataAvailable ?? this.isSeasonalDataAvailable,
-      seasonalDeviationScore: seasonalDeviationScore ?? this.seasonalDeviationScore,
+      isSeasonalDataAvailable:
+          isSeasonalDataAvailable ?? this.isSeasonalDataAvailable,
+      seasonalDeviationScore:
+          seasonalDeviationScore ?? this.seasonalDeviationScore,
       calculatedAt: calculatedAt ?? this.calculatedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -431,59 +436,59 @@ class WeatherStatisticsEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        locationId,
-        locationName,
-        period,
-        startDate,
-        endDate,
-        avgTemperature,
-        minTemperature,
-        maxTemperature,
-        temperatureVariance,
-        avgHumidity,
-        minHumidity,
-        maxHumidity,
-        humidityVariance,
-        avgPressure,
-        minPressure,
-        maxPressure,
-        pressureVariance,
-        avgWindSpeed,
-        maxWindSpeed,
-        avgWindDirection,
-        predominantWindDirection,
-        totalRainfall,
-        avgDailyRainfall,
-        maxDailyRainfall,
-        rainyDays,
-        dryDays,
-        avgUVIndex,
-        maxUVIndex,
-        avgVisibility,
-        minVisibility,
-        weatherConditionCounts,
-        predominantCondition,
-        favorableDays,
-        unfavorableDays,
-        avgHeatIndex,
-        avgDewPoint,
-        totalMeasurements,
-        validMeasurements,
-        dataCompleteness,
-        avgDataQuality,
-        temperatureTrend,
-        humidityTrend,
-        pressureTrend,
-        rainfallTrend,
-        detectedAnomalies,
-        anomalyScore,
-        isSeasonalDataAvailable,
-        seasonalDeviationScore,
-        calculatedAt,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    locationId,
+    locationName,
+    period,
+    startDate,
+    endDate,
+    avgTemperature,
+    minTemperature,
+    maxTemperature,
+    temperatureVariance,
+    avgHumidity,
+    minHumidity,
+    maxHumidity,
+    humidityVariance,
+    avgPressure,
+    minPressure,
+    maxPressure,
+    pressureVariance,
+    avgWindSpeed,
+    maxWindSpeed,
+    avgWindDirection,
+    predominantWindDirection,
+    totalRainfall,
+    avgDailyRainfall,
+    maxDailyRainfall,
+    rainyDays,
+    dryDays,
+    avgUVIndex,
+    maxUVIndex,
+    avgVisibility,
+    minVisibility,
+    weatherConditionCounts,
+    predominantCondition,
+    favorableDays,
+    unfavorableDays,
+    avgHeatIndex,
+    avgDewPoint,
+    totalMeasurements,
+    validMeasurements,
+    dataCompleteness,
+    avgDataQuality,
+    temperatureTrend,
+    humidityTrend,
+    pressureTrend,
+    rainfallTrend,
+    detectedAnomalies,
+    anomalyScore,
+    isSeasonalDataAvailable,
+    seasonalDeviationScore,
+    calculatedAt,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   String toString() {

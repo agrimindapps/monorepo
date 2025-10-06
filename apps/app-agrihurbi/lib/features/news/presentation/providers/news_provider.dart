@@ -6,7 +6,7 @@ import 'package:app_agrihurbi/features/news/domain/usecases/get_commodity_prices
 import 'package:app_agrihurbi/features/news/domain/usecases/get_news.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Provider Riverpod para NewsProvider
 ///
@@ -59,7 +59,7 @@ class NewsProvider with ChangeNotifier {
   String? _errorMessage;
   NewsFilter? _currentFilter;
   String _currentSearchQuery = '';
-  
+
   DateTime? _lastRSSUpdate;
   List<String> _rssSources = [];
 
@@ -81,7 +81,7 @@ class NewsProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   NewsFilter? get currentFilter => _currentFilter;
   String get currentSearchQuery => _currentSearchQuery;
-  
+
   DateTime? get lastRSSUpdate => _lastRSSUpdate;
   List<String> get rssSources => _rssSources;
 
@@ -103,7 +103,7 @@ class NewsProvider with ChangeNotifier {
 
     try {
       final result = await _getNews(filter: filter, limit: limit);
-      
+
       result.fold(
         (failure) => _setError('Erro ao carregar notícias: ${failure.message}'),
         (articles) {
@@ -120,10 +120,7 @@ class NewsProvider with ChangeNotifier {
   }
 
   /// Load premium articles
-  Future<void> loadPremiumNews({
-    int limit = 10,
-    bool refresh = false,
-  }) async {
+  Future<void> loadPremiumNews({int limit = 10, bool refresh = false}) async {
     if (_isLoadingPremium && !refresh) return;
 
     _setLoadingPremium(true);
@@ -131,9 +128,10 @@ class NewsProvider with ChangeNotifier {
 
     try {
       final result = await _getPremiumArticles(limit: limit);
-      
+
       result.fold(
-        (failure) => _setError('Erro ao carregar notícias premium: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar notícias premium: ${failure.message}'),
         (articles) {
           _premiumArticles = articles;
           notifyListeners();
@@ -168,15 +166,14 @@ class NewsProvider with ChangeNotifier {
         filter: filter,
         limit: limit,
       );
-      
-      result.fold(
-        (failure) => _setError('Erro na busca: ${failure.message}'),
-        (articles) {
-          _searchResults = articles;
-          _currentSearchQuery = query;
-          notifyListeners();
-        },
-      );
+
+      result.fold((failure) => _setError('Erro na busca: ${failure.message}'), (
+        articles,
+      ) {
+        _searchResults = articles;
+        _currentSearchQuery = query;
+        notifyListeners();
+      });
     } catch (e) {
       _setError('Erro inesperado: $e');
     } finally {
@@ -195,13 +192,10 @@ class NewsProvider with ChangeNotifier {
   Future<NewsArticleEntity?> getArticleById(String id) async {
     try {
       final result = await _getArticleById(id);
-      return result.fold(
-        (failure) {
-          _setError('Erro ao carregar artigo: ${failure.message}');
-          return null;
-        },
-        (article) => article,
-      );
+      return result.fold((failure) {
+        _setError('Erro ao carregar artigo: ${failure.message}');
+        return null;
+      }, (article) => article);
     } catch (e) {
       _setError('Erro inesperado: $e');
       return null;
@@ -214,9 +208,10 @@ class NewsProvider with ChangeNotifier {
   Future<void> loadFavorites() async {
     try {
       final result = await _manageFavorites.getFavorites();
-      
+
       result.fold(
-        (failure) => _setError('Erro ao carregar favoritos: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar favoritos: ${failure.message}'),
         (articles) {
           _favoriteArticles = articles;
           notifyListeners();
@@ -231,7 +226,7 @@ class NewsProvider with ChangeNotifier {
   Future<bool> addToFavorites(String articleId) async {
     try {
       final result = await _manageFavorites.addToFavorites(articleId);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao adicionar favorito: ${failure.message}');
@@ -253,7 +248,7 @@ class NewsProvider with ChangeNotifier {
   Future<bool> removeFromFavorites(String articleId) async {
     try {
       final result = await _manageFavorites.removeFromFavorites(articleId);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao remover favorito: ${failure.message}');
@@ -275,11 +270,8 @@ class NewsProvider with ChangeNotifier {
   Future<bool> isArticleFavorite(String articleId) async {
     try {
       final result = await _manageFavorites.isFavorite(articleId);
-      
-      return result.fold(
-        (failure) => false,
-        (isFavorite) => isFavorite,
-      );
+
+      return result.fold((failure) => false, (isFavorite) => isFavorite);
     } catch (e) {
       return false;
     }
@@ -296,7 +288,7 @@ class NewsProvider with ChangeNotifier {
 
     try {
       final result = await _refreshRSSFeeds();
-      
+
       result.fold(
         (failure) => _setError('Erro ao atualizar feeds: ${failure.message}'),
         (_) async {
@@ -317,13 +309,10 @@ class NewsProvider with ChangeNotifier {
   Future<void> _updateLastRSSTime() async {
     try {
       final result = await _repository.getLastRSSUpdate();
-      result.fold(
-        (failure) => null,
-        (lastUpdate) {
-          _lastRSSUpdate = lastUpdate;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => null, (lastUpdate) {
+        _lastRSSUpdate = lastUpdate;
+        notifyListeners();
+      });
     } catch (e) {
       // Silent fail
     }
@@ -334,7 +323,8 @@ class NewsProvider with ChangeNotifier {
     try {
       final result = await _repository.getRSSSources();
       result.fold(
-        (failure) => _setError('Erro ao carregar feeds RSS: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar feeds RSS: ${failure.message}'),
         (sources) {
           _rssSources = sources;
           notifyListeners();
@@ -349,7 +339,7 @@ class NewsProvider with ChangeNotifier {
   Future<bool> addRSSSource(String feedUrl) async {
     try {
       final result = await _repository.addRSSSource(feedUrl);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao adicionar feed RSS: ${failure.message}');
@@ -370,7 +360,7 @@ class NewsProvider with ChangeNotifier {
   Future<bool> removeRSSSource(String feedUrl) async {
     try {
       final result = await _repository.removeRSSSource(feedUrl);
-      
+
       return result.fold(
         (failure) {
           _setError('Erro ao remover feed RSS: ${failure.message}');
@@ -401,7 +391,7 @@ class NewsProvider with ChangeNotifier {
 
     try {
       final result = await _getCommodityPrices(types: types);
-      
+
       result.fold(
         (failure) => _setError('Erro ao carregar preços: ${failure.message}'),
         (prices) {
@@ -420,9 +410,10 @@ class NewsProvider with ChangeNotifier {
   Future<void> loadMarketSummary() async {
     try {
       final result = await _repository.getMarketSummary();
-      
+
       result.fold(
-        (failure) => _setError('Erro ao carregar resumo do mercado: ${failure.message}'),
+        (failure) =>
+            _setError('Erro ao carregar resumo do mercado: ${failure.message}'),
         (summary) {
           _marketSummary = summary;
           notifyListeners();
@@ -518,5 +509,4 @@ class NewsProvider with ChangeNotifier {
   void _clearError() {
     _errorMessage = null;
   }
-
 }

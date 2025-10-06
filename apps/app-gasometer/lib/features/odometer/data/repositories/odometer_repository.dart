@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/logging/entities/log_entry.dart';
@@ -16,8 +16,8 @@ import '../models/odometer_model.dart';
 
 /// Repository para persistência de leituras de odômetro usando Hive com cache strategy e sync Firebase
 @injectable
-class OdometerRepository with CachedRepository<OdometerEntity>, LoggableRepositoryMixin {
-
+class OdometerRepository
+    with CachedRepository<OdometerEntity>, LoggableRepositoryMixin {
   OdometerRepository(
     this._loggingService,
     this._remoteDataSource,
@@ -44,20 +44,19 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
 
   Future<String?> _getCurrentUserId() async {
     final userResult = await _authRepository.getCurrentUser();
-    return userResult.fold(
-      (failure) => null,
-      (user) => user?.id,
-    );
+    return userResult.fold((failure) => null, (user) => user?.id);
   }
 
   /// Initializes the repository
   Future<void> initialize() async {
     _box = await Hive.openBox<OdometerModel>(_boxName);
-    
+
     // Initialize cache with optimized settings for odometer
     initializeCache(
       maxSize: 100,
-      defaultTtl: const Duration(minutes: 8), // TTL médio para leituras de odômetro
+      defaultTtl: const Duration(
+        minutes: 8,
+      ), // TTL médio para leituras de odômetro
     );
   }
 
@@ -75,7 +74,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       operationFunc: () async {
         final model = _entityToModel(reading);
         await _box.put(reading.id, model);
-        
+
         // Log local storage
         await logLocalStorage(
           action: 'saved',
@@ -83,10 +82,10 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           entityId: reading.id,
           metadata: {'storage_type': 'hive'},
         );
-        
+
         // Remote sync in background (fire-and-forget)
         unawaited(_syncOdometerReadingToRemoteInBackground(reading));
-        
+
         return _modelToEntity(model);
       },
     );
@@ -107,10 +106,10 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
         if (!_box.containsKey(reading.id)) {
           throw Exception('Leitura de odômetro não encontrada');
         }
-        
+
         final model = _entityToModel(reading);
         await _box.put(reading.id, model);
-        
+
         // Log local storage
         await logLocalStorage(
           action: 'updated',
@@ -118,10 +117,10 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           entityId: reading.id,
           metadata: {'storage_type': 'hive'},
         );
-        
+
         // Remote sync in background (fire-and-forget)
         unawaited(_syncOdometerReadingToRemoteInBackground(reading));
-        
+
         return _modelToEntity(model);
       },
     );
@@ -135,7 +134,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       entityId: readingId,
       operationFunc: () async {
         await _box.delete(readingId);
-        
+
         // Log local storage
         await logLocalStorage(
           action: 'deleted',
@@ -143,7 +142,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           entityId: readingId,
           metadata: {'storage_type': 'hive'},
         );
-        
+
         return true;
       },
     );
@@ -168,13 +167,13 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       if (cached != null) {
         return cached;
       }
-      
+
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache o resultado
       cacheList(cacheKey, entities);
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao carregar leituras de odômetro: $e');
@@ -193,7 +192,9 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   ///
   /// Returns a sorted list of [OdometerEntity] objects for the specified vehicle
   /// Throws [Exception] if data access fails
-  Future<List<OdometerEntity>> getOdometerReadingsByVehicle(String vehicleId) async {
+  Future<List<OdometerEntity>> getOdometerReadingsByVehicle(
+    String vehicleId,
+  ) async {
     try {
       // Verificar cache primeiro
       final cacheKey = vehicleCacheKey(vehicleId, 'odometer_readings');
@@ -201,19 +202,22 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       if (cached != null) {
         return cached;
       }
-      
-      final models = _box.values
-          .where((model) => model.vehicleId == vehicleId && !model.isDeleted)
-          .toList();
-      
+
+      final models =
+          _box.values
+              .where(
+                (model) => model.vehicleId == vehicleId && !model.isDeleted,
+              )
+              .toList();
+
       // Ordenar por data decrescente (mais recente primeiro)
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
-      
+
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache o resultado
       cacheList(cacheKey, entities);
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao carregar leituras do veículo: $e');
@@ -221,16 +225,19 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   }
 
   /// Loads odometer readings by type
-  Future<List<OdometerEntity>> getOdometerReadingsByType(OdometerType type) async {
+  Future<List<OdometerEntity>> getOdometerReadingsByType(
+    OdometerType type,
+  ) async {
     try {
       final typeString = _typeToString(type);
-      final models = _box.values
-          .where((model) => model.type == typeString && !model.isDeleted)
-          .toList();
-      
+      final models =
+          _box.values
+              .where((model) => model.type == typeString && !model.isDeleted)
+              .toList();
+
       // Ordenar por data decrescente
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
-      
+
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao carregar leituras por tipo: $e');
@@ -238,20 +245,24 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   }
 
   /// Loads odometer readings by period
-  Future<List<OdometerEntity>> getOdometerReadingsByPeriod(DateTime start, DateTime end) async {
+  Future<List<OdometerEntity>> getOdometerReadingsByPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
       final startMs = start.millisecondsSinceEpoch;
       final endMs = end.millisecondsSinceEpoch;
-      
-      final models = _box.values.where((model) {
-        return model.registrationDate >= startMs && 
-               model.registrationDate <= endMs && 
-               !model.isDeleted;
-      }).toList();
-      
+
+      final models =
+          _box.values.where((model) {
+            return model.registrationDate >= startMs &&
+                model.registrationDate <= endMs &&
+                !model.isDeleted;
+          }).toList();
+
       // Ordenar por data decrescente
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
-      
+
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao carregar leituras por período: $e');
@@ -261,16 +272,20 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   /// Finds the last reading for a vehicle
   Future<OdometerEntity?> getLastOdometerReading(String vehicleId) async {
     try {
-      final models = _box.values
-          .where((model) => model.vehicleId == vehicleId && !model.isDeleted)
-          .toList();
-      
+      final models =
+          _box.values
+              .where(
+                (model) => model.vehicleId == vehicleId && !model.isDeleted,
+              )
+              .toList();
+
       if (models.isEmpty) return null;
-      
+
       // Encontrar o modelo com a maior data
-      final latestModel = models.reduce((a, b) => 
-          a.registrationDate > b.registrationDate ? a : b);
-      
+      final latestModel = models.reduce(
+        (a, b) => a.registrationDate > b.registrationDate ? a : b,
+      );
+
       return _modelToEntity(latestModel);
     } catch (e) {
       throw Exception('Erro ao buscar última leitura: $e');
@@ -281,14 +296,15 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   Future<List<OdometerEntity>> searchOdometerReadings(String query) async {
     try {
       final lowerQuery = query.toLowerCase();
-      final models = _box.values.where((model) {
-        return !model.isDeleted && 
-               model.description.toLowerCase().contains(lowerQuery);
-      }).toList();
-      
+      final models =
+          _box.values.where((model) {
+            return !model.isDeleted &&
+                model.description.toLowerCase().contains(lowerQuery);
+          }).toList();
+
       // Ordenar por data decrescente
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
-      
+
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao buscar leituras: $e');
@@ -316,10 +332,13 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   /// Throws [Exception] if statistical calculation fails
   Future<Map<String, dynamic>> getVehicleStats(String vehicleId) async {
     try {
-      final models = _box.values
-          .where((model) => model.vehicleId == vehicleId && !model.isDeleted)
-          .toList();
-      
+      final models =
+          _box.values
+              .where(
+                (model) => model.vehicleId == vehicleId && !model.isDeleted,
+              )
+              .toList();
+
       if (models.isEmpty) {
         return {
           'totalRecords': 0,
@@ -332,11 +351,11 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
 
       // Ordenar por data
       models.sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
-      
+
       final firstModel = models.first;
       final lastModel = models.last;
       final totalDistance = lastModel.value - firstModel.value;
-      
+
       return {
         'totalRecords': models.length,
         'currentOdometer': lastModel.value,
@@ -369,17 +388,21 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final duplicates = <OdometerModel>[];
-      
+
       for (int i = 0; i < models.length; i++) {
         for (int j = i + 1; j < models.length; j++) {
           final model1 = models[i];
           final model2 = models[j];
-          
+
           // Considera duplicata se mesmo veículo, valor próximo e data próxima
-          final date1 = DateTime.fromMillisecondsSinceEpoch(model1.registrationDate);
-          final date2 = DateTime.fromMillisecondsSinceEpoch(model2.registrationDate);
+          final date1 = DateTime.fromMillisecondsSinceEpoch(
+            model1.registrationDate,
+          );
+          final date2 = DateTime.fromMillisecondsSinceEpoch(
+            model2.registrationDate,
+          );
           final daysDiff = date1.difference(date2).inDays.abs();
-          
+
           if (model1.vehicleId == model2.vehicleId &&
               (model1.value - model2.value).abs() < 1.0 &&
               daysDiff <= 1) {
@@ -387,7 +410,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           }
         }
       }
-      
+
       return duplicates.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao buscar duplicatas: $e');
@@ -423,7 +446,9 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
       vehicleId: model.vehicleId,
       userId: model.userId ?? '',
       value: model.value,
-      registrationDate: DateTime.fromMillisecondsSinceEpoch(model.registrationDate),
+      registrationDate: DateTime.fromMillisecondsSinceEpoch(
+        model.registrationDate,
+      ),
       description: model.description,
       type: _stringToType(model.type ?? 'other'),
       createdAt: model.createdAt ?? DateTime.now(),
@@ -447,7 +472,9 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
   }
 
   /// Sincroniza leitura de odômetro com Firebase em background
-  Future<void> _syncOdometerReadingToRemoteInBackground(OdometerEntity reading) async {
+  Future<void> _syncOdometerReadingToRemoteInBackground(
+    OdometerEntity reading,
+  ) async {
     try {
       // Verificar se está conectado
       if (!await _isConnected()) {
@@ -462,7 +489,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
 
       // Sincronizar com Firebase
       await _remoteDataSource.addOdometerReading(userId, reading);
-      
+
       // Log successful sync
       await logRemoteSync(
         action: 'synced',
@@ -488,7 +515,7 @@ class OdometerRepository with CachedRepository<OdometerEntity>, LoggableReposito
           'type': reading.type.name,
         },
       );
-      
+
       // Log but don't throw - background sync should be silent
       if (kDebugMode) {
         print('Background sync failed for odometer reading ${reading.id}: $e');

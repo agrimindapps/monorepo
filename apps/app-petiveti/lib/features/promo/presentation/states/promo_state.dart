@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../domain/entities/promo_content.dart';
 
@@ -24,16 +24,16 @@ class PromoState extends Equatable {
   });
 
   const PromoState.initial()
-      : this(
-          isLoading: false,
-          isSubmittingPreRegistration: false,
-          preRegistrationSuccess: false,
-          showPreRegistrationDialog: false,
-          promoContent: null,
-          error: null,
-          preRegistrationError: null,
-          currentScreenshotIndex: 0,
-        );
+    : this(
+        isLoading: false,
+        isSubmittingPreRegistration: false,
+        preRegistrationSuccess: false,
+        showPreRegistrationDialog: false,
+        promoContent: null,
+        error: null,
+        preRegistrationError: null,
+        currentScreenshotIndex: 0,
+      );
 
   PromoState copyWith({
     bool? isLoading,
@@ -47,13 +47,17 @@ class PromoState extends Equatable {
   }) {
     return PromoState(
       isLoading: isLoading ?? this.isLoading,
-      isSubmittingPreRegistration: isSubmittingPreRegistration ?? this.isSubmittingPreRegistration,
-      preRegistrationSuccess: preRegistrationSuccess ?? this.preRegistrationSuccess,
-      showPreRegistrationDialog: showPreRegistrationDialog ?? this.showPreRegistrationDialog,
+      isSubmittingPreRegistration:
+          isSubmittingPreRegistration ?? this.isSubmittingPreRegistration,
+      preRegistrationSuccess:
+          preRegistrationSuccess ?? this.preRegistrationSuccess,
+      showPreRegistrationDialog:
+          showPreRegistrationDialog ?? this.showPreRegistrationDialog,
       promoContent: promoContent ?? this.promoContent,
       error: error,
       preRegistrationError: preRegistrationError,
-      currentScreenshotIndex: currentScreenshotIndex ?? this.currentScreenshotIndex,
+      currentScreenshotIndex:
+          currentScreenshotIndex ?? this.currentScreenshotIndex,
     );
   }
 
@@ -63,13 +67,13 @@ class PromoState extends Equatable {
 
   @override
   List<Object?> get props => [
-        isLoading,
-        isSubmittingPreRegistration,
-        preRegistrationSuccess,
-        showPreRegistrationDialog,
-        promoContent,
-        error,
-        preRegistrationError,
-        currentScreenshotIndex,
-      ];
+    isLoading,
+    isSubmittingPreRegistration,
+    preRegistrationSuccess,
+    showPreRegistrationDialog,
+    promoContent,
+    error,
+    preRegistrationError,
+    currentScreenshotIndex,
+  ];
 }

@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
@@ -51,14 +51,14 @@ class ExpensesState extends Equatable {
 
   @override
   List<Object?> get props => [
-        expenses,
-        filteredExpenses,
-        filtersConfig,
-        stats,
-        patternAnalysis,
-        isLoading,
-        error,
-      ];
+    expenses,
+    filteredExpenses,
+    filtersConfig,
+    stats,
+    patternAnalysis,
+    isLoading,
+    error,
+  ];
 
   /// Verifica se há filtros ativos
   bool get hasActiveFilters => filtersConfig.hasActiveFilters;
@@ -107,9 +107,10 @@ class ExpensesState extends Equatable {
       filteredExpenses: filteredExpenses ?? this.filteredExpenses,
       filtersConfig: filtersConfig ?? this.filtersConfig,
       stats: stats ?? this.stats,
-      patternAnalysis: clearPatternAnalysis
-          ? null
-          : (patternAnalysis ?? this.patternAnalysis),
+      patternAnalysis:
+          clearPatternAnalysis
+              ? null
+              : (patternAnalysis ?? this.patternAnalysis),
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
     );
@@ -165,14 +166,14 @@ class ExpensePatternAnalysis extends Equatable {
 
   @override
   List<Object?> get props => [
-        vehicleId,
-        totalExpenses,
-        averageMonthly,
-        mostFrequentType,
-        mostExpensiveType,
-        trends,
-        anomalies,
-      ];
+    vehicleId,
+    totalExpenses,
+    averageMonthly,
+    mostFrequentType,
+    mostExpensiveType,
+    trends,
+    anomalies,
+  ];
 }
 
 /// Anomalia detectada em despesas

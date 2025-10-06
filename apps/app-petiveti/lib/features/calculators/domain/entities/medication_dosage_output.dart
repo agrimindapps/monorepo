@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import 'calculation_result.dart';
 
 /// Nível de alerta para dosagem
@@ -67,12 +67,12 @@ class MonitoringInfo extends Equatable {
 
   @override
   List<Object?> get props => [
-        parametersToMonitor,
-        frequency,
-        duration,
-        warningSignsToWatch,
-        emergencyProtocol,
-      ];
+    parametersToMonitor,
+    frequency,
+    duration,
+    warningSignsToWatch,
+    emergencyProtocol,
+  ];
 }
 
 /// Instruções de administração
@@ -95,13 +95,13 @@ class AdministrationInstructions extends Equatable {
 
   @override
   List<Object?> get props => [
-        route,
-        timing,
-        dilution,
-        storage,
-        contraindications,
-        sideEffects,
-      ];
+    route,
+    timing,
+    dilution,
+    storage,
+    contraindications,
+    sideEffects,
+  ];
 }
 
 /// Helper method to map AlertLevel to ResultSeverity
@@ -150,32 +150,40 @@ class MedicationDosageOutput extends CalculationResult {
     required DateTime calculatedAt,
     required this.isSafeToAdminister,
   }) : super(
-    calculatorId: 'medication_dosage',
-    results: [
-      ResultItem(
-        label: 'Dosagem Total Diária',
-        value: totalDailyDose,
-        unit: unit,
-        severity: isSafeToAdminister ? ResultSeverity.success : ResultSeverity.danger,
-      ),
-      ResultItem(
-        label: 'Dose por Administração',
-        value: dosePerAdministration,
-        unit: unit,
-      ),
-    ],
-    recommendations: alerts.map((alert) => Recommendation(
-      title: alert.type.displayName,
-      message: alert.message,
-      severity: _mapAlertLevelToResultSeverity(alert.level),
-    )).toList(),
-    calculatedAt: calculatedAt,
-  );
+         calculatorId: 'medication_dosage',
+         results: [
+           ResultItem(
+             label: 'Dosagem Total Diária',
+             value: totalDailyDose,
+             unit: unit,
+             severity:
+                 isSafeToAdminister
+                     ? ResultSeverity.success
+                     : ResultSeverity.danger,
+           ),
+           ResultItem(
+             label: 'Dose por Administração',
+             value: dosePerAdministration,
+             unit: unit,
+           ),
+         ],
+         recommendations:
+             alerts
+                 .map(
+                   (alert) => Recommendation(
+                     title: alert.type.displayName,
+                     message: alert.message,
+                     severity: _mapAlertLevelToResultSeverity(alert.level),
+                   ),
+                 )
+                 .toList(),
+         calculatedAt: calculatedAt,
+       );
 
   /// Retorna o nível de alerta mais alto
   AlertLevel get highestAlertLevel {
     if (alerts.isEmpty) return AlertLevel.safe;
-    
+
     final levels = alerts.map((a) => a.level).toList();
     if (levels.contains(AlertLevel.danger)) return AlertLevel.danger;
     if (levels.contains(AlertLevel.warning)) return AlertLevel.warning;
@@ -190,18 +198,20 @@ class MedicationDosageOutput extends CalculationResult {
 
   /// Retorna se há alertas críticos
   bool get hasCriticalAlerts {
-    return alerts.any((alert) => 
-      alert.level == AlertLevel.danger || alert.isBlocking);
+    return alerts.any(
+      (alert) => alert.level == AlertLevel.danger || alert.isBlocking,
+    );
   }
 
   /// Retorna resumo da prescrição
   String get prescriptionSummary {
-    final volume = volumeToAdminister != null 
-        ? ' (${volumeToAdminister!.toStringAsFixed(2)} ml)'
-        : '';
-    
+    final volume =
+        volumeToAdminister != null
+            ? ' (${volumeToAdminister!.toStringAsFixed(2)} ml)'
+            : '';
+
     return '$medicationName: ${dosePerAdministration.toStringAsFixed(2)} $unit$volume '
-           '- ${administrationsPerDay}x/dia';
+        '- ${administrationsPerDay}x/dia';
   }
 
   /// Converte para Map para serialização
@@ -215,20 +225,28 @@ class MedicationDosageOutput extends CalculationResult {
       'unit': unit,
       'administrationsPerDay': administrationsPerDay,
       'intervalBetweenDoses': intervalBetweenDoses,
-      'alerts': alerts.map((a) => {
-        'type': a.type.name,
-        'level': a.level.name,
-        'message': a.message,
-        'recommendation': a.recommendation,
-        'isBlocking': a.isBlocking,
-      }).toList(),
-      'monitoringInfo': monitoringInfo != null ? {
-        'parametersToMonitor': monitoringInfo!.parametersToMonitor,
-        'frequency': monitoringInfo!.frequency,
-        'duration': monitoringInfo!.duration,
-        'warningSignsToWatch': monitoringInfo!.warningSignsToWatch,
-        'emergencyProtocol': monitoringInfo!.emergencyProtocol,
-      } : null,
+      'alerts':
+          alerts
+              .map(
+                (a) => {
+                  'type': a.type.name,
+                  'level': a.level.name,
+                  'message': a.message,
+                  'recommendation': a.recommendation,
+                  'isBlocking': a.isBlocking,
+                },
+              )
+              .toList(),
+      'monitoringInfo':
+          monitoringInfo != null
+              ? {
+                'parametersToMonitor': monitoringInfo!.parametersToMonitor,
+                'frequency': monitoringInfo!.frequency,
+                'duration': monitoringInfo!.duration,
+                'warningSignsToWatch': monitoringInfo!.warningSignsToWatch,
+                'emergencyProtocol': monitoringInfo!.emergencyProtocol,
+              }
+              : null,
       'instructions': {
         'route': instructions.route,
         'timing': instructions.timing,
@@ -245,25 +263,25 @@ class MedicationDosageOutput extends CalculationResult {
 
   @override
   List<Object?> get props => [
-        medicationName,
-        dosagePerKg,
-        totalDailyDose,
-        dosePerAdministration,
-        volumeToAdminister,
-        unit,
-        administrationsPerDay,
-        intervalBetweenDoses,
-        alerts,
-        monitoringInfo,
-        instructions,
-        calculationDetails,
-        calculatedAt,
-        isSafeToAdminister,
-      ];
+    medicationName,
+    dosagePerKg,
+    totalDailyDose,
+    dosePerAdministration,
+    volumeToAdminister,
+    unit,
+    administrationsPerDay,
+    intervalBetweenDoses,
+    alerts,
+    monitoringInfo,
+    instructions,
+    calculationDetails,
+    calculatedAt,
+    isSafeToAdminister,
+  ];
 
   @override
   String toString() {
     return 'MedicationDosageOutput($prescriptionSummary, '
-           'alerts: ${alerts.length}, safe: $isSafeToAdminister)';
+        'alerts: ${alerts.length}, safe: $isSafeToAdminister)';
   }
 }

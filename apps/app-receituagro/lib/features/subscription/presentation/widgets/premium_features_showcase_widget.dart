@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/feature_flags_notifier.dart';
 import '../providers/subscription_notifier.dart';
@@ -24,10 +23,12 @@ class PremiumFeaturesShowcaseWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PremiumFeaturesShowcaseWidget> createState() => _PremiumFeaturesShowcaseWidgetState();
+  ConsumerState<PremiumFeaturesShowcaseWidget> createState() =>
+      _PremiumFeaturesShowcaseWidgetState();
 }
 
-class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesShowcaseWidget>
+class _PremiumFeaturesShowcaseWidgetState
+    extends ConsumerState<PremiumFeaturesShowcaseWidget>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _animationController;
@@ -41,13 +42,9 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
   }
 
@@ -68,7 +65,9 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       data: (subscriptionState) {
         return featureFlagsAsync.when(
           data: (featureFlagsState) {
-            final featureFlags = ref.read(featureFlagsNotifierProvider.notifier);
+            final featureFlags = ref.read(
+              featureFlagsNotifierProvider.notifier,
+            );
 
             return FadeTransition(
               opacity: _fadeAnimation,
@@ -76,7 +75,11 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header with Premium Status
-                  _buildHeader(context, featureFlags, subscriptionState.hasActiveSubscription),
+                  _buildHeader(
+                    context,
+                    featureFlags,
+                    subscriptionState.hasActiveSubscription,
+                  ),
 
                   const SizedBox(height: 24),
 
@@ -91,9 +94,21 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        _buildCoreFeatures(context, featureFlags, subscriptionState.hasActiveSubscription),
-                        _buildAdvancedFeatures(context, featureFlags, subscriptionState.hasActiveSubscription),
-                        _buildExclusiveFeatures(context, featureFlags, subscriptionState.hasActiveSubscription),
+                        _buildCoreFeatures(
+                          context,
+                          featureFlags,
+                          subscriptionState.hasActiveSubscription,
+                        ),
+                        _buildAdvancedFeatures(
+                          context,
+                          featureFlags,
+                          subscriptionState.hasActiveSubscription,
+                        ),
+                        _buildExclusiveFeatures(
+                          context,
+                          featureFlags,
+                          subscriptionState.hasActiveSubscription,
+                        ),
                       ],
                     ),
                   ),
@@ -123,23 +138,28 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
   }
 
   /// Header with Premium Status and Validation
-  Widget _buildHeader(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
+  Widget _buildHeader(
+    BuildContext context,
+    FeatureFlagsNotifier featureFlags,
+    bool hasActiveSubscription,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: hasActiveSubscription
-            ? LinearGradient(
-                colors: [Colors.amber.shade400, Colors.orange.shade500],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : LinearGradient(
-                colors: [Colors.blue.shade600, Colors.purple.shade600],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+        gradient:
+            hasActiveSubscription
+                ? LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.orange.shade500],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+                : LinearGradient(
+                  colors: [Colors.blue.shade600, Colors.purple.shade600],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -164,16 +184,18 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
               size: 28,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Status Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  hasActiveSubscription ? 'Premium Ativo' : 'ReceitaAgro Premium',
+                  hasActiveSubscription
+                      ? 'Premium Ativo'
+                      : 'ReceitaAgro Premium',
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -181,7 +203,7 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  hasActiveSubscription 
+                  hasActiveSubscription
                       ? 'Todos os recursos desbloqueados'
                       : 'Desbloqueie recursos avançados',
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -191,9 +213,10 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
               ],
             ),
           ),
-          
+
           // Cross-platform Sync Status
-          if (hasActiveSubscription && featureFlags.isContentSynchronizationEnabled)
+          if (hasActiveSubscription &&
+              featureFlags.isContentSynchronizationEnabled)
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -202,11 +225,7 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
               ),
               child: Column(
                 children: [
-                  const Icon(
-                    Icons.sync,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  const Icon(Icons.sync, color: Colors.white, size: 16),
                   const SizedBox(height: 2),
                   Text(
                     'SYNC',
@@ -254,7 +273,11 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
   }
 
   /// Core Features Tab
-  Widget _buildCoreFeatures(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
+  Widget _buildCoreFeatures(
+    BuildContext context,
+    FeatureFlagsNotifier featureFlags,
+    bool hasActiveSubscription,
+  ) {
     final coreFeatures = [
       const PremiumFeature(
         icon: Icons.favorite,
@@ -279,11 +302,20 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
     ];
 
-    return _buildFeatureGrid(context, coreFeatures, 'Recursos fundamentais para diagnósticos eficientes', hasActiveSubscription);
+    return _buildFeatureGrid(
+      context,
+      coreFeatures,
+      'Recursos fundamentais para diagnósticos eficientes',
+      hasActiveSubscription,
+    );
   }
 
   /// Advanced Features Tab
-  Widget _buildAdvancedFeatures(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
+  Widget _buildAdvancedFeatures(
+    BuildContext context,
+    FeatureFlagsNotifier featureFlags,
+    bool hasActiveSubscription,
+  ) {
     final advancedFeatures = [
       PremiumFeature(
         icon: Icons.cloud_download,
@@ -308,11 +340,20 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
     ];
 
-    return _buildFeatureGrid(context, advancedFeatures, 'Funcionalidades avançadas para usuários experientes', hasActiveSubscription);
+    return _buildFeatureGrid(
+      context,
+      advancedFeatures,
+      'Funcionalidades avançadas para usuários experientes',
+      hasActiveSubscription,
+    );
   }
 
   /// Exclusive Features Tab
-  Widget _buildExclusiveFeatures(BuildContext context, FeatureFlagsNotifier featureFlags, bool hasActiveSubscription) {
+  Widget _buildExclusiveFeatures(
+    BuildContext context,
+    FeatureFlagsNotifier featureFlags,
+    bool hasActiveSubscription,
+  ) {
     final exclusiveFeatures = [
       const PremiumFeature(
         icon: Icons.support_agent,
@@ -337,11 +378,21 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
     ];
 
-    return _buildFeatureGrid(context, exclusiveFeatures, 'Benefícios exclusivos para membros Premium', hasActiveSubscription);
+    return _buildFeatureGrid(
+      context,
+      exclusiveFeatures,
+      'Benefícios exclusivos para membros Premium',
+      hasActiveSubscription,
+    );
   }
 
   /// Build Feature Grid
-  Widget _buildFeatureGrid(BuildContext context, List<PremiumFeature> features, String description, bool hasActiveSubscription) {
+  Widget _buildFeatureGrid(
+    BuildContext context,
+    List<PremiumFeature> features,
+    String description,
+    bool hasActiveSubscription,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -354,14 +405,21 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
             ),
           ),
           const SizedBox(height: 16),
-          ...features.map((feature) => _buildFeatureCard(context, feature, hasActiveSubscription)),
+          ...features.map(
+            (feature) =>
+                _buildFeatureCard(context, feature, hasActiveSubscription),
+          ),
         ],
       ),
     );
   }
 
   /// Individual Feature Card
-  Widget _buildFeatureCard(BuildContext context, PremiumFeature feature, bool hasActiveSubscription) {
+  Widget _buildFeatureCard(
+    BuildContext context,
+    PremiumFeature feature,
+    bool hasActiveSubscription,
+  ) {
     final theme = Theme.of(context);
     final isEnabled = feature.isAvailable && hasActiveSubscription;
 
@@ -369,14 +427,16 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isEnabled 
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
-            : theme.colorScheme.surface,
+        color:
+            isEnabled
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isEnabled 
-              ? theme.colorScheme.primary.withValues(alpha: 0.3)
-              : theme.colorScheme.outline.withValues(alpha: 0.2),
+          color:
+              isEnabled
+                  ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -385,22 +445,24 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isEnabled 
-                  ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              color:
+                  isEnabled
+                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               feature.icon,
-              color: isEnabled 
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color:
+                  isEnabled
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
               size: 24,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Feature Info
           Expanded(
             child: Column(
@@ -410,9 +472,12 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
                   feature.title,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isEnabled 
-                        ? theme.colorScheme.onSurface
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    color:
+                        isEnabled
+                            ? theme.colorScheme.onSurface
+                            : theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -425,7 +490,7 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
               ],
             ),
           ),
-          
+
           // Status Indicator
           _buildFeatureStatusIndicator(context, feature, hasActiveSubscription),
         ],
@@ -434,15 +499,15 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
   }
 
   /// Feature Status Indicator
-  Widget _buildFeatureStatusIndicator(BuildContext context, PremiumFeature feature, bool hasSubscription) {
+  Widget _buildFeatureStatusIndicator(
+    BuildContext context,
+    PremiumFeature feature,
+    bool hasSubscription,
+  ) {
     final theme = Theme.of(context);
-    
+
     if (hasSubscription && feature.isAvailable) {
-      return const Icon(
-        Icons.check_circle,
-        color: Colors.green,
-        size: 20,
-      );
+      return const Icon(Icons.check_circle, color: Colors.green, size: 20);
     } else if (hasSubscription && !feature.isAvailable) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -469,11 +534,15 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
   }
 
   /// Cross-platform Sync Indicator
-  Widget _buildCrossPlatformIndicator(BuildContext context, FeatureFlagsNotifier featureFlags) {
-    if (!featureFlags.isContentSynchronizationEnabled) return const SizedBox.shrink();
-    
+  Widget _buildCrossPlatformIndicator(
+    BuildContext context,
+    FeatureFlagsNotifier featureFlags,
+  ) {
+    if (!featureFlags.isContentSynchronizationEnabled)
+      return const SizedBox.shrink();
+
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -485,10 +554,7 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.devices,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.devices, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -516,11 +582,7 @@ class _PremiumFeaturesShowcaseWidgetState extends ConsumerState<PremiumFeaturesS
               color: Colors.green.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: const Icon(
-              Icons.sync,
-              color: Colors.green,
-              size: 16,
-            ),
+            child: const Icon(Icons.sync, color: Colors.green, size: 16),
           ),
         ],
       ),

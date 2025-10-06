@@ -1,10 +1,9 @@
 import 'package:core/core.dart';
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 import '../entities/maintenance_entity.dart';
 import '../repositories/maintenance_repository.dart';
 
 class GetUpcomingMaintenanceRecordsParams extends Equatable {
-
   const GetUpcomingMaintenanceRecordsParams({
     required this.vehicleId,
     this.days = 30,
@@ -17,15 +16,18 @@ class GetUpcomingMaintenanceRecordsParams extends Equatable {
 }
 
 @injectable
-class GetUpcomingMaintenanceRecords implements UseCase<List<MaintenanceEntity>, GetUpcomingMaintenanceRecordsParams> {
-
+class GetUpcomingMaintenanceRecords
+    implements
+        UseCase<List<MaintenanceEntity>, GetUpcomingMaintenanceRecordsParams> {
   GetUpcomingMaintenanceRecords(this.repository);
   final MaintenanceRepository repository;
 
   @override
-  Future<Either<Failure, List<MaintenanceEntity>>> call(GetUpcomingMaintenanceRecordsParams params) async {
+  Future<Either<Failure, List<MaintenanceEntity>>> call(
+    GetUpcomingMaintenanceRecordsParams params,
+  ) async {
     return repository.getUpcomingMaintenanceRecords(
-      params.vehicleId, 
+      params.vehicleId,
       days: params.days,
     );
   }

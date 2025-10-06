@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/premium_status.dart';
@@ -15,7 +15,6 @@ import '../../domain/entities/premium_status.dart';
 /// do status de assinatura premium
 @injectable
 class PremiumFirebaseDataSource {
-
   PremiumFirebaseDataSource(this._firestore, this._authService) {
     _initializeFirebaseSync();
   }
@@ -59,7 +58,9 @@ class PremiumFirebaseDataSource {
                 final data = doc.data() as Map<String, dynamic>;
                 final status = _mapFirebaseDataToPremiumStatus(data);
                 _statusController.add(status);
-                debugPrint('[FirebaseDataSource] Status atualizado via Firebase');
+                debugPrint(
+                  '[FirebaseDataSource] Status atualizado via Firebase',
+                );
               }
             },
             onError: (error) {
@@ -121,10 +122,8 @@ class PremiumFirebaseDataSource {
     required String userId,
   }) async {
     try {
-      final doc = await _firestore
-          .collection('user_subscriptions')
-          .doc(userId)
-          .get();
+      final doc =
+          await _firestore.collection('user_subscriptions').doc(userId).get();
 
       if (!doc.exists || doc.data() == null) {
         return const Right(null);
@@ -146,19 +145,20 @@ class PremiumFirebaseDataSource {
       // Busca dados mais recentes do Firebase
       final firebaseResult = await getPremiumStatusFromFirebase(userId: userId);
 
-      return firebaseResult.fold(
-        (failure) => Left(failure),
-        (firebaseStatus) async {
-          if (firebaseStatus != null) {
-            // Notifica sobre atualização
-            _statusController.add(firebaseStatus);
-            debugPrint('[FirebaseDataSource] Cross-device sync realizado');
-          }
-          return const Right(null);
-        },
-      );
+      return firebaseResult.fold((failure) => Left(failure), (
+        firebaseStatus,
+      ) async {
+        if (firebaseStatus != null) {
+          // Notifica sobre atualização
+          _statusController.add(firebaseStatus);
+          debugPrint('[FirebaseDataSource] Cross-device sync realizado');
+        }
+        return const Right(null);
+      });
     } catch (e) {
-      return Left(ServerFailure('Erro na sincronização cross-device: ${e.toString()}'));
+      return Left(
+        ServerFailure('Erro na sincronização cross-device: ${e.toString()}'),
+      );
     }
   }
 
@@ -173,10 +173,7 @@ class PremiumFirebaseDataSource {
       data['cache_expires_at'] = DateTime.now().add(ttl).toIso8601String();
       data['cached_at'] = DateTime.now().toIso8601String();
 
-      await _firestore
-          .collection('premium_cache')
-          .doc(userId)
-          .set(data);
+      await _firestore.collection('premium_cache').doc(userId).set(data);
 
       return const Right(null);
     } catch (e) {
@@ -189,10 +186,8 @@ class PremiumFirebaseDataSource {
     required String userId,
   }) async {
     try {
-      final doc = await _firestore
-          .collection('premium_cache')
-          .doc(userId)
-          .get();
+      final doc =
+          await _firestore.collection('premium_cache').doc(userId).get();
 
       if (!doc.exists || doc.data() == null) {
         return const Right(null);
@@ -234,10 +229,7 @@ class PremiumFirebaseDataSource {
     try {
       final resolvedStatus = _resolveStatusConflict(localStatus, remoteStatus);
 
-      return syncPremiumStatus(
-        userId: userId,
-        status: resolvedStatus,
-      );
+      return syncPremiumStatus(userId: userId, status: resolvedStatus);
     } catch (e) {
       return Left(ServerFailure('Erro ao resolver conflitos: ${e.toString()}'));
     }
@@ -289,11 +281,14 @@ class PremiumFirebaseDataSource {
     }
 
     if (data['premium_source'] == 'local_license') {
-      return PremiumStatus.localLicense(expiration: expirationDate ?? DateTime.now());
+      return PremiumStatus.localLicense(
+        expiration: expirationDate ?? DateTime.now(),
+      );
     }
 
     return PremiumStatus.premium(
-      expirationDate: expirationDate ?? DateTime.now().add(const Duration(days: 30)),
+      expirationDate:
+          expirationDate ?? DateTime.now().add(const Duration(days: 30)),
     );
   }
 
@@ -311,7 +306,8 @@ class PremiumFirebaseDataSource {
     }
     if (localStatus.isPremium && remoteStatus.isPremium) {
       // Ambos premium, usar o com expiração mais distante
-      if (localStatus.expirationDate != null && remoteStatus.expirationDate != null) {
+      if (localStatus.expirationDate != null &&
+          remoteStatus.expirationDate != null) {
         return localStatus.expirationDate!.isAfter(remoteStatus.expirationDate!)
             ? localStatus
             : remoteStatus;

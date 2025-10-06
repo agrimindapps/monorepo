@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../providers/home_defensivos_notifier.dart';
@@ -16,10 +15,7 @@ import 'defensivos_category_button.dart';
 /// Performance: Optimized with RepaintBoundary and efficient layout calculations.
 /// Migrated to Riverpod - uses ConsumerWidget.
 class DefensivosStatsGrid extends ConsumerWidget {
-  const DefensivosStatsGrid({
-    super.key,
-    required this.onCategoryTap,
-  });
+  const DefensivosStatsGrid({super.key, required this.onCategoryTap});
 
   final void Function(String category) onCategoryTap;
 
@@ -28,46 +24,58 @@ class DefensivosStatsGrid extends ConsumerWidget {
     final state = ref.watch(homeDefensivosNotifierProvider);
 
     return state.when(
-      data: (data) => RepaintBoundary(
-        child: Card(
-          elevation: ReceitaAgroElevation.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-            side: BorderSide.none,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 0,
-              vertical: ReceitaAgroSpacing.sm,
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final availableWidth = constraints.maxWidth;
-                final screenWidth = MediaQuery.of(context).size.width;
-                final isSmallDevice =
-                    screenWidth < ReceitaAgroBreakpoints.smallDevice;
-                final useVerticalLayout = isSmallDevice ||
-                    availableWidth <
-                        ReceitaAgroBreakpoints.verticalLayoutThreshold;
+      data:
+          (data) => RepaintBoundary(
+            child: Card(
+              elevation: ReceitaAgroElevation.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  ReceitaAgroBorderRadius.card,
+                ),
+                side: BorderSide.none,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 0,
+                  vertical: ReceitaAgroSpacing.sm,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableWidth = constraints.maxWidth;
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    final isSmallDevice =
+                        screenWidth < ReceitaAgroBreakpoints.smallDevice;
+                    final useVerticalLayout =
+                        isSmallDevice ||
+                        availableWidth <
+                            ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
-                if (useVerticalLayout) {
-                  return _buildVerticalLayout(availableWidth, context, data);
-                } else {
-                  return _buildGridLayout(availableWidth, context, data);
-                }
-              },
+                    if (useVerticalLayout) {
+                      return _buildVerticalLayout(
+                        availableWidth,
+                        context,
+                        data,
+                      );
+                    } else {
+                      return _buildGridLayout(availableWidth, context, data);
+                    }
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
 
-  Widget _buildVerticalLayout(double availableWidth, BuildContext context, HomeDefensivosState data) {
+  Widget _buildVerticalLayout(
+    double availableWidth,
+    BuildContext context,
+    HomeDefensivosState data,
+  ) {
     final theme = Theme.of(context);
-    final buttonWidth = availableWidth;  // Largura total sem padding extra
+    final buttonWidth = availableWidth; // Largura total sem padding extra
     final standardColor = theme.colorScheme.primary;
 
     return Column(
@@ -121,12 +129,17 @@ class DefensivosStatsGrid extends ConsumerWidget {
     );
   }
 
-  Widget _buildGridLayout(double availableWidth, BuildContext context, HomeDefensivosState data) {
+  Widget _buildGridLayout(
+    double availableWidth,
+    BuildContext context,
+    HomeDefensivosState data,
+  ) {
     final theme = Theme.of(context);
     // ignore: unused_local_variable
     final isMediumDevice =
         MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
-    final buttonWidth = (availableWidth - 6) / 2;  // Apenas o espaço do gap entre botões
+    final buttonWidth =
+        (availableWidth - 6) / 2; // Apenas o espaço do gap entre botões
     final standardColor = theme.colorScheme.primary;
 
     return Column(
@@ -180,7 +193,7 @@ class DefensivosStatsGrid extends ConsumerWidget {
         DefensivosCategoryButton(
           count: data.getFormattedCount(data.totalDefensivos),
           title: 'Defensivos',
-          width: availableWidth,  // Largura total para o último botão
+          width: availableWidth, // Largura total para o último botão
           onTap: () => onCategoryTap('defensivos'),
           icon: FontAwesomeIcons.sprayCan,
           color: standardColor,

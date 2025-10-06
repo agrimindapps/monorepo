@@ -1,10 +1,10 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show injectable;
 
 /// Get News Use Case
-/// 
+///
 /// Handles fetching news articles with filtering and pagination
 @injectable
 class GetNews {
@@ -69,10 +69,7 @@ class GetPremiumArticles {
     int limit = 10,
     int offset = 0,
   }) async {
-    return await _repository.getPremiumArticles(
-      limit: limit,
-      offset: offset,
-    );
+    return await _repository.getPremiumArticles(limit: limit, offset: offset);
   }
 }
 

@@ -19,35 +19,22 @@ class DatabaseInspectorPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.storage,
-                size: 64,
-                color: Colors.blue,
-              ),
+              Icon(Icons.storage, size: 64, color: Colors.blue),
               SizedBox(height: 16),
               Text(
                 'Database Inspector',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               Text(
                 'Unified data inspector temporarily unavailable.\nWill be integrated when core package presentation layer is restored.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               SizedBox(height: 24),
               Text(
                 'Planned features:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               SizedBox(height: 8),
               Text(

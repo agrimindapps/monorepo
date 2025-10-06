@@ -19,8 +19,8 @@ import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_form_notifier.dart';
 import '../providers/vehicles_notifier.dart';
-class AddVehiclePage extends ConsumerStatefulWidget {
 
+class AddVehiclePage extends ConsumerStatefulWidget {
   const AddVehiclePage({super.key, this.vehicle});
   final VehicleEntity? vehicle;
 
@@ -28,7 +28,8 @@ class AddVehiclePage extends ConsumerStatefulWidget {
   ConsumerState<AddVehiclePage> createState() => _AddVehiclePageState();
 }
 
-class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorHandlerMixin {
+class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
+    with FormErrorHandlerMixin {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _observacoesController = TextEditingController();
   late final FormValidator _formValidator;
@@ -42,7 +43,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
 
     if (widget.vehicle != null) {
       notifier.initializeForEdit(widget.vehicle!);
-      _observacoesController.text = widget.vehicle!.metadata['observacoes'] as String? ?? '';
+      _observacoesController.text =
+          widget.vehicle!.metadata['observacoes'] as String? ?? '';
     }
     _initializeFormValidator();
     _isInitialized = true;
@@ -159,12 +161,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     final authState = ref.watch(authProvider);
     final formState = ref.watch(vehicleFormNotifierProvider);
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
-    if (authState.status == AuthStatus.authenticating || !authState.isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+    if (authState.status == AuthStatus.authenticating ||
+        !authState.isInitialized) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     _initializeFormNotifier();
 
@@ -204,65 +203,76 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       icon: Icons.directions_car,
       child: Column(
         children: [
-        _buildPhotoUploadSection(),
-        const SizedBox(height: GasometerDesignTokens.spacingLg),
-        Container(
-          key: _fieldKeys['marca'],
-          child: ValidatedFormField(
-            controller: notifier.brandController,
-            label: 'Marca',
-            hint: 'Ex: Ford, Volkswagen, etc.',
-            required: true,
-            validationType: ValidationType.length,
-            minLength: 2,
-            maxLengthValidation: 50,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-          ),
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingMd),
-        Container(
-          key: _fieldKeys['modelo'],
-          child: ValidatedFormField(
-            controller: notifier.modelController,
-            label: 'Modelo',
-            hint: 'Ex: Gol, Fiesta, etc.',
-            required: true,
-            validationType: ValidationType.length,
-            minLength: 2,
-            maxLengthValidation: 50,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'))],
-          ),
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingMd),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                key: _fieldKeys['ano'],
-                child: _buildYearDropdown(notifier),
-              ),
+          _buildPhotoUploadSection(),
+          const SizedBox(height: GasometerDesignTokens.spacingLg),
+          Container(
+            key: _fieldKeys['marca'],
+            child: ValidatedFormField(
+              controller: notifier.brandController,
+              label: 'Marca',
+              hint: 'Ex: Ford, Volkswagen, etc.',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 2,
+              maxLengthValidation: 50,
+              validateOnChange: false, // Desabilitar validação em tempo real
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]')),
+              ],
             ),
-            const SizedBox(width: GasometerDesignTokens.spacingMd),
-            Expanded(
-              child: Container(
-                key: _fieldKeys['cor'],
-                child: ValidatedFormField(
-                  controller: notifier.colorController,
-                  label: 'Cor',
-                  hint: 'Ex: Branco, Preto, etc.',
-                  required: true,
-                  validationType: ValidationType.length,
-                  minLength: 3,
-                  maxLengthValidation: 30,
-                  validateOnChange: false, // Desabilitar validação em tempo real
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
+          ),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          Container(
+            key: _fieldKeys['modelo'],
+            child: ValidatedFormField(
+              controller: notifier.modelController,
+              label: 'Modelo',
+              hint: 'Ex: Gol, Fiesta, etc.',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 2,
+              maxLengthValidation: 50,
+              validateOnChange: false, // Desabilitar validação em tempo real
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  key: _fieldKeys['ano'],
+                  child: _buildYearDropdown(notifier),
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: GasometerDesignTokens.spacingMd),
+              Expanded(
+                child: Container(
+                  key: _fieldKeys['cor'],
+                  child: ValidatedFormField(
+                    controller: notifier.colorController,
+                    label: 'Cor',
+                    hint: 'Ex: Branco, Preto, etc.',
+                    required: true,
+                    validationType: ValidationType.length,
+                    minLength: 3,
+                    maxLengthValidation: 30,
+                    validateOnChange:
+                        false, // Desabilitar validação em tempo real
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[a-zA-ZÀ-ÿ\s\-]'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -273,11 +283,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     return FormSectionHeader(
       title: 'Informações Técnicas',
       icon: Icons.speed,
-      child: Column(
-        children: [
-          _buildCombustivelSelector(notifier),
-        ],
-      ),
+      child: Column(children: [_buildCombustivelSelector(notifier)]),
     );
   }
 
@@ -288,93 +294,97 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       icon: Icons.description,
       child: Column(
         children: [
-        Container(
-          key: _fieldKeys['odometro'],
-          child: ValidatedFormField(
-            controller: notifier.odometerController,
-            label: 'Odômetro Atual',
-            hint: '0,00',
-            required: true,
-            validationType: ValidationType.decimal,
-            minValue: 0.0,
-            maxValue: 999999.0,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-            ],
-            suffix: const Text(
-              'km',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+          Container(
+            key: _fieldKeys['odometro'],
+            child: ValidatedFormField(
+              controller: notifier.odometerController,
+              label: 'Odômetro Atual',
+              hint: '0,00',
+              required: true,
+              validationType: ValidationType.decimal,
+              minValue: 0.0,
+              maxValue: 999999.0,
+              validateOnChange: false, // Desabilitar validação em tempo real
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+              ],
+              suffix: const Text(
+                'km',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              onChanged: (value) {
+                setState(
+                  () {},
+                ); // Manter para cálculos em tempo real se necessário
+              },
             ),
-            onChanged: (value) {
-              setState(() {}); // Manter para cálculos em tempo real se necessário
-            },
           ),
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingMd),
-        Container(
-          key: _fieldKeys['placa'],
-          child: ValidatedFormField(
-            controller: notifier.plateController,
-            label: 'Placa',
-            hint: 'Ex: ABC1234 ou ABC1D23',
-            required: true,
-            validationType: ValidationType.licensePlate,
-            maxLength: 7,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-              UpperCaseTextFormatter(),
-              LengthLimitingTextInputFormatter(7),
-            ],
-            onChanged: (value) {
-              setState(() {}); // Manter para formatação em tempo real
-            },
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          Container(
+            key: _fieldKeys['placa'],
+            child: ValidatedFormField(
+              controller: notifier.plateController,
+              label: 'Placa',
+              hint: 'Ex: ABC1234 ou ABC1D23',
+              required: true,
+              validationType: ValidationType.licensePlate,
+              maxLength: 7,
+              validateOnChange: false, // Desabilitar validação em tempo real
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                UpperCaseTextFormatter(),
+                LengthLimitingTextInputFormatter(7),
+              ],
+              onChanged: (value) {
+                setState(() {}); // Manter para formatação em tempo real
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingMd),
-        Container(
-          key: _fieldKeys['chassi'],
-          child: ValidatedFormField(
-            controller: notifier.chassisController,
-            label: 'Chassi (opcional)',
-            hint: 'Ex: 9BWZZZ377VT004251',
-            required: false,
-            validationType: ValidationType.chassis,
-            maxLength: 17,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
-              LengthLimitingTextInputFormatter(17),
-              UpperCaseTextFormatter(),
-            ],
-            onChanged: (value) {
-              setState(() {}); // Manter para formatação em tempo real
-            },
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          Container(
+            key: _fieldKeys['chassi'],
+            child: ValidatedFormField(
+              controller: notifier.chassisController,
+              label: 'Chassi (opcional)',
+              hint: 'Ex: 9BWZZZ377VT004251',
+              required: false,
+              validationType: ValidationType.chassis,
+              maxLength: 17,
+              validateOnChange: false, // Desabilitar validação em tempo real
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-HJ-NPR-Z0-9]')),
+                LengthLimitingTextInputFormatter(17),
+                UpperCaseTextFormatter(),
+              ],
+              onChanged: (value) {
+                setState(() {}); // Manter para formatação em tempo real
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: GasometerDesignTokens.spacingMd),
-        Container(
-          key: _fieldKeys['renavam'],
-          child: ValidatedFormField(
-            controller: notifier.renavamController,
-            label: 'Renavam (opcional)',
-            hint: 'Ex: 12345678901',
-            required: false,
-            validationType: ValidationType.renavam,
-            keyboardType: TextInputType.number,
-            maxLength: 11,
-            validateOnChange: false, // Desabilitar validação em tempo real
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(11),
-            ],
-            onChanged: (value) {
-              setState(() {}); // Manter para formatação em tempo real
-            },
+          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          Container(
+            key: _fieldKeys['renavam'],
+            child: ValidatedFormField(
+              controller: notifier.renavamController,
+              label: 'Renavam (opcional)',
+              hint: 'Ex: 12345678901',
+              required: false,
+              validationType: ValidationType.renavam,
+              keyboardType: TextInputType.number,
+              maxLength: 11,
+              validateOnChange: false, // Desabilitar validação em tempo real
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(11),
+              ],
+              onChanged: (value) {
+                setState(() {}); // Manter para formatação em tempo real
+              },
+            ),
           ),
-        ),
         ],
       ),
     );
@@ -394,7 +404,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
               hint: 'Adicione observações sobre o veículo...',
               required: false,
               onChanged: (value) {
-                setState(() {}); // Manter para contador de caracteres se necessário
+                setState(
+                  () {},
+                ); // Manter para contador de caracteres se necessário
               },
             ),
           ),
@@ -406,7 +418,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
   Widget _buildPhotoUploadSection() {
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
     final formState = ref.watch(vehicleFormNotifierProvider);
-    final hasPhoto = formState.vehicleImage != null && formState.vehicleImage!.existsSync();
+    final hasPhoto =
+        formState.vehicleImage != null && formState.vehicleImage!.existsSync();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,7 +438,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
               ' (opcional)',
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeMd,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withValues(
+                  alpha: GasometerDesignTokens.opacitySecondary,
+                ),
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -436,7 +451,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).colorScheme.outline),
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusLg),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusLg,
+            ),
           ),
           child: Column(
             children: [
@@ -475,7 +492,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
                 ),
                 const Divider(height: 1),
                 Padding(
-                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingMd),
+                  padding: GasometerDesignTokens.paddingAll(
+                    GasometerDesignTokens.spacingMd,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -489,19 +508,29 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
                 ),
               ] else ...[
                 Padding(
-                  padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXxxl),
+                  padding: GasometerDesignTokens.paddingAll(
+                    GasometerDesignTokens.spacingXxxl,
+                  ),
                   child: Column(
                     children: [
                       Icon(
                         Icons.directions_car,
                         size: GasometerDesignTokens.iconSizeXxxl + 16,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityHint),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(
+                          alpha: GasometerDesignTokens.opacityHint,
+                        ),
                       ),
                       const SizedBox(height: GasometerDesignTokens.spacingLg),
                       Text(
                         'Nenhuma foto selecionada',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(
+                            alpha: GasometerDesignTokens.opacitySecondary,
+                          ),
                           fontSize: GasometerDesignTokens.fontSizeLg,
                         ),
                       ),
@@ -511,8 +540,10 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
                         icon: const Icon(Icons.add_a_photo),
                         label: const Text('Adicionar Foto'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onPrimary,
                           padding: GasometerDesignTokens.paddingOnly(
                             left: GasometerDesignTokens.spacingXxl,
                             right: GasometerDesignTokens.spacingXxl,
@@ -590,7 +621,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       ),
     );
   }
-
 
   void _showImageSourceDialog() {
     showDialog<void>(
@@ -677,14 +707,15 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     }
   }
 
-
   Widget _buildYearDropdown(dynamic notifier) {
     final currentYear = DateTime.now().year;
-    final years = List.generate(currentYear - 1900 + 1, (index) => currentYear - index);
+    final years = List.generate(
+      currentYear - 1900 + 1,
+      (index) => currentYear - index,
+    );
     final yearText = notifier.yearController.text as String;
-    final currentValue = yearText.trim().isNotEmpty
-        ? int.tryParse(yearText)
-        : null;
+    final currentValue =
+        yearText.trim().isNotEmpty ? int.tryParse(yearText) : null;
 
     return DropdownButtonFormField<int>(
       value: currentValue,
@@ -700,19 +731,26 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
         ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       validator: (value) => value == null ? 'Campo obrigatório' : null,
-      items: years.map((year) {
-        return DropdownMenuItem<int>(
-          value: year,
-          child: Text(year.toString()),
-        );
-      }).toList(),
+      items:
+          years.map((year) {
+            return DropdownMenuItem<int>(
+              value: year,
+              child: Text(year.toString()),
+            );
+          }).toList(),
       onChanged: (value) {
         notifier.yearController.text = value?.toString() ?? '';
         notifier.markAsChanged();
@@ -722,38 +760,39 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
 
   Widget _buildCombustivelSelector(dynamic notifier) {
     final formState = ref.watch(vehicleFormNotifierProvider);
-    final combustiveis = FuelTypeMapper.availableFuelStrings.map((fuelName) {
-      IconData icon;
-      switch (fuelName) {
-        case 'Gasolina':
-          icon = Icons.local_gas_station;
-          break;
-        case 'Etanol':
-          icon = Icons.eco;
-          break;
-        case 'Diesel':
-          icon = Icons.local_shipping;
-          break;
-        case 'Diesel S-10':
-          icon = Icons.local_gas_station;
-          break;
-        case 'GNV':
-        case 'Gás':
-          icon = Icons.circle;
-          break;
-        case 'Energia Elétrica':
-        case 'Elétrico':
-          icon = Icons.electric_car;
-          break;
-        case 'Híbrido':
-          icon = Icons.ev_station;
-          break;
-        default:
-          icon = Icons.local_gas_station;
-      }
-      return {'name': fuelName, 'icon': icon};
-    }).toList();
-    
+    final combustiveis =
+        FuelTypeMapper.availableFuelStrings.map((fuelName) {
+          IconData icon;
+          switch (fuelName) {
+            case 'Gasolina':
+              icon = Icons.local_gas_station;
+              break;
+            case 'Etanol':
+              icon = Icons.eco;
+              break;
+            case 'Diesel':
+              icon = Icons.local_shipping;
+              break;
+            case 'Diesel S-10':
+              icon = Icons.local_gas_station;
+              break;
+            case 'GNV':
+            case 'Gás':
+              icon = Icons.circle;
+              break;
+            case 'Energia Elétrica':
+            case 'Elétrico':
+              icon = Icons.electric_car;
+              break;
+            case 'Híbrido':
+              icon = Icons.ev_station;
+              break;
+            default:
+              icon = Icons.local_gas_station;
+          }
+          return {'name': fuelName, 'icon': icon};
+        }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -769,50 +808,72 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: combustiveis.map((combustivel) {
-            final isSelected = formState.selectedFuel == combustivel['name'];
-            return GestureDetector(
-              onTap: () => notifier.updateSelectedFuel(combustivel['name'] as String),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        combustivel['icon'] as IconData,
-                        size: 14,
-                        color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
+          children:
+              combustiveis.map((combustivel) {
+                final isSelected =
+                    formState.selectedFuel == combustivel['name'];
+                return GestureDetector(
+                  onTap:
+                      () => notifier.updateSelectedFuel(
                         combustivel['name'] as String,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
-                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                        ),
                       ),
-                    ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color:
+                            isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            combustivel['icon'] as IconData,
+                            size: 14,
+                            color:
+                                isSelected
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onSurface
+                                        .withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            combustivel['name'] as String,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  isSelected
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSurface,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.w500
+                                      : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
         ),
       ],
     );
   }
-
-
 
   Future<void> _submitForm() async {
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
@@ -837,7 +898,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
       final vehicleEntity = notifier.createVehicleEntity();
       final updatedMetadata = Map<String, dynamic>.from(vehicleEntity.metadata);
       updatedMetadata['observacoes'] = _observacoesController.text.trim();
-      
+
       final updatedVehicleEntity = VehicleEntity(
         id: vehicleEntity.id,
         userId: vehicleEntity.userId,

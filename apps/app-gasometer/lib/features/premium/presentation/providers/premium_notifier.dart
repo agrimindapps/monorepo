@@ -49,6 +49,7 @@ class PremiumNotifierState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
+
   bool get isPremium => premiumStatus.isPremium;
   bool get canPurchasePremium => !isPremium;
   DateTime? get expirationDate => premiumStatus.expirationDate;
@@ -399,6 +400,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     );
     return result.fold((failure) => false, (canAdd) => canAdd);
   }
+
   Future<bool> canAddUnlimitedVehicles() async =>
       state.valueOrNull?.isPremium ?? false;
   Future<bool> canAccessAdvancedReports() async =>

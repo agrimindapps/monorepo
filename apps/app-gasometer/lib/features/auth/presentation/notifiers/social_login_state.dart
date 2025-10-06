@@ -1,9 +1,5 @@
 /// Enum para métodos de social login
-enum SocialLoginMethod {
-  google,
-  apple,
-  facebook,
-}
+enum SocialLoginMethod { google, apple, facebook }
 
 /// Estado do social login
 class SocialLoginState {
@@ -16,27 +12,27 @@ class SocialLoginState {
 
   /// Construtor para estado inicial
   const SocialLoginState.initial()
-      : isLoading = false,
-        currentMethod = null,
-        errorMessage = null;
+    : isLoading = false,
+      currentMethod = null,
+      errorMessage = null;
 
   /// Construtor para estado de loading
   const SocialLoginState.loading(SocialLoginMethod method)
-      : isLoading = true,
-        currentMethod = method,
-        errorMessage = null;
+    : isLoading = true,
+      currentMethod = method,
+      errorMessage = null;
 
   /// Construtor para estado de sucesso
   const SocialLoginState.success(SocialLoginMethod method)
-      : isLoading = false,
-        currentMethod = method,
-        errorMessage = null;
+    : isLoading = false,
+      currentMethod = method,
+      errorMessage = null;
 
   /// Construtor para estado de erro
   const SocialLoginState.error(String message, [SocialLoginMethod? method])
-      : isLoading = false,
-        currentMethod = method,
-        errorMessage = message;
+    : isLoading = false,
+      currentMethod = method,
+      errorMessage = message;
 
   final bool isLoading;
   final SocialLoginMethod? currentMethod;

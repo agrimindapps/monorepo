@@ -50,7 +50,8 @@ class FuelTypeMapper {
   }
 
   /// Lista de strings de combustível disponíveis para interface
-  static List<String> get availableFuelStrings => _stringToFuelType.keys.toList();
+  static List<String> get availableFuelStrings =>
+      _stringToFuelType.keys.toList();
 
   /// Lista de FuelTypes disponíveis
   static List<FuelType> get availableFuelTypes => FuelType.values;

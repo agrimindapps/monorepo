@@ -122,11 +122,12 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               }
             },
             onShowDialog: (dialog) {
-              if (mounted) showDialog(context: context, builder: (_) => dialog);
+              if (mounted)
+                showDialog<void>(context: context, builder: (_) => dialog);
             },
             onShowBottomSheet: (bottomSheet) {
               if (mounted) {
-                showModalBottomSheet(
+                showModalBottomSheet<void>(
                   context: context,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   shape: const RoundedRectangleBorder(
@@ -189,11 +190,13 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         child: Builder(
           builder: (context) {
             // Estados de loading e erro
-            if (plantDetailsProvider.isLoading && plantDetailsProvider.plant == null) {
+            if (plantDetailsProvider.isLoading &&
+                plantDetailsProvider.plant == null) {
               return _buildLoadingState(context);
             }
 
-            if (plantDetailsProvider.hasError && plantDetailsProvider.plant == null) {
+            if (plantDetailsProvider.hasError &&
+                plantDetailsProvider.plant == null) {
               return _buildErrorState(
                 context,
                 plantDetailsProvider.errorMessage,
@@ -703,7 +706,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   }
 
   void _showErrorHelp(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

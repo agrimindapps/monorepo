@@ -96,7 +96,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       // Start monitoring connectivity changes
       _connectivitySubscription = enhanced.connectivityStream.listen(
         _onConnectivityChanged,
-        onError: (error) {
+        onError: (Object error) {
           if (kDebugMode) {
             print('⚠️ PlantsRepository: Connectivity monitoring error: $error');
           }
@@ -172,27 +172,23 @@ class PlantsRepositoryImpl implements PlantsRepository {
           'plantis',
         );
 
-        return result.fold(
-          (failure) => Left(failure),
-          (plants) {
-            // Filtrar plantas não deletadas e ordenar
-            final activePlants =
-                plants.where((p) => !p.isDeleted).toList()
-                  ..sort(
-                    (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
-                      a.createdAt ?? DateTime.now(),
-                    ),
-                  );
-
-            if (kDebugMode) {
-              print(
-                '✅ PlantsRepository (Web): Loaded ${activePlants.length} plants',
+        return result.fold((failure) => Left(failure), (plants) {
+          // Filtrar plantas não deletadas e ordenar
+          final activePlants =
+              plants.where((p) => !p.isDeleted).toList()..sort(
+                (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+                  a.createdAt ?? DateTime.now(),
+                ),
               );
-            }
 
-            return Right(activePlants);
-          },
-        );
+          if (kDebugMode) {
+            print(
+              '✅ PlantsRepository (Web): Loaded ${activePlants.length} plants',
+            );
+          }
+
+          return Right(activePlants);
+        });
       }
 
       // MOBILE/DESKTOP: usar datasource legado
@@ -511,7 +507,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
       final tasksResult = await taskRepository.deletePlantTasksByPlantId(id);
       if (tasksResult.isLeft()) {
         if (kDebugMode) {
-          print('⚠️ Failed to delete tasks for plant $id: ${tasksResult.fold((f) => f.message, (_) => '')}');
+          print(
+            '⚠️ Failed to delete tasks for plant $id: ${tasksResult.fold((f) => f.message, (_) => '')}',
+          );
         }
         // Continue even if task deletion fails
       }
@@ -520,10 +518,14 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (kDebugMode) {
         print('🗑️ Deleting comments for plant: $id');
       }
-      final commentsResult = await commentsRepository.deleteCommentsForPlant(id);
+      final commentsResult = await commentsRepository.deleteCommentsForPlant(
+        id,
+      );
       if (commentsResult.isLeft()) {
         if (kDebugMode) {
-          print('⚠️ Failed to delete comments for plant $id: ${commentsResult.fold((f) => f.message, (_) => '')}');
+          print(
+            '⚠️ Failed to delete comments for plant $id: ${commentsResult.fold((f) => f.message, (_) => '')}',
+          );
         }
         // Continue even if comment deletion fails
       }

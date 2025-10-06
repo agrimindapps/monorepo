@@ -183,7 +183,7 @@ class _PlantTaskHistoryOverviewTabState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final careStats = _calculateCareTypeStats();
     final currentStreak = _calculateCurrentStreak();
     final recentTasks = _getRecentTasks();
@@ -282,7 +282,7 @@ class _PlantTaskHistoryOverviewTabState
     int currentStreak,
     Map<String, dynamic> monthStats,
   ) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Row(
       children: [

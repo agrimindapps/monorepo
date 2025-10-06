@@ -365,9 +365,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           // 2. Filtrar tasks desta planta específica que não estão deletadas
           final plantTasks =
               allTasks
-                  .where(
-                    (task) => task.plantId == plantId && !task.isDeleted,
-                  )
+                  .where((task) => task.plantId == plantId && !task.isDeleted)
                   .toList();
 
           if (kDebugMode) {
@@ -378,8 +376,10 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
           // 3. Deletar cada task (soft delete + sync Firebase automático)
           for (final task in plantTasks) {
-            final deleteResult = await UnifiedSyncManager.instance
-                .delete<Task>('plantis', task.id);
+            final deleteResult = await UnifiedSyncManager.instance.delete<Task>(
+              'plantis',
+              task.id,
+            );
 
             if (deleteResult.isLeft()) {
               if (kDebugMode) {
@@ -583,7 +583,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
             localDatasource.updatePlantTask(task.toEntity());
           }
         })
-        .catchError((e) {
+        .catchError((Object e) {
           // Log background sync errors for debugging
           if (kDebugMode) {
             print('⚠️ PlantTasksRepository: Background sync failed: $e');
@@ -605,7 +605,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
             localDatasource.updatePlantTask(task.toEntity());
           }
         })
-        .catchError((e) {
+        .catchError((Object e) {
           // Log background sync errors for debugging
           if (kDebugMode) {
             print(

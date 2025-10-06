@@ -11,7 +11,7 @@ class BackupSettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final settingsState = ref.watch(settingsNotifierProvider);
+    ref.watch(settingsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -40,8 +40,6 @@ class BackupSettingsPage extends ConsumerWidget {
             if (!isPremium) {
               return _buildPremiumRequired(context, theme);
             }
-
-            return _buildBackupSettings(context, theme, settingsState);
           },
         ),
       ),
@@ -92,107 +90,6 @@ class BackupSettingsPage extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildBackupSettings(
-    BuildContext context,
-    ThemeData theme,
-    SettingsState settingsState,
-  ) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Configurações de Backup',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SwitchListTile(
-                  title: const Text('Backup Automático'),
-                  subtitle: const Text('Backup automático dos dados'),
-                  value: settingsState.settings.backup.autoBackupEnabled,
-                  onChanged: (value) {
-                    // TODO: Implementar toggle de backup automático
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.cloud_upload),
-                  title: const Text('Fazer Backup Agora'),
-                  subtitle: const Text('Sincronizar dados com a nuvem'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: Implementar backup manual
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Backup em desenvolvimento'),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.cloud_download),
-                  title: const Text('Restaurar Backup'),
-                  subtitle: const Text('Restaurar dados da nuvem'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: Implementar restauração
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Restauração em desenvolvimento'),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Status do Backup',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const ListTile(
-                  leading: Icon(
-                    Icons.check_circle,
-                    color: Colors.green,
-                  ),
-                  title: Text('Último Backup'),
-                  subtitle: Text('Nunca realizado'),
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.storage,
-                    color: theme.colorScheme.primary,
-                  ),
-                  title: const Text('Espaço Utilizado'),
-                  subtitle: const Text('0 KB de 1 GB'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

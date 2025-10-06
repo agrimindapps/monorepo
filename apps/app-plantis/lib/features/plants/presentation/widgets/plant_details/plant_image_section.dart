@@ -207,7 +207,7 @@ class PlantImageSection extends StatelessWidget {
     List<String> imageUrls,
     int initialIndex,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierColor: Colors.black87,
       builder:
@@ -281,7 +281,7 @@ class PlantImageSection extends StatelessWidget {
 
   void _showFullGallery(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder:
             (context) => Scaffold(
               backgroundColor: Colors.black,

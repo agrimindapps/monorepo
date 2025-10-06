@@ -327,7 +327,7 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final weeklyData = _calculateWeeklyFrequency();
     final typeDistribution = _calculateTypeDistribution();
     final achievements = _calculateAchievements();

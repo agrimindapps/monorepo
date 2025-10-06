@@ -715,7 +715,7 @@ class _PlantTaskHistoryTimelineTabState
   }
 
   Widget _buildLoadMoreButton(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Center(
       child: OutlinedButton.icon(

@@ -19,7 +19,7 @@ import '../../../../core/theme/plantis_colors.dart';
 class PlantisSubscriptionPlansWidget extends StatefulWidget {
   final List<ProductInfo> availableProducts;
   final String? selectedPlanId;
-  final Function(String) onPlanSelected;
+  final void Function(String) onPlanSelected;
 
   const PlantisSubscriptionPlansWidget({
     super.key,

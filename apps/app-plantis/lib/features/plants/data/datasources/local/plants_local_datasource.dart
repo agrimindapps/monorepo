@@ -21,7 +21,8 @@ abstract class PlantsLocalDatasource {
 
 class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   static const String _boxName = 'plants'; // Usa box do UnifiedSyncManager
-  Box? _box; // Sem tipo específico para aceitar Box<dynamic> ou Box<String>
+  Box<dynamic>?
+  _box; // Sem tipo específico para aceitar Box<dynamic> ou Box<String>
 
   // Cache for performance optimization
   List<Plant>? _cachedPlants;
@@ -30,13 +31,13 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
   final PlantsSearchService _searchService = PlantsSearchService.instance;
 
-  Future<Box> get box async {
+  Future<Box<dynamic>> get box async {
     if (_box != null) return _box!;
 
     // Se a box já está aberta (por UnifiedSync ou outro processo), reutiliza
     if (Hive.isBoxOpen(_boxName)) {
       if (kDebugMode) {
-        print('ℹ️ Box "$_boxName" já está aberta - reutilizando');
+        debugPrint('ℹ️ Box "$_boxName" já está aberta - reutilizando');
       }
       // Pega a box já aberta (pode ser Box<dynamic> ou Box<String>)
       _box = Hive.box(_boxName);
@@ -74,12 +75,14 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           }
         } catch (e) {
           // Log corrupted data and remove from Hive
-          print('Found corrupted plant data for key $key: $e');
+          debugPrint('Found corrupted plant data for key $key: $e');
           try {
             await hiveBox.delete(key);
-            print('Removed corrupted plant data for key: $key');
+            debugPrint('Removed corrupted plant data for key: $key');
           } catch (deleteError) {
-            print('Failed to remove corrupted data for key $key: $deleteError');
+            debugPrint(
+              'Failed to remove corrupted data for key $key: $deleteError',
+            );
           }
           // Continue processing other plants
           continue;
@@ -102,9 +105,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
       return plants;
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao buscar plantas do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar plantas do cache local: ${e.toString()}');
     }
   }
 
@@ -125,19 +126,19 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         return plant.isDeleted ? null : plant;
       } catch (corruptionError) {
         // Handle corrupted individual plant data
-        print('Found corrupted plant data for ID $id: $corruptionError');
+        debugPrint('Found corrupted plant data for ID $id: $corruptionError');
         try {
           await hiveBox.delete(id);
-          print('Removed corrupted plant data for ID: $id');
+          debugPrint('Removed corrupted plant data for ID: $id');
         } catch (deleteError) {
-          print('Failed to remove corrupted data for ID $id: $deleteError');
+          debugPrint(
+            'Failed to remove corrupted data for ID $id: $deleteError',
+          );
         }
         return null;
       }
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao buscar planta do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar planta do cache local: ${e.toString()}');
     }
   }
 
@@ -145,11 +146,11 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<void> addPlant(Plant plant) async {
     try {
       if (kDebugMode) {
-        print('🌱 PlantsLocalDatasourceImpl.addPlant() - Iniciando');
-        print(
+        debugPrint('🌱 PlantsLocalDatasourceImpl.addPlant() - Iniciando');
+        debugPrint(
           '🌱 PlantsLocalDatasourceImpl.addPlant() - plant.id: ${plant.id}',
         );
-        print(
+        debugPrint(
           '🌱 PlantsLocalDatasourceImpl.addPlant() - plant.name: ${plant.name}',
         );
       }
@@ -159,7 +160,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       // Verificar se a planta já existe
       if (hiveBox.containsKey(plant.id)) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '⚠️ PlantsLocalDatasourceImpl.addPlant() - Planta já existe com id: ${plant.id}',
           );
         }
@@ -169,14 +170,18 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final plantJson = jsonEncode(plantModel.toJson());
 
       if (kDebugMode) {
-        print('🌱 PlantsLocalDatasourceImpl.addPlant() - Gravando no Hive');
+        debugPrint(
+          '🌱 PlantsLocalDatasourceImpl.addPlant() - Gravando no Hive',
+        );
       }
 
       await hiveBox.put(plant.id, plantJson);
 
       if (kDebugMode) {
-        print('✅ PlantsLocalDatasourceImpl.addPlant() - Gravado com sucesso');
-        print(
+        debugPrint(
+          '✅ PlantsLocalDatasourceImpl.addPlant() - Gravado com sucesso',
+        );
+        debugPrint(
           '🌱 PlantsLocalDatasourceImpl.addPlant() - Total de plantas no box: ${hiveBox.length}',
         );
       }
@@ -185,11 +190,9 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       _invalidateCache();
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsLocalDatasourceImpl.addPlant() - Erro: $e');
+        debugPrint('❌ PlantsLocalDatasourceImpl.addPlant() - Erro: $e');
       }
-      throw CacheFailure(
-        'Erro ao salvar planta no cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao salvar planta no cache local: ${e.toString()}');
     }
   }
 
@@ -204,7 +207,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       // Invalidate cache
       _invalidateCache();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao atualizar planta no cache local: ${e.toString()}',
       );
     }
@@ -235,9 +238,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         _invalidateCache();
       }
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao deletar planta do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao deletar planta do cache local: ${e.toString()}');
     }
   }
 
@@ -246,8 +247,10 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<void> hardDeletePlant(String id) async {
     try {
       if (kDebugMode) {
-        print('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Iniciando');
-        print('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - id: $id');
+        debugPrint(
+          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Iniciando',
+        );
+        debugPrint('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - id: $id');
       }
 
       final hiveBox = await box;
@@ -255,10 +258,10 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       // Verificar se existe antes de deletar
       final exists = hiveBox.containsKey(id);
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Registro existe: $exists',
         );
-        print(
+        debugPrint(
           '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total antes da remoção: ${hiveBox.length}',
         );
       }
@@ -266,10 +269,10 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       await hiveBox.delete(id);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantsLocalDatasourceImpl.hardDeletePlant() - Removido fisicamente',
         );
-        print(
+        debugPrint(
           '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total após remoção: ${hiveBox.length}',
         );
       }
@@ -278,9 +281,9 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       _invalidateCache();
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsLocalDatasourceImpl.hardDeletePlant() - Erro: $e');
+        debugPrint('❌ PlantsLocalDatasourceImpl.hardDeletePlant() - Erro: $e');
       }
-      throw CacheFailure(
+      throw Exception(
         'Erro ao remover fisicamente planta do cache local: ${e.toString()}',
       );
     }
@@ -312,7 +315,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
               notes.contains(searchQuery);
         }).toList();
       } catch (fallbackError) {
-        throw CacheFailure(
+        throw Exception(
           'Erro ao buscar plantas no cache local: ${fallbackError.toString()}',
         );
       }
@@ -325,7 +328,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final allPlants = await getPlants();
       return allPlants.where((plant) => plant.spaceId == spaceId).toList();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar plantas por espaço no cache local: ${e.toString()}',
       );
     }
@@ -341,7 +344,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       _invalidateCache();
       _searchService.clearCache();
     } catch (e) {
-      throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
+      throw Exception('Erro ao limpar cache local: ${e.toString()}');
     }
   }
 

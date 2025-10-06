@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:injectable/injectable.dart';
+
+import 'package:core/core.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/export_metadata.dart';
 import '../../domain/entities/export_progress.dart';
@@ -14,7 +14,6 @@ import '../../domain/services/data_export_service.dart';
 /// Implementação do repositório de exportação de dados LGPD
 @LazySingleton(as: DataExportRepository)
 class DataExportRepositoryImpl implements DataExportRepository {
-  
   DataExportRepositoryImpl() : _exportService = DataExportService.instance;
   final DataExportService _exportService;
 
@@ -24,7 +23,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
     void Function(ExportProgress progress)? onProgress,
   }) async {
     final startTime = DateTime.now();
-    
+
     try {
       // Validar request
       if (!await validateExportRequest(request)) {
@@ -37,7 +36,8 @@ class DataExportRepositoryImpl implements DataExportRepository {
       // Verificar rate limiting
       if (!await canExportData(request.userId)) {
         return ExportResult.failure(
-          errorMessage: 'Limite de exportações atingido. Tente novamente em 24 horas.',
+          errorMessage:
+              'Limite de exportações atingido. Tente novamente em 24 horas.',
           processingTime: DateTime.now().difference(startTime),
         );
       }
@@ -46,8 +46,13 @@ class DataExportRepositoryImpl implements DataExportRepository {
       onProgress?.call(ExportProgress.initial());
 
       // Coletar dados do usuário
-      onProgress?.call(ExportProgress.processing('Coletando dados do usuário...', 0.1));
-      final userData = await _exportService.collectUserData(request, onProgress);
+      onProgress?.call(
+        ExportProgress.processing('Coletando dados do usuário...', 0.1),
+      );
+      final userData = await _exportService.collectUserData(
+        request,
+        onProgress,
+      );
 
       // Gerar metadados
       final metadata = ExportMetadata(
@@ -63,11 +68,13 @@ class DataExportRepositoryImpl implements DataExportRepository {
         },
         format: 'json',
         fileSizeMb: 0, // Será calculado depois
-        checksum: '',  // Será calculado depois
+        checksum: '', // Será calculado depois
       );
 
       // Processar em isolate para não bloquear a UI
-      onProgress?.call(ExportProgress.processing('Gerando arquivos de exportação...', 0.7));
+      onProgress?.call(
+        ExportProgress.processing('Gerando arquivos de exportação...', 0.7),
+      );
       final exportFiles = await _processExportInIsolate(userData, metadata);
 
       // Salvar arquivo final
@@ -79,13 +86,13 @@ class DataExportRepositoryImpl implements DataExportRepository {
           processingTime: DateTime.now().difference(startTime),
         );
       }
-      
+
       final filePath = await _saveExportFile(jsonData, request.userId);
 
       // Calcular metadados finais
       final fileSize = await File(filePath).length();
       final checksum = _exportService.generateChecksum(jsonData);
-      
+
       final finalMetadata = metadata.copyWith(
         fileSizeMb: (fileSize / (1024 * 1024)).ceil(),
         checksum: checksum,
@@ -104,7 +111,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
         metadata: finalMetadata,
         processingTime: DateTime.now().difference(startTime),
       );
-
     } catch (e) {
       return ExportResult.failure(
         errorMessage: 'Erro durante exportação: $e',
@@ -118,13 +124,13 @@ class DataExportRepositoryImpl implements DataExportRepository {
     final prefs = await SharedPreferences.getInstance();
     final lastExportKey = 'last_export_$userId';
     final lastExportTimestamp = prefs.getInt(lastExportKey);
-    
+
     if (lastExportTimestamp == null) return true;
-    
+
     final lastExport = DateTime.fromMillisecondsSinceEpoch(lastExportTimestamp);
     final now = DateTime.now();
     final difference = now.difference(lastExport);
-    
+
     // Limite de 1 exportação por dia
     return difference.inHours >= 24;
   }
@@ -134,7 +140,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
     final prefs = await SharedPreferences.getInstance();
     final historyKey = 'export_history_$userId';
     final historyJson = prefs.getStringList(historyKey) ?? [];
-    
+
     return historyJson
         .map((json) => ExportResult.fromJson(_parseJson(json)))
         .toList();
@@ -145,16 +151,16 @@ class DataExportRepositoryImpl implements DataExportRepository {
     try {
       final tempDir = await getTemporaryDirectory();
       final exportTempDir = Directory('${tempDir.path}/exports');
-      
+
       if (await exportTempDir.exists()) {
         final files = await exportTempDir.list().toList();
         final now = DateTime.now();
-        
+
         for (final file in files) {
           if (file is File) {
             final stat = await file.stat();
             final age = now.difference(stat.modified);
-            
+
             // Remove arquivos temporários mais antigos que 1 hora
             if (age.inHours >= 1) {
               await file.delete();
@@ -199,10 +205,10 @@ class DataExportRepositoryImpl implements DataExportRepository {
     try {
       // Simular coleta para estimativa (sem salvar)
       final userData = await _exportService.collectUserData(request, null);
-      
+
       int totalRecords = 0;
       final int totalCategories = userData.keys.length;
-      
+
       for (final data in userData.values) {
         if (data is List) {
           totalRecords += data.length;
@@ -212,24 +218,29 @@ class DataExportRepositoryImpl implements DataExportRepository {
       }
 
       // Estimar tamanho do JSON
-      final jsonData = await _exportService.generateJsonExport(userData, ExportMetadata(
-        id: 'estimate',
-        generatedAt: DateTime.now(),
-        version: '1.0.0',
-        lgpdCompliance: true,
-        dataCategories: request.includedCategories,
-        exportStats: {},
-        format: 'json',
-        fileSizeMb: 0,
-        checksum: '',
-      ));
+      final jsonData = await _exportService.generateJsonExport(
+        userData,
+        ExportMetadata(
+          id: 'estimate',
+          generatedAt: DateTime.now(),
+          version: '1.0.0',
+          lgpdCompliance: true,
+          dataCategories: request.includedCategories,
+          exportStats: {},
+          format: 'json',
+          fileSizeMb: 0,
+          checksum: '',
+        ),
+      );
 
       return {
         'total_categories': totalCategories,
         'total_records': totalRecords,
         'estimated_size_bytes': jsonData.length,
         'estimated_size_mb': (jsonData.length / (1024 * 1024)).ceil(),
-        'processing_time_estimate_minutes': (totalRecords / 1000 * 2).ceil().clamp(1, 10),
+        'processing_time_estimate_minutes': (totalRecords / 1000 * 2)
+            .ceil()
+            .clamp(1, 10),
       };
     } catch (e) {
       return {
@@ -252,13 +263,13 @@ class DataExportRepositoryImpl implements DataExportRepository {
     try {
       // Para esta implementação, vamos processar no thread principal
       // Em produção, seria ideal usar um Isolate real
-      final jsonData = await _exportService.generateJsonExport(userData, metadata);
+      final jsonData = await _exportService.generateJsonExport(
+        userData,
+        metadata,
+      );
       final csvData = await _exportService.generateCsvExport(userData);
-      
-      return {
-        'json': jsonData,
-        'csv': csvData,
-      };
+
+      return {'json': jsonData, 'csv': csvData};
     } catch (e) {
       rethrow;
     }
@@ -270,10 +281,10 @@ class DataExportRepositoryImpl implements DataExportRepository {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'gasometer_export_${userId}_$timestamp.json';
       final filePath = '${directory.path}/$fileName';
-      
+
       final file = File(filePath);
       await file.writeAsBytes(data);
-      
+
       return filePath;
     } catch (e) {
       rethrow;
@@ -283,17 +294,20 @@ class DataExportRepositoryImpl implements DataExportRepository {
   Future<Directory> _getExportDirectory() async {
     final documentsDir = await getApplicationDocumentsDirectory();
     final exportDir = Directory('${documentsDir.path}/exports');
-    
+
     if (!await exportDir.exists()) {
       await exportDir.create(recursive: true);
     }
-    
+
     return exportDir;
   }
 
   Future<void> _recordExport(String userId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('last_export_$userId', DateTime.now().millisecondsSinceEpoch);
+    await prefs.setInt(
+      'last_export_$userId',
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   void _cleanupTemporaryFiles() async {

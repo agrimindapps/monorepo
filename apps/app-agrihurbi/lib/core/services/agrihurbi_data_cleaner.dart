@@ -1,7 +1,4 @@
 import 'package:core/core.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Implementação de IAppDataCleaner para app-agrihurbi
 /// Gerencia limpeza de farms, fields, crops, activities, harvests e cache local
@@ -13,8 +10,8 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   AgrihurbiDataCleaner({
     required HiveInterface hive,
     required SharedPreferences prefs,
-  })  : _hive = hive,
-        _prefs = prefs;
+  }) : _hive = hive,
+       _prefs = prefs;
 
   @override
   String get appName => 'Agrihurbi';
@@ -65,11 +62,13 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
 
       // 2. Limpar SharedPreferences (apenas chaves do app)
       final prefsKeys = _prefs.getKeys();
-      final appSpecificKeys = prefsKeys.where((key) =>
-          key.startsWith('agrihurbi_') ||
-          key.startsWith('farm_') ||
-          key.startsWith('crop_') ||
-          key.startsWith('field_'));
+      final appSpecificKeys = prefsKeys.where(
+        (key) =>
+            key.startsWith('agrihurbi_') ||
+            key.startsWith('farm_') ||
+            key.startsWith('crop_') ||
+            key.startsWith('field_'),
+      );
 
       for (final key in appSpecificKeys) {
         try {
@@ -82,7 +81,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
 
       result['totalRecordsCleared'] =
           (result['clearedBoxes'] as List).length +
-              (result['clearedPreferences'] as List).length;
+          (result['clearedPreferences'] as List).length;
 
       result['statsBefore'] = statsBefore;
     } catch (e) {
@@ -163,12 +162,16 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
 
       // Contar preferences
       final prefsKeys = _prefs.getKeys();
-      stats['totalPreferences'] = prefsKeys
-          .where((key) =>
-              key.startsWith('agrihurbi_') || key.startsWith('farm_'))
-          .length;
+      stats['totalPreferences'] =
+          prefsKeys
+              .where(
+                (key) =>
+                    key.startsWith('agrihurbi_') || key.startsWith('farm_'),
+              )
+              .length;
 
-      stats['totalRecords'] = (stats['totalFarms'] as int) +
+      stats['totalRecords'] =
+          (stats['totalFarms'] as int) +
           (stats['totalFields'] as int) +
           (stats['totalCrops'] as int) +
           (stats['totalActivities'] as int) +

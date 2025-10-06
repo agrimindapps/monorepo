@@ -1,11 +1,10 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 
 part 'log_entry.g.dart';
 
 @HiveType(typeId: 20)
 class LogEntry extends HiveObject {
-
   LogEntry({
     required this.timestamp,
     required this.level,
@@ -230,12 +229,7 @@ class LogEntry extends HiveObject {
 }
 
 /// Níveis de log disponíveis
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
-}
+enum LogLevel { debug, info, warning, error }
 
 /// Categorias de log para o Gasometer
 class LogCategory {

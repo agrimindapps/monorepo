@@ -79,10 +79,7 @@ class TaskNotifier extends _$TaskNotifier {
     // Load initial tasks
     final result = await _getTasks(const GetTasksParams());
 
-    return result.fold(
-      (failure) => throw failure,
-      (tasks) => tasks,
-    );
+    return result.fold((failure) => throw failure, (tasks) => tasks);
   }
 
   // =============================================================================
@@ -99,18 +96,17 @@ class TaskNotifier extends _$TaskNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _getTasks(GetTasksParams(
-        listId: listId,
-        userId: userId,
-        status: status,
-        priority: priority,
-        isStarred: isStarred,
-      ));
-
-      return result.fold(
-        (failure) => throw failure,
-        (tasks) => tasks,
+      final result = await _getTasks(
+        GetTasksParams(
+          listId: listId,
+          userId: userId,
+          status: status,
+          priority: priority,
+          isStarred: isStarred,
+        ),
       );
+
+      return result.fold((failure) => throw failure, (tasks) => tasks);
     });
   }
 
@@ -120,14 +116,11 @@ class TaskNotifier extends _$TaskNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _createTask(CreateTaskParams(task: task));
 
-      return result.fold(
-        (failure) => throw failure,
-        (taskId) {
-          final updatedTask = task.copyWith(id: taskId);
-          final currentTasks = state.value ?? [];
-          return [...currentTasks, updatedTask];
-        },
-      );
+      return result.fold((failure) => throw failure, (taskId) {
+        final updatedTask = task.copyWith(id: taskId);
+        final currentTasks = state.value ?? [];
+        return [...currentTasks, updatedTask];
+      });
     });
   }
 
@@ -142,15 +135,12 @@ class TaskNotifier extends _$TaskNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _updateTask(UpdateTaskParams(task: task));
 
-      return result.fold(
-        (failure) => throw failure,
-        (_) {
-          final currentTasks = state.value ?? [];
-          return currentTasks.map((t) {
-            return t.id == task.id ? task : t;
-          }).toList();
-        },
-      );
+      return result.fold((failure) => throw failure, (_) {
+        final currentTasks = state.value ?? [];
+        return currentTasks.map((t) {
+          return t.id == task.id ? task : t;
+        }).toList();
+      });
     });
   }
 
@@ -160,13 +150,10 @@ class TaskNotifier extends _$TaskNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _deleteTask(DeleteTaskParams(taskId: taskId));
 
-      return result.fold(
-        (failure) => throw failure,
-        (_) {
-          final currentTasks = state.value ?? [];
-          return currentTasks.where((t) => t.id != taskId).toList();
-        },
-      );
+      return result.fold((failure) => throw failure, (_) {
+        final currentTasks = state.value ?? [];
+        return currentTasks.where((t) => t.id != taskId).toList();
+      });
     });
   }
 
@@ -185,32 +172,28 @@ class TaskNotifier extends _$TaskNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _reorderTasks(ReorderTasksParams(taskIds: taskIds));
 
-      return result.fold(
-        (failure) => throw failure,
-        (_) {
-          final currentTasks = state.value ?? [];
-          // Reordenar as tasks localmente conforme a nova ordem
-          final reorderedTasks = <TaskEntity>[];
+      return result.fold((failure) => throw failure, (_) {
+        final currentTasks = state.value ?? [];
+        // Reordenar as tasks localmente conforme a nova ordem
+        final reorderedTasks = <TaskEntity>[];
 
-          // Adicionar tasks na nova ordem
-          for (int i = 0; i < taskIds.length; i++) {
-            final taskId = taskIds[i];
-            final task = currentTasks.firstWhere(
-              (t) => t.id == taskId,
-              orElse: () => currentTasks.first, // fallback, não deveria acontecer
-            );
-            reorderedTasks.add(task.copyWith(position: i));
-          }
+        // Adicionar tasks na nova ordem
+        for (int i = 0; i < taskIds.length; i++) {
+          final taskId = taskIds[i];
+          final task = currentTasks.firstWhere(
+            (t) => t.id == taskId,
+            orElse: () => currentTasks.first, // fallback, não deveria acontecer
+          );
+          reorderedTasks.add(task.copyWith(position: i));
+        }
 
-          // Adicionar qualquer task que não estava na lista de reordenação
-          final remainingTasks = currentTasks.where(
-            (task) => !taskIds.contains(task.id),
-          ).toList();
-          reorderedTasks.addAll(remainingTasks);
+        // Adicionar qualquer task que não estava na lista de reordenação
+        final remainingTasks =
+            currentTasks.where((task) => !taskIds.contains(task.id)).toList();
+        reorderedTasks.addAll(remainingTasks);
 
-          return reorderedTasks;
-        },
-      );
+        return reorderedTasks;
+      });
     });
   }
 }
@@ -265,13 +248,15 @@ Stream<List<TaskEntity>> tasksStream(
 ) {
   final watchTasks = ref.watch(watchTasksUseCaseProvider);
 
-  return watchTasks(WatchTasksParams(
-    listId: params.listId,
-    userId: params.userId,
-    status: params.status,
-    priority: params.priority,
-    isStarred: params.isStarred,
-  ));
+  return watchTasks(
+    WatchTasksParams(
+      listId: params.listId,
+      userId: params.userId,
+      status: params.status,
+      priority: params.priority,
+      isStarred: params.isStarred,
+    ),
+  );
 }
 
 // =============================================================================
@@ -395,13 +380,15 @@ Future<List<TaskEntity>> getTasksFuture(
 ) async {
   final getTasks = ref.watch(getTasksUseCaseProvider);
 
-  final result = await getTasks(GetTasksParams(
-    listId: request.listId,
-    userId: request.userId,
-    status: request.status,
-    priority: request.priority,
-    isStarred: request.isStarred,
-  ));
+  final result = await getTasks(
+    GetTasksParams(
+      listId: request.listId,
+      userId: request.userId,
+      status: request.status,
+      priority: request.priority,
+      isStarred: request.isStarred,
+    ),
+  );
 
   return result.fold(
     (failure) => throw Exception(failure.message),
@@ -418,7 +405,9 @@ Future<List<TaskEntity>> getTasksFuture(
 Future<List<TaskEntity>> subtasks(SubtasksRef ref, String parentTaskId) async {
   final getSubtasks = ref.watch(getSubtasksUseCaseProvider);
 
-  final result = await getSubtasks(GetSubtasksParams(parentTaskId: parentTaskId));
+  final result = await getSubtasks(
+    GetSubtasksParams(parentTaskId: parentTaskId),
+  );
 
   return result.fold(
     (failure) => throw Exception(failure.message),

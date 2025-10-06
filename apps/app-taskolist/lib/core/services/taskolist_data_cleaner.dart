@@ -1,7 +1,4 @@
 import 'package:core/core.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Implementação de IAppDataCleaner para app-taskolist
 /// Gerencia limpeza de tasks, categories, settings e cache local
@@ -13,8 +10,8 @@ class TaskolistDataCleaner implements IAppDataCleaner {
   TaskolistDataCleaner({
     required HiveInterface hive,
     required SharedPreferences prefs,
-  })  : _hive = hive,
-        _prefs = prefs;
+  }) : _hive = hive,
+       _prefs = prefs;
 
   @override
   String get appName => 'Taskolist';
@@ -65,14 +62,16 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
       // 2. Limpar SharedPreferences (apenas chaves do app)
       final prefsKeys = _prefs.getKeys();
-      final appSpecificKeys = prefsKeys.where((key) =>
-          key.startsWith('taskolist_') ||
-          key.startsWith('task_') ||
-          key.startsWith('category_') ||
-          key.startsWith('theme_') ||
-          key.startsWith('notification_') ||
-          key.startsWith('onboarding_') ||
-          key.startsWith('last_sync_'));
+      final appSpecificKeys = prefsKeys.where(
+        (key) =>
+            key.startsWith('taskolist_') ||
+            key.startsWith('task_') ||
+            key.startsWith('category_') ||
+            key.startsWith('theme_') ||
+            key.startsWith('notification_') ||
+            key.startsWith('onboarding_') ||
+            key.startsWith('last_sync_'),
+      );
 
       for (final key in appSpecificKeys) {
         try {
@@ -85,7 +84,7 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
       result['totalRecordsCleared'] =
           (result['clearedBoxes'] as List).length +
-              (result['clearedPreferences'] as List).length;
+          (result['clearedPreferences'] as List).length;
 
       result['statsBefore'] = statsBefore;
     } catch (e) {
@@ -143,12 +142,16 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
       // Contar preferences
       final prefsKeys = _prefs.getKeys();
-      stats['totalPreferences'] = prefsKeys
-          .where((key) =>
-              key.startsWith('taskolist_') || key.startsWith('task_'))
-          .length;
+      stats['totalPreferences'] =
+          prefsKeys
+              .where(
+                (key) =>
+                    key.startsWith('taskolist_') || key.startsWith('task_'),
+              )
+              .length;
 
-      stats['totalRecords'] = (stats['totalTasks'] as int) +
+      stats['totalRecords'] =
+          (stats['totalTasks'] as int) +
           (stats['totalCategories'] as int) +
           (stats['totalPreferences'] as int);
     } catch (e) {
@@ -206,13 +209,7 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
   @override
   List<String> getAvailableCategories() {
-    return [
-      'Tasks',
-      'Categories',
-      'Settings',
-      'Cache',
-      'Preferences',
-    ];
+    return ['Tasks', 'Categories', 'Settings', 'Cache', 'Preferences'];
   }
 
   @override

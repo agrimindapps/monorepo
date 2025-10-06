@@ -7,7 +7,6 @@ import '../widgets/semantic_widgets.dart';
 
 /// Retry button component with built-in loading state and accessibility
 class RetryButton extends StatefulWidget {
-
   const RetryButton({
     super.key,
     required this.onRetry,
@@ -123,7 +122,8 @@ class RetryButton extends StatefulWidget {
   State<RetryButton> createState() => _RetryButtonState();
 }
 
-class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStateMixin {
+class _RetryButtonState extends State<RetryButton>
+    with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   bool _inCooldown = false;
   late AnimationController _animationController;
@@ -136,13 +136,9 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.linear,
-    ));
+    _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.linear),
+    );
   }
 
   @override
@@ -158,7 +154,7 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
       _isLoading = true;
     });
 
-    _animationController.repeat();
+    await _animationController.repeat();
 
     try {
       await Future.delayed(const Duration(milliseconds: 100));
@@ -204,18 +200,12 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
             builder: (context, child) {
               return Transform.rotate(
                 angle: _rotationAnimation.value * 2 * 3.14159,
-                child: Icon(
-                  Icons.refresh,
-                  size: _getIconSize(),
-                ),
+                child: Icon(Icons.refresh, size: _getIconSize()),
               );
             },
           )
         else
-          Icon(
-            icon,
-            size: _getIconSize(),
-          ),
+          Icon(icon, size: _getIconSize()),
         if (widget.type != RetryButtonType.iconOnly) ...[
           const SizedBox(width: GasometerDesignTokens.spacingSm),
           Text(
@@ -249,7 +239,7 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
 
   TextStyle? _getTextStyle(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     switch (widget.type) {
       case RetryButtonType.text:
         return theme.textTheme.labelMedium;
@@ -260,10 +250,9 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
     }
   }
 
-
   ButtonStyle? _getButtonStyle(BuildContext context, bool isDisabled) {
     final theme = Theme.of(context);
-    
+
     ButtonStyle baseStyle = widget.style ?? const ButtonStyle();
 
     if (widget.type == RetryButtonType.compact) {
@@ -288,18 +277,10 @@ class _RetryButtonState extends State<RetryButton> with SingleTickerProviderStat
 }
 
 /// Types of retry buttons
-enum RetryButtonType {
-  elevated,
-  filled,
-  outlined,
-  text,
-  compact,
-  iconOnly,
-}
+enum RetryButtonType { elevated, filled, outlined, text, compact, iconOnly }
 
 /// Retry button with countdown timer
 class RetryButtonWithCountdown extends StatefulWidget {
-
   const RetryButtonWithCountdown({
     super.key,
     required this.onRetry,
@@ -315,7 +296,8 @@ class RetryButtonWithCountdown extends StatefulWidget {
   final RetryButtonType type;
 
   @override
-  State<RetryButtonWithCountdown> createState() => _RetryButtonWithCountdownState();
+  State<RetryButtonWithCountdown> createState() =>
+      _RetryButtonWithCountdownState();
 }
 
 class _RetryButtonWithCountdownState extends State<RetryButtonWithCountdown> {
@@ -355,13 +337,14 @@ class _RetryButtonWithCountdownState extends State<RetryButtonWithCountdown> {
   @override
   Widget build(BuildContext context) {
     final isCountingDown = _remainingSeconds != null && _remainingSeconds! > 0;
-    
+
     return RetryButton(
       onRetry: _handleRetry,
       enabled: !isCountingDown,
-      label: isCountingDown 
-        ? '${widget.label ?? 'Tentar Novamente'} (${_remainingSeconds}s)'
-        : widget.label,
+      label:
+          isCountingDown
+              ? '${widget.label ?? 'Tentar Novamente'} (${_remainingSeconds}s)'
+              : widget.label,
       icon: widget.icon,
       type: widget.type,
     );
@@ -370,7 +353,6 @@ class _RetryButtonWithCountdownState extends State<RetryButtonWithCountdown> {
 
 /// Retry button with attempt counter
 class RetryButtonWithCounter extends StatefulWidget {
-
   const RetryButtonWithCounter({
     super.key,
     required this.onRetry,
@@ -414,7 +396,7 @@ class _RetryButtonWithCounterState extends State<RetryButtonWithCounter> {
   @override
   Widget build(BuildContext context) {
     final hasReachedMax = _attemptCount >= widget.maxAttempts;
-    
+
     String label = widget.label ?? 'Tentar Novamente';
     if (_attemptCount > 0 && !hasReachedMax) {
       label += ' ($_attemptCount/${widget.maxAttempts})';
@@ -426,9 +408,10 @@ class _RetryButtonWithCounterState extends State<RetryButtonWithCounter> {
       label: hasReachedMax ? 'Máx. tentativas atingido' : label,
       icon: widget.icon,
       type: widget.type,
-      semanticHint: hasReachedMax 
-        ? 'Número máximo de tentativas atingido'
-        : 'Tentativa ${_attemptCount + 1} de ${widget.maxAttempts}',
+      semanticHint:
+          hasReachedMax
+              ? 'Número máximo de tentativas atingido'
+              : 'Tentativa ${_attemptCount + 1} de ${widget.maxAttempts}',
     );
   }
 }

@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path;
 class FirebaseStorageService {
   static const String _receiptsBasePath = 'receipts';
   static const int _uploadTimeoutSeconds = 60;
-  
+
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   /// Upload receipt image for fuel supply
@@ -63,7 +63,7 @@ class FirebaseStorageService {
     try {
       final fileName = _generateFileName(recordId, 'webp');
       final ref = _getStorageReference(userId, category, fileName);
-      
+
       final metadata = SettableMetadata(
         contentType: 'image/webp',
         customMetadata: {
@@ -75,17 +75,16 @@ class FirebaseStorageService {
       );
 
       final uploadTask = ref.putData(imageBytes, metadata);
-      
+
       // Monitor upload progress if needed
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
         // Can emit progress events here if needed
       });
 
       final snapshot = await uploadTask.timeout(
         const Duration(seconds: _uploadTimeoutSeconds),
       );
-      
+
       if (snapshot.state == TaskState.success) {
         final downloadUrl = await ref.getDownloadURL();
         return downloadUrl;
@@ -111,9 +110,12 @@ class FirebaseStorageService {
       }
 
       final fileExtension = path.extension(imagePath).toLowerCase();
-      final fileName = _generateFileName(recordId, fileExtension.replaceAll('.', ''));
+      final fileName = _generateFileName(
+        recordId,
+        fileExtension.replaceAll('.', ''),
+      );
       final ref = _getStorageReference(userId, category, fileName);
-      
+
       final metadata = SettableMetadata(
         contentType: _getContentType(fileExtension),
         customMetadata: {
@@ -126,17 +128,16 @@ class FirebaseStorageService {
       );
 
       final uploadTask = ref.putFile(file, metadata);
-      
+
       // Monitor upload progress
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
         // Can emit progress events here if needed
       });
 
       final snapshot = await uploadTask.timeout(
         const Duration(seconds: _uploadTimeoutSeconds),
       );
-      
+
       if (snapshot.state == TaskState.success) {
         final downloadUrl = await ref.getDownloadURL();
         return downloadUrl;
@@ -159,8 +160,14 @@ class FirebaseStorageService {
   }
 
   /// Get storage reference for receipt image
-  Reference _getStorageReference(String userId, String category, String fileName) {
-    return _storage.ref().child('$_receiptsBasePath/$userId/$category/$fileName');
+  Reference _getStorageReference(
+    String userId,
+    String category,
+    String fileName,
+  ) {
+    return _storage.ref().child(
+      '$_receiptsBasePath/$userId/$category/$fileName',
+    );
   }
 
   /// Generate unique filename for receipt image
@@ -187,7 +194,11 @@ class FirebaseStorageService {
   }
 
   /// Get upload progress stream for monitoring
-  Stream<double> getUploadProgress(String userId, String recordId, String category) {
+  Stream<double> getUploadProgress(
+    String userId,
+    String recordId,
+    String category,
+  ) {
     // This would need to be implemented with a state management solution
     // For now, returning empty stream
     return const Stream.empty();
@@ -222,14 +233,14 @@ class FirebaseStorageService {
     try {
       final userRef = _storage.ref().child('$_receiptsBasePath/$userId');
       final result = await userRef.listAll();
-      
+
       final List<Reference> allFiles = [];
       for (final prefix in result.prefixes) {
         final prefixResult = await prefix.listAll();
         allFiles.addAll(prefixResult.items);
       }
       allFiles.addAll(result.items);
-      
+
       return allFiles;
     } catch (e) {
       return [];
@@ -241,12 +252,12 @@ class FirebaseStorageService {
     try {
       final cutoffDate = DateTime.now().subtract(Duration(days: daysOld));
       final userImages = await listUserReceiptImages(userId);
-      
+
       for (final imageRef in userImages) {
         try {
           final metadata = await imageRef.getMetadata();
           final uploadedAt = metadata.customMetadata?['uploadedAt'];
-          
+
           if (uploadedAt != null) {
             final uploadDate = DateTime.parse(uploadedAt);
             if (uploadDate.isBefore(cutoffDate)) {
@@ -293,11 +304,14 @@ class FirebaseStorageService {
   }
 
   /// Download image to local file
-  Future<File?> downloadImageToFile(String downloadUrl, String localPath) async {
+  Future<File?> downloadImageToFile(
+    String downloadUrl,
+    String localPath,
+  ) async {
     try {
       final ref = _storage.refFromURL(downloadUrl);
       final file = File(localPath);
-      
+
       await ref.writeToFile(file);
       return file;
     } catch (e) {

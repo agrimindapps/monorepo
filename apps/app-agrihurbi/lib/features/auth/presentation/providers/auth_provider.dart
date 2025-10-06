@@ -40,48 +40,52 @@ class AuthProvider extends ChangeNotifier {
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required RefreshUserUseCase refreshUserUseCase,
     EnhancedAccountDeletionService? enhancedAccountDeletionService,
-  })  : _loginUseCase = loginUseCase,
-        _registerUseCase = registerUseCase,
-        _logoutUseCase = logoutUseCase,
-        _getCurrentUserUseCase = getCurrentUserUseCase,
-        _refreshUserUseCase = refreshUserUseCase,
-        _enhancedDeletionService = enhancedAccountDeletionService {
+  }) : _loginUseCase = loginUseCase,
+       _registerUseCase = registerUseCase,
+       _logoutUseCase = logoutUseCase,
+       _getCurrentUserUseCase = getCurrentUserUseCase,
+       _refreshUserUseCase = refreshUserUseCase,
+       _enhancedDeletionService = enhancedAccountDeletionService {
     _initializeAuthState();
   }
 
   // === ESTADO PRIVADO ===
-  
+
   UserEntity? _currentUser;
   bool _isLoading = false;
   bool _isLoggedIn = false;
   bool _isInitializing = true;
-  
+
   // Estados específicos de operações
   bool _isLoggingIn = false;
   bool _isRegistering = false;
   bool _isLoggingOut = false;
   bool _isRefreshing = false;
-  
+
   String? _errorMessage;
-  
+
   // === GETTERS PÚBLICOS ===
-  
+
   UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _isLoggedIn;
   bool get isInitializing => _isInitializing;
-  
+
   bool get isLoggingIn => _isLoggingIn;
   bool get isRegistering => _isRegistering;
   bool get isLoggingOut => _isLoggingOut;
   bool get isRefreshing => _isRefreshing;
-  
+
   String? get errorMessage => _errorMessage;
-  
+
   /// Estado geral indicando se alguma operação está em andamento
-  bool get isAnyOperationInProgress => 
-    _isLoading || _isLoggingIn || _isRegistering || _isLoggingOut || _isRefreshing;
-  
+  bool get isAnyOperationInProgress =>
+      _isLoading ||
+      _isLoggingIn ||
+      _isRegistering ||
+      _isLoggingOut ||
+      _isRefreshing;
+
   /// Informações do usuário para exibição
   String get userDisplayName => _currentUser?.displayName ?? 'Usuário';
   String get userEmail => _currentUser?.email ?? '';
@@ -92,18 +96,20 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _initializeAuthState() async {
     try {
       debugPrint('AuthProvider: Inicializando estado de autenticação');
-      
+
       _isInitializing = true;
       _clearError();
       notifyListeners();
-      
+
       final result = await _getCurrentUserUseCase.call(
         const GetCurrentUserParams(),
       );
-      
+
       result.fold(
         (failure) {
-          debugPrint('AuthProvider: Falha ao obter usuário atual - ${failure.message}');
+          debugPrint(
+            'AuthProvider: Falha ao obter usuário atual - ${failure.message}',
+          );
           _clearUserState();
         },
         (user) {
@@ -135,7 +141,7 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     try {
       debugPrint('AuthProvider: Iniciando login para $email');
-      
+
       _isLoggingIn = true;
       _setLoading(true);
       _clearError();
@@ -184,7 +190,7 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     try {
       debugPrint('AuthProvider: Iniciando registro para $email');
-      
+
       _isRegistering = true;
       _setLoading(true);
       _clearError();
@@ -232,7 +238,7 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     try {
       debugPrint('AuthProvider: Iniciando logout');
-      
+
       _isLoggingOut = true;
       _setLoading(true);
       _clearError();
@@ -286,9 +292,11 @@ class AuthProvider extends ChangeNotifier {
         _setError(error);
         return const Left(ValidationFailure(message: error));
       }
-      
-      debugPrint('AuthProvider: Atualizando dados do usuário ${_currentUser!.id}');
-      
+
+      debugPrint(
+        'AuthProvider: Atualizando dados do usuário ${_currentUser!.id}',
+      );
+
       _isRefreshing = true;
       _clearError();
       notifyListeners();
@@ -329,11 +337,10 @@ class AuthProvider extends ChangeNotifier {
   void clearError() {
     _clearError();
   }
-  
+
   /// Verifica se o usuário atual é válido
-  bool get hasValidUser => 
-    _currentUser != null && _currentUser!.id.isNotEmpty;
-  
+  bool get hasValidUser => _currentUser != null && _currentUser!.id.isNotEmpty;
+
   /// Força verificação do estado de autenticação
   Future<void> checkAuthenticationStatus() async {
     await _initializeAuthState();
@@ -399,7 +406,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (_enhancedDeletionService != null) {
         // Use Enhanced Account Deletion Service if available
-        final result = await _enhancedDeletionService!.deleteAccount(
+        final result = await _enhancedDeletionService.deleteAccount(
           password: password ?? '',
           userId: _currentUser!.id,
           isAnonymous: false, // agrihurbi doesn't support anonymous
@@ -407,7 +414,9 @@ class AuthProvider extends ChangeNotifier {
 
         return result.fold(
           (error) {
-            debugPrint('AuthProvider: Erro ao deletar conta - ${error.message}');
+            debugPrint(
+              'AuthProvider: Erro ao deletar conta - ${error.message}',
+            );
             _setError(error.message);
             _isLoading = false;
             notifyListeners();
@@ -419,7 +428,9 @@ class AuthProvider extends ChangeNotifier {
               _performPostDeletionCleanup();
               return true;
             } else {
-              debugPrint('AuthProvider: Falha na exclusão - ${deletionResult.userMessage}');
+              debugPrint(
+                'AuthProvider: Falha na exclusão - ${deletionResult.userMessage}',
+              );
               _setError(deletionResult.userMessage);
               _isLoading = false;
               notifyListeners();
@@ -429,7 +440,9 @@ class AuthProvider extends ChangeNotifier {
         );
       } else {
         // Fallback: Basic account deletion (requires implementation)
-        debugPrint('AuthProvider: EnhancedAccountDeletionService not available');
+        debugPrint(
+          'AuthProvider: EnhancedAccountDeletionService not available',
+        );
         _setError('Funcionalidade de exclusão de conta não está disponível');
         _isLoading = false;
         notifyListeners();

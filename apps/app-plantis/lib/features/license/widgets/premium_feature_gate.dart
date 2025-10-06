@@ -79,13 +79,13 @@ class PremiumFeatureGate extends ConsumerWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            PlantisColors.primary.withOpacity(0.1),
-            PlantisColors.primaryLight.withOpacity(0.05),
+            PlantisColors.primary.withValues(alpha: 0.1),
+            PlantisColors.primaryLight.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: PlantisColors.primary.withOpacity(0.3),
+          color: PlantisColors.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -160,9 +160,7 @@ class _LoadingGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -172,11 +170,7 @@ class SimplePremiumGate extends ConsumerWidget {
   final Widget child;
   final Widget? fallback;
 
-  const SimplePremiumGate({
-    super.key,
-    required this.child,
-    this.fallback,
-  });
+  const SimplePremiumGate({super.key, required this.child, this.fallback});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -188,10 +182,7 @@ class SimplePremiumGate extends ConsumerWidget {
     // }
 
     return fallback ??
-        PremiumFeatureGate(
-          feature: PremiumFeature.cloudSync,
-          child: child,
-        );
+        PremiumFeatureGate(feature: PremiumFeature.cloudSync, child: child);
   }
 }
 
@@ -213,7 +204,7 @@ class LicenseExpirationWarning extends ConsumerWidget {
     //   margin: const EdgeInsets.all(8),
     //   padding: const EdgeInsets.all(12),
     //   decoration: BoxDecoration(
-    //     color: Colors.orange.withOpacity(0.1),
+    //     color: Colors.orange.withValues(alpha: 0.1),
     //     borderRadius: BorderRadius.circular(8),
     //     border: Border.all(color: Colors.orange),
     //   ),

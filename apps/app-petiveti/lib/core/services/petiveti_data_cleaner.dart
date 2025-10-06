@@ -1,7 +1,4 @@
 import 'package:core/core.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Implementação de IAppDataCleaner para app-petiveti
 /// Gerencia limpeza de pets, reminders, schedules, health_records e cache local
@@ -13,8 +10,8 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   PetivetiDataCleaner({
     required HiveInterface hive,
     required SharedPreferences prefs,
-  })  : _hive = hive,
-        _prefs = prefs;
+  }) : _hive = hive,
+       _prefs = prefs;
 
   @override
   String get appName => 'Petiveti';
@@ -65,10 +62,12 @@ class PetivetiDataCleaner implements IAppDataCleaner {
 
       // 2. Limpar SharedPreferences (apenas chaves do app)
       final prefsKeys = _prefs.getKeys();
-      final appSpecificKeys = prefsKeys.where((key) =>
-          key.startsWith('petiveti_') ||
-          key.startsWith('pet_') ||
-          key.startsWith('reminder_'));
+      final appSpecificKeys = prefsKeys.where(
+        (key) =>
+            key.startsWith('petiveti_') ||
+            key.startsWith('pet_') ||
+            key.startsWith('reminder_'),
+      );
 
       for (final key in appSpecificKeys) {
         try {
@@ -81,7 +80,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
 
       result['totalRecordsCleared'] =
           (result['clearedBoxes'] as List).length +
-              (result['clearedPreferences'] as List).length;
+          (result['clearedPreferences'] as List).length;
 
       result['statsBefore'] = statsBefore;
     } catch (e) {
@@ -146,7 +145,9 @@ class PetivetiDataCleaner implements IAppDataCleaner {
       // Contar health_records
       if (await _hive.boxExists('health_records')) {
         try {
-          final healthRecordsBox = await _hive.openBox<dynamic>('health_records');
+          final healthRecordsBox = await _hive.openBox<dynamic>(
+            'health_records',
+          );
           stats['totalHealthRecords'] = healthRecordsBox.length;
           await healthRecordsBox.close();
         } catch (_) {
@@ -156,12 +157,15 @@ class PetivetiDataCleaner implements IAppDataCleaner {
 
       // Contar preferences
       final prefsKeys = _prefs.getKeys();
-      stats['totalPreferences'] = prefsKeys
-          .where((key) =>
-              key.startsWith('petiveti_') || key.startsWith('pet_'))
-          .length;
+      stats['totalPreferences'] =
+          prefsKeys
+              .where(
+                (key) => key.startsWith('petiveti_') || key.startsWith('pet_'),
+              )
+              .length;
 
-      stats['totalRecords'] = (stats['totalPets'] as int) +
+      stats['totalRecords'] =
+          (stats['totalPets'] as int) +
           (stats['totalReminders'] as int) +
           (stats['totalSchedules'] as int) +
           (stats['totalHealthRecords'] as int) +
@@ -177,7 +181,13 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   Future<bool> verifyDataCleanup() async {
     try {
       // Verificar se boxes foram deletadas
-      final boxNames = ['pets', 'pet_box', 'reminders', 'schedules', 'health_records'];
+      final boxNames = [
+        'pets',
+        'pet_box',
+        'reminders',
+        'schedules',
+        'health_records',
+      ];
       for (final boxName in boxNames) {
         if (await _hive.boxExists(boxName)) {
           return false;
@@ -200,7 +210,13 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   Future<bool> hasDataToClear() async {
     try {
       // Verificar se existe alguma box
-      final boxNames = ['pets', 'pet_box', 'reminders', 'schedules', 'health_records'];
+      final boxNames = [
+        'pets',
+        'pet_box',
+        'reminders',
+        'schedules',
+        'health_records',
+      ];
       for (final boxName in boxNames) {
         if (await _hive.boxExists(boxName)) {
           return true;

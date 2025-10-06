@@ -67,7 +67,7 @@ final getIt = GetIt.instance;
 /// Run 'flutter packages pub run build_runner build' to generate
 void configureDependencies() {
   // === AUTH DEPENDENCIES ===
-  
+
   // Auth Data Sources
   getIt.registerSingleton<AuthLocalDataSource>(
     AuthLocalDataSourceImpl(
@@ -75,11 +75,11 @@ void configureDependencies() {
       getIt<FlutterSecureStorage>(),
     ),
   );
-  
+
   getIt.registerSingleton<AuthRemoteDataSource>(
     AuthRemoteDataSourceImpl(getIt<DioClient>()),
   );
-  
+
   // Auth Repository
   getIt.registerSingleton<AuthRepository>(
     AuthRepositoryImpl(
@@ -88,24 +88,22 @@ void configureDependencies() {
       getIt<Connectivity>(),
     ),
   );
-  
+
   // Auth Use Cases
-  getIt.registerSingleton<LoginUseCase>(
-    LoginUseCase(getIt<AuthRepository>()),
-  );
-  
+  getIt.registerSingleton<LoginUseCase>(LoginUseCase(getIt<AuthRepository>()));
+
   getIt.registerSingleton<RegisterUseCase>(
     RegisterUseCase(getIt<AuthRepository>()),
   );
-  
+
   getIt.registerSingleton<LogoutUseCase>(
     LogoutUseCase(getIt<AuthRepository>()),
   );
-  
+
   getIt.registerSingleton<GetCurrentUserUseCase>(
     GetCurrentUserUseCase(getIt<AuthRepository>()),
   );
-  
+
   getIt.registerSingleton<RefreshUserUseCase>(
     RefreshUserUseCase(getIt<AuthRepository>()),
   );
@@ -126,18 +124,18 @@ void configureDependencies() {
       // enhancedAccountDeletionService: getIt<EnhancedAccountDeletionService>(),
     ),
   );
-  
+
   // === LIVESTOCK DEPENDENCIES ===
-  
+
   // Livestock Data Sources
   getIt.registerSingleton<LivestockLocalDataSource>(
     LivestockLocalDataSourceImpl(),
   );
-  
+
   getIt.registerSingleton<LivestockRemoteDataSource>(
     LivestockRemoteDataSourceImpl(getIt<DioClient>()),
   );
-  
+
   // Livestock Repository
   getIt.registerSingleton<LivestockRepository>(
     LivestockRepositoryImpl(
@@ -146,36 +144,36 @@ void configureDependencies() {
       getIt<Connectivity>(),
     ),
   );
-  
+
   // Livestock Use Cases
   getIt.registerSingleton<GetAllBovinesUseCase>(
     GetAllBovinesUseCase(getIt<LivestockRepository>()),
   );
-  
+
   getIt.registerSingleton<GetEquinesUseCase>(
     GetEquinesUseCase(getIt<LivestockRepository>()),
   );
-  
+
   getIt.registerSingleton<CreateBovineUseCase>(
     CreateBovineUseCase(getIt<LivestockRepository>()),
   );
-  
+
   getIt.registerSingleton<UpdateBovineUseCase>(
     UpdateBovineUseCase(getIt<LivestockRepository>()),
   );
-  
+
   getIt.registerSingleton<DeleteBovineUseCase>(
     DeleteBovineUseCase(getIt<LivestockRepository>()),
   );
-  
+
   getIt.registerSingleton<SearchAnimalsUseCase>(
     SearchAnimalsUseCase(getIt<LivestockRepository>()),
   );
-  
+
   getIt.registerSingleton<GetBovineByIdUseCase>(
     GetBovineByIdUseCase(getIt<LivestockRepository>()),
   );
-  
+
   // Livestock Provider
   getIt.registerSingleton<LivestockProvider>(
     LivestockProvider(
@@ -188,65 +186,61 @@ void configureDependencies() {
       searchAnimals: getIt<SearchAnimalsUseCase>(),
     ),
   );
-  
+
   // === CALCULATOR DEPENDENCIES ===
-  
+
   // Calculator Data Sources
   getIt.registerSingleton<CalculatorLocalDataSource>(
     CalculatorLocalDataSourceImpl(),
   );
-  
+
   getIt.registerSingleton<CalculatorRemoteDataSource>(
     CalculatorRemoteDataSourceImpl(getIt<DioClient>()),
   );
-  
+
   // Calculator Repository
   getIt.registerSingleton<CalculatorRepository>(
     CalculatorRepositoryImpl(getIt<CalculatorLocalDataSource>()),
   );
-  
+
   // Calculator Use Cases
   getIt.registerSingleton<GetCalculators>(
     GetCalculators(getIt<CalculatorRepository>()),
   );
-  
+
   getIt.registerSingleton<GetCalculatorById>(
     GetCalculatorById(getIt<CalculatorRepository>()),
   );
-  
+
   getIt.registerSingleton<ExecuteCalculation>(
     ExecuteCalculation(getIt<CalculatorRepository>()),
   );
-  
+
   getIt.registerSingleton<GetCalculationHistory>(
     GetCalculationHistory(getIt<CalculatorRepository>()),
   );
-  
+
   getIt.registerSingleton<ManageFavorites>(
     ManageFavorites(getIt<CalculatorRepository>()),
   );
-  
+
   getIt.registerSingleton<GetCalculatorsByCategory>(
     GetCalculatorsByCategory(getIt<CalculatorRepository>()),
   );
-  
+
   getIt.registerSingleton<SearchCalculators>(
     SearchCalculators(getIt<CalculatorRepository>()),
   );
-  
+
   // Calculator System Services
-  getIt.registerSingleton<CalculatorRegistry>(
-    CalculatorRegistry(),
-  );
-  
-  getIt.registerSingleton<CalculatorEngine>(
-    CalculatorEngine(),
-  );
-  
+  getIt.registerSingleton<CalculatorRegistry>(CalculatorRegistry());
+
+  getIt.registerSingleton<CalculatorEngine>(CalculatorEngine());
+
   getIt.registerSingleton<CalculatorFavoritesService>(
     CalculatorFavoritesService(getIt<SharedPreferences>()),
   );
-  
+
   // Calculator Provider
   getIt.registerSingleton<CalculatorProvider>(
     CalculatorProvider(
@@ -256,25 +250,21 @@ void configureDependencies() {
       getCalculationHistory: getIt<GetCalculationHistory>(),
     ),
   );
-  
+
   // Calculator Favorites Provider
   getIt.registerSingleton<CalculatorFavoritesProvider>(
-    CalculatorFavoritesProvider(
-      manageFavorites: getIt<ManageFavorites>(),
-    ),
+    CalculatorFavoritesProvider(manageFavorites: getIt<ManageFavorites>()),
   );
-  
+
   // === MARKET DEPENDENCIES ===
-  
+
   // Market Data Sources
-  getIt.registerSingleton<MarketLocalDataSource>(
-    MarketLocalDataSourceImpl(),
-  );
-  
+  getIt.registerSingleton<MarketLocalDataSource>(MarketLocalDataSourceImpl());
+
   getIt.registerSingleton<MarketRemoteDataSource>(
     MarketRemoteDataSourceImpl(getIt<DioClient>()),
   );
-  
+
   // Market Repository
   getIt.registerSingleton<MarketRepository>(
     MarketRepositoryImpl(
@@ -283,20 +273,18 @@ void configureDependencies() {
       getIt<NetworkInfo>(),
     ),
   );
-  
+
   // Market Use Cases
-  getIt.registerSingleton<GetMarkets>(
-    GetMarkets(getIt<MarketRepository>()),
-  );
-  
+  getIt.registerSingleton<GetMarkets>(GetMarkets(getIt<MarketRepository>()));
+
   getIt.registerSingleton<GetMarketSummary>(
     GetMarketSummary(getIt<MarketRepository>()),
   );
-  
+
   getIt.registerSingleton<ManageMarketFavorites>(
     ManageMarketFavorites(getIt<MarketRepository>()),
   );
-  
+
   // Market Provider - TODO: Fix missing dependencies GetTopGainers, GetTopLosers, GetMostActive
   // Temporarily commented until these use cases are implemented
   /*
@@ -312,7 +300,7 @@ void configureDependencies() {
     ),
   );
   */
-  
+
   // Initialize Calculator System
   _initializeCalculatorSystem();
 }
@@ -328,38 +316,48 @@ Future<void> init() async {
 /// All @injectable classes are auto-registered by code generation
 Future<void> configureAppDependencies() async {
   // === EXTERNAL DEPENDENCIES (not @injectable) ===
-  
+
   // === HIVE INITIALIZATION ===
   // Register Hive adapters BEFORE initializing storage service
   registerAgrihurbiHiveAdapters();
 
   // Core Services (cannot be @injectable due to external package)
-  getIt.registerSingleton<core_lib.IBoxRegistryService>(core_lib.BoxRegistryService());
-  getIt.registerSingleton<core_lib.HiveStorageService>(
-    core_lib.HiveStorageService(getIt<core_lib.IBoxRegistryService>())
+  getIt.registerSingleton<core_lib.IBoxRegistryService>(
+    core_lib.BoxRegistryService(),
   );
-  getIt.registerSingleton<core_lib.FirebaseAuthService>(core_lib.FirebaseAuthService());
-  getIt.registerSingleton<core_lib.RevenueCatService>(core_lib.RevenueCatService());
-  getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(core_lib.FirebaseAnalyticsService());
-  
+  getIt.registerSingleton<core_lib.HiveStorageService>(
+    core_lib.HiveStorageService(getIt<core_lib.IBoxRegistryService>()),
+  );
+  getIt.registerSingleton<core_lib.FirebaseAuthService>(
+    core_lib.FirebaseAuthService(),
+  );
+  getIt.registerSingleton<core_lib.RevenueCatService>(
+    core_lib.RevenueCatService(),
+  );
+  getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(
+    core_lib.FirebaseAnalyticsService(),
+  );
+
   // App Core Services
-  getIt.registerSingleton(PremiumService(
-    getIt<core_lib.RevenueCatService>(),
-    getIt<core_lib.FirebaseAnalyticsService>(),
-  ));
-  
+  getIt.registerSingleton(
+    PremiumService(
+      getIt<core_lib.RevenueCatService>(),
+      getIt<core_lib.FirebaseAnalyticsService>(),
+    ),
+  );
+
   // Network & Storage (external packages)
   getIt.registerSingleton<Connectivity>(Connectivity());
   getIt.registerSingleton<NetworkInfo>(NetworkInfoImpl(getIt<Connectivity>()));
   getIt.registerSingleton<Dio>(Dio());
   getIt.registerSingleton<DioClient>(DioClient(getIt<Dio>()));
-  
+
   final sharedPrefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPrefs);
   getIt.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage());
-  
+
   // === AUTO-GENERATED INJECTABLE DEPENDENCIES ===
-  
+
   // All @injectable/@singleton/@lazySingleton classes are automatically registered
   // This includes all providers, use cases, repositories, and data sources
   configureDependencies();
@@ -370,10 +368,14 @@ Future<void> configureAppDependencies() async {
   initSubscriptionModule(getIt);
 
   // === POST-INITIALIZATION ===
-  
+
   debugPrint('✅ App Dependencies configured successfully!');
-  debugPrint('   - External dependencies: ${_getExternalDependenciesCount()} registered manually');
-  debugPrint('   - Injectable dependencies: Auto-registered by code generation');
+  debugPrint(
+    '   - External dependencies: ${_getExternalDependenciesCount()} registered manually',
+  );
+  debugPrint(
+    '   - Injectable dependencies: Auto-registered by code generation',
+  );
   debugPrint('   - Total reduction: ~90% fewer lines of code');
 }
 
@@ -387,29 +389,34 @@ void _initializeCalculatorSystem() {
   try {
     // Configurar registry e motor de cálculo
     CalculatorDependencyConfigurator.configure();
-    
+
     // Validar configuração
     final validation = CalculatorDependencyConfigurator.validateConfiguration();
-    
+
     if (!validation.isValid) {
       debugPrint('⚠️  Avisos na configuração das calculadoras:');
       for (final error in validation.errors) {
         debugPrint('   - $error');
       }
     }
-    
+
     if (validation.warnings.isNotEmpty) {
       debugPrint('ℹ️  Avisos na configuração das calculadoras:');
       for (final warning in validation.warnings) {
         debugPrint('   - $warning');
       }
     }
-    
+
     debugPrint('✅ Sistema de calculadoras inicializado com sucesso!');
-    debugPrint('   - ${validation.registryStats.totalRegistered} calculadoras registradas');
-    debugPrint('   - ${validation.engineStats.totalCalculators} calculadoras no motor');
-    debugPrint('   - ${validation.registryStats.totalCached} calculadoras em cache');
-    
+    debugPrint(
+      '   - ${validation.registryStats.totalRegistered} calculadoras registradas',
+    );
+    debugPrint(
+      '   - ${validation.engineStats.totalCalculators} calculadoras no motor',
+    );
+    debugPrint(
+      '   - ${validation.registryStats.totalCached} calculadoras em cache',
+    );
   } catch (e) {
     debugPrint('❌ Erro ao inicializar sistema de calculadoras: $e');
     // Continue execution - calculator system is not critical for app startup

@@ -1,9 +1,9 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 import 'market_entity.dart';
 
 /// Market Filter Entity
-/// 
+///
 /// Represents filtering criteria for market searches and listings
 class MarketFilter extends Equatable {
   final List<MarketType>? types;
@@ -56,61 +56,61 @@ class MarketFilter extends Equatable {
   /// Check if filter has any active criteria
   bool get hasActiveFilters {
     return types?.isNotEmpty == true ||
-           exchanges?.isNotEmpty == true ||
-           priceRange != null ||
-           volumeRange != null ||
-           performance != null ||
-           searchQuery?.isNotEmpty == true ||
-           onlyFavorites;
+        exchanges?.isNotEmpty == true ||
+        priceRange != null ||
+        volumeRange != null ||
+        performance != null ||
+        searchQuery?.isNotEmpty == true ||
+        onlyFavorites;
   }
 
   /// Get human-readable description of active filters
   List<String> get activeFiltersDescription {
     final descriptions = <String>[];
-    
+
     if (types?.isNotEmpty == true) {
       descriptions.add('Tipos: ${types!.map((t) => t.displayName).join(", ")}');
     }
-    
+
     if (exchanges?.isNotEmpty == true) {
       descriptions.add('Bolsas: ${exchanges!.join(", ")}');
     }
-    
+
     if (priceRange != null) {
       descriptions.add(priceRange!.description);
     }
-    
+
     if (volumeRange != null) {
       descriptions.add(volumeRange!.description);
     }
-    
+
     if (performance != null) {
       descriptions.add(performance!.description);
     }
-    
+
     if (searchQuery?.isNotEmpty == true) {
       descriptions.add('Busca: "$searchQuery"');
     }
-    
+
     if (onlyFavorites) {
       descriptions.add('Apenas Favoritos');
     }
-    
+
     return descriptions;
   }
 
   @override
   List<Object?> get props => [
-        types,
-        exchanges,
-        priceRange,
-        volumeRange,
-        performance,
-        searchQuery,
-        sortBy,
-        sortOrder,
-        onlyFavorites,
-      ];
+    types,
+    exchanges,
+    priceRange,
+    volumeRange,
+    performance,
+    searchQuery,
+    sortBy,
+    sortOrder,
+    onlyFavorites,
+  ];
 }
 
 /// Price Range Filter
@@ -119,11 +119,7 @@ class PriceRange extends Equatable {
   final double? maxPrice;
   final String currency;
 
-  const PriceRange({
-    this.minPrice,
-    this.maxPrice,
-    this.currency = 'BRL',
-  });
+  const PriceRange({this.minPrice, this.maxPrice, this.currency = 'BRL'});
 
   String get description {
     if (minPrice != null && maxPrice != null) {
@@ -145,10 +141,7 @@ class VolumeRange extends Equatable {
   final double? minVolume;
   final double? maxVolume;
 
-  const VolumeRange({
-    this.minVolume,
-    this.maxVolume,
-  });
+  const VolumeRange({this.minVolume, this.maxVolume});
 
   String get description {
     if (minVolume != null && maxVolume != null) {
@@ -179,10 +172,7 @@ class PerformanceFilter extends Equatable {
   final PerformanceType type;
   final double threshold;
 
-  const PerformanceFilter({
-    required this.type,
-    required this.threshold,
-  });
+  const PerformanceFilter({required this.type, required this.threshold});
 
   String get description {
     switch (type) {

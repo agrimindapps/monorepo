@@ -1,21 +1,21 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 
 import '../entities/calculator_category.dart';
 import '../entities/calculator_entity.dart';
 
 /// Serviço de gerenciamento de calculadoras favoritas
-/// 
+///
 /// Implementa persistência local e sincronização para favoritos
 /// com backup e recovery automático
 class CalculatorFavoritesService {
   static const String _favoritesKey = 'calculator_favorites';
   static const String _favoritesBackupKey = 'calculator_favorites_backup';
   static const String _lastSyncKey = 'calculator_favorites_last_sync';
-  
+
   final SharedPreferences _prefs;
-  
+
   CalculatorFavoritesService(this._prefs);
 
   /// Obtém lista de IDs das calculadoras favoritas
@@ -23,7 +23,7 @@ class CalculatorFavoritesService {
     try {
       final favoritesJson = _prefs.getString(_favoritesKey);
       if (favoritesJson == null) return [];
-      
+
       final favoritesList = jsonDecode(favoritesJson) as List;
       return favoritesList.cast<String>();
     } catch (e) {
@@ -42,14 +42,14 @@ class CalculatorFavoritesService {
   Future<bool> addToFavorites(String calculatorId) async {
     try {
       final favorites = await getFavoriteIds();
-      
+
       if (!favorites.contains(calculatorId)) {
         favorites.add(calculatorId);
         await _saveFavorites(favorites);
         await _createBackup(favorites);
         return true;
       }
-      
+
       return false; // Já estava nos favoritos
     } catch (e) {
       return false;
@@ -60,14 +60,14 @@ class CalculatorFavoritesService {
   Future<bool> removeFromFavorites(String calculatorId) async {
     try {
       final favorites = await getFavoriteIds();
-      
+
       if (favorites.contains(calculatorId)) {
         favorites.remove(calculatorId);
         await _saveFavorites(favorites);
         await _createBackup(favorites);
         return true;
       }
-      
+
       return false; // Não estava nos favoritos
     } catch (e) {
       return false;
@@ -77,7 +77,7 @@ class CalculatorFavoritesService {
   /// Alterna status de favorito
   Future<bool> toggleFavorite(String calculatorId) async {
     final isFav = await isFavorite(calculatorId);
-    
+
     if (isFav) {
       return await removeFromFavorites(calculatorId);
     } else {
@@ -116,7 +116,7 @@ class CalculatorFavoritesService {
   Future<FavoritesStats> getStats() async {
     final favorites = await getFavoriteIds();
     final lastSync = _prefs.getString(_lastSyncKey);
-    
+
     return FavoritesStats(
       totalFavorites: favorites.length,
       lastSync: lastSync != null ? DateTime.parse(lastSync) : null,
@@ -129,9 +129,7 @@ class CalculatorFavoritesService {
     List<CalculatorEntity> calculators,
   ) async {
     final favoriteIds = await getFavoriteIds();
-    return calculators
-        .where((calc) => favoriteIds.contains(calc.id))
-        .toList();
+    return calculators.where((calc) => favoriteIds.contains(calc.id)).toList();
   }
 
   /// Sincroniza favoritos (placeholder para sincronização remota)
@@ -171,13 +169,13 @@ class CalculatorFavoritesService {
     try {
       final backupJson = _prefs.getString(_favoritesBackupKey);
       if (backupJson == null) return [];
-      
+
       final backupData = jsonDecode(backupJson) as Map<String, dynamic>;
       final favorites = backupData['favorites'] as List;
-      
+
       // Restaurar dados principais
       await _saveFavorites(favorites.cast<String>());
-      
+
       return favorites.cast<String>();
     } catch (e) {
       return [];
@@ -195,27 +193,27 @@ class CalculatorSearchService {
     String query,
   ) {
     if (query.trim().isEmpty) return calculators;
-    
+
     final normalizedQuery = _normalizeText(query);
-    
+
     return calculators.where((calculator) {
       // Busca no nome
       if (_normalizeText(calculator.name).contains(normalizedQuery)) {
         return true;
       }
-      
+
       // Busca na descrição
       if (_normalizeText(calculator.description).contains(normalizedQuery)) {
         return true;
       }
-      
+
       // Busca nas tags
       for (final tag in calculator.tags) {
         if (_normalizeText(tag).contains(normalizedQuery)) {
           return true;
         }
       }
-      
+
       // Busca nos parâmetros
       for (final parameter in calculator.parameters) {
         if (_normalizeText(parameter.name).contains(normalizedQuery) ||
@@ -223,7 +221,7 @@ class CalculatorSearchService {
           return true;
         }
       }
-      
+
       return false;
     }).toList();
   }
@@ -234,7 +232,7 @@ class CalculatorSearchService {
     CalculatorCategory? category,
   ) {
     if (category == null) return calculators;
-    
+
     return calculators
         .where((calculator) => calculator.category == category)
         .toList();
@@ -246,7 +244,7 @@ class CalculatorSearchService {
     CalculatorComplexity? complexity,
   ) {
     if (complexity == null) return calculators;
-    
+
     return calculators
         .where((calculator) => calculator.complexity == complexity)
         .toList();
@@ -258,7 +256,7 @@ class CalculatorSearchService {
     List<String> tags,
   ) {
     if (tags.isEmpty) return calculators;
-    
+
     return calculators.where((calculator) {
       return tags.any((tag) => calculator.tags.contains(tag));
     }).toList();
@@ -270,7 +268,7 @@ class CalculatorSearchService {
     CalculatorSortOrder sortOrder,
   ) {
     final sortedList = List<CalculatorEntity>.from(calculators);
-    
+
     switch (sortOrder) {
       case CalculatorSortOrder.nameAsc:
         sortedList.sort((a, b) => a.name.compareTo(b.name));
@@ -282,58 +280,71 @@ class CalculatorSearchService {
         sortedList.sort((a, b) => a.category.name.compareTo(b.category.name));
         break;
       case CalculatorSortOrder.complexityAsc:
-        sortedList.sort((a, b) => a.complexity.index.compareTo(b.complexity.index));
+        sortedList.sort(
+          (a, b) => a.complexity.index.compareTo(b.complexity.index),
+        );
         break;
       case CalculatorSortOrder.complexityDesc:
-        sortedList.sort((a, b) => b.complexity.index.compareTo(a.complexity.index));
+        sortedList.sort(
+          (a, b) => b.complexity.index.compareTo(a.complexity.index),
+        );
         break;
     }
-    
+
     return sortedList;
   }
 
   /// Sugere calculadoras relacionadas
   static List<CalculatorEntity> getSuggestions(
     List<CalculatorEntity> allCalculators,
-    CalculatorEntity currentCalculator,
-    {int maxSuggestions = 5}
-  ) {
+    CalculatorEntity currentCalculator, {
+    int maxSuggestions = 5,
+  }) {
     final suggestions = <CalculatorEntity>[];
-    
+
     // Prioridade 1: Mesma categoria
-    final sameCategory = allCalculators
-        .where((calc) => 
-            calc.id != currentCalculator.id && 
-            calc.category == currentCalculator.category)
-        .toList();
+    final sameCategory =
+        allCalculators
+            .where(
+              (calc) =>
+                  calc.id != currentCalculator.id &&
+                  calc.category == currentCalculator.category,
+            )
+            .toList();
     suggestions.addAll(sameCategory);
-    
+
     // Prioridade 2: Tags em comum
-    final commonTags = allCalculators
-        .where((calc) => 
-            calc.id != currentCalculator.id &&
-            calc.tags.any((tag) => currentCalculator.tags.contains(tag)))
-        .toList();
-    
+    final commonTags =
+        allCalculators
+            .where(
+              (calc) =>
+                  calc.id != currentCalculator.id &&
+                  calc.tags.any((tag) => currentCalculator.tags.contains(tag)),
+            )
+            .toList();
+
     for (final calc in commonTags) {
       if (!suggestions.contains(calc)) {
         suggestions.add(calc);
       }
     }
-    
+
     // Prioridade 3: Complexidade similar
-    final similarComplexity = allCalculators
-        .where((calc) => 
-            calc.id != currentCalculator.id &&
-            calc.complexity == currentCalculator.complexity)
-        .toList();
-    
+    final similarComplexity =
+        allCalculators
+            .where(
+              (calc) =>
+                  calc.id != currentCalculator.id &&
+                  calc.complexity == currentCalculator.complexity,
+            )
+            .toList();
+
     for (final calc in similarComplexity) {
       if (!suggestions.contains(calc)) {
         suggestions.add(calc);
       }
     }
-    
+
     return suggestions.take(maxSuggestions).toList();
   }
 
@@ -373,4 +384,3 @@ enum CalculatorSortOrder {
   complexityAsc,
   complexityDesc,
 }
-

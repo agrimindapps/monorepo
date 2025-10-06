@@ -1,7 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Commodity Price Entity for Agricultural Market Data
-/// 
+///
 /// Represents current and historical pricing data
 /// for agricultural commodities and products
 class CommodityPriceEntity extends Equatable {
@@ -48,18 +48,18 @@ class CommodityPriceEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        commodityName,
-        type,
-        currentPrice,
-        previousPrice,
-        changePercent,
-        currency,
-        unit,
-        market,
-        lastUpdated,
-        history,
-      ];
+    id,
+    commodityName,
+    type,
+    currentPrice,
+    previousPrice,
+    changePercent,
+    currency,
+    unit,
+    market,
+    lastUpdated,
+    history,
+  ];
 }
 
 /// Commodity Types for Agricultural Products
@@ -114,11 +114,11 @@ class MarketSummaryEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        marketName,
-        lastUpdated,
-        topGainers,
-        topLosers,
-        marketIndex,
-        marketIndexChange,
-      ];
+    marketName,
+    lastUpdated,
+    topGainers,
+    topLosers,
+    marketIndex,
+    marketIndexChange,
+  ];
 }

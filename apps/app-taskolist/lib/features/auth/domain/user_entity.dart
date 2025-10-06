@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 class UserEntity extends Equatable {
   final String id;
@@ -45,15 +45,15 @@ class UserEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        email,
-        avatarUrl,
-        createdAt,
-        updatedAt,
-        isActive,
-        _emailVerified,
-      ];
+    id,
+    name,
+    email,
+    avatarUrl,
+    createdAt,
+    updatedAt,
+    isActive,
+    _emailVerified,
+  ];
 
   bool get isAnonymous => id == 'anonymous';
   bool get emailVerified => _emailVerified;

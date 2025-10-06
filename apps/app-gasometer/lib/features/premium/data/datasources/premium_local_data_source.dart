@@ -1,5 +1,4 @@
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 
 /// Data source local para funcionalidades premium de desenvolvimento
 abstract class PremiumLocalDataSource {
@@ -18,21 +17,20 @@ abstract class PremiumLocalDataSource {
 
 @LazySingleton(as: PremiumLocalDataSource)
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
-
   PremiumLocalDataSourceImpl(this.sharedPreferences);
   static const String _localLicenseKey = 'gasometer_local_license';
-  
+
   final SharedPreferences sharedPreferences;
 
   @override
   Future<void> generateLocalLicense({int days = 30}) async {
     final expirationDate = DateTime.now().add(Duration(days: days));
-    
+
     await sharedPreferences.setString(
       _localLicenseKey,
       expirationDate.toIso8601String(),
     );
-    
+
     print('Licença local gerada. Expira em: ${expirationDate.toString()}');
   }
 
@@ -46,7 +44,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   Future<bool> hasActiveLocalLicense() async {
     final expiration = await getLocalLicenseExpiration();
     if (expiration == null) return false;
-    
+
     return DateTime.now().isBefore(expiration);
   }
 
@@ -54,7 +52,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   Future<DateTime?> getLocalLicenseExpiration() async {
     final licenseString = sharedPreferences.getString(_localLicenseKey);
     if (licenseString == null) return null;
-    
+
     try {
       return DateTime.parse(licenseString);
     } catch (e) {

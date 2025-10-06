@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart';
 
 import '../domain/entities/calculation_result.dart';
 import '../domain/entities/calculator_category.dart';
@@ -29,7 +29,8 @@ class CalculatorServiceLocator {
   static CalculatorRegistry get registry => _getIt<CalculatorRegistry>();
 
   /// Obtém instância do serviço de favoritos
-  static CalculatorFavoritesService get favorites => _getIt<CalculatorFavoritesService>();
+  static CalculatorFavoritesService get favorites =>
+      _getIt<CalculatorFavoritesService>();
 
   /// Obtém instância do provider de calculadoras
   static CalculatorProvider get provider => _getIt<CalculatorProvider>();

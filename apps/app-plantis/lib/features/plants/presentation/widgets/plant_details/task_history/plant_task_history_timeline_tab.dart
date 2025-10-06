@@ -170,7 +170,7 @@ class _PlantTaskHistoryTimelineTabState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final filteredTasks = _getFilteredTasks();
     final paginatedTasks = _getPaginatedTasks(filteredTasks);
     final groupedTasks = _groupTasksByDate(paginatedTasks);

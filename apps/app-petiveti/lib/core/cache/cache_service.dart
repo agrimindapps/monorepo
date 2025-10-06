@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:core/core.dart';
 
 /// Serviço de cache inteligente para otimização de performance
 class CacheService {
@@ -105,18 +106,21 @@ class CacheService {
   /// Limpa entradas expiradas
   Future<void> clearExpired() async {
     // Limpar da memória
-    final expiredKeys = _memoryCache.entries
-        .where((entry) => entry.value.isExpired)
-        .map((entry) => entry.key)
-        .toList();
-    
+    final expiredKeys =
+        _memoryCache.entries
+            .where((entry) => entry.value.isExpired)
+            .map((entry) => entry.key)
+            .toList();
+
     for (final key in expiredKeys) {
       _memoryCache.remove(key);
     }
 
     // Limpar do disco
     if (_prefs != null) {
-      final allKeys = _prefs!.getKeys().where((k) => k.startsWith(_cachePrefix));
+      final allKeys = _prefs!.getKeys().where(
+        (k) => k.startsWith(_cachePrefix),
+      );
       for (final diskKey in allKeys) {
         final key = diskKey.replaceFirst(_cachePrefix, '');
         final entry = await _loadFromDisk<dynamic>(key);
@@ -130,7 +134,8 @@ class CacheService {
   /// Obter estatísticas do cache
   CacheStatistics getStatistics() {
     final memoryEntries = _memoryCache.length;
-    final expiredEntries = _memoryCache.values.where((entry) => entry.isExpired).length;
+    final expiredEntries =
+        _memoryCache.values.where((entry) => entry.isExpired).length;
     final validEntries = memoryEntries - expiredEntries;
 
     return CacheStatistics(
@@ -180,7 +185,7 @@ class CacheService {
     bool refreshInBackground = false,
   }) async {
     final cachedData = await get<T>(key);
-    
+
     if (cachedData != null) {
       // Se deve fazer refresh em background
       if (refreshInBackground) {
@@ -192,7 +197,7 @@ class CacheService {
     // Se não há dados em cache, busca normalmente
     final freshData = await fetchFunction();
     await put(key, freshData, duration: duration, persistToDisk: true);
-    
+
     _recordHit(false); // Cache miss
     return freshData;
   }
@@ -211,10 +216,13 @@ class CacheService {
   }
 
   void _cleanOldestEntries() {
-    final sortedEntries = _memoryCache.entries.toList()
-      ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
-    
-    final toRemove = sortedEntries.take(_memoryCache.length - maxMemoryEntries + 10);
+    final sortedEntries =
+        _memoryCache.entries.toList()
+          ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
+
+    final toRemove = sortedEntries.take(
+      _memoryCache.length - maxMemoryEntries + 10,
+    );
     for (final entry in toRemove) {
       _memoryCache.remove(entry.key);
     }
@@ -222,7 +230,7 @@ class CacheService {
 
   Future<void> _saveToDisk<T>(String key, CacheEntry<T> entry) async {
     if (_prefs == null) return;
-    
+
     try {
       final diskKey = '$_cachePrefix$key';
       final serializedEntry = {
@@ -231,7 +239,7 @@ class CacheService {
         'duration': entry.duration.inMilliseconds,
         'type': T.toString(),
       };
-      
+
       await _prefs!.setString(diskKey, jsonEncode(serializedEntry));
     } catch (e) {
       // Falha silenciosa para serialização
@@ -240,18 +248,21 @@ class CacheService {
 
   Future<CacheEntry<T>?> _loadFromDisk<T>(String key) async {
     if (_prefs == null) return null;
-    
+
     try {
       final diskKey = '$_cachePrefix$key';
       final serializedData = _prefs!.getString(diskKey);
-      
+
       if (serializedData == null) return null;
-      
-      final Map<String, dynamic> entryData = jsonDecode(serializedData) as Map<String, dynamic>;
-      
+
+      final Map<String, dynamic> entryData =
+          jsonDecode(serializedData) as Map<String, dynamic>;
+
       return CacheEntry<T>(
         data: _deserializeData<T>(entryData['data']),
-        timestamp: DateTime.fromMillisecondsSinceEpoch(entryData['timestamp'] as int),
+        timestamp: DateTime.fromMillisecondsSinceEpoch(
+          entryData['timestamp'] as int,
+        ),
         duration: Duration(milliseconds: entryData['duration'] as int),
       );
     } catch (e) {
@@ -351,7 +362,8 @@ class CacheStatistics {
   /// Uso de memória formatado
   String get formattedMemoryUsage {
     if (memoryUsageEstimate < 1024) return '${memoryUsageEstimate}B';
-    if (memoryUsageEstimate < 1024 * 1024) return '${(memoryUsageEstimate / 1024).toStringAsFixed(1)}KB';
+    if (memoryUsageEstimate < 1024 * 1024)
+      return '${(memoryUsageEstimate / 1024).toStringAsFixed(1)}KB';
     return '${(memoryUsageEstimate / (1024 * 1024)).toStringAsFixed(1)}MB';
   }
 }
@@ -367,13 +379,17 @@ class CacheKeys {
   static const String reminders = 'reminders';
   static const String calculators = 'calculators';
   static const String userProfile = 'user_profile';
-  
+
   // Keys com parâmetros
   static String animalById(String id) => 'animal_$id';
   static String animalsByUser(String userId) => 'animals_user_$userId';
-  static String appointmentsByAnimal(String animalId) => 'appointments_animal_$animalId';
-  static String medicationsByAnimal(String animalId) => 'medications_animal_$animalId';
+  static String appointmentsByAnimal(String animalId) =>
+      'appointments_animal_$animalId';
+  static String medicationsByAnimal(String animalId) =>
+      'medications_animal_$animalId';
   static String weightsByAnimal(String animalId) => 'weights_animal_$animalId';
-  static String expensesByAnimal(String animalId) => 'expenses_animal_$animalId';
-  static String calculationHistory(String calculatorId) => 'calc_history_$calculatorId';
+  static String expensesByAnimal(String animalId) =>
+      'expenses_animal_$animalId';
+  static String calculationHistory(String calculatorId) =>
+      'calc_history_$calculatorId';
 }

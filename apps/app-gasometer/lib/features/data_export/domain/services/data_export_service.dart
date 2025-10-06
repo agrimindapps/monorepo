@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:core/core.dart';
 
 import '../../../../core/services/database_inspector_service.dart';
 import '../entities/export_metadata.dart';
@@ -9,7 +10,6 @@ import '../entities/export_request.dart';
 
 /// Serviço principal para coleta e exportação de dados LGPD
 class DataExportService {
-
   DataExportService._internal();
   static DataExportService? _instance;
   static DataExportService get instance {
@@ -33,11 +33,13 @@ class DataExportService {
 
     // Coletar dados por categoria
     for (final categoryKey in request.includedCategories) {
-      onProgress?.call(ExportProgress.collecting(
-        categoryKey, 
-        processedCategories, 
-        totalCategories,
-      ));
+      onProgress?.call(
+        ExportProgress.collecting(
+          categoryKey,
+          processedCategories,
+          totalCategories,
+        ),
+      );
 
       try {
         switch (categoryKey) {
@@ -51,7 +53,9 @@ class DataExportService {
             userData['fuel_records'] = await _collectFuelData(request);
             break;
           case 'maintenance':
-            userData['maintenance_records'] = await _collectMaintenanceData(request);
+            userData['maintenance_records'] = await _collectMaintenanceData(
+              request,
+            );
             break;
           case 'odometer':
             userData['odometer_readings'] = await _collectOdometerData(request);
@@ -90,7 +94,8 @@ class DataExportService {
       'export_metadata': metadata.toJson(),
       'lgpd_compliance_info': {
         'data_controller': 'GasOMeter App',
-        'export_purpose': 'Atendimento ao direito de portabilidade de dados (LGPD)',
+        'export_purpose':
+            'Atendimento ao direito de portabilidade de dados (LGPD)',
         'user_rights': [
           'Direito de acesso aos dados pessoais',
           'Direito de correção de dados inexatos',
@@ -98,7 +103,8 @@ class DataExportService {
           'Direito de portabilidade dos dados',
           'Direito de revogação do consentimento',
         ],
-        'contact_info': 'Para questões sobre seus dados, contate o DPO em: privacy@gasometer.app',
+        'contact_info':
+            'Para questões sobre seus dados, contate o DPO em: privacy@gasometer.app',
       },
       'exported_data': userData,
     };
@@ -110,7 +116,7 @@ class DataExportService {
   /// Gera arquivo CSV para dados tabulares
   Future<Uint8List> generateCsvExport(Map<String, dynamic> userData) async {
     final csvLines = <String>[];
-    
+
     // Header CSV
     csvLines.add('Categoria,Item,Campo,Valor,Data_Registro');
 
@@ -125,26 +131,30 @@ class DataExportService {
           final item = data[i];
           if (item is Map<String, dynamic>) {
             for (final field in item.entries) {
-              csvLines.add(_escapeCsvField([
-                category,
-                'item_${i + 1}',
-                field.key,
-                field.value?.toString() ?? '',
-                _extractDate(item) ?? '',
-              ]));
+              csvLines.add(
+                _escapeCsvField([
+                  category,
+                  'item_${i + 1}',
+                  field.key,
+                  field.value?.toString() ?? '',
+                  _extractDate(item) ?? '',
+                ]),
+              );
             }
           }
         }
       } else if (data is Map<String, dynamic>) {
         // Dados em mapa (perfil, configurações, etc.)
         for (final field in data.entries) {
-          csvLines.add(_escapeCsvField([
-            category,
-            'single_record',
-            field.key,
-            field.value?.toString() ?? '',
-            DateTime.now().toIso8601String(),
-          ]));
+          csvLines.add(
+            _escapeCsvField([
+              category,
+              'single_record',
+              field.key,
+              field.value?.toString() ?? '',
+              DateTime.now().toIso8601String(),
+            ]),
+          );
         }
       }
     }
@@ -158,13 +168,17 @@ class DataExportService {
     final metadataJson = const JsonEncoder.withIndent('  ').convert({
       'informacoes_exportacao': metadata.toJson(),
       'instrucoes': {
-        'dados_completos_json': 'Contém todos os seus dados em formato estruturado JSON',
-        'dados_tabulares_csv': 'Contém os dados em formato tabular para análise em planilhas',
-        'lgpd_compliance': 'Esta exportação está em conformidade com a LGPD (Lei Geral de Proteção de Dados)',
-        'formato_datas': 'Todas as datas estão no formato ISO 8601 (YYYY-MM-DDTHH:MM:SS)',
-      }
+        'dados_completos_json':
+            'Contém todos os seus dados em formato estruturado JSON',
+        'dados_tabulares_csv':
+            'Contém os dados em formato tabular para análise em planilhas',
+        'lgpd_compliance':
+            'Esta exportação está em conformidade com a LGPD (Lei Geral de Proteção de Dados)',
+        'formato_datas':
+            'Todas as datas estão no formato ISO 8601 (YYYY-MM-DDTHH:MM:SS)',
+      },
     });
-    
+
     return Uint8List.fromList(utf8.encode(metadataJson));
   }
 
@@ -178,7 +192,7 @@ class DataExportService {
   Future<Map<String, dynamic>> _collectUserProfile() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       return {
         'user_id': prefs.getString('user_id') ?? 'anonymous',
         'display_name': prefs.getString('display_name') ?? '',
@@ -194,7 +208,9 @@ class DataExportService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _collectVehicleData(ExportRequest request) async {
+  Future<List<Map<String, dynamic>>> _collectVehicleData(
+    ExportRequest request,
+  ) async {
     try {
       final records = await _databaseInspector.loadHiveBoxData('vehicles');
       final vehicles = <Map<String, dynamic>>[];
@@ -208,11 +224,15 @@ class DataExportService {
 
       return vehicles;
     } catch (e) {
-      return [{'error': 'Não foi possível acessar dados dos veículos: $e'}];
+      return [
+        {'error': 'Não foi possível acessar dados dos veículos: $e'},
+      ];
     }
   }
 
-  Future<List<Map<String, dynamic>>> _collectFuelData(ExportRequest request) async {
+  Future<List<Map<String, dynamic>>> _collectFuelData(
+    ExportRequest request,
+  ) async {
     try {
       final records = await _databaseInspector.loadHiveBoxData('fuel_records');
       final fuelRecords = <Map<String, dynamic>>[];
@@ -226,11 +246,15 @@ class DataExportService {
 
       return fuelRecords;
     } catch (e) {
-      return [{'error': 'Não foi possível acessar dados de abastecimento: $e'}];
+      return [
+        {'error': 'Não foi possível acessar dados de abastecimento: $e'},
+      ];
     }
   }
 
-  Future<List<Map<String, dynamic>>> _collectMaintenanceData(ExportRequest request) async {
+  Future<List<Map<String, dynamic>>> _collectMaintenanceData(
+    ExportRequest request,
+  ) async {
     try {
       final records = await _databaseInspector.loadHiveBoxData('maintenance');
       final maintenanceRecords = <Map<String, dynamic>>[];
@@ -244,11 +268,15 @@ class DataExportService {
 
       return maintenanceRecords;
     } catch (e) {
-      return [{'error': 'Não foi possível acessar dados de manutenção: $e'}];
+      return [
+        {'error': 'Não foi possível acessar dados de manutenção: $e'},
+      ];
     }
   }
 
-  Future<List<Map<String, dynamic>>> _collectOdometerData(ExportRequest request) async {
+  Future<List<Map<String, dynamic>>> _collectOdometerData(
+    ExportRequest request,
+  ) async {
     try {
       final records = await _databaseInspector.loadHiveBoxData('odometer');
       final odometerRecords = <Map<String, dynamic>>[];
@@ -262,11 +290,15 @@ class DataExportService {
 
       return odometerRecords;
     } catch (e) {
-      return [{'error': 'Não foi possível acessar dados do odômetro: $e'}];
+      return [
+        {'error': 'Não foi possível acessar dados do odômetro: $e'},
+      ];
     }
   }
 
-  Future<List<Map<String, dynamic>>> _collectExpenseData(ExportRequest request) async {
+  Future<List<Map<String, dynamic>>> _collectExpenseData(
+    ExportRequest request,
+  ) async {
     try {
       final records = await _databaseInspector.loadHiveBoxData('expenses');
       final expenseRecords = <Map<String, dynamic>>[];
@@ -280,7 +312,9 @@ class DataExportService {
 
       return expenseRecords;
     } catch (e) {
-      return [{'error': 'Não foi possível acessar dados de despesas: $e'}];
+      return [
+        {'error': 'Não foi possível acessar dados de despesas: $e'},
+      ];
     }
   }
 
@@ -295,7 +329,9 @@ class DataExportService {
 
       return categories;
     } catch (e) {
-      return [{'error': 'Não foi possível acessar dados de categorias: $e'}];
+      return [
+        {'error': 'Não foi possível acessar dados de categorias: $e'},
+      ];
     }
   }
 
@@ -328,15 +364,15 @@ class DataExportService {
 
     try {
       final dataDate = DateTime.parse(dataDateStr);
-      
+
       if (request.startDate != null && dataDate.isBefore(request.startDate!)) {
         return false;
       }
-      
+
       if (request.endDate != null && dataDate.isAfter(request.endDate!)) {
         return false;
       }
-      
+
       return true;
     } catch (e) {
       return true; // Se não conseguir parsear, inclui no resultado
@@ -345,7 +381,13 @@ class DataExportService {
 
   String? _extractDate(Map<String, dynamic> data) {
     // Tenta diferentes campos de data comuns
-    for (final dateField in ['date', 'createdAt', 'created_at', 'timestamp', 'updatedAt']) {
+    for (final dateField in [
+      'date',
+      'createdAt',
+      'created_at',
+      'timestamp',
+      'updatedAt',
+    ]) {
       if (data.containsKey(dateField) && data[dateField] != null) {
         return data[dateField].toString();
       }
@@ -355,17 +397,17 @@ class DataExportService {
 
   Map<String, dynamic> _sanitizeData(Map<String, dynamic> data) {
     final sanitized = <String, dynamic>{};
-    
+
     for (final entry in data.entries) {
       final key = entry.key;
       final value = entry.value;
-      
+
       // Remove dados sensíveis ou internos
       if (_isSensitiveKey(key)) continue;
-      
+
       sanitized[key] = value;
     }
-    
+
     return sanitized;
   }
 
@@ -381,17 +423,21 @@ class DataExportService {
       'device_id',
       'installation_id',
     };
-    
+
     final lowerKey = key.toLowerCase();
     return sensitiveKeys.any((sensitive) => lowerKey.contains(sensitive));
   }
 
   String _escapeCsvField(List<String> fields) {
-    return fields.map((field) {
-      if (field.contains(',') || field.contains('"') || field.contains('\n')) {
-        return '"${field.replaceAll('"', '""')}"';
-      }
-      return field;
-    }).join(',');
+    return fields
+        .map((field) {
+          if (field.contains(',') ||
+              field.contains('"') ||
+              field.contains('\n')) {
+            return '"${field.replaceAll('"', '""')}"';
+          }
+          return field;
+        })
+        .join(',');
   }
 }

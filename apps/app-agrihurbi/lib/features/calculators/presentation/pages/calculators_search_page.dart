@@ -1,6 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/debounced_search_manager.dart';
 import '../../../../core/utils/performance_benchmark.dart';
@@ -21,24 +20,26 @@ class CalculatorsSearchPage extends ConsumerStatefulWidget {
   const CalculatorsSearchPage({super.key});
 
   @override
-  ConsumerState<CalculatorsSearchPage> createState() => _CalculatorsSearchPageState();
+  ConsumerState<CalculatorsSearchPage> createState() =>
+      _CalculatorsSearchPageState();
 }
 
 class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late final _debouncedSearchManager = DebouncedSearchManager();
-  
+
   CalculatorCategory? _selectedCategory;
   CalculatorComplexity? _selectedComplexity;
-  search_service.CalculatorSortOrder _sortOrder = search_service.CalculatorSortOrder.nameAsc;
+  search_service.CalculatorSortOrder _sortOrder =
+      search_service.CalculatorSortOrder.nameAsc;
   List<String> _selectedTags = [];
   bool _showOnlyFavorites = false;
-  
+
   List<CalculatorEntity> _searchResults = [];
   List<String> _availableTags = [];
   bool _isSearching = false;
-  
+
   // Performance benchmarking
   int _searchCallCount = 0;
 
@@ -87,13 +88,14 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
               // Barra de busca
               CalculatorSearchBarWidget(
                 controller: _searchController,
-                onChanged: (_) => _debouncedSearchManager.searchWithDebounce(
-                  _searchController.text,
-                  _performOptimizedSearch,
-                ),
+                onChanged:
+                    (_) => _debouncedSearchManager.searchWithDebounce(
+                      _searchController.text,
+                      _performOptimizedSearch,
+                    ),
                 isLoading: _isSearching,
               ),
-              
+
               // Filtros avançados
               CalculatorSearchFiltersWidget(
                 selectedCategory: _selectedCategory,
@@ -135,7 +137,7 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
                 onClearFilters: _clearAllFilters,
                 onApplyFilters: _updateSearchResults,
               ),
-              
+
               // Resultados da busca
               Expanded(
                 child: CalculatorSearchResultsWidget(
@@ -154,81 +156,62 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
     );
   }
 
-  // Método removido - funcionalidade movida para CalculatorSearchBarWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchResultsWidget
-
   /// Nova implementação otimizada com single-pass algorithm
   void _performOptimizedSearch(String query) async {
     if (!mounted) return; // ✅ Safety check at start
-    
+
     setState(() {
       _isSearching = true;
       _searchCallCount++;
     });
 
-    await PerformanceBenchmark.measureAsync(
-      'search_otimizada',
-      () async {
-        final provider = ref.read(calculatorProvider);
-        
-        // Obter IDs dos favoritos para o filtro
-        List<String> favoriteIds = [];
-        if (_showOnlyFavorites) {
-          final favoritesService = CalculatorFavoritesService(
-            await SharedPreferences.getInstance(),
-          );
-          favoriteIds = await favoritesService.getFavoriteIds();
-        }
+    await PerformanceBenchmark.measureAsync('search_otimizada', () async {
+      final provider = ref.read(calculatorProvider);
 
-        if (!mounted) return <CalculatorEntity>[];
-
-        // Criar critérios de busca unificados
-        final criteria = search_service.SearchCriteria(
-          query: query.trim().isEmpty ? null : query.trim(),
-          category: _selectedCategory,
-          complexity: _selectedComplexity,
-          tags: _selectedTags,
-          sortOrder: _sortOrder,
-          favoriteIds: favoriteIds,
-          showOnlyFavorites: _showOnlyFavorites,
+      // Obter IDs dos favoritos para o filtro
+      List<String> favoriteIds = [];
+      if (_showOnlyFavorites) {
+        final favoritesService = CalculatorFavoritesService(
+          await SharedPreferences.getInstance(),
         );
+        favoriteIds = await favoritesService.getFavoriteIds();
+      }
 
-        // Executar busca otimizada em single-pass
-        final results = search_service.CalculatorSearchService.optimizedSearch(
-          provider.calculators,
-          criteria,
-        );
+      if (!mounted) return <CalculatorEntity>[];
 
-        if (!mounted) return results;
-        
-        setState(() {
-          _searchResults = results;
-          _isSearching = false;
-        });
+      // Criar critérios de busca unificados
+      final criteria = search_service.SearchCriteria(
+        query: query.trim().isEmpty ? null : query.trim(),
+        category: _selectedCategory,
+        complexity: _selectedComplexity,
+        tags: _selectedTags,
+        sortOrder: _sortOrder,
+        favoriteIds: favoriteIds,
+        showOnlyFavorites: _showOnlyFavorites,
+      );
 
-        return results;
-      },
-    );
+      // Executar busca otimizada em single-pass
+      final results = search_service.CalculatorSearchService.optimizedSearch(
+        provider.calculators,
+        criteria,
+      );
+
+      if (!mounted) return results;
+
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+
+      return results;
+    });
   }
-  
+
   /// Método para atualizar resultados da busca
   void _updateSearchResults() {
     _performOptimizedSearch(_searchController.text);
   }
-  
+
   // Método removido - funcionalidade movida para CalculatorSearchResultsWidget
 
   void _extractAvailableTags(List<CalculatorEntity> calculators) {
@@ -254,5 +237,4 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
   // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 
   // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
 }

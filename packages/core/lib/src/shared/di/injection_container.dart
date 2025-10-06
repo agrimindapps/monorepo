@@ -31,6 +31,7 @@ import '../../sync/implementations/network_monitor_impl.dart';
 import '../../sync/implementations/sync_orchestrator_impl.dart';
 import '../../sync/factories/sync_service_factory.dart';
 import '../../sync/config/sync_feature_flags.dart';
+import '../services/uuid_service.dart';
 
 /// Global service locator instance
 final GetIt getIt = GetIt.instance;
@@ -88,6 +89,11 @@ class InjectionContainer {
       // 5. RevenueCat para gerenciar assinaturas
       getIt.registerLazySingleton<ISubscriptionRepository>(
         () => RevenueCatService(),
+      );
+
+      // 5.5. UUID Service - Geração de identificadores únicos
+      getIt.registerLazySingleton<UuidService>(
+        () => UuidService(),
       );
 
       // 6. License System - License Repository and Service

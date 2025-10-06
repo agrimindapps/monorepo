@@ -243,7 +243,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                   decoration: BoxDecoration(
                     color: _getCategoryColor(
                       calculator.category,
-                    ).withOpacity(0.1),
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -611,7 +611,8 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
         return;
       }
 
-      final success = await featuresProvider?.toggleFavorite(calculator.id) ?? false;
+      final success =
+          await featuresProvider?.toggleFavorite(calculator.id) ?? false;
 
       if (mounted && success && featuresProvider != null) {
         final isFavorite = featuresProvider.isFavorite(calculator.id);

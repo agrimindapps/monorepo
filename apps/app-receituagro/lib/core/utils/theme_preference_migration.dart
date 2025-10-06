@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Theme Preference Migration Utility
 ///
@@ -34,7 +34,9 @@ class ThemePreferenceMigration {
           await prefs.setString(_newKey, oldTheme);
           debugPrint('Theme preferences migrated: $oldTheme -> $_newKey');
         } else {
-          debugPrint('Theme preferences: new key already exists, keeping existing value');
+          debugPrint(
+            'Theme preferences: new key already exists, keeping existing value',
+          );
         }
 
         // Remove old key

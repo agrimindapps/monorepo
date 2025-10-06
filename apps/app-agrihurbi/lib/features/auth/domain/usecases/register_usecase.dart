@@ -1,7 +1,5 @@
 import 'package:core/core.dart' as core_lib;
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show Equatable, Left, lazySingleton;
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/typedef.dart';
@@ -9,21 +7,20 @@ import '../entities/user_entity.dart' as local_user;
 import '../repositories/auth_repository.dart';
 
 /// Use case para registro de usuário com validação e regras de negócio
-/// 
+///
 /// Implementa UseCase que retorna a entidade do usuário criado em caso de sucesso
 /// Inclui validações de email, senha, nome e segurança
 @lazySingleton
 class RegisterUseCase {
   final AuthRepository repository;
   final core_lib.FirebaseAnalyticsService _analyticsService;
-  
-  RegisterUseCase(
-    this.repository,
-  ) : _analyticsService = core_lib.FirebaseAnalyticsService();
-  
+
+  RegisterUseCase(this.repository)
+    : _analyticsService = core_lib.FirebaseAnalyticsService();
+
   ResultFuture<local_user.UserEntity> call(RegisterParams params) async {
     final startTime = DateTime.now();
-    
+
     try {
       // Analytics: track registration attempt
       await _analyticsService.logEvent(
@@ -35,7 +32,7 @@ class RegisterUseCase {
           'password_length': params.password.length,
         },
       );
-      
+
       // Validação dos parâmetros de entrada
       final validation = _validateRegistrationData(params);
       if (validation != null) {
@@ -48,24 +45,22 @@ class RegisterUseCase {
         );
         return Left(ValidationFailure(message: validation));
       }
-      
+
       // Normalizar dados
       final normalizedEmail = params.email.trim().toLowerCase();
       final normalizedName = params.name.trim();
       final normalizedPhone = params.phone?.trim();
-      
+
       // Validar se email já existe
       final emailExists = await _checkEmailExists(normalizedEmail);
       if (emailExists) {
         await _analyticsService.logEvent(
           'registration_email_exists',
-          parameters: {
-            'email_domain': params.email.split('@').last,
-          },
+          parameters: {'email_domain': params.email.split('@').last},
         );
         return const Left(ValidationFailure(message: 'Email já está em uso'));
       }
-      
+
       // Executar registro no repository
       final result = await repository.register(
         name: normalizedName,
@@ -73,10 +68,10 @@ class RegisterUseCase {
         password: params.password,
         phone: normalizedPhone,
       );
-      
+
       // Analytics: track registration result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
+
       await result.fold(
         (failure) async {
           await _analyticsService.logEvent(
@@ -98,15 +93,21 @@ class RegisterUseCase {
               'has_phone': params.phone != null,
             },
           );
-          
+
           // Set user properties for analytics
           await _analyticsService.setUserId(user.id);
           await _analyticsService.setUserProperty('user_type', 'farmer');
-          await _analyticsService.setUserProperty('app_version', 'agrihurbi_v1');
-          await _analyticsService.setUserProperty('registration_date', DateTime.now().toIso8601String());
+          await _analyticsService.setUserProperty(
+            'app_version',
+            'agrihurbi_v1',
+          );
+          await _analyticsService.setUserProperty(
+            'registration_date',
+            DateTime.now().toIso8601String(),
+          );
         },
       );
-      
+
       return result;
     } catch (e) {
       await _analyticsService.logEvent(
@@ -119,55 +120,55 @@ class RegisterUseCase {
       rethrow;
     }
   }
-  
+
   /// Valida os dados de registro antes do processamento
   String? _validateRegistrationData(RegisterParams params) {
     // Validar nome
     if (params.name.trim().isEmpty) {
       return 'Nome é obrigatório';
     }
-    
+
     if (params.name.trim().length < 2) {
       return 'Nome deve ter pelo menos 2 caracteres';
     }
-    
+
     if (params.name.trim().length > 100) {
       return 'Nome deve ter no máximo 100 caracteres';
     }
-    
+
     // Validar email
     if (params.email.trim().isEmpty) {
       return 'Email é obrigatório';
     }
-    
+
     final emailPattern = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
     if (!emailPattern.hasMatch(params.email.trim())) {
       return 'Formato de email inválido';
     }
-    
+
     // Validar senha
     if (params.password.isEmpty) {
       return 'Senha é obrigatória';
     }
-    
+
     if (params.password.length < 6) {
       return 'Senha deve ter pelo menos 6 caracteres';
     }
-    
+
     if (params.password.length > 128) {
       return 'Senha deve ter no máximo 128 caracteres';
     }
-    
+
     // Validar senha complexidade
     final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(params.password);
     final hasNumber = RegExp(r'[0-9]').hasMatch(params.password);
-    
+
     if (!hasLetter || !hasNumber) {
       return 'Senha deve conter pelo menos uma letra e um número';
     }
-    
+
     // Validar telefone se fornecido
     if (params.phone != null && params.phone!.trim().isNotEmpty) {
       final phonePattern = RegExp(r'^[\+]?[(]?[\d\s\-\(\)]{10,20}$');
@@ -175,10 +176,10 @@ class RegisterUseCase {
         return 'Formato de telefone inválido';
       }
     }
-    
+
     return null;
   }
-  
+
   /// Verifica se o email já está em uso
   Future<bool> _checkEmailExists(String email) async {
     // Esta verificação será implementada quando o repository estiver completo
@@ -199,19 +200,19 @@ class RegisterParams extends Equatable {
 
   /// Nome completo do usuário
   final String name;
-  
+
   /// Email do usuário
   final String email;
-  
+
   /// Senha do usuário
   final String password;
-  
+
   /// Telefone opcional do usuário
   final String? phone;
-  
+
   /// Se o usuário aceitou os termos
   final bool acceptTerms;
-  
+
   @override
   List<Object?> get props => [name, email, password, phone, acceptTerms];
 }

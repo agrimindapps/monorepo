@@ -1,7 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Serviço responsável por gerenciar dados locais
 /// Usado especialmente para o modo anônimo onde os dados não são sincronizados com o Firebase
@@ -83,7 +81,8 @@ class LocalDataService {
     _ensureInitialized();
     return _vehiclesBox.values
         .map(
-            (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
+          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
+        )
         .toList();
   }
 
@@ -115,7 +114,8 @@ class LocalDataService {
     _ensureInitialized();
     return _fuelRecordsBox.values
         .map(
-            (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
+          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
+        )
         .toList();
   }
 
@@ -123,12 +123,16 @@ class LocalDataService {
   List<Map<String, dynamic>> getFuelRecordsByVehicle(String vehicleId) {
     _ensureInitialized();
     return _fuelRecordsBox.values
-        .where((record) =>
-            Map<String, dynamic>.from(
-                record as Map<dynamic, dynamic>? ?? {})['vehicleId'] ==
-            vehicleId)
+        .where(
+          (record) =>
+              Map<String, dynamic>.from(
+                record as Map<dynamic, dynamic>? ?? {},
+              )['vehicleId'] ==
+              vehicleId,
+        )
         .map(
-            (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
+          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
+        )
         .toList();
   }
 
@@ -142,7 +146,9 @@ class LocalDataService {
 
   /// Salva um registro de manutenção
   Future<void> saveMaintenanceRecord(
-      String id, Map<String, dynamic> maintenanceData) async {
+    String id,
+    Map<String, dynamic> maintenanceData,
+  ) async {
     await _ensureInitialized();
     await _maintenanceBox.put(id, maintenanceData);
   }
@@ -161,7 +167,8 @@ class LocalDataService {
     _ensureInitialized();
     return _maintenanceBox.values
         .map(
-            (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
+          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
+        )
         .toList();
   }
 
@@ -169,12 +176,16 @@ class LocalDataService {
   List<Map<String, dynamic>> getMaintenanceRecordsByVehicle(String vehicleId) {
     _ensureInitialized();
     return _maintenanceBox.values
-        .where((record) =>
-            Map<String, dynamic>.from(
-                record as Map<dynamic, dynamic>? ?? {})['vehicleId'] ==
-            vehicleId)
+        .where(
+          (record) =>
+              Map<String, dynamic>.from(
+                record as Map<dynamic, dynamic>? ?? {},
+              )['vehicleId'] ==
+              vehicleId,
+        )
         .map(
-            (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}))
+          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
+        )
         .toList();
   }
 
@@ -202,8 +213,10 @@ class LocalDataService {
       } else if (value is bool) {
         await _prefs!.setBool('${_userPreferencesKey}_${entry.key}', value);
       } else if (value is List<String>) {
-        await _prefs!
-            .setStringList('${_userPreferencesKey}_${entry.key}', value);
+        await _prefs!.setStringList(
+          '${_userPreferencesKey}_${entry.key}',
+          value,
+        );
       }
     }
   }
@@ -213,10 +226,11 @@ class LocalDataService {
     _ensureInitialized();
 
     final preferences = <String, dynamic>{};
-    final keys = _prefs!
-        .getKeys()
-        .where((key) => key.startsWith(_userPreferencesKey))
-        .toList();
+    final keys =
+        _prefs!
+            .getKeys()
+            .where((key) => key.startsWith(_userPreferencesKey))
+            .toList();
 
     for (final key in keys) {
       final actualKey = key.replaceFirst('${_userPreferencesKey}_', '');
@@ -284,11 +298,7 @@ class LocalDataService {
   /// Obtém resumo dos dados locais
   Map<String, int> getLocalDataSummary() {
     if (!_isInitialized) {
-      return {
-        'vehicles': 0,
-        'fuelRecords': 0,
-        'maintenanceRecords': 0,
-      };
+      return {'vehicles': 0, 'fuelRecords': 0, 'maintenanceRecords': 0};
     }
 
     return {

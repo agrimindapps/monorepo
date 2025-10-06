@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
@@ -22,7 +21,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _userKey = 'cached_user';
   static const String _tokenKey = 'auth_token';
   static const String _firstLaunchKey = 'first_launch';
-  
+
   final SharedPreferences sharedPreferences;
 
   AuthLocalDataSourceImpl({required this.sharedPreferences});

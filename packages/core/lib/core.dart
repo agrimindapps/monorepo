@@ -166,6 +166,7 @@ export 'src/shared/services/enhanced_navigation_service.dart';
 export 'src/shared/services/navigation_configuration_service.dart';
 export 'src/shared/services/platform_capabilities_service.dart';
 export 'src/shared/services/navigation_analytics_service.dart';
+export 'src/shared/services/uuid_service.dart';
 
 // Navigation models and interfaces
 export 'src/shared/models/navigation_state.dart';

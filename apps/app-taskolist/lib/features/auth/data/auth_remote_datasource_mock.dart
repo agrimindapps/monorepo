@@ -9,19 +9,22 @@ import 'user_model.dart';
 class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   static const uuid = Uuid();
   UserModel? _currentUser;
-  final StreamController<UserModel?> _authStateController = 
+  final StreamController<UserModel?> _authStateController =
       StreamController<UserModel?>.broadcast();
 
   @override
-  Future<UserModel> signInWithEmailPassword(String email, String password) async {
+  Future<UserModel> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     // Simular delay de rede
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     // Validação simples para demo
     if (email.isEmpty || password.isEmpty) {
       throw Exception('Email e senha são obrigatórios');
     }
-    
+
     if (password.length < 6) {
       throw Exception('Senha deve ter pelo menos 6 caracteres');
     }
@@ -37,20 +40,24 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
 
     _currentUser = user;
     _authStateController.add(user);
-    
+
     return user;
   }
 
   @override
-  Future<UserModel> signUpWithEmailPassword(String email, String password, String name) async {
+  Future<UserModel> signUpWithEmailPassword(
+    String email,
+    String password,
+    String name,
+  ) async {
     // Simular delay de rede
     await Future<void>.delayed(const Duration(milliseconds: 800));
-    
+
     // Validação simples para demo
     if (email.isEmpty || password.isEmpty || name.isEmpty) {
       throw Exception('Todos os campos são obrigatórios');
     }
-    
+
     if (password.length < 6) {
       throw Exception('Senha deve ter pelo menos 6 caracteres');
     }
@@ -70,14 +77,14 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
 
     _currentUser = user;
     _authStateController.add(user);
-    
+
     return user;
   }
 
   @override
   Future<void> signOut() async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    
+
     _currentUser = null;
     _authStateController.add(null);
   }
@@ -91,11 +98,11 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   @override
   Future<void> resetPassword(String email) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     if (email.isEmpty || !email.contains('@')) {
       throw Exception('Email inválido');
     }
-    
+
     // Em uma implementação real, enviaria email de reset
     // Por enquanto apenas simula sucesso
   }
@@ -103,7 +110,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   @override
   Future<void> updateProfile(UserModel user) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    
+
     _currentUser = user;
     _authStateController.add(user);
   }
@@ -111,18 +118,18 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   @override
   Future<void> deleteAccount() async {
     await Future<void>.delayed(const Duration(milliseconds: 600));
-    
+
     if (_currentUser == null) {
       throw Exception('Nenhum usuário logado para deletar');
     }
-    
+
     // Em uma implementação real, deletaria a conta no servidor
     // e todos os dados associados
     final deletedUserId = _currentUser!.id;
-    
+
     _currentUser = null;
     _authStateController.add(null);
-    
+
     // Log da exclusão para debug
     debugPrint('🗑️ Account deleted for user: $deletedUserId');
   }

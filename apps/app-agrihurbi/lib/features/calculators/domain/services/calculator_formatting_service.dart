@@ -1,17 +1,16 @@
 import 'dart:math' as math;
 
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
 import '../entities/calculation_result.dart';
 import '../interfaces/calculator_strategy.dart';
 
 /// Service especializado em formatação de resultados de cálculos
-/// 
+///
 /// Implementa Single Responsibility Principle (SRP) - foca apenas na formatação.
 /// Separado do Calculator Engine para maior modularidade e personalização.
 @injectable
 class CalculatorFormattingService {
-
   /// Formata resultado de cálculo com base na estratégia
   Future<FormattedCalculationResult> formatResult(
     CalculationResult result,
@@ -21,8 +20,14 @@ class CalculatorFormattingService {
     final opts = options ?? const FormattingOptions();
 
     final formattedValues = await _formatResultValues(result.values, opts);
-    final formattedRecommendations = _formatRecommendations(result.recommendations ?? [], opts);
-    final formattedTableData = await _formatTableData(result.tableData ?? [], opts);
+    final formattedRecommendations = _formatRecommendations(
+      result.recommendations ?? [],
+      opts,
+    );
+    final formattedTableData = await _formatTableData(
+      result.tableData ?? [],
+      opts,
+    );
 
     return FormattedCalculationResult(
       calculatorId: result.calculatorId,
@@ -99,11 +104,7 @@ class CalculatorFormattingService {
   }
 
   /// Formata área
-  String formatArea(
-    double value, {
-    String unit = 'ha',
-    int decimalPlaces = 2,
-  }) {
+  String formatArea(double value, {String unit = 'ha', int decimalPlaces = 2}) {
     return formatValue(value, decimalPlaces: decimalPlaces, unit: unit);
   }
 
@@ -128,7 +129,11 @@ class CalculatorFormattingService {
   }) {
     // Auto-conversão para m³ se muito grande
     if (value >= 1000 && unit == 'L') {
-      return formatValue(value / 1000, decimalPlaces: decimalPlaces, unit: 'm³');
+      return formatValue(
+        value / 1000,
+        decimalPlaces: decimalPlaces,
+        unit: 'm³',
+      );
     }
     return formatValue(value, decimalPlaces: decimalPlaces, unit: unit);
   }
@@ -139,14 +144,14 @@ class CalculatorFormattingService {
     FormattingOptions? options,
   }) {
     final opts = options ?? const FormattingOptions();
-    
+
     return tableData.map((row) {
       final formattedCells = <String, String>{};
-      
+
       for (final entry in row.entries) {
         formattedCells[entry.key] = _formatCellValue(entry.value, opts);
       }
-      
+
       return FormattedTableRow(
         originalData: row,
         formattedCells: formattedCells,
@@ -161,12 +166,16 @@ class CalculatorFormattingService {
   ) async {
     final primaryValues = result.values.where((v) => v.isPrimary).toList();
     final keyInsights = _extractKeyInsights(result);
-    
+
     return ResultSummary(
       title: 'Resumo - ${strategy.strategyName}',
-      primaryResults: primaryValues.map((v) => 
-        '${v.label}: ${formatValue((v.value as num).toDouble(), unit: v.unit)}'
-      ).toList(),
+      primaryResults:
+          primaryValues
+              .map(
+                (v) =>
+                    '${v.label}: ${formatValue((v.value as num).toDouble(), unit: v.unit)}',
+              )
+              .toList(),
       keyInsights: keyInsights,
       totalRecommendations: result.recommendations?.length ?? 0,
       confidence: _calculateConfidence(result),
@@ -180,8 +189,12 @@ class CalculatorFormattingService {
     FormattingOptions options,
   ) async {
     return values.map((value) {
-      final formatted = _formatByUnit((value.value as num).toDouble(), value.unit, options);
-      
+      final formatted = _formatByUnit(
+        (value.value as num).toDouble(),
+        value.unit,
+        options,
+      );
+
       return FormattedResultValue(
         label: value.label,
         formattedValue: formatted,
@@ -201,7 +214,7 @@ class CalculatorFormattingService {
     return recommendations.asMap().entries.map((entry) {
       final index = entry.key;
       final recommendation = entry.value;
-      
+
       return FormattedRecommendation(
         id: 'rec_$index',
         text: recommendation,
@@ -226,23 +239,37 @@ class CalculatorFormattingService {
         return formatWeight(value, decimalPlaces: options.decimalPlaces);
       case 't':
       case 't/ha':
-        return formatWeight(value, unit: 't', decimalPlaces: options.decimalPlaces);
+        return formatWeight(
+          value,
+          unit: 't',
+          decimalPlaces: options.decimalPlaces,
+        );
       case 'ha':
         return formatArea(value, decimalPlaces: options.decimalPlaces);
       case 'r\$':
         return formatCurrency(value, decimalPlaces: options.decimalPlaces);
       case '%':
-        return formatPercentage(value / 100, decimalPlaces: options.decimalPlaces);
+        return formatPercentage(
+          value / 100,
+          decimalPlaces: options.decimalPlaces,
+        );
       case 'l':
         return formatVolume(value, decimalPlaces: options.decimalPlaces);
       default:
-        return formatValue(value, decimalPlaces: options.decimalPlaces, unit: unit);
+        return formatValue(
+          value,
+          decimalPlaces: options.decimalPlaces,
+          unit: unit,
+        );
     }
   }
 
   String _formatCellValue(dynamic value, FormattingOptions options) {
     if (value is num) {
-      return formatValue(value.toDouble(), decimalPlaces: options.decimalPlaces);
+      return formatValue(
+        value.toDouble(),
+        decimalPlaces: options.decimalPlaces,
+      );
     }
     return value.toString();
   }
@@ -252,15 +279,18 @@ class CalculatorFormattingService {
     final parts = number.split('.');
     final integerPart = parts[0];
     final decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-    
+
     // Adicionar separadores a cada 3 dígitos
     final regex = RegExp(r'(\d)(?=(\d{3})+(?!\d))');
     final formattedInteger = integerPart.replaceAll(regex, r'$1.');
-    
+
     return formattedInteger + decimalPart;
   }
 
-  String _generateResultTitle(ICalculatorStrategy strategy, CalculationResult result) {
+  String _generateResultTitle(
+    ICalculatorStrategy strategy,
+    CalculationResult result,
+  ) {
     return 'Resultado - ${strategy.strategyName}';
   }
 
@@ -271,35 +301,44 @@ class CalculatorFormattingService {
   }
 
   Future<String> _generateSummary(
-    CalculationResult result, 
+    CalculationResult result,
     ICalculatorStrategy strategy,
     FormattingOptions options,
   ) async {
     final primaryValues = result.values.where((v) => v.isPrimary).take(3);
     final summaryParts = <String>[];
-    
+
     for (final value in primaryValues) {
-      final formatted = _formatByUnit((value.value as num).toDouble(), value.unit, options);
+      final formatted = _formatByUnit(
+        (value.value as num).toDouble(),
+        value.unit,
+        options,
+      );
       summaryParts.add('${value.label}: $formatted');
     }
-    
+
     if (result.recommendations?.isNotEmpty == true) {
-      summaryParts.add('${result.recommendations!.length} recomendações geradas');
+      summaryParts.add(
+        '${result.recommendations!.length} recomendações geradas',
+      );
     }
-    
+
     return summaryParts.join(' • ');
   }
 
   ValueCategory _categorizeValue(CalculationResultValue value) {
     if (value.isPrimary) return ValueCategory.primary;
-    if (value.unit.toLowerCase().contains('r\$')) return ValueCategory.financial;
+    if (value.unit.toLowerCase().contains('r\$'))
+      return ValueCategory.financial;
     if (value.label.toLowerCase().contains('total')) return ValueCategory.total;
     return ValueCategory.supporting;
   }
 
   RecommendationPriority _extractPriority(String recommendation) {
     final lower = recommendation.toLowerCase();
-    if (lower.contains('importante') || lower.contains('crítico') || lower.contains('essencial')) {
+    if (lower.contains('importante') ||
+        lower.contains('crítico') ||
+        lower.contains('essencial')) {
       return RecommendationPriority.high;
     }
     if (lower.contains('recomenda') || lower.contains('considera')) {
@@ -326,38 +365,48 @@ class CalculatorFormattingService {
   }
 
   bool _isActionable(String recommendation) {
-    final actionWords = ['aplicar', 'realizar', 'considerar', 'adequar', 'implementar'];
+    final actionWords = [
+      'aplicar',
+      'realizar',
+      'considerar',
+      'adequar',
+      'implementar',
+    ];
     final lower = recommendation.toLowerCase();
     return actionWords.any((word) => lower.contains(word));
   }
 
   List<String> _extractKeyInsights(CalculationResult result) {
     final insights = <String>[];
-    
+
     // Insights baseados nos valores primários
     final primaryValues = result.values.where((v) => v.isPrimary).toList();
-    
+
     if (primaryValues.length >= 3) {
-      final maxValue = primaryValues.reduce((a, b) => (a.value as num) > (b.value as num) ? a : b);
+      final maxValue = primaryValues.reduce(
+        (a, b) => (a.value as num) > (b.value as num) ? a : b,
+      );
       insights.add('${maxValue.label} é o maior valor calculado');
     }
-    
+
     // Insights baseados em recomendações
     if ((result.recommendations?.length ?? 0) > 5) {
-      insights.add('Múltiplas recomendações indicam necessidade de atenção especial');
+      insights.add(
+        'Múltiplas recomendações indicam necessidade de atenção especial',
+      );
     }
-    
+
     return insights;
   }
 
   double _calculateConfidence(CalculationResult result) {
     // Algoritmo simples para calcular confiança baseado na completude dos dados
     double confidence = 0.8; // Base
-    
+
     if (result.values.isNotEmpty) confidence += 0.1;
     if (result.recommendations?.isNotEmpty == true) confidence += 0.1;
     if (result.tableData?.isNotEmpty == true) confidence += 0.1;
-    
+
     return math.min(confidence, 1.0);
   }
 }
@@ -484,18 +533,9 @@ class ResultSummary {
   });
 }
 
-enum ValueCategory {
-  primary,
-  supporting,
-  financial,
-  total,
-}
+enum ValueCategory { primary, supporting, financial, total }
 
-enum RecommendationPriority {
-  high,
-  medium,
-  low,
-}
+enum RecommendationPriority { high, medium, low }
 
 enum RecommendationCategory {
   application,

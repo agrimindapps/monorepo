@@ -9,22 +9,21 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// Serviço de identificação única de dispositivos
 class DeviceIdentityService {
   static DeviceIdentityService? _instance;
-  static DeviceIdentityService get instance => _instance ??= DeviceIdentityService._();
+  static DeviceIdentityService get instance =>
+      _instance ??= DeviceIdentityService._();
 
   DeviceIdentityService._()
-      : _deviceInfo = DeviceInfoPlugin(),
-        _secureStorage = const FlutterSecureStorage(
-          aOptions: AndroidOptions(
-            encryptedSharedPreferences: true,
-          ),
-          iOptions: IOSOptions(
-            accessibility: KeychainAccessibility.first_unlock_this_device,
-          ),
-        );
+    : _deviceInfo = DeviceInfoPlugin(),
+      _secureStorage = const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+        iOptions: IOSOptions(
+          accessibility: KeychainAccessibility.first_unlock_this_device,
+        ),
+      );
 
   final DeviceInfoPlugin _deviceInfo;
   final FlutterSecureStorage _secureStorage;
-  
+
   static const String _deviceUuidKey = 'device_uuid_v2';
   static const String _deviceInfoKey = 'device_info_cache';
 
@@ -43,7 +42,7 @@ class DeviceIdentityService {
 
       // 3. Armazenar de forma segura
       await _secureStorage.write(key: _deviceUuidKey, value: uuid);
-      
+
       return uuid;
     } catch (e) {
       // Fallback: gerar UUID baseado apenas em timestamp
@@ -64,10 +63,10 @@ class DeviceIdentityService {
 
       // Obter informações atuais
       final deviceInfo = await _getCurrentDeviceInfo();
-      
+
       // Armazenar em cache
       await _cacheDeviceInfo(deviceInfo);
-      
+
       return deviceInfo;
     } catch (e) {
       // Retornar informações básicas em caso de erro
@@ -79,7 +78,7 @@ class DeviceIdentityService {
   Future<DeviceInfo> refreshDeviceInfo() async {
     // Limpar cache
     await _secureStorage.delete(key: _deviceInfoKey);
-    
+
     // Obter informações atualizadas
     return await getDeviceInfo();
   }
@@ -91,12 +90,11 @@ class DeviceIdentityService {
       if (cachedInfo == null) return false;
 
       final currentInfo = await _getCurrentDeviceInfo();
-      
+
       // Verificar mudanças críticas
       return cachedInfo.platform != currentInfo.platform ||
-             cachedInfo.model != currentInfo.model ||
-             cachedInfo.systemVersion != currentInfo.systemVersion;
-             
+          cachedInfo.model != currentInfo.model ||
+          cachedInfo.systemVersion != currentInfo.systemVersion;
     } catch (e) {
       return false;
     }
@@ -142,19 +140,21 @@ class DeviceIdentityService {
         isActive: true,
       );
     }
-    
-    throw UnsupportedError('Platform not supported: ${Platform.operatingSystem}');
+
+    throw UnsupportedError(
+      'Platform not supported: ${Platform.operatingSystem}',
+    );
   }
 
   /// Gera nome amigável para dispositivos Android
   String _generateFriendlyName(AndroidDeviceInfo androidInfo) {
     final brand = _capitalizeFirst(androidInfo.brand);
     final model = androidInfo.model;
-    
+
     if (model.toLowerCase().startsWith(brand.toLowerCase())) {
       return model;
     }
-    
+
     return '$brand $model';
   }
 
@@ -192,11 +192,11 @@ class DeviceIdentityService {
       // Adicionar informações da aplicação
       final packageInfo = await PackageInfo.fromPlatform();
       identifiers['packageName'] = packageInfo.packageName;
-      
     } catch (e) {
       // Em caso de erro, usar identificadores mínimos
       identifiers['platform'] = Platform.operatingSystem;
-      identifiers['timestamp'] = DateTime.now().millisecondsSinceEpoch.toString();
+      identifiers['timestamp'] =
+          DateTime.now().millisecondsSinceEpoch.toString();
     }
 
     return identifiers;
@@ -213,14 +213,14 @@ class DeviceIdentityService {
     // Gerar hash SHA-256
     final bytes = utf8.encode(identifierString);
     final digest = sha256.convert(bytes);
-    
+
     // Converter para formato UUID (32 caracteres hexadecimais)
     final hexString = digest.toString();
     return '${hexString.substring(0, 8)}-'
-           '${hexString.substring(8, 12)}-'
-           '${hexString.substring(12, 16)}-'
-           '${hexString.substring(16, 20)}-'
-           '${hexString.substring(20, 32)}';
+        '${hexString.substring(8, 12)}-'
+        '${hexString.substring(12, 16)}-'
+        '${hexString.substring(16, 20)}-'
+        '${hexString.substring(20, 32)}';
   }
 
   /// Gera UUID de fallback em caso de erro
@@ -228,7 +228,7 @@ class DeviceIdentityService {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final random = (timestamp % 10000).toString().padLeft(4, '0');
     final platform = Platform.operatingSystem.substring(0, 3);
-    
+
     return 'fallback-$platform-$timestamp-$random';
   }
 
@@ -250,7 +250,7 @@ class DeviceIdentityService {
     try {
       final data = deviceInfo.toMap();
       data['cachedAt'] = DateTime.now().millisecondsSinceEpoch;
-      
+
       final jsonData = jsonEncode(data);
       await _secureStorage.write(key: _deviceInfoKey, value: jsonData);
     } catch (e) {
@@ -262,9 +262,9 @@ class DeviceIdentityService {
   bool _isCacheValid(DeviceInfo cachedInfo) {
     try {
       final cachedAt = DateTime.fromMillisecondsSinceEpoch(
-        cachedInfo.toMap()['cachedAt'] as int? ?? 0
+        cachedInfo.toMap()['cachedAt'] as int? ?? 0,
       );
-      
+
       final age = DateTime.now().difference(cachedAt);
       return age.inHours < 24;
     } catch (e) {
@@ -369,10 +369,10 @@ class DeviceInfo {
     isPhysicalDevice: map['isPhysicalDevice'] as bool? ?? true,
     manufacturer: map['manufacturer'] as String? ?? 'Unknown',
     firstLoginAt: DateTime.fromMillisecondsSinceEpoch(
-      map['firstLoginAt'] as int? ?? DateTime.now().millisecondsSinceEpoch
+      map['firstLoginAt'] as int? ?? DateTime.now().millisecondsSinceEpoch,
     ),
     lastActiveAt: DateTime.fromMillisecondsSinceEpoch(
-      map['lastActiveAt'] as int? ?? DateTime.now().millisecondsSinceEpoch
+      map['lastActiveAt'] as int? ?? DateTime.now().millisecondsSinceEpoch,
     ),
     isActive: map['isActive'] as bool? ?? true,
   );

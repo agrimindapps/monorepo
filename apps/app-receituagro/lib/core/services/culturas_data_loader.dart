@@ -4,31 +4,35 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../di/injection_container.dart' as di;
 import '../data/repositories/cultura_hive_repository.dart';
+import '../di/injection_container.dart' as di;
 
-/// Serviço para carregar dados de culturas dos assets JSON
 class CulturasDataLoader {
   static bool _isLoaded = false;
 
   /// Carrega dados de culturas do JSON dos assets usando repositório Hive
   static Future<void> loadCulturasData() async {
     if (_isLoaded) {
-      developer.log('Culturas já carregadas, pulando...',
-          name: 'CulturasDataLoader');
+      developer.log(
+        'Culturas já carregadas, pulando...',
+        name: 'CulturasDataLoader',
+      );
       return;
     }
 
     try {
-      developer.log('🌱 [CULTURAS] Iniciando carregamento de culturas...',
-          name: 'CulturasDataLoader');
+      developer.log(
+        '🌱 [CULTURAS] Iniciando carregamento de culturas...',
+        name: 'CulturasDataLoader',
+      );
       print('🌱 [CULTURAS] Iniciando carregamento de culturas...');
 
       // 1. Carrega JSON do asset - use path without 'assets/' prefix for web compatibility
-      const String assetPath = kIsWeb 
-          ? 'database/json/tbculturas/TBCULTURAS0.json'
-          : 'assets/database/json/tbculturas/TBCULTURAS0.json';
-      
+      const String assetPath =
+          kIsWeb
+              ? 'database/json/tbculturas/TBCULTURAS0.json'
+              : 'assets/database/json/tbculturas/TBCULTURAS0.json';
+
       final String jsonString = await rootBundle.loadString(assetPath);
 
       final dynamic decodedJson = json.decode(jsonString);
@@ -37,19 +41,24 @@ class CulturasDataLoader {
           jsonData.cast<Map<String, dynamic>>().toList();
 
       // Filtra apenas registros válidos
-      final List<Map<String, dynamic>> culturas = allCulturas
-          .where((item) =>
-              item['cultura'] != null &&
-              item['cultura'].toString().trim().isNotEmpty &&
-              item['idReg'] != null &&
-              item['idReg'].toString().trim().isNotEmpty)
-          .toList();
+      final List<Map<String, dynamic>> culturas =
+          allCulturas
+              .where(
+                (item) =>
+                    item['cultura'] != null &&
+                    item['cultura'].toString().trim().isNotEmpty &&
+                    item['idReg'] != null &&
+                    item['idReg'].toString().trim().isNotEmpty,
+              )
+              .toList();
 
       developer.log(
-          '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
-          name: 'CulturasDataLoader');
+        '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
+        name: 'CulturasDataLoader',
+      );
       print(
-          '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas');
+        '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
+      );
 
       // 2. Obtém repositório do DI
       final repository = di.sl<CulturaHiveRepository>();
@@ -59,13 +68,17 @@ class CulturasDataLoader {
 
       result.fold(
         (error) {
-          developer.log('Erro ao carregar culturas: $error',
-              name: 'CulturasDataLoader');
+          developer.log(
+            'Erro ao carregar culturas: $error',
+            name: 'CulturasDataLoader',
+          );
           throw Exception('Erro ao carregar culturas: $error');
         },
         (_) {
-          developer.log('Culturas carregadas com sucesso!',
-              name: 'CulturasDataLoader');
+          developer.log(
+            'Culturas carregadas com sucesso!',
+            name: 'CulturasDataLoader',
+          );
           _isLoaded = true;
         },
       );
@@ -75,18 +88,22 @@ class CulturasDataLoader {
       if (loadedResult.isSuccess) {
         final loadedCulturas = loadedResult.data!;
         developer.log(
-            'Verificação: ${loadedCulturas.length} culturas disponíveis',
-            name: 'CulturasDataLoader');
+          'Verificação: ${loadedCulturas.length} culturas disponíveis',
+          name: 'CulturasDataLoader',
+        );
 
         if (loadedCulturas.isNotEmpty) {
           developer.log(
-              'Primeiras 3 culturas: ${loadedCulturas.take(3).map((c) => c.cultura).join(', ')}',
-              name: 'CulturasDataLoader');
+            'Primeiras 3 culturas: ${loadedCulturas.take(3).map((c) => c.cultura).join(', ')}',
+            name: 'CulturasDataLoader',
+          );
         }
       }
     } catch (e) {
-      developer.log('❌ [CULTURAS] Erro durante carregamento de culturas: $e',
-          name: 'CulturasDataLoader');
+      developer.log(
+        '❌ [CULTURAS] Erro durante carregamento de culturas: $e',
+        name: 'CulturasDataLoader',
+      );
       print('❌ [CULTURAS] Erro durante carregamento de culturas: $e');
       print('❌ [CULTURAS] Stack trace: ${StackTrace.current}');
       // Não bloqueia o app, apenas registra o erro
@@ -117,7 +134,7 @@ class CulturasDataLoader {
     try {
       final repository = di.sl<CulturaHiveRepository>();
       final result = await repository.getAll();
-      
+
       if (result.isSuccess) {
         final culturas = result.data!;
         return {
@@ -133,11 +150,7 @@ class CulturasDataLoader {
         };
       }
     } catch (e) {
-      return {
-        'total_culturas': 0,
-        'is_loaded': false,
-        'error': e.toString(),
-      };
+      return {'total_culturas': 0, 'is_loaded': false, 'error': e.toString()};
     }
   }
 }

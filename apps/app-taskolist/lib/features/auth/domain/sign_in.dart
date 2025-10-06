@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' hide UserEntity;
 
 import '../../../core/usecases/usecase.dart';
 import '../../../core/utils/typedef.dart';
@@ -12,18 +12,12 @@ class SignIn extends UseCaseWithParams<UserEntity, SignInParams> {
 
   @override
   ResultFuture<UserEntity> call(SignInParams params) async {
-    return _repository.signInWithEmailPassword(
-      params.email,
-      params.password,
-    );
+    return _repository.signInWithEmailPassword(params.email, params.password);
   }
 }
 
 class SignInParams extends Equatable {
-  const SignInParams({
-    required this.email,
-    required this.password,
-  });
+  const SignInParams({required this.email, required this.password});
 
   final String email;
   final String password;

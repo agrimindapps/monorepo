@@ -1,9 +1,7 @@
+import 'package:core/core.dart' hide AuthProvider, getIt;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_agrihurbi/core/di/injection_container.dart';
 
-import '../../domain/entities/user_entity.dart';
+import '../../../../core/di/injection_container.dart';
 import '../providers/auth_provider.dart';
 
 /// Riverpod provider exposing the existing AuthProvider (registered with GetIt)

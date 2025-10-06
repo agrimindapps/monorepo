@@ -1,22 +1,22 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart';
 
 import '../entities/calculation_template.dart';
 
 /// Serviço de gerenciamento de templates de cálculo
-/// 
+///
 /// Implementa persistência local para templates salvos
 /// com funcionalidades de busca, filtragem e organização
 class CalculatorTemplateService {
   static const String _templatesKey = 'calculator_templates';
   static const String _templatesBackupKey = 'calculator_templates_backup';
   static const String _lastSyncKey = 'calculator_templates_last_sync';
-  
+
   final SharedPreferences _prefs;
   final Random _random = Random();
-  
+
   CalculatorTemplateService(this._prefs);
 
   /// Gera ID único para template
@@ -31,7 +31,7 @@ class CalculatorTemplateService {
     try {
       final templatesJson = _prefs.getString(_templatesKey);
       if (templatesJson == null) return [];
-      
+
       final templatesList = jsonDecode(templatesJson) as List;
       return templatesList
           .map((json) => _templateFromJson(json as Map<String, dynamic>))
@@ -51,7 +51,9 @@ class CalculatorTemplateService {
     return allTemplates
         .where((template) => template.calculatorId == calculatorId)
         .toList()
-      ..sort((a, b) => b.lastUsed?.compareTo(a.lastUsed ?? DateTime(1970)) ?? 0);
+      ..sort(
+        (a, b) => b.lastUsed?.compareTo(a.lastUsed ?? DateTime(1970)) ?? 0,
+      );
   }
 
   /// Obtém template por ID
@@ -68,14 +70,15 @@ class CalculatorTemplateService {
   Future<bool> saveTemplate(CalculationTemplate template) async {
     try {
       final templates = await getAllTemplates();
-      
+
       // Verificar se já existe template com mesmo nome para esta calculadora
       final existingIndex = templates.indexWhere(
-        (t) => t.name == template.name && 
-               t.calculatorId == template.calculatorId &&
-               t.userId == template.userId,
+        (t) =>
+            t.name == template.name &&
+            t.calculatorId == template.calculatorId &&
+            t.userId == template.userId,
       );
-      
+
       if (existingIndex != -1) {
         // Atualizar template existente
         templates[existingIndex] = template.copyWith(
@@ -88,7 +91,7 @@ class CalculatorTemplateService {
         );
         templates.add(newTemplate);
       }
-      
+
       await _saveTemplates(templates);
       await _createBackup(templates);
       return true;
@@ -102,7 +105,7 @@ class CalculatorTemplateService {
     try {
       final templates = await getAllTemplates();
       templates.removeWhere((template) => template.id == templateId);
-      
+
       await _saveTemplates(templates);
       await _createBackup(templates);
       return true;
@@ -116,13 +119,13 @@ class CalculatorTemplateService {
     try {
       final templates = await getAllTemplates();
       final templateIndex = templates.indexWhere((t) => t.id == templateId);
-      
+
       if (templateIndex != -1) {
         templates[templateIndex] = templates[templateIndex].markAsUsed();
         await _saveTemplates(templates);
         return true;
       }
-      
+
       return false;
     } catch (e) {
       return false;
@@ -132,15 +135,19 @@ class CalculatorTemplateService {
   /// Busca templates por termo
   Future<List<CalculationTemplate>> searchTemplates(String query) async {
     if (query.trim().isEmpty) return await getAllTemplates();
-    
+
     final templates = await getAllTemplates();
     final normalizedQuery = _normalizeText(query);
-    
+
     return templates.where((template) {
       return _normalizeText(template.name).contains(normalizedQuery) ||
-             _normalizeText(template.description ?? '').contains(normalizedQuery) ||
-             template.tags.any((tag) => _normalizeText(tag).contains(normalizedQuery)) ||
-             _normalizeText(template.calculatorName).contains(normalizedQuery);
+          _normalizeText(
+            template.description ?? '',
+          ).contains(normalizedQuery) ||
+          template.tags.any(
+            (tag) => _normalizeText(tag).contains(normalizedQuery),
+          ) ||
+          _normalizeText(template.calculatorName).contains(normalizedQuery);
     }).toList();
   }
 
@@ -154,28 +161,30 @@ class CalculatorTemplateService {
   /// Obtém templates usados recentemente
   Future<List<CalculationTemplate>> getRecentTemplates({int limit = 10}) async {
     final templates = await getAllTemplates();
-    
+
     // Filtrar templates que foram usados
-    final usedTemplates = templates
-        .where((template) => template.lastUsed != null)
-        .toList()
-      ..sort((a, b) => b.lastUsed!.compareTo(a.lastUsed!));
-    
+    final usedTemplates =
+        templates.where((template) => template.lastUsed != null).toList()
+          ..sort((a, b) => b.lastUsed!.compareTo(a.lastUsed!));
+
     return usedTemplates.take(limit).toList();
   }
 
   /// Obtém templates mais populares (mais usados)
-  Future<List<CalculationTemplate>> getPopularTemplates({int limit = 10}) async {
+  Future<List<CalculationTemplate>> getPopularTemplates({
+    int limit = 10,
+  }) async {
     final templates = await getAllTemplates();
-    
+
     // Por simplicidade, considerar templates com lastUsed como mais populares
     // Em implementação mais avançada, poderia ter contador de usos
-    final popularTemplates = templates
-        .where((template) => template.wasUsedRecently)
-        .toList()
-      ..sort((a, b) => (b.lastUsed ?? DateTime(1970))
-          .compareTo(a.lastUsed ?? DateTime(1970)));
-    
+    final popularTemplates =
+        templates.where((template) => template.wasUsedRecently).toList()..sort(
+          (a, b) => (b.lastUsed ?? DateTime(1970)).compareTo(
+            a.lastUsed ?? DateTime(1970),
+          ),
+        );
+
     return popularTemplates.take(limit).toList();
   }
 
@@ -189,27 +198,29 @@ class CalculatorTemplateService {
   Future<bool> importTemplates(String jsonData) async {
     try {
       final templatesList = jsonDecode(jsonData) as List;
-      final templates = templatesList
-          .map((json) => _templateFromJson(json as Map<String, dynamic>))
-          .where((template) => template.isValid)
-          .toList();
-      
+      final templates =
+          templatesList
+              .map((json) => _templateFromJson(json as Map<String, dynamic>))
+              .where((template) => template.isValid)
+              .toList();
+
       final existingTemplates = await getAllTemplates();
-      
+
       // Combinar templates, evitando duplicatas
       final combinedTemplates = <CalculationTemplate>[...existingTemplates];
-      
+
       for (final template in templates) {
         final existsIndex = combinedTemplates.indexWhere(
-          (t) => t.name == template.name && 
-                 t.calculatorId == template.calculatorId,
+          (t) =>
+              t.name == template.name &&
+              t.calculatorId == template.calculatorId,
         );
-        
+
         if (existsIndex == -1) {
           combinedTemplates.add(template.copyWith(id: _generateUniqueId()));
         }
       }
-      
+
       await _saveTemplates(combinedTemplates);
       await _createBackup(combinedTemplates);
       return true;
@@ -233,7 +244,7 @@ class CalculatorTemplateService {
   Future<TemplateStats> getStats() async {
     final templates = await getAllTemplates();
     final lastSync = _prefs.getString(_lastSyncKey);
-    
+
     return TemplateStats(
       totalTemplates: templates.length,
       recentlyUsed: templates.where((t) => t.wasUsedRecently).length,
@@ -270,16 +281,17 @@ class CalculatorTemplateService {
     try {
       final backupJson = _prefs.getString(_templatesBackupKey);
       if (backupJson == null) return [];
-      
+
       final backupData = jsonDecode(backupJson) as Map<String, dynamic>;
-      final templates = (backupData['templates'] as List)
-          .map((json) => _templateFromJson(json as Map<String, dynamic>))
-          .where((template) => template.isValid)
-          .toList();
-      
+      final templates =
+          (backupData['templates'] as List)
+              .map((json) => _templateFromJson(json as Map<String, dynamic>))
+              .where((template) => template.isValid)
+              .toList();
+
       // Restaurar dados principais
       await _saveTemplates(templates);
-      
+
       return templates;
     } catch (e) {
       return [];
@@ -308,11 +320,18 @@ class CalculatorTemplateService {
       name: json['name']?.toString() ?? '',
       calculatorId: json['calculatorId']?.toString() ?? '',
       calculatorName: json['calculatorName']?.toString() ?? '',
-      inputValues: Map<String, dynamic>.from((json['inputValues'] as Map<dynamic, dynamic>?) ?? {}),
+      inputValues: Map<String, dynamic>.from(
+        (json['inputValues'] as Map<dynamic, dynamic>?) ?? {},
+      ),
       description: json['description']?.toString(),
       tags: List<String>.from((json['tags'] as Iterable?) ?? []),
-      createdAt: DateTime.parse(json['createdAt']?.toString() ?? DateTime.now().toIso8601String()),
-      lastUsed: json['lastUsed']?.toString() != null ? DateTime.parse(json['lastUsed'].toString()) : null,
+      createdAt: DateTime.parse(
+        json['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
+      ),
+      lastUsed:
+          json['lastUsed']?.toString() != null
+              ? DateTime.parse(json['lastUsed'].toString())
+              : null,
       userId: json['userId']?.toString() ?? '',
       isPublic: json['isPublic'] == true,
     );

@@ -1,12 +1,10 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'database_inspector_service.dart';
 
 /// Serviço para limpeza de dados do GasOMeter
 /// Permite limpar boxes Hive e SharedPreferences de forma segura
 class DataCleanerService {
-
   DataCleanerService._internal();
   static DataCleanerService? _instance;
   static DataCleanerService get instance {
@@ -48,7 +46,6 @@ class DataCleanerService {
       results['success'] = true;
       results['totalClearedBoxes'] = results['clearedBoxes'].length;
       results['totalClearedPreferences'] = results['clearedPreferences'].length;
-      
     } catch (e) {
       results['success'] = false;
       results['mainError'] = e.toString();
@@ -58,12 +55,15 @@ class DataCleanerService {
     }
 
     results['endTime'] = DateTime.now();
-    results['duration'] = results['endTime'].difference(startTime).inMilliseconds;
+    results['duration'] =
+        results['endTime'].difference(startTime).inMilliseconds;
 
     if (kDebugMode) {
       debugPrint('✅ Limpeza completa finalizada:');
       debugPrint('   Boxes limpos: ${results['totalClearedBoxes'] ?? 0}');
-      debugPrint('   Preferências limpas: ${results['totalClearedPreferences'] ?? 0}');
+      debugPrint(
+        '   Preferências limpas: ${results['totalClearedPreferences'] ?? 0}',
+      );
       debugPrint('   Erros: ${(results['errors'] as List).length}');
       debugPrint('   Tempo: ${results['duration']}ms');
     }
@@ -87,18 +87,18 @@ class DataCleanerService {
       try {
         final box = Hive.box<dynamic>(boxKey);
         final recordCount = box.keys.length;
-        
+
         await box.clear();
-        
+
         results['clearedBoxes'].add(boxKey);
-        
+
         if (kDebugMode) {
           debugPrint('   ✅ Box "$boxKey" limpo ($recordCount registros)');
         }
       } catch (e) {
         final error = 'Erro ao limpar box "$boxKey": $e';
         results['errors'].add(error);
-        
+
         if (kDebugMode) {
           debugPrint('   ❌ $error');
         }
@@ -123,16 +123,15 @@ class DataCleanerService {
 
       final box = Hive.box<dynamic>(boxKey);
       final recordCount = box.keys.length;
-      
+
       await box.clear();
-      
+
       results['success'] = true;
       results['recordsCleared'] = recordCount;
 
       if (kDebugMode) {
         debugPrint('✅ Box "$boxKey" limpo ($recordCount registros)');
       }
-      
     } catch (e) {
       results['error'] = e.toString();
       if (kDebugMode) {
@@ -153,19 +152,23 @@ class DataCleanerService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final allKeys = prefs.getKeys();
-      
+
       // Chaves específicas do app que devem ser limpas
-      final appKeys = allKeys.where((key) => 
-        key.startsWith('gasometer_') ||
-        key.startsWith('theme_') ||
-        key.startsWith('user_') ||
-        key.startsWith('vehicle_') ||
-        key.startsWith('fuel_') ||
-        key.startsWith('maintenance_') ||
-        key.startsWith('expense_') ||
-        key.contains('gasometer') ||
-        key == 'theme_mode' // Theme provider key
-      ).toList();
+      final appKeys =
+          allKeys
+              .where(
+                (key) =>
+                    key.startsWith('gasometer_') ||
+                    key.startsWith('theme_') ||
+                    key.startsWith('user_') ||
+                    key.startsWith('vehicle_') ||
+                    key.startsWith('fuel_') ||
+                    key.startsWith('maintenance_') ||
+                    key.startsWith('expense_') ||
+                    key.contains('gasometer') ||
+                    key == 'theme_mode', // Theme provider key
+              )
+              .toList();
 
       if (kDebugMode) {
         debugPrint('🧹 Limpando ${appKeys.length} preferências do app...');
@@ -175,14 +178,14 @@ class DataCleanerService {
         try {
           await prefs.remove(key);
           results['clearedKeys'].add(key);
-          
+
           if (kDebugMode) {
             debugPrint('   ✅ Chave "$key" removida');
           }
         } catch (e) {
           final error = 'Erro ao remover chave "$key": $e';
           results['errors'].add(error);
-          
+
           if (kDebugMode) {
             debugPrint('   ❌ $error');
           }
@@ -194,7 +197,6 @@ class DataCleanerService {
           debugPrint('   ℹ️ Nenhuma preferência específica do app encontrada');
         }
       }
-
     } catch (e) {
       results['errors'].add('Erro ao acessar SharedPreferences: $e');
       if (kDebugMode) {
@@ -232,12 +234,14 @@ class DataCleanerService {
     }
 
     if (kDebugMode) {
-      debugPrint('🧹 Limpando módulo "$moduleName" (${boxesToClear.length} boxes)...');
+      debugPrint(
+        '🧹 Limpando módulo "$moduleName" (${boxesToClear.length} boxes)...',
+      );
     }
 
     for (final boxKey in boxesToClear) {
       final boxResult = await clearSpecificBox(boxKey);
-      
+
       if (boxResult['success'] == true) {
         results['clearedBoxes'].add(boxKey);
       } else {
@@ -263,13 +267,18 @@ class DataCleanerService {
       }
 
       // Estatísticas SharedPreferences
-      final sharedPrefsData = await _inspectorService.loadSharedPreferencesData();
-      final appPrefsCount = sharedPrefsData.where((record) => 
-        record.key.contains('gasometer') ||
-        record.key.startsWith('theme_') ||
-        record.key.startsWith('user_') ||
-        record.key == 'theme_mode'
-      ).length;
+      final sharedPrefsData =
+          await _inspectorService.loadSharedPreferencesData();
+      final appPrefsCount =
+          sharedPrefsData
+              .where(
+                (record) =>
+                    record.key.contains('gasometer') ||
+                    record.key.startsWith('theme_') ||
+                    record.key.startsWith('user_') ||
+                    record.key == 'theme_mode',
+              )
+              .length;
 
       return {
         'totalBoxes': availableBoxes.length,
@@ -277,13 +286,14 @@ class DataCleanerService {
         'totalSharedPrefs': sharedPrefsData.length,
         'appSpecificPrefs': appPrefsCount,
         'boxStats': boxStats,
-        'availableModules': _inspectorService.customBoxes.map((box) => box.module).toSet().toList(),
+        'availableModules':
+            _inspectorService.customBoxes
+                .map((box) => box.module)
+                .toSet()
+                .toList(),
       };
-
     } catch (e) {
-      return {
-        'error': 'Erro ao obter estatísticas: $e',
-      };
+      return {'error': 'Erro ao obter estatísticas: $e'};
     }
   }
 
@@ -291,7 +301,8 @@ class DataCleanerService {
   Future<bool> hasDataToClear() async {
     try {
       final stats = await getDataStatsBeforeCleaning();
-      return (stats['totalRecords'] as int? ?? 0) > 0 || (stats['appSpecificPrefs'] as int? ?? 0) > 0;
+      return (stats['totalRecords'] as int? ?? 0) > 0 ||
+          (stats['appSpecificPrefs'] as int? ?? 0) > 0;
     } catch (e) {
       return false;
     }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/promotional_notification.dart';
 import 'firebase_messaging_service.dart';
@@ -9,7 +9,7 @@ import 'firebase_messaging_service.dart';
 /// Gerenciador de notificações promocionais do ReceitaAgro
 /// Controla when/how mostrar notificações promocionais baseado no comportamento do usuário
 class PromotionalNotificationManager {
-  static final PromotionalNotificationManager _instance = 
+  static final PromotionalNotificationManager _instance =
       PromotionalNotificationManager._internal();
   factory PromotionalNotificationManager() => _instance;
   PromotionalNotificationManager._internal();
@@ -19,7 +19,7 @@ class PromotionalNotificationManager {
   static const String _keyUserPreferences = 'promotional_preferences';
   static const String _keyDismissedNotifications = 'dismissed_notifications';
 
-  final ReceitaAgroFirebaseMessagingService _messagingService = 
+  final ReceitaAgroFirebaseMessagingService _messagingService =
       ReceitaAgroFirebaseMessagingService();
 
   /// Configurações de frequência de notificações
@@ -42,12 +42,12 @@ class PromotionalNotificationManager {
   Future<bool> canShowPromotionalNotification() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Verificar última vez que mostrou promoção
       final lastShown = prefs.getInt(_keyLastPromotionalShown) ?? 0;
       final lastShownTime = DateTime.fromMillisecondsSinceEpoch(lastShown);
       final timeSinceLastShown = DateTime.now().difference(lastShownTime);
-      
+
       if (timeSinceLastShown < _minIntervalBetweenPromotions) {
         return false;
       }
@@ -108,15 +108,18 @@ class PromotionalNotificationManager {
   }
 
   /// Cria promoção relacionada a defensivos
-  PromotionalNotification _createDefensivosPromotion(Map<String, dynamic>? data) {
+  PromotionalNotification _createDefensivosPromotion(
+    Map<String, dynamic>? data,
+  ) {
     final searchTerm = data?['search_term'] as String?;
-    
+
     return PromotionalNotification(
       id: DateTime.now().millisecondsSinceEpoch,
       title: '🌱 Encontre o Defensivo Ideal',
-      body: searchTerm != null 
-          ? 'Veja mais opções para "$searchTerm" no ReceitaAgro Premium!'
-          : 'Acesso completo a todos os defensivos com ReceitaAgro Premium',
+      body:
+          searchTerm != null
+              ? 'Veja mais opções para "$searchTerm" no ReceitaAgro Premium!'
+              : 'Acesso completo a todos os defensivos com ReceitaAgro Premium',
       type: NotificationType.promotional,
       channelId: 'receituagro_promotional',
       channelName: 'Ofertas e Promoções',
@@ -133,13 +136,14 @@ class PromotionalNotificationManager {
   /// Cria promoção relacionada a pragas
   PromotionalNotification _createPragasPromotion(Map<String, dynamic>? data) {
     final pragaName = data?['praga_name'] as String?;
-    
+
     return PromotionalNotification(
       id: DateTime.now().millisecondsSinceEpoch,
       title: '🐛 Combata Pragas Eficazmente',
-      body: pragaName != null
-          ? 'Descubra tratamentos completos para $pragaName'
-          : 'Acesso a diagnósticos avançados e tratamentos específicos',
+      body:
+          pragaName != null
+              ? 'Descubra tratamentos completos para $pragaName'
+              : 'Acesso a diagnósticos avançados e tratamentos específicos',
       type: NotificationType.promotional,
       channelId: 'receituagro_promotional',
       channelName: 'Ofertas e Promoções',
@@ -156,13 +160,14 @@ class PromotionalNotificationManager {
   /// Cria promoção para recursos premium
   PromotionalNotification _createPremiumPromotion(Map<String, dynamic>? data) {
     final feature = data?['blocked_feature'] as String?;
-    
+
     return PromotionalNotification(
       id: DateTime.now().millisecondsSinceEpoch,
       title: '✨ Desbloqueie Recursos Premium',
-      body: feature != null
-          ? 'Acesse $feature e muito mais por apenas R\$ 9,90/mês'
-          : 'Tenha acesso completo a todos os recursos do ReceitaAgro',
+      body:
+          feature != null
+              ? 'Acesse $feature e muito mais por apenas R\$ 9,90/mês'
+              : 'Tenha acesso completo a todos os recursos do ReceitaAgro',
       type: NotificationType.premium,
       channelId: 'receituagro_promotional',
       channelName: 'Ofertas e Promoções',
@@ -179,7 +184,7 @@ class PromotionalNotificationManager {
   /// Cria promoção sazonal
   PromotionalNotification _createSeasonalPromotion(Map<String, dynamic>? data) {
     final season = data?['season'] as String? ?? 'atual';
-    
+
     return PromotionalNotification(
       id: DateTime.now().millisecondsSinceEpoch,
       title: '📅 Alerta Sazonal ReceitaAgro',
@@ -198,9 +203,11 @@ class PromotionalNotificationManager {
   }
 
   /// Cria promoção baseada em marcos do usuário
-  PromotionalNotification _createMilestonePromotion(Map<String, dynamic>? data) {
+  PromotionalNotification _createMilestonePromotion(
+    Map<String, dynamic>? data,
+  ) {
     final milestone = data?['milestone'] as String? ?? 'progresso';
-    
+
     return PromotionalNotification(
       id: DateTime.now().millisecondsSinceEpoch,
       title: '🎉 Parabéns pelo seu $milestone!',
@@ -219,7 +226,9 @@ class PromotionalNotificationManager {
   }
 
   /// Agenda a notificação para ser enviada
-  Future<bool> _scheduleNotification(PromotionalNotification notification) async {
+  Future<bool> _scheduleNotification(
+    PromotionalNotification notification,
+  ) async {
     try {
       // Para desenvolvimento, mostrar imediatamente
       // Em produção, usar Firebase Functions para agendar
@@ -229,7 +238,7 @@ class PromotionalNotificationManager {
 
       // Registrar que mostrou uma promoção
       await _recordPromotionalShown(notification);
-      
+
       return true;
     } catch (e) {
       debugPrint('Error scheduling notification: $e');
@@ -238,20 +247,24 @@ class PromotionalNotificationManager {
   }
 
   /// Registra que uma promoção foi mostrada
-  Future<void> _recordPromotionalShown(PromotionalNotification notification) async {
+  Future<void> _recordPromotionalShown(
+    PromotionalNotification notification,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Atualizar timestamp da última promoção
-      await prefs.setInt(_keyLastPromotionalShown, DateTime.now().millisecondsSinceEpoch);
-      
+      await prefs.setInt(
+        _keyLastPromotionalShown,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+
       // Incrementar contador semanal
       final weeklyCount = await _getWeeklyPromotionalCount();
       await prefs.setInt(_keyPromotionalCount, weeklyCount + 1);
-      
+
       // Salvar histórico da notificação
       await _saveNotificationHistory(notification);
-      
     } catch (e) {
       debugPrint('Error recording promotional shown: $e');
     }
@@ -262,18 +275,22 @@ class PromotionalNotificationManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       final count = prefs.getInt(_keyPromotionalCount) ?? 0;
-      
+
       // Reset contador se passou uma semana
       final lastReset = prefs.getInt('${_keyPromotionalCount}_reset') ?? 0;
       final lastResetTime = DateTime.fromMillisecondsSinceEpoch(lastReset);
-      final weeksSinceReset = DateTime.now().difference(lastResetTime).inDays ~/ 7;
-      
+      final weeksSinceReset =
+          DateTime.now().difference(lastResetTime).inDays ~/ 7;
+
       if (weeksSinceReset > 0) {
         await prefs.setInt(_keyPromotionalCount, 0);
-        await prefs.setInt('${_keyPromotionalCount}_reset', DateTime.now().millisecondsSinceEpoch);
+        await prefs.setInt(
+          '${_keyPromotionalCount}_reset',
+          DateTime.now().millisecondsSinceEpoch,
+        );
         return 0;
       }
-      
+
       return count;
     } catch (e) {
       debugPrint('Error getting weekly count: $e');
@@ -286,12 +303,12 @@ class PromotionalNotificationManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       final prefsJson = prefs.getString(_keyUserPreferences);
-      
+
       if (prefsJson != null) {
         final data = jsonDecode(prefsJson) as Map<String, dynamic>;
         return NotificationPreferences.fromJson(data);
       }
-      
+
       // Preferências padrão
       return NotificationPreferences.defaultPreferences();
     } catch (e) {
@@ -301,11 +318,16 @@ class PromotionalNotificationManager {
   }
 
   /// Salva preferências de notificação do usuário
-  Future<void> saveUserNotificationPreferences(NotificationPreferences preferences) async {
+  Future<void> saveUserNotificationPreferences(
+    NotificationPreferences preferences,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyUserPreferences, jsonEncode(preferences.toJson()));
-      
+      await prefs.setString(
+        _keyUserPreferences,
+        jsonEncode(preferences.toJson()),
+      );
+
       // Atualizar subscrições no Firebase
       if (preferences.promotionalEnabled) {
         await _messagingService.subscribeToPromotionalNotifications();
@@ -318,18 +340,20 @@ class PromotionalNotificationManager {
   }
 
   /// Salva histórico de notificações
-  Future<void> _saveNotificationHistory(PromotionalNotification notification) async {
+  Future<void> _saveNotificationHistory(
+    PromotionalNotification notification,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final historyJson = prefs.getStringList('notification_history') ?? [];
-      
+
       historyJson.add(jsonEncode(notification.toJson()));
-      
+
       // Manter apenas últimas 50 notificações
       if (historyJson.length > 50) {
         historyJson.removeRange(0, historyJson.length - 50);
       }
-      
+
       await prefs.setStringList('notification_history', historyJson);
     } catch (e) {
       debugPrint('Error saving notification history: $e');
@@ -341,7 +365,7 @@ class PromotionalNotificationManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       final historyJson = prefs.getStringList('notification_history') ?? [];
-      
+
       return historyJson.map((json) {
         final data = jsonDecode(json) as Map<String, dynamic>;
         return PromotionalNotification.fromJson(data);
@@ -397,7 +421,9 @@ class NotificationPreferences {
       seasonalAlertsEnabled: json['seasonal_alerts_enabled'] as bool? ?? true,
       premiumOffersEnabled: json['premium_offers_enabled'] as bool? ?? true,
       newFeaturesEnabled: json['new_features_enabled'] as bool? ?? true,
-      interestedCategories: List<String>.from(json['interested_categories'] as List? ?? []),
+      interestedCategories: List<String>.from(
+        json['interested_categories'] as List? ?? [],
+      ),
     );
   }
 
@@ -420,7 +446,8 @@ class NotificationPreferences {
   }) {
     return NotificationPreferences(
       promotionalEnabled: promotionalEnabled ?? this.promotionalEnabled,
-      seasonalAlertsEnabled: seasonalAlertsEnabled ?? this.seasonalAlertsEnabled,
+      seasonalAlertsEnabled:
+          seasonalAlertsEnabled ?? this.seasonalAlertsEnabled,
       premiumOffersEnabled: premiumOffersEnabled ?? this.premiumOffersEnabled,
       newFeaturesEnabled: newFeaturesEnabled ?? this.newFeaturesEnabled,
       interestedCategories: interestedCategories ?? this.interestedCategories,

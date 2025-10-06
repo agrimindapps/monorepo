@@ -149,7 +149,7 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
     return Scaffold(
       // appBar: AppBar(
       //   toolbarHeight: 70,
-      //   backgroundColor: Colors.white.withOpacity(0.7), // Cor com transparência
+      //   backgroundColor: Colors.white.withValues(alpha: 0.7), // Cor com transparência
       //   title: SizedBox(
       //     width: 1120,
       //     child: rowOpcoesMenuSuperior(),

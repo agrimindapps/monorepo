@@ -1,8 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/usecases/sign_in_anonymously.dart';
 import '../../domain/usecases/sign_in_with_email.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
@@ -60,7 +59,9 @@ class LoginFormNotifier extends _$LoginFormNotifier {
 
   /// Alterna visibilidade da confirmação de senha
   void toggleConfirmPasswordVisibility() {
-    state = state.copyWith(obscureConfirmPassword: !state.obscureConfirmPassword);
+    state = state.copyWith(
+      obscureConfirmPassword: !state.obscureConfirmPassword,
+    );
   }
 
   /// Alterna estado do "lembrar-me"
@@ -94,10 +95,7 @@ class LoginFormNotifier extends _$LoginFormNotifier {
   Future<bool> signInWithEmail() async {
     if (!_validateLoginForm()) return false;
 
-    state = state.copyWith(
-      isLoading: true,
-      errorMessage: () => null,
-    );
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
       final params = SignInWithEmailParams(
@@ -136,10 +134,7 @@ class LoginFormNotifier extends _$LoginFormNotifier {
   Future<bool> signUpWithEmail() async {
     if (!_validateSignUpForm()) return false;
 
-    state = state.copyWith(
-      isLoading: true,
-      errorMessage: () => null,
-    );
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
       final params = SignUpWithEmailParams(
@@ -177,10 +172,7 @@ class LoginFormNotifier extends _$LoginFormNotifier {
 
   /// Faz login anônimo
   Future<bool> signInAnonymously() async {
-    state = state.copyWith(
-      isLoading: true,
-      errorMessage: () => null,
-    );
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
 
     try {
       final result = await _signInAnonymously();
@@ -352,11 +344,17 @@ class LoginFormNotifier extends _$LoginFormNotifier {
       final prefs = await SharedPreferences.getInstance();
 
       if (nameController.text.trim().isNotEmpty) {
-        await prefs.setString('gasometer_saved_name', nameController.text.trim());
+        await prefs.setString(
+          'gasometer_saved_name',
+          nameController.text.trim(),
+        );
       }
 
       if (emailController.text.trim().isNotEmpty) {
-        await prefs.setString('gasometer_saved_email', emailController.text.trim());
+        await prefs.setString(
+          'gasometer_saved_email',
+          emailController.text.trim(),
+        );
       }
 
       await prefs.setBool('gasometer_remember_me', state.rememberMe);

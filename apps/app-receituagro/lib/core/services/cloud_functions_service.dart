@@ -28,7 +28,9 @@ class DeviceInfo {
       deviceName: json['deviceName']?.toString() ?? '',
       platform: json['platform']?.toString() ?? '',
       appVersion: json['appVersion']?.toString() ?? '',
-      lastActive: DateTime.tryParse(json['lastActive']?.toString() ?? '') ?? DateTime.now(),
+      lastActive:
+          DateTime.tryParse(json['lastActive']?.toString() ?? '') ??
+          DateTime.now(),
       isActive: json['isActive'] as bool? ?? true,
     );
   }
@@ -71,9 +73,10 @@ class SubscriptionStatus {
     return SubscriptionStatus(
       isValid: json['isValid'] as bool? ?? false,
       isPremium: json['isPremium'] as bool? ?? false,
-      expirationDate: json['expirationDate'] != null 
-          ? DateTime.tryParse(json['expirationDate']?.toString() ?? '')
-          : null,
+      expirationDate:
+          json['expirationDate'] != null
+              ? DateTime.tryParse(json['expirationDate']?.toString() ?? '')
+              : null,
       productId: json['productId']?.toString(),
       activeDevicesCount: json['activeDevicesCount'] as int? ?? 0,
       maxDevicesAllowed: json['maxDevicesAllowed'] as int? ?? 3,
@@ -98,9 +101,11 @@ class ReceitaAgroCloudFunctionsService {
   ReceitaAgroCloudFunctionsService._internal();
 
   // Cloud Functions endpoints
-  static const String _baseUrl = 'https://us-central1-receituagro-prod.cloudfunctions.net';
-  static const String _devUrl = 'https://us-central1-receituagro-dev.cloudfunctions.net';
-  
+  static const String _baseUrl =
+      'https://us-central1-receituagro-prod.cloudfunctions.net';
+  static const String _devUrl =
+      'https://us-central1-receituagro-dev.cloudfunctions.net';
+
   String get baseUrl => EnvironmentConfig.isProductionMode ? _baseUrl : _devUrl;
 
   final http.Client _httpClient = http.Client();
@@ -137,9 +142,13 @@ class ReceitaAgroCloudFunctionsService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          return Right(DeviceInfo.fromJson(data['device'] as Map<String, dynamic>));
+          return Right(
+            DeviceInfo.fromJson(data['device'] as Map<String, dynamic>),
+          );
         } else {
-          return Left(data['error']?.toString() ?? 'Device registration failed');
+          return Left(
+            data['error']?.toString() ?? 'Device registration failed',
+          );
         }
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -165,17 +174,19 @@ class ReceitaAgroCloudFunctionsService {
       final token = await user.getIdToken();
       final response = await _httpClient.get(
         Uri.parse('$baseUrl/getUserDevices'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          final devicesList = (data['devices'] as List<dynamic>)
-              .map((device) => DeviceInfo.fromJson(device as Map<String, dynamic>))
-              .toList();
+          final devicesList =
+              (data['devices'] as List<dynamic>)
+                  .map(
+                    (device) =>
+                        DeviceInfo.fromJson(device as Map<String, dynamic>),
+                  )
+                  .toList();
           return Right(devicesList);
         } else {
           return Left(data['error']?.toString() ?? 'Failed to fetch devices');
@@ -208,9 +219,7 @@ class ReceitaAgroCloudFunctionsService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({
-          'deviceId': deviceId,
-        }),
+        body: json.encode({'deviceId': deviceId}),
       );
 
       if (response.statusCode == 200) {
@@ -244,17 +253,21 @@ class ReceitaAgroCloudFunctionsService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
+        body: json.encode({'timestamp': DateTime.now().toIso8601String()}),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          return Right(SubscriptionStatus.fromJson(data['subscription'] as Map<String, dynamic>));
+          return Right(
+            SubscriptionStatus.fromJson(
+              data['subscription'] as Map<String, dynamic>,
+            ),
+          );
         } else {
-          return Left(data['error']?.toString() ?? 'Subscription validation failed');
+          return Left(
+            data['error']?.toString() ?? 'Subscription validation failed',
+          );
         }
       } else {
         return Left('HTTP ${response.statusCode}: ${response.reasonPhrase}');
@@ -299,7 +312,11 @@ class ReceitaAgroCloudFunctionsService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
-          return Right(SubscriptionStatus.fromJson(data['subscription'] as Map<String, dynamic>));
+          return Right(
+            SubscriptionStatus.fromJson(
+              data['subscription'] as Map<String, dynamic>,
+            ),
+          );
         } else {
           return Left(data['error']?.toString() ?? 'Purchase sync failed');
         }
@@ -321,29 +338,26 @@ class ReceitaAgroCloudFunctionsService {
     try {
       // First validate subscription
       final subscriptionResult = await validateSubscription();
-      
-      return subscriptionResult.fold(
-        (error) => Left(error),
-        (subscription) {
-          // Check if subscription is valid and device is registered
-          if (!subscription.isValid) {
-            return const Right(false);
-          }
 
-          // For premium features, check if user has premium subscription
-          if (!subscription.isPremium) {
-            return const Right(false);
-          }
+      return subscriptionResult.fold((error) => Left(error), (subscription) {
+        // Check if subscription is valid and device is registered
+        if (!subscription.isValid) {
+          return const Right(false);
+        }
 
-          // Check if device limit is respected
-          if (!subscription.canAddDevice && subscription.activeDevicesCount > 0) {
-            // Need to check if this specific device is already registered
-            return const Right(true); // Assuming device check happens elsewhere
-          }
+        // For premium features, check if user has premium subscription
+        if (!subscription.isPremium) {
+          return const Right(false);
+        }
 
-          return const Right(true);
-        },
-      );
+        // Check if device limit is respected
+        if (!subscription.canAddDevice && subscription.activeDevicesCount > 0) {
+          // Need to check if this specific device is already registered
+          return const Right(true); // Assuming device check happens elsewhere
+        }
+
+        return const Right(true);
+      });
     } catch (e) {
       developer.log(
         'Error checking device access: $e',

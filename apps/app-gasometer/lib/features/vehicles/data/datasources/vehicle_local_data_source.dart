@@ -1,4 +1,5 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
+
 import '../../../../core/services/local_data_service.dart';
 import '../models/vehicle_model.dart';
 
@@ -13,7 +14,6 @@ abstract class VehicleLocalDataSource {
 
 @LazySingleton(as: VehicleLocalDataSource)
 class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
-
   VehicleLocalDataSourceImpl(this._localDataService);
   final LocalDataService _localDataService;
 
@@ -23,9 +23,7 @@ class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
       // Aguardar inicialização antes de acessar os dados
       await _localDataService.initialize();
       final vehiclesData = _localDataService.getAllVehicles();
-      return vehiclesData
-          .map((data) => VehicleModel.fromJson(data))
-          .toList();
+      return vehiclesData.map((data) => VehicleModel.fromJson(data)).toList();
     } catch (e) {
       throw LocalDataSourceException('Failed to get all vehicles: $e');
     }

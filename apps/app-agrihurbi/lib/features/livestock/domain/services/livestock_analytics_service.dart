@@ -1,16 +1,15 @@
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart';
 
 import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';
 import '../entities/equine_entity.dart';
 
 /// Service especializado para analytics e métricas de livestock
-/// 
+///
 /// Responsabilidade única: Calcular métricas, análises e relatórios
 /// Seguindo Single Responsibility Principle
 @singleton
 class LivestockAnalyticsService {
-  
   /// Calcula métricas gerais do rebanho
   LivestockMetrics calculateGeneralMetrics({
     required List<BovineEntity> bovines,
@@ -18,7 +17,7 @@ class LivestockAnalyticsService {
   }) {
     final activeBovines = bovines.where((b) => b.isActive).toList();
     final activeEquines = equines.where((e) => e.isActive).toList();
-    
+
     return LivestockMetrics(
       totalAnimals: bovines.length + equines.length,
       totalBovines: bovines.length,
@@ -27,61 +26,75 @@ class LivestockAnalyticsService {
       activeEquines: activeEquines.length,
       inactiveBovines: bovines.length - activeBovines.length,
       inactiveEquines: equines.length - activeEquines.length,
-      bovinesPercentage: _calculatePercentage(bovines.length, bovines.length + equines.length),
-      equinesPercentage: _calculatePercentage(equines.length, bovines.length + equines.length),
+      bovinesPercentage: _calculatePercentage(
+        bovines.length,
+        bovines.length + equines.length,
+      ),
+      equinesPercentage: _calculatePercentage(
+        equines.length,
+        bovines.length + equines.length,
+      ),
       lastCalculated: DateTime.now(),
     );
   }
 
   /// Calcula distribuição por raças de bovinos
-  Map<String, int> calculateBovineBreedDistribution(List<BovineEntity> bovines) {
+  Map<String, int> calculateBovineBreedDistribution(
+    List<BovineEntity> bovines,
+  ) {
     final distribution = <String, int>{};
-    
+
     for (final bovine in bovines.where((b) => b.isActive)) {
       final breed = bovine.breed;
       distribution[breed] = (distribution[breed] ?? 0) + 1;
     }
-    
+
     return Map.fromEntries(
-      distribution.entries.toList()..sort((a, b) => b.value.compareTo(a.value))
+      distribution.entries.toList()..sort((a, b) => b.value.compareTo(a.value)),
     );
   }
 
   /// Calcula distribuição por aptidões de bovinos
-  Map<BovineAptitude, int> calculateAptitudeDistribution(List<BovineEntity> bovines) {
+  Map<BovineAptitude, int> calculateAptitudeDistribution(
+    List<BovineEntity> bovines,
+  ) {
     final distribution = <BovineAptitude, int>{};
-    
+
     for (final bovine in bovines.where((b) => b.isActive)) {
       final aptitude = bovine.aptitude;
       distribution[aptitude] = (distribution[aptitude] ?? 0) + 1;
     }
-    
+
     return distribution;
   }
 
   /// Calcula distribuição por sistema de criação
-  Map<BreedingSystem, int> calculateBreedingSystemDistribution(List<BovineEntity> bovines) {
+  Map<BreedingSystem, int> calculateBreedingSystemDistribution(
+    List<BovineEntity> bovines,
+  ) {
     final distribution = <BreedingSystem, int>{};
-    
+
     for (final bovine in bovines.where((b) => b.isActive)) {
       final system = bovine.breedingSystem;
       distribution[system] = (distribution[system] ?? 0) + 1;
     }
-    
+
     return distribution;
   }
 
   /// Calcula distribuição por países de origem
-  Map<String, int> calculateOriginCountryDistribution(List<AnimalBaseEntity> animals) {
+  Map<String, int> calculateOriginCountryDistribution(
+    List<AnimalBaseEntity> animals,
+  ) {
     final distribution = <String, int>{};
-    
+
     for (final animal in animals.where((a) => a.isActive)) {
       final country = animal.originCountry;
       distribution[country] = (distribution[country] ?? 0) + 1;
     }
-    
+
     return Map.fromEntries(
-      distribution.entries.toList()..sort((a, b) => b.value.compareTo(a.value))
+      distribution.entries.toList()..sort((a, b) => b.value.compareTo(a.value)),
     );
   }
 
@@ -90,21 +103,33 @@ class LivestockAnalyticsService {
     final now = DateTime.now();
     final lastMonth = DateTime(now.year, now.month - 1, now.day);
     final last3Months = DateTime(now.year, now.month - 3, now.day);
-    
-    final recentAnimals = animals.where((a) => 
-      a.createdAt != null && a.createdAt!.isAfter(lastMonth)
-    ).length;
-    
-    final last3MonthsAnimals = animals.where((a) => 
-      a.createdAt != null && a.createdAt!.isAfter(last3Months)
-    ).length;
-    
+
+    final recentAnimals =
+        animals
+            .where(
+              (a) => a.createdAt != null && a.createdAt!.isAfter(lastMonth),
+            )
+            .length;
+
+    final last3MonthsAnimals =
+        animals
+            .where(
+              (a) => a.createdAt != null && a.createdAt!.isAfter(last3Months),
+            )
+            .length;
+
     return GrowthMetrics(
       totalAnimals: animals.length,
       newThisMonth: recentAnimals,
       newLast3Months: last3MonthsAnimals,
-      monthlyGrowthRate: _calculateGrowthRate(animals.length - recentAnimals, recentAnimals),
-      quarterlyGrowthRate: _calculateGrowthRate(animals.length - last3MonthsAnimals, last3MonthsAnimals),
+      monthlyGrowthRate: _calculateGrowthRate(
+        animals.length - recentAnimals,
+        recentAnimals,
+      ),
+      quarterlyGrowthRate: _calculateGrowthRate(
+        animals.length - last3MonthsAnimals,
+        last3MonthsAnimals,
+      ),
     );
   }
 
@@ -121,9 +146,11 @@ class LivestockAnalyticsService {
       );
     }
 
-    final ages = animals.where((a) => a.createdAt != null).map((animal) {
-      return DateTime.now().difference(animal.createdAt!).inDays ~/ 30; // Aproximação em meses
-    }).toList();
+    final ages =
+        animals.where((a) => a.createdAt != null).map((animal) {
+          return DateTime.now().difference(animal.createdAt!).inDays ~/
+              30; // Aproximação em meses
+        }).toList();
 
     if (ages.isEmpty) {
       return const AgeMetrics(
@@ -137,7 +164,7 @@ class LivestockAnalyticsService {
     }
 
     ages.sort();
-    
+
     return AgeMetrics(
       averageAgeMonths: ages.reduce((a, b) => a + b) ~/ ages.length,
       youngestAgeMonths: ages.first,
@@ -154,11 +181,13 @@ class LivestockAnalyticsService {
     required List<EquineEntity> equines,
   }) {
     final totalAnimals = bovines.length + equines.length;
-    final activeAnimals = bovines.where((b) => b.isActive).length + 
-                         equines.where((e) => e.isActive).length;
-    
-    final healthScore = totalAnimals > 0 ? (activeAnimals / totalAnimals * 100) : 100.0;
-    
+    final activeAnimals =
+        bovines.where((b) => b.isActive).length +
+        equines.where((e) => e.isActive).length;
+
+    final healthScore =
+        totalAnimals > 0 ? (activeAnimals / totalAnimals * 100) : 100.0;
+
     return HealthReport(
       totalAnimals: totalAnimals,
       activeAnimals: activeAnimals,
@@ -181,19 +210,19 @@ class LivestockAnalyticsService {
 
   List<String> _generateHealthRecommendations(double healthScore) {
     final recommendations = <String>[];
-    
+
     if (healthScore < 80) {
       recommendations.add('Revisar animais inativos e investigar causas');
     }
-    
+
     if (healthScore < 60) {
       recommendations.add('Implementar plano de recuperação urgente');
     }
-    
+
     if (healthScore >= 95) {
       recommendations.add('Excelente saúde do rebanho, manter práticas atuais');
     }
-    
+
     return recommendations;
   }
 }

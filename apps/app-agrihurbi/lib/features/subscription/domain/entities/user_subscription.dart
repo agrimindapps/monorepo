@@ -1,4 +1,5 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
+
 import 'subscription_plan.dart';
 
 class UserSubscription extends Equatable {
@@ -94,7 +95,8 @@ class UserSubscription extends Equatable {
 
   bool get willExpireSoon {
     if (expirationDate == null) return false;
-    final daysUntilExpiration = expirationDate!.difference(DateTime.now()).inDays;
+    final daysUntilExpiration =
+        expirationDate!.difference(DateTime.now()).inDays;
     return daysUntilExpiration <= 7 && daysUntilExpiration > 0;
   }
 
@@ -115,22 +117,22 @@ class UserSubscription extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        planId,
-        plan,
-        status,
-        startDate,
-        expirationDate,
-        cancelledAt,
-        pausedAt,
-        autoRenew,
-        transactionId,
-        receiptData,
-        isTrialPeriod,
-        trialEndDate,
-        metadata,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    planId,
+    plan,
+    status,
+    startDate,
+    expirationDate,
+    cancelledAt,
+    pausedAt,
+    autoRenew,
+    transactionId,
+    receiptData,
+    isTrialPeriod,
+    trialEndDate,
+    metadata,
+    createdAt,
+    updatedAt,
+  ];
 }

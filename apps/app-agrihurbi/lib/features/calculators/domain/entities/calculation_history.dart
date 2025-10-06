@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 import 'calculation_result.dart';
 
@@ -55,13 +55,13 @@ class CalculationHistory extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        calculatorId,
-        calculatorName,
-        createdAt,
-        result,
-        notes,
-        tags,
-      ];
+    id,
+    userId,
+    calculatorId,
+    calculatorName,
+    createdAt,
+    result,
+    notes,
+    tags,
+  ];
 }

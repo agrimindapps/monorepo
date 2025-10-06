@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
-import '../enums/analytics_user_type.dart';
 import 'device_identity_service.dart';
 
 /// User type enum for authentication state
@@ -18,8 +17,8 @@ class AuthSessionManager {
   AuthSessionManager({
     required DeviceIdentityService deviceService,
     required ReceitaAgroAnalyticsService analytics,
-  })  : _deviceService = deviceService,
-        _analytics = analytics;
+  }) : _deviceService = deviceService,
+       _analytics = analytics;
 
   /// Initialize user session with device info and analytics
   Future<UserSessionData> initializeSession(
@@ -46,7 +45,8 @@ class AuthSessionManager {
 
       if (kDebugMode) {
         debugPrint(
-            '✅ AuthSessionManager: User session initialized for ${user.displayName}');
+          '✅ AuthSessionManager: User session initialized for ${user.displayName}',
+        );
       }
 
       return sessionData;

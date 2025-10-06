@@ -1,7 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart' show Equatable;
 
 /// Entidade que representa um template de cálculo salvo
-/// 
+///
 /// Templates permitem salvar configurações de entrada para reutilização
 /// e acelerar workflows de cálculos recorrentes
 class CalculationTemplate extends Equatable {
@@ -69,14 +69,15 @@ class CalculationTemplate extends Equatable {
   bool get wasUsedRecently {
     if (lastUsed == null) return false;
     final daysSinceLastUse = DateTime.now().difference(lastUsed!).inDays;
-    return daysSinceLastUse <= 7; // Considerado recente se usado nos últimos 7 dias
+    return daysSinceLastUse <=
+        7; // Considerado recente se usado nos últimos 7 dias
   }
 
   /// Verifica se template é válido (tem valores não vazios)
   bool get isValid {
-    return name.trim().isNotEmpty && 
-           calculatorId.isNotEmpty && 
-           inputValues.isNotEmpty;
+    return name.trim().isNotEmpty &&
+        calculatorId.isNotEmpty &&
+        inputValues.isNotEmpty;
   }
 
   /// Formata data de criação
@@ -96,16 +97,16 @@ class CalculationTemplate extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        calculatorId,
-        calculatorName,
-        inputValues,
-        description,
-        tags,
-        createdAt,
-        lastUsed,
-        userId,
-        isPublic,
-      ];
+    id,
+    name,
+    calculatorId,
+    calculatorName,
+    inputValues,
+    description,
+    tags,
+    createdAt,
+    lastUsed,
+    userId,
+    isPublic,
+  ];
 }

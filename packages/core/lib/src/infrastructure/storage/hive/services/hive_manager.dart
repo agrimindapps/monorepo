@@ -11,10 +11,10 @@ import '../utils/result_adapter.dart';
 class HiveManager implements IHiveManager {
   static HiveManager? _instance;
   static HiveManager get instance => _instance ??= HiveManager._();
-  
+
   HiveManager._();
 
-  final Map<String, Box> _openBoxes = {};
+  final Map<String, Box<dynamic>> _openBoxes = {};
   final Map<Type, int> _registeredAdapters = {};
   bool _isInitialized = false;
   String? _appName;
@@ -35,12 +35,11 @@ class HiveManager implements IHiveManager {
     try {
       _appName = appName;
       await Hive.initFlutter('${appName}_storage');
-      
+
       _isInitialized = true;
-      
+
       debugPrint('HiveManager: Successfully initialized for app: $appName');
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('HiveManager: Failed to initialize - $e');
       return ResultAdapter.failure(
@@ -77,10 +76,9 @@ class HiveManager implements IHiveManager {
       }
 
       _openBoxes[boxName] = box;
-      
+
       debugPrint('HiveManager: Opened box: $boxName (${box.length} items)');
       return Result.success(box);
-      
     } catch (e, stackTrace) {
       debugPrint('HiveManager: Failed to open box: $boxName - $e');
       return ResultAdapter.failure(
@@ -103,9 +101,8 @@ class HiveManager implements IHiveManager {
         _openBoxes.remove(boxName);
         debugPrint('HiveManager: Closed box: $boxName');
       }
-      
+
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('HiveManager: Failed to close box: $boxName - $e');
       return ResultAdapter.failure(
@@ -154,16 +151,19 @@ class HiveManager implements IHiveManager {
     try {
       final typeId = adapter.typeId;
       if (Hive.isAdapterRegistered(typeId)) {
-        debugPrint('HiveManager: Adapter already registered for typeId: $typeId');
+        debugPrint(
+          'HiveManager: Adapter already registered for typeId: $typeId',
+        );
         return Result.success(null);
       }
 
       Hive.registerAdapter<T>(adapter);
       _registeredAdapters[T] = typeId;
-      
-      debugPrint('HiveManager: Registered adapter for type: $T (typeId: $typeId)');
+
+      debugPrint(
+        'HiveManager: Registered adapter for type: $T (typeId: $typeId)',
+      );
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('HiveManager: Failed to register adapter for type: $T - $e');
       return ResultAdapter.failure(
@@ -203,7 +203,6 @@ class HiveManager implements IHiveManager {
 
       debugPrint('HiveManager: Cleared all data successfully');
       return Result.success(null);
-      
     } catch (e) {
       debugPrint('HiveManager: Failed to clear all data - $e');
       return ResultAdapter.error(
@@ -215,11 +214,11 @@ class HiveManager implements IHiveManager {
   @override
   Map<String, int> getBoxStatistics() {
     final statistics = <String, int>{};
-    
+
     for (final entry in _openBoxes.entries) {
       statistics[entry.key] = entry.value.length;
     }
-    
+
     return statistics;
   }
 
@@ -231,7 +230,8 @@ class HiveManager implements IHiveManager {
       'openBoxes': _openBoxes.length,
       'registeredAdapters': _registeredAdapters.length,
       'boxStatistics': getBoxStatistics(),
-      'registeredTypes': _registeredAdapters.keys.map((t) => t.toString()).toList(),
+      'registeredTypes':
+          _registeredAdapters.keys.map((t) => t.toString()).toList(),
     };
   }
 

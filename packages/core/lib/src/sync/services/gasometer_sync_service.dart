@@ -40,7 +40,6 @@ class GasometerSyncService implements ISyncService {
   @override
   final String version = '2.0.0';
 
-  @override
   final List<String> dependencies = [];
   bool _isInitialized = false;
   final bool _canSync = true;

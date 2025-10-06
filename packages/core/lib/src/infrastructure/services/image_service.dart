@@ -186,7 +186,7 @@ class ImageService {
         if (validationResult.isError) {
           return Future.error(validationResult.error!);
         }
-        
+
         files.add(file);
       }
 
@@ -200,7 +200,7 @@ class ImageService {
     String? folder,
     String? fileName,
     String? uploadType,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
       final validationResult = validateImage(imageFile);
@@ -208,8 +208,8 @@ class ImageService {
         return Future.error(validationResult.error!);
       }
       final targetFolder = _determineFolder(folder, uploadType);
-      final finalFileName = fileName ?? 
-          '${_uuid.v4()}${_getFileExtension(imageFile.path)}';
+      final finalFileName =
+          fileName ?? '${_uuid.v4()}${_getFileExtension(imageFile.path)}';
       final Reference storageRef = _storage.ref().child(
         '$targetFolder/$finalFileName',
       );
@@ -245,7 +245,7 @@ class ImageService {
     List<File> imageFiles, {
     String? folder,
     String? uploadType,
-    Function(int index, double progress)? onProgress,
+    void Function(int index, double progress)? onProgress,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
       final List<ImageUploadResult> successful = [];
@@ -253,14 +253,13 @@ class ImageService {
 
       for (int i = 0; i < imageFiles.length; i++) {
         final file = imageFiles[i];
-        
+
         final uploadResult = await uploadImage(
           file,
           folder: folder,
           uploadType: uploadType,
-          onProgress: onProgress != null 
-              ? (progress) => onProgress(i, progress) 
-              : null,
+          onProgress:
+              onProgress != null ? (progress) => onProgress(i, progress) : null,
         );
 
         if (uploadResult.isSuccess) {
@@ -270,10 +269,7 @@ class ImageService {
         }
       }
 
-      return MultipleImageUploadResult(
-        successful: successful,
-        failed: failed,
-      );
+      return MultipleImageUploadResult(successful: successful, failed: failed);
     });
   }
 
@@ -323,16 +319,18 @@ class ImageService {
     if (!_isValidImageFormat(imageFile.path)) {
       return Result.error(
         ValidationError(
-          message: 'Formato de imagem não suportado. '
-                  'Formatos aceitos: ${config.allowedFormats.join(', ')}',
+          message:
+              'Formato de imagem não suportado. '
+              'Formatos aceitos: ${config.allowedFormats.join(', ')}',
         ),
       );
     }
     if (!_isValidFileSize(imageFile)) {
       return Result.error(
         ValidationError(
-          message: 'Arquivo muito grande. '
-                  'Tamanho máximo: ${config.maxFileSizeInMB}MB',
+          message:
+              'Arquivo muito grande. '
+              'Tamanho máximo: ${config.maxFileSizeInMB}MB',
         ),
       );
     }
@@ -379,11 +377,11 @@ class ImageService {
   /// Determinar pasta de upload
   String _determineFolder(String? folder, String? uploadType) {
     if (folder != null) return folder;
-    
+
     if (uploadType != null && config.folders.containsKey(uploadType)) {
       return config.folders[uploadType]!;
     }
-    
+
     return config.defaultFolder;
   }
 

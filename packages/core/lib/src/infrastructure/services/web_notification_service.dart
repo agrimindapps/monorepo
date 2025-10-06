@@ -5,22 +5,25 @@ import '../../domain/repositories/i_notification_repository.dart';
 
 /// Implementação mock do serviço de notificações para web
 class WebNotificationService implements INotificationRepository {
-  static final WebNotificationService _instance = WebNotificationService._internal();
+  static final WebNotificationService _instance =
+      WebNotificationService._internal();
   factory WebNotificationService() => _instance;
   WebNotificationService._internal();
 
-  NotificationTapCallback? _onNotificationTap;
-  NotificationActionCallback? _onNotificationAction;
   bool _isInitialized = false;
 
   @override
-  Future<bool> initialize({List<NotificationChannelEntity>? defaultChannels}) async {
+  Future<bool> initialize({
+    List<NotificationChannelEntity>? defaultChannels,
+  }) async {
     if (_isInitialized) return true;
-    
+
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock initialization for web platform');
+      debugPrint(
+        '🌐 WebNotificationService: Mock initialization for web platform',
+      );
     }
-    
+
     _isInitialized = true;
     return true;
   }
@@ -41,9 +44,11 @@ class WebNotificationService implements INotificationRepository {
   @override
   Future<NotificationPermissionEntity> requestPermission() async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock permission request (always denied for web)');
+      debugPrint(
+        '🌐 WebNotificationService: Mock permission request (always denied for web)',
+      );
     }
-    
+
     return const NotificationPermissionEntity(
       isGranted: false,
       canShowAlerts: false,
@@ -58,15 +63,21 @@ class WebNotificationService implements INotificationRepository {
   @override
   Future<bool> openNotificationSettings() async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Cannot open notification settings on web');
+      debugPrint(
+        '🌐 WebNotificationService: Cannot open notification settings on web',
+      );
     }
     return false;
   }
 
   @override
-  Future<bool> createNotificationChannel(NotificationChannelEntity channel) async {
+  Future<bool> createNotificationChannel(
+    NotificationChannelEntity channel,
+  ) async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock channel creation: ${channel.id}');
+      debugPrint(
+        '🌐 WebNotificationService: Mock channel creation: ${channel.id}',
+      );
     }
     return true;
   }
@@ -74,7 +85,9 @@ class WebNotificationService implements INotificationRepository {
   @override
   Future<bool> deleteNotificationChannel(String channelId) async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock channel deletion: $channelId');
+      debugPrint(
+        '🌐 WebNotificationService: Mock channel deletion: $channelId',
+      );
     }
     return true;
   }
@@ -87,7 +100,9 @@ class WebNotificationService implements INotificationRepository {
   @override
   Future<bool> showNotification(NotificationEntity notification) async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock notification shown: ${notification.title}');
+      debugPrint(
+        '🌐 WebNotificationService: Mock notification shown: ${notification.title}',
+      );
     }
     return true;
   }
@@ -95,7 +110,9 @@ class WebNotificationService implements INotificationRepository {
   @override
   Future<bool> scheduleNotification(NotificationEntity notification) async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock notification scheduled: ${notification.title}');
+      debugPrint(
+        '🌐 WebNotificationService: Mock notification scheduled: ${notification.title}',
+      );
     }
     return true;
   }
@@ -106,7 +123,9 @@ class WebNotificationService implements INotificationRepository {
     Duration repeatInterval,
   ) async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock periodic notification scheduled: ${notification.title}');
+      debugPrint(
+        '🌐 WebNotificationService: Mock periodic notification scheduled: ${notification.title}',
+      );
     }
     return true;
   }
@@ -114,7 +133,9 @@ class WebNotificationService implements INotificationRepository {
   @override
   Future<bool> cancelNotification(int notificationId) async {
     if (kDebugMode) {
-      debugPrint('🌐 WebNotificationService: Mock notification cancelled: $notificationId');
+      debugPrint(
+        '🌐 WebNotificationService: Mock notification cancelled: $notificationId',
+      );
     }
     return true;
   }
@@ -138,14 +159,10 @@ class WebNotificationService implements INotificationRepository {
   }
 
   @override
-  void setNotificationTapCallback(NotificationTapCallback callback) {
-    _onNotificationTap = callback;
-  }
+  void setNotificationTapCallback(NotificationTapCallback callback) {}
 
   @override
-  void setNotificationActionCallback(NotificationActionCallback callback) {
-    _onNotificationAction = callback;
-  }
+  void setNotificationActionCallback(NotificationActionCallback callback) {}
 
   @override
   Future<bool> isNotificationScheduled(int notificationId) async {

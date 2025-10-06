@@ -9,9 +9,8 @@ import 'hive_storage_service.dart';
 
 /// Serviço responsável por gerenciar sincronização seletiva de boxes do Hive
 class SelectiveSyncService {
-  SelectiveSyncService({
-    required HiveStorageService hiveStorage,
-  }) : _hiveStorage = hiveStorage;
+  SelectiveSyncService({required HiveStorageService hiveStorage})
+    : _hiveStorage = hiveStorage;
 
   final HiveStorageService _hiveStorage;
   final ConnectivityService _connectivity = ConnectivityService.instance;
@@ -61,13 +60,19 @@ class SelectiveSyncService {
   Future<Either<Failure, void>> syncBox(String boxName) async {
     try {
       final config = _boxConfigs[boxName];
-      
+
       if (config == null) {
-        return Left(SyncFailure('Box "$boxName" não possui configuração de sincronização'));
+        return Left(
+          SyncFailure(
+            'Box "$boxName" não possui configuração de sincronização',
+          ),
+        );
       }
 
       if (config.localOnly || !config.shouldSync) {
-        return Left(SyncFailure('Box "$boxName" configurada como somente local'));
+        return Left(
+          SyncFailure('Box "$boxName" configurada como somente local'),
+        );
       }
       switch (config.syncStrategy) {
         case BoxSyncStrategy.automatic:
@@ -88,14 +93,17 @@ class SelectiveSyncService {
   Future<Either<Failure, void>> syncAllSyncableBoxes() async {
     try {
       final syncableBoxes = getSyncableBoxes();
-      
+
       for (final boxName in syncableBoxes) {
         final result = await syncBox(boxName);
         if (result.isLeft()) {
-          developer.log('Erro ao sincronizar box "$boxName": ${result.fold((l) => l.message, (r) => "")}', name: 'SelectiveSyncService');
+          developer.log(
+            'Erro ao sincronizar box "$boxName": ${result.fold((l) => l.message, (r) => "")}',
+            name: 'SelectiveSyncService',
+          );
         }
       }
-      
+
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure('Erro ao sincronizar boxes: $e'));
@@ -110,9 +118,13 @@ class SelectiveSyncService {
   }) async {
     try {
       final config = _boxConfigs[boxName];
-      
+
       if (config == null || !config.localOnly) {
-        return Left(CacheFailure('Box "$boxName" não é configurada como conteúdo estático'));
+        return Left(
+          CacheFailure(
+            'Box "$boxName" não é configurada como conteúdo estático',
+          ),
+        );
       }
       final versionKey = '_app_version_$boxName';
       final storedVersionResult = await _hiveStorage.get<String>(
@@ -135,11 +147,7 @@ class SelectiveSyncService {
           box: boxName,
         );
       }
-      await _hiveStorage.save(
-        key: versionKey,
-        data: appVersion,
-        box: boxName,
-      );
+      await _hiveStorage.save(key: versionKey, data: appVersion, box: boxName);
 
       return const Right(null);
     } catch (e) {
@@ -150,9 +158,11 @@ class SelectiveSyncService {
   /// Força sincronização manual de uma box
   Future<Either<Failure, void>> forceSyncBox(String boxName) async {
     final config = _boxConfigs[boxName];
-    
+
     if (config?.localOnly == true) {
-      return Left(SyncFailure('Não é possível sincronizar box somente local: $boxName'));
+      return Left(
+        SyncFailure('Não é possível sincronizar box somente local: $boxName'),
+      );
     }
 
     return _syncBoxManual(boxName);
@@ -160,7 +170,9 @@ class SelectiveSyncService {
 
   Future<Either<Failure, void>> _syncBoxAutomatic(String boxName) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
+      await Future<void>.delayed(
+        const Duration(milliseconds: 100),
+      ); // Simula operação
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure('Erro na sincronização automática: $e'));
@@ -169,7 +181,9 @@ class SelectiveSyncService {
 
   Future<Either<Failure, void>> _syncBoxManual(String boxName) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
+      await Future<void>.delayed(
+        const Duration(milliseconds: 100),
+      ); // Simula operação
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure('Erro na sincronização manual: $e'));
@@ -178,7 +192,9 @@ class SelectiveSyncService {
 
   Future<Either<Failure, void>> _syncBoxPeriodic(String boxName) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
+      await Future<void>.delayed(
+        const Duration(milliseconds: 100),
+      ); // Simula operação
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure('Erro na sincronização periódica: $e'));
@@ -189,12 +205,16 @@ class SelectiveSyncService {
     try {
       final connectivityResult = await _connectivity.isOnline();
       final isOnline = connectivityResult.getOrElse(() => false);
-      
+
       if (!isOnline) {
-        return const Left(NetworkFailure('Não é possível sincronizar: offline'));
+        return const Left(
+          NetworkFailure('Não é possível sincronizar: offline'),
+        );
       }
-      
-      await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
+
+      await Future<void>.delayed(
+        const Duration(milliseconds: 100),
+      ); // Simula operação
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure('Erro na sincronização online: $e'));
@@ -217,7 +237,7 @@ class SelectiveSyncService {
 
   Map<String, int> _getBoxesByStrategy() {
     final stats = <String, int>{};
-    
+
     for (final config in _boxConfigs.values) {
       if (config.localOnly) {
         stats['local_only'] = (stats['local_only'] ?? 0) + 1;
@@ -226,7 +246,7 @@ class SelectiveSyncService {
         stats[strategy] = (stats[strategy] ?? 0) + 1;
       }
     }
-    
+
     return stats;
   }
 }

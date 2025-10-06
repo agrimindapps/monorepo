@@ -99,7 +99,7 @@ final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
 
 /// Provider para limitações de sync baseadas em premium
 final syncLimitsProvider = Provider.family<SyncLimits, String>((ref, appId) {
-  final user = ref.watch(domainCurrentUserProvider);
+  ref.watch(domainCurrentUserProvider);
   const isPremium = false; // Temporário até integração ser feita
 
   return SyncLimits.forApp(appId, isPremium);
@@ -638,10 +638,7 @@ class ConflictResolution {
 class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
   OfflineSyncStateNotifier() : super(const SyncIdle());
 
-  late final SelectiveSyncService _syncService;
-
-  void _initialize() {
-  }
+  void _initialize() {}
 
   Future<void> startSync() async {
     if (state is SyncSyncing) return;
@@ -654,7 +651,7 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
           progress: i.toDouble(),
           currentItem: 'Sincronizando item $i%',
         );
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
       }
       state = SyncSuccess(SyncInfo(lastSync: DateTime.now(), errors: []));
     } catch (e) {
@@ -673,8 +670,7 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
     await startSync();
   }
 
-  Future<void> clearOfflineData(String appId) async {
-  }
+  Future<void> clearOfflineData(String appId) async {}
 }
 
 /// Notifier para sincronização por app
@@ -689,7 +685,7 @@ class AppSyncNotifier extends StateNotifier<AppOfflineSyncState> {
     state = const AppSyncSyncing();
 
     try {
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
       state = const AppSyncComplete();
     } catch (e) {
       state = const AppSyncNeedsSync();
@@ -711,7 +707,7 @@ bool _shouldSync(DateTime? lastSync) {
 }
 
 Future<void> _resolveConflict(
-  ProviderRef ref,
+  Ref ref,
   String conflictId,
   ResolutionType type,
 ) async {
@@ -721,7 +717,7 @@ Future<void> _resolveConflict(
 }
 
 Future<void> _resolveConflictWithMerge(
-  ProviderRef ref,
+  Ref ref,
   String conflictId,
   Map<String, dynamic> mergedData,
 ) async {
@@ -730,6 +726,6 @@ Future<void> _resolveConflictWithMerge(
   ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
 }
 
-Future<void> _resolveAllConflicts(ProviderRef ref, ResolutionType type) async {
+Future<void> _resolveAllConflicts(Ref ref, ResolutionType type) async {
   ref.read(syncConflictsProvider.notifier).state = [];
 }

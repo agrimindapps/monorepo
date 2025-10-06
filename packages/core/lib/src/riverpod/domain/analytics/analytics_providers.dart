@@ -1,3 +1,13 @@
+// ignore_for_file: public_member_api_docs
+
+/// Providers de analytics, tracking e métricas utilizados por múltiplos
+/// apps do monorepo.
+///
+/// Este arquivo reúne providers Riverpod para analytics, crash reporting,
+/// métricas de performance e utilitários relacionados. A regra de
+/// documentação pública foi temporariamente suprimida aqui para permitir
+/// iterações rápidas; substitua por documentação específica por membro ao
+/// evoluir o código.
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -171,7 +181,7 @@ final crashReportingActionsProvider = Provider<CrashReportingActions>((ref) {
     recordFlutterError:
         (flutterError) => crashService
             .recordError(
-              exception: flutterError.exception ?? 'Unknown Flutter error',
+              exception: flutterError.exception,
               stackTrace: flutterError.stack ?? StackTrace.empty,
               additionalInfo: userProperties,
             )
@@ -764,8 +774,7 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     try {
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
       state = const AnalyticsDisabled();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 }
 

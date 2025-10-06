@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import '../../services/webhook_handler_service.dart';
 import '../../shared/utils/failure.dart';
@@ -30,17 +29,5 @@ class WebhookController {
   /// Rate limit check - stub implementation
   bool _checkRateLimit() {
     return true;
-  }
-
-  /// Handle different failure types
-  String _handleFailure(Failure failure) {
-    switch (failure.runtimeType) {
-      case ValidationFailure:
-        return 'Validation error: ${failure.message}';
-      case ServerFailure:
-        return 'Server error: ${failure.message}';
-      default:
-        return 'Unknown error: ${failure.message}';
-    }
   }
 }

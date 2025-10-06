@@ -11,7 +11,7 @@ import '../../shared/utils/app_error.dart';
 import '../../shared/utils/result.dart';
 
 /// Enhanced Security Service - Sistema completo de segurança
-/// 
+///
 /// Funcionalidades:
 /// - Criptografia simétrica e assimétrica
 /// - Hash seguro de passwords
@@ -29,13 +29,12 @@ class EnhancedSecurityService {
   static const int _defaultKeyLength = 32;
   static const int _defaultSaltLength = 16;
   static const int _defaultIterations = 100000; // PBKDF2 iterations
-  static const String _encryptionVersion = 'v2'; // Version for new AES encryption
+  static const String _encryptionVersion =
+      'v2'; // Version for new AES encryption
   static const String _legacyPrefix = 'legacy:';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
@@ -46,7 +45,7 @@ class EnhancedSecurityService {
   final Map<String, int> _failedAttempts = {};
   bool _biometricsEnabled = false;
   int _maxFailedAttempts = 5;
-  
+
   bool _initialized = false;
 
   /// Inicializa o security service
@@ -110,14 +109,18 @@ class EnhancedSecurityService {
   }
 
   /// Descriptografa dados (suporta tanto AES quanto legacy Base64)
-  Future<Result<String>> decrypt(String encryptedData, {String? customKey}) async {
+  Future<Result<String>> decrypt(
+    String encryptedData, {
+    String? customKey,
+  }) async {
     if (!_initialized) {
       final initResult = await initialize();
       if (initResult.isError) return Result.error(initResult.error!);
     }
 
     try {
-      if (encryptedData.startsWith(_legacyPrefix) || !encryptedData.contains(':')) {
+      if (encryptedData.startsWith(_legacyPrefix) ||
+          !encryptedData.contains(':')) {
         return _decryptLegacyData(encryptedData, customKey);
       }
 
@@ -150,7 +153,10 @@ class EnhancedSecurityService {
   }
 
   /// Gera hash seguro de senha usando PBKDF2
-  Future<Result<String>> hashPassword(String password, {String? customSalt}) async {
+  Future<Result<String>> hashPassword(
+    String password, {
+    String? customSalt,
+  }) async {
     try {
       final salt = customSalt ?? await _getMasterSalt();
       final bytes = utf8.encode(password + salt);
@@ -158,7 +164,7 @@ class EnhancedSecurityService {
       for (int i = 0; i < _defaultIterations; i++) {
         hash = sha256.convert(hash).bytes;
       }
-      
+
       final hashedPassword = base64Encode(hash);
       return Result.success('$salt:$hashedPassword');
     } catch (e, stackTrace) {
@@ -174,7 +180,10 @@ class EnhancedSecurityService {
   }
 
   /// Verifica senha contra hash
-  Future<Result<bool>> verifyPassword(String password, String hashedPassword) async {
+  Future<Result<bool>> verifyPassword(
+    String password,
+    String hashedPassword,
+  ) async {
     try {
       final parts = hashedPassword.split(':');
       if (parts.length != 2) {
@@ -188,13 +197,13 @@ class EnhancedSecurityService {
 
       final salt = parts[0];
       final expectedHash = parts[1];
-      
+
       final newHashResult = await hashPassword(password, customSalt: salt);
       if (newHashResult.isError) return Result.error(newHashResult.error!);
-      
+
       final newHashParts = newHashResult.data!.split(':');
       final newHash = newHashParts[1];
-      
+
       final isValid = _constantTimeCompare(expectedHash, newHash);
       return Result.success(isValid);
     } catch (e, stackTrace) {
@@ -213,10 +222,15 @@ class EnhancedSecurityService {
   Future<Result<String>> generateSecureToken({int length = 32}) async {
     try {
       final random = Random.secure();
-      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      
-      final token = List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
-      
+      const chars =
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+      final token =
+          List.generate(
+            length,
+            (_) => chars[random.nextInt(chars.length)],
+          ).join();
+
       return Result.success(token);
     } catch (e, stackTrace) {
       return Result.error(
@@ -231,12 +245,14 @@ class EnhancedSecurityService {
   }
 
   /// Gera chave criptográfica segura
-  Future<Result<String>> generateCryptoKey({int length = _defaultKeyLength}) async {
+  Future<Result<String>> generateCryptoKey({
+    int length = _defaultKeyLength,
+  }) async {
     try {
       final random = Random.secure();
       final bytes = List.generate(length, (_) => random.nextInt(256));
       final key = base64Encode(bytes);
-      
+
       return Result.success(key);
     } catch (e, stackTrace) {
       return Result.error(
@@ -257,10 +273,11 @@ class EnhancedSecurityService {
       final bytes = List.generate(16, (_) => random.nextInt(256));
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
-      
+
       final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-      final uuid = '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
-      
+      final uuid =
+          '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
+
       return Result.success(uuid);
     } catch (e, stackTrace) {
       return Result.error(
@@ -280,14 +297,14 @@ class EnhancedSecurityService {
       final isAvailable = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       final availableBiometrics = await _localAuth.getAvailableBiometrics();
-      
+
       final info = BiometricInfo(
         isAvailable: isAvailable,
         isDeviceSupported: isDeviceSupported,
         availableTypes: availableBiometrics,
         isEnabled: _biometricsEnabled,
       );
-      
+
       return Result.success(info);
     } catch (e, stackTrace) {
       return Result.error(
@@ -322,7 +339,7 @@ class EnhancedSecurityService {
           stickyAuth: true,
         ),
       );
-      
+
       return Result.success(isAuthenticated);
     } catch (e, stackTrace) {
       return Result.error(
@@ -337,7 +354,11 @@ class EnhancedSecurityService {
   }
 
   /// Armazena dados com criptografia adicional
-  Future<Result<void>> secureStore(String key, String value, {bool requireBiometrics = false}) async {
+  Future<Result<void>> secureStore(
+    String key,
+    String value, {
+    bool requireBiometrics = false,
+  }) async {
     try {
       if (requireBiometrics && _biometricsEnabled) {
         final authResult = await authenticateWithBiometrics(
@@ -354,7 +375,7 @@ class EnhancedSecurityService {
       }
       final encryptResult = await encrypt(value);
       if (encryptResult.isError) return Result.error(encryptResult.error!);
-      
+
       await _secureStorage.write(key: key, value: encryptResult.data);
       return Result.success(null);
     } catch (e, stackTrace) {
@@ -370,7 +391,10 @@ class EnhancedSecurityService {
   }
 
   /// Recupera dados com descriptografia
-  Future<Result<String?>> secureRetrieve(String key, {bool requireBiometrics = false}) async {
+  Future<Result<String?>> secureRetrieve(
+    String key, {
+    bool requireBiometrics = false,
+  }) async {
     try {
       if (requireBiometrics && _biometricsEnabled) {
         final authResult = await authenticateWithBiometrics(
@@ -392,7 +416,7 @@ class EnhancedSecurityService {
       }
       final decryptResult = await decrypt(encryptedValue);
       if (decryptResult.isError) return Result.error(decryptResult.error!);
-      
+
       return Result.success(decryptResult.data);
     } catch (e, stackTrace) {
       return Result.error(
@@ -424,23 +448,23 @@ class EnhancedSecurityService {
   }
 
   /// Verifica se operação está sendo feita com muita frequência
-  Future<Result<bool>> checkRateLimit(String operation, {
+  Future<Result<bool>> checkRateLimit(
+    String operation, {
     int maxAttempts = 10,
     Duration timeWindow = const Duration(minutes: 1),
   }) async {
     try {
       final now = DateTime.now();
       final attempts = _rateLimitMap[operation] ?? [];
-      attempts.removeWhere((attempt) => 
-        now.difference(attempt) > timeWindow);
-      
+      attempts.removeWhere((attempt) => now.difference(attempt) > timeWindow);
+
       if (attempts.length >= maxAttempts) {
         return Result.success(false); // Rate limit exceeded
       }
-      
+
       attempts.add(now);
       _rateLimitMap[operation] = attempts;
-      
+
       return Result.success(true); // Within rate limit
     } catch (e) {
       return Result.success(true); // Em caso de erro, permite a operação
@@ -452,7 +476,7 @@ class EnhancedSecurityService {
     try {
       final currentAttempts = _failedAttempts[identifier] ?? 0;
       _failedAttempts[identifier] = currentAttempts + 1;
-      
+
       return Result.success(null);
     } catch (e) {
       return Result.success(null); // Falha não crítica
@@ -482,7 +506,13 @@ class EnhancedSecurityService {
   /// Sanitiza input removendo caracteres perigosos
   String sanitizeInput(String input, {bool allowHtml = false}) {
     if (allowHtml) {
-      return input.replaceAll(RegExp(r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>', caseSensitive: false), '');
+      return input.replaceAll(
+        RegExp(
+          r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>',
+          caseSensitive: false,
+        ),
+        '',
+      );
     } else {
       return input
           .replaceAll(RegExp(r'<[^>]*>'), '')
@@ -500,7 +530,7 @@ class EnhancedSecurityService {
       RegExp(r'on\w+\s*=', caseSensitive: false),
       RegExp(r'style\s*=.*expression', caseSensitive: false),
     ];
-    
+
     return !dangerousPatterns.any((pattern) => pattern.hasMatch(input));
   }
 
@@ -527,7 +557,7 @@ class EnhancedSecurityService {
     try {
       final hashResult = await generateIntegrityHash(data);
       if (hashResult.isError) return Result.error(hashResult.error!);
-      
+
       final isValid = _constantTimeCompare(hashResult.data!, expectedHash);
       return Result.success(isValid);
     } catch (e, stackTrace) {
@@ -554,11 +584,15 @@ class EnhancedSecurityService {
   }
 
   /// Descriptografa dados legacy usando Base64
-  Future<Result<String>> _decryptLegacyData(String encryptedData, String? customKey) async {
+  Future<Result<String>> _decryptLegacyData(
+    String encryptedData,
+    String? customKey,
+  ) async {
     try {
-      final data = encryptedData.startsWith(_legacyPrefix)
-          ? encryptedData.substring(_legacyPrefix.length)
-          : encryptedData;
+      final data =
+          encryptedData.startsWith(_legacyPrefix)
+              ? encryptedData.substring(_legacyPrefix.length)
+              : encryptedData;
       final decoded = utf8.decode(base64Decode(data));
 
       return Result.success(decoded);
@@ -575,7 +609,10 @@ class EnhancedSecurityService {
   }
 
   /// Descriptografa dados AES
-  Future<Result<String>> _decryptAESData(List<String> parts, String? customKey) async {
+  Future<Result<String>> _decryptAESData(
+    List<String> parts,
+    String? customKey,
+  ) async {
     try {
       if (parts.length < 3) {
         return Result.error(
@@ -615,7 +652,7 @@ class EnhancedSecurityService {
   Future<String> _getOrCreateKey(String keyName) async {
     final keyKey = '$_keyPrefix$keyName';
     String? key = await _secureStorage.read(key: keyKey);
-    
+
     if (key == null) {
       final keyResult = await generateCryptoKey();
       if (keyResult.isSuccess && keyResult.data != null) {
@@ -625,8 +662,8 @@ class EnhancedSecurityService {
         throw Exception('Failed to generate crypto key');
       }
     }
-    
-    return key;
+
+    return key!;
   }
 
   Future<void> _ensureMasterSalt() async {
@@ -656,12 +693,12 @@ class EnhancedSecurityService {
   /// Comparação em tempo constante para prevenir timing attacks
   bool _constantTimeCompare(String a, String b) {
     if (a.length != b.length) return false;
-    
+
     int result = 0;
     for (int i = 0; i < a.length; i++) {
       result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
     }
-    
+
     return result == 0;
   }
 
@@ -687,7 +724,8 @@ class BiometricInfo {
     required this.isEnabled,
   });
 
-  bool get hasFingerprintSupport => availableTypes.contains(BiometricType.fingerprint);
+  bool get hasFingerprintSupport =>
+      availableTypes.contains(BiometricType.fingerprint);
   bool get hasFaceSupport => availableTypes.contains(BiometricType.face);
   bool get hasIrisSupport => availableTypes.contains(BiometricType.iris);
 

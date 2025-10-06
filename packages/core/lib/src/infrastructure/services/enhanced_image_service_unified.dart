@@ -148,7 +148,8 @@ class EnhancedImageServiceConfig {
       cacheExpiration: cacheExpiration ?? this.cacheExpiration,
       maxMemoryUsageMB: maxMemoryUsageMB ?? this.maxMemoryUsageMB,
       enablePreloading: enablePreloading ?? this.enablePreloading,
-      maxConcurrentPreloads: maxConcurrentPreloads ?? this.maxConcurrentPreloads,
+      maxConcurrentPreloads:
+          maxConcurrentPreloads ?? this.maxConcurrentPreloads,
       preloadQueueSize: preloadQueueSize ?? this.preloadQueueSize,
       autoOptimize: autoOptimize ?? this.autoOptimize,
       compressionThreshold: compressionThreshold ?? this.compressionThreshold,
@@ -200,13 +201,7 @@ class ImageLoadProgress {
   });
 }
 
-enum ImageLoadStatus {
-  queued,
-  loading,
-  cached,
-  completed,
-  failed,
-}
+enum ImageLoadStatus { queued, loading, cached, completed, failed }
 
 /// Enhanced Unified Image Service
 /// Consolidates functionality from all 4 image services:
@@ -241,9 +236,9 @@ class EnhancedImageServiceUnified {
     ImagePicker? picker,
     FirebaseStorage? storage,
     required EnhancedImageServiceConfig config,
-  })  : _picker = picker ?? ImagePicker(),
-        _storage = storage ?? FirebaseStorage.instance,
-        _config = config;
+  }) : _picker = picker ?? ImagePicker(),
+       _storage = storage ?? FirebaseStorage.instance,
+       _config = config;
 
   /// Initialize the service (must be called before use)
   Future<Result<void>> initialize() async {
@@ -283,10 +278,12 @@ class EnhancedImageServiceUnified {
       );
 
       if (pickedFile == null) {
-        return Result.failure(AppError.custom(
-          message: 'Image selection was cancelled',
-          code: 'CANCELLED',
-        ));
+        return Result.failure(
+          AppError.custom(
+            message: 'Image selection was cancelled',
+            code: 'CANCELLED',
+          ),
+        );
       }
 
       final file = File(pickedFile.path);
@@ -320,10 +317,12 @@ class EnhancedImageServiceUnified {
       );
 
       if (pickedFile == null) {
-        return Result.failure(AppError.custom(
-          message: 'Camera image capture was cancelled',
-          code: 'CANCELLED',
-        ));
+        return Result.failure(
+          AppError.custom(
+            message: 'Camera image capture was cancelled',
+            code: 'CANCELLED',
+          ),
+        );
       }
 
       final file = File(pickedFile.path);
@@ -352,9 +351,7 @@ class EnhancedImageServiceUnified {
       final int limit = maxImages ?? _config.maxImagesCount;
       final List<XFile> pickedFiles = [];
       try {
-        final medias = await _picker.pickMultipleMedia(
-          limit: limit,
-        );
+        final medias = await _picker.pickMultipleMedia(limit: limit);
         for (final media in medias) {
           if (media.mimeType?.startsWith('image/') ?? false) {
             pickedFiles.add(media);
@@ -363,24 +360,25 @@ class EnhancedImageServiceUnified {
       } catch (e) {
         return Result.failure(
           AppError.custom(
-            message: 'Multiple image selection not supported on this device. Please select one image at a time.',
+            message:
+                'Multiple image selection not supported on this device. Please select one image at a time.',
             code: 'MULTIPLE_SELECTION_NOT_SUPPORTED',
           ),
         );
       }
 
       if (pickedFiles.isEmpty) {
-        return Result.failure(AppError.custom(
-          message: 'Multiple images selection was cancelled',
-          code: 'CANCELLED',
-        ));
+        return Result.failure(
+          AppError.custom(
+            message: 'Multiple images selection was cancelled',
+            code: 'CANCELLED',
+          ),
+        );
       }
 
       if (pickedFiles.length > limit) {
         return Result.failure(
-          ValidationError(
-            message: 'Maximum $limit images allowed',
-          ),
+          ValidationError(message: 'Maximum $limit images allowed'),
         );
       }
 
@@ -423,10 +421,10 @@ class EnhancedImageServiceUnified {
       if (validationResult.isFailure) {
         return Result.failure(validationResult.error!);
       }
-      final uploadFolder = folder ??
-          _config.folders[uploadType] ??
-          _config.defaultFolder;
-      final String uniqueFileName = fileName ??
+      final uploadFolder =
+          folder ?? _config.folders[uploadType] ?? _config.defaultFolder;
+      final String uniqueFileName =
+          fileName ??
           '${const Uuid().v4()}.${path.extension(imageFile.path).substring(1)}';
       final storageRef = _storage
           .ref()
@@ -445,10 +443,7 @@ class EnhancedImageServiceUnified {
       Uint8List? thumbnail;
       if (_config.enableCaching) {
         final thumbnailResult = await _createThumbnail(imageFile);
-        thumbnail = thumbnailResult.fold(
-          (error) => null,
-          (data) => data,
-        );
+        thumbnail = thumbnailResult.fold((error) => null, (data) => data);
       }
 
       _uploadsCount++;
@@ -465,10 +460,7 @@ class EnhancedImageServiceUnified {
       return Result.success(result);
     } catch (e, stackTrace) {
       return Result.failure(
-        AppError.unknown(
-          'Failed to upload image: $e',
-          stackTrace: stackTrace,
-        ),
+        AppError.unknown('Failed to upload image: $e', stackTrace: stackTrace),
       );
     }
   }
@@ -573,12 +565,13 @@ class EnhancedImageServiceUnified {
   }) async {
     if (!_config.enablePreloading || imageUrls.isEmpty) return;
 
-    final newImages = imageUrls
-        .where((url) => url.isNotEmpty)
-        .where((url) => !_preloadedImages.contains(url))
-        .where((url) => !_preloadingImages.contains(url))
-        .where((url) => !_preloadQueue.contains(url))
-        .toList();
+    final newImages =
+        imageUrls
+            .where((url) => url.isNotEmpty)
+            .where((url) => !_preloadedImages.contains(url))
+            .where((url) => !_preloadingImages.contains(url))
+            .where((url) => !_preloadQueue.contains(url))
+            .toList();
 
     if (newImages.isEmpty) return;
 
@@ -631,7 +624,7 @@ class EnhancedImageServiceUnified {
   /// Check if image is preloaded
   bool isPreloaded(String imageUrl) {
     return _preloadedImages.contains(imageUrl) ||
-           _memoryCache.containsKey(imageUrl);
+        _memoryCache.containsKey(imageUrl);
   }
 
   /// Clear image cache
@@ -679,10 +672,13 @@ class EnhancedImageServiceUnified {
       'memory_usage_percent': memoryUsageMB / _config.maxMemoryUsageMB * 100,
       'cache_hits': _cacheHits,
       'cache_misses': _cacheMisses,
-      'hit_rate_percent': _cacheHits + _cacheMisses > 0
-          ? _cacheHits / (_cacheHits + _cacheMisses) * 100
-          : 0,
+      'hit_rate_percent':
+          _cacheHits + _cacheMisses > 0
+              ? _cacheHits / (_cacheHits + _cacheMisses) * 100
+              : 0,
       'total_loaded': _totalLoaded,
+      'total_size_bytes': _totalSize,
+      'total_size_mb': _totalSize / (1024 * 1024),
       'total_uploads': _uploadsCount,
       'preload_queue_size': _preloadQueue.length,
       'preloaded_images': _preloadedImages.length,
@@ -695,14 +691,13 @@ class EnhancedImageServiceUnified {
         'auto_optimize': _config.autoOptimize,
         'compression_threshold_kb': _config.compressionThreshold / 1024,
         'thumbnail_size': _config.thumbnailSize,
-      }
+      },
     };
   }
 
   /// Watch image loading progress
   Stream<ImageLoadProgress> watchImageLoading(String url) {
-    return _progressController.stream
-        .where((progress) => progress.url == url);
+    return _progressController.stream.where((progress) => progress.url == url);
   }
 
   /// Dispose resources
@@ -771,7 +766,8 @@ class EnhancedImageServiceUnified {
       if (fileSizeMB > _config.maxFileSizeInMB) {
         return Result.failure(
           ValidationError(
-            message: 'File size (${fileSizeMB.toStringAsFixed(1)}MB) exceeds maximum allowed size (${_config.maxFileSizeInMB}MB)',
+            message:
+                'File size (${fileSizeMB.toStringAsFixed(1)}MB) exceeds maximum allowed size (${_config.maxFileSizeInMB}MB)',
           ),
         );
       }
@@ -780,7 +776,8 @@ class EnhancedImageServiceUnified {
       if (!_config.allowedFormats.contains(extension)) {
         return Result.failure(
           ValidationError(
-            message: 'File format $extension is not allowed. Allowed formats: ${_config.allowedFormats.join(', ')}',
+            message:
+                'File format $extension is not allowed. Allowed formats: ${_config.allowedFormats.join(', ')}',
           ),
         );
       }
@@ -801,9 +798,7 @@ class EnhancedImageServiceUnified {
       final dio = Dio();
       final response = await dio.get<List<int>>(
         url,
-        options: Options(
-          responseType: ResponseType.bytes,
-        ),
+        options: Options(responseType: ResponseType.bytes),
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -828,17 +823,17 @@ class EnhancedImageServiceUnified {
 
   Future<Uint8List?> _loadAndCacheImage(String url) async {
     try {
-      _progressController.add(ImageLoadProgress(
-        url: url,
-        progress: 0.0,
-        status: ImageLoadStatus.loading,
-      ));
+      _progressController.add(
+        ImageLoadProgress(
+          url: url,
+          progress: 0.0,
+          status: ImageLoadStatus.loading,
+        ),
+      );
       final dio = Dio();
       final response = await dio.get<List<int>>(
         url,
-        options: Options(
-          responseType: ResponseType.bytes,
-        ),
+        options: Options(responseType: ResponseType.bytes),
       );
 
       if (response.statusCode != 200 || response.data == null) {
@@ -847,11 +842,13 @@ class EnhancedImageServiceUnified {
 
       final data = Uint8List.fromList(response.data!);
 
-      _progressController.add(ImageLoadProgress(
-        url: url,
-        progress: 1.0,
-        status: ImageLoadStatus.completed,
-      ));
+      _progressController.add(
+        ImageLoadProgress(
+          url: url,
+          progress: 1.0,
+          status: ImageLoadStatus.completed,
+        ),
+      );
       if (_config.enableCaching) {
         _addToCache(url, data);
       }
@@ -862,11 +859,13 @@ class EnhancedImageServiceUnified {
       debugPrint('📥 Image loaded and cached: $url (${data.length} bytes)');
       return data;
     } catch (e) {
-      _progressController.add(ImageLoadProgress(
-        url: url,
-        progress: 0.0,
-        status: ImageLoadStatus.failed,
-      ));
+      _progressController.add(
+        ImageLoadProgress(
+          url: url,
+          progress: 0.0,
+          status: ImageLoadStatus.failed,
+        ),
+      );
 
       debugPrint('❌ Failed to load image: $url - $e');
       return null;
@@ -929,11 +928,10 @@ class EnhancedImageServiceUnified {
       int concurrent = 0;
 
       while (_preloadQueue.isNotEmpty &&
-             concurrent < _config.maxConcurrentPreloads) {
+          concurrent < _config.maxConcurrentPreloads) {
         final url = _preloadQueue.removeFirst();
 
-        if (_preloadedImages.contains(url) ||
-            _preloadingImages.contains(url)) {
+        if (_preloadedImages.contains(url) || _preloadingImages.contains(url)) {
           continue;
         }
 
@@ -947,7 +945,10 @@ class EnhancedImageServiceUnified {
     } finally {
       _isProcessing = false;
       if (_preloadQueue.isNotEmpty) {
-        _preloadTimer = Timer(const Duration(milliseconds: 500), _startPreloading);
+        _preloadTimer = Timer(
+          const Duration(milliseconds: 500),
+          _startPreloading,
+        );
       }
     }
   }

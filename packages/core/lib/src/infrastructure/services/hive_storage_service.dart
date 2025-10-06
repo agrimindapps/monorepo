@@ -23,7 +23,10 @@ class HiveStorageService implements ILocalStorageRepository {
       if (_isInitialized) return const Right(null);
       final registryResult = await _boxRegistry.initialize();
       if (registryResult.isLeft()) {
-        return registryResult.fold((failure) => Left(failure), (_) => const Right(null));
+        return registryResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(null),
+        );
       }
       await _registerCoreBoxes();
 
@@ -38,7 +41,7 @@ class HiveStorageService implements ILocalStorageRepository {
   Future<void> _registerCoreBoxes() async {
     final coreBoxes = [
       BoxConfiguration.basic(name: HiveBoxes.settings, appId: 'core'),
-      BoxConfiguration.basic(name: HiveBoxes.cache, appId: 'core'), 
+      BoxConfiguration.basic(name: HiveBoxes.cache, appId: 'core'),
       BoxConfiguration.basic(name: HiveBoxes.offline, appId: 'core'),
     ];
 
@@ -61,14 +64,11 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
-      
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (targetBox) async {
-          await targetBox.put(key, data);
-          return const Right(null);
-        },
-      );
+
+      return boxResult.fold((failure) => Left(failure), (targetBox) async {
+        await targetBox.put(key, data);
+        return const Right(null);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao salvar dados: $e'));
     }
@@ -88,14 +88,11 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
-      
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (targetBox) {
-          final data = targetBox.get(key) as T?;
-          return Right(data);
-        },
-      );
+
+      return boxResult.fold((failure) => Left(failure), (targetBox) {
+        final data = targetBox.get(key) as T?;
+        return Right(data);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao obter dados: $e'));
     }
@@ -109,14 +106,11 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
-      
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (targetBox) async {
-          await targetBox.delete(key);
-          return const Right(null);
-        },
-      );
+
+      return boxResult.fold((failure) => Left(failure), (targetBox) async {
+        await targetBox.delete(key);
+        return const Right(null);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao remover dados: $e'));
     }
@@ -127,14 +121,11 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final boxResult = await _boxRegistry.getBox(box ?? HiveBoxes.settings);
-      
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (targetBox) async {
-          await targetBox.clear();
-          return const Right(null);
-        },
-      );
+
+      return boxResult.fold((failure) => Left(failure), (targetBox) async {
+        await targetBox.clear();
+        return const Right(null);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao limpar dados: $e'));
     }
@@ -174,12 +165,13 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-      final values = targetBox.values.map((dynamic value) {
-        if (value is Map && value is! Map<String, dynamic>) {
-          return Map<String, dynamic>.from(value) as T;
-        }
-        return value as T;
-      }).toList();
+      final values =
+          targetBox.values.map((dynamic value) {
+            if (value is Map && value is! Map<String, dynamic>) {
+              return Map<String, dynamic>.from(value) as T;
+            }
+            return value as T;
+          }).toList();
 
       return Right(values);
     } catch (e) {
@@ -214,7 +206,7 @@ class HiveStorageService implements ILocalStorageRepository {
     String? box,
   }) async {
     try {
-      final result = await get<List>(key: key, box: box);
+      final result = await get<List<dynamic>>(key: key, box: box);
 
       return result.fold((failure) => Left(failure), (data) {
         if (data == null) return const Right([]);
@@ -461,7 +453,9 @@ class HiveStorageService implements ILocalStorageRepository {
 
       return dataResult.fold((failure) => Left(failure), (offlineData) async {
         if (offlineData == null) {
-          return const Left(CacheFailure('Dados não encontrados para sincronizar'));
+          return const Left(
+            CacheFailure('Dados não encontrados para sincronizar'),
+          );
         }
 
         return saveOfflineData<dynamic>(
@@ -508,12 +502,13 @@ class HiveStorageService implements ILocalStorageRepository {
   }
 
   /// Garante que uma box está aberta
-  Future<Box> _ensureBoxOpen(String boxName) async {
+  Future<Box<dynamic>> _ensureBoxOpen(String boxName) async {
     await _ensureInitialized();
     final boxResult = await _boxRegistry.getBox(boxName);
-    
+
     return boxResult.fold(
-      (failure) => throw Exception('Failed to open box "$boxName": ${failure.message}'),
+      (failure) =>
+          throw Exception('Failed to open box "$boxName": ${failure.message}'),
       (box) => box,
     );
   }

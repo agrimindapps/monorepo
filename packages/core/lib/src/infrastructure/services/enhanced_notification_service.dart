@@ -21,7 +21,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   late final INotificationRepository _coreService;
   final Map<String, NotificationPlugin> _plugins = {};
   final Map<String, NotificationTemplate> _templates = {};
-  late final NotificationTemplateEngine _templateEngine;
   late final NotificationAnalyticsHelper _analyticsHelper;
   bool _isInitialized = false;
   bool _testMode = false;
@@ -53,7 +52,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       }
       _coreService.setNotificationTapCallback(_handleNotificationTap);
       _coreService.setNotificationActionCallback(_handleNotificationAction);
-
       _isInitialized = true;
 
       if (_settings.enableDebugLogs) {
@@ -208,13 +206,15 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   }
 
   @override
-  void setNotificationTapCallback(Function(String? payload) callback) {
+  void setNotificationTapCallback(void Function(String? payload) callback) {
+    _coreService.setNotificationTapCallback(callback);
   }
 
   @override
   void setNotificationActionCallback(
-    Function(String actionId, String? payload) callback,
+    void Function(String actionId, String? payload) callback,
   ) {
+    _coreService.setNotificationActionCallback(callback);
   }
 
   @override
@@ -529,8 +529,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
             id: pending.id,
             title: pending.title,
             body: pending.body,
-            scheduledDate:
-                DateTime.now(),
+            scheduledDate: DateTime.now(),
             templateId: payload['templateId'] as String?,
             pluginId: payload['pluginId'] as String?,
             data: payload,
@@ -677,18 +676,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
 
     return PerformanceMetrics(
       timestamp: now,
-      fps:
-          60.0,
+      fps: 60.0,
       memoryUsage: const MemoryUsage(
-        usedMemory:
-            0,
-        totalMemory:
-            0,
-        availableMemory:
-            0,
+        usedMemory: 0,
+        totalMemory: 0,
+        availableMemory: 0,
       ),
-      cpuUsage:
-          0.0,
+      cpuUsage: 0.0,
       batteryLevel: null, // Optional
       networkLatency: null, // Optional
       renderTime:

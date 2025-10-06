@@ -33,7 +33,9 @@ class _AccountDeletionConfirmationDialogState
   final ScrollController _scrollController = ScrollController();
 
   bool get _canConfirm =>
-      _hasReadInformation && _acknowledgesConsequences && _confirmsUnderstanding;
+      _hasReadInformation &&
+      _acknowledgesConsequences &&
+      _confirmsUnderstanding;
 
   @override
   void initState() {
@@ -86,32 +88,41 @@ class _AccountDeletionConfirmationDialogState
                       icon: Icons.info_outline,
                       title: 'LGPD/GDPR - Lei Geral de Proteção de Dados',
                       content: const Text(
-                          'Você tem o direito de solicitar a exclusão de seus dados '
-                          'pessoais de acordo com a LGPD (Lei 13.709/2018) e GDPR. '
-                          'Esta ação é permanente e não pode ser desfeita.'),
+                        'Você tem o direito de solicitar a exclusão de seus dados '
+                        'pessoais de acordo com a LGPD (Lei 13.709/2018) e GDPR. '
+                        'Esta ação é permanente e não pode ser desfeita.',
+                      ),
                       color: Colors.blue,
                     ),
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: Colors.orange.withAlpha((0.1 * 255).round()),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                        border: Border.all(
+                          color: Colors.orange.withAlpha((0.3 * 255).round()),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.delete_forever, color: Colors.orange, size: 20),
+                              const Icon(
+                                Icons.delete_forever,
+                                color: Colors.orange,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'O que será excluído',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.orange.withOpacity(0.9),
+                                    color: Colors.orange.withAlpha(
+                                      (0.9 * 255).round(),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -126,23 +137,31 @@ class _AccountDeletionConfirmationDialogState
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: Colors.red.withAlpha((0.1 * 255).round()),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        border: Border.all(
+                          color: Colors.red.withAlpha((0.3 * 255).round()),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.warning_amber, color: Colors.red, size: 20),
+                              const Icon(
+                                Icons.warning_amber,
+                                color: Colors.red,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'Consequências Importantes',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.red.withOpacity(0.9),
+                                    color: Colors.red.withAlpha(
+                                      (0.9 * 255).round(),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -171,8 +190,10 @@ class _AccountDeletionConfirmationDialogState
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.arrow_downward,
-                                color: Colors.amber.shade700),
+                            Icon(
+                              Icons.arrow_downward,
+                              color: Colors.amber.shade700,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -201,12 +222,13 @@ class _AccountDeletionConfirmationDialogState
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _canConfirm
-              ? () {
-                  Navigator.of(context).pop();
-                  widget.onConfirmed();
-                }
-              : null,
+          onPressed:
+              _canConfirm
+                  ? () {
+                    Navigator.of(context).pop();
+                    widget.onConfirmed();
+                  }
+                  : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.error,
             foregroundColor: Colors.white,
@@ -226,9 +248,9 @@ class _AccountDeletionConfirmationDialogState
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha((0.1 * 255).round()),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withAlpha((0.3 * 255).round())),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +264,7 @@ class _AccountDeletionConfirmationDialogState
                   title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: color.withOpacity(0.9),
+                    color: color.withAlpha((0.9 * 255).round()),
                   ),
                 ),
               ),
@@ -276,11 +298,14 @@ class _AccountDeletionConfirmationDialogState
         _buildBulletPoint('⚠️ Esta ação é IRREVERSÍVEL'),
         _buildBulletPoint('⚠️ Você perderá TODOS os seus dados'),
         _buildBulletPoint('⚠️ Não será possível recuperar sua conta'),
-        _buildBulletPoint('⚠️ Você precisará criar uma nova conta para usar o app'),
+        _buildBulletPoint(
+          '⚠️ Você precisará criar uma nova conta para usar o app',
+        ),
         if (widget.hasActiveSubscription)
           _buildBulletPoint(
-              '⚠️ Assinaturas devem ser canceladas manualmente na loja',
-              isWarning: true),
+            '⚠️ Assinaturas devem ser canceladas manualmente na loja',
+            isWarning: true,
+          ),
       ],
     );
   }
@@ -356,10 +381,14 @@ class _AccountDeletionConfirmationDialogState
           ),
           const SizedBox(height: 8),
           if (localData != null) ...[
-            Text('Dados Locais: ${localData['stats']?['totalRecords'] ?? 0} registros'),
+            Text(
+              'Dados Locais: ${localData['stats']?['totalRecords'] ?? 0} registros',
+            ),
           ],
           if (cloudData != null) ...[
-            Text('Dados na Nuvem: ${cloudData['totalDocuments'] ?? 0} documentos'),
+            Text(
+              'Dados na Nuvem: ${cloudData['totalDocuments'] ?? 0} documentos',
+            ),
           ],
         ],
       ),
@@ -407,8 +436,9 @@ class _AccountDeletionConfirmationDialogState
         CheckboxListTile(
           value: _acknowledgesConsequences,
           enabled: _hasReadInformation,
-          onChanged: (value) =>
-              setState(() => _acknowledgesConsequences = value ?? false),
+          onChanged:
+              (value) =>
+                  setState(() => _acknowledgesConsequences = value ?? false),
           title: const Text(
             'Estou ciente que esta ação é IRREVERSÍVEL',
             style: TextStyle(fontSize: 13),
@@ -420,8 +450,9 @@ class _AccountDeletionConfirmationDialogState
         CheckboxListTile(
           value: _confirmsUnderstanding,
           enabled: _hasReadInformation,
-          onChanged: (value) =>
-              setState(() => _confirmsUnderstanding = value ?? false),
+          onChanged:
+              (value) =>
+                  setState(() => _confirmsUnderstanding = value ?? false),
           title: const Text(
             'Confirmo que li e entendi todas as consequências',
             style: TextStyle(fontSize: 13),

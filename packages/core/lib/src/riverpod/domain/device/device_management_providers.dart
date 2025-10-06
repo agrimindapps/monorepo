@@ -135,19 +135,17 @@ final deviceActionsProvider = Provider<DeviceActions>((ref) {
 });
 
 /// Provider para estatísticas de uso por dispositivo
-final deviceUsageStatsProvider = FutureProvider.family<
-  DeviceUsageStats,
-  String
->((ref, deviceId) async {
-  return DeviceUsageStats(
-    deviceId: deviceId,
-    totalSessions: 42,
-    totalUsageTime: const Duration(hours: 24),
-    lastUsed: DateTime.now(),
-    appLaunches: 156,
-    featureUsage: {'auth': 50, 'sync': 30, 'analytics': 20},
-  );
-});
+final deviceUsageStatsProvider =
+    FutureProvider.family<DeviceUsageStats, String>((ref, deviceId) async {
+      return DeviceUsageStats(
+        deviceId: deviceId,
+        totalSessions: 42,
+        totalUsageTime: const Duration(hours: 24),
+        lastUsed: DateTime.now(),
+        appLaunches: 156,
+        featureUsage: {'auth': 50, 'sync': 30, 'analytics': 20},
+      );
+    });
 
 /// Provider para dispositivos ativos recentemente
 final recentActiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
@@ -366,15 +364,10 @@ class DeviceActions {
 class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   DeviceManagementNotifier() : super(const DeviceManagementIdle());
 
-  late final DeviceManagementService _deviceService;
-
-  void _initialize() {
-  }
-
   Future<bool> registerCurrentDevice() async {
     try {
       state = const DeviceManagementLoading();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
 
       state = const DeviceManagementSuccess(
         'Dispositivo registrado com sucesso',
@@ -389,7 +382,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> revokeDevice(String deviceId) async {
     try {
       state = const DeviceManagementLoading();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
 
       state = const DeviceManagementSuccess('Dispositivo revogado com sucesso');
       return true;
@@ -402,7 +395,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> revokeAllOtherDevices() async {
     try {
       state = const DeviceManagementLoading();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
 
       state = const DeviceManagementSuccess(
         'Outros dispositivos revogados com sucesso',
@@ -417,7 +410,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> updateDeviceInfo(Map<String, dynamic> updates) async {
     try {
       state = const DeviceManagementLoading();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
 
       state = const DeviceManagementSuccess(
         'Informações do dispositivo atualizadas',

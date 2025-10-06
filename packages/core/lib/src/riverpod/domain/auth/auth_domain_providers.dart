@@ -71,17 +71,17 @@ final authFeaturesProvider = Provider.family<AuthFeatures, String>((
 
 /// Provider para informações do perfil do usuário
 final userProfileProvider = Provider<UserProfile?>((ref) {
-  final user = ref.watch(domainCurrentUserProvider);
-  if (user == null) return null;
+  final currentUser = ref.watch(domainCurrentUserProvider);
+  if (currentUser == null) return null;
 
   return UserProfile(
-    id: user.id,
-    name: user.displayName,
-    email: user.email,
-    photoUrl: user.photoUrl,
-    isEmailVerified: user.isEmailVerified,
-    createdAt: user.createdAt,
-    lastSignIn: user.lastLoginAt,
+    id: currentUser.id,
+    name: currentUser.displayName,
+    email: currentUser.email,
+    photoUrl: currentUser.photoUrl,
+    isEmailVerified: currentUser.isEmailVerified,
+    createdAt: currentUser.createdAt,
+    lastSignIn: currentUser.lastLoginAt,
   );
 });
 
@@ -409,6 +409,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
       setUnauthenticated();
     }
   }
+
   Future<void> loginWithGoogle() async {
     setLoading();
     try {

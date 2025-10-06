@@ -15,7 +15,7 @@ class CoreHiveStorageService implements IBoxStorageService {
   String? _appName;
 
   CoreHiveStorageService({IHiveManager? hiveManager})
-      : _hiveManager = hiveManager ?? HiveManager.instance;
+    : _hiveManager = hiveManager ?? HiveManager.instance;
 
   @override
   String get serviceName => 'CoreHiveStorageService';
@@ -49,7 +49,6 @@ class CoreHiveStorageService implements IBoxStorageService {
       _isInitialized = true;
       debugPrint('$serviceName: Successfully initialized for app: $_appName');
       return Result.success(null);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Initialization failed - $e');
       return Result.error(
@@ -91,7 +90,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       debugPrint('$serviceName: Health check completed successfully');
       return Result.success(healthData);
-
     } catch (e) {
       debugPrint('$serviceName: Health check failed - $e');
       final errorData = {
@@ -126,7 +124,6 @@ class CoreHiveStorageService implements IBoxStorageService {
       };
 
       return Result.success(statistics);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to get statistics - $e');
       return Result.error(
@@ -152,7 +149,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       final openBoxes = _hiveManager.openBoxNames;
       return Result.success(openBoxes);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to list boxes - $e');
       return Result.error(
@@ -178,7 +174,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       final exists = _hiveManager.isBoxOpen(boxName);
       return Result.success(exists);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to check if box exists - $e');
       return Result.error(
@@ -202,7 +197,7 @@ class CoreHiveStorageService implements IBoxStorageService {
         return Result.error(validationResult.error!);
       }
 
-      final boxResult = await _hiveManager.getBox(boxName);
+      final boxResult = await _hiveManager.getBox<dynamic>(boxName);
       if (boxResult.isError) {
         return Result.error(boxResult.error!);
       }
@@ -219,7 +214,6 @@ class CoreHiveStorageService implements IBoxStorageService {
       };
 
       return Result.success(statistics);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to get box statistics - $e');
       return Result.error(
@@ -244,7 +238,7 @@ class CoreHiveStorageService implements IBoxStorageService {
         return validationResult;
       }
 
-      final boxResult = await _hiveManager.getBox(boxName);
+      final boxResult = await _hiveManager.getBox<dynamic>(boxName);
       if (boxResult.isError) {
         return Result.error(boxResult.error!);
       }
@@ -254,7 +248,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       debugPrint('$serviceName: Compacted box: $boxName');
       return Result.success(null);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to compact box - $e');
       return Result.error(
@@ -283,9 +276,10 @@ class CoreHiveStorageService implements IBoxStorageService {
       if (closeResult.isError) {
         return closeResult;
       }
-      debugPrint('$serviceName: Box closed: $boxName (Note: Physical deletion not implemented)');
+      debugPrint(
+        '$serviceName: Box closed: $boxName (Note: Physical deletion not implemented)',
+      );
       return Result.success(null);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to delete box - $e');
       return Result.error(
@@ -325,7 +319,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       debugPrint('$serviceName: Backup metadata created');
       return Result.success(backupData);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to create backup - $e');
       return Result.error(
@@ -353,11 +346,11 @@ class CoreHiveStorageService implements IBoxStorageService {
         'boxName': boxName,
         'backupTimestamp': DateTime.now().toIso8601String(),
         'statistics': statisticsResult.data!,
-        'note': 'Box data backup requires specific implementation per data type',
+        'note':
+            'Box data backup requires specific implementation per data type',
       };
 
       return Result.success(backupData);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to backup box - $e');
       return Result.error(
@@ -376,21 +369,33 @@ class CoreHiveStorageService implements IBoxStorageService {
 
   @override
   Future<Result<void>> restore(Map<String, dynamic> backupData) async {
-    debugPrint('$serviceName: Restore functionality requires specific implementation');
+    debugPrint(
+      '$serviceName: Restore functionality requires specific implementation',
+    );
     return Result.error(
       AppErrorFactory.fromException(
-        const HiveInitializationException('Restore functionality not implemented yet'),
+        const HiveInitializationException(
+          'Restore functionality not implemented yet',
+        ),
         null,
       ),
     );
   }
 
   @override
-  Future<Result<void>> restoreBox(String boxName, Map<String, dynamic> boxData) async {
-    debugPrint('$serviceName: Box restore functionality requires specific implementation');
+  Future<Result<void>> restoreBox(
+    String boxName,
+    Map<String, dynamic> boxData,
+  ) async {
+    debugPrint(
+      '$serviceName: Box restore functionality requires specific implementation',
+    );
     return Result.error(
       AppErrorFactory.fromException(
-        HiveBoxException('Box restore functionality not implemented yet', boxName),
+        HiveBoxException(
+          'Box restore functionality not implemented yet',
+          boxName,
+        ),
         null,
       ),
     );
@@ -401,7 +406,9 @@ class CoreHiveStorageService implements IBoxStorageService {
     if (!confirm) {
       return Result.error(
         AppErrorFactory.fromException(
-          const HiveInitializationException('Clear all data operation requires explicit confirmation'),
+          const HiveInitializationException(
+            'Clear all data operation requires explicit confirmation',
+          ),
           null,
         ),
       );
@@ -420,7 +427,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       debugPrint('$serviceName: All data cleared successfully');
       return Result.success(null);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to clear all data - $e');
       return Result.error(
@@ -454,9 +460,10 @@ class CoreHiveStorageService implements IBoxStorageService {
         }
       }
 
-      debugPrint('$serviceName: Maintenance completed - compacted $compactedBoxes boxes');
+      debugPrint(
+        '$serviceName: Maintenance completed - compacted $compactedBoxes boxes',
+      );
       return Result.success(null);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Maintenance failed - $e');
       return Result.error(
@@ -485,7 +492,6 @@ class CoreHiveStorageService implements IBoxStorageService {
 
       debugPrint('$serviceName: Disposed successfully');
       return Result.success(null);
-
     } catch (e, stackTrace) {
       debugPrint('$serviceName: Failed to dispose - $e');
       return Result.error(
@@ -506,7 +512,9 @@ class CoreHiveStorageService implements IBoxStorageService {
     if (!_isInitialized) {
       return Result.error(
         AppErrorFactory.fromException(
-          const HiveInitializationException('Storage service not initialized. Call initialize() first.'),
+          const HiveInitializationException(
+            'Storage service not initialized. Call initialize() first.',
+          ),
           null,
         ),
       );

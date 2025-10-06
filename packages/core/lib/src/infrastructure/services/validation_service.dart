@@ -1,7 +1,5 @@
-
-
 /// Validation Service - Sistema completo de validação de dados
-/// 
+///
 /// Funcionalidades:
 /// - Validações comuns (email, CPF, CNPJ, telefone)
 /// - Validadores customizados
@@ -13,16 +11,11 @@
 /// - Sanitização de dados
 class ValidationService {
   static final _emailPattern = RegExp(
-    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
   );
-  
-  static final _phonePattern = RegExp(
-    r'^\+?[\d\s\-\(\)]{8,}$'
-  );
-  
-  static final _strongPasswordPattern = RegExp(
-    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]'
-  );
+
+  static final _phonePattern = RegExp(r'^\+?[\d\s\-\(\)]{8,}$');
+
   static const Map<String, String> _defaultMessages = {
     'required': 'Este campo é obrigatório',
     'email': 'Email inválido',
@@ -34,7 +27,8 @@ class ValidationService {
     'min': 'Deve ser maior ou igual a {min}',
     'max': 'Deve ser menor ou igual a {max}',
     'pattern': 'Formato inválido',
-    'strongPassword': 'Senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula, número e símbolo',
+    'strongPassword':
+        'Senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula, número e símbolo',
     'passwordMatch': 'Senhas não coincidem',
     'url': 'URL inválida',
     'date': 'Data inválida',
@@ -55,13 +49,13 @@ class ValidationService {
   /// Obtém mensagem formatada
   static String _getMessage(String key, [Map<String, dynamic>? params]) {
     String message = _messages[key] ?? key;
-    
+
     if (params != null) {
       params.forEach((key, value) {
         message = message.replaceAll('{$key}', value.toString());
       });
     }
-    
+
     return message;
   }
 
@@ -69,9 +63,7 @@ class ValidationService {
   static Validator<String> required([String? message]) {
     return (value) {
       if (value == null || value.trim().isEmpty) {
-        return ValidationResult.error(
-          message ?? _getMessage('required'),
-        );
+        return ValidationResult.error(message ?? _getMessage('required'));
       }
       return ValidationResult.valid();
     };
@@ -83,13 +75,11 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid(); // Use required() para obrigatório
       }
-      
+
       if (!_emailPattern.hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('email'),
-        );
+        return ValidationResult.error(message ?? _getMessage('email'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -100,15 +90,13 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       final cleanCpf = value.replaceAll(RegExp(r'\D'), '');
-      
+
       if (!_isValidCpf(cleanCpf)) {
-        return ValidationResult.error(
-          message ?? _getMessage('cpf'),
-        );
+        return ValidationResult.error(message ?? _getMessage('cpf'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -119,15 +107,13 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       final cleanCnpj = value.replaceAll(RegExp(r'\D'), '');
-      
+
       if (!_isValidCnpj(cleanCnpj)) {
-        return ValidationResult.error(
-          message ?? _getMessage('cnpj'),
-        );
+        return ValidationResult.error(message ?? _getMessage('cnpj'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -138,13 +124,11 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (!_phonePattern.hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('phone'),
-        );
+        return ValidationResult.error(message ?? _getMessage('phone'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -155,13 +139,13 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (value.length < min) {
         return ValidationResult.error(
           message ?? _getMessage('minLength', {'min': min}),
         );
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -172,13 +156,13 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (value.length > max) {
         return ValidationResult.error(
           message ?? _getMessage('maxLength', {'max': max}),
         );
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -189,13 +173,13 @@ class ValidationService {
       if (value == null) {
         return ValidationResult.valid();
       }
-      
+
       if (value < minValue) {
         return ValidationResult.error(
           message ?? _getMessage('min', {'min': minValue}),
         );
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -206,13 +190,13 @@ class ValidationService {
       if (value == null) {
         return ValidationResult.valid();
       }
-      
+
       if (value > maxValue) {
         return ValidationResult.error(
           message ?? _getMessage('max', {'max': maxValue}),
         );
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -223,13 +207,11 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (!pattern.hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('pattern'),
-        );
+        return ValidationResult.error(message ?? _getMessage('pattern'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -240,50 +222,41 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (value.length < 8) {
-        return ValidationResult.error(
-          message ?? _getMessage('strongPassword'),
-        );
+        return ValidationResult.error(message ?? _getMessage('strongPassword'));
       }
       if (!RegExp(r'[a-z]').hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('strongPassword'),
-        );
+        return ValidationResult.error(message ?? _getMessage('strongPassword'));
       }
       if (!RegExp(r'[A-Z]').hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('strongPassword'),
-        );
+        return ValidationResult.error(message ?? _getMessage('strongPassword'));
       }
       if (!RegExp(r'\d').hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('strongPassword'),
-        );
+        return ValidationResult.error(message ?? _getMessage('strongPassword'));
       }
       if (!RegExp(r'[@$!%*?&]').hasMatch(value)) {
-        return ValidationResult.error(
-          message ?? _getMessage('strongPassword'),
-        );
+        return ValidationResult.error(message ?? _getMessage('strongPassword'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
 
   /// Validador de confirmação de senha
-  static Validator<String> passwordConfirmation(String originalPassword, [String? message]) {
+  static Validator<String> passwordConfirmation(
+    String originalPassword, [
+    String? message,
+  ]) {
     return (value) {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (value != originalPassword) {
-        return ValidationResult.error(
-          message ?? _getMessage('passwordMatch'),
-        );
+        return ValidationResult.error(message ?? _getMessage('passwordMatch'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -294,7 +267,7 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       try {
         final uri = Uri.parse(value);
         if (!uri.hasScheme || (!uri.scheme.startsWith('http'))) {
@@ -302,9 +275,7 @@ class ValidationService {
         }
         return ValidationResult.valid();
       } catch (e) {
-        return ValidationResult.error(
-          message ?? _getMessage('url'),
-        );
+        return ValidationResult.error(message ?? _getMessage('url'));
       }
     };
   }
@@ -315,13 +286,11 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (double.tryParse(value) == null) {
-        return ValidationResult.error(
-          message ?? _getMessage('numeric'),
-        );
+        return ValidationResult.error(message ?? _getMessage('numeric'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -332,13 +301,11 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       if (int.tryParse(value) == null) {
-        return ValidationResult.error(
-          message ?? _getMessage('integer'),
-        );
+        return ValidationResult.error(message ?? _getMessage('integer'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -349,13 +316,11 @@ class ValidationService {
       if (value == null) {
         return ValidationResult.valid();
       }
-      
+
       if (value <= 0) {
-        return ValidationResult.error(
-          message ?? _getMessage('positive'),
-        );
+        return ValidationResult.error(message ?? _getMessage('positive'));
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -366,34 +331,37 @@ class ValidationService {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       try {
         DateTime.parse(value);
         return ValidationResult.valid();
       } catch (e) {
-        return ValidationResult.error(
-          message ?? _getMessage('date'),
-        );
+        return ValidationResult.error(message ?? _getMessage('date'));
       }
     };
   }
 
   /// Validador de faixa de datas
-  static Validator<DateTime> dateRange(DateTime start, DateTime end, [String? message]) {
+  static Validator<DateTime> dateRange(
+    DateTime start,
+    DateTime end, [
+    String? message,
+  ]) {
     return (value) {
       if (value == null) {
         return ValidationResult.valid();
       }
-      
+
       if (value.isBefore(start) || value.isAfter(end)) {
         return ValidationResult.error(
-          message ?? _getMessage('dateRange', {
-            'start': start.toIso8601String().split('T')[0],
-            'end': end.toIso8601String().split('T')[0],
-          }),
+          message ??
+              _getMessage('dateRange', {
+                'start': start.toIso8601String().split('T')[0],
+                'end': end.toIso8601String().split('T')[0],
+              }),
         );
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -422,7 +390,10 @@ class ValidationService {
   }
 
   /// Aplica validador apenas se função de condição retornar true
-  static Validator<T> whenFunction<T>(bool Function(T? value) condition, Validator<T> validator) {
+  static Validator<T> whenFunction<T>(
+    bool Function(T? value) condition,
+    Validator<T> validator,
+  ) {
     return (value) {
       if (!condition(value)) {
         return ValidationResult.valid();
@@ -432,32 +403,35 @@ class ValidationService {
   }
 
   /// Valida um mapa de campos
-  static ValidationResult validateForm(Map<String, dynamic> data, Map<String, List<Validator>> rules) {
+  static ValidationResult validateForm(
+    Map<String, dynamic> data,
+    Map<String, List<Validator<dynamic>>> rules,
+  ) {
     final errors = <String, List<String>>{};
-    
+
     for (final entry in rules.entries) {
       final fieldName = entry.key;
       final validators = entry.value;
       final value = data[fieldName];
-      
+
       final fieldErrors = <String>[];
-      
+
       for (final validator in validators) {
         final result = validator(value);
         if (!result.isValid) {
           fieldErrors.addAll(result.errors);
         }
       }
-      
+
       if (fieldErrors.isNotEmpty) {
         errors[fieldName] = fieldErrors;
       }
     }
-    
+
     if (errors.isEmpty) {
       return ValidationResult.valid();
     }
-    
+
     return ValidationResult.errorWithFields(errors);
   }
 
@@ -496,28 +470,26 @@ class ValidationService {
 
   /// Validador assíncrono customizado
   static AsyncValidator<T> asyncCustom<T>(
-    Future<ValidationResult> Function(T? value) validator
+    Future<ValidationResult> Function(T? value) validator,
   ) {
     return validator;
   }
 
   /// Validador assíncrono de email único (exemplo)
   static AsyncValidator<String> uniqueEmail(
-    Future<bool> Function(String email) checkUnique,
-    [String? message]
-  ) {
+    Future<bool> Function(String email) checkUnique, [
+    String? message,
+  ]) {
     return (value) async {
       if (value == null || value.isEmpty) {
         return ValidationResult.valid();
       }
-      
+
       final isUnique = await checkUnique(value);
       if (!isUnique) {
-        return ValidationResult.error(
-          message ?? 'Este email já está em uso',
-        );
+        return ValidationResult.error(message ?? 'Este email já está em uso');
       }
-      
+
       return ValidationResult.valid();
     };
   }
@@ -525,9 +497,9 @@ class ValidationService {
   /// Valida formulário com validadores assíncronos
   static Future<ValidationResult> validateFormAsync(
     Map<String, dynamic> data,
-    Map<String, List<Validator>> syncRules,
-    [Map<String, List<AsyncValidator>>? asyncRules]
-  ) async {
+    Map<String, List<Validator<dynamic>>> syncRules, [
+    Map<String, List<AsyncValidator<dynamic>>>? asyncRules,
+  ]) async {
     final syncResult = validateForm(data, syncRules);
     if (!syncResult.isValid) {
       return syncResult;
@@ -536,30 +508,30 @@ class ValidationService {
       return syncResult;
     }
     final errors = <String, List<String>>{};
-    
+
     for (final entry in asyncRules.entries) {
       final fieldName = entry.key;
       final validators = entry.value;
       final value = data[fieldName];
-      
+
       final fieldErrors = <String>[];
-      
+
       for (final validator in validators) {
         final result = await validator(value);
         if (!result.isValid) {
           fieldErrors.addAll(result.errors);
         }
       }
-      
+
       if (fieldErrors.isNotEmpty) {
         errors[fieldName] = fieldErrors;
       }
     }
-    
+
     if (errors.isEmpty) {
       return ValidationResult.valid();
     }
-    
+
     return ValidationResult.errorWithFields(errors);
   }
 
@@ -572,7 +544,7 @@ class ValidationService {
     }
     int remainder = sum % 11;
     int firstDigit = remainder < 2 ? 0 : 11 - remainder;
-    
+
     if (int.parse(cpf[9]) != firstDigit) return false;
     sum = 0;
     for (int i = 0; i < 10; i++) {
@@ -580,7 +552,7 @@ class ValidationService {
     }
     remainder = sum % 11;
     int secondDigit = remainder < 2 ? 0 : 11 - remainder;
-    
+
     return int.parse(cpf[10]) == secondDigit;
   }
 
@@ -594,7 +566,7 @@ class ValidationService {
     }
     int remainder = sum % 11;
     int firstDigit = remainder < 2 ? 0 : 11 - remainder;
-    
+
     if (int.parse(cnpj[12]) != firstDigit) return false;
     const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
     sum = 0;
@@ -603,7 +575,7 @@ class ValidationService {
     }
     remainder = sum % 11;
     int secondDigit = remainder < 2 ? 0 : 11 - remainder;
-    
+
     return int.parse(cnpj[13]) == secondDigit;
   }
 }
@@ -638,7 +610,9 @@ class ValidationResult {
   }
 
   /// Cria resultado com erros por campo
-  factory ValidationResult.errorWithFields(Map<String, List<String>> fieldErrors) {
+  factory ValidationResult.errorWithFields(
+    Map<String, List<String>> fieldErrors,
+  ) {
     final allErrors = <String>[];
     for (final errors in fieldErrors.values) {
       allErrors.addAll(errors);

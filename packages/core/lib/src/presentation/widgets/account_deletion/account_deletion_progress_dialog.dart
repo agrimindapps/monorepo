@@ -33,16 +33,15 @@ class AccountDeletionProgressDialog extends StatelessWidget {
               ),
             if (isComplete)
               const Icon(Icons.check_circle, color: Colors.green, size: 24),
-            if (hasError)
-              const Icon(Icons.error, color: Colors.red, size: 24),
+            if (hasError) const Icon(Icons.error, color: Colors.red, size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 hasError
                     ? 'Erro na Exclusão'
                     : isComplete
-                        ? 'Exclusão Concluída'
-                        : 'Excluindo Conta...',
+                    ? 'Exclusão Concluída'
+                    : 'Excluindo Conta...',
                 style: const TextStyle(fontSize: 18),
               ),
             ),
@@ -78,9 +77,10 @@ class AccountDeletionProgressDialog extends StatelessWidget {
               ],
               if (!hasError) ...[
                 LinearProgressIndicator(
-                  value: isComplete
-                      ? 1.0
-                      : steps.isEmpty
+                  value:
+                      isComplete
+                          ? 1.0
+                          : steps.isEmpty
                           ? 0.0
                           : (currentStepIndex + 1) / steps.length,
                 ),
@@ -94,7 +94,6 @@ class AccountDeletionProgressDialog extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final isPast = index < currentStepIndex;
                     final isCurrent = index == currentStepIndex;
-                    final isFuture = index > currentStepIndex;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -124,11 +123,14 @@ class AccountDeletionProgressDialog extends StatelessWidget {
                             child: Text(
                               steps[index],
                               style: TextStyle(
-                                color: isPast || isCurrent
-                                    ? Colors.black87
-                                    : Colors.grey.shade600,
+                                color:
+                                    isPast || isCurrent
+                                        ? Colors.black87
+                                        : Colors.grey.shade600,
                                 fontWeight:
-                                    isCurrent ? FontWeight.w600 : FontWeight.normal,
+                                    isCurrent
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
                               ),
                             ),
                           ),
@@ -184,16 +186,17 @@ class AccountDeletionProgressDialog extends StatelessWidget {
     bool hasError = false,
     String? errorMessage,
   }) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AccountDeletionProgressDialog(
-        steps: steps,
-        currentStepIndex: currentStepIndex,
-        isComplete: isComplete,
-        hasError: hasError,
-        errorMessage: errorMessage,
-      ),
+      builder:
+          (context) => AccountDeletionProgressDialog(
+            steps: steps,
+            currentStepIndex: currentStepIndex,
+            isComplete: isComplete,
+            hasError: hasError,
+            errorMessage: errorMessage,
+          ),
     );
   }
 }

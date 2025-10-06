@@ -11,9 +11,8 @@ import '../../shared/utils/failure.dart';
 class FirebaseStorageService implements IStorageRepository {
   final FirebaseStorage _storage;
 
-  FirebaseStorageService({
-    FirebaseStorage? storage,
-  }) : _storage = storage ?? FirebaseStorage.instance;
+  FirebaseStorageService({FirebaseStorage? storage})
+    : _storage = storage ?? FirebaseStorage.instance;
 
   @override
   Future<Either<Failure, String>> uploadFile({
@@ -21,7 +20,7 @@ class FirebaseStorageService implements IStorageRepository {
     required String path,
     String? contentType,
     Map<String, String>? metadata,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   }) async {
     try {
       final ref = _storage.ref().child(path);
@@ -33,9 +32,10 @@ class FirebaseStorageService implements IStorageRepository {
         );
       }
 
-      final uploadTask = settableMetadata != null
-          ? ref.putFile(file, settableMetadata)
-          : ref.putFile(file);
+      final uploadTask =
+          settableMetadata != null
+              ? ref.putFile(file, settableMetadata)
+              : ref.putFile(file);
       if (onProgress != null) {
         uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;
@@ -61,11 +61,11 @@ class FirebaseStorageService implements IStorageRepository {
     int? maxWidth,
     int? maxHeight,
     int? quality,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   }) async {
     try {
       File processedImage = imageFile;
-      
+
       return uploadFile(
         file: processedImage,
         path: path,
@@ -88,7 +88,7 @@ class FirebaseStorageService implements IStorageRepository {
   Future<Either<Failure, File>> downloadFile({
     required String url,
     required String localPath,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   }) async {
     try {
       final ref = _storage.refFromURL(url);
@@ -113,9 +113,7 @@ class FirebaseStorageService implements IStorageRepository {
   }
 
   @override
-  Future<Either<Failure, String>> getDownloadUrl({
-    required String path,
-  }) async {
+  Future<Either<Failure, String>> getDownloadUrl({required String path}) async {
     try {
       final ref = _storage.ref().child(path);
       final url = await ref.getDownloadURL();
@@ -128,9 +126,7 @@ class FirebaseStorageService implements IStorageRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteFile({
-    required String path,
-  }) async {
+  Future<Either<Failure, void>> deleteFile({required String path}) async {
     try {
       final ref = _storage.ref().child(path);
       await ref.delete();
@@ -156,24 +152,28 @@ class FirebaseStorageService implements IStorageRepository {
       for (final item in result.items) {
         try {
           final metadata = await item.getMetadata();
-          items.add(StorageItem(
-            name: item.name,
-            path: path,
-            fullPath: item.fullPath,
-            bucket: item.bucket,
-            size: metadata.size,
-            contentType: metadata.contentType,
-            timeCreated: metadata.timeCreated,
-            updated: metadata.updated,
-            metadata: metadata.customMetadata,
-          ));
+          items.add(
+            StorageItem(
+              name: item.name,
+              path: path,
+              fullPath: item.fullPath,
+              bucket: item.bucket,
+              size: metadata.size,
+              contentType: metadata.contentType,
+              timeCreated: metadata.timeCreated,
+              updated: metadata.updated,
+              metadata: metadata.customMetadata,
+            ),
+          );
         } catch (e) {
-          items.add(StorageItem(
-            name: item.name,
-            path: path,
-            fullPath: item.fullPath,
-            bucket: item.bucket,
-          ));
+          items.add(
+            StorageItem(
+              name: item.name,
+              path: path,
+              fullPath: item.fullPath,
+              bucket: item.bucket,
+            ),
+          );
         }
       }
       if (maxResults != null && items.length > maxResults) {
@@ -189,9 +189,7 @@ class FirebaseStorageService implements IStorageRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> fileExists({
-    required String path,
-  }) async {
+  Future<Either<Failure, bool>> fileExists({required String path}) async {
     try {
       final ref = _storage.ref().child(path);
       await ref.getMetadata();
@@ -214,21 +212,23 @@ class FirebaseStorageService implements IStorageRepository {
       final ref = _storage.ref().child(path);
       final metadata = await ref.getMetadata();
 
-      return Right(StorageMetadata(
-        bucket: metadata.bucket ?? '',
-        fullPath: metadata.fullPath,
-        name: metadata.name,
-        size: metadata.size,
-        contentType: metadata.contentType,
-        timeCreated: metadata.timeCreated,
-        updated: metadata.updated,
-        md5Hash: metadata.md5Hash,
-        cacheControl: metadata.cacheControl,
-        contentDisposition: metadata.contentDisposition,
-        contentEncoding: metadata.contentEncoding,
-        contentLanguage: metadata.contentLanguage,
-        customMetadata: metadata.customMetadata,
-      ));
+      return Right(
+        StorageMetadata(
+          bucket: metadata.bucket ?? '',
+          fullPath: metadata.fullPath,
+          name: metadata.name,
+          size: metadata.size,
+          contentType: metadata.contentType,
+          timeCreated: metadata.timeCreated,
+          updated: metadata.updated,
+          md5Hash: metadata.md5Hash,
+          cacheControl: metadata.cacheControl,
+          contentDisposition: metadata.contentDisposition,
+          contentEncoding: metadata.contentEncoding,
+          contentLanguage: metadata.contentLanguage,
+          customMetadata: metadata.customMetadata,
+        ),
+      );
     } on FirebaseException catch (e) {
       return Left(FirebaseFailure(_mapStorageError(e)));
     } catch (e) {
@@ -243,27 +243,27 @@ class FirebaseStorageService implements IStorageRepository {
   }) async {
     try {
       final ref = _storage.ref().child(path);
-      final settableMetadata = SettableMetadata(
-        customMetadata: metadata,
-      );
+      final settableMetadata = SettableMetadata(customMetadata: metadata);
 
       final updatedMetadata = await ref.updateMetadata(settableMetadata);
 
-      return Right(StorageMetadata(
-        bucket: updatedMetadata.bucket ?? '',
-        fullPath: updatedMetadata.fullPath,
-        name: updatedMetadata.name,
-        size: updatedMetadata.size,
-        contentType: updatedMetadata.contentType,
-        timeCreated: updatedMetadata.timeCreated,
-        updated: updatedMetadata.updated,
-        md5Hash: updatedMetadata.md5Hash,
-        cacheControl: updatedMetadata.cacheControl,
-        contentDisposition: updatedMetadata.contentDisposition,
-        contentEncoding: updatedMetadata.contentEncoding,
-        contentLanguage: updatedMetadata.contentLanguage,
-        customMetadata: updatedMetadata.customMetadata,
-      ));
+      return Right(
+        StorageMetadata(
+          bucket: updatedMetadata.bucket ?? '',
+          fullPath: updatedMetadata.fullPath,
+          name: updatedMetadata.name,
+          size: updatedMetadata.size,
+          contentType: updatedMetadata.contentType,
+          timeCreated: updatedMetadata.timeCreated,
+          updated: updatedMetadata.updated,
+          md5Hash: updatedMetadata.md5Hash,
+          cacheControl: updatedMetadata.cacheControl,
+          contentDisposition: updatedMetadata.contentDisposition,
+          contentEncoding: updatedMetadata.contentEncoding,
+          contentLanguage: updatedMetadata.contentLanguage,
+          customMetadata: updatedMetadata.customMetadata,
+        ),
+      );
     } on FirebaseException catch (e) {
       return Left(FirebaseFailure(_mapStorageError(e)));
     } catch (e) {
@@ -317,16 +317,10 @@ class FirebaseStorageService implements IStorageRepository {
         destinationPath: destinationPath,
       );
 
-      return copyResult.fold(
-        (failure) => Left(failure),
-        (url) async {
-          final deleteResult = await deleteFile(path: sourcePath);
-          return deleteResult.fold(
-            (failure) => Left(failure),
-            (_) => Right(url),
-          );
-        },
-      );
+      return copyResult.fold((failure) => Left(failure), (url) async {
+        final deleteResult = await deleteFile(path: sourcePath);
+        return deleteResult.fold((failure) => Left(failure), (_) => Right(url));
+      });
     } catch (e) {
       return Left(ServerFailure('Erro ao mover arquivo: $e'));
     }
@@ -337,7 +331,7 @@ class FirebaseStorageService implements IStorageRepository {
     required File imageFile,
     required String basePath,
     List<ImageVariant>? variants,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   }) async {
     try {
       final originalResult = await uploadImage(
@@ -346,43 +340,50 @@ class FirebaseStorageService implements IStorageRepository {
         onProgress: onProgress != null ? (p) => onProgress(p * 0.5) : null,
       );
 
-      return originalResult.fold(
-        (failure) => Left(failure),
-        (originalUrl) async {
-          final variantUrls = <String, String>{};
-          if (variants != null) {
-            for (int i = 0; i < variants.length; i++) {
-              final variant = variants[i];
-              final variantPath = basePath.replaceAll(
-                basePath.split('/').last,
-                '${basePath.split('/').last.split('.').first}${variant.suffix}.${basePath.split('/').last.split('.').last}',
-              );
+      return originalResult.fold((failure) => Left(failure), (
+        originalUrl,
+      ) async {
+        final variantUrls = <String, String>{};
+        if (variants != null) {
+          for (int i = 0; i < variants.length; i++) {
+            final variant = variants[i];
+            final variantPath = basePath.replaceAll(
+              basePath.split('/').last,
+              '${basePath.split('/').last.split('.').first}${variant.suffix}.${basePath.split('/').last.split('.').last}',
+            );
 
-              final variantResult = await uploadImage(
-                imageFile: imageFile,
-                path: variantPath,
-                onProgress: onProgress != null 
-                    ? (p) => onProgress(0.5 + (p * 0.5 * (i + 1) / variants.length))
-                    : null,
-              );
+            final variantResult = await uploadImage(
+              imageFile: imageFile,
+              path: variantPath,
+              onProgress:
+                  onProgress != null
+                      ? (p) => onProgress(
+                        0.5 + (p * 0.5 * (i + 1) / variants.length),
+                      )
+                      : null,
+            );
 
-              variantResult.fold(
-                (failure) {
-                  developer.log('Erro ao fazer upload de variante ${variant.suffix}: $failure', name: 'FirebaseStorage');
-                },
-                (variantUrl) {
-                  variantUrls[variant.suffix] = variantUrl;
-                },
-              );
-            }
+            variantResult.fold(
+              (failure) {
+                developer.log(
+                  'Erro ao fazer upload de variante ${variant.suffix}: $failure',
+                  name: 'FirebaseStorage',
+                );
+              },
+              (variantUrl) {
+                variantUrls[variant.suffix] = variantUrl;
+              },
+            );
           }
+        }
 
-          return Right(StorageImageUploadResult(
+        return Right(
+          StorageImageUploadResult(
             originalUrl: originalUrl,
             variants: variantUrls,
-          ));
-        },
-      );
+          ),
+        );
+      });
     } catch (e) {
       return Left(ServerFailure('Erro ao fazer upload com variantes: $e'));
     }

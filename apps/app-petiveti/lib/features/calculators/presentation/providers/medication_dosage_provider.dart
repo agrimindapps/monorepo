@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/repositories/medication_database.dart';
@@ -6,6 +7,13 @@ import '../../domain/entities/medication_data.dart';
 import '../../domain/entities/medication_dosage_input.dart';
 import '../../domain/entities/medication_dosage_output.dart';
 import '../../domain/strategies/medication_dosage_strategy.dart';
+
+/// Provider Riverpod para MedicationDosageProvider
+///
+/// Gerencia estado da calculadora de dosagem de medicamentos
+final medicationDosageProviderProvider = ChangeNotifierProvider<MedicationDosageProvider>((ref) {
+  return MedicationDosageProvider();
+});
 
 /// Provider para gerenciamento de state da calculadora de dosagem de medicamentos
 class MedicationDosageProvider with ChangeNotifier {

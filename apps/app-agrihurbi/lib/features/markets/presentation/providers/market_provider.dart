@@ -1,3 +1,4 @@
+import 'package:app_agrihurbi/core/di/injection.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
@@ -5,10 +6,18 @@ import 'package:app_agrihurbi/features/markets/domain/usecases/get_market_summar
 import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart';
 import 'package:app_agrihurbi/features/markets/domain/usecases/manage_market_favorites.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:injectable/injectable.dart';
 
+/// Provider Riverpod para MarketProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final marketProviderProvider = Provider<MarketProvider>((ref) {
+  return getIt<MarketProvider>();
+});
+
 /// Market Provider for State Management
-/// 
+///
 /// Manages market data, filtering, favorites, and search state
 /// using Provider pattern for reactive UI updates
 @injectable

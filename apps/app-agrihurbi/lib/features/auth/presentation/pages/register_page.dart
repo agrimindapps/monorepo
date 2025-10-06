@@ -1,12 +1,18 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
+import 'package:app_agrihurbi/core/di/injection_container.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+
+/// Riverpod provider exposing the existing AuthProvider (registered with GetIt)
+final authProviderProvider = ChangeNotifierProvider<AuthProvider>(
+  (ref) => getIt<AuthProvider>(),
+);
 
 /// Register page
 class RegisterPage extends StatefulWidget {
@@ -54,7 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Header
                 Text(
                   'Criar conta',
@@ -64,9 +70,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   'Preencha os dados para criar sua conta',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -74,9 +80,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Name Field
                 TextFormField(
                   controller: _nameController,
@@ -88,9 +94,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: InputValidators.validateFullName,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Email Field
                 TextFormField(
                   controller: _emailController,
@@ -102,9 +108,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: InputValidators.validateEmail,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Phone Field (Optional)
                 TextFormField(
                   controller: _phoneController,
@@ -116,9 +122,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: InputValidators.validatePhone,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Password Field
                 TextFormField(
                   controller: _passwordController,
@@ -142,9 +148,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: PasswordValidator.validatePassword,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Confirm Password Field
                 TextFormField(
                   controller: _confirmPasswordController,
@@ -166,40 +172,43 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                   ),
-                  validator: (value) => PasswordValidator.validatePasswordConfirmation(
-                    _passwordController.text,
-                    value,
-                  ),
+                  validator:
+                      (value) => PasswordValidator.validatePasswordConfirmation(
+                        _passwordController.text,
+                        value,
+                      ),
                 ),
-                
-                const SizedBox(height: 32),
-                
-                // Register Button
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return ElevatedButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () => _handleRegister(context, authProvider),
-                      child: authProvider.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  DesignTokens.textLightColor,
-                                ),
 
-                              ),
-                            )
-                          : const Text('Criar conta'),
+                const SizedBox(height: 32),
+
+                // Register Button
+                Consumer(
+                  builder: (context, ref, child) {
+                    final authProvider = ref.watch(authProviderProvider);
+                    return ElevatedButton(
+                      onPressed:
+                          authProvider.isLoading
+                              ? null
+                              : () => _handleRegister(context, authProvider),
+                      child:
+                          authProvider.isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    DesignTokens.textLightColor,
+                                  ),
+                                ),
+                              )
+                              : const Text('Criar conta'),
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Login Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -214,20 +223,21 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Error Message
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
+                Consumer(
+                  builder: (context, ref, child) {
+                    final authProvider = ref.watch(authProviderProvider);
                     if (authProvider.errorMessage != null) {
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppTheme.errorColor.withValues(alpha: 0.1),
+                          color: AppTheme.errorColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.errorColor.withValues(alpha: 0.3),
+                            color: AppTheme.errorColor.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -276,23 +286,26 @@ class _RegisterPageState extends State<RegisterPage> {
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        phone: _phoneController.text.trim().isEmpty 
-            ? null 
-            : _phoneController.text.trim(),
+        phone:
+            _phoneController.text.trim().isEmpty
+                ? null
+                : _phoneController.text.trim(),
       );
 
       if (!mounted) return; // ✅ Safety check
 
       result.fold(
         (failure) {
-          if (mounted) { // ✅ Double check before using context
+          if (mounted) {
+            // ✅ Double check before using context
             ErrorHandler.showErrorSnackbar(context, failure);
           }
         },
         (user) {
-          if (mounted) { // ✅ Double check before using context
+          if (mounted) {
+            // ✅ Double check before using context
             ErrorHandler.showSuccessSnackbar(
-              context, 
+              context,
               SuccessMessages.registerSuccess,
             );
             context.go('/home');

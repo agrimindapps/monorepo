@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/debounced_search_manager.dart';
@@ -15,16 +15,16 @@ import '../widgets/calculator_search_filters_widget.dart';
 import '../widgets/calculator_search_results_widget.dart';
 
 /// Página de busca avançada de calculadoras
-/// 
+///
 /// Implementa busca por texto, filtros avançados e sugestões
-class CalculatorsSearchPage extends StatefulWidget {
+class CalculatorsSearchPage extends ConsumerStatefulWidget {
   const CalculatorsSearchPage({super.key});
 
   @override
-  State<CalculatorsSearchPage> createState() => _CalculatorsSearchPageState();
+  ConsumerState<CalculatorsSearchPage> createState() => _CalculatorsSearchPageState();
 }
 
-class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
+class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late final _debouncedSearchManager = DebouncedSearchManager();
@@ -59,7 +59,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
   void _loadInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return; // ✅ Safety check
-      final provider = Provider.of<CalculatorProvider>(context, listen: false);
+      final provider = ref.read(calculatorProvider);
       _updateSearchResults();
       _extractAvailableTags(provider.calculators);
     });
@@ -79,8 +79,9 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
           ),
         ],
       ),
-      body: Consumer<CalculatorProvider>(
-        builder: (context, provider, child) {
+      body: Builder(
+        builder: (context) {
+          ref.watch(calculatorProvider); // Watch for reactivity
           return Column(
             children: [
               // Barra de busca
@@ -181,7 +182,7 @@ class _CalculatorsSearchPageState extends State<CalculatorsSearchPage> {
     await PerformanceBenchmark.measureAsync(
       'search_otimizada',
       () async {
-        final provider = Provider.of<CalculatorProvider>(context, listen: false);
+        final provider = ref.read(calculatorProvider);
         
         // Obter IDs dos favoritos para o filtro
         List<String> favoriteIds = [];

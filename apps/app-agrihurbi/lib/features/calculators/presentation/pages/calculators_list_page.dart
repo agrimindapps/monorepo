@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/design_system_components.dart';
 import '../../domain/entities/calculation_history.dart';
@@ -13,19 +13,20 @@ import '../widgets/calculator_list_widget.dart';
 import '../widgets/calculator_search_widget.dart';
 
 /// Página de listagem de calculadoras
-/// 
+///
 /// Implementa navegação por categorias, busca e favoritos
 /// Segue o padrão Provider estabelecido na migração livestock
-class CalculatorsListPage extends StatefulWidget {
+class CalculatorsListPage extends ConsumerStatefulWidget {
   final String? category;
-  
+
   const CalculatorsListPage({super.key, this.category});
 
   @override
-  State<CalculatorsListPage> createState() => _CalculatorsListPageState();
+  ConsumerState<CalculatorsListPage> createState() =>
+      _CalculatorsListPageState();
 }
 
-class _CalculatorsListPageState extends State<CalculatorsListPage>
+class _CalculatorsListPageState extends ConsumerState<CalculatorsListPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _searchController = TextEditingController();
@@ -35,13 +36,13 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Carrega dados iniciais
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return; // ✅ Safety check
-      final provider = Provider.of<CalculatorProvider>(context, listen: false);
+      final provider = ref.read(calculatorProvider.notifier);
       provider.refreshAllData();
-      
+
       // Aplica filtro de categoria se especificado
       if (widget.category != null) {
         final category = _mapStringToCategory(widget.category!);
@@ -62,6 +63,8 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
 
   @override
   Widget build(BuildContext context) {
+    final provider = ref.watch(calculatorProvider);
+    final providerNotifier = ref.read(calculatorProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: Text(_getPageTitle()),
@@ -77,44 +80,43 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<CalculatorProvider>().refreshAllData(),
+            onPressed: () => providerNotifier.refreshAllData(),
             tooltip: 'Atualizar',
           ),
         ],
       ),
-      body: Consumer<CalculatorProvider>(
-        builder: (context, provider, child) {
-          return Column(
-            children: [
-              // Barra de busca e filtros
-              _buildSearchAndFilters(provider),
-              
-              // Conteúdo principal em abas
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildAllCalculatorsTab(provider),
-                    _buildFavoritesTab(provider),
-                    _buildHistoryTab(provider),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          // Barra de busca e filtros
+          _buildSearchAndFilters(provider, providerNotifier),
+
+          // Conteúdo principal em abas
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildAllCalculatorsTab(provider, providerNotifier),
+                _buildFavoritesTab(provider, providerNotifier),
+                _buildHistoryTab(provider, providerNotifier),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSearchAndFilters(CalculatorProvider provider) {
+  Widget _buildSearchAndFilters(
+    CalculatorProvider provider,
+    CalculatorProvider providerNotifier,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -124,21 +126,24 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
         children: [
           CalculatorSearchWidget(
             controller: _searchController,
-            onChanged: provider.updateSearchQuery,
+            onChanged: providerNotifier.updateSearchQuery,
             hintText: 'Buscar calculadoras...',
           ),
           const SizedBox(height: 12),
           CalculatorCategoryFilter(
             selectedCategory: provider.selectedCategory,
-            onCategoryChanged: provider.updateCategoryFilter,
-            onClearFilters: provider.clearFilters,
+            onCategoryChanged: providerNotifier.updateCategoryFilter,
+            onClearFilters: providerNotifier.clearFilters,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAllCalculatorsTab(CalculatorProvider provider) {
+  Widget _buildAllCalculatorsTab(
+    CalculatorProvider provider,
+    CalculatorProvider providerNotifier,
+  ) {
     if (provider.isLoading) {
       return const Center(
         child: Column(
@@ -156,8 +161,8 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
       return DSErrorState(
         message: provider.errorMessage!,
         onRetry: () {
-          provider.clearError();
-          provider.loadCalculators();
+          providerNotifier.clearError();
+          providerNotifier.loadCalculators();
         },
       );
     }
@@ -165,17 +170,20 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
     final calculators = provider.filteredCalculators;
 
     if (calculators.isEmpty) {
-      final hasFilters = provider.searchQuery.isNotEmpty || provider.selectedCategory != null;
+      final hasFilters =
+          provider.searchQuery.isNotEmpty || provider.selectedCategory != null;
       return CalculatorEmptyStateWidget(
-        type: hasFilters 
-            ? CalculatorEmptyStateType.noSearchResults 
-            : CalculatorEmptyStateType.noCalculators,
-        onAction: hasFilters 
-            ? () {
-                _searchController.clear();
-                provider.clearFilters();
-              } 
-            : null,
+        type:
+            hasFilters
+                ? CalculatorEmptyStateType.noSearchResults
+                : CalculatorEmptyStateType.noCalculators,
+        onAction:
+            hasFilters
+                ? () {
+                  _searchController.clear();
+                  providerNotifier.clearFilters();
+                }
+                : null,
       );
     }
 
@@ -183,11 +191,14 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
       calculators: calculators,
       scrollController: _scrollController,
       showCategory: provider.selectedCategory == null,
-      onRefresh: provider.loadCalculators,
+      onRefresh: providerNotifier.loadCalculators,
     );
   }
 
-  Widget _buildFavoritesTab(CalculatorProvider provider) {
+  Widget _buildFavoritesTab(
+    CalculatorProvider provider,
+    CalculatorProvider providerNotifier,
+  ) {
     final favoriteCalculators = provider.favoriteCalculators;
 
     if (provider.isLoadingFavorites) {
@@ -213,11 +224,14 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
       calculators: favoriteCalculators,
       scrollController: _scrollController,
       showCategory: true,
-      onRefresh: provider.refreshAllData,
+      onRefresh: providerNotifier.refreshAllData,
     );
   }
 
-  Widget _buildHistoryTab(CalculatorProvider provider) {
+  Widget _buildHistoryTab(
+    CalculatorProvider provider,
+    CalculatorProvider providerNotifier,
+  ) {
     final history = provider.calculationHistory;
 
     if (provider.isLoadingHistory) {
@@ -242,8 +256,12 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
     return CalculatorHistoryListWidget(
       history: history,
       scrollController: _scrollController,
-      onReapply: (CalculationHistory historyItem) => _navigateToCalculatorWithHistory(historyItem, provider),
-      onDelete: (CalculationHistory historyItem) => provider.removeFromHistory(historyItem.id),
+      onReapply:
+          (CalculationHistory historyItem) =>
+              _navigateToCalculatorWithHistory(historyItem, providerNotifier),
+      onDelete:
+          (CalculationHistory historyItem) =>
+              providerNotifier.removeFromHistory(historyItem.id),
     );
   }
 
@@ -253,9 +271,9 @@ class _CalculatorsListPageState extends State<CalculatorsListPage>
 
   void _navigateToCalculatorWithHistory(
     CalculationHistory historyItem,
-    CalculatorProvider provider,
+    CalculatorProvider providerNotifier,
   ) {
-    provider.applyHistoryResult(historyItem);
+    providerNotifier.applyHistoryResult(historyItem);
     CalculatorUIService.navigateToCalculatorWithHistory(context, historyItem);
   }
 

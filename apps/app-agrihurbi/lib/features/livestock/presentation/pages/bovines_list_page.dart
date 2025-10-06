@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 import '../providers/livestock_provider.dart';
@@ -9,17 +9,17 @@ import '../widgets/livestock_filter_widget.dart';
 import '../widgets/livestock_search_widget.dart';
 
 /// Página de listagem de bovinos com filtros e busca
-/// 
+///
 /// Substitui a antiga bovinos_lista_page.dart do GetX
 /// Implementa padrões Provider + go_router para navegação
-class BovinesListPage extends StatefulWidget {
+class BovinesListPage extends ConsumerStatefulWidget {
   const BovinesListPage({super.key});
 
   @override
-  State<BovinesListPage> createState() => _BovinesListPageState();
+  ConsumerState<BovinesListPage> createState() => _BovinesListPageState();
 }
 
-class _BovinesListPageState extends State<BovinesListPage> {
+class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   bool _showFilters = false;
@@ -29,7 +29,7 @@ class _BovinesListPageState extends State<BovinesListPage> {
     super.initState();
     // Carrega dados iniciais
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LivestockProvider>().loadBovines();
+      ref.read(livestockProviderProvider).loadBovines();
     });
   }
 
@@ -42,13 +42,16 @@ class _BovinesListPageState extends State<BovinesListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = ref.watch(livestockProviderProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Bovinos'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
-            icon: Icon(_showFilters ? Icons.filter_list : Icons.filter_list_off),
+            icon: Icon(
+              _showFilters ? Icons.filter_list : Icons.filter_list_off,
+            ),
             onPressed: () {
               setState(() {
                 _showFilters = !_showFilters;
@@ -58,75 +61,70 @@ class _BovinesListPageState extends State<BovinesListPage> {
           ),
           PopupMenuButton<String>(
             onSelected: _handleMenuAction,
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'sync',
-                child: Row(
-                  children: [
-                    Icon(Icons.sync),
-                    SizedBox(width: 8),
-                    Text('Sincronizar'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'statistics',
-                child: Row(
-                  children: [
-                    Icon(Icons.analytics),
-                    SizedBox(width: 8),
-                    Text('Estatísticas'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: Row(
-                  children: [
-                    Icon(Icons.download),
-                    SizedBox(width: 8),
-                    Text('Exportar'),
-                  ],
-                ),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'sync',
+                    child: Row(
+                      children: [
+                        Icon(Icons.sync),
+                        SizedBox(width: 8),
+                        Text('Sincronizar'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'statistics',
+                    child: Row(
+                      children: [
+                        Icon(Icons.analytics),
+                        SizedBox(width: 8),
+                        Text('Estatísticas'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'export',
+                    child: Row(
+                      children: [
+                        Icon(Icons.download),
+                        SizedBox(width: 8),
+                        Text('Exportar'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
-      body: Consumer<LivestockProvider>(
-        builder: (context, provider, child) {
-          return Column(
-            children: [
-              // Barra de busca
-              LivestockSearchWidget(
-                controller: _searchController,
-                onChanged: provider.updateSearchQuery,
-                hintText: 'Buscar bovinos...',
-              ),
-              
-              // Filtros (se visível)
-              if (_showFilters)
-                LivestockFilterWidget(
-                  selectedBreed: provider.selectedBreed,
-                  selectedOriginCountry: provider.selectedOriginCountry,
-                  selectedAptitude: provider.selectedAptitude,
-                  selectedBreedingSystem: provider.selectedBreedingSystem,
-                  availableBreeds: provider.uniqueBreeds,
-                  availableOriginCountries: provider.uniqueOriginCountries,
-                  onBreedChanged: provider.updateBreedFilter,
-                  onOriginCountryChanged: provider.updateOriginCountryFilter,
-                  onAptitudeChanged: provider.updateAptitudeFilter,
-                  onBreedingSystemChanged: provider.updateBreedingSystemFilter,
-                  onClearFilters: provider.clearFilters,
-                ),
+      body: Column(
+        children: [
+          // Barra de busca
+          LivestockSearchWidget(
+            controller: _searchController,
+            onChanged: provider.updateSearchQuery,
+            hintText: 'Buscar bovinos...',
+          ),
 
-              // Lista de bovinos
-              Expanded(
-                child: _buildBovinesList(context, provider),
-              ),
-            ],
-          );
-        },
+          // Filtros (se visível)
+          if (_showFilters)
+            LivestockFilterWidget(
+              selectedBreed: provider.selectedBreed,
+              selectedOriginCountry: provider.selectedOriginCountry,
+              selectedAptitude: provider.selectedAptitude,
+              selectedBreedingSystem: provider.selectedBreedingSystem,
+              availableBreeds: provider.uniqueBreeds,
+              availableOriginCountries: provider.uniqueOriginCountries,
+              onBreedChanged: provider.updateBreedFilter,
+              onOriginCountryChanged: provider.updateOriginCountryFilter,
+              onAptitudeChanged: provider.updateAptitudeFilter,
+              onBreedingSystemChanged: provider.updateBreedingSystemFilter,
+              onClearFilters: provider.clearFilters,
+            ),
+
+          // Lista de bovinos
+          Expanded(child: _buildBovinesList(context, provider)),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddBovine(context),
@@ -198,7 +196,7 @@ class _BovinesListPageState extends State<BovinesListPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              provider.searchQuery.isEmpty 
+              provider.searchQuery.isEmpty
                   ? 'Nenhum bovino cadastrado'
                   : 'Nenhum bovino encontrado',
               style: Theme.of(context).textTheme.headlineSmall,
@@ -247,9 +245,9 @@ class _BovinesListPageState extends State<BovinesListPage> {
 
   bool _hasActiveFilters(LivestockProvider provider) {
     return provider.selectedBreed != null ||
-           provider.selectedOriginCountry != null ||
-           provider.selectedAptitude != null ||
-           provider.selectedBreedingSystem != null;
+        provider.selectedOriginCountry != null ||
+        provider.selectedAptitude != null ||
+        provider.selectedBreedingSystem != null;
   }
 
   void _handleMenuAction(String action) {
@@ -269,16 +267,16 @@ class _BovinesListPageState extends State<BovinesListPage> {
   }
 
   void _performSync() async {
-    final provider = context.read<LivestockProvider>();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Iniciando sincronização...')),
-    );
-    
+    final provider = ref.read(livestockProviderProvider);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Iniciando sincronização...')));
+
     await provider.forceSyncNow();
-    
+
     if (!mounted) return;
-    
+
     if (provider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -297,42 +295,48 @@ class _BovinesListPageState extends State<BovinesListPage> {
   }
 
   void _showStatistics() {
-    final provider = context.read<LivestockProvider>();
-    
+    final provider = ref.read(livestockProviderProvider);
+
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Estatísticas do Rebanho'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Total de Bovinos: ${provider.totalActiveBovines}'),
-            Text('Total de Equinos: ${provider.totalActiveEquines}'),
-            Text('Total de Animais: ${provider.totalAnimals}'),
-            const SizedBox(height: 16),
-            Text('Filtros Ativos:', style: Theme.of(context).textTheme.titleSmall),
-            if (provider.searchQuery.isNotEmpty)
-              Text('• Busca: "${provider.searchQuery}"'),
-            if (provider.selectedBreed != null)
-              Text('• Raça: ${provider.selectedBreed}'),
-            if (provider.selectedAptitude != null)
-              Text('• Aptidão: ${provider.selectedAptitude!.displayName}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Estatísticas do Rebanho'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Total de Bovinos: ${provider.totalActiveBovines}'),
+                Text('Total de Equinos: ${provider.totalActiveEquines}'),
+                Text('Total de Animais: ${provider.totalAnimals}'),
+                const SizedBox(height: 16),
+                Text(
+                  'Filtros Ativos:',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                if (provider.searchQuery.isNotEmpty)
+                  Text('• Busca: "${provider.searchQuery}"'),
+                if (provider.selectedBreed != null)
+                  Text('• Raça: ${provider.selectedBreed}'),
+                if (provider.selectedAptitude != null)
+                  Text('• Aptidão: ${provider.selectedAptitude!.displayName}'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _exportData() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade de exportação em desenvolvimento')),
+      const SnackBar(
+        content: Text('Funcionalidade de exportação em desenvolvimento'),
+      ),
     );
   }
 
@@ -351,38 +355,39 @@ class _BovinesListPageState extends State<BovinesListPage> {
   void _confirmDeleteBovine(BuildContext context, BovineEntity bovine) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Exclusão'),
-        content: Text(
-          'Tem certeza que deseja excluir o bovino "${bovine.commonName}"?\n\n'
-          'Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteBovine(bovine);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar Exclusão'),
+            content: Text(
+              'Tem certeza que deseja excluir o bovino "${bovine.commonName}"?\n\n'
+              'Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Excluir'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deleteBovine(bovine);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _deleteBovine(BovineEntity bovine) async {
-    final provider = context.read<LivestockProvider>();
+    final provider = ref.read(livestockProviderProvider);
     final success = await provider.deleteBovine(bovine.id);
-    
+
     if (!mounted) return;
-    
+
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

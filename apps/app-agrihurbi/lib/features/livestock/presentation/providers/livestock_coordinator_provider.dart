@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'bovines_filter_provider.dart';
 import 'bovines_management_provider.dart';
@@ -7,9 +8,10 @@ import 'equines_management_provider.dart';
 import 'livestock_search_provider.dart';
 import 'livestock_statistics_provider.dart';
 import 'livestock_sync_provider.dart';
+import '../../../../core/di/injection_container.dart';
 
 /// Provider coordenador que compõe funcionalidades especializadas
-/// 
+///
 /// Responsabilidade única: Coordenar providers especializados seguindo SRP
 /// Substitui o LivestockProvider monolítico original de 475 linhas
 @singleton
@@ -28,17 +30,17 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     required LivestockSearchProvider searchProvider,
     required LivestockStatisticsProvider statisticsProvider,
     required LivestockSyncProvider syncProvider,
-  })  : _bovinesProvider = bovinesProvider,
-        _equinesProvider = equinesProvider,
-        _filtersProvider = filtersProvider,
-        _searchProvider = searchProvider,
-        _statisticsProvider = statisticsProvider,
-        _syncProvider = syncProvider {
+  }) : _bovinesProvider = bovinesProvider,
+       _equinesProvider = equinesProvider,
+       _filtersProvider = filtersProvider,
+       _searchProvider = searchProvider,
+       _statisticsProvider = statisticsProvider,
+       _syncProvider = syncProvider {
     _initializeProviders();
   }
 
   // === PROVIDERS ACCESS ===
-  
+
   BovinesManagementProvider get bovinesProvider => _bovinesProvider;
   EquinesManagementProvider get equinesProvider => _equinesProvider;
   BovinesFilterProvider get filtersProvider => _filtersProvider;
@@ -50,16 +52,16 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
 
   /// Verifica se alguma operação está em andamento
   bool get isAnyOperationInProgress =>
-    _bovinesProvider.isAnyOperationInProgress ||
-    _equinesProvider.isAnyOperationInProgress ||
-    _searchProvider.isSearching ||
-    _statisticsProvider.isLoading ||
-    _syncProvider.isSyncing;
+      _bovinesProvider.isAnyOperationInProgress ||
+      _equinesProvider.isAnyOperationInProgress ||
+      _searchProvider.isSearching ||
+      _statisticsProvider.isLoading ||
+      _syncProvider.isSyncing;
 
   /// Obtém mensagem de erro consolidada
   String? get consolidatedErrorMessage {
     final errors = <String>[];
-    
+
     if (_bovinesProvider.errorMessage != null) {
       errors.add('Bovinos: ${_bovinesProvider.errorMessage}');
     }
@@ -75,7 +77,7 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     if (_syncProvider.errorMessage != null) {
       errors.add('Sincronização: ${_syncProvider.errorMessage}');
     }
-    
+
     return errors.isEmpty ? null : errors.join('\n');
   }
 
@@ -85,15 +87,15 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
   }
 
   /// Total de animais
-  int get totalAnimals => 
-    _bovinesProvider.totalBovines + _equinesProvider.totalEquines;
+  int get totalAnimals =>
+      _bovinesProvider.totalBovines + _equinesProvider.totalEquines;
 
   // === COORDINATED OPERATIONS ===
 
   /// Inicialização completa do sistema livestock
   Future<void> initializeSystem() async {
     debugPrint('LivestockCoordinatorProvider: Inicializando sistema livestock');
-    
+
     await Future.wait([
       _bovinesProvider.loadBovines(),
       _equinesProvider.loadEquines(),
@@ -102,14 +104,14 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
 
     // Atualiza filtros com dados carregados
     _filtersProvider.updateAvailableValues(_bovinesProvider.bovines);
-    
+
     debugPrint('LivestockCoordinatorProvider: Sistema livestock inicializado');
   }
 
   /// Refresh completo de todos os dados
   Future<void> refreshAllData() async {
     debugPrint('LivestockCoordinatorProvider: Atualizando todos os dados');
-    
+
     await Future.wait([
       _bovinesProvider.refreshBovines(),
       _equinesProvider.refreshEquines(),
@@ -118,23 +120,29 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
 
     // Atualiza filtros
     _filtersProvider.updateAvailableValues(_bovinesProvider.bovines);
-    
+
     debugPrint('LivestockCoordinatorProvider: Todos os dados atualizados');
   }
 
   /// Sincronização completa com callback de progresso
   Future<bool> performCompleteSync({void Function(double)? onProgress}) async {
-    debugPrint('LivestockCoordinatorProvider: Iniciando sincronização completa');
-    
+    debugPrint(
+      'LivestockCoordinatorProvider: Iniciando sincronização completa',
+    );
+
     // Executa sincronização
-    final syncSuccess = await _syncProvider.forceSyncNow(onProgress: onProgress);
-    
+    final syncSuccess = await _syncProvider.forceSyncNow(
+      onProgress: onProgress,
+    );
+
     if (syncSuccess) {
       // Recarrega dados após sync bem-sucedido
       await refreshAllData();
-      debugPrint('LivestockCoordinatorProvider: Sincronização completa realizada com sucesso');
+      debugPrint(
+        'LivestockCoordinatorProvider: Sincronização completa realizada com sucesso',
+      );
     }
-    
+
     return syncSuccess;
   }
 
@@ -145,7 +153,7 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     _searchProvider.clearError();
     _statisticsProvider.clearError();
     _syncProvider.clearError();
-    
+
     debugPrint('LivestockCoordinatorProvider: Todos os erros limpos');
   }
 
@@ -157,7 +165,7 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     _searchProvider.clearSearchResults();
     _statisticsProvider.clearStatistics();
     _syncProvider.resetSyncState();
-    
+
     debugPrint('LivestockCoordinatorProvider: Sistema resetado');
   }
 
@@ -171,8 +179,10 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     _searchProvider.addListener(_onProviderChanged);
     _statisticsProvider.addListener(_onProviderChanged);
     _syncProvider.addListener(_onProviderChanged);
-    
-    debugPrint('LivestockCoordinatorProvider: Providers especializados inicializados');
+
+    debugPrint(
+      'LivestockCoordinatorProvider: Providers especializados inicializados',
+    );
   }
 
   void _onProviderChanged() {
@@ -189,22 +199,31 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     _searchProvider.removeListener(_onProviderChanged);
     _statisticsProvider.removeListener(_onProviderChanged);
     _syncProvider.removeListener(_onProviderChanged);
-    
+
     debugPrint('LivestockCoordinatorProvider: Disposed - listeners removidos');
     super.dispose();
   }
 }
 
 /// Extensão para facilitar acesso aos providers especializados
-extension LivestockCoordinatorProviderExtension on LivestockCoordinatorProvider {
+extension LivestockCoordinatorProviderExtension
+    on LivestockCoordinatorProvider {
   /// Atalho para buscar animais
-  Future<void> searchAnimals(String query) => searchProvider.searchAllAnimals(query);
-  
+  Future<void> searchAnimals(String query) =>
+      searchProvider.searchAllAnimals(query);
+
   /// Atalho para sincronização rápida
   Future<bool> quickSync() => syncProvider.backgroundSync();
-  
+
   /// Atalho para aplicar filtros
   void applyBovineFilters() {
     filtersProvider.updateAvailableValues(bovinesProvider.bovines);
   }
 }
+
+/// Riverpod provider for LivestockCoordinatorProvider
+final livestockCoordinatorProvider = Provider<LivestockCoordinatorProvider>((
+  ref,
+) {
+  return getIt<LivestockCoordinatorProvider>();
+});

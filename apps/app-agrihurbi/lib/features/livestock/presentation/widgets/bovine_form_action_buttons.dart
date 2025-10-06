@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/design_system_components.dart';
 import '../providers/livestock_provider.dart';
 
 /// Seção de botões de ação do formulário de bovino
-/// 
+///
 /// Responsabilidades:
 /// - Botões de cancelar e salvar
 /// - Estados de loading diferenciados
-/// - Integração com BovinesProvider
+/// - Integração com LivestockProvider
 /// - Confirmação de ações destrutivas
 /// - Feedback visual consistente
-class BovineFormActionButtons extends StatelessWidget {
+class BovineFormActionButtons extends ConsumerWidget {
   const BovineFormActionButtons({
     super.key,
     required this.onCancel,
@@ -31,61 +31,58 @@ class BovineFormActionButtons extends StatelessWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<LivestockProvider>(
-      builder: (context, provider, child) {
-        final isLoading = provider.isCreating || 
-                         provider.isUpdating || 
-                         provider.isDeleting;
-        
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -2),
-              ),
-            ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = ref.watch(livestockProviderProvider);
+    final isLoading = provider.isCreating ||
+                     provider.isUpdating ||
+                     provider.isDeleting;
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
           ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Indicador de mudanças não salvas
+            if (hasUnsavedChanges && !isLoading)
+              _buildUnsavedChangesIndicator(context),
+
+            // Botões principais
+            Row(
               children: [
-                // Indicador de mudanças não salvas
-                if (hasUnsavedChanges && !isLoading)
-                  _buildUnsavedChangesIndicator(context),
-                
-                // Botões principais
-                Row(
-                  children: [
-                    // Botão Cancelar
-                    Expanded(
-                      child: _buildCancelButton(context, isLoading),
-                    ),
-                    
-                    const SizedBox(width: 12),
-                    
-                    // Botão Salvar
-                    Expanded(
-                      flex: 2,
-                      child: _buildSaveButton(context, provider, isLoading),
-                    ),
-                  ],
+                // Botão Cancelar
+                Expanded(
+                  child: _buildCancelButton(context, isLoading),
                 ),
-                
-                // Botão de deletar (se editando)
-                if (isEditing && onDelete != null) ...[
-                  const SizedBox(height: 12),
-                  _buildDeleteButton(context, provider, isLoading),
-                ],
+
+                const SizedBox(width: 12),
+
+                // Botão Salvar
+                Expanded(
+                  flex: 2,
+                  child: _buildSaveButton(context, provider, isLoading),
+                ),
               ],
             ),
-          ),
-        );
-      },
+
+            // Botão de deletar (se editando)
+            if (isEditing && onDelete != null) ...[
+              const SizedBox(height: 12),
+              _buildDeleteButton(context, provider, isLoading),
+            ],
+          ],
+        ),
+      ),
     );
   }
 

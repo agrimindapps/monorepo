@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/entities/bovine_entity.dart';
@@ -9,17 +9,17 @@ import '../providers/livestock_provider.dart';
 import '../widgets/bovine_card_widget.dart';
 
 /// Página dedicada para busca avançada de animais
-/// 
+///
 /// Permite filtros complexos, ordenação e visualização unificada
 /// de bovinos e equinos com busca em tempo real
-class LivestockSearchPage extends StatefulWidget {
+class LivestockSearchPage extends ConsumerStatefulWidget {
   const LivestockSearchPage({super.key});
 
   @override
-  State<LivestockSearchPage> createState() => _LivestockSearchPageState();
+  ConsumerState<LivestockSearchPage> createState() => _LivestockSearchPageState();
 }
 
-class _LivestockSearchPageState extends State<LivestockSearchPage> {
+class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   
@@ -63,7 +63,7 @@ class _LivestockSearchPageState extends State<LivestockSearchPage> {
   }
 
   Future<void> _performInitialSearch() async {
-    final provider = context.read<LivestockProvider>();
+    final provider = ref.read(livestockProviderProvider);
     await provider.loadBovines();
     await provider.loadEquines();
     _performSearch();
@@ -74,7 +74,7 @@ class _LivestockSearchPageState extends State<LivestockSearchPage> {
       _isSearching = true;
     });
 
-    final provider = context.read<LivestockProvider>();
+    final provider = ref.read(livestockProviderProvider);
     List<AnimalBaseEntity> results = [];
 
     // Coleta bovinos se selecionados
@@ -602,7 +602,7 @@ class _LivestockSearchPageState extends State<LivestockSearchPage> {
   }
 
   void _deleteAnimal(AnimalBaseEntity animal) async {
-    final provider = context.read<LivestockProvider>();
+    final provider = ref.read(livestockProviderProvider);
     bool success = false;
 
     if (animal is BovineEntity) {

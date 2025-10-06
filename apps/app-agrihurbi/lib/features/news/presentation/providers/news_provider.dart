@@ -1,13 +1,22 @@
+import 'package:app_agrihurbi/core/di/injection.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
 import 'package:app_agrihurbi/features/news/domain/usecases/get_commodity_prices.dart';
 import 'package:app_agrihurbi/features/news/domain/usecases/get_news.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:injectable/injectable.dart';
 
+/// Provider Riverpod para NewsProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final newsProviderProvider = Provider<NewsProvider>((ref) {
+  return getIt<NewsProvider>();
+});
+
 /// News Provider for State Management
-/// 
+///
 /// Manages news articles, commodity prices, and RSS feed state
 /// using Provider pattern for reactive UI updates
 @injectable

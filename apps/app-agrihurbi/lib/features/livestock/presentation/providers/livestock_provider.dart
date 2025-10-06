@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/entities/equine_entity.dart';
@@ -11,6 +13,13 @@ import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/get_equines.dart';
 import '../../domain/usecases/search_animals.dart' as search_use_case;
 import '../../domain/usecases/update_bovine.dart';
+
+/// Provider Riverpod para LivestockProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final livestockProviderProvider = Provider<LivestockProvider>((ref) {
+  return getIt<LivestockProvider>();
+});
 
 /// Provider principal para gerenciamento de estado do livestock
 /// 

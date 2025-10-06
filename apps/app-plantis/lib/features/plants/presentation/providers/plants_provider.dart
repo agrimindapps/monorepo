@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/services/plants_care_service.dart';
 import '../../domain/services/plants_crud_service.dart';
@@ -17,6 +18,19 @@ import '../../domain/usecases/update_plant_usecase.dart';
 // Export enums from services for backward compatibility
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
+
+/// Provider Riverpod para PlantsProvider
+final plantsProviderProvider = ChangeNotifierProvider<PlantsProvider>((ref) {
+  return PlantsProvider(
+    getPlantsUseCase: getIt<GetPlantsUseCase>(),
+    getPlantByIdUseCase: getIt<GetPlantByIdUseCase>(),
+    searchPlantsUseCase: getIt<SearchPlantsUseCase>(),
+    addPlantUseCase: getIt<AddPlantUseCase>(),
+    updatePlantUseCase: getIt<UpdatePlantUseCase>(),
+    deletePlantUseCase: getIt<DeletePlantUseCase>(),
+    authStateNotifier: AuthStateNotifier.instance,
+  );
+});
 
 /// Plants Provider refactored with specialized services
 /// Now follows Single Responsibility Principle using Facade pattern

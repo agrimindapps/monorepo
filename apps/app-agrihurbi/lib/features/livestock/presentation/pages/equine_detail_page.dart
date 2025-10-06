@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/equine_entity.dart';
 import '../providers/equines_provider.dart';
 
 /// Página de detalhes completos do equino com visualização rica
-/// 
+///
 /// Apresenta todas as informações do equino de forma organizada e visualmente
 /// atraente, seguindo padrões Material 3 e fornecendo navegação para edição
-class EquineDetailPage extends StatefulWidget {
+class EquineDetailPage extends ConsumerStatefulWidget {
   const EquineDetailPage({
     super.key,
     required this.equineId,
@@ -20,10 +20,10 @@ class EquineDetailPage extends StatefulWidget {
   final String equineId;
 
   @override
-  State<EquineDetailPage> createState() => _EquineDetailPageState();
+  ConsumerState<EquineDetailPage> createState() => _EquineDetailPageState();
 }
 
-class _EquineDetailPageState extends State<EquineDetailPage> {
+class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
   final _scrollController = ScrollController();
   EquineEntity? _equine;
   bool _isLoading = true;
@@ -41,11 +41,11 @@ class _EquineDetailPageState extends State<EquineDetailPage> {
   }
 
   Future<void> _loadEquineDetails() async {
-    final provider = context.read<EquinesProvider>();
-    
+    final provider = ref.read(equinesProviderProvider);
+
     // Busca equino local primeiro
     var equine = provider.getEquineById(widget.equineId);
-    
+
     // Se não encontrou local, busca remoto
     if (equine == null) {
       await provider.loadEquineById(widget.equineId);

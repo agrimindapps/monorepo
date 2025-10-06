@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/medication_dosage_input.dart';
 import '../providers/medication_dosage_provider.dart';
@@ -10,12 +10,14 @@ class MedicationDosageInputForm extends StatefulWidget {
   const MedicationDosageInputForm({super.key});
 
   @override
-  State<MedicationDosageInputForm> createState() => _MedicationDosageInputFormState();
+  State<MedicationDosageInputForm> createState() =>
+      _MedicationDosageInputFormState();
 }
 
 class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
   final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _concentrationController = TextEditingController();
+  final TextEditingController _concentrationController =
+      TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
   @override
@@ -28,27 +30,28 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MedicationDosageProvider>(
-      builder: (context, provider, child) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final provider = ref.watch(medicationDosageProviderProvider);
         // Atualizar controllers quando o provider mudar
         _updateControllers(provider);
-        
+
         return Column(
           children: [
             // Dados básicos do animal
             _buildAnimalDataSection(provider),
             const SizedBox(height: 16),
-            
+
             // Configuração do medicamento
             if (provider.selectedMedication != null) ...[
               _buildMedicationConfigSection(provider),
               const SizedBox(height: 16),
             ],
-            
+
             // Condições especiais
             _buildSpecialConditionsSection(provider),
             const SizedBox(height: 16),
-            
+
             // Notas adicionais
             _buildNotesSection(provider),
           ],
@@ -61,12 +64,12 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
     if (_weightController.text != provider.input.weight.toString()) {
       _weightController.text = provider.input.weight.toString();
     }
-    
+
     final concentration = provider.input.concentration?.toString() ?? '';
     if (_concentrationController.text != concentration) {
       _concentrationController.text = concentration;
     }
-    
+
     final notes = provider.input.veterinarianNotes ?? '';
     if (_notesController.text != notes) {
       _notesController.text = notes;
@@ -87,15 +90,12 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 const SizedBox(width: 8),
                 const Text(
                   'Dados do Animal',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Espécie e Peso na mesma linha
             Row(
               children: [
@@ -118,22 +118,25 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                           filled: true,
                           fillColor: Colors.grey.shade50,
                         ),
-                        items: Species.values.map((species) {
-                          return DropdownMenuItem(
-                            value: species,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  species == Species.dog ? Icons.pets : Icons.pets,
-                                  size: 20,
-                                  color: Colors.grey.shade600,
+                        items:
+                            Species.values.map((species) {
+                              return DropdownMenuItem(
+                                value: species,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      species == Species.dog
+                                          ? Icons.pets
+                                          : Icons.pets,
+                                      size: 20,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(species.displayName),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Text(species.displayName),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                              );
+                            }).toList(),
                         onChanged: (species) {
                           if (species != null) {
                             provider.updateSpecies(species);
@@ -144,7 +147,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                
+
                 // Peso
                 Expanded(
                   child: Column(
@@ -157,9 +160,13 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _weightController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
                         ],
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -183,7 +190,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Grupo de Idade
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,12 +209,13 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                     filled: true,
                     fillColor: Colors.grey.shade50,
                   ),
-                  items: AgeGroup.values.map((ageGroup) {
-                    return DropdownMenuItem(
-                      value: ageGroup,
-                      child: Text(ageGroup.displayName),
-                    );
-                  }).toList(),
+                  items:
+                      AgeGroup.values.map((ageGroup) {
+                        return DropdownMenuItem(
+                          value: ageGroup,
+                          child: Text(ageGroup.displayName),
+                        );
+                      }).toList(),
                   onChanged: (ageGroup) {
                     if (ageGroup != null) {
                       provider.updateAgeGroup(ageGroup);
@@ -224,7 +232,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
 
   Widget _buildMedicationConfigSection(MedicationDosageProvider provider) {
     final medication = provider.selectedMedication!;
-    
+
     return Card(
       elevation: 1,
       child: Padding(
@@ -238,15 +246,12 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 const SizedBox(width: 8),
                 const Text(
                   'Configuração do Medicamento',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Medicamento selecionado
             Container(
               padding: const EdgeInsets.all(12),
@@ -259,10 +264,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 children: [
                   CircleAvatar(
                     backgroundColor: Colors.red.shade100,
-                    child: Icon(
-                      Icons.medication,
-                      color: Colors.red.shade600,
-                    ),
+                    child: Icon(Icons.medication, color: Colors.red.shade600),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -290,7 +292,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Concentração e Frequência
             Row(
               children: [
@@ -314,21 +316,23 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                             filled: true,
                             fillColor: Colors.grey.shade50,
                           ),
-                          items: medication.concentrations.map((concentration) {
-                            return DropdownMenuItem(
-                              value: concentration.value,
-                              child: Text(concentration.description),
-                            );
-                          }).toList(),
+                          items:
+                              medication.concentrations.map((concentration) {
+                                return DropdownMenuItem(
+                                  value: concentration.value,
+                                  child: Text(concentration.description),
+                                );
+                              }).toList(),
                           onChanged: provider.updateConcentration,
                           hint: const Text('Selecionar'),
                         ),
                       ],
                     ),
                   ),
-                
-                if (medication.concentrations.isNotEmpty) const SizedBox(width: 16),
-                
+
+                if (medication.concentrations.isNotEmpty)
+                  const SizedBox(width: 16),
+
                 // Frequência
                 Expanded(
                   child: Column(
@@ -348,12 +352,13 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                           filled: true,
                           fillColor: Colors.grey.shade50,
                         ),
-                        items: medication.recommendedFrequencies.map((frequency) {
-                          return DropdownMenuItem(
-                            value: frequency,
-                            child: Text(frequency.displayName),
-                          );
-                        }).toList(),
+                        items:
+                            medication.recommendedFrequencies.map((frequency) {
+                              return DropdownMenuItem(
+                                value: frequency,
+                                child: Text(frequency.displayName),
+                              );
+                            }).toList(),
                         onChanged: (frequency) {
                           if (frequency != null) {
                             provider.updateFrequency(frequency);
@@ -366,7 +371,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Forma farmacêutica (se disponível)
             if (medication.pharmaceuticalForms.isNotEmpty)
               Column(
@@ -386,19 +391,20 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                       filled: true,
                       fillColor: Colors.grey.shade50,
                     ),
-                    items: medication.pharmaceuticalForms.map((form) {
-                      return DropdownMenuItem(
-                        value: form,
-                        child: Text(form),
-                      );
-                    }).toList(),
+                    items:
+                        medication.pharmaceuticalForms.map((form) {
+                          return DropdownMenuItem(
+                            value: form,
+                            child: Text(form),
+                          );
+                        }).toList(),
                     onChanged: provider.updatePharmaceuticalForm,
                     hint: const Text('Selecionar forma'),
                   ),
                   const SizedBox(height: 16),
                 ],
               ),
-            
+
             // Flag de emergência
             CheckboxListTile(
               title: const Text('Situação de Emergência'),
@@ -435,23 +441,17 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 const SizedBox(width: 8),
                 const Text(
                   'Condições Especiais',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             const Text(
               'Selecione todas as condições que se aplicam ao animal:',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 16),
-            
+
             // Grid de condições
             GridView.builder(
               shrinkWrap: true,
@@ -465,8 +465,10 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               itemCount: SpecialCondition.values.length,
               itemBuilder: (context, index) {
                 final condition = SpecialCondition.values[index];
-                final isSelected = provider.input.specialConditions.contains(condition);
-                
+                final isSelected = provider.input.specialConditions.contains(
+                  condition,
+                );
+
                 return FilterChip(
                   label: Text(
                     condition.displayName,
@@ -509,10 +511,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 const SizedBox(width: 8),
                 const Text(
                   'Notas Adicionais',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -526,7 +525,8 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
-                hintText: 'Observações do veterinário, histórico médico relevante, etc.',
+                hintText:
+                    'Observações do veterinário, histórico médico relevante, etc.',
               ),
               onChanged: provider.updateVeterinarianNotes,
             ),

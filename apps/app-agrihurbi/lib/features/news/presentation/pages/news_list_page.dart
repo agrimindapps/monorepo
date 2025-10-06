@@ -5,20 +5,20 @@ import 'package:app_agrihurbi/features/news/presentation/widgets/commodity_price
 import 'package:app_agrihurbi/features/news/presentation/widgets/news_article_card.dart';
 import 'package:app_agrihurbi/features/news/presentation/widgets/news_filter_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// News List Page
-/// 
+///
 /// Main page for displaying agriculture news with RSS feeds,
 /// commodity prices, and filtering capabilities
-class NewsListPage extends StatefulWidget {
+class NewsListPage extends ConsumerStatefulWidget {
   const NewsListPage({super.key});
 
   @override
-  State<NewsListPage> createState() => _NewsListPageState();
+  ConsumerState<NewsListPage> createState() => _NewsListPageState();
 }
 
-class _NewsListPageState extends State<NewsListPage>
+class _NewsListPageState extends ConsumerState<NewsListPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
@@ -28,10 +28,10 @@ class _NewsListPageState extends State<NewsListPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Initialize news provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NewsProvider>().initialize();
+      ref.read(newsProviderProvider).initialize();
     });
   }
 
@@ -150,8 +150,10 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   Widget _buildNewsTab() {
-    return Consumer<NewsProvider>(
-      builder: (context, provider, child) {
+    final provider = ref.watch(newsProviderProvider);
+
+    return Builder(
+      builder: (context) {
         if (provider.isLoadingNews && provider.articles.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -198,8 +200,10 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   Widget _buildPremiumTab() {
-    return Consumer<NewsProvider>(
-      builder: (context, provider, child) {
+    final provider = ref.watch(newsProviderProvider);
+
+    return Builder(
+      builder: (context) {
         if (provider.isLoadingPremium && provider.premiumArticles.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -233,8 +237,10 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   Widget _buildCommoditiesTab() {
-    return Consumer<NewsProvider>(
-      builder: (context, provider, child) {
+    final provider = ref.watch(newsProviderProvider);
+
+    return Builder(
+      builder: (context) {
         return RefreshIndicator(
           onRefresh: () => provider.loadCommodityPrices(refresh: true),
           child: SingleChildScrollView(
@@ -335,7 +341,7 @@ class _NewsListPageState extends State<NewsListPage>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              context.read<NewsProvider>().loadNews(refresh: true);
+              ref.read(newsProviderProvider).loadNews(refresh: true);
             },
             child: const Text('Tentar Novamente'),
           ),
@@ -367,7 +373,7 @@ class _NewsListPageState extends State<NewsListPage>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              context.read<NewsProvider>().refreshRSSFeeds();
+              ref.read(newsProviderProvider).refreshRSSFeeds();
             },
             child: const Text('Atualizar Feeds'),
           ),
@@ -410,24 +416,22 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   Widget _buildRefreshFAB() {
-    return Consumer<NewsProvider>(
-      builder: (context, provider, child) {
-        return FloatingActionButton(
-          onPressed: provider.isRefreshing ? null : () {
-            provider.refreshRSSFeeds();
-          },
-          child: provider.isRefreshing
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.refresh),
-        );
+    final provider = ref.watch(newsProviderProvider);
+
+    return FloatingActionButton(
+      onPressed: provider.isRefreshing ? null : () {
+        provider.refreshRSSFeeds();
       },
+      child: provider.isRefreshing
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Icon(Icons.refresh),
     );
   }
 
@@ -446,7 +450,7 @@ class _NewsListPageState extends State<NewsListPage>
           onSubmitted: (query) {
             Navigator.pop(context);
             if (query.isNotEmpty) {
-              context.read<NewsProvider>().searchNews(query: query);
+              ref.read(newsProviderProvider).searchNews(query: query);
               // Navigate to search results page
               Navigator.pushNamed(context, '/news/search', arguments: query);
             }
@@ -462,7 +466,7 @@ class _NewsListPageState extends State<NewsListPage>
               Navigator.pop(context);
               final query = _searchController.text.trim();
               if (query.isNotEmpty) {
-                context.read<NewsProvider>().searchNews(query: query);
+                ref.read(newsProviderProvider).searchNews(query: query);
                 // Navigate to search results page
                 Navigator.pushNamed(context, '/news/search', arguments: query);
               }
@@ -483,13 +487,13 @@ class _NewsListPageState extends State<NewsListPage>
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: NewsFilterWidget(
-          currentFilter: context.read<NewsProvider>().currentFilter,
+          currentFilter: ref.read(newsProviderProvider).currentFilter,
           onApply: (filter) {
-            context.read<NewsProvider>().applyFilter(filter);
+            ref.read(newsProviderProvider).applyFilter(filter);
             Navigator.pop(context);
           },
           onClear: () {
-            context.read<NewsProvider>().clearFilter();
+            ref.read(newsProviderProvider).clearFilter();
             Navigator.pop(context);
           },
         ),
@@ -498,8 +502,8 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   void _handleMenuAction(String action) {
-    final provider = context.read<NewsProvider>();
-    
+    final provider = ref.read(newsProviderProvider);
+
     switch (action) {
       case 'refresh_rss':
         provider.refreshRSSFeeds();
@@ -522,9 +526,9 @@ class _NewsListPageState extends State<NewsListPage>
   }
 
   Future<void> _toggleFavorite(String articleId) async {
-    final provider = context.read<NewsProvider>();
+    final provider = ref.read(newsProviderProvider);
     final isFavorite = await provider.isArticleFavorite(articleId);
-    
+
     if (isFavorite) {
       await provider.removeFromFavorites(articleId);
       if (mounted) {

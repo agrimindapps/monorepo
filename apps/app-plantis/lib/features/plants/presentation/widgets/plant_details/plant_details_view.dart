@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/localization/app_strings.dart';
@@ -38,16 +38,16 @@ import 'plant_tasks_section.dart';
 /// ```dart
 /// PlantDetailsView(plantId: 'plant-123')
 /// ```
-class PlantDetailsView extends StatefulWidget {
+class PlantDetailsView extends ConsumerStatefulWidget {
   final String plantId;
 
   const PlantDetailsView({super.key, required this.plantId});
 
   @override
-  State<PlantDetailsView> createState() => _PlantDetailsViewState();
+  ConsumerState<PlantDetailsView> createState() => _PlantDetailsViewState();
 }
 
-class _PlantDetailsViewState extends State<PlantDetailsView>
+class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     with TickerProviderStateMixin {
   PlantDetailsController? _controller;
   late TabController _tabController;
@@ -69,8 +69,8 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       if (!mounted) return;
 
       try {
-        final provider = context.read<PlantDetailsProvider>();
-        final taskProvider = context.read<PlantTaskProvider>();
+        final provider = ref.read(plantDetailsProviderProvider);
+        final taskProvider = ref.read(plantTaskProviderProvider);
 
         // Only create controller if widget is still mounted
         if (mounted) {
@@ -91,7 +91,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
                 );
                 if (result == true && mounted) {
                   // Planta foi editada com sucesso, recarregar dados
-                  final provider = context.read<PlantDetailsProvider>();
+                  final provider = ref.read(plantDetailsProviderProvider);
                   await provider.reloadPlant(plantId);
 
                   if (kDebugMode) {
@@ -181,32 +181,26 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
 
   @override
   Widget build(BuildContext context) {
+    final plantDetailsProvider = ref.watch(plantDetailsProviderProvider);
+
     return BasePageScaffold(
-      // Optimized with Selector - only rebuilds when plant loading state changes
+      // Optimized with ref.watch - only rebuilds when provider state changes
       body: ResponsiveLayout(
-        child: Selector<PlantDetailsProvider, Map<String, dynamic>>(
-          selector:
-              (context, provider) => {
-                'isLoading': provider.isLoading,
-                'hasError': provider.hasError,
-                'plant': provider.plant,
-                'errorMessage': provider.errorMessage,
-              },
-          builder: (context, plantData, child) {
+        child: Builder(
+          builder: (context) {
             // Estados de loading e erro
-            if ((plantData['isLoading'] as bool) &&
-                plantData['plant'] == null) {
+            if (plantDetailsProvider.isLoading && plantDetailsProvider.plant == null) {
               return _buildLoadingState(context);
             }
 
-            if ((plantData['hasError'] as bool) && plantData['plant'] == null) {
+            if (plantDetailsProvider.hasError && plantDetailsProvider.plant == null) {
               return _buildErrorState(
                 context,
-                plantData['errorMessage'] as String?,
+                plantDetailsProvider.errorMessage,
               );
             }
 
-            final plant = plantData['plant'] as Plant?;
+            final plant = plantDetailsProvider.plant;
             if (plant == null) {
               return _buildLoadingState(context);
             }
@@ -748,7 +742,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       if (!mounted) return;
 
       try {
-        final provider = context.read<PlantDetailsProvider>();
+        final provider = ref.read(plantDetailsProviderProvider);
         if (provider.plant != null && mounted) {
           final tasks = taskProvider.getTasksForPlant(widget.plantId);
           // Se não há tarefas, gera tarefas iniciais
@@ -822,7 +816,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
   void _syncPlantDeletion(String plantId) {
     try {
       // Tentar sincronizar com PlantsProvider se disponível
-      final plantsProvider = context.read<PlantsProvider>();
+      final plantsProvider = ref.read(plantsProviderProvider);
       // Forçar recarregamento completo da lista para refletir as mudanças
       plantsProvider.refreshPlants();
 
@@ -843,7 +837,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         // Não usa ref.read() pois esta é uma StatefulWidget
         Future.delayed(Duration.zero, () {
           if (mounted) {
-            final plantsProvider = context.read<PlantsProvider>();
+            final plantsProvider = ref.read(plantsProviderProvider);
             plantsProvider.refreshPlants();
           }
         });
@@ -857,7 +851,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
             try {
-              final plantsProvider = context.read<PlantsProvider>();
+              final plantsProvider = ref.read(plantsProviderProvider);
               plantsProvider.refreshPlants();
 
               if (kDebugMode) {
@@ -883,7 +877,7 @@ class _PlantDetailsViewState extends State<PlantDetailsView>
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) {
           try {
-            final plantsProvider = context.read<PlantsProvider>();
+            final plantsProvider = ref.read(plantsProviderProvider);
             plantsProvider.refreshPlants();
 
             if (kDebugMode) {

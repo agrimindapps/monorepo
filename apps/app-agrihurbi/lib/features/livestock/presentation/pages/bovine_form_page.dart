@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../domain/services/bovine_form_service.dart';
@@ -12,21 +12,23 @@ import '../widgets/bovine_characteristics_section.dart';
 import '../widgets/bovine_form_action_buttons.dart';
 import '../widgets/bovine_status_section.dart';
 
+final bovineFormProvider = ChangeNotifierProvider<BovineFormProvider>((ref) {
+  final formService = getIt<BovineFormService>();
+  return BovineFormProvider(formService);
+});
+
+// Removido - já existe em bovines_provider.dart
+
 /// Página de formulário para criação/edição de bovinos - REFATORADO
-/// 
+///
 /// ARQUITETURA LIMPA:
 /// - Separação de responsabilidades em widgets dedicados
 /// - BovineFormProvider para state management otimizado
 /// - BovineFormService para lógica de negócio centralizada
 /// - Design System unificado em todos os componentes
 /// - Controller pooling para otimização de memória
-/// 
-/// REDUZIDO DE 627 LINHAS PARA <80 LINHAS 🎯
-class BovineFormPage extends StatefulWidget {
-  const BovineFormPage({
-    super.key,
-    this.bovineId,
-  });
+class BovineFormPage extends ConsumerStatefulWidget {
+  const BovineFormPage({super.key, this.bovineId});
 
   /// ID do bovino para edição (null para criação)
   final String? bovineId;
@@ -35,51 +37,40 @@ class BovineFormPage extends StatefulWidget {
   bool get isEditing => bovineId != null;
 
   @override
-  State<BovineFormPage> createState() => _BovineFormPageState();
+  ConsumerState<BovineFormPage> createState() => _BovineFormPageState();
 }
 
-class _BovineFormPageState extends State<BovineFormPage> {
+class _BovineFormPageState extends ConsumerState<BovineFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  
-  // Services injetados via Clean Architecture
-  late final BovineFormService _formService;
-  late final BovineFormProvider _formProvider;
-  
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _initializeServices();
     _loadBovineData();
-  }
-
-  void _initializeServices() {
-    _formService = getIt<BovineFormService>();
-    _formProvider = BovineFormProvider(_formService);
   }
 
   @override
   void dispose() {
-    _formProvider.cleanup();
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _formProvider),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.isEditing ? 'Editar Bovino' : 'Novo Bovino'),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        ),
-        body: _isLoading ? _buildLoadingState() : _buildFormContent(),
+    final formProvider = ref.watch(bovineFormProvider);
+    final bovinesProviderState = ref.watch(bovinesProviderProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.isEditing ? 'Editar Bovino' : 'Novo Bovino'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
+      body:
+          _isLoading
+              ? _buildLoadingState()
+              : _buildFormContent(formProvider, bovinesProviderState),
     );
   }
 
@@ -100,29 +91,32 @@ class _BovineFormPageState extends State<BovineFormPage> {
     );
   }
 
-  Widget _buildFormContent() {
-    return Consumer2<BovineFormProvider, BovinesProvider>(
-      builder: (context, formProvider, bovinesProvider, child) {
-        // Verifica erros de carregamento
-        if (bovinesProvider.errorMessage != null && widget.isEditing) {
-          return _buildErrorState(bovinesProvider);
-        }
+  Widget _buildFormContent(
+    BovineFormProvider formProvider,
+    BovinesProvider bovinesProvider,
+  ) {
+    // Verifica erros de carregamento
+    if (bovinesProvider.errorMessage != null && widget.isEditing) {
+      return _buildErrorState(bovinesProvider);
+    }
 
-        return Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Expanded(child: _buildScrollableForm(formProvider, bovinesProvider)),
-              _buildActionButtons(),
-            ],
-          ),
-        );
-      },
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Expanded(child: _buildScrollableForm(formProvider, bovinesProvider)),
+          _buildActionButtons(formProvider),
+        ],
+      ),
     );
   }
 
-  Widget _buildScrollableForm(BovineFormProvider formProvider, BovinesProvider bovinesProvider) {
-    final isOperating = bovinesProvider.isCreating || bovinesProvider.isUpdating;
+  Widget _buildScrollableForm(
+    BovineFormProvider formProvider,
+    BovinesProvider bovinesProvider,
+  ) {
+    final isOperating =
+        bovinesProvider.isCreating || bovinesProvider.isUpdating;
 
     return SingleChildScrollView(
       controller: _scrollController,
@@ -136,7 +130,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
             registrationIdController: formProvider.registrationIdController,
             breedController: formProvider.breedController,
             originCountryController: formProvider.originCountryController,
-            formService: _formService,
+            formService: ref.read(bovineFormProvider).formService,
             enabled: !isOperating,
           ),
           const SizedBox(height: 24),
@@ -144,7 +138,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
           // Seção: Características
           BovineCharacteristicsSection(
             purposeController: formProvider.purposeController,
-            formService: _formService,
+            formService: ref.read(bovineFormProvider).formService,
             selectedAptitude: formProvider.selectedAptitude,
             selectedBreedingSystem: formProvider.selectedBreedingSystem,
             onAptitudeChanged: formProvider.updateAptitude,
@@ -159,7 +153,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
             animalTypeController: formProvider.animalTypeController,
             originController: formProvider.originController,
             characteristicsController: formProvider.characteristicsController,
-            formService: _formService,
+            formService: ref.read(bovineFormProvider).formService,
             onTagsChanged: formProvider.updateTags,
             selectedTags: formProvider.selectedTags,
             enabled: !isOperating,
@@ -178,17 +172,13 @@ class _BovineFormPageState extends State<BovineFormPage> {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Consumer<BovineFormProvider>(
-      builder: (context, formProvider, child) {
-        return BovineFormActionButtons(
-          onCancel: () => context.pop(),
-          onSave: _saveBovine,
-          isEditing: widget.isEditing,
-          onDelete: widget.isEditing ? _deleteBovine : null,
-          hasUnsavedChanges: formProvider.hasUnsavedChanges,
-        );
-      },
+  Widget _buildActionButtons(BovineFormProvider formProvider) {
+    return BovineFormActionButtons(
+      onCancel: () => context.pop(),
+      onSave: _saveBovine,
+      isEditing: widget.isEditing,
+      onDelete: widget.isEditing ? _deleteBovine : null,
+      hasUnsavedChanges: formProvider.hasUnsavedChanges,
     );
   }
 
@@ -249,7 +239,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
       if (widget.isEditing) {
         await _loadBovineForEditing();
       } else {
-        _formProvider.initializeForCreation();
+        ref.read(bovineFormProvider).initializeForCreation();
       }
     } catch (e) {
       if (mounted) {
@@ -264,7 +254,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
   }
 
   Future<void> _loadBovineForEditing() async {
-    final provider = Provider.of<BovinesProvider>(context, listen: false);
+    final provider = ref.read(bovinesProviderProvider);
 
     // Tenta buscar localmente primeiro
     var bovine = provider.getBovineById(widget.bovineId!);
@@ -278,7 +268,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
     if (!mounted) return;
 
     if (bovine != null) {
-      _formProvider.initializeForEditing(bovine);
+      ref.read(bovineFormProvider).initializeForEditing(bovine);
     } else {
       final errorMsg = provider.errorMessage ?? 'Bovino não encontrado';
       _showErrorAndGoBack(errorMsg);
@@ -291,22 +281,25 @@ class _BovineFormPageState extends State<BovineFormPage> {
       return;
     }
 
-    final provider = Provider.of<BovinesProvider>(context, listen: false);
-    final bovine = _formProvider.prepareBovineForSaving(
-      isEditing: widget.isEditing,
-      existingId: widget.bovineId,
-      existingImageUrls: provider.selectedBovine?.imageUrls,
-      existingCreatedAt: provider.selectedBovine?.createdAt,
-    );
+    final provider = ref.read(bovinesProviderProvider);
+    final bovine = ref
+        .read(bovineFormProvider)
+        .prepareBovineForSaving(
+          isEditing: widget.isEditing,
+          existingId: widget.bovineId,
+          existingImageUrls: provider.selectedBovine?.imageUrls,
+          existingCreatedAt: provider.selectedBovine?.createdAt,
+        );
 
-    final success = widget.isEditing
-        ? await provider.updateBovine(bovine)
-        : await provider.createBovine(bovine);
+    final success =
+        widget.isEditing
+            ? await provider.updateBovine(bovine)
+            : await provider.createBovine(bovine);
 
     if (!mounted) return;
 
     if (success) {
-      _formProvider.markAsSaved();
+      ref.read(bovineFormProvider).markAsSaved();
       _showSuccessMessage(widget.isEditing ? 'atualizado' : 'criado');
       context.pop();
     } else {
@@ -315,8 +308,11 @@ class _BovineFormPageState extends State<BovineFormPage> {
   }
 
   void _deleteBovine() async {
-    final provider = Provider.of<BovinesProvider>(context, listen: false);
-    final success = await provider.deleteBovine(widget.bovineId!, confirmed: true);
+    final provider = ref.read(bovinesProviderProvider);
+    final success = await provider.deleteBovine(
+      widget.bovineId!,
+      confirmed: true,
+    );
 
     if (!mounted) return;
 

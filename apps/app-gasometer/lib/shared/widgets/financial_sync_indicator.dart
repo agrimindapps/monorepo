@@ -1,14 +1,15 @@
 /// Financial Sync Status Indicator Widget
 /// Shows sync status for financial data with appropriate visual cues
 library;
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/financial_sync_service.dart';
+import '../../core/services/financial_sync_service_provider.dart';
 
 /// Financial sync status indicator widget
-class FinancialSyncIndicator extends StatelessWidget {
-
+class FinancialSyncIndicator extends ConsumerWidget {
   const FinancialSyncIndicator({
     super.key,
     this.entityId,
@@ -22,19 +23,20 @@ class FinancialSyncIndicator extends StatelessWidget {
   final bool showDetails;
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<FinancialSyncService>(
-      builder: (context, syncService, child) {
-        final status = entityId != null
+  Widget build(BuildContext context, WidgetRef ref) {
+    final syncService = ref.watch(financialSyncServiceProvider);
+    final status =
+        entityId != null
             ? syncService.getSyncStatus(entityId!)
             : _getOverallStatus(syncService);
-
-        return _buildIndicator(context, status, syncService);
-      },
-    );
+    return _buildIndicator(context, status, syncService);
   }
 
-  Widget _buildIndicator(BuildContext context, FinancialSyncStatus status, FinancialSyncService syncService) {
+  Widget _buildIndicator(
+    BuildContext context,
+    FinancialSyncStatus status,
+    FinancialSyncService syncService,
+  ) {
     final theme = Theme.of(context);
     final config = _getStatusConfig(status, theme);
 
@@ -45,11 +47,7 @@ class FinancialSyncIndicator extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          config.icon,
-          color: config.color,
-          size: size,
-        ),
+        Icon(config.icon, color: config.color, size: size),
         if (showLabel) ...[
           const SizedBox(width: 8),
           Text(
@@ -83,11 +81,7 @@ class FinancialSyncIndicator extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  config.icon,
-                  color: config.color,
-                  size: size,
-                ),
+                Icon(config.icon, color: config.color, size: size),
                 const SizedBox(width: 8),
                 Text(
                   config.label,
@@ -175,18 +169,9 @@ class FinancialSyncIndicator extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: color,
-          ),
+          Icon(icon, size: 16, color: color),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall,
-            ),
-          ),
+          Expanded(child: Text(label, style: theme.textTheme.bodySmall)),
           Text(
             value,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -258,7 +243,8 @@ class FinancialSyncIndicator extends StatelessWidget {
           icon: Icons.warning,
           color: Colors.deepOrange,
           label: 'Validação falhou',
-          description: 'Dados financeiros contêm erros que impedem a sincronização',
+          description:
+              'Dados financeiros contêm erros que impedem a sincronização',
         );
     }
   }
@@ -266,7 +252,6 @@ class FinancialSyncIndicator extends StatelessWidget {
 
 /// Status configuration class
 class _StatusConfig {
-
   const _StatusConfig({
     required this.icon,
     required this.color,

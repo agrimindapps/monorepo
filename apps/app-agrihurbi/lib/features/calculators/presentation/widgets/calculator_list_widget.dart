@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/calculator_entity.dart';
-import '../providers/calculator_provider.dart';
+import '../providers/calculator_provider_simple.dart';
 import 'calculator_card_widget.dart';
 
 /// Widget otimizado para lista de calculadoras
-/// 
+///
 /// Implementa lista virtualizada com performance otimizada
 /// Inclui RepaintBoundaries e cache adequado
 class CalculatorListWidget extends StatelessWidget {
@@ -71,16 +71,17 @@ class CalculatorListWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       itemCount: calculators.length,
       // Otimizações de performance críticas:
-      addAutomaticKeepAlives: false,      // Reduce memory usage
-      addRepaintBoundaries: false,       // Reduce painting overhead  
-      cacheExtent: 500.0,               // Cache 500px de conteúdo off-screen
+      addAutomaticKeepAlives: false, // Reduce memory usage
+      addRepaintBoundaries: false, // Reduce painting overhead
+      cacheExtent: 500.0, // Cache 500px de conteúdo off-screen
       itemBuilder: (context, index) {
         final calculator = calculators[index];
-        
+
         // RepaintBoundary isola repaints do widget individual
         return RepaintBoundary(
-          child: Consumer<CalculatorProvider>(
-            builder: (context, provider, child) {
+          child: Consumer(
+            builder: (context, ref, child) {
+              final provider = ref.watch(calculatorProvider);
               return CalculatorCardWidget(
                 calculator: calculator,
                 isFavorite: provider.isCalculatorFavorite(calculator.id),

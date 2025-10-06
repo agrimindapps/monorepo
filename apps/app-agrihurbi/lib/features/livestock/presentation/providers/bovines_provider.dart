@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/usecases/create_bovine.dart';
 import '../../domain/usecases/delete_bovine.dart';
@@ -8,8 +10,15 @@ import '../../domain/usecases/get_bovine_by_id.dart';
 import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/update_bovine.dart';
 
+/// Provider Riverpod para BovinesProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final bovinesProviderProvider = Provider<BovinesProvider>((ref) {
+  return getIt<BovinesProvider>();
+});
+
 /// Provider especializado para operações de bovinos
-/// 
+///
 /// Separado do provider principal para otimização e modularização
 /// Integrado completamente com todos os use cases bovinos
 @singleton

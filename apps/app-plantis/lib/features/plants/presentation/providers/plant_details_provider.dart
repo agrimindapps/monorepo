@@ -1,10 +1,20 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
+
+/// Provider Riverpod para PlantDetailsProvider
+final plantDetailsProviderProvider = ChangeNotifierProvider<PlantDetailsProvider>((ref) {
+  return PlantDetailsProvider(
+    getPlantByIdUseCase: getIt<GetPlantByIdUseCase>(),
+    deletePlantUseCase: getIt<DeletePlantUseCase>(),
+    updatePlantUseCase: getIt<UpdatePlantUseCase>(),
+  );
+});
 
 class PlantDetailsProvider extends ChangeNotifier {
   final GetPlantByIdUseCase getPlantByIdUseCase;

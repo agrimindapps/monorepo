@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/plantis_colors.dart';
 import '../../../../tasks/presentation/widgets/task_completion_dialog.dart';
@@ -9,22 +9,22 @@ import '../../providers/plant_task_provider.dart';
 import 'plant_task_adapter.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
-class PlantTasksSection extends StatefulWidget {
+class PlantTasksSection extends ConsumerStatefulWidget {
   final Plant plant;
 
   const PlantTasksSection({super.key, required this.plant});
 
   @override
-  State<PlantTasksSection> createState() => _PlantTasksSectionState();
+  ConsumerState<PlantTasksSection> createState() => _PlantTasksSectionState();
 }
 
-class _PlantTasksSectionState extends State<PlantTasksSection>
+class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     with PlantTaskAdapter {
   bool _showAllCompletedTasks = false;
 
   @override
   Widget build(BuildContext context) {
-    final taskProvider = context.watch<PlantTaskProvider>();
+    final taskProvider = ref.watch(plantTaskProviderProvider);
 
     if (taskProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());

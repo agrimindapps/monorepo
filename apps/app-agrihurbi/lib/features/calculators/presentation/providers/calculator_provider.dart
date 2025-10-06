@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -9,9 +9,25 @@ import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/manage_favorites.dart';
 import '../../domain/usecases/save_calculation_to_history.dart';
+import '../../data/repositories/calculator_repository_impl.dart';
+import '../../data/datasources/calculator_local_datasource.dart';
+
+/// Provider Riverpod para CalculatorProvider
+final calculatorProvider = ChangeNotifierProvider<CalculatorProvider>((ref) {
+  final repository = CalculatorRepositoryImpl(CalculatorLocalDataSourceImpl());
+
+  return CalculatorProvider(
+    getCalculators: GetCalculators(repository),
+    getCalculatorById: GetCalculatorById(repository),
+    executeCalculation: ExecuteCalculation(repository),
+    getCalculationHistory: GetCalculationHistory(repository),
+    saveCalculationToHistory: SaveCalculationToHistory(repository),
+    manageFavorites: ManageFavorites(repository),
+  );
+});
 
 /// Provider principal para gerenciamento de estado das calculadoras
-/// 
+///
 /// Substitui controllers GetX por ChangeNotifier
 /// Implementa padrões clean architecture com Provider pattern
 /// Gerencia calculadoras, cálculos, histórico e favoritos
@@ -30,12 +46,12 @@ class CalculatorProvider extends ChangeNotifier {
     required GetCalculationHistory getCalculationHistory,
     required SaveCalculationToHistory saveCalculationToHistory,
     required ManageFavorites manageFavorites,
-  })  : _getCalculators = getCalculators,
-        _getCalculatorById = getCalculatorById,
-        _executeCalculation = executeCalculation,
-        _getCalculationHistory = getCalculationHistory,
-        _saveCalculationToHistory = saveCalculationToHistory,
-        _manageFavorites = manageFavorites;
+  }) : _getCalculators = getCalculators,
+       _getCalculatorById = getCalculatorById,
+       _executeCalculation = executeCalculation,
+       _getCalculationHistory = getCalculationHistory,
+       _saveCalculationToHistory = saveCalculationToHistory,
+       _manageFavorites = manageFavorites;
 
   // === STATE MANAGEMENT ===
 
@@ -49,19 +65,19 @@ class CalculatorProvider extends ChangeNotifier {
   List<CalculatorEntity> _calculators = [];
   List<CalculatorEntity> _filteredCalculators = [];
   CalculatorEntity? _selectedCalculator;
-  
+
   /// Filtros e busca
   String _searchQuery = '';
   CalculatorCategory? _selectedCategory;
-  
+
   /// Resultados e histórico
   CalculationResult? _currentResult;
   List<CalculationHistory> _calculationHistory = [];
   List<String> _favoriteCalculatorIds = [];
-  
+
   /// Estado do cálculo atual
   Map<String, dynamic> _currentInputs = {};
-  
+
   /// Erro handling
   String? _errorMessage;
 
@@ -88,7 +104,9 @@ class CalculatorProvider extends ChangeNotifier {
 
   /// Calculadoras por categoria
   List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
-    return _filteredCalculators.where((calc) => calc.category == category).toList();
+    return _filteredCalculators
+        .where((calc) => calc.category == category)
+        .toList();
   }
 
   /// Calculadoras favoritas
@@ -118,16 +136,20 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculators();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar calculadoras - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar calculadoras - ${failure.message}',
+        );
       },
       (calculators) {
         _calculators = calculators;
         _applyFilters();
-        debugPrint('CalculatorProvider: Calculadoras carregadas - ${calculators.length} itens');
+        debugPrint(
+          'CalculatorProvider: Calculadoras carregadas - ${calculators.length} itens',
+        );
       },
     );
 
@@ -142,19 +164,23 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculatorById(calculatorId);
-    
+
     bool success = false;
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar calculadora - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar calculadora - ${failure.message}',
+        );
       },
       (calculator) {
         _selectedCalculator = calculator;
         _currentInputs = {};
         _currentResult = null;
         success = true;
-        debugPrint('CalculatorProvider: Calculadora carregada - ${calculator.id}');
+        debugPrint(
+          'CalculatorProvider: Calculadora carregada - ${calculator.id}',
+        );
       },
     );
 
@@ -169,7 +195,9 @@ class CalculatorProvider extends ChangeNotifier {
     _currentInputs = {};
     _currentResult = null;
     notifyListeners();
-    debugPrint('CalculatorProvider: Calculadora selecionada - ${calculator?.id ?? 'nenhuma'}');
+    debugPrint(
+      'CalculatorProvider: Calculadora selecionada - ${calculator?.id ?? 'nenhuma'}',
+    );
   }
 
   // === OPERAÇÕES DE CÁLCULO ===
@@ -222,7 +250,7 @@ class CalculatorProvider extends ChangeNotifier {
         _currentResult = calculationResult;
         success = true;
         debugPrint('CalculatorProvider: Cálculo executado com sucesso');
-        
+
         // Salva no histórico automaticamente se bem-sucedido
         if (calculationResult.isValid) {
           _saveToHistory(calculationResult);
@@ -247,10 +275,12 @@ class CalculatorProvider extends ChangeNotifier {
     );
 
     final saveResult = await _saveCalculationToHistory.call(historyItem);
-    
+
     saveResult.fold(
       (failure) {
-        debugPrint('CalculatorProvider: Erro ao salvar no histórico - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao salvar no histórico - ${failure.message}',
+        );
       },
       (_) {
         _calculationHistory.insert(0, historyItem);
@@ -274,7 +304,9 @@ class CalculatorProvider extends ChangeNotifier {
     _selectedCategory = category;
     _applyFilters();
     notifyListeners();
-    debugPrint('CalculatorProvider: Categoria filtrada - ${category?.name ?? 'todas'}');
+    debugPrint(
+      'CalculatorProvider: Categoria filtrada - ${category?.name ?? 'todas'}',
+    );
   }
 
   /// Limpa todos os filtros
@@ -292,16 +324,21 @@ class CalculatorProvider extends ChangeNotifier {
 
     // Filtrar por categoria
     if (_selectedCategory != null) {
-      filtered = filtered.where((calc) => calc.category == _selectedCategory).toList();
+      filtered =
+          filtered.where((calc) => calc.category == _selectedCategory).toList();
     }
 
     // Filtrar por busca
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered = filtered.where((calc) =>
-        calc.name.toLowerCase().contains(query) ||
-        calc.description.toLowerCase().contains(query)
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (calc) =>
+                    calc.name.toLowerCase().contains(query) ||
+                    calc.description.toLowerCase().contains(query),
+              )
+              .toList();
     }
 
     _filteredCalculators = filtered;
@@ -316,15 +353,19 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculationHistory.call();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar histórico - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar histórico - ${failure.message}',
+        );
       },
       (history) {
         _calculationHistory = history;
-        debugPrint('CalculatorProvider: Histórico carregado - ${history.length} itens');
+        debugPrint(
+          'CalculatorProvider: Histórico carregado - ${history.length} itens',
+        );
       },
     );
 
@@ -356,15 +397,20 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _manageFavorites.call(const GetFavoritesParams());
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar favoritos - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar favoritos - ${failure.message}',
+        );
       },
       (favorites) {
-        _favoriteCalculatorIds = favorites is List ? List<String>.from(favorites) : <String>[];
-        debugPrint('CalculatorProvider: Favoritos carregados - ${favorites.length} itens');
+        _favoriteCalculatorIds =
+            favorites is List ? List<String>.from(favorites) : <String>[];
+        debugPrint(
+          'CalculatorProvider: Favoritos carregados - ${favorites.length} itens',
+        );
       },
     );
 
@@ -375,18 +421,20 @@ class CalculatorProvider extends ChangeNotifier {
   /// Adiciona/remove favorito
   Future<bool> toggleFavorite(String calculatorId) async {
     final isFavorite = _favoriteCalculatorIds.contains(calculatorId);
-    
+
     final result = await _manageFavorites.call(
-      isFavorite 
-        ? RemoveFavoriteParams(calculatorId)
-        : AddFavoriteParams(calculatorId),
+      isFavorite
+          ? RemoveFavoriteParams(calculatorId)
+          : AddFavoriteParams(calculatorId),
     );
 
     bool success = false;
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao alterar favorito - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao alterar favorito - ${failure.message}',
+        );
       },
       (_) {
         if (isFavorite) {
@@ -395,7 +443,9 @@ class CalculatorProvider extends ChangeNotifier {
           _favoriteCalculatorIds.add(calculatorId);
         }
         success = true;
-        debugPrint('CalculatorProvider: Favorito ${isFavorite ? 'removido' : 'adicionado'} - $calculatorId');
+        debugPrint(
+          'CalculatorProvider: Favorito ${isFavorite ? 'removido' : 'adicionado'} - $calculatorId',
+        );
       },
     );
 
@@ -424,16 +474,18 @@ class CalculatorProvider extends ChangeNotifier {
   void applyHistoryResult(CalculationHistory historyItem) {
     _currentResult = historyItem.result;
     _currentInputs = Map<String, dynamic>.from(historyItem.result.inputs);
-    
+
     // Tenta encontrar e selecionar a calculadora
     final calculator = _calculators.firstWhere(
       (calc) => calc.id == historyItem.calculatorId,
       orElse: () => _calculators.first,
     );
     _selectedCalculator = calculator;
-    
+
     notifyListeners();
-    debugPrint('CalculatorProvider: Resultado do histórico aplicado - ${historyItem.id}');
+    debugPrint(
+      'CalculatorProvider: Resultado do histórico aplicado - ${historyItem.id}',
+    );
   }
 
   @override

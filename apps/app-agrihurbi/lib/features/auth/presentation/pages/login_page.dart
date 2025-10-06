@@ -1,12 +1,19 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
+import 'package:app_agrihurbi/core/di/injection_container.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+
+/// Riverpod provider exposing the existing AuthProvider (registered with GetIt)
+final authProviderProvider = ChangeNotifierProvider<AuthProvider>(
+  (ref) => getIt<AuthProvider>(),
+);
 
 /// Login page
 class LoginPage extends StatefulWidget {
@@ -42,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 60),
-                
+
                 // Logo and Title
                 Column(
                   children: [
@@ -76,9 +83,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 48),
-                
+
                 // Email Field
                 TextFormField(
                   controller: _emailController,
@@ -90,9 +97,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   validator: InputValidators.validateEmail,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Password Field
                 TextFormField(
                   controller: _passwordController,
@@ -116,35 +123,37 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   validator: PasswordValidator.validatePassword,
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Login Button
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return ElevatedButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () => _handleLogin(context, authProvider),
-                      child: authProvider.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  DesignTokens.textLightColor,
-                                ),
 
-                              ),
-                            )
-                          : const Text('Entrar'),
+                const SizedBox(height: 24),
+
+                // Login Button
+                Consumer(
+                  builder: (context, ref, child) {
+                    final authProvider = ref.watch(authProviderProvider);
+                    return ElevatedButton(
+                      onPressed:
+                          authProvider.isLoading
+                              ? null
+                              : () => _handleLogin(context, authProvider),
+                      child:
+                          authProvider.isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    DesignTokens.textLightColor,
+                                  ),
+                                ),
+                              )
+                              : const Text('Entrar'),
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Register Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -159,12 +168,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Error Message
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
+                Consumer(
+                  builder: (context, ref, child) {
+                    final authProvider = ref.watch(authProviderProvider);
                     if (authProvider.errorMessage != null) {
                       return Container(
                         padding: const EdgeInsets.all(12),
@@ -226,14 +236,16 @@ class _LoginPageState extends State<LoginPage> {
 
       result.fold(
         (failure) {
-          if (mounted) { // ✅ Double check before using context
+          if (mounted) {
+            // ✅ Double check before using context
             ErrorHandler.showErrorSnackbar(context, failure);
           }
         },
         (user) {
-          if (mounted) { // ✅ Double check before using context
+          if (mounted) {
+            // ✅ Double check before using context
             ErrorHandler.showSuccessSnackbar(
-              context, 
+              context,
               SuccessMessages.loginSuccess,
             );
             context.go('/home');

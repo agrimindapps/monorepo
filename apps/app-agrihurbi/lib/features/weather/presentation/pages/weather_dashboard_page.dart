@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/weather_provider.dart';
 import '../widgets/rain_gauges_summary.dart';
@@ -9,14 +9,14 @@ import '../widgets/weather_statistics_card.dart';
 
 /// Main weather dashboard page
 /// Displays current weather, measurements, rain gauges, and statistics
-class WeatherDashboardPage extends StatefulWidget {
+class WeatherDashboardPage extends ConsumerStatefulWidget {
   const WeatherDashboardPage({super.key});
 
   @override
-  State<WeatherDashboardPage> createState() => _WeatherDashboardPageState();
+  ConsumerState<WeatherDashboardPage> createState() => _WeatherDashboardPageState();
 }
 
-class _WeatherDashboardPageState extends State<WeatherDashboardPage>
+class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -27,7 +27,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
     
     // Initialize weather provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WeatherProvider>().initialize();
+      ref.read(weatherProviderProvider).initialize();
     });
   }
 
@@ -45,8 +45,9 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           // Sync button
-          Consumer<WeatherProvider>(
-            builder: (context, provider, child) {
+          Builder(
+            builder: (context) {
+              final provider = ref.watch(weatherProviderProvider);
               return IconButton(
                 onPressed: provider.isSyncing ? null : () => _syncWeatherData(),
                 icon: provider.isSyncing
@@ -77,8 +78,9 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
           ],
         ),
       ),
-      body: Consumer<WeatherProvider>(
-        builder: (context, provider, child) {
+      body: Builder(
+        builder: (context) {
+          final provider = ref.watch(weatherProviderProvider);
           if (provider.isLoading && !provider.hasMeasurements) {
             return const Center(
               child: Column(
@@ -368,7 +370,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
 
   /// Sync weather data
   Future<void> _syncWeatherData() async {
-    final provider = context.read<WeatherProvider>();
+    final provider = ref.read(weatherProviderProvider);
     final success = await provider.syncWeatherData();
     
     if (mounted) {
@@ -450,7 +452,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
 
   /// Show date range picker
   Future<void> _showDateRangePicker() async {
-    final provider = context.read<WeatherProvider>();
+    final provider = ref.read(weatherProviderProvider);
     
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -518,7 +520,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
     const latitude = -23.5505;
     const longitude = -46.6333;
     
-    final provider = context.read<WeatherProvider>();
+    final provider = ref.read(weatherProviderProvider);
     await provider.getCurrentWeatherFromAPI(latitude, longitude);
     
     if (mounted) {
@@ -541,7 +543,7 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage>
     const latitude = -23.5505;
     const longitude = -46.6333;
     
-    final provider = context.read<WeatherProvider>();
+    final provider = ref.read(weatherProviderProvider);
     await provider.getWeatherForecast(latitude, longitude, days: 7);
     
     if (mounted) {

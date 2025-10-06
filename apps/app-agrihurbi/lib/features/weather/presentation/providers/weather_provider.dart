@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/rain_gauge_entity.dart';
 import '../../domain/entities/weather_measurement_entity.dart';
 import '../../domain/entities/weather_statistics_entity.dart';
@@ -9,6 +11,13 @@ import '../../domain/usecases/calculate_weather_statistics.dart';
 import '../../domain/usecases/create_weather_measurement.dart';
 import '../../domain/usecases/get_rain_gauges.dart';
 import '../../domain/usecases/get_weather_measurements.dart';
+
+/// Provider Riverpod para WeatherProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final weatherProviderProvider = Provider<WeatherProvider>((ref) {
+  return getIt<WeatherProvider>();
+});
 
 /// Weather provider using ChangeNotifier for state management
 /// Follows Provider pattern similar to existing app architecture

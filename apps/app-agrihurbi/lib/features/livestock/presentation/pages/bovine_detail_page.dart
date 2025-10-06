@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 import '../providers/bovines_provider.dart';
 
 /// Página de detalhes completos do bovino com visualização rica
-/// 
+///
 /// Apresenta todas as informações do bovino de forma organizada e visualmente
 /// atraente, seguindo padrões Material 3 e fornecendo navegação para edição
-class BovineDetailPage extends StatefulWidget {
+class BovineDetailPage extends ConsumerStatefulWidget {
   const BovineDetailPage({
     super.key,
     required this.bovineId,
@@ -20,10 +20,10 @@ class BovineDetailPage extends StatefulWidget {
   final String bovineId;
 
   @override
-  State<BovineDetailPage> createState() => _BovineDetailPageState();
+  ConsumerState<BovineDetailPage> createState() => _BovineDetailPageState();
 }
 
-class _BovineDetailPageState extends State<BovineDetailPage> {
+class _BovineDetailPageState extends ConsumerState<BovineDetailPage> {
   final _scrollController = ScrollController();
   BovineEntity? _bovine;
   bool _isLoading = true;
@@ -41,7 +41,7 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
   }
 
   Future<void> _loadBovineDetails() async {
-    final provider = context.read<BovinesProvider>();
+    final provider = ref.read(bovinesProviderProvider);
     
     // Busca bovino local primeiro
     var bovine = provider.getBovineById(widget.bovineId);
@@ -553,7 +553,7 @@ class _BovineDetailPageState extends State<BovineDetailPage> {
   }
 
   void _deleteBovine() async {
-    final provider = context.read<BovinesProvider>();
+    final provider = ref.read(bovinesProviderProvider);
     final success = await provider.deleteBovine(_bovine!.id);
     
     if (!mounted) return;

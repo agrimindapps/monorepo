@@ -6,13 +6,13 @@ import 'package:app_agrihurbi/features/markets/presentation/widgets/market_info_
 import 'package:app_agrihurbi/features/markets/presentation/widgets/market_price_chart.dart';
 import 'package:app_agrihurbi/features/markets/presentation/widgets/market_stats_grid.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Market Detail Page
-/// 
+///
 /// Displays detailed information about a specific market
 /// including price charts, statistics, and real-time updates
-class MarketDetailPage extends StatefulWidget {
+class MarketDetailPage extends ConsumerStatefulWidget {
   final String marketId;
 
   const MarketDetailPage({
@@ -21,10 +21,10 @@ class MarketDetailPage extends StatefulWidget {
   });
 
   @override
-  State<MarketDetailPage> createState() => _MarketDetailPageState();
+  ConsumerState<MarketDetailPage> createState() => _MarketDetailPageState();
 }
 
-class _MarketDetailPageState extends State<MarketDetailPage>
+class _MarketDetailPageState extends ConsumerState<MarketDetailPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   MarketEntity? _market;
@@ -49,14 +49,14 @@ class _MarketDetailPageState extends State<MarketDetailPage>
     setState(() => _isLoading = true);
 
     try {
-      final provider = context.read<MarketProvider>();
-      
+      final provider = ref.read(marketProviderProvider);
+
       // Load market details
       final market = await provider.getMarketById(widget.marketId);
-      
+
       if (market != null) {
         final isFavorite = await provider.isMarketFavorite(widget.marketId);
-        
+
         setState(() {
           _market = market;
           _isFavorite = isFavorite;
@@ -79,15 +79,15 @@ class _MarketDetailPageState extends State<MarketDetailPage>
   Future<void> _toggleFavorite() async {
     if (_market == null) return;
 
-    final provider = context.read<MarketProvider>();
+    final provider = ref.read(marketProviderProvider);
     final newStatus = await provider.toggleFavorite(_market!.id);
-    
+
     setState(() {
       _isFavorite = newStatus;
     });
 
-    final message = newStatus 
-        ? 'Adicionado aos favoritos' 
+    final message = newStatus
+        ? 'Adicionado aos favoritos'
         : 'Removido dos favoritos';
 
     if (mounted) {

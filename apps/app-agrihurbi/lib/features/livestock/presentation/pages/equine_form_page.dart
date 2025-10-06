@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/equine_entity.dart';
 import '../providers/equines_provider.dart';
 
 /// Página de formulário para criação/edição de equinos
-/// 
+///
 /// Unifica as funcionalidades de cadastro e edição em uma única página
 /// Implementa validação completa e integração com EquinesProvider
-class EquineFormPage extends StatefulWidget {
-  const EquineFormPage({
-    super.key,
-    this.equineId,
-  });
+class EquineFormPage extends ConsumerStatefulWidget {
+  const EquineFormPage({super.key, this.equineId});
 
   /// ID do equino para edição (null para criação)
   final String? equineId;
@@ -23,13 +20,13 @@ class EquineFormPage extends StatefulWidget {
   bool get isEditing => equineId != null;
 
   @override
-  State<EquineFormPage> createState() => _EquineFormPageState();
+  ConsumerState<EquineFormPage> createState() => _EquineFormPageState();
 }
 
-class _EquineFormPageState extends State<EquineFormPage> {
+class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  
+
   // Controladores dos campos
   final _commonNameController = TextEditingController();
   final _registrationIdController = TextEditingController();
@@ -67,18 +64,17 @@ class _EquineFormPageState extends State<EquineFormPage> {
 
   Future<void> _loadEquineData() async {
     if (widget.isEditing) {
-      final provider = context.read<EquinesProvider>();
-      
+      final provider = ref.read(equinesProvider);
+
       // Tenta buscar o equino local primeiro
       var equine = provider.getEquineById(widget.equineId!);
-      
+
       // Se não encontrou local, carrega do servidor
       if (equine == null) {
-        // TODO: Implementar carregamento individual quando disponível
-        // final success = await provider.loadEquineById(widget.equineId!);
-        // if (success) {
-        //   equine = provider.selectedEquine;
-        // }
+        final success = await provider.loadEquineById(widget.equineId!);
+        if (success) {
+          equine = provider.selectedEquine;
+        }
       }
 
       if (equine != null && mounted) {
@@ -104,7 +100,7 @@ class _EquineFormPageState extends State<EquineFormPage> {
     _geneticInfluencesController.text = equine.geneticInfluences;
     _heightController.text = equine.height;
     _weightController.text = equine.weight;
-    
+
     _selectedTemperament = equine.temperament;
     _selectedCoat = equine.coat;
     _selectedPrimaryUse = equine.primaryUse;
@@ -126,41 +122,37 @@ class _EquineFormPageState extends State<EquineFormPage> {
             ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Consumer<EquinesProvider>(
-              builder: (context, provider, child) {
-                return Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildBasicInfoSection(),
-                              const SizedBox(height: 24),
-                              _buildCharacteristicsSection(),
-                              const SizedBox(height: 24),
-                              _buildPhysicalInfoSection(),
-                              const SizedBox(height: 24),
-                              _buildAdditionalInfoSection(),
-                              const SizedBox(height: 24),
-                              if (widget.isEditing)
-                                _buildStatusSection(),
-                            ],
-                          ),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildBasicInfoSection(),
+                            const SizedBox(height: 24),
+                            _buildCharacteristicsSection(),
+                            const SizedBox(height: 24),
+                            _buildPhysicalInfoSection(),
+                            const SizedBox(height: 24),
+                            _buildAdditionalInfoSection(),
+                            const SizedBox(height: 24),
+                            if (widget.isEditing) _buildStatusSection(),
+                          ],
                         ),
                       ),
-                      _buildActionButtons(),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                    _buildActionButtons(),
+                  ],
+                ),
+              ),
     );
   }
 
@@ -244,12 +236,13 @@ class _EquineFormPageState extends State<EquineFormPage> {
                 labelText: 'Uso Principal *',
                 border: OutlineInputBorder(),
               ),
-              items: EquinePrimaryUse.values.map((use) {
-                return DropdownMenuItem(
-                  value: use,
-                  child: Text(use.displayName),
-                );
-              }).toList(),
+              items:
+                  EquinePrimaryUse.values.map((use) {
+                    return DropdownMenuItem(
+                      value: use,
+                      child: Text(use.displayName),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedPrimaryUse = value;
@@ -286,12 +279,13 @@ class _EquineFormPageState extends State<EquineFormPage> {
                 labelText: 'Temperamento *',
                 border: OutlineInputBorder(),
               ),
-              items: EquineTemperament.values.map((temperament) {
-                return DropdownMenuItem(
-                  value: temperament,
-                  child: Text(temperament.displayName),
-                );
-              }).toList(),
+              items:
+                  EquineTemperament.values.map((temperament) {
+                    return DropdownMenuItem(
+                      value: temperament,
+                      child: Text(temperament.displayName),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedTemperament = value;
@@ -311,12 +305,13 @@ class _EquineFormPageState extends State<EquineFormPage> {
                 labelText: 'Pelagem *',
                 border: OutlineInputBorder(),
               ),
-              items: CoatColor.values.map((coat) {
-                return DropdownMenuItem(
-                  value: coat,
-                  child: Text(coat.displayName),
-                );
-              }).toList(),
+              items:
+                  CoatColor.values.map((coat) {
+                    return DropdownMenuItem(
+                      value: coat,
+                      child: Text(coat.displayName),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedCoat = value;
@@ -359,9 +354,7 @@ class _EquineFormPageState extends State<EquineFormPage> {
                       suffixIcon: Icon(Icons.height),
                     ),
                     keyboardType: TextInputType.text,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(20),
-                    ],
+                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -375,9 +368,7 @@ class _EquineFormPageState extends State<EquineFormPage> {
                       suffixIcon: Icon(Icons.monitor_weight),
                     ),
                     keyboardType: TextInputType.text,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(20),
-                    ],
+                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
                   ),
                 ),
               ],
@@ -435,14 +426,13 @@ class _EquineFormPageState extends State<EquineFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Status',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Status', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Ativo'),
-              subtitle: Text(_isActive ? 'Equino ativo no rebanho' : 'Equino inativo'),
+              subtitle: Text(
+                _isActive ? 'Equino ativo no rebanho' : 'Equino inativo',
+              ),
               value: _isActive,
               onChanged: (value) {
                 setState(() {
@@ -463,7 +453,7 @@ class _EquineFormPageState extends State<EquineFormPage> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -518,29 +508,30 @@ class _EquineFormPageState extends State<EquineFormPage> {
   void _confirmDelete() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Exclusão'),
-        content: const Text(
-          'Tem certeza que deseja excluir este equino?\n\n'
-          'Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteEquine();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar Exclusão'),
+            content: const Text(
+              'Tem certeza que deseja excluir este equino?\n\n'
+              'Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Excluir'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deleteEquine();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -548,7 +539,9 @@ class _EquineFormPageState extends State<EquineFormPage> {
     // TODO: Implementar exclusão quando EquinesProvider estiver completo
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Funcionalidade de exclusão de equinos em desenvolvimento'),
+        content: Text(
+          'Funcionalidade de exclusão de equinos em desenvolvimento',
+        ),
       ),
     );
     context.pop();

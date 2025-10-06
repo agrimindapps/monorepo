@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 import '../providers/bovines_provider.dart';
 
 /// Página de formulário para criação/edição de bovinos
-/// 
+///
 /// Unifica as funcionalidades de cadastro e edição em uma única página
 /// Implementa validação completa e integração com BovinesProvider
-class BovineFormPage extends StatefulWidget {
+class BovineFormPage extends ConsumerStatefulWidget {
   const BovineFormPage({
     super.key,
     this.bovineId,
@@ -23,10 +23,10 @@ class BovineFormPage extends StatefulWidget {
   bool get isEditing => bovineId != null;
 
   @override
-  State<BovineFormPage> createState() => _BovineFormPageState();
+  ConsumerState<BovineFormPage> createState() => _BovineFormPageState();
 }
 
-class _BovineFormPageState extends State<BovineFormPage> {
+class _BovineFormPageState extends ConsumerState<BovineFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   
@@ -71,13 +71,13 @@ class _BovineFormPageState extends State<BovineFormPage> {
 
   Future<void> _loadBovineData() async {
     if (!mounted) return; // ✅ Safety check at start
-    
+
     if (widget.isEditing) {
-      final provider = Provider.of<BovinesProvider>(context, listen: false);
-      
+      final provider = ref.read(bovinesProviderProvider);
+
       // Tenta buscar o bovino local primeiro
       var bovine = provider.getBovineById(widget.bovineId!);
-      
+
       // Se não encontrou local, carrega usando use case dedicado
       if (bovine == null) {
         final success = await provider.loadBovineById(widget.bovineId!);
@@ -92,7 +92,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
         _populateForm(bovine);
       } else {
         // Mostra erro específico baseado no estado do provider
-        final provider = Provider.of<BovinesProvider>(context, listen: false);
+        final provider = ref.read(bovinesProviderProvider);
         final errorMsg = provider.errorMessage ?? 'Bovino não encontrado';
         _showErrorAndGoBack(errorMsg);
         return;
@@ -149,8 +149,9 @@ class _BovineFormPageState extends State<BovineFormPage> {
                 ],
               ),
             )
-          : Consumer<BovinesProvider>(
-              builder: (context, provider, child) {
+          : Builder(
+              builder: (context) {
+                final provider = ref.watch(bovinesProviderProvider);
                 // Mostra loading específico para carregamento de bovino individual
                 if (provider.isLoadingBovine) {
                   return Center(
@@ -576,7 +577,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
       return;
     }
 
-    final provider = Provider.of<BovinesProvider>(context, listen: false);
+    final provider = ref.read(bovinesProviderProvider);
     final now = DateTime.now();
 
     final bovine = BovineEntity(
@@ -684,7 +685,7 @@ class _BovineFormPageState extends State<BovineFormPage> {
   }
 
   void _deleteBovine() async {
-    final provider = Provider.of<BovinesProvider>(context, listen: false);
+    final provider = ref.read(bovinesProviderProvider);
     final success = await provider.deleteBovine(widget.bovineId!, confirmed: true);
     
     if (!mounted) return; // ✅ Safety check after async operation

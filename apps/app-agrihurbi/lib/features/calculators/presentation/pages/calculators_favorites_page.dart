@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/calculator_category.dart';
@@ -10,20 +10,21 @@ import '../providers/calculator_provider_simple.dart';
 import '../widgets/calculator_card_widget.dart';
 
 /// Página de calculadoras favoritas
-/// 
+///
 /// Implementa gestão completa de favoritos com organização e exportação
-class CalculatorsFavoritesPage extends StatefulWidget {
+class CalculatorsFavoritesPage extends ConsumerStatefulWidget {
   const CalculatorsFavoritesPage({super.key});
 
   @override
-  State<CalculatorsFavoritesPage> createState() => _CalculatorsFavoritesPageState();
+  ConsumerState<CalculatorsFavoritesPage> createState() =>
+      _CalculatorsFavoritesPageState();
 }
 
-class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
+class _CalculatorsFavoritesPageState extends ConsumerState<CalculatorsFavoritesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _scrollController = ScrollController();
-  
+
   List<CalculatorEntity> _favoriteCalculators = [];
   FavoritesStats? _stats;
   bool _isLoading = true;
@@ -57,7 +58,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
     });
 
     try {
-      final provider = context.read<CalculatorProvider>();
+      final provider = ref.read(calculatorProvider);
       final favoriteCalculators = await _favoritesService!.filterFavorites(
         provider.calculators,
       );
@@ -91,59 +92,58 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
         actions: [
           PopupMenuButton<String>(
             onSelected: _handleMenuAction,
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'organize',
-                child: Row(
-                  children: [
-                    Icon(Icons.sort),
-                    SizedBox(width: 8),
-                    Text('Organizar'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: Row(
-                  children: [
-                    Icon(Icons.share),
-                    SizedBox(width: 8),
-                    Text('Exportar'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'import',
-                child: Row(
-                  children: [
-                    Icon(Icons.file_download),
-                    SizedBox(width: 8),
-                    Text('Importar'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'clear',
-                child: Row(
-                  children: [
-                    Icon(Icons.clear_all),
-                    SizedBox(width: 8),
-                    Text('Limpar Todos'),
-                  ],
-                ),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'organize',
+                    child: Row(
+                      children: [
+                        Icon(Icons.sort),
+                        SizedBox(width: 8),
+                        Text('Organizar'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'export',
+                    child: Row(
+                      children: [
+                        Icon(Icons.share),
+                        SizedBox(width: 8),
+                        Text('Exportar'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'import',
+                    child: Row(
+                      children: [
+                        Icon(Icons.file_download),
+                        SizedBox(width: 8),
+                        Text('Importar'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'clear',
+                    child: Row(
+                      children: [
+                        Icon(Icons.clear_all),
+                        SizedBox(width: 8),
+                        Text('Limpar Todos'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
-      body: Consumer<CalculatorProvider>(
-        builder: (context, provider, child) {
+      body: Builder(
+        builder: (context) {
+          final provider = ref.watch(calculatorProvider);
           return TabBarView(
             controller: _tabController,
-            children: [
-              _buildFavoritesTab(provider),
-              _buildStatsTab(),
-            ],
+            children: [_buildFavoritesTab(provider), _buildStatsTab()],
           );
         },
       ),
@@ -203,10 +203,13 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
 
   Widget _buildFavoritesList() {
     // Agrupa favoritos por categoria
-    final Map<CalculatorCategory, List<CalculatorEntity>> favoritesByCategory = {};
-    
+    final Map<CalculatorCategory, List<CalculatorEntity>> favoritesByCategory =
+        {};
+
     for (final calculator in _favoriteCalculators) {
-      favoritesByCategory.putIfAbsent(calculator.category, () => []).add(calculator);
+      favoritesByCategory
+          .putIfAbsent(calculator.category, () => [])
+          .add(calculator);
     }
 
     return ListView.builder(
@@ -228,7 +231,10 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
           children: [
             // Cabeçalho da categoria
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 children: [
                   Icon(
@@ -246,12 +252,13 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
                   const Spacer(),
                   Chip(
                     label: Text('${categoryCalculators.length}'),
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
                   ),
                 ],
               ),
             ),
-            
+
             // Lista de calculadoras da categoria
             ...categoryCalculators.map((calculator) {
               return CalculatorCardWidget(
@@ -262,7 +269,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
                 showCategory: false,
               );
             }),
-            
+
             // Espaçamento entre categorias
             if (categoryIndex < favoritesByCategory.length - 1)
               const SizedBox(height: 16),
@@ -313,9 +320,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
 
   Widget _buildStatsTab() {
     if (_isLoading || _stats == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     return ListView(
@@ -335,7 +340,10 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildStatRow('Total de Favoritos', '${_stats!.totalFavorites}'),
+                _buildStatRow(
+                  'Total de Favoritos',
+                  '${_stats!.totalFavorites}',
+                ),
                 _buildStatRow(
                   'Última Sincronização',
                   _stats!.lastSync != null
@@ -350,9 +358,9 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Card de distribuição por categoria
         Card(
           child: Padding(
@@ -372,9 +380,9 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Ações de manutenção
         Card(
           child: Padding(
@@ -422,10 +430,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -433,16 +438,14 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
 
   List<Widget> _buildCategoryDistribution() {
     final Map<CalculatorCategory, int> distribution = {};
-    
+
     for (final calculator in _favoriteCalculators) {
-      distribution[calculator.category] = 
+      distribution[calculator.category] =
           (distribution[calculator.category] ?? 0) + 1;
     }
 
     if (distribution.isEmpty) {
-      return [
-        const Text('Nenhum dado para exibir'),
-      ];
+      return [const Text('Nenhum dado para exibir')];
     }
 
     return distribution.entries.map((entry) {
@@ -460,9 +463,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(category.displayName),
-            ),
+            Expanded(child: Text(category.displayName)),
             Text('$count ($percentage%)'),
           ],
         ),
@@ -501,16 +502,19 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
   void _showOrganizeDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Organizar Favoritos'),
-        content: const Text('Funcionalidade de organização em desenvolvimento'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Organizar Favoritos'),
+            content: const Text(
+              'Funcionalidade de organização em desenvolvimento',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -535,29 +539,30 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
   void _showClearAllDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Limpar Todos os Favoritos'),
-        content: const Text(
-          'Tem certeza que deseja remover todas as calculadoras dos favoritos? '
-          'Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _clearAllFavorites();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Limpar Todos os Favoritos'),
+            content: const Text(
+              'Tem certeza que deseja remover todas as calculadoras dos favoritos? '
+              'Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Limpar Todos'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _clearAllFavorites();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Limpar Todos'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -570,9 +575,7 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
       if (!context.mounted) return;
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Todos os favoritos foram removidos'),
-        ),
+        const SnackBar(content: Text('Todos os favoritos foram removidos')),
       );
     }
   }
@@ -586,18 +589,14 @@ class _CalculatorsFavoritesPageState extends State<CalculatorsFavoritesPage>
       if (!context.mounted) return;
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Favoritos sincronizados com sucesso'),
-        ),
+        const SnackBar(content: Text('Favoritos sincronizados com sucesso')),
       );
     }
   }
 
   void _createBackup() async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Backup criado automaticamente'),
-      ),
+      const SnackBar(content: Text('Backup criado automaticamente')),
     );
   }
 

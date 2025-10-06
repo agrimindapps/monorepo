@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/medication_dosage_output.dart';
 import '../../domain/services/dosage_validation_service.dart';
@@ -12,26 +12,14 @@ import '../widgets/prescription_export_widget.dart';
 import '../widgets/safety_alerts_widget.dart';
 
 /// Página principal da Calculadora de Dosagem de Medicamentos
-class MedicationDosagePage extends StatelessWidget {
+class MedicationDosagePage extends ConsumerStatefulWidget {
   const MedicationDosagePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MedicationDosageProvider(),
-      child: const _MedicationDosagePageContent(),
-    );
-  }
+  ConsumerState<MedicationDosagePage> createState() => _MedicationDosagePageState();
 }
 
-class _MedicationDosagePageContent extends StatefulWidget {
-  const _MedicationDosagePageContent();
-
-  @override
-  State<_MedicationDosagePageContent> createState() => _MedicationDosagePageContentState();
-}
-
-class _MedicationDosagePageContentState extends State<_MedicationDosagePageContent>
+class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -56,8 +44,9 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
         backgroundColor: Colors.red.shade50,
         foregroundColor: Colors.red.shade800,
         actions: [
-          Consumer<MedicationDosageProvider>(
-            builder: (context, provider, child) {
+          Builder(
+            builder: (context) {
+              final provider = ref.watch(medicationDosageProviderProvider);
               return IconButton(
                 icon: Icon(
                   provider.output != null ? Icons.medical_services : Icons.medical_services_outlined,
@@ -114,14 +103,15 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
           _buildAlertsTab(),
         ],
       ),
-      floatingActionButton: Consumer<MedicationDosageProvider>(
-        builder: (context, provider, child) {
+      floatingActionButton: Builder(
+        builder: (context) {
+          final provider = ref.watch(medicationDosageProviderProvider);
           if (!provider.hasValidInput) return const SizedBox.shrink();
-          
+
           return FloatingActionButton.extended(
             onPressed: provider.isCalculating ? null : () => _handleCalculateWithSafetyCheck(provider),
             backgroundColor: Colors.red.shade600,
-            icon: provider.isCalculating 
+            icon: provider.isCalculating
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -161,71 +151,67 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
   }
 
   Widget _buildResultTab() {
-    return Consumer<MedicationDosageProvider>(
-      builder: (context, provider, child) {
-        if (provider.error != null) {
-          return _buildErrorState(provider.error!);
-        }
-        
-        if (provider.output == null) {
-          return _buildEmptyResultState();
-        }
-        
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              MedicationDosageResultCard(output: provider.output!),
-              const SizedBox(height: 16),
-              if (provider.output!.monitoringInfo != null) ...[
-                _buildMonitoringCard(provider.output!),
-                const SizedBox(height: 16),
-              ],
-              _buildAdministrationInstructionsCard(provider.output!),
-            ],
-          ),
-        );
-      },
+    final provider = ref.watch(medicationDosageProviderProvider);
+
+    if (provider.error != null) {
+      return _buildErrorState(provider.error!);
+    }
+
+    if (provider.output == null) {
+      return _buildEmptyResultState();
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          MedicationDosageResultCard(output: provider.output!),
+          const SizedBox(height: 16),
+          if (provider.output!.monitoringInfo != null) ...[
+            _buildMonitoringCard(provider.output!),
+            const SizedBox(height: 16),
+          ],
+          _buildAdministrationInstructionsCard(provider.output!),
+        ],
+      ),
     );
   }
 
   Widget _buildAlertsTab() {
-    return Consumer<MedicationDosageProvider>(
-      builder: (context, provider, child) {
-        if (provider.output?.alerts.isEmpty ?? true) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.shield_outlined,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Nenhum alerta disponível',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Realize um cálculo para ver alertas de segurança',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
+    final provider = ref.watch(medicationDosageProviderProvider);
+
+    if (provider.output?.alerts.isEmpty ?? true) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.shield_outlined,
+              size: 64,
+              color: Colors.grey,
             ),
-          );
-        }
-        
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: SafetyAlertsWidget(alerts: provider.output!.alerts),
-        );
-      },
+            SizedBox(height: 16),
+            Text(
+              'Nenhum alerta disponível',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Realize um cálculo para ver alertas de segurança',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: SafetyAlertsWidget(alerts: provider.output!.alerts),
     );
   }
 
@@ -303,7 +289,7 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<MedicationDosageProvider>().clearAll();
+                ref.read(medicationDosageProviderProvider).clearAll();
                 _tabController.animateTo(0);
               },
               icon: const Icon(Icons.refresh),
@@ -571,8 +557,9 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
         initialChildSize: 0.6,
         maxChildSize: 0.9,
         minChildSize: 0.3,
-        builder: (context, scrollController) => Consumer<MedicationDosageProvider>(
-          builder: (context, provider, child) => Container(
+        builder: (context, scrollController) {
+          final provider = ref.watch(medicationDosageProviderProvider);
+          return Container(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -661,14 +648,14 @@ class _MedicationDosagePageContentState extends State<_MedicationDosagePageConte
                 ),
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
   void _handleMenuAction(BuildContext context, String action) {
-    final provider = context.read<MedicationDosageProvider>();
+    final provider = ref.read(medicationDosageProviderProvider);
     
     switch (action) {
       case 'clear':

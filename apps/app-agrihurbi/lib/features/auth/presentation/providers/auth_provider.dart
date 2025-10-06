@@ -1,8 +1,10 @@
 import 'package:core/core.dart' show EnhancedAccountDeletionService;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
@@ -10,6 +12,13 @@ import '../../domain/usecases/login_usecase.dart' as local_login;
 import '../../domain/usecases/logout_usecase.dart' as local_logout;
 import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+
+/// Provider Riverpod para AuthProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final authProviderProvider = Provider<AuthProvider>((ref) {
+  return getIt<AuthProvider>();
+});
 
 /// Provider para operações de autenticação usando Clean Architecture
 ///

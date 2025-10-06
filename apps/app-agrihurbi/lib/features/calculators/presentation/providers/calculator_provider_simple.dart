@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -9,8 +11,13 @@ import '../../domain/usecases/execute_calculation.dart';
 import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 
+/// Provider Riverpod para CalculatorProvider
+final calculatorProvider = ChangeNotifierProvider<CalculatorProvider>((ref) {
+  return di.getIt<CalculatorProvider>();
+});
+
 /// Provider simplificado para gerenciamento de estado das calculadoras
-/// 
+///
 /// Implementa funcionalidades básicas sem complexidade excessiva
 /// Segue o padrão Provider estabelecido na migração livestock
 @singleton
@@ -25,10 +32,10 @@ class CalculatorProvider extends ChangeNotifier {
     required GetCalculatorById getCalculatorById,
     required ExecuteCalculation executeCalculation,
     required GetCalculationHistory getCalculationHistory,
-  })  : _getCalculators = getCalculators,
-        _getCalculatorById = getCalculatorById,
-        _executeCalculation = executeCalculation,
-        _getCalculationHistory = getCalculationHistory;
+  }) : _getCalculators = getCalculators,
+       _getCalculatorById = getCalculatorById,
+       _executeCalculation = executeCalculation,
+       _getCalculationHistory = getCalculationHistory;
 
   // === STATE MANAGEMENT ===
 
@@ -41,20 +48,23 @@ class CalculatorProvider extends ChangeNotifier {
   List<CalculatorEntity> _calculators = [];
   List<CalculatorEntity> _filteredCalculators = [];
   CalculatorEntity? _selectedCalculator;
-  
+
   /// Filtros e busca
   String _searchQuery = '';
   CalculatorCategory? _selectedCategory;
-  
+
   /// Resultados e histórico
   CalculationResult? _currentResult;
   List<CalculationHistory> _calculationHistory = [];
-  
+
   /// Estado do cálculo atual
   Map<String, dynamic> _currentInputs = {};
-  
+
   /// Erro handling
   String? _errorMessage;
+
+  /// Favoritos armazenados por ID
+  final Set<String> _favoriteIds = {};
 
   // === GETTERS ===
 
@@ -77,7 +87,9 @@ class CalculatorProvider extends ChangeNotifier {
 
   /// Calculadoras por categoria
   List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
-    return _filteredCalculators.where((calc) => calc.category == category).toList();
+    return _filteredCalculators
+        .where((calc) => calc.category == category)
+        .toList();
   }
 
   /// Estatísticas
@@ -94,16 +106,20 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculators();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar calculadoras - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar calculadoras - ${failure.message}',
+        );
       },
       (calculators) {
         _calculators = calculators;
         _applyFilters();
-        debugPrint('CalculatorProvider: Calculadoras carregadas - ${calculators.length} itens');
+        debugPrint(
+          'CalculatorProvider: Calculadoras carregadas - ${calculators.length} itens',
+        );
       },
     );
 
@@ -118,19 +134,23 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculatorById(calculatorId);
-    
+
     bool success = false;
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar calculadora - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar calculadora - ${failure.message}',
+        );
       },
       (calculator) {
         _selectedCalculator = calculator;
         _currentInputs = {};
         _currentResult = null;
         success = true;
-        debugPrint('CalculatorProvider: Calculadora carregada - ${calculator.id}');
+        debugPrint(
+          'CalculatorProvider: Calculadora carregada - ${calculator.id}',
+        );
       },
     );
 
@@ -145,7 +165,9 @@ class CalculatorProvider extends ChangeNotifier {
     _currentInputs = {};
     _currentResult = null;
     notifyListeners();
-    debugPrint('CalculatorProvider: Calculadora selecionada - ${calculator?.id ?? 'nenhuma'}');
+    debugPrint(
+      'CalculatorProvider: Calculadora selecionada - ${calculator?.id ?? 'nenhuma'}',
+    );
   }
 
   // === OPERAÇÕES DE CÁLCULO ===
@@ -219,7 +241,9 @@ class CalculatorProvider extends ChangeNotifier {
     _selectedCategory = category;
     _applyFilters();
     notifyListeners();
-    debugPrint('CalculatorProvider: Categoria filtrada - ${category?.name ?? 'todas'}');
+    debugPrint(
+      'CalculatorProvider: Categoria filtrada - ${category?.name ?? 'todas'}',
+    );
   }
 
   /// Limpa todos os filtros
@@ -237,16 +261,21 @@ class CalculatorProvider extends ChangeNotifier {
 
     // Filtrar por categoria
     if (_selectedCategory != null) {
-      filtered = filtered.where((calc) => calc.category == _selectedCategory).toList();
+      filtered =
+          filtered.where((calc) => calc.category == _selectedCategory).toList();
     }
 
     // Filtrar por busca
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered = filtered.where((calc) =>
-        calc.name.toLowerCase().contains(query) ||
-        calc.description.toLowerCase().contains(query)
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (calc) =>
+                    calc.name.toLowerCase().contains(query) ||
+                    calc.description.toLowerCase().contains(query),
+              )
+              .toList();
     }
 
     _filteredCalculators = filtered;
@@ -261,15 +290,19 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculationHistory();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorProvider: Erro ao carregar histórico - ${failure.message}');
+        debugPrint(
+          'CalculatorProvider: Erro ao carregar histórico - ${failure.message}',
+        );
       },
       (history) {
         _calculationHistory = history;
-        debugPrint('CalculatorProvider: Histórico carregado - ${history.length} itens');
+        debugPrint(
+          'CalculatorProvider: Histórico carregado - ${history.length} itens',
+        );
       },
     );
 
@@ -303,17 +336,14 @@ class CalculatorProvider extends ChangeNotifier {
 
   /// Refresh completo dos dados
   Future<void> refreshAllData() async {
-    await Future.wait([
-      loadCalculators(),
-      loadCalculationHistory(),
-    ]);
+    await Future.wait([loadCalculators(), loadCalculationHistory()]);
   }
 
   /// Reaplica resultado de cálculo do histórico
   void applyHistoryResult(CalculationHistory historyItem) {
     _currentResult = historyItem.result;
     _currentInputs = Map<String, dynamic>.from(historyItem.result.inputs);
-    
+
     // Tenta encontrar e selecionar a calculadora
     try {
       final calculator = _calculators.firstWhere(
@@ -321,11 +351,30 @@ class CalculatorProvider extends ChangeNotifier {
       );
       _selectedCalculator = calculator;
     } catch (e) {
-      debugPrint('CalculatorProvider: Calculadora do histórico não encontrada - ${historyItem.calculatorId}');
+      debugPrint(
+        'CalculatorProvider: Calculadora do histórico não encontrada - ${historyItem.calculatorId}',
+      );
     }
-    
+
     notifyListeners();
-    debugPrint('CalculatorProvider: Resultado do histórico aplicado - ${historyItem.id}');
+    debugPrint(
+      'CalculatorProvider: Resultado do histórico aplicado - ${historyItem.id}',
+    );
+  }
+
+  /// Verifica se a calculadora está marcada como favorita
+  bool isCalculatorFavorite(String id) {
+    return _favoriteIds.contains(id);
+  }
+
+  /// Alterna o estado de favorito para a calculadora
+  void toggleFavorite(String id) {
+    if (_favoriteIds.contains(id)) {
+      _favoriteIds.remove(id);
+    } else {
+      _favoriteIds.add(id);
+    }
+    notifyListeners();
   }
 
   @override

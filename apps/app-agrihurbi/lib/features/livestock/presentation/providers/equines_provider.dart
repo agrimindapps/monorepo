@@ -1,11 +1,20 @@
+import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/equine_entity.dart';
 import '../../domain/repositories/livestock_repository.dart';
 import '../../domain/usecases/get_equines.dart';
 
+/// Provider Riverpod para EquinesProvider
+///
+/// Integra GetIt com Riverpod para gerenciamento de estado
+final equinesProviderProvider = Provider<EquinesProvider>((ref) {
+  return getIt<EquinesProvider>();
+});
+
 /// Provider especializado para operações de equinos
-/// 
+///
 /// Separado do provider principal para otimização e modularização
 /// Integrado completamente com use cases de equinos
 class EquinesProvider extends ChangeNotifier {
@@ -17,18 +26,18 @@ class EquinesProvider extends ChangeNotifier {
     required GetAllEquinesUseCase getAllEquines,
     required GetEquinesUseCase getEquines,
     required GetEquineByIdUseCase getEquineById,
-  })  : _getAllEquines = getAllEquines,
-        _getEquines = getEquines,
-        _getEquineById = getEquineById;
+  }) : _getAllEquines = getAllEquines,
+       _getEquines = getEquines,
+       _getEquineById = getEquineById;
 
   // === STATE MANAGEMENT ===
 
   List<EquineEntity> _equines = [];
   EquineEntity? _selectedEquine;
-  
+
   bool _isLoading = false;
   bool _isLoadingDetail = false;
-  
+
   String? _errorMessage;
   String _searchQuery = '';
 
@@ -36,40 +45,51 @@ class EquinesProvider extends ChangeNotifier {
 
   List<EquineEntity> get equines => _equines;
   EquineEntity? get selectedEquine => _selectedEquine;
-  
+
   bool get isLoading => _isLoading;
   bool get isLoadingDetail => _isLoadingDetail;
-  
+
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
-  
+
   /// Equinos ativos (não deletados)
-  List<EquineEntity> get activeEquines => 
-    _equines.where((equine) => equine.isActive).toList();
-  
+  List<EquineEntity> get activeEquines =>
+      _equines.where((equine) => equine.isActive).toList();
+
   /// Equinos filtrados por busca
   List<EquineEntity> get filteredEquines {
     var filtered = activeEquines;
-    
+
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((equine) =>
-        equine.commonName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        equine.registrationId.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        equine.originCountry.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (equine) =>
+                    equine.commonName.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    equine.registrationId.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    equine.originCountry.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
     }
-    
+
     return filtered;
   }
-  
+
   /// Estatísticas dos equinos
   int get totalEquines => _equines.length;
   int get activeEquinesCount => activeEquines.length;
   int get filteredEquinesCount => filteredEquines.length;
-  
+
   /// Países de origem únicos para filtros
   List<String> get uniqueOriginCountries {
-    final countries = activeEquines.map((equine) => equine.originCountry).toSet();
+    final countries =
+        activeEquines.map((equine) => equine.originCountry).toSet();
     return countries.toList()..sort();
   }
 
@@ -82,15 +102,19 @@ class EquinesProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getAllEquines();
-    
+
     result.fold(
-      (failure) {
+      (Failure failure) {
         _errorMessage = failure.message;
-        debugPrint('EquinesProvider: Erro ao carregar equinos - ${failure.message}');
+        debugPrint(
+          'EquinesProvider: Erro ao carregar equinos - ${failure.message}',
+        );
       },
-      (equines) {
+      (List<EquineEntity> equines) {
         _equines = equines;
-        debugPrint('EquinesProvider: Equinos carregados - ${equines.length} itens');
+        debugPrint(
+          'EquinesProvider: Equinos carregados - ${equines.length} itens',
+        );
       },
     );
 
@@ -106,15 +130,19 @@ class EquinesProvider extends ChangeNotifier {
 
     final params = GetEquinesParams(searchParams: searchParams);
     final result = await _getEquines(params);
-    
+
     result.fold(
-      (failure) {
+      (Failure failure) {
         _errorMessage = failure.message;
-        debugPrint('EquinesProvider: Erro ao carregar equinos filtrados - ${failure.message}');
+        debugPrint(
+          'EquinesProvider: Erro ao carregar equinos filtrados - ${failure.message}',
+        );
       },
-      (equines) {
+      (List<EquineEntity> equines) {
         _equines = equines;
-        debugPrint('EquinesProvider: Equinos filtrados carregados - ${equines.length} itens');
+        debugPrint(
+          'EquinesProvider: Equinos filtrados carregados - ${equines.length} itens',
+        );
       },
     );
 
@@ -129,16 +157,18 @@ class EquinesProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getEquineById(equineId);
-    
+
     bool success = false;
     result.fold(
-      (failure) {
+      (Failure failure) {
         _errorMessage = failure.message;
-        debugPrint('EquinesProvider: Erro ao carregar equino por ID - ${failure.message}');
+        debugPrint(
+          'EquinesProvider: Erro ao carregar equino por ID - ${failure.message}',
+        );
       },
-      (equine) {
+      (EquineEntity equine) {
         _selectedEquine = equine;
-        
+
         // Atualiza na lista se já existe
         final index = _equines.indexWhere((e) => e.id == equine.id);
         if (index != -1) {
@@ -146,7 +176,7 @@ class EquinesProvider extends ChangeNotifier {
         } else {
           _equines.add(equine);
         }
-        
+
         success = true;
         debugPrint('EquinesProvider: Equino carregado por ID - ${equine.id}');
       },
@@ -161,7 +191,9 @@ class EquinesProvider extends ChangeNotifier {
   void selectEquine(EquineEntity? equine) {
     _selectedEquine = equine;
     notifyListeners();
-    debugPrint('EquinesProvider: Equino selecionado - ${equine?.id ?? 'nenhum'}');
+    debugPrint(
+      'EquinesProvider: Equino selecionado - ${equine?.id ?? 'nenhum'}',
+    );
   }
 
   // === OPERAÇÕES DE BUSCA E FILTROS ===
@@ -193,7 +225,10 @@ class EquinesProvider extends ChangeNotifier {
   /// Busca equinos por país de origem
   List<EquineEntity> getEquinesByOriginCountry(String originCountry) {
     return activeEquines
-        .where((equine) => equine.originCountry.toLowerCase() == originCountry.toLowerCase())
+        .where(
+          (equine) =>
+              equine.originCountry.toLowerCase() == originCountry.toLowerCase(),
+        )
         .toList();
   }
 
@@ -236,11 +271,11 @@ class EquinesProvider extends ChangeNotifier {
   /// Remove equino da lista local
   void removeEquine(String equineId) {
     _equines.removeWhere((equine) => equine.id == equineId);
-    
+
     if (_selectedEquine?.id == equineId) {
       _selectedEquine = null;
     }
-    
+
     notifyListeners();
     debugPrint('EquinesProvider: Equino removido da lista local - $equineId');
   }
@@ -251,3 +286,12 @@ class EquinesProvider extends ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Riverpod provider for EquinesProvider
+final equinesProvider = ChangeNotifierProvider<EquinesProvider>((ref) {
+  return EquinesProvider(
+    getAllEquines: getIt<GetAllEquinesUseCase>(),
+    getEquines: getIt<GetEquinesUseCase>(),
+    getEquineById: getIt<GetEquineByIdUseCase>(),
+  );
+});

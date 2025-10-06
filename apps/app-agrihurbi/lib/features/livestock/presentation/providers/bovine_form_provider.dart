@@ -4,7 +4,7 @@ import '../../domain/entities/bovine_entity.dart';
 import '../../domain/services/bovine_form_service.dart';
 
 /// Provider especializado para gerenciar o estado do formulário de bovino
-/// 
+///
 /// Responsabilidades:
 /// - Gerenciar controllers de forma otimizada
 /// - Controlar estado dos campos do formulário
@@ -16,12 +16,15 @@ class BovineFormProvider extends ChangeNotifier {
 
   BovineFormProvider(this._formService);
 
+  /// Expõe o formService para uso externo
+  BovineFormService get formService => _formService;
+
   // =====================================================================
   // CONTROLLERS POOL - Reutilização otimizada
   // =====================================================================
-  
+
   static final Map<String, TextEditingController> _controllerPool = {};
-  
+
   TextEditingController _getController(String key) {
     return _controllerPool.putIfAbsent(key, () => TextEditingController());
   }
@@ -33,24 +36,38 @@ class BovineFormProvider extends ChangeNotifier {
   }
 
   // Controllers principais
-  late final TextEditingController _commonNameController = _getController('commonName');
-  late final TextEditingController _registrationIdController = _getController('registrationId');
+  late final TextEditingController _commonNameController = _getController(
+    'commonName',
+  );
+  late final TextEditingController _registrationIdController = _getController(
+    'registrationId',
+  );
   late final TextEditingController _breedController = _getController('breed');
-  late final TextEditingController _originCountryController = _getController('originCountry');
-  late final TextEditingController _animalTypeController = _getController('animalType');
+  late final TextEditingController _originCountryController = _getController(
+    'originCountry',
+  );
+  late final TextEditingController _animalTypeController = _getController(
+    'animalType',
+  );
   late final TextEditingController _originController = _getController('origin');
-  late final TextEditingController _characteristicsController = _getController('characteristics');
-  late final TextEditingController _purposeController = _getController('purpose');
+  late final TextEditingController _characteristicsController = _getController(
+    'characteristics',
+  );
+  late final TextEditingController _purposeController = _getController(
+    'purpose',
+  );
   late final TextEditingController _tagsController = _getController('tags');
 
   // Getters para controllers
   TextEditingController get commonNameController => _commonNameController;
-  TextEditingController get registrationIdController => _registrationIdController;
+  TextEditingController get registrationIdController =>
+      _registrationIdController;
   TextEditingController get breedController => _breedController;
   TextEditingController get originCountryController => _originCountryController;
   TextEditingController get animalTypeController => _animalTypeController;
   TextEditingController get originController => _originController;
-  TextEditingController get characteristicsController => _characteristicsController;
+  TextEditingController get characteristicsController =>
+      _characteristicsController;
   TextEditingController get purposeController => _purposeController;
   TextEditingController get tagsController => _tagsController;
 
@@ -111,7 +128,7 @@ class BovineFormProvider extends ChangeNotifier {
     _characteristicsController.clear();
     _purposeController.clear();
     _tagsController.clear();
-    
+
     _selectedAptitude = null;
     _selectedBreedingSystem = null;
     _selectedTags = [];
@@ -128,7 +145,7 @@ class BovineFormProvider extends ChangeNotifier {
     _characteristicsController.text = bovine.characteristics;
     _purposeController.text = bovine.purpose;
     _tagsController.text = _formService.tagsToString(bovine.tags);
-    
+
     _selectedAptitude = bovine.aptitude;
     _selectedBreedingSystem = bovine.breedingSystem;
     _selectedTags = List.from(bovine.tags);
@@ -138,7 +155,7 @@ class BovineFormProvider extends ChangeNotifier {
   void _setupListeners() {
     // Remove listeners existentes para evitar duplicação
     _removeListeners();
-    
+
     // Adiciona listeners para detectar mudanças
     _commonNameController.addListener(_onFormChanged);
     _registrationIdController.addListener(_onFormChanged);
@@ -165,9 +182,10 @@ class BovineFormProvider extends ChangeNotifier {
 
   void _onFormChanged() {
     final currentData = _getCurrentFormData();
-    final hasChanges = _originalData != null && 
-                      _formService.hasFormChanged(currentData, _originalData!);
-    
+    final hasChanges =
+        _originalData != null &&
+        _formService.hasFormChanged(currentData, _originalData!);
+
     if (hasChanges != _hasUnsavedChanges) {
       _hasUnsavedChanges = hasChanges;
       notifyListeners();
@@ -195,7 +213,7 @@ class BovineFormProvider extends ChangeNotifier {
   }
 
   void updateTags(List<String> tags) {
-    if (_selectedTags.length != tags.length || 
+    if (_selectedTags.length != tags.length ||
         !_selectedTags.every(tags.contains)) {
       _selectedTags = List.from(tags);
       _onFormChanged();
@@ -302,7 +320,7 @@ class BovineFormProvider extends ChangeNotifier {
     _characteristicsController.text = data.characteristics ?? '';
     _purposeController.text = data.purpose ?? '';
     _tagsController.text = data.tagsString ?? '';
-    
+
     _selectedAptitude = data.aptitude;
     _selectedBreedingSystem = data.breedingSystem;
     _selectedTags = _formService.processTags(data.tagsString ?? '');
@@ -344,10 +362,7 @@ class BovineFormProvider extends ChangeNotifier {
 
   bool isFieldNearLimit(String fieldName, int maxLength) {
     final currentLength = getCharacterCount(fieldName);
-    return _formService.isNearCharLimit(
-      currentLength.toString(), 
-      maxLength,
-    );
+    return _formService.isNearCharLimit(currentLength.toString(), maxLength);
   }
 
   // =====================================================================
@@ -356,7 +371,7 @@ class BovineFormProvider extends ChangeNotifier {
 
   void cleanup() {
     _removeListeners();
-    
+
     // Retorna controllers para a pool
     _returnController('commonName');
     _returnController('registrationId');
@@ -367,7 +382,7 @@ class BovineFormProvider extends ChangeNotifier {
     _returnController('characteristics');
     _returnController('purpose');
     _returnController('tags');
-    
+
     _isInitialized = false;
     _hasUnsavedChanges = false;
     _originalData = null;

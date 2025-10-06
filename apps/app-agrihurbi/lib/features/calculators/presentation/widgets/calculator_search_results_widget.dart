@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/utils/performance_benchmark.dart';
 import '../../domain/entities/calculator_entity.dart';
@@ -10,7 +10,7 @@ import 'calculator_card_widget.dart';
 import 'calculator_empty_state_widget.dart';
 
 /// Widget para exibir resultados de busca de calculadoras
-/// 
+///
 /// Implementa lista de resultados com contagem e performance stats
 /// Inclui feedback visual e ações de navegação
 class CalculatorSearchResultsWidget extends StatelessWidget {
@@ -49,14 +49,12 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
       children: [
         // Cabeçalho dos resultados
         _buildResultsHeader(context),
-        
+
         // Stats de performance (apenas em debug)
         if (kDebugMode) _buildPerformanceStats(context),
-        
+
         // Lista de resultados
-        Expanded(
-          child: _buildResultsList(context),
-        ),
+        Expanded(child: _buildResultsList(context)),
       ],
     );
   }
@@ -79,16 +77,16 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Text(
         '${searchResults.length} ${searchResults.length == 1 ? "calculadora encontrada" : "calculadoras encontradas"}',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }
 
   Widget _buildPerformanceStats(BuildContext context) {
     final stats = PerformanceBenchmark.getOperationStats('search_otimizada');
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -139,15 +137,19 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
         final calculator = searchResults[index];
         return RepaintBoundary(
           key: ValueKey(calculator.id),
-          child: Consumer<CalculatorProvider>(
-            builder: (context, provider, child) {
+          child: Consumer(
+            builder: (context, ref, child) {
+              final provider = ref.watch(calculatorProvider);
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: CalculatorCardWidget(
                   calculator: calculator,
                   isFavorite: provider.isCalculatorFavorite(calculator.id),
                   onTap: () => _navigateToCalculator(context, calculator.id),
-                  onFavoriteToggle: () => provider.toggleFavorite(calculator.id),
+                  onFavoriteToggle:
+                      () => ref
+                          .read(calculatorProvider)
+                          .toggleFavorite(calculator.id),
                   showCategory: showCategory,
                 ),
               );

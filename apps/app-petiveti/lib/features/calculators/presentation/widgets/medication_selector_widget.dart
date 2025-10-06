@@ -1,18 +1,18 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../domain/entities/medication_data.dart';
 import '../providers/medication_dosage_provider.dart';
 
 /// Widget para seleção de medicamentos com busca e favoritos
-class MedicationSelectorWidget extends StatefulWidget {
+class MedicationSelectorWidget extends ConsumerStatefulWidget {
   const MedicationSelectorWidget({super.key});
 
   @override
-  State<MedicationSelectorWidget> createState() => _MedicationSelectorWidgetState();
+  ConsumerState<MedicationSelectorWidget> createState() => _MedicationSelectorWidgetState();
 }
 
-class _MedicationSelectorWidgetState extends State<MedicationSelectorWidget> {
+class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWidget> {
   final TextEditingController _searchController = TextEditingController();
   bool _showFavoritesOnly = false;
 
@@ -24,8 +24,10 @@ class _MedicationSelectorWidgetState extends State<MedicationSelectorWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MedicationDosageProvider>(
-      builder: (context, provider, child) {
+    final provider = ref.watch(medicationDosageProviderProvider);
+
+    return Builder(
+      builder: (context) {
         return Card(
           elevation: 2,
           child: Padding(

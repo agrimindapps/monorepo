@@ -3,36 +3,38 @@ import 'package:app_agrihurbi/features/settings/presentation/providers/settings_
 import 'package:app_agrihurbi/features/settings/presentation/widgets/settings_section.dart';
 import 'package:app_agrihurbi/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Settings Page
-/// 
+///
 /// Comprehensive settings page for app configuration,
 /// user preferences, and system settings
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize settings provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SettingsProvider>().initialize();
+      ref.read(settingsProviderProvider).initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = ref.watch(settingsProviderProvider);
+
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Consumer<SettingsProvider>(
-        builder: (context, provider, child) {
+      body: Builder(
+        builder: (context) {
           if (provider.isLoadingSettings) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -145,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => context.read<SettingsProvider>().clearMessages(),
+            onPressed: () => ref.read(settingsProviderProvider).clearMessages(),
           ),
         ],
       ),
@@ -173,7 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => context.read<SettingsProvider>().clearMessages(),
+            onPressed: () => ref.read(settingsProviderProvider).clearMessages(),
           ),
         ],
       ),
@@ -584,7 +586,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              context.read<SettingsProvider>().loadSettings();
+              ref.read(settingsProviderProvider).loadSettings();
             },
             child: const Text('Tentar Novamente'),
           ),
@@ -594,8 +596,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _handleMenuAction(String action) {
-    final provider = context.read<SettingsProvider>();
-    
+    final provider = ref.read(settingsProviderProvider);
+
     switch (action) {
       case 'export':
         _exportSettings(provider);

@@ -349,32 +349,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Exibe confirmação de logout
-  void _showLogoutConfirmation(WidgetRef ref) {
-    showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirmar Logout'),
-            content: const Text('Tem certeza que deseja sair da sua conta?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Sair'),
-              ),
-            ],
-          ),
-    ).then((confirmed) {
-      if (confirmed == true) {
-        _performLogout(ref);
-      }
-    });
-  }
-
   /// Executa logout
   Future<void> _performLogout(WidgetRef ref) async {
     final authProvider = ref.read(authProviderProvider);

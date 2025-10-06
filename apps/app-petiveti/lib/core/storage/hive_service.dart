@@ -1,4 +1,5 @@
 import 'package:core/core.dart' show Hive, HiveX, Box;
+import 'package:hive/hive.dart';
 
 // Generated Adapters
 import '../../features/animals/data/models/animal_model.dart';
@@ -35,7 +36,7 @@ class HiveService {
 
     // Appointments
     if (!Hive.isAdapterRegistered(12)) {
-      Hive.registerAdapter(AppointmentModelAdapter());
+      Hive.registerAdapter(AppointmentModelAdapter() as TypeAdapter);
     }
 
     // Medications

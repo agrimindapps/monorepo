@@ -1,5 +1,5 @@
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
+import 'package:core/core.dart' show StateNotifier, StateNotifierProvider;
+
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/subscription_plan.dart';

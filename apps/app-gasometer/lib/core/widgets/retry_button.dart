@@ -157,7 +157,7 @@ class _RetryButtonState extends State<RetryButton>
     await _animationController.repeat();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       widget.onRetry();
 
       // Start cooldown if specified
@@ -166,7 +166,7 @@ class _RetryButtonState extends State<RetryButton>
           _inCooldown = true;
         });
 
-        await Future.delayed(widget.cooldownDuration!);
+        await Future<void>.delayed(widget.cooldownDuration!);
 
         if (mounted) {
           setState(() {

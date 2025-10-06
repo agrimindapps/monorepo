@@ -6,7 +6,6 @@ import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Diálogo com ações para um dispositivo específico
 class DeviceActionsDialog extends StatelessWidget {
-
   const DeviceActionsDialog({
     super.key,
     required this.device,
@@ -15,8 +14,7 @@ class DeviceActionsDialog extends StatelessWidget {
   });
   final DeviceEntity device;
   final bool isCurrentDevice;
-  final Function(String action) onAction;
-
+  final void Function(String action) onAction;
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -72,7 +70,7 @@ class DeviceActionsDialog extends StatelessWidget {
   Widget _buildPlatformIcon() {
     IconData iconData;
     Color iconColor;
-    
+
     switch (device.platform.toLowerCase()) {
       case 'ios':
         iconData = Icons.phone_iphone;
@@ -90,7 +88,7 @@ class DeviceActionsDialog extends StatelessWidget {
         iconData = Icons.device_unknown;
         iconColor = Colors.grey;
     }
-    
+
     return Container(
       width: 40,
       height: 40,
@@ -98,17 +96,13 @@ class DeviceActionsDialog extends StatelessWidget {
         color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Icon(
-        iconData,
-        color: iconColor,
-        size: 24,
-      ),
+      child: Icon(iconData, color: iconColor, size: 24),
     );
   }
 
   Widget _buildDeviceDetails(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -118,23 +112,11 @@ class DeviceActionsDialog extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildDetailRow(
-            'Status',
-            _getStatusText(),
-            _getStatusColor(),
-          ),
+          _buildDetailRow('Status', _getStatusText(), _getStatusColor()),
           const Divider(height: 20),
-          _buildDetailRow(
-            'Modelo',
-            device.model,
-            Colors.black87,
-          ),
+          _buildDetailRow('Modelo', device.model, Colors.black87),
           const Divider(height: 20),
-          _buildDetailRow(
-            'Fabricante',
-            device.manufacturer,
-            Colors.black87,
-          ),
+          _buildDetailRow('Fabricante', device.manufacturer, Colors.black87),
           const Divider(height: 20),
           _buildDetailRow(
             'Versão do App',
@@ -155,11 +137,7 @@ class DeviceActionsDialog extends StatelessWidget {
           ),
           if (device.location != null) ...[
             const Divider(height: 20),
-            _buildDetailRow(
-              'Localização',
-              device.location!,
-              Colors.black87,
-            ),
+            _buildDetailRow('Localização', device.location!, Colors.black87),
           ],
         ],
       ),
@@ -183,10 +161,7 @@ class DeviceActionsDialog extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: TextStyle(
-              color: valueColor,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: valueColor, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -247,17 +222,11 @@ class DeviceActionsDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.red.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.red.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.block,
-              color: Colors.red,
-              size: 24,
-            ),
+            const Icon(Icons.block, color: Colors.red, size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -335,17 +304,11 @@ class DeviceActionsDialog extends StatelessWidget {
         leading: Icon(icon, color: color),
         title: Text(
           title,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 12,
-          ),
+          style: TextStyle(color: Colors.grey[600], fontSize: 12),
         ),
         onTap: onTap,
         shape: RoundedRectangleBorder(
@@ -357,62 +320,67 @@ class DeviceActionsDialog extends StatelessWidget {
   }
 
   void _confirmRevokeDevice(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Desconexão'),
-        content: Text(
-          'Tem certeza que deseja desconectar o dispositivo "${device.name}"?\n\n'
-          'Este dispositivo perderá o acesso à sua conta imediatamente.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Fecha confirmação
-              Navigator.of(context).pop(); // Fecha diálogo principal
-              onAction('revoke');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar Desconexão'),
+            content: Text(
+              'Tem certeza que deseja desconectar o dispositivo "${device.name}"?\n\n'
+              'Este dispositivo perderá o acesso à sua conta imediatamente.',
             ),
-            child: const Text('Desconectar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Fecha confirmação
+                  Navigator.of(context).pop(); // Fecha diálogo principal
+                  onAction('revoke');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Desconectar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showTechnicalDetails(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Detalhes Técnicos - ${device.name}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTechnicalDetail('UUID', device.uuid),
-              _buildTechnicalDetail('Identificador', device.identifier),
-              _buildTechnicalDetail('Dispositivo Físico', device.isPhysicalDevice ? 'Sim' : 'Não'),
-              if (device.ipAddress != null)
-                _buildTechnicalDetail('IP', device.ipAddress!),
-              _buildTechnicalDetail('Build Number', device.buildNumber),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Detalhes Técnicos - ${device.name}'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildTechnicalDetail('UUID', device.uuid),
+                  _buildTechnicalDetail('Identificador', device.identifier),
+                  _buildTechnicalDetail(
+                    'Dispositivo Físico',
+                    device.isPhysicalDevice ? 'Sim' : 'Não',
+                  ),
+                  if (device.ipAddress != null)
+                    _buildTechnicalDetail('IP', device.ipAddress!),
+                  _buildTechnicalDetail('Build Number', device.buildNumber),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -432,10 +400,7 @@ class DeviceActionsDialog extends StatelessWidget {
           const SizedBox(height: 2),
           SelectableText(
             value,
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontFamily: 'monospace',
-            ),
+            style: TextStyle(color: Colors.grey[700], fontFamily: 'monospace'),
           ),
         ],
       ),
@@ -451,7 +416,7 @@ class DeviceActionsDialog extends StatelessWidget {
   Color _getStatusColor() {
     if (!device.isActive) return Colors.red;
     if (isCurrentDevice) return GasometerColors.primary;
-    
+
     final diff = DateTime.now().difference(device.lastActiveAt);
     if (diff.inMinutes < 5) return Colors.green;
     if (diff.inDays < 1) return Colors.orange;

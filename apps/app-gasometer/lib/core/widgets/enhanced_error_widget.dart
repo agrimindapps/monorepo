@@ -4,7 +4,6 @@ import '../providers/base_provider.dart';
 
 /// Enhanced error widget with better UX and retry mechanisms
 class EnhancedErrorWidget extends StatelessWidget {
-
   const EnhancedErrorWidget({
     super.key,
     required this.error,
@@ -45,7 +44,8 @@ class EnhancedErrorWidget extends StatelessWidget {
     return EnhancedErrorWidget(
       error: NetworkError(
         message: 'Network connection failed',
-        userFriendlyMessage: customMessage ?? 'Problemas de conexão. Verifique sua internet.',
+        userFriendlyMessage:
+            customMessage ?? 'Problemas de conexão. Verifique sua internet.',
       ),
       onRetry: onRetry,
       showRetryButton: onRetry != null,
@@ -192,7 +192,10 @@ class EnhancedErrorWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildValidationErrors(BuildContext context, ValidationError validationError) {
+  Widget _buildValidationErrors(
+    BuildContext context,
+    ValidationError validationError,
+  ) {
     if (validationError.fieldErrors.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -226,11 +229,7 @@ class EnhancedErrorWidget extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 16,
-                    color: colorScheme.error,
-                  ),
+                  Icon(Icons.error_outline, size: 16, color: colorScheme.error),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -243,12 +242,16 @@ class EnhancedErrorWidget extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        ...entry.value.map((error) => Text(
-                          error,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onErrorContainer.withValues(alpha: 0.8),
+                        ...entry.value.map(
+                          (error) => Text(
+                            error,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onErrorContainer.withValues(
+                                alpha: 0.8,
+                              ),
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     ),
                   ),
@@ -282,10 +285,7 @@ class EnhancedErrorWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Wrap(
-      spacing: 8.0,
-      children: actions,
-    );
+    return Wrap(spacing: 8.0, children: actions);
   }
 
   Widget _buildFullActions(BuildContext context) {
@@ -336,10 +336,14 @@ class EnhancedErrorWidget extends StatelessWidget {
       children: [
         actions.first,
         const SizedBox(height: 12),
-        ...actions.skip(1).map((action) => Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: action,
-        )),
+        ...actions
+            .skip(1)
+            .map(
+              (action) => Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: action,
+              ),
+            ),
       ],
     );
   }
@@ -405,7 +409,6 @@ class EnhancedErrorWidget extends StatelessWidget {
 
 /// Loading state with error handling
 class LoadingWithErrorWidget extends StatelessWidget {
-
   const LoadingWithErrorWidget({
     super.key,
     required this.isLoading,
@@ -432,10 +435,7 @@ class LoadingWithErrorWidget extends StatelessWidget {
             const CircularProgressIndicator(),
             if (loadingText != null) ...[
               const SizedBox(height: 16),
-              Text(
-                loadingText!,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text(loadingText!, style: Theme.of(context).textTheme.bodyMedium),
             ],
           ],
         ),
@@ -456,7 +456,6 @@ class LoadingWithErrorWidget extends StatelessWidget {
 
 /// Provider state builder with error handling
 class ProviderStateBuilder extends StatelessWidget {
-
   const ProviderStateBuilder({
     super.key,
     required this.provider,
@@ -486,16 +485,12 @@ class ProviderStateBuilder extends StatelessWidget {
         if (errorBuilder != null && provider.error != null) {
           return errorBuilder!(context, provider.error!);
         }
-        return EnhancedErrorWidget.fromProvider(
-          provider,
-          onRetry: onRetry,
-        );
+        return EnhancedErrorWidget.fromProvider(provider, onRetry: onRetry);
 
       case ProviderState.loaded:
         return contentBuilder(context);
 
       case ProviderState.initial:
-      default:
         return const SizedBox.shrink();
     }
   }

@@ -12,11 +12,11 @@ class DevicesSectionWidget extends ConsumerStatefulWidget {
   const DevicesSectionWidget({super.key});
 
   @override
-  ConsumerState<DevicesSectionWidget> createState() => _DevicesSectionWidgetState();
+  ConsumerState<DevicesSectionWidget> createState() =>
+      _DevicesSectionWidgetState();
 }
 
 class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
-
   @override
   void initState() {
     super.initState();
@@ -30,15 +30,13 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   Widget build(BuildContext context) {
     // TODO: Replace Consumer<VehicleDeviceProvider> with Riverpod provider
     // final provider = ref.watch(vehicleDeviceProviderNotifier);
-    
+
     // Placeholder implementation without provider dependencies
     return _buildSection(
       context,
       title: 'Dispositivos Conectados',
       icon: Icons.devices,
-      children: [
-        _buildPlaceholderDevicesOverview(context),
-      ],
+      children: [_buildPlaceholderDevicesOverview(context)],
     );
   }
 
@@ -51,7 +49,9 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusCard,
+        ),
         side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       color: Theme.of(context).colorScheme.surface,
@@ -65,8 +65,12 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
+                    ),
                   ),
                   child: Icon(
                     icon,
@@ -93,7 +97,8 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
                   icon: const Icon(Icons.open_in_new, size: 20),
                   tooltip: 'Ver todos os dispositivos',
                   style: IconButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     foregroundColor: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -113,14 +118,18 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusDialog,
+        ),
       ),
       child: Column(
         children: [
           Icon(
             Icons.devices,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
           Text(
@@ -128,7 +137,9 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 8),
@@ -136,7 +147,9 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
             'Provider migration in progress',
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -164,29 +177,24 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   //         // Current device as ListTile
   //         if (provider.currentDevice != null)
   //           _buildCurrentDeviceListTile(context, provider.currentDevice!),
-          
+
   //         // Other devices
   //         ...provider.devices
   //             .where((device) => device.uuid != provider.currentDevice?.uuid)
   //             .map((device) => _buildDeviceListTile(context, device, provider)),
-          
+
   //         // Quick actions as ListTiles
   //         if (provider.devices.length > 1) ...[
   //           _buildDivider(),
   //           _buildRevokeAllListTile(context, provider),
   //         ],
-          
+
   //         _buildDivider(),
   //         _buildViewAllDevicesListTile(context),
   //       ],
   //     ),
   //   );
   // }
-
-
-
-
-
 
   // TODO: Implement with Riverpod providers
   // Widget _buildCurrentDeviceListTile(BuildContext context, DeviceEntity device) {
@@ -246,14 +254,14 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   //       leading: Container(
   //         padding: const EdgeInsets.all(8),
   //         decoration: BoxDecoration(
-  //           color: device.isActive 
+  //           color: device.isActive
   //               ? GasometerDesignTokens.colorSuccess.withValues(alpha: 0.1)
   //               : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
   //           shape: BoxShape.circle,
   //         ),
   //         child: Icon(
   //           _getDeviceIcon(device.platform),
-  //           color: device.isActive 
+  //           color: device.isActive
   //               ? GasometerDesignTokens.colorSuccess
   //               : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
   //           size: 20,
@@ -342,81 +350,6 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   //   );
   // }
 
-  Widget _buildViewAllDevicesListTile(BuildContext context) {
-    return Semantics(
-      label: 'Ver todos os dispositivos',
-      button: true,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.devices,
-            color: Theme.of(context).colorScheme.primary,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          'Gerenciar Dispositivos',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          'Ver detalhes e configurações avançadas',
-          style: TextStyle(
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        trailing: Icon(
-          Icons.open_in_new,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          context.go('/devices');
-        },
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Divider(
-      height: 1,
-      thickness: 0.5,
-      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-    );
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-      ),
-      child: Column(
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            'Carregando dispositivos...',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // TODO: Implement with Riverpod providers
   // Widget _buildErrorState(BuildContext context, VehicleDeviceProvider provider) {
   //   return Container(
@@ -465,142 +398,6 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   //             foregroundColor: Theme.of(context).colorScheme.error,
   //             side: BorderSide(color: Theme.of(context).colorScheme.error),
   //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-
-  IconData _getDeviceIcon(String platform) {
-    switch (platform.toLowerCase()) {
-      case 'android':
-        return Icons.android;
-      case 'ios':
-        return Icons.phone_iphone;
-      case 'web':
-        return Icons.web;
-      case 'windows':
-        return Icons.desktop_windows;
-      case 'macos':
-        return Icons.desktop_mac;
-      case 'linux':
-        return Icons.computer;
-      default:
-        return Icons.device_unknown;
-    }
-  }
-
-  String _formatLastAccess(DateTime lastAccess) {
-    final now = DateTime.now();
-    final difference = now.difference(lastAccess);
-
-    if (difference.inMinutes < 1) {
-      return 'Agora';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}min atrás';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h atrás';
-    } else if (difference.inDays < 30) {
-      return '${difference.inDays}d atrás';
-    } else {
-      return '${lastAccess.day}/${lastAccess.month}/${lastAccess.year}';
-    }
-  }
-
-  // TODO: Implement with Riverpod providers
-  // void _handleDeviceAction(
-  //   BuildContext context,
-  //   DeviceEntity device,
-  //   String action,
-  //   VehicleDeviceProvider provider,
-  // ) async {
-  //   switch (action) {
-  //     case 'revoke':
-  //       final confirmed = await _showRevokeDeviceDialog(context, device);
-  //       if (confirmed == true && mounted) {
-  //         final success = await provider.revokeDevice(device.uuid);
-  //         if (success && mounted) {
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(
-  //               content: Text('${device.name} foi desconectado'),
-  //               backgroundColor: GasometerDesignTokens.colorSuccess,
-  //               behavior: SnackBarBehavior.floating,
-  //             ),
-  //           );
-  //         }
-  //       }
-  //       break;
-  //   }
-  // }
-
-  Future<bool?> _showRevokeDeviceDialog(BuildContext context, DeviceEntity device) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-        ),
-        title: const Text('Desconectar Dispositivo'),
-        content: Text(
-          'Deseja desconectar "${device.name}"?\n\n'
-          'Este dispositivo perderá acesso à sua conta e precisará fazer login novamente.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Desconectar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // TODO: Implement with Riverpod providers
-  // void _showRevokeAllDialog(BuildContext context, VehicleDeviceProvider provider) {
-  //   showDialog<bool>(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-  //       ),
-  //       title: const Text('Desconectar Outros Dispositivos'),
-  //       content: const Text(
-  //         'Isso irá desconectar todos os outros dispositivos, '
-  //         'mantendo apenas este. Deseja continuar?',
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.of(context).pop(),
-  //           child: const Text('Cancelar'),
-  //         ),
-  //         ElevatedButton(
-  //           onPressed: () async {
-  //             Navigator.of(context).pop();
-  //             final success = await provider.revokeAllOtherDevices();
-  //             if (success && mounted) {
-  //               ScaffoldMessenger.of(context).showSnackBar(
-  //                 const SnackBar(
-  //                   content: Text('Outros dispositivos desconectados'),
-  //                   backgroundColor: GasometerDesignTokens.colorSuccess,
-  //                   behavior: SnackBarBehavior.floating,
-  //                 ),
-  //               );
-  //             }
-  //           },
-  //           style: ElevatedButton.styleFrom(
-  //             backgroundColor: Theme.of(context).colorScheme.error,
-  //             foregroundColor: Colors.white,
-  //           ),
-  //           child: const Text('Desconectar'),
   //         ),
   //       ],
   //     ),

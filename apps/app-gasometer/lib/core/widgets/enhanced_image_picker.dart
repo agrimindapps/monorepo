@@ -6,7 +6,6 @@ import '../error/unified_error_handler.dart';
 
 /// ✅ UX ENHANCEMENT: Enhanced image picker with progress, retry, and better feedback
 class EnhancedImagePicker extends StatefulWidget {
-
   const EnhancedImagePicker({
     super.key,
     required this.onImageChanged,
@@ -21,7 +20,7 @@ class EnhancedImagePicker extends StatefulWidget {
     this.emptyStateText,
   });
   final String? currentImagePath;
-  final Function(String?) onImageChanged;
+  final void Function(String?) onImageChanged;
   final String label;
   final String? hint;
   final bool required;
@@ -35,14 +34,15 @@ class EnhancedImagePicker extends StatefulWidget {
   State<EnhancedImagePicker> createState() => _EnhancedImagePickerState();
 }
 
-class _EnhancedImagePickerState extends State<EnhancedImagePicker> 
+class _EnhancedImagePickerState extends State<EnhancedImagePicker>
     with UnifiedErrorMixin {
   final ImagePicker _imagePicker = ImagePicker();
   bool _isUploading = false;
   double _uploadProgress = 0.0;
   String? _tempImagePath;
 
-  bool get hasImage => _tempImagePath != null || widget.currentImagePath != null;
+  bool get hasImage =>
+      _tempImagePath != null || widget.currentImagePath != null;
   String? get currentImagePath => _tempImagePath ?? widget.currentImagePath;
 
   @override
@@ -53,10 +53,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         _buildLabel(),
         const SizedBox(height: 8),
         _buildImageArea(),
-        if (widget.hint != null) ...[
-          const SizedBox(height: 4),
-          _buildHint(),
-        ],
+        if (widget.hint != null) ...[const SizedBox(height: 4), _buildHint()],
       ],
     );
   }
@@ -66,9 +63,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       children: [
         Text(
           widget.label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500),
         ),
         if (widget.required)
           Text(
@@ -86,11 +83,11 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
     if (_isUploading) {
       return _buildUploadingState();
     }
-    
+
     if (hasImage) {
       return _buildImagePreview();
     }
-    
+
     return _buildEmptyState();
   }
 
@@ -99,7 +96,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.primary,
@@ -167,7 +166,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ),
           ),
         ),
-        
+
         // Overlay with actions
         Container(
           decoration: BoxDecoration(
@@ -184,7 +183,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ),
           ),
         ),
-        
+
         // Action buttons
         Positioned(
           top: 8,
@@ -207,7 +206,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ],
           ),
         ),
-        
+
         // Status indicator
         Positioned(
           bottom: 8,
@@ -221,11 +220,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 16,
-                ),
+                Icon(Icons.check_circle, color: Colors.green, size: 16),
                 SizedBox(width: 4),
                 Text(
                   'Imagem adicionada',
@@ -255,7 +250,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             child: ClipRRect(
@@ -272,9 +269,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
               ),
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Info and actions
           Expanded(
             child: Column(
@@ -340,7 +337,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          color: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
@@ -381,7 +380,9 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(11),
       ),
       child: Column(
@@ -429,10 +430,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
           size: 20,
         ),
         tooltip: tooltip,
-        constraints: const BoxConstraints(
-          minWidth: 36,
-          minHeight: 36,
-        ),
+        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         padding: EdgeInsets.zero,
       ),
     );
@@ -448,48 +446,49 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
   }
 
   void _showImageSourceOptions() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Selecionar imagem',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+      builder:
+          (context) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Selecionar imagem',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildSourceOption(
+                    icon: Icons.camera_alt,
+                    title: 'Câmera',
+                    subtitle: 'Tirar uma nova foto',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickImage(ImageSource.camera);
+                    },
+                  ),
+                  _buildSourceOption(
+                    icon: Icons.photo_library,
+                    title: 'Galeria',
+                    subtitle: 'Escolher da galeria',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickImage(ImageSource.gallery);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildSourceOption(
-                icon: Icons.camera_alt,
-                title: 'Câmera',
-                subtitle: 'Tirar uma nova foto',
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              _buildSourceOption(
-                icon: Icons.photo_library,
-                title: 'Galeria',
-                subtitle: 'Escolher da galeria',
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -510,9 +509,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       title: Text(title),
       subtitle: Text(subtitle),
       onTap: onTap,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 
@@ -539,7 +536,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
           _isUploading = false;
           _uploadProgress = 1.0;
         });
-        
+
         widget.onImageChanged(image.path);
         showSuccess('Imagem adicionada com sucesso');
       } else {
@@ -553,7 +550,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         _isUploading = false;
         _uploadProgress = 0.0;
       });
-      
+
       handleError(
         e,
         customMessage: 'Erro ao selecionar imagem',
@@ -571,7 +568,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         });
       }
     });
-    
+
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_isUploading && mounted) {
         setState(() {

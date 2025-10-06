@@ -5,7 +5,6 @@ import 'device_card_widget.dart';
 
 /// Widget que exibe lista de dispositivos
 class DeviceListWidget extends StatelessWidget {
-
   const DeviceListWidget({
     super.key,
     required this.devices,
@@ -14,7 +13,7 @@ class DeviceListWidget extends StatelessWidget {
   });
   final List<DeviceEntity> devices;
   final String? currentDeviceUuid;
-  final Function(String deviceUuid, String action) onDeviceAction;
+  final void Function(String deviceUuid, String action) onDeviceAction;
 
   @override
   Widget build(BuildContext context) {
@@ -23,75 +22,76 @@ class DeviceListWidget extends StatelessWidget {
     final inactiveDevices = devices.where((d) => !d.isActive).toList();
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          // Primeiro mostrar header dos ativos
-          if (index == 0 && activeDevices.isNotEmpty) {
-            return _buildSectionHeader(
-              context,
-              'Dispositivos Ativos',
-              activeDevices.length,
-              Icons.check_circle,
-              Colors.green,
-            );
-          }
+      delegate: SliverChildBuilderDelegate((context, index) {
+        // Primeiro mostrar header dos ativos
+        if (index == 0 && activeDevices.isNotEmpty) {
+          return _buildSectionHeader(
+            context,
+            'Dispositivos Ativos',
+            activeDevices.length,
+            Icons.check_circle,
+            Colors.green,
+          );
+        }
 
-          // Mostrar dispositivos ativos
-          if (index > 0 && index <= activeDevices.length) {
-            final deviceIndex = index - 1;
-            final device = activeDevices[deviceIndex];
+        // Mostrar dispositivos ativos
+        if (index > 0 && index <= activeDevices.length) {
+          final deviceIndex = index - 1;
+          final device = activeDevices[deviceIndex];
+          return DeviceCardWidget(
+            device: device,
+            isCurrentDevice: device.uuid == currentDeviceUuid,
+            onAction: (action) => onDeviceAction(device.uuid, action),
+          );
+        }
+
+        // Header dos inativos (se houver)
+        final activeSection =
+            activeDevices.isNotEmpty ? activeDevices.length + 1 : 0;
+        if (index == activeSection && inactiveDevices.isNotEmpty) {
+          return _buildSectionHeader(
+            context,
+            'Dispositivos Inativos',
+            inactiveDevices.length,
+            Icons.block,
+            Colors.red,
+          );
+        }
+
+        // Mostrar dispositivos inativos
+        if (index > activeSection && inactiveDevices.isNotEmpty) {
+          final deviceIndex = index - activeSection - 1;
+          if (deviceIndex < inactiveDevices.length) {
+            final device = inactiveDevices[deviceIndex];
             return DeviceCardWidget(
               device: device,
               isCurrentDevice: device.uuid == currentDeviceUuid,
               onAction: (action) => onDeviceAction(device.uuid, action),
             );
           }
+        }
 
-          // Header dos inativos (se houver)
-          final activeSection = activeDevices.isNotEmpty ? activeDevices.length + 1 : 0;
-          if (index == activeSection && inactiveDevices.isNotEmpty) {
-            return _buildSectionHeader(
-              context,
-              'Dispositivos Inativos',
-              inactiveDevices.length,
-              Icons.block,
-              Colors.red,
-            );
-          }
-
-          // Mostrar dispositivos inativos
-          if (index > activeSection && inactiveDevices.isNotEmpty) {
-            final deviceIndex = index - activeSection - 1;
-            if (deviceIndex < inactiveDevices.length) {
-              final device = inactiveDevices[deviceIndex];
-              return DeviceCardWidget(
-                device: device,
-                isCurrentDevice: device.uuid == currentDeviceUuid,
-                onAction: (action) => onDeviceAction(device.uuid, action),
-              );
-            }
-          }
-
-          return const SizedBox.shrink();
-        },
-        childCount: _calculateChildCount(activeDevices, inactiveDevices),
-      ),
+        return const SizedBox.shrink();
+      }, childCount: _calculateChildCount(activeDevices, inactiveDevices)),
     );
   }
 
-  int _calculateChildCount(List<DeviceEntity> active, List<DeviceEntity> inactive) {
+  int _calculateChildCount(
+    List<DeviceEntity> active,
+    List<DeviceEntity> inactive,
+  ) {
     int count = 0;
-    
+
     // Dispositivos ativos + header (se houver)
     if (active.isNotEmpty) {
       count += active.length + 1;
     }
-    
+
     // Dispositivos inativos + header (se houver)
     if (inactive.isNotEmpty) {
       count += inactive.length + 1;
     }
-    
+
     return count;
   }
 
@@ -103,19 +103,10 @@ class DeviceListWidget extends StatelessWidget {
     Color color,
   ) {
     return Container(
-      margin: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 24,
-        bottom: 8,
-      ),
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: color,
-          ),
+          Icon(icon, size: 20, color: color),
           const SizedBox(width: 8),
           Text(
             title,

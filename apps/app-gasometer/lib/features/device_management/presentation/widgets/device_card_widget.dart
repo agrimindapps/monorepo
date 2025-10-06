@@ -6,7 +6,6 @@ import '../../domain/extensions/vehicle_device_extension.dart';
 
 /// Widget de card para exibir informações de um dispositivo
 class DeviceCardWidget extends StatelessWidget {
-
   const DeviceCardWidget({
     super.key,
     required this.device,
@@ -15,7 +14,7 @@ class DeviceCardWidget extends StatelessWidget {
   });
   final DeviceEntity device;
   final bool isCurrentDevice;
-  final Function(String action) onAction;
+  final void Function(String action) onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +24,7 @@ class DeviceCardWidget extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isCurrentDevice 
-              ? GasometerColors.primary 
-              : Colors.grey[200]!,
+          color: isCurrentDevice ? GasometerColors.primary : Colors.grey[200]!,
           width: isCurrentDevice ? 2 : 1,
         ),
         boxShadow: [
@@ -77,9 +74,10 @@ class DeviceCardWidget extends StatelessWidget {
                       device.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isCurrentDevice 
-                            ? GasometerColors.primary 
-                            : Colors.black87,
+                        color:
+                            isCurrentDevice
+                                ? GasometerColors.primary
+                                : Colors.black87,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -109,9 +107,9 @@ class DeviceCardWidget extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${device.platform} ${device.systemVersion}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ),
@@ -124,7 +122,7 @@ class DeviceCardWidget extends StatelessWidget {
   Widget _buildPlatformIcon() {
     IconData iconData;
     Color iconColor;
-    
+
     switch (device.platform.toLowerCase()) {
       case 'ios':
         iconData = Icons.phone_iphone;
@@ -142,7 +140,7 @@ class DeviceCardWidget extends StatelessWidget {
         iconData = Icons.device_unknown;
         iconColor = Colors.grey;
     }
-    
+
     return Container(
       width: 48,
       height: 48,
@@ -150,11 +148,7 @@ class DeviceCardWidget extends StatelessWidget {
         color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        iconData,
-        color: iconColor,
-        size: 28,
-      ),
+      child: Icon(iconData, color: iconColor, size: 28),
     );
   }
 
@@ -162,7 +156,7 @@ class DeviceCardWidget extends StatelessWidget {
     Color statusColor;
     IconData statusIcon;
     String statusText;
-    
+
     if (!device.isActive) {
       statusColor = Colors.red;
       statusIcon = Icons.block;
@@ -187,14 +181,10 @@ class DeviceCardWidget extends StatelessWidget {
         statusText = '${diff.inDays}d';
       }
     }
-    
+
     return Column(
       children: [
-        Icon(
-          statusIcon,
-          color: statusColor,
-          size: 16,
-        ),
+        Icon(statusIcon, color: statusColor, size: 16),
         const SizedBox(height: 2),
         Text(
           statusText,
@@ -217,12 +207,7 @@ class DeviceCardWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildInfoRow(
-            context,
-            'Modelo',
-            device.model,
-            Icons.smartphone,
-          ),
+          _buildInfoRow(context, 'Modelo', device.model, Icons.smartphone),
           const Divider(height: 16),
           _buildInfoRow(
             context,
@@ -250,11 +235,7 @@ class DeviceCardWidget extends StatelessWidget {
   ) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: Colors.grey[600],
-        ),
+        Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Text(
           label,
@@ -267,9 +248,9 @@ class DeviceCardWidget extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
             textAlign: TextAlign.right,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -281,7 +262,7 @@ class DeviceCardWidget extends StatelessWidget {
 
   Widget _buildFooter(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-    
+
     return Row(
       children: [
         Expanded(
@@ -290,15 +271,15 @@ class DeviceCardWidget extends StatelessWidget {
             children: [
               Text(
                 'Primeiro acesso',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
               ),
               Text(
                 dateFormat.format(device.firstLoginAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -309,15 +290,15 @@ class DeviceCardWidget extends StatelessWidget {
             children: [
               Text(
                 'Última atividade',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
               ),
               Text(
                 dateFormat.format(device.lastActiveAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -329,10 +310,7 @@ class DeviceCardWidget extends StatelessWidget {
             color: Colors.red,
             tooltip: 'Desconectar dispositivo',
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 32,
-              minHeight: 32,
-            ),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
           ),
       ],
     );

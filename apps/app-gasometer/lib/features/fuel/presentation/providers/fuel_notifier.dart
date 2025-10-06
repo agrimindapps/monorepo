@@ -117,12 +117,14 @@ class FuelState {
     // Filter by search query
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
-      records = records.where((record) {
-        return record.gasStationName?.toLowerCase().contains(query) == true ||
-            record.gasStationBrand?.toLowerCase().contains(query) == true ||
-            record.notes?.toLowerCase().contains(query) == true ||
-            record.fuelType.displayName.toLowerCase().contains(query);
-      }).toList();
+      records =
+          records.where((record) {
+            return record.gasStationName?.toLowerCase().contains(query) ==
+                    true ||
+                record.gasStationBrand?.toLowerCase().contains(query) == true ||
+                record.notes?.toLowerCase().contains(query) == true ||
+                record.fuelType.displayName.toLowerCase().contains(query);
+          }).toList();
     }
 
     return records;
@@ -155,7 +157,10 @@ class FuelState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       isInitialized: isInitialized ?? this.isInitialized,
-      selectedVehicleId: clearVehicleFilter ? null : (selectedVehicleId ?? this.selectedVehicleId),
+      selectedVehicleId:
+          clearVehicleFilter
+              ? null
+              : (selectedVehicleId ?? this.selectedVehicleId),
       searchQuery: clearSearchQuery ? '' : (searchQuery ?? this.searchQuery),
       statistics: statistics ?? this.statistics,
       analytics: analytics ?? this.analytics,
@@ -181,17 +186,16 @@ class FuelNotifier extends StateNotifier<FuelState> {
     required GetTotalSpent getTotalSpent,
     required GetRecentFuelRecords getRecentFuelRecords,
     required ConnectivityService connectivityService,
-  })  : _getAllFuelRecords = getAllFuelRecords,
-        _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
-        _addFuelRecord = addFuelRecord,
-        _updateFuelRecord = updateFuelRecord,
-        _deleteFuelRecord = deleteFuelRecord,
-        _searchFuelRecords = searchFuelRecords,
-        _getAverageConsumption = getAverageConsumption,
-        _getTotalSpent = getTotalSpent,
-        _getRecentFuelRecords = getRecentFuelRecords,
-        _connectivityService = connectivityService,
-        super(const FuelState()) {
+  }) : _getAllFuelRecords = getAllFuelRecords,
+       _getFuelRecordsByVehicle = getFuelRecordsByVehicle,
+       _addFuelRecord = addFuelRecord,
+       _updateFuelRecord = updateFuelRecord,
+       _deleteFuelRecord = deleteFuelRecord,
+       _getAverageConsumption = getAverageConsumption,
+       _getTotalSpent = getTotalSpent,
+       _getRecentFuelRecords = getRecentFuelRecords,
+       _connectivityService = connectivityService,
+       super(const FuelState()) {
     _initialize();
   }
 
@@ -200,7 +204,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
   final AddFuelRecord _addFuelRecord;
   final UpdateFuelRecord _updateFuelRecord;
   final DeleteFuelRecord _deleteFuelRecord;
-  final SearchFuelRecords _searchFuelRecords;
   final GetAverageConsumption _getAverageConsumption;
   final GetTotalSpent _getTotalSpent;
   final GetRecentFuelRecords _getRecentFuelRecords;
@@ -243,13 +246,17 @@ class FuelNotifier extends StateNotifier<FuelState> {
     result.fold(
       (failure) {
         if (kDebugMode) {
-          debugPrint('🔌 Erro ao verificar conectividade inicial: ${failure.message}');
+          debugPrint(
+            '🔌 Erro ao verificar conectividade inicial: ${failure.message}',
+          );
         }
       },
       (isOnline) {
         state = state.copyWith(isOnline: isOnline);
         if (kDebugMode) {
-          debugPrint('🔌 Conectividade inicial: ${isOnline ? 'online' : 'offline'}');
+          debugPrint(
+            '🔌 Conectividade inicial: ${isOnline ? 'online' : 'offline'}',
+          );
         }
       },
     );
@@ -272,7 +279,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
     state = state.copyWith(isOnline: isOnline);
 
     if (kDebugMode) {
-      debugPrint('🔌 Conectividade mudou: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}');
+      debugPrint(
+        '🔌 Conectividade mudou: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}',
+      );
     }
 
     // Auto-sync when coming back online
@@ -289,14 +298,21 @@ class FuelNotifier extends StateNotifier<FuelState> {
       final data = _offlineQueueBox?.get('pending_records') as List?;
 
       if (data != null && data.isNotEmpty) {
-        final pendingRecords = data
-            .map((json) => FuelRecordEntity.fromFirebaseMap(json as Map<String, dynamic>))
-            .toList();
+        final pendingRecords =
+            data
+                .map(
+                  (json) => FuelRecordEntity.fromFirebaseMap(
+                    json as Map<String, dynamic>,
+                  ),
+                )
+                .toList();
 
         state = state.copyWith(pendingRecords: pendingRecords);
 
         if (kDebugMode) {
-          debugPrint('🚗 Carregados ${pendingRecords.length} registros pendentes do Hive');
+          debugPrint(
+            '🚗 Carregados ${pendingRecords.length} registros pendentes do Hive',
+          );
         }
       }
     } catch (e) {
@@ -339,7 +355,11 @@ class FuelNotifier extends StateNotifier<FuelState> {
   // ========== CRUD OPERATIONS ==========
 
   Future<void> loadFuelRecords() async {
-    state = state.copyWith(isLoading: true, errorMessage: null, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      clearError: true,
+    );
 
     try {
       final result = await _getAllFuelRecords();
@@ -361,7 +381,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
           );
 
           if (kDebugMode) {
-            debugPrint('🚗 Carregados ${records.length} registros de combustível');
+            debugPrint(
+              '🚗 Carregados ${records.length} registros de combustível',
+            );
           }
         },
       );
@@ -404,7 +426,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
           );
 
           if (kDebugMode) {
-            debugPrint('🚗 Carregados ${records.length} registros para veículo $vehicleId');
+            debugPrint(
+              '🚗 Carregados ${records.length} registros para veículo $vehicleId',
+            );
           }
         },
       );
@@ -417,7 +441,11 @@ class FuelNotifier extends StateNotifier<FuelState> {
   }
 
   Future<bool> addFuelRecord(FuelRecordEntity record) async {
-    state = state.copyWith(isLoading: true, errorMessage: null, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      clearError: true,
+    );
 
     try {
       // Check if online
@@ -441,7 +469,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
       }
 
       // Try to add online
-      final result = await _addFuelRecord(AddFuelRecordParams(fuelRecord: record));
+      final result = await _addFuelRecord(
+        AddFuelRecordParams(fuelRecord: record),
+      );
 
       return result.fold(
         (failure) async {
@@ -486,10 +516,16 @@ class FuelNotifier extends StateNotifier<FuelState> {
   }
 
   Future<bool> updateFuelRecord(FuelRecordEntity record) async {
-    state = state.copyWith(isLoading: true, errorMessage: null, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      clearError: true,
+    );
 
     try {
-      final result = await _updateFuelRecord(UpdateFuelRecordParams(fuelRecord: record));
+      final result = await _updateFuelRecord(
+        UpdateFuelRecordParams(fuelRecord: record),
+      );
 
       return result.fold(
         (failure) {
@@ -500,9 +536,10 @@ class FuelNotifier extends StateNotifier<FuelState> {
           return false;
         },
         (updatedRecord) {
-          final updatedRecords = state.fuelRecords.map((r) {
-            return r.id == updatedRecord.id ? updatedRecord : r;
-          }).toList();
+          final updatedRecords =
+              state.fuelRecords.map((r) {
+                return r.id == updatedRecord.id ? updatedRecord : r;
+              }).toList();
 
           state = state.copyWith(
             fuelRecords: updatedRecords,
@@ -529,10 +566,16 @@ class FuelNotifier extends StateNotifier<FuelState> {
   Future<bool> deleteFuelRecord(String recordId) async {
     if (recordId.isEmpty) return false;
 
-    state = state.copyWith(isLoading: true, errorMessage: null, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      clearError: true,
+    );
 
     try {
-      final result = await _deleteFuelRecord(DeleteFuelRecordParams(id: recordId));
+      final result = await _deleteFuelRecord(
+        DeleteFuelRecordParams(id: recordId),
+      );
 
       return result.fold(
         (failure) {
@@ -543,7 +586,8 @@ class FuelNotifier extends StateNotifier<FuelState> {
           return false;
         },
         (_) {
-          final updatedRecords = state.fuelRecords.where((r) => r.id != recordId).toList();
+          final updatedRecords =
+              state.fuelRecords.where((r) => r.id != recordId).toList();
           state = state.copyWith(
             fuelRecords: updatedRecords,
             isLoading: false,
@@ -580,7 +624,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
     state = state.copyWith(isSyncing: true);
 
     if (kDebugMode) {
-      debugPrint('🔌 Sincronizando ${state.pendingRecordsCount} registros pendentes...');
+      debugPrint(
+        '🔌 Sincronizando ${state.pendingRecordsCount} registros pendentes...',
+      );
     }
 
     final recordsToSync = List<FuelRecordEntity>.from(state.pendingRecords);
@@ -588,13 +634,17 @@ class FuelNotifier extends StateNotifier<FuelState> {
 
     for (final record in recordsToSync) {
       try {
-        final result = await _addFuelRecord(AddFuelRecordParams(fuelRecord: record));
+        final result = await _addFuelRecord(
+          AddFuelRecordParams(fuelRecord: record),
+        );
 
         result.fold(
           (failure) {
             failedRecords.add(record);
             if (kDebugMode) {
-              debugPrint('🔌 Falha ao sincronizar registro: ${failure.message}');
+              debugPrint(
+                '🔌 Falha ao sincronizar registro: ${failure.message}',
+              );
             }
           },
           (syncedRecord) {
@@ -612,10 +662,7 @@ class FuelNotifier extends StateNotifier<FuelState> {
     }
 
     // Update pending records with only failed ones
-    state = state.copyWith(
-      pendingRecords: failedRecords,
-      isSyncing: false,
-    );
+    state = state.copyWith(pendingRecords: failedRecords, isSyncing: false);
 
     if (failedRecords.isEmpty) {
       await _clearOfflineQueue();
@@ -639,7 +686,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
     state = state.copyWith(searchQuery: query.trim());
 
     if (kDebugMode && query.isNotEmpty) {
-      debugPrint('🔍 Busca: "$query" - ${state.filteredRecords.length} resultados');
+      debugPrint(
+        '🔍 Busca: "$query" - ${state.filteredRecords.length} resultados',
+      );
     }
   }
 
@@ -678,22 +727,21 @@ class FuelNotifier extends StateNotifier<FuelState> {
 
       double averageConsumption = 0.0;
       consumptionResult.fold(
-        (failure) => debugPrint('Erro ao carregar consumo médio: ${failure.message}'),
+        (failure) =>
+            debugPrint('Erro ao carregar consumo médio: ${failure.message}'),
         (consumption) => averageConsumption = consumption,
       );
 
       // Load total spent (last 30 days)
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       final totalSpentResult = await _getTotalSpent(
-        GetTotalSpentParams(
-          vehicleId: vehicleId,
-          startDate: thirtyDaysAgo,
-        ),
+        GetTotalSpentParams(vehicleId: vehicleId, startDate: thirtyDaysAgo),
       );
 
       double totalSpent = 0.0;
       totalSpentResult.fold(
-        (failure) => debugPrint('Erro ao carregar total gasto: ${failure.message}'),
+        (failure) =>
+            debugPrint('Erro ao carregar total gasto: ${failure.message}'),
         (total) => totalSpent = total,
       );
 
@@ -704,7 +752,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
 
       List<FuelRecordEntity> recentRecords = [];
       recentResult.fold(
-        (failure) => debugPrint('Erro ao carregar registros recentes: ${failure.message}'),
+        (failure) => debugPrint(
+          'Erro ao carregar registros recentes: ${failure.message}',
+        ),
         (records) => recentRecords = records,
       );
 
@@ -717,7 +767,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
         period: 30,
       );
 
-      final updatedAnalyticsCache = Map<String, FuelAnalytics>.from(state.analytics);
+      final updatedAnalyticsCache = Map<String, FuelAnalytics>.from(
+        state.analytics,
+      );
       updatedAnalyticsCache[vehicleId] = analytics;
 
       state = state.copyWith(analytics: updatedAnalyticsCache);
@@ -743,17 +795,27 @@ class FuelNotifier extends StateNotifier<FuelState> {
   }
 
   double getTotalSpentInDateRange(DateTime startDate, DateTime endDate) {
-    final recordsInRange = state.fuelRecords.where((record) {
-      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
-    }).toList();
-    return recordsInRange.fold<double>(0.0, (sum, record) => sum + record.totalPrice);
+    final recordsInRange =
+        state.fuelRecords.where((record) {
+          return record.date.isAfter(startDate) &&
+              record.date.isBefore(endDate);
+        }).toList();
+    return recordsInRange.fold<double>(
+      0.0,
+      (sum, record) => sum + record.totalPrice,
+    );
   }
 
   double getTotalLitersInDateRange(DateTime startDate, DateTime endDate) {
-    final recordsInRange = state.fuelRecords.where((record) {
-      return record.date.isAfter(startDate) && record.date.isBefore(endDate);
-    }).toList();
-    return recordsInRange.fold<double>(0.0, (sum, record) => sum + record.liters);
+    final recordsInRange =
+        state.fuelRecords.where((record) {
+          return record.date.isAfter(startDate) &&
+              record.date.isBefore(endDate);
+        }).toList();
+    return recordsInRange.fold<double>(
+      0.0,
+      (sum, record) => sum + record.liters,
+    );
   }
 
   void clearError() {
@@ -778,15 +840,34 @@ class FuelNotifier extends StateNotifier<FuelState> {
       );
     }
 
-    final totalLiters = records.fold<double>(0, (total, record) => total + record.liters);
-    final totalCost = records.fold<double>(0, (total, record) => total + record.totalPrice);
-    final averagePrice = records.fold<double>(0, (total, record) => total + record.pricePerLiter) / records.length;
+    final totalLiters = records.fold<double>(
+      0,
+      (total, record) => total + record.liters,
+    );
+    final totalCost = records.fold<double>(
+      0,
+      (total, record) => total + record.totalPrice,
+    );
+    final averagePrice =
+        records.fold<double>(
+          0,
+          (total, record) => total + record.pricePerLiter,
+        ) /
+        records.length;
 
     // Calculate average consumption only for records with data
     double averageConsumption = 0.0;
-    final recordsWithConsumption = records.where((r) => r.consumption != null && r.consumption! > 0).toList();
+    final recordsWithConsumption =
+        records
+            .where((r) => r.consumption != null && r.consumption! > 0)
+            .toList();
     if (recordsWithConsumption.isNotEmpty) {
-      averageConsumption = recordsWithConsumption.fold<double>(0, (total, record) => total + record.consumption!) / recordsWithConsumption.length;
+      averageConsumption =
+          recordsWithConsumption.fold<double>(
+            0,
+            (total, record) => total + record.consumption!,
+          ) /
+          recordsWithConsumption.length;
     }
 
     return FuelStatistics(
@@ -824,7 +905,9 @@ class FuelNotifier extends StateNotifier<FuelState> {
 // ========== PROVIDERS ==========
 
 /// Main fuel notifier provider
-final fuelNotifierProvider = StateNotifierProvider<FuelNotifier, FuelState>((ref) {
+final fuelNotifierProvider = StateNotifierProvider<FuelNotifier, FuelState>((
+  ref,
+) {
   final getIt = ModularInjectionContainer.instance;
 
   return FuelNotifier(
@@ -864,7 +947,10 @@ final fuelStatisticsProvider = Provider<FuelStatistics?>((ref) {
 });
 
 // Analytics provider for specific vehicle
-final fuelAnalyticsProvider = Provider.family<FuelAnalytics?, String>((ref, vehicleId) {
+final fuelAnalyticsProvider = Provider.family<FuelAnalytics?, String>((
+  ref,
+  vehicleId,
+) {
   final analytics = ref.watch(fuelNotifierProvider).analytics;
   return analytics[vehicleId];
 });

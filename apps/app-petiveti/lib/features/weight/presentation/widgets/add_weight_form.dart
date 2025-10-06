@@ -13,12 +13,8 @@ import '../providers/weights_provider.dart';
 class AddWeightForm extends ConsumerStatefulWidget {
   final Weight? weight; // For editing
   final String? initialAnimalId;
-  
-  const AddWeightForm({
-    super.key,
-    this.weight,
-    this.initialAnimalId,
-  });
+
+  const AddWeightForm({super.key, this.weight, this.initialAnimalId});
 
   @override
   ConsumerState<AddWeightForm> createState() => _AddWeightFormState();
@@ -67,7 +63,7 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final animalsState = ref.watch(animalsProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.weight != null ? 'Editar Peso' : 'Novo Registro'),
@@ -77,7 +73,10 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             child: Text(
               'Salvar',
               style: TextStyle(
-                color: _isLoading ? theme.disabledColor : theme.colorScheme.primary,
+                color:
+                    _isLoading
+                        ? theme.disabledColor
+                        : theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -93,7 +92,9 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             PetiVetiFormComponents.animalRequired(
               value: _selectedAnimal?.id,
               onChanged: (animalId) {
-                final animal = animalsState.animals.firstWhere((a) => a.id == animalId);
+                final animal = animalsState.animals.firstWhere(
+                  (a) => a.id == animalId,
+                );
                 setState(() {
                   _selectedAnimal = animal;
                 });
@@ -111,7 +112,9 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             const SizedBox(height: 8),
             TextFormField(
               controller: _weightController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
@@ -127,20 +130,20 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
                 if (value == null || value.trim().isEmpty) {
                   return 'Peso é obrigatório';
                 }
-                
+
                 final weight = double.tryParse(value.trim());
                 if (weight == null) {
                   return 'Digite um peso válido';
                 }
-                
+
                 if (weight <= 0) {
                   return 'Peso deve ser maior que zero';
                 }
-                
+
                 if (weight > 200) {
                   return 'Peso muito alto. Verifique o valor';
                 }
-                
+
                 return null;
               },
             ),
@@ -224,12 +227,14 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
                       min: 0,
                       max: 9,
                       divisions: 9,
-                      label: _bodyConditionScore != null 
-                          ? _bodyConditionScore.toString() 
-                          : 'Não informado',
+                      label:
+                          _bodyConditionScore != null
+                              ? _bodyConditionScore.toString()
+                              : 'Não informado',
                       onChanged: (value) {
                         setState(() {
-                          _bodyConditionScore = value == 0 ? null : value.round();
+                          _bodyConditionScore =
+                              value == 0 ? null : value.round();
                         });
                       },
                     ),
@@ -248,12 +253,14 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
                       return Text(
                         index.toString(),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: _bodyConditionScore == index 
-                              ? theme.colorScheme.primary 
-                              : theme.colorScheme.onSurface.withAlpha(153),
-                          fontWeight: _bodyConditionScore == index 
-                              ? FontWeight.bold 
-                              : null,
+                          color:
+                              _bodyConditionScore == index
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface.withAlpha(153),
+                          fontWeight:
+                              _bodyConditionScore == index
+                                  ? FontWeight.bold
+                                  : null,
                         ),
                       );
                     }),
@@ -273,14 +280,14 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             // Save Button
             widget.weight != null
                 ? PetiVetiFormComponents.submitUpdate(
-                    onSubmit: _saveWeight,
-                    isLoading: _isLoading,
-                  )
+                  onSubmit: _saveWeight,
+                  isLoading: _isLoading,
+                )
                 : PetiVetiFormComponents.submitCreate(
-                    onSubmit: _saveWeight,
-                    isLoading: _isLoading,
-                    itemName: 'Registro de Peso',
-                  ),
+                  onSubmit: _saveWeight,
+                  isLoading: _isLoading,
+                  itemName: 'Registro de Peso',
+                ),
             const SizedBox(height: 16),
 
             // Quick weight suggestions (for new records)
@@ -304,9 +311,9 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
 
   Widget _buildWeightSuggestions(BuildContext context) {
     if (_selectedAnimal == null) return const SizedBox.shrink();
-    
+
     List<double> suggestions = [];
-    
+
     switch (_selectedAnimal!.species) {
       case AnimalSpecies.dog:
         suggestions = [2.5, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0];
@@ -317,38 +324,25 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
       default:
         suggestions = [1.0, 2.0, 5.0, 10.0];
     }
-    
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: suggestions.map((weight) {
-        return ActionChip(
-          label: Text('${weight}kg'),
-          onPressed: () {
-            _weightController.text = weight.toString();
-          },
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withAlpha(127),
-          ),
-        );
-      }).toList(),
+      children:
+          suggestions.map((weight) {
+            return ActionChip(
+              label: Text('${weight}kg'),
+              onPressed: () {
+                _weightController.text = weight.toString();
+              },
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withAlpha(127),
+              ),
+            );
+          }).toList(),
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
-      lastDate: DateTime.now(),
-    );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
   }
 
   Future<void> _saveWeight() async {
@@ -359,13 +353,16 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
 
     try {
       final weightValue = double.parse(_weightController.text.trim());
-      
+
       final weight = Weight(
         id: widget.weight?.id ?? UuidGenerator.generate(),
         animalId: _selectedAnimal!.id,
         weight: weightValue,
         date: _selectedDate,
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        notes:
+            _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
         bodyConditionScore: _bodyConditionScore,
         createdAt: widget.weight?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
@@ -381,9 +378,11 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.weight != null 
-                ? 'Registro de peso atualizado com sucesso' 
-                : 'Registro de peso adicionado com sucesso'),
+            content: Text(
+              widget.weight != null
+                  ? 'Registro de peso atualizado com sucesso'
+                  : 'Registro de peso adicionado com sucesso',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -401,25 +400,6 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
-  String _getDateSubtitle() {
-    final now = DateTime.now();
-    final difference = now.difference(_selectedDate).inDays;
-    
-    if (difference == 0) {
-      return 'Hoje';
-    } else if (difference == 1) {
-      return 'Ontem';
-    } else if (difference < 7) {
-      return '$difference dias atrás';
-    } else {
-      return 'Há ${(difference / 7).floor()} semanas';
     }
   }
 }

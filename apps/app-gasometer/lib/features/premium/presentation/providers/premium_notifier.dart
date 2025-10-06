@@ -20,7 +20,6 @@ import '../../domain/usecases/restore_purchases.dart';
 /// State para Premium com loading separado para operações
 @immutable
 class PremiumNotifierState {
-
   const PremiumNotifierState({
     this.premiumStatus = PremiumStatus.free,
     this.availableProducts = const [],
@@ -73,7 +72,10 @@ class PremiumNotifierState {
       other is PremiumNotifierState &&
           runtimeType == other.runtimeType &&
           premiumStatus == other.premiumStatus &&
-          const ListEquality().equals(availableProducts, other.availableProducts) &&
+          const ListEquality<core.ProductInfo>().equals(
+            availableProducts,
+            other.availableProducts,
+          ) &&
           isLoadingProducts == other.isLoadingProducts &&
           isProcessingPurchase == other.isProcessingPurchase &&
           errorMessage == other.errorMessage;
@@ -81,13 +83,14 @@ class PremiumNotifierState {
   @override
   int get hashCode =>
       premiumStatus.hashCode ^
-      const ListEquality().hash(availableProducts) ^
+      const ListEquality<core.ProductInfo>().hash(availableProducts) ^
       isLoadingProducts.hashCode ^
       isProcessingPurchase.hashCode ^
       errorMessage.hashCode;
 
   @override
-  String toString() => 'PremiumNotifierState('
+  String toString() =>
+      'PremiumNotifierState('
       'premiumStatus: $premiumStatus, '
       'availableProducts: ${availableProducts.length}, '
       'isLoadingProducts: $isLoadingProducts, '
@@ -136,7 +139,10 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
 
     // Escuta mudanças no stream do repository e armazena subscription
     _statusSubscription = _premiumRepository!.premiumStatus.listen((status) {
-      state = core.AsyncValue.data(state.valueOrNull?.copyWith(premiumStatus: status) ?? PremiumNotifierState(premiumStatus: status));
+      state = core.AsyncValue.data(
+        state.valueOrNull?.copyWith(premiumStatus: status) ??
+            PremiumNotifierState(premiumStatus: status),
+      );
     });
 
     // Registra cleanup quando o provider for disposed
@@ -146,23 +152,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     });
 
     return PremiumNotifierState(premiumStatus: premiumStatus);
-  }
-
-  // =========================================================================
-  // INITIALIZATION
-  // =========================================================================
-
-  Future<void> _checkInitialStatus() async {
-    if (_checkPremiumStatus == null) return;
-    final result = await _checkPremiumStatus!(const NoParams());
-    result.fold(
-      (failure) {
-        debugPrint('Error checking initial premium status: ${failure.message}');
-      },
-      (status) {
-        debugPrint('Initial premium status: $status');
-      },
-    );
   }
 
   // =========================================================================
@@ -447,14 +436,21 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   }
 
   // Métodos de conveniência para features específicas do GasOMeter
-  Future<bool> canAddUnlimitedVehicles() async => state.valueOrNull?.isPremium ?? false;
-  Future<bool> canAccessAdvancedReports() async => await _canUseFeatureById('advanced_reports');
+  Future<bool> canAddUnlimitedVehicles() async =>
+      state.valueOrNull?.isPremium ?? false;
+  Future<bool> canAccessAdvancedReports() async =>
+      await _canUseFeatureById('advanced_reports');
   Future<bool> canExportData() async => await _canUseFeatureById('export_data');
-  Future<bool> canUseCustomCategories() async => await _canUseFeatureById('custom_categories');
-  Future<bool> canAccessPremiumThemes() async => await _canUseFeatureById('premium_themes');
-  Future<bool> canBackupToCloud() async => await _canUseFeatureById('cloud_backup');
-  Future<bool> canUseLocationHistory() async => await _canUseFeatureById('location_history');
-  Future<bool> canAccessAdvancedAnalytics() async => await _canUseFeatureById('advanced_analytics');
+  Future<bool> canUseCustomCategories() async =>
+      await _canUseFeatureById('custom_categories');
+  Future<bool> canAccessPremiumThemes() async =>
+      await _canUseFeatureById('premium_themes');
+  Future<bool> canBackupToCloud() async =>
+      await _canUseFeatureById('cloud_backup');
+  Future<bool> canUseLocationHistory() async =>
+      await _canUseFeatureById('location_history');
+  Future<bool> canAccessAdvancedAnalytics() async =>
+      await _canUseFeatureById('advanced_analytics');
 
   /// Método auxiliar para verificar features
   Future<bool> _canUseFeatureById(String featureId) async {
@@ -508,7 +504,9 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   void _updateError(String message) {
     final currentState = state.valueOrNull;
     if (currentState != null) {
-      state = core.AsyncValue.data(currentState.copyWith(errorMessage: message));
+      state = core.AsyncValue.data(
+        currentState.copyWith(errorMessage: message),
+      );
     } else {
       state = core.AsyncValue.data(PremiumNotifierState(errorMessage: message));
     }
@@ -522,8 +520,8 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
 /// Provider para PremiumNotifier
 final premiumNotifierProvider =
     core.AsyncNotifierProvider<PremiumNotifier, PremiumNotifierState>(
-  PremiumNotifier.new,
-);
+      PremiumNotifier.new,
+    );
 
 /// Provider para status premium direto (renomeado para evitar conflito com core)
 final gasometerIsPremiumProvider = core.Provider<bool>((ref) {
@@ -560,7 +558,9 @@ final canAddFuelRecordProvider = core.Provider<CanAddFuelRecord>((ref) {
   return core.GetIt.instance<CanAddFuelRecord>();
 });
 
-final canAddMaintenanceRecordProvider = core.Provider<CanAddMaintenanceRecord>((ref) {
+final canAddMaintenanceRecordProvider = core.Provider<CanAddMaintenanceRecord>((
+  ref,
+) {
   return core.GetIt.instance<CanAddMaintenanceRecord>();
 });
 

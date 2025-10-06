@@ -9,7 +9,7 @@ import 'package:core/core.dart'
         ProviderContainer,
         PrivacySettings;
 import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
+    show StateNotifier, StateNotifierProvider, Provider;
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/markets/domain/entities/market_entity.dart';

@@ -10,7 +10,6 @@ import '../../../../core/theme/design_tokens.dart';
 /// Widget modal elegante para seleção de imagem de perfil
 /// Permite escolher entre câmera, galeria ou remover foto atual
 class ProfileImagePickerWidget extends StatelessWidget {
-
   const ProfileImagePickerWidget({
     super.key,
     this.onCameraTap,
@@ -40,11 +39,12 @@ class ProfileImagePickerWidget extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _ProfileImagePickerModal(
-        onImageSelected: onImageSelected,
-        onRemoveImage: onRemoveImage,
-        hasCurrentImage: hasCurrentImage,
-      ),
+      builder:
+          (context) => _ProfileImagePickerModal(
+            onImageSelected: onImageSelected,
+            onRemoveImage: onRemoveImage,
+            hasCurrentImage: hasCurrentImage,
+          ),
     );
   }
 
@@ -73,13 +73,15 @@ class ProfileImagePickerWidget extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Title
               Text(
                 'Alterar Foto do Perfil',
@@ -88,18 +90,20 @@ class ProfileImagePickerWidget extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 'Escolha uma fonte para sua nova foto',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Options
               Column(
                 children: [
@@ -111,9 +115,9 @@ class ProfileImagePickerWidget extends StatelessWidget {
                     onTap: isLoading ? null : onCameraTap,
                     isLoading: isLoading,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   _buildOption(
                     context,
                     icon: Icons.photo_library,
@@ -122,7 +126,7 @@ class ProfileImagePickerWidget extends StatelessWidget {
                     onTap: isLoading ? null : onGalleryTap,
                     isLoading: isLoading,
                   ),
-                  
+
                   if (hasCurrentImage) ...[
                     const SizedBox(height: 16),
                     _buildOption(
@@ -137,14 +141,15 @@ class ProfileImagePickerWidget extends StatelessWidget {
                   ],
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Cancel button
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                  onPressed:
+                      isLoading ? null : () => Navigator.of(context).pop(),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -158,12 +163,14 @@ class ProfileImagePickerWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
             ],
           ),
@@ -181,10 +188,11 @@ class ProfileImagePickerWidget extends StatelessWidget {
     bool isDestructive = false,
     bool isLoading = false,
   }) {
-    final primaryColor = isDestructive 
-        ? Theme.of(context).colorScheme.error
-        : GasometerDesignTokens.colorPrimary;
-    
+    final primaryColor =
+        isDestructive
+            ? Theme.of(context).colorScheme.error
+            : GasometerDesignTokens.colorPrimary;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -196,9 +204,14 @@ class ProfileImagePickerWidget extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isDestructive
-                ? Theme.of(context).colorScheme.error.withValues(alpha: 0.05)
-                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+            color:
+                isDestructive
+                    ? Theme.of(
+                      context,
+                    ).colorScheme.error.withValues(alpha: 0.05)
+                    : Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.05),
             borderRadius: GasometerDesignTokens.borderRadius(
               GasometerDesignTokens.radiusButton,
             ),
@@ -218,23 +231,24 @@ class ProfileImagePickerWidget extends StatelessWidget {
                     GasometerDesignTokens.radiusButton,
                   ),
                 ),
-                child: isLoading
-                    ? Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+                child:
+                    isLoading
+                        ? Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: primaryColor,
+                          ),
+                        )
+                        : Icon(
+                          icon,
                           color: primaryColor,
+                          size: GasometerDesignTokens.iconSizeButton,
                         ),
-                      )
-                    : Icon(
-                        icon,
-                        color: primaryColor,
-                        size: GasometerDesignTokens.iconSizeButton,
-                      ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,28 +257,33 @@ class ProfileImagePickerWidget extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: isDestructive
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurface,
+                        color:
+                            isDestructive
+                                ? Theme.of(context).colorScheme.error
+                                : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 2),
-                    
+
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               if (!isLoading)
                 Icon(
                   Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.4),
                   size: 20,
                 ),
             ],
@@ -277,18 +296,18 @@ class ProfileImagePickerWidget extends StatelessWidget {
 
 /// Modal interno para seleção de imagem
 class _ProfileImagePickerModal extends StatefulWidget {
-
   const _ProfileImagePickerModal({
     required this.onImageSelected,
     this.onRemoveImage,
     this.hasCurrentImage = false,
   });
-  final Function(File) onImageSelected;
+  final void Function(File) onImageSelected;
   final VoidCallback? onRemoveImage;
   final bool hasCurrentImage;
 
   @override
-  State<_ProfileImagePickerModal> createState() => __ProfileImagePickerModalState();
+  State<_ProfileImagePickerModal> createState() =>
+      __ProfileImagePickerModalState();
 }
 
 class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
@@ -317,7 +336,7 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
   Future<void> _pickImage(ImageSource source) async {
     try {
       setState(() => _isLoading = true);
-      
+
       if (kDebugMode) {
         debugPrint('📷 ProfileImagePicker: Picking image from ${source.name}');
       }
@@ -331,19 +350,19 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
 
       if (pickedFile != null) {
         final file = File(pickedFile.path);
-        
+
         if (kDebugMode) {
           debugPrint('📷 ProfileImagePicker: Image selected: ${file.path}');
         }
 
         // Haptic feedback
         HapticFeedback.lightImpact();
-        
+
         // Close modal
         if (mounted) {
           Navigator.of(context).pop();
         }
-        
+
         // Call callback
         widget.onImageSelected(file);
       } else {
@@ -355,7 +374,7 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
       if (kDebugMode) {
         debugPrint('❌ ProfileImagePicker: Error picking image: $e');
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -375,26 +394,26 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
   Future<void> _removeImage() async {
     try {
       setState(() => _isLoading = true);
-      
+
       if (kDebugMode) {
         debugPrint('🗑️ ProfileImagePicker: Removing current image');
       }
 
       // Haptic feedback
       HapticFeedback.lightImpact();
-      
+
       // Close modal
       if (mounted) {
         Navigator.of(context).pop();
       }
-      
+
       // Call callback
       widget.onRemoveImage?.call();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ ProfileImagePicker: Error removing image: $e');
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

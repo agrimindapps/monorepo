@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Dropdown customizado com validação e formatação
 class CustomDropdown<T> extends StatelessWidget {
-
   const CustomDropdown({
     super.key,
     this.value,
@@ -65,7 +64,8 @@ class CustomDropdown<T> extends StatelessWidget {
         errorText: errorText,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        contentPadding: contentPadding ?? 
+        contentPadding:
+            contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: border ?? _defaultBorder(context),
         enabledBorder: enabledBorder ?? _defaultEnabledBorder(context),
@@ -138,12 +138,10 @@ class CustomDropdown<T> extends StatelessWidget {
     return CustomDropdown<String>(
       key: key,
       value: value,
-      items: options.map((String option) {
-        return DropdownMenuItem<String>(
-          value: option,
-          child: Text(option),
-        );
-      }).toList(),
+      items:
+          options.map((String option) {
+            return DropdownMenuItem<String>(value: option, child: Text(option));
+          }).toList(),
       onChanged: onChanged,
       label: label,
       hint: hint,
@@ -172,12 +170,13 @@ class CustomDropdown<T> extends StatelessWidget {
     return CustomDropdown<K>(
       key: key,
       value: value,
-      items: options.map((K option) {
-        return DropdownMenuItem<K>(
-          value: option,
-          child: buildItem?.call(option) ?? Text(getLabel(option)),
-        );
-      }).toList(),
+      items:
+          options.map((K option) {
+            return DropdownMenuItem<K>(
+              value: option,
+              child: buildItem?.call(option) ?? Text(getLabel(option)),
+            );
+          }).toList(),
       onChanged: onChanged,
       label: label,
       hint: hint,
@@ -203,18 +202,19 @@ class CustomDropdown<T> extends StatelessWidget {
     return CustomDropdown<String>(
       key: key,
       value: value,
-      items: optionsWithIcons.entries.map((entry) {
-        return DropdownMenuItem<String>(
-          value: entry.key,
-          child: Row(
-            children: [
-              Icon(entry.value, size: 20),
-              const SizedBox(width: 12),
-              Text(entry.key),
-            ],
-          ),
-        );
-      }).toList(),
+      items:
+          optionsWithIcons.entries.map((entry) {
+            return DropdownMenuItem<String>(
+              value: entry.key,
+              child: Row(
+                children: [
+                  Icon(entry.value, size: 20),
+                  const SizedBox(width: 12),
+                  Text(entry.key),
+                ],
+              ),
+            );
+          }).toList(),
       onChanged: onChanged,
       label: label,
       hint: hint,
@@ -236,18 +236,16 @@ class CustomDropdown<T> extends StatelessWidget {
     bool enabled = true,
     Widget? prefixIcon,
   }) {
-    final displayText = selectedValues?.isEmpty ?? true
-        ? hint ?? 'Selecione opções'
-        : '${selectedValues!.length} selecionados';
+    final displayText =
+        selectedValues?.isEmpty ?? true
+            ? hint ?? 'Selecione opções'
+            : '${selectedValues!.length} selecionados';
 
     return CustomDropdown<String>(
       key: key,
       value: displayText,
       items: [
-        DropdownMenuItem<String>(
-          value: displayText,
-          child: Text(displayText),
-        ),
+        DropdownMenuItem<String>(value: displayText, child: Text(displayText)),
       ],
       onChanged: null, // Disable dropdown, use onTap instead
       label: label,
@@ -261,7 +259,6 @@ class CustomDropdown<T> extends StatelessWidget {
 
 /// Widget auxiliar para dropdown com busca
 class SearchableDropdown<T> extends StatefulWidget {
-
   const SearchableDropdown({
     super.key,
     this.value,
@@ -311,11 +308,13 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
       if (query.isEmpty) {
         filteredItems = widget.items;
       } else {
-        filteredItems = widget.items.where((item) {
-          return widget.getLabel(item)
-              .toLowerCase()
-              .contains(query.toLowerCase());
-        }).toList();
+        filteredItems =
+            widget.items.where((item) {
+              return widget
+                  .getLabel(item)
+                  .toLowerCase()
+                  .contains(query.toLowerCase());
+            }).toList();
       }
     });
   }
@@ -327,7 +326,8 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
       child: AbsorbPointer(
         child: TextFormField(
           controller: TextEditingController(
-            text: widget.value != null ? widget.getLabel(widget.value as T) : '',
+            text:
+                widget.value != null ? widget.getLabel(widget.value as T) : '',
           ),
           decoration: InputDecoration(
             labelText: widget.label,
@@ -337,9 +337,10 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
           ),
           enabled: widget.enabled,
           readOnly: true,
-          validator: widget.validator != null
-              ? (value) => widget.validator!(widget.value)
-              : null,
+          validator:
+              widget.validator != null
+                  ? (value) => widget.validator!(widget.value)
+                  : null,
         ),
       ),
     );
@@ -349,57 +350,59 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
     filteredItems = widget.items;
     searchController.clear();
 
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(widget.label ?? 'Selecionar'),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 400,
-            child: Column(
-              children: [
-                TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: widget.searchHint ?? 'Buscar...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: const OutlineInputBorder(),
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setDialogState) => AlertDialog(
+                  title: Text(widget.label ?? 'Selecionar'),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    height: 400,
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: widget.searchHint ?? 'Buscar...',
+                            prefixIcon: const Icon(Icons.search),
+                            border: const OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            setDialogState(() => _filterItems(value));
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredItems[index];
+                              final isSelected = widget.value == item;
+
+                              return ListTile(
+                                title: Text(widget.getLabel(item)),
+                                selected: isSelected,
+                                onTap: () {
+                                  widget.onChanged?.call(item);
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  onChanged: (value) {
-                    setDialogState(() => _filterItems(value));
-                  },
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-                      final item = filteredItems[index];
-                      final isSelected = widget.value == item;
-                      
-                      return ListTile(
-                        title: Text(widget.getLabel(item)),
-                        selected: isSelected,
-                        onTap: () {
-                          widget.onChanged?.call(item);
-                          Navigator.of(context).pop();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

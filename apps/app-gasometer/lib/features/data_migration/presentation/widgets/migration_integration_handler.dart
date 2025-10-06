@@ -1,12 +1,11 @@
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // TODO: Replace with Riverpod providers
 // import '../notifiers/data_migration_notifier.dart';
 
 /// Widget that handles the integration of data migration into the authentication flow
-/// 
+///
 /// This widget should be used during the login process to detect and handle
 /// conflicts between anonymous and account data. It provides a seamless
 /// user experience for resolving data conflicts.
@@ -24,22 +23,22 @@ class MigrationIntegrationHandler extends ConsumerWidget {
 
   /// The anonymous user ID to migrate from
   final String anonymousUserId;
-  
+
   /// The account user ID to migrate to
   final String accountUserId;
-  
+
   /// Callback when migration is completed successfully
-  final Function(DataMigrationResult result) onMigrationComplete;
-  
+  final void Function(DataMigrationResult result) onMigrationComplete;
+
   /// Callback when migration is canceled by user
   final VoidCallback onMigrationCanceled;
-  
+
   /// Callback when migration encounters an error
-  final Function(String error)? onMigrationError;
-  
+  final void Function(String error)? onMigrationError;
+
   /// Whether to automatically detect conflicts on widget build
   final bool autoDetectConflicts;
-  
+
   /// Whether to show progress dialog during migration
   final bool showProgressDialog;
 
@@ -47,10 +46,10 @@ class MigrationIntegrationHandler extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // TODO: Replace Consumer<DataMigrationProvider> with Riverpod provider
     // final provider = ref.watch(dataMigrationProviderNotifier);
-    
+
     // Placeholder implementation without provider dependencies
     return const SizedBox.shrink();
-    
+
     // TODO: Implement with Riverpod providers
     // Auto-detect conflicts if enabled and not already detecting
     // if (autoDetectConflicts && !provider.isDetectingConflicts && provider.conflictResult == null) {
@@ -131,7 +130,7 @@ class MigrationIntegrationHandler extends ConsumerWidget {
 
   //     // Show conflict resolution dialog
   //     final choice = await provider.showConflictDialog(context);
-      
+
   //     if (choice == null || choice == DataResolutionChoice.cancel) {
   //       if (kDebugMode) {
   //         debugPrint('🚫 User canceled migration');
@@ -152,8 +151,8 @@ class MigrationIntegrationHandler extends ConsumerWidget {
   // }
 
   // Future<void> _executeUserChoice(
-  //   BuildContext context, 
-  //   DataMigrationProvider provider, 
+  //   BuildContext context,
+  //   DataMigrationProvider provider,
   //   DataResolutionChoice choice,
   // ) async {
   //   try {
@@ -167,7 +166,7 @@ class MigrationIntegrationHandler extends ConsumerWidget {
   //     if (showProgressDialog) {
   //       // Start migration execution in background
   //       _executeMigration(provider, choice);
-        
+
   //       // Show progress dialog
   //       await provider.showProgressDialog(
   //         context: context,
@@ -191,96 +190,103 @@ class MigrationIntegrationHandler extends ConsumerWidget {
   // }
 
   // Future<void> _executeMigration(
-  //   DataMigrationProvider provider, 
+  //   DataMigrationProvider provider,
   //   DataResolutionChoice choice,
   // ) async {
   //   await provider.executeResolution(choice: choice);
   // }
 
-  Future<void> _handleKeepAnonymousDataChoice(BuildContext context) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('📝 Handling keep anonymous data choice');
-      }
+  // The following method was previously used to handle the "keep anonymous data" choice.
+  // It is no longer referenced in the widget and has been removed to avoid unused
+  // declaration warnings. If future functionality requires it, it can be
+  // re‑implemented here.
 
-      // Show dialog guiding user to create new account
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Text('Criar Nova Conta'),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.account_circle, size: 64, color: Colors.blue),
-              SizedBox(height: 16),
-              Text(
-                'Para manter seus dados anônimos, você precisará criar uma nova conta.',
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Após criar a conta, seus dados atuais serão vinculados à nova conta.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onMigrationCanceled();
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _navigateToAccountCreation(context);
-              },
-              child: const Text('Criar Conta'),
-            ),
-          ],
-        ),
-      );
+  // Future<void> _handleKeepAnonymousDataChoice(BuildContext context) async {
+  //   try {
+  //     if (kDebugMode) {
+  //       debugPrint('📝 Handling keep anonymous data choice');
+  //     }
 
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Error handling keep anonymous data: $e');
-      }
-      onMigrationError?.call('Erro ao processar opção: $e');
-    }
-  }
+  //     // Show dialog guiding user to create new account
+  //     await showDialog<void>(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       builder:
+  //           (context) => AlertDialog(
+  //             title: const Text('Criar Nova Conta'),
+  //             content: const Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Icon(Icons.account_circle, size: 64, color: Colors.blue),
+  //                 SizedBox(height: 16),
+  //                 Text(
+  //                   'Para manter seus dados anônimos, você precisará criar uma nova conta.',
+  //                   textAlign: TextAlign.center,
+  //                 ),
+  //                 SizedBox(height: 8),
+  //                 Text(
+  //                   'Após criar a conta, seus dados atuais serão vinculados à nova conta.',
+  //                   style: TextStyle(fontSize: 12, color: Colors.grey),
+  //                   textAlign: TextAlign.center,
+  //                 ),
+  //               ],
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                   onMigrationCanceled();
+  //                 },
+  //                 child: const Text('Cancelar'),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                   _navigateToAccountCreation(context);
+  //                 },
+  //                 child: const Text('Criar Conta'),
+  //               ),
+  //             ],
+  //           ),
+  //     );
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       debugPrint('❌ Error handling keep anonymous data: $e');
+  //     }
+  //     onMigrationError?.call('Erro ao processar opção: $e');
+  //   }
+  // }
 
-  void _navigateToAccountCreation(BuildContext context) {
-    // Navigate to account creation screen
-    // This would typically navigate to a sign-up page
-    // Implementation depends on your app's navigation structure
-    
-    if (kDebugMode) {
-      debugPrint('🚀 Navigating to account creation');
-    }
-    
-    // Example: Navigator.pushNamed(context, '/sign-up');
-    // For now, we'll call the completion callback with a special result
-    onMigrationComplete(const DataMigrationResult(
-      success: true,
-      choiceExecuted: DataResolutionChoice.keepAnonymousData,
-      message: 'Redirecionando para criação de nova conta',
-    ));
-  }
+  // void _navigateToAccountCreation(BuildContext context) {
+  //   // Navigate to account creation screen
+  //   // This would typically navigate to a sign-up page
+  //   // Implementation depends on your app's navigation structure
+  //
+  //   if (kDebugMode) {
+  //     debugPrint('🚀 Navigating to account creation');
+  //   }
+  //
+  //   // Example: Navigator.pushNamed(context, '/sign-up');
+  //   // For now, we'll call the completion callback with a special result
+  //   onMigrationComplete(
+  //     const DataMigrationResult(
+  //       success: true,
+  //       choiceExecuted: DataResolutionChoice.keepAnonymousData,
+  //       message: 'Redirecionando para criação de nova conta',
+  //     ),
+  //   );
+  // }
 
   // TODO: Implement with Riverpod providers
   // void _handleError(BuildContext context, DataMigrationProvider provider) {
   //   final error = provider.error?.message ?? 'Erro desconhecido durante migração';
-    
+  //
   //   if (kDebugMode) {
   //     debugPrint('❌ Handling migration error: $error');
   //   }
-
+  //
   //   onMigrationError?.call(error);
-    
+  //
   //   // Also show error dialog to user
   //   showDialog<void>(
   //     context: context,
@@ -313,9 +319,9 @@ class MigrationIntegrationHandler extends ConsumerWidget {
     required BuildContext context,
     required String anonymousUserId,
     required String accountUserId,
-    required Function(DataMigrationResult) onComplete,
+    required void Function(DataMigrationResult) onComplete,
     required VoidCallback onCanceled,
-    Function(String)? onError,
+    void Function(String)? onError,
   }) {
     return MigrationIntegrationHandler(
       anonymousUserId: anonymousUserId,

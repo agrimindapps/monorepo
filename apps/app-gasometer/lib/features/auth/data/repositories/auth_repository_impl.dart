@@ -11,7 +11,6 @@ import '../datasources/auth_remote_data_source.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
@@ -24,19 +23,19 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // Try to get current user from Firebase first
       final remoteUser = await remoteDataSource.getCurrentUser();
-      
+
       if (remoteUser != null) {
         // Cache the user locally
         await localDataSource.cacheUser(remoteUser);
         return Right(remoteUser);
       }
-      
+
       // Fallback to local cache
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
         return Right(cachedUser);
       }
-      
+
       return const Right(null);
     } on local_exceptions.ServerException catch (e) {
       // Try local cache on server error
@@ -58,23 +57,28 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<Either<Failure, UserEntity?>> watchAuthState() {
     try {
-      return remoteDataSource.watchAuthState().map<Either<Failure, UserEntity?>>((userModel) {
-        if (userModel == null) {
-          // Clear local cache when user signs out
-          localDataSource.clearCachedUser().catchError((_) {});
-          return const Right(null);
-        }
-        
-        // Cache the user locally
-        localDataSource.cacheUser(userModel).catchError((_) {});
+      return remoteDataSource
+          .watchAuthState()
+          .map<Either<Failure, UserEntity?>>((userModel) {
+            if (userModel == null) {
+              // Clear local cache when user signs out
+              localDataSource.clearCachedUser().catchError((_) {});
+              return const Right(null);
+            }
 
-        return Right(userModel);
-      }).handleError((Object error) {
-        if (error is local_exceptions.ServerException) {
-          return Left(ServerFailure(error.message));
-        }
-        return Left(UnexpectedFailure(error.toString()));
-      });
+            // Cache the user locally
+            localDataSource.cacheUser(userModel).catchError((_) {});
+
+            return Right(userModel);
+          })
+          .handleError((Object error) {
+            if (error is local_exceptions.ServerException) {
+              return Left<Failure, UserEntity?>(ServerFailure(error.message));
+            }
+            return Left<Failure, UserEntity?>(
+              UnexpectedFailure(error.toString()),
+            );
+          });
     } catch (e) {
       return Stream.value(Left(UnexpectedFailure(e.toString())));
     }
@@ -87,7 +91,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       final userModel = await remoteDataSource.signInWithEmail(email, password);
-      
+
       // Cache user locally
       await localDataSource.cacheUser(userModel);
 
@@ -105,7 +109,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> signInAnonymously() async {
     try {
       final userModel = await remoteDataSource.signInAnonymously();
-      
+
       // Don't cache anonymous users
 
       return Right(userModel);
@@ -130,7 +134,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password,
         displayName,
       );
-      
+
       // Cache user locally
       await localDataSource.cacheUser(userModel);
 
@@ -150,8 +154,11 @@ class AuthRepositoryImpl implements AuthRepository {
     String? photoUrl,
   }) async {
     try {
-      final userModel = await remoteDataSource.updateProfile(displayName, photoUrl);
-      
+      final userModel = await remoteDataSource.updateProfile(
+        displayName,
+        photoUrl,
+      );
+
       // Update cached user
       await localDataSource.cacheUser(userModel);
 
@@ -229,7 +236,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // This would need to be implemented in the remote data source
       // For now, return not implemented
-      return const Left(UnexpectedFailure('Password reset confirmation not implemented'));
+      return const Left(
+        UnexpectedFailure('Password reset confirmation not implemented'),
+      );
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
     }
@@ -241,7 +250,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final userModel = await remoteDataSource.linkAnonymousWithEmail(email, password);
+      final userModel = await remoteDataSource.linkAnonymousWithEmail(
+        email,
+        password,
+      );
 
       // Cache the converted user
       await localDataSource.cacheUser(userModel);
@@ -404,20 +416,20 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(UnexpectedFailure(e.toString()));
     }
   }
-  
+
   /// Clears all local gasometer-specific data after account deletion
   Future<void> _clearGasometerLocalData() async {
     try {
       // Get DataCleanerService instance
       final dataCleanerService = DataCleanerService.instance;
-      
+
       // Clear all local data including Hive boxes and SharedPreferences
       final clearResult = await dataCleanerService.clearAllData();
-      
+
       if (clearResult['success'] == true) {
         final clearedBoxes = clearResult['totalClearedBoxes'] ?? 0;
         final clearedPrefs = clearResult['totalClearedPreferences'] ?? 0;
-        
+
         if (kDebugMode) {
           debugPrint('✅ Gasometer local data cleared successfully:');
           debugPrint('   - Hive boxes: $clearedBoxes');
@@ -461,7 +473,9 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     if (password.length < 6) {
-      return const Left(ValidationFailure('Senha deve ter pelo menos 6 caracteres'));
+      return const Left(
+        ValidationFailure('Senha deve ter pelo menos 6 caracteres'),
+      );
     }
 
     return const Right(unit);

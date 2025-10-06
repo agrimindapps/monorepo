@@ -15,18 +15,16 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesNotifierProvider);
-    final settingsAsync = ref.watch(settingsNotifierProvider);
-    final themeMode = ref.watch(themeModeProvider);
+    ref.watch(vehiclesNotifierProvider);
+    ref.watch(settingsNotifierProvider);
+    ref.watch(themeModeProvider);
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
@@ -113,11 +111,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
       child: IconButton(
         onPressed: () => _showThemeDialog(context),
-        icon: const Icon(
-          Icons.brightness_auto,
-          color: Colors.white,
-          size: 19,
-        ),
+        icon: const Icon(Icons.brightness_auto, color: Colors.white, size: 19),
         tooltip: 'Alterar tema',
       ),
     );
@@ -169,8 +163,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Widget _buildNotificationSection() {
     final settingsAsync = ref.watch(settingsNotifierProvider);
-    final notificationsEnabled = settingsAsync.valueOrNull?.notificationsEnabled ?? true;
-    final fuelAlertsEnabled = settingsAsync.valueOrNull?.fuelAlertsEnabled ?? true;
+    final notificationsEnabled =
+        settingsAsync.valueOrNull?.notificationsEnabled ?? true;
+    final fuelAlertsEnabled =
+        settingsAsync.valueOrNull?.fuelAlertsEnabled ?? true;
 
     return _buildSection(
       title: 'Notificações',
@@ -182,11 +178,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           subtitle: 'Receber alertas e lembretes',
           trailing: Switch(
             value: notificationsEnabled,
-            onChanged: settingsAsync.isLoading
-                ? null
-                : (value) {
-                    ref.read(settingsNotifierProvider.notifier).toggleNotifications(value);
-                  },
+            onChanged:
+                settingsAsync.isLoading
+                    ? null
+                    : (value) {
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleNotifications(value);
+                    },
           ),
         ),
         _buildSettingItem(
@@ -195,11 +194,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           subtitle: 'Notificações sobre abastecimento',
           trailing: Switch(
             value: fuelAlertsEnabled,
-            onChanged: settingsAsync.isLoading
-                ? null
-                : (value) {
-                    ref.read(settingsNotifierProvider.notifier).toggleFuelAlerts(value);
-                  },
+            onChanged:
+                settingsAsync.isLoading
+                    ? null
+                    : (value) {
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleFuelAlerts(value);
+                    },
           ),
         ),
       ],
@@ -317,7 +319,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -351,10 +355,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     VoidCallback? onTap,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: Theme.of(context).textTheme.bodyMedium?.color,
-      ),
+      leading: Icon(icon, color: Theme.of(context).textTheme.bodyMedium?.color),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: trailing ?? const Icon(Icons.chevron_right),
@@ -368,44 +369,45 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Escolher Tema'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildThemeOption(
-              'Automático (Sistema)',
-              'Segue a configuração do sistema',
-              Icons.brightness_auto,
-              ThemeMode.system,
-              currentThemeMode == ThemeMode.system,
-              () => _changeTheme(ThemeMode.system),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Escolher Tema'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildThemeOption(
+                  'Automático (Sistema)',
+                  'Segue a configuração do sistema',
+                  Icons.brightness_auto,
+                  ThemeMode.system,
+                  currentThemeMode == ThemeMode.system,
+                  () => _changeTheme(ThemeMode.system),
+                ),
+                _buildThemeOption(
+                  'Claro',
+                  'Tema claro sempre ativo',
+                  Icons.brightness_high,
+                  ThemeMode.light,
+                  currentThemeMode == ThemeMode.light,
+                  () => _changeTheme(ThemeMode.light),
+                ),
+                _buildThemeOption(
+                  'Escuro',
+                  'Tema escuro sempre ativo',
+                  Icons.brightness_2,
+                  ThemeMode.dark,
+                  currentThemeMode == ThemeMode.dark,
+                  () => _changeTheme(ThemeMode.dark),
+                ),
+              ],
             ),
-            _buildThemeOption(
-              'Claro',
-              'Tema claro sempre ativo',
-              Icons.brightness_high,
-              ThemeMode.light,
-              currentThemeMode == ThemeMode.light,
-              () => _changeTheme(ThemeMode.light),
-            ),
-            _buildThemeOption(
-              'Escuro',
-              'Tema escuro sempre ativo',
-              Icons.brightness_2,
-              ThemeMode.dark,
-              currentThemeMode == ThemeMode.dark,
-              () => _changeTheme(ThemeMode.dark),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -434,9 +436,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             Icon(
               icon,
-              color: isSelected
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).textTheme.bodyMedium?.color,
+              color:
+                  isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).textTheme.bodyMedium?.color,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -446,24 +449,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color:
+                          isSelected
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check,
-                color: Theme.of(context).primaryColor,
-              ),
+              Icon(Icons.check, color: Theme.of(context).primaryColor),
           ],
         ),
       ),
@@ -473,23 +472,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair da conta'),
-        content: const Text('Tem certeza que deseja fazer logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Sair da conta'),
+            content: const Text('Tem certeza que deseja fazer logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _showSnackBar('Logout realizado com sucesso');
+                },
+                child: const Text('Sair'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showSnackBar('Logout realizado com sucesso');
-            },
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -506,53 +506,56 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.star_rate, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Avaliar o App'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Você está gostando do GasOMeter? Sua avaliação é muito importante!',
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      builder:
+          (context) => AlertDialog(
+            title: const Row(
               children: [
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star_rate, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Avaliar o App'),
               ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Talvez mais tarde'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Você está gostando do GasOMeter? Sua avaliação é muito importante!',
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.star, color: Colors.orange, size: 32),
+                    Icon(Icons.star, color: Colors.orange, size: 32),
+                    Icon(Icons.star, color: Colors.orange, size: 32),
+                    Icon(Icons.star, color: Colors.orange, size: 32),
+                    Icon(Icons.star, color: Colors.orange, size: 32),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Talvez mais tarde'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  final success = await notifier.handleAppRating(context);
+                  if (mounted) {
+                    _showSnackBar(
+                      success
+                          ? 'Obrigado pelo feedback!'
+                          : 'Não foi possível abrir a avaliação',
+                    );
+                  }
+                },
+                icon: const Icon(Icons.star),
+                label: const Text('Avaliar'),
+              ),
+            ],
           ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              final success = await notifier.handleAppRating(context);
-              if (mounted) {
-                _showSnackBar(
-                  success ? 'Obrigado pelo feedback!' : 'Não foi possível abrir a avaliação',
-                );
-              }
-            },
-            icon: const Icon(Icons.star),
-            label: const Text('Avaliar'),
-          ),
-        ],
-      ),
     );
   }
 

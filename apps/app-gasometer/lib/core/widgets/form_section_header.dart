@@ -23,7 +23,6 @@ import '../theme/design_tokens.dart';
 /// )
 /// ```
 class FormSectionHeader extends StatelessWidget {
-
   const FormSectionHeader({
     super.key,
     required this.title,
@@ -35,6 +34,7 @@ class FormSectionHeader extends StatelessWidget {
     this.titleStyle,
     this.applyVerticalPadding = true,
   });
+
   /// Título da seção
   final String title;
 
@@ -61,7 +61,7 @@ class FormSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +69,8 @@ class FormSectionHeader extends StatelessWidget {
         // Header com título e ícone
         Padding(
           padding: EdgeInsets.symmetric(
-            vertical: applyVerticalPadding ? GasometerDesignTokens.spacingMd : 0,
+            vertical:
+                applyVerticalPadding ? GasometerDesignTokens.spacingMd : 0,
           ),
           child: Row(
             children: [
@@ -81,21 +82,20 @@ class FormSectionHeader extends StatelessWidget {
               const SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(
                 title,
-                style: titleStyle ?? const TextStyle(
-                  fontSize: GasometerDesignTokens.fontSizeLg,
-                  fontWeight: GasometerDesignTokens.fontWeightMedium,
-                  color: GasometerDesignTokens.colorTextPrimary,
-                ),
+                style:
+                    titleStyle ??
+                    const TextStyle(
+                      fontSize: GasometerDesignTokens.fontSizeLg,
+                      fontWeight: GasometerDesignTokens.fontWeightMedium,
+                      color: GasometerDesignTokens.colorTextPrimary,
+                    ),
               ),
             ],
           ),
         ),
 
         // Conteúdo da seção
-        Padding(
-          padding: contentPadding ?? EdgeInsets.zero,
-          child: child,
-        ),
+        Padding(padding: contentPadding ?? EdgeInsets.zero, child: child),
       ],
     );
   }
@@ -103,7 +103,6 @@ class FormSectionHeader extends StatelessWidget {
 
 /// Variação compacta do FormSectionHeader para casos específicos
 class CompactFormSectionHeader extends StatelessWidget {
-
   const CompactFormSectionHeader({
     super.key,
     required this.title,

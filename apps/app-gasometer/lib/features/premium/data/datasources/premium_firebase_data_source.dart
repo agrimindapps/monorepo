@@ -63,7 +63,7 @@ class PremiumFirebaseDataSource {
                 );
               }
             },
-            onError: (error) {
+            onError: (Object error, StackTrace stackTrace) {
               debugPrint('[FirebaseDataSource] Erro no stream: $error');
             },
           );
@@ -258,7 +258,7 @@ class PremiumFirebaseDataSource {
         'max_fuel_records': status.limits.maxFuelRecords,
         'max_maintenance_records': status.limits.maxMaintenanceRecords,
       },
-      'features': status.features ?? [],
+      'features': status.features,
     };
   }
 

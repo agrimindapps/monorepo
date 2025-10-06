@@ -20,7 +20,6 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(loginFormNotifierProvider);
     final formNotifier = ref.read(loginFormNotifierProvider.notifier);
 
     return Column(
@@ -184,7 +183,7 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
         });
 
         // Aguardar 3 segundos e voltar para login
-        await Future.delayed(const Duration(seconds: 3));
+        await Future<void>.delayed(const Duration(seconds: 3));
         if (mounted) {
           formNotifier.hideRecoveryForm();
         }

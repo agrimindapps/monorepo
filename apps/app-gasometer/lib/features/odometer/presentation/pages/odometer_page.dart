@@ -13,12 +13,11 @@ class OdometerPage extends ConsumerStatefulWidget {
 }
 
 class _OdometerPageState extends ConsumerState<OdometerPage> {
-  String? _selectedVehicleId;
   int _currentMonthIndex = DateTime.now().month - 1;
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesNotifierProvider);
+    ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -27,9 +26,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
             _buildHeader(context),
             _buildVehicleSelector(context),
             _buildMonthSelector(),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
@@ -59,18 +56,15 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           children: [
             Semantics(
               label: 'Seção de odômetro',
-              hint: 'Página principal para controlar quilometragem dos veículos',
+              hint:
+                  'Página principal para controlar quilometragem dos veículos',
               child: Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: const Icon(
-                  Icons.speed,
-                  color: Colors.white,
-                  size: 19,
-                ),
+                child: const Icon(Icons.speed, color: Colors.white, size: 19),
               ),
             ),
             const SizedBox(width: 13),
@@ -163,24 +157,30 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).cardColor,
+                color:
+                    isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                  color:
+                      isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        isSelected
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -194,7 +194,8 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
   Widget _buildContent(BuildContext context) {
     return EnhancedEmptyState(
       title: 'Nenhum registro',
-      description: 'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
+      description:
+          'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
       icon: Icons.speed_outlined,
       actionLabel: 'Adicionar leitura',
       onAction: () {
@@ -202,7 +203,6 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
       },
     );
   }
-
 
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
@@ -218,8 +218,18 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     final now = DateTime.now();
     final currentYear = now.year;
     const monthNames = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
     ];
 
     return monthNames

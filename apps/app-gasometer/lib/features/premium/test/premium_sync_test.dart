@@ -9,7 +9,6 @@ import '../domain/entities/premium_status.dart';
 ///
 /// Para ser executado durante desenvolvimento para validar o sistema de sync
 class PremiumSyncTest {
-
   PremiumSyncTest(this._syncService);
   final PremiumSyncService _syncService;
 
@@ -48,9 +47,11 @@ class PremiumSyncTest {
     // Escuta mudanças de status
     _statusSubscription = _syncService.premiumStatusStream.listen(
       (status) {
-        debugPrint('📱 Status atualizado: ${status.isPremium} (${status.premiumSource})');
+        debugPrint(
+          '📱 Status atualizado: ${status.isPremium} (${status.premiumSource})',
+        );
       },
-      onError: (error) {
+      onError: (Object error) {
         debugPrint('❌ Erro no stream de status: $error');
       },
     );
@@ -60,13 +61,13 @@ class PremiumSyncTest {
       (event) {
         debugPrint('🔄 Evento de sync: ${event.runtimeType}');
       },
-      onError: (error) {
+      onError: (Object error) {
         debugPrint('❌ Erro no stream de eventos: $error');
       },
     );
 
     // Aguarda um pouco para permitir setup dos streams
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
     debugPrint('✅ Listeners configurados');
   }
 
@@ -78,7 +79,9 @@ class PremiumSyncTest {
 
     result.fold(
       (failure) {
-        debugPrint('⚠️  Sync retornou failure (esperado em dev): ${failure.message}');
+        debugPrint(
+          '⚠️  Sync retornou failure (esperado em dev): ${failure.message}',
+        );
       },
       (_) {
         debugPrint('✅ Sincronização forçada bem-sucedida');
@@ -91,7 +94,7 @@ class PremiumSyncTest {
     debugPrint('📦 Testando múltiplas atualizações...');
 
     // Simula múltiplas chamadas de sync em sequência
-    final futures = <Future>[];
+    final futures = <Future<void>>[];
 
     for (int i = 0; i < 3; i++) {
       futures.add(
@@ -160,8 +163,12 @@ class PremiumSyncTest {
 
     debugPrint('📏 Limites de uso:');
     debugPrint('   - Pode adicionar 3º veículo: ${status.canAddVehicle(2)}');
-    debugPrint('   - Pode adicionar 20º abastecimento: ${status.canAddFuelRecord(19)}');
-    debugPrint('   - Pode adicionar 15ª manutenção: ${status.canAddMaintenanceRecord(14)}');
+    debugPrint(
+      '   - Pode adicionar 20º abastecimento: ${status.canAddFuelRecord(19)}',
+    );
+    debugPrint(
+      '   - Pode adicionar 15ª manutenção: ${status.canAddMaintenanceRecord(14)}',
+    );
   }
 
   /// Executa teste básico rápido

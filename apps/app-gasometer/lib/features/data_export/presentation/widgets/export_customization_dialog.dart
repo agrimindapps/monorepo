@@ -5,17 +5,17 @@ import '../../domain/entities/export_request.dart';
 
 /// Dialog para customização da exportação de dados LGPD
 class ExportCustomizationDialog extends StatefulWidget {
-
   const ExportCustomizationDialog({
     super.key,
     required this.userId,
     required this.onStartExport,
   });
   final String userId;
-  final Function(ExportRequest) onStartExport;
+  final void Function(ExportRequest) onStartExport;
 
   @override
-  State<ExportCustomizationDialog> createState() => _ExportCustomizationDialogState();
+  State<ExportCustomizationDialog> createState() =>
+      _ExportCustomizationDialogState();
 }
 
 class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
@@ -24,7 +24,8 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
   DateTime? _endDate;
   bool _includeAttachments = true;
 
-  final List<ExportDataCategory> _availableCategories = ExportDataCategory.values;
+  final List<ExportDataCategory> _availableCategories =
+      ExportDataCategory.values;
 
   @override
   void initState() {
@@ -37,7 +38,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusDialog,
+        ),
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
@@ -73,9 +76,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(12),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
         children: [
@@ -119,9 +120,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
             const SizedBox(width: 8),
             Text(
               'Categorias de Dados',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -129,7 +130,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
         DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withValues(alpha: 0.3),
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -139,13 +142,16 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
               CheckboxListTile(
                 title: const Text('Selecionar Todos'),
                 subtitle: const Text('Incluir todas as categorias disponíveis'),
-                value: _selectedCategories.length == _availableCategories.length,
+                value:
+                    _selectedCategories.length == _availableCategories.length,
                 tristate: true,
                 onChanged: (value) {
                   setState(() {
                     if (value == true) {
                       _selectedCategories.clear();
-                      _selectedCategories.addAll(_availableCategories.map((e) => e.key));
+                      _selectedCategories.addAll(
+                        _availableCategories.map((e) => e.key),
+                      );
                     } else {
                       _selectedCategories.clear();
                     }
@@ -155,22 +161,24 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
               ),
               const Divider(height: 1),
               // Categorias individuais
-              ..._availableCategories.map((category) => CheckboxListTile(
-                title: Text(category.displayName),
-                subtitle: _getCategoryDescription(category),
-                value: _selectedCategories.contains(category.key),
-                onChanged: (value) {
-                  setState(() {
-                    if (value == true) {
-                      _selectedCategories.add(category.key);
-                    } else {
-                      _selectedCategories.remove(category.key);
-                    }
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
-                dense: true,
-              )),
+              ..._availableCategories.map(
+                (category) => CheckboxListTile(
+                  title: Text(category.displayName),
+                  subtitle: _getCategoryDescription(category),
+                  value: _selectedCategories.contains(category.key),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value == true) {
+                        _selectedCategories.add(category.key);
+                      } else {
+                        _selectedCategories.remove(category.key);
+                      }
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                  dense: true,
+                ),
+              ),
             ],
           ),
         ),
@@ -192,9 +200,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
             const SizedBox(width: 8),
             Text(
               'Período (Opcional)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -202,7 +210,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
         Text(
           'Deixe em branco para incluir todos os dados',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 16),
@@ -243,9 +253,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
             const SizedBox(width: 8),
             Text(
               'Opções Adicionais',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -298,7 +308,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
   Widget _buildDateField({
     required String label,
     required DateTime? date,
-    required Function(DateTime?) onChanged,
+    required void Function(DateTime?) onChanged,
   }) {
     return InkWell(
       onTap: () => _selectDate(onChanged),
@@ -315,7 +325,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
             Icon(
               Icons.calendar_today,
               size: 16,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -326,7 +338,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
                   Text(
                     label,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   Text(
@@ -344,7 +358,9 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
                 child: Icon(
                   Icons.close,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
           ],
@@ -353,7 +369,7 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
     );
   }
 
-  Future<void> _selectDate(Function(DateTime?) onChanged) async {
+  Future<void> _selectDate(void Function(DateTime?) onChanged) async {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),

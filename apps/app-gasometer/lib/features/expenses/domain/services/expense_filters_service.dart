@@ -3,7 +3,6 @@ import '../entities/expense_entity.dart';
 
 /// Configuração de filtros para despesas
 class ExpenseFiltersConfig {
-
   const ExpenseFiltersConfig({
     this.vehicleId,
     this.type,
@@ -47,11 +46,11 @@ class ExpenseFiltersConfig {
 
   /// Verifica se há filtros ativos
   bool get hasActiveFilters {
-    return vehicleId != null || 
-           type != null || 
-           startDate != null || 
-           endDate != null || 
-           searchQuery.isNotEmpty;
+    return vehicleId != null ||
+        type != null ||
+        startDate != null ||
+        endDate != null ||
+        searchQuery.isNotEmpty;
   }
 
   /// Limpa todos os filtros
@@ -63,13 +62,13 @@ class ExpenseFiltersConfig {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is ExpenseFiltersConfig &&
-           other.vehicleId == vehicleId &&
-           other.type == type &&
-           other.startDate == startDate &&
-           other.endDate == endDate &&
-           other.searchQuery == searchQuery &&
-           other.sortBy == sortBy &&
-           other.sortAscending == sortAscending;
+        other.vehicleId == vehicleId &&
+        other.type == type &&
+        other.startDate == startDate &&
+        other.endDate == endDate &&
+        other.searchQuery == searchQuery &&
+        other.sortBy == sortBy &&
+        other.sortAscending == sortAscending;
   }
 
   @override
@@ -129,7 +128,7 @@ class ExpenseFiltersService {
         );
         if (expense.date.isBefore(startOfDay)) return false;
       }
-      
+
       if (config.endDate != null) {
         final endOfDay = DateTime(
           config.endDate!.year,
@@ -149,7 +148,8 @@ class ExpenseFiltersService {
             !expense.description.toLowerCase().contains(query) &&
             !expense.type.displayName.toLowerCase().contains(query) &&
             (!expense.establishmentName.toLowerCase().contains(query)) &&
-            (expense.notes == null || !expense.notes!.toLowerCase().contains(query))) {
+            (expense.notes == null ||
+                !expense.notes!.toLowerCase().contains(query))) {
           return false;
         }
       }
@@ -166,7 +166,7 @@ class ExpenseFiltersService {
   ) {
     expenses.sort((a, b) {
       int comparison = 0;
-      
+
       switch (sortBy) {
         case 'date':
           comparison = a.date.compareTo(b.date);
@@ -184,8 +184,8 @@ class ExpenseFiltersService {
           comparison = a.title.compareTo(b.title);
           break;
         case 'establishment':
-          final aName = a.establishmentName ?? '';
-          final bName = b.establishmentName ?? '';
+          final aName = a.establishmentName;
+          final bName = b.establishmentName;
           comparison = aName.compareTo(bName);
           break;
         default:
@@ -222,63 +222,63 @@ class ExpenseFiltersService {
   ) {
     final startOfDay = DateTime(start.year, start.month, start.day);
     final endOfDay = DateTime(end.year, end.month, end.day, 23, 59, 59);
-    
+
     return expenses.where((e) {
-      return e.date.isAfter(startOfDay.subtract(const Duration(milliseconds: 1))) &&
-             e.date.isBefore(endOfDay.add(const Duration(milliseconds: 1)));
+      return e.date.isAfter(
+            startOfDay.subtract(const Duration(milliseconds: 1)),
+          ) &&
+          e.date.isBefore(endOfDay.add(const Duration(milliseconds: 1)));
     }).toList();
   }
 
   /// Busca por texto
-  List<ExpenseEntity> searchByText(
-    List<ExpenseEntity> expenses,
-    String query,
-  ) {
+  List<ExpenseEntity> searchByText(List<ExpenseEntity> expenses, String query) {
     if (query.isEmpty) return expenses;
-    
+
     final lowerQuery = query.toLowerCase();
     return expenses.where((e) {
       return e.title.toLowerCase().contains(lowerQuery) ||
-             e.description.toLowerCase().contains(lowerQuery) ||
-             e.type.displayName.toLowerCase().contains(lowerQuery) ||
-             (e.establishmentName.toLowerCase().contains(lowerQuery) == true) ||
-             (e.notes?.toLowerCase().contains(lowerQuery) == true);
+          e.description.toLowerCase().contains(lowerQuery) ||
+          e.type.displayName.toLowerCase().contains(lowerQuery) ||
+          (e.establishmentName.toLowerCase().contains(lowerQuery) == true) ||
+          (e.notes?.toLowerCase().contains(lowerQuery) == true);
     }).toList();
   }
 
   /// Obtém despesas de alto valor (acima do threshold)
   List<ExpenseEntity> getHighValueExpenses(
-    List<ExpenseEntity> expenses,
-    {double threshold = ExpenseConstants.reportAmountThousands}
-  ) {
+    List<ExpenseEntity> expenses, {
+    double threshold = ExpenseConstants.reportAmountThousands,
+  }) {
     return expenses.where((e) => e.amount >= threshold).toList();
   }
 
   /// Obtém despesas recorrentes (mesmo tipo e valor similar)
   List<ExpenseEntity> getRecurringExpenses(
-    List<ExpenseEntity> expenses,
-    {double amountTolerance = 0.1} // 10% de tolerância
-  ) {
+    List<ExpenseEntity> expenses, {
+    double amountTolerance = 0.1, // 10% de tolerância
+  }) {
     final recurring = <ExpenseEntity>[];
-    
+
     for (int i = 0; i < expenses.length; i++) {
       final expense = expenses[i];
-      final similar = expenses.where((e) {
-        if (e.id == expense.id) return false;
-        
-        final amountDiff = (e.amount - expense.amount).abs();
-        final toleranceAmount = expense.amount * amountTolerance;
-        
-        return e.type == expense.type &&
-               e.vehicleId == expense.vehicleId &&
-               amountDiff <= toleranceAmount;
-      }).toList();
-      
+      final similar =
+          expenses.where((e) {
+            if (e.id == expense.id) return false;
+
+            final amountDiff = (e.amount - expense.amount).abs();
+            final toleranceAmount = expense.amount * amountTolerance;
+
+            return e.type == expense.type &&
+                e.vehicleId == expense.vehicleId &&
+                amountDiff <= toleranceAmount;
+          }).toList();
+
       if (similar.isNotEmpty && !recurring.contains(expense)) {
         recurring.add(expense);
       }
     }
-    
+
     return recurring;
   }
 
@@ -293,7 +293,7 @@ class ExpenseFiltersService {
       'R\$ 1.000 - R\$ 5.000': [],
       'Acima de R\$ 5.000': [],
     };
-    
+
     for (final expense in expenses) {
       if (expense.amount <= 100) {
         ranges['Até R\$ 100']!.add(expense);
@@ -307,24 +307,23 @@ class ExpenseFiltersService {
         ranges['Acima de R\$ 5.000']!.add(expense);
       }
     }
-    
+
     return ranges;
   }
 
   /// Obtém despesas agrupadas por mês
-  Map<String, List<ExpenseEntity>> groupByMonth(
-    List<ExpenseEntity> expenses,
-  ) {
+  Map<String, List<ExpenseEntity>> groupByMonth(List<ExpenseEntity> expenses) {
     final grouped = <String, List<ExpenseEntity>>{};
-    
+
     for (final expense in expenses) {
-      final key = '${expense.date.year}-${expense.date.month.toString().padLeft(2, '0')}';
+      final key =
+          '${expense.date.year}-${expense.date.month.toString().padLeft(2, '0')}';
       if (!grouped.containsKey(key)) {
         grouped[key] = [];
       }
       grouped[key]!.add(expense);
     }
-    
+
     return grouped;
   }
 
@@ -333,14 +332,14 @@ class ExpenseFiltersService {
     List<ExpenseEntity> expenses,
   ) {
     final grouped = <ExpenseType, List<ExpenseEntity>>{};
-    
+
     for (final expense in expenses) {
       if (!grouped.containsKey(expense.type)) {
         grouped[expense.type] = [];
       }
       grouped[expense.type]!.add(expense);
     }
-    
+
     return grouped;
   }
 

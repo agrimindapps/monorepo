@@ -342,20 +342,6 @@ class MaintenanceRepository {
     }
   }
 
-  /// Converte MaintenanceStatus para string
-  String _statusToString(MaintenanceStatus status) {
-    switch (status) {
-      case MaintenanceStatus.pending:
-        return 'Pendente';
-      case MaintenanceStatus.inProgress:
-        return 'Em Andamento';
-      case MaintenanceStatus.completed:
-        return 'Concluída';
-      case MaintenanceStatus.cancelled:
-        return 'Cancelada';
-    }
-  }
-
   /// Fecha o box (cleanup)
   Future<void> close() async {
     try {

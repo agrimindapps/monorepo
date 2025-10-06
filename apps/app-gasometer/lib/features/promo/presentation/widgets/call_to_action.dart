@@ -122,20 +122,24 @@ class CallToAction extends StatelessWidget {
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(width: 16),
-                        
+
                         // Botão secundário - Ser Notificado
                         OutlinedButton(
                           onPressed: () {
-                            showDialog(
+                            showDialog<void>(
                               context: context,
-                              builder: (context) => const NotificationFormDialog(),
+                              builder:
+                                  (context) => const NotificationFormDialog(),
                             );
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white, width: 2),
+                            side: const BorderSide(
+                              color: Colors.white,
+                              width: 2,
+                            ),
                             padding: EdgeInsets.symmetric(
                               horizontal: isMobile ? 24 : 32,
                               vertical: isMobile ? 16 : 20,

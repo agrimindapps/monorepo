@@ -1,0 +1,80 @@
+warning • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • apps/app-agrihurbi/lib/core/extensions/color_extensions.dart:7:41 • deprecated_member_use
+warning • The name WidgetRef is shown, but isn't used • apps/app-agrihurbi/lib/core/providers/support_providers.dart:12:48 • unused_shown_name
+warning • The declaration '_showLogoutConfirmation' isn't referenced • apps/app-agrihurbi/lib/features/auth/presentation/pages/profile_page.dart:353:8 • unused_element
+warning • The name WidgetRef is shown, but isn't used • apps/app-agrihurbi/lib/features/subscription/presentation/providers/subscription_provider.dart:2:48 • unused_shown_name
+warning • The name Provider is shown, but isn't used • apps/app-agrihurbi/lib/features/subscription/presentation/providers/subscription_provider.dart:2:59 • unused_shown_name
+warning • The name StateNotifier is shown, but isn't used • apps/app-gasometer/lib/core/services/financial_sync_service_provider.dart:2:10 • unused_shown_name
+warning • The name StateNotifierProvider is shown, but isn't used • apps/app-gasometer/lib/core/services/financial_sync_service_provider.dart:2:25 • unused_shown_name
+warning • The name WidgetRef is shown, but isn't used • apps/app-gasometer/lib/core/services/financial_sync_service_provider.dart:2:48 • unused_shown_name
+warning • The type argument(s) of the function 'showDialog' can't be inferred • apps/app-gasometer/lib/core/widgets/custom_dropdown.dart:352:5 • inference_failure_on_function_invocation
+warning • This default clause is covered by the previous cases • apps/app-gasometer/lib/core/widgets/enhanced_error_widget.dart:498:7 • unreachable_switch_default
+warning • The return type of ' Function(String?)' cannot be inferred • apps/app-gasometer/lib/core/widgets/enhanced_image_picker.dart:24:9 • inference_failure_on_function_return_type
+warning • The type argument(s) of the function 'showModalBottomSheet' can't be inferred • apps/app-gasometer/lib/core/widgets/enhanced_image_picker.dart:451:5 • inference_failure_on_function_invocation
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/form_section_header.dart:64:11 • unused_local_variable
+warning • The type argument(s) of the constructor 'Future.delayed' can't be inferred • apps/app-gasometer/lib/core/widgets/retry_button.dart:160:13 • inference_failure_on_instance_creation
+warning • The type argument(s) of the constructor 'Future.delayed' can't be inferred • apps/app-gasometer/lib/core/widgets/retry_button.dart:169:15 • inference_failure_on_instance_creation
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_date_picker.dart:6:1 • unused_local_variable
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_form_field.dart:153:9 • unawaited_futures
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:310:10 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:318:9 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:322:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:330:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:338:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:346:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:354:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:362:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:370:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:378:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:386:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:394:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:402:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:410:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:418:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:426:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:434:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:442:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:450:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:458:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:466:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:474:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:482:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:490:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:498:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:506:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:514:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:522:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:530:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:538:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:546:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:554:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:562:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:570:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:578:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:586:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:594:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:602:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:610:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:618:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:626:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:634:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:642:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:650:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:658:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:666:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:674:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:682:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:690:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:698:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:706:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:714:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:722:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:730:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:738:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:746:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:754:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:762:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:770:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:778:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:786:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-gasometer/lib/core/widgets/unified_loading_states.dart:794:1 • library_private_types_in_public_api
+warning • The value of the local variable 'theme' isn't used • apps/app-

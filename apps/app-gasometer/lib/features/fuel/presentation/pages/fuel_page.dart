@@ -15,7 +15,6 @@ class FuelPage extends ConsumerStatefulWidget {
 }
 
 class _FuelPageState extends ConsumerState<FuelPage> {
-  String? _selectedVehicleId;
   int _currentMonthIndex = DateTime.now().month - 1;
 
   @override
@@ -40,14 +39,13 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           children: [
             _buildHeader(context),
             // Offline indicator
-            if (!isOnline || pendingCount > 0) _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
+            if (!isOnline || pendingCount > 0)
+              _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
             // Vehicle selector (simplified for now)
             _buildVehicleSelector(context),
             // Month selector
             _buildMonthSelector(),
-            Expanded(
-              child: _buildContent(context, fuelState),
-            ),
+            Expanded(child: _buildContent(context, fuelState)),
           ],
         ),
       ),
@@ -55,7 +53,11 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     );
   }
 
-  Widget _buildOfflineIndicator(bool isOnline, int pendingCount, bool isSyncing) {
+  Widget _buildOfflineIndicator(
+    bool isOnline,
+    int pendingCount,
+    bool isSyncing,
+  ) {
     if (isOnline && pendingCount == 0) return const SizedBox.shrink();
 
     return Container(
@@ -63,7 +65,10 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: isOnline ? Colors.orange.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color:
+            isOnline
+                ? Colors.orange.withValues(alpha: 0.1)
+                : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isOnline ? Colors.orange : Colors.red,
@@ -233,24 +238,30 @@ class _FuelPageState extends ConsumerState<FuelPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).cardColor,
+                color:
+                    isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                  color:
+                      isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        isSelected
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -286,11 +297,15 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     if (records.isEmpty) {
       return EnhancedEmptyState(
         title: 'Nenhum abastecimento',
-        description: fuelState.hasActiveFilters
-            ? 'Nenhum registro encontrado com os filtros aplicados.'
-            : 'Adicione seu primeiro abastecimento para começar a acompanhar seus gastos com combustível.',
+        description:
+            fuelState.hasActiveFilters
+                ? 'Nenhum registro encontrado com os filtros aplicados.'
+                : 'Adicione seu primeiro abastecimento para começar a acompanhar seus gastos com combustível.',
         icon: Icons.local_gas_station_outlined,
-        actionLabel: fuelState.hasActiveFilters ? 'Limpar filtros' : 'Adicionar abastecimento',
+        actionLabel:
+            fuelState.hasActiveFilters
+                ? 'Limpar filtros'
+                : 'Adicionar abastecimento',
         onAction: () {
           if (fuelState.hasActiveFilters) {
             ref.read(fuelNotifierProvider.notifier).clearAllFilters();
@@ -322,9 +337,10 @@ class _FuelPageState extends ConsumerState<FuelPage> {
 
   Widget _buildFuelRecordCard(FuelRecordEntity record) {
     final date = record.date;
-    final formattedDate = '${date.day.toString().padLeft(2, '0')}/'
-                          '${date.month.toString().padLeft(2, '0')}/'
-                          '${date.year}';
+    final formattedDate =
+        '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -410,8 +426,18 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     final now = DateTime.now();
     final currentYear = now.year;
     const monthNames = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
     ];
 
     return monthNames

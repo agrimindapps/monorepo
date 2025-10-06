@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
-import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -13,13 +12,10 @@ class ExpensesPage extends ConsumerStatefulWidget {
 }
 
 class _ExpensesPageState extends ConsumerState<ExpensesPage> {
-  String? _selectedVehicleId;
   int _currentMonthIndex = DateTime.now().month - 1;
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesNotifierProvider);
-
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -27,9 +23,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
             _buildHeader(context),
             _buildVehicleSelector(context),
             _buildMonthSelector(),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
@@ -163,24 +157,30 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).cardColor,
+                color:
+                    isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                  color:
+                      isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        isSelected
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -194,7 +194,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   Widget _buildContent(BuildContext context) {
     return EnhancedEmptyState(
       title: 'Nenhuma despesa',
-      description: 'Adicione sua primeira despesa para começar a acompanhar seus gastos.',
+      description:
+          'Adicione sua primeira despesa para começar a acompanhar seus gastos.',
       icon: Icons.attach_money_outlined,
       actionLabel: 'Adicionar despesa',
       onAction: () {
@@ -202,7 +203,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       },
     );
   }
-
 
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
@@ -218,8 +218,18 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     final now = DateTime.now();
     final currentYear = now.year;
     const monthNames = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
     ];
 
     return monthNames

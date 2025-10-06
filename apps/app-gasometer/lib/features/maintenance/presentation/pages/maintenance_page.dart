@@ -13,12 +13,11 @@ class MaintenancePage extends ConsumerStatefulWidget {
 }
 
 class _MaintenancePageState extends ConsumerState<MaintenancePage> {
-  String? _selectedVehicleId;
   int _currentMonthIndex = DateTime.now().month - 1;
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesNotifierProvider);
+    ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -27,9 +26,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             _buildHeader(context),
             _buildVehicleSelector(context),
             _buildMonthSelector(),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
@@ -66,11 +63,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: const Icon(
-                  Icons.build,
-                  color: Colors.white,
-                  size: 19,
-                ),
+                child: const Icon(Icons.build, color: Colors.white, size: 19),
               ),
             ),
             const SizedBox(width: 13),
@@ -163,24 +156,30 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).cardColor,
+                color:
+                    isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                  color:
+                      isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        isSelected
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -194,7 +193,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   Widget _buildContent(BuildContext context) {
     return EnhancedEmptyState(
       title: 'Nenhuma manutenção',
-      description: 'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
+      description:
+          'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
       icon: Icons.build_outlined,
       actionLabel: 'Adicionar manutenção',
       onAction: () {
@@ -202,7 +202,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       },
     );
   }
-
 
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
@@ -218,8 +217,18 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     final now = DateTime.now();
     final currentYear = now.year;
     const monthNames = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
     ];
 
     return monthNames
